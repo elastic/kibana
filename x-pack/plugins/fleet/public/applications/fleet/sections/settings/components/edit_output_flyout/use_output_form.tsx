@@ -381,13 +381,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaBrokerTimeoutInput = useInput(
-    `${kafkaOutput?.broker_timeout ?? 30}`,
+    `${kafkaOutput?.timeout ?? 30}`,
     undefined,
     isDisabled('broker_timeout')
   );
 
   const kafkaBrokerReachabilityTimeoutInput = useInput(
-    `${kafkaOutput?.timeout ?? 30}`,
+    `${kafkaOutput?.broker_timeout ?? 30}`,
     undefined,
     isDisabled('timeout')
   );

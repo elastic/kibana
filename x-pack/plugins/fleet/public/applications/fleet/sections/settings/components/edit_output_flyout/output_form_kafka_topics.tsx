@@ -214,6 +214,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                             >
                               <EuiFlexItem grow={false}>
                                 <DraggableDiv
+                                  data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorDragHandle${index}`}
                                   {...provided.dragHandleProps}
                                   aria-label={i18n.translate('xpack.fleet.settings.sortHandle', {
                                     defaultMessage: 'Sort host handle',
@@ -226,6 +227,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                               <EuiFlexItem style={{ flex: '30%', paddingRight: 10 }}>
                                 <EuiFormRow fullWidth>
                                   <EuiSelect
+                                    data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorWhenInput${index}`}
                                     fullWidth
                                     options={kafkaTopicWhenTypes}
                                     value={topic.when?.type}
@@ -238,6 +240,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                               <EuiFlexItem style={{ flex: '40%' }}>
                                 <EuiFormRow fullWidth>
                                   <EuiFieldText
+                                    data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorConditionInput${index}`}
                                     value={topic.when?.condition}
                                     onChange={(e) =>
                                       handleTopicProcessorChange(index, 'condition', e.target.value)
@@ -248,6 +251,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
 
                               <EuiFlexItem grow={false} style={{ marginTop: 10 }}>
                                 <EuiButtonIcon
+                                  data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorDeleteButton${index}`}
                                   color="text"
                                   onClick={() => deleteTopicProcessor(index)}
                                   iconType="cross"
@@ -273,6 +277,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                                   isInvalid={(topicErrors?.length ?? 0) > 0}
                                 >
                                   <EuiFieldText
+                                    data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorTopicInput${index}`}
                                     autoFocus={autoFocus}
                                     prepend="Topic"
                                     value={topic.topic}
@@ -304,6 +309,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                       <EuiFlexItem style={{ flex: '30%', paddingRight: 10 }}>
                         <EuiFormRow fullWidth>
                           <EuiSelect
+                            data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorWhenInput${index}`}
                             fullWidth
                             options={kafkaTopicWhenTypes}
                             value={topic.when?.type}
@@ -316,6 +322,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                       <EuiFlexItem style={{ flex: '40%' }}>
                         <EuiFormRow fullWidth>
                           <EuiFieldText
+                            data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorConditionInput${index}`}
                             value={topic.when?.condition}
                             onChange={(e) =>
                               handleTopicProcessorChange(index, 'condition', e.target.value)
@@ -326,6 +333,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
 
                       <EuiFlexItem grow={false} style={{ marginTop: 10 }}>
                         <EuiButtonIcon
+                          data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorDeleteButton${index}`}
                           color="text"
                           onClick={() => deleteTopicProcessor(index)}
                           iconType="cross"
@@ -348,6 +356,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                           isInvalid={(topicErrors?.length ?? 0) > 0}
                         >
                           <EuiFieldText
+                            data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorTopicInput${index}`}
                             isInvalid={(topicErrors?.length ?? 0) > 0}
                             autoFocus={autoFocus}
                             prepend="Topic"

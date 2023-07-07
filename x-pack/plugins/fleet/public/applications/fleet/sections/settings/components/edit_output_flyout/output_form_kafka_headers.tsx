@@ -130,6 +130,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                   isInvalid={(keyErrors?.length ?? 0) > 0}
                 >
                   <EuiFieldText
+                    data-test-subj={`settingsOutputsFlyout.kafkaHeadersKeyInput${index}`}
                     fullWidth
                     value={pair.key}
                     onChange={(e) => handleKeyValuePairChange(index, 'key', e.target.value)}
@@ -150,18 +151,18 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                   error={displayErrors(valueErrors)}
                   isInvalid={(valueErrors?.length ?? 0) > 0}
                 >
-                  <>
-                    <EuiFieldText
-                      fullWidth
-                      value={pair.value}
-                      onChange={(e) => handleKeyValuePairChange(index, 'value', e.target.value)}
-                    />
-                  </>
+                  <EuiFieldText
+                    data-test-subj={`settingsOutputsFlyout.kafkaHeadersValueInput${index}`}
+                    fullWidth
+                    value={pair.value}
+                    onChange={(e) => handleKeyValuePairChange(index, 'value', e.target.value)}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false} style={{ marginTop: 28 }}>
                 <EuiButtonIcon
+                  data-test-subj={`settingsOutputsFlyout.kafkaHeadersDeleteButton${index}`}
                   color="text"
                   onClick={() => deleteKeyValuePair(index)}
                   iconType="cross"

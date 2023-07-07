@@ -59,7 +59,7 @@ export const OutputFormKafkaCompression: React.FunctionComponent<{
         >
           <EuiSelect
             fullWidth
-            data-test-subj="settingsOutputsFlyout.kafkaCompressionCodecInputLabel"
+            data-test-subj="settingsOutputsFlyout.kafkaCompressionCodecInput"
             {...inputs.kafkaCompressionCodecInput.props}
             options={kafkaCompressionTypeOptions}
           />
@@ -77,8 +77,8 @@ export const OutputFormKafkaCompression: React.FunctionComponent<{
           >
             <EuiSelect
               fullWidth
-              data-test-subj="settingsOutputsFlyout.kafkaCompressionInputLabel"
               {...inputs.kafkaCompressionLevelInput.props}
+              data-test-subj="settingsOutputsFlyout.kafkaCompressionLevelInput"
               options={kafkaCompressionLevelOptions}
             />
           </EuiFormRow>
@@ -105,6 +105,7 @@ export const OutputFormKafkaCompression: React.FunctionComponent<{
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiSwitch
+        data-test-subj={'settingsOutputsFlyout.kafkaCompressionSwitch'}
         {...inputs.kafkaCompressionInput.props}
         onChange={(e) => {
           if (!e.target.checked) {
