@@ -66,7 +66,7 @@ export class DetectionsPageObject extends FtrService {
   }
 
   async closeImportQueryModal(): Promise<void> {
-    await this.find.clickByCssSelector('.euiButtonIcon.euiButtonIcon--text.euiModal__closeIcon');
+    await this.find.clickByCssSelector('.euiButtonIcon.euiModal__closeIcon');
   }
 
   async selectMachineLearningJob(): Promise<void> {

@@ -60,7 +60,7 @@ const CsvSchema = schema.object({
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
   maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
-    defaultValue: ByteSizeValue.parse('10mb'),
+    defaultValue: ByteSizeValue.parse('250mb'),
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
