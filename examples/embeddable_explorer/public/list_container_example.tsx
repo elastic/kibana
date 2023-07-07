@@ -37,7 +37,7 @@ export function ListContainerExample({
   return (
     <>
       <EuiPageTemplate.Header
-        pageTitle="Container embeddable"
+        pageTitle="Groups of embeddables"
       />
       <EuiPageTemplate.Section grow={false}>
         <>

@@ -99,7 +99,7 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'Container embeddable',
+      title: 'Groups of embeddables',
       id: 'listContainerSection',
       component: (
         <ListContainerExample
