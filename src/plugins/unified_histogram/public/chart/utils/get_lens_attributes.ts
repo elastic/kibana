@@ -205,6 +205,13 @@ export const getLensAttributes = ({
       filters,
       query,
       visualization,
+      ...(dataView &&
+        dataView.id &&
+        !dataView.isPersisted() && {
+          adHocDataViews: {
+            [dataView.id]: dataView.toSpec(false),
+          },
+        }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];
