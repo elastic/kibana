@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const observability = getService('observability');
 
   const testData = {
     correlationsTab: 'Failed transaction correlations',
@@ -147,6 +148,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(apmCorrelationsTable).to.be(
             'No significant correlations\nCorrelations will only be identified if they have significant impact.\nTry selecting another time range or remove any added filter.'
           );
+        });
+      });
+
+      it('navigates to the alerts tab', async function () {
+        await find.clickByCssSelector(`[data-test-subj="alertsTab"]`);
+
+        await PageObjects.timePicker.timePickerExists();
+        await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
+
+        // Should show no data message
+        await retry.try(async () => {
+          await observability.overview.common.getAlertsTableNoDataOrFail();
         });
       });
     });

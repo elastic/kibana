@@ -60,6 +60,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       (await doAnyChangesMatch([
+        /^src\/plugins\/controls/,
         /^packages\/kbn-securitysolution-.*/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/security_solution/,

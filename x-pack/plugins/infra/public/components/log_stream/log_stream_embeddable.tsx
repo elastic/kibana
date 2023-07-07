@@ -13,10 +13,10 @@ import { Subscription } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { CoreProviders } from '../../apps/common_providers';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 import { datemathToEpochMillis } from '../../utils/datemath';
-import { LazyLogStreamWrapper } from './lazy_log_stream_wrapper';
 
 export const LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
 
@@ -90,7 +90,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
       >
         <EuiThemeProvider darkMode={this.isDarkMode}>
           <div style={{ width: '100%' }}>
-            <LazyLogStreamWrapper
+            <LogStream
               logView={{ type: 'log-view-reference', logViewId: 'default' }}
               startTimestamp={startTimestamp}
               endTimestamp={endTimestamp}

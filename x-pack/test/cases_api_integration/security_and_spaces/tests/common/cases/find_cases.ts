@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import {
   CASES_URL,
   MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_CASES_PER_PAGE,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
@@ -341,39 +342,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('errors', () => {
-        it('unhappy path - 400s when bad query supplied', async () => {
-          await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
-        });
-
-        for (const field of ['owner', 'tags', 'severity', 'status']) {
-          it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
-            await findCases({
-              supertest,
-              query: { searchFields: [field], search: 'some search string*' },
-              expectedHttpCode: 400,
-            });
-          });
-        }
-
-        for (const scenario of [
-          { fieldName: 'category', sizeLimit: MAX_CATEGORY_FILTER_LENGTH },
-          { fieldName: 'tags', sizeLimit: MAX_TAGS_FILTER_LENGTH },
-          { fieldName: 'assignees', sizeLimit: MAX_ASSIGNEES_FILTER_LENGTH },
-          { fieldName: 'reporters', sizeLimit: MAX_REPORTERS_FILTER_LENGTH },
-        ]) {
-          it(`unhappy path - 400s when the field ${scenario.fieldName} exceeds the size limit`, async () => {
-            const value = Array(scenario.sizeLimit + 1).fill('foobar');
-
-            await findCases({
-              supertest,
-              query: { [scenario.fieldName]: value },
-              expectedHttpCode: 400,
-            });
-          });
-        }
-      });
-
       describe('search and searchField', () => {
         beforeEach(async () => {
           await createCase(supertest, postCaseReq);
@@ -456,6 +424,51 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(cases.total).to.be(1);
         });
+      });
+    });
+
+    describe('errors', () => {
+      it('unhappy path - 400s when bad query supplied', async () => {
+        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+      });
+
+      for (const field of ['owner', 'tags', 'severity', 'status']) {
+        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
+          await findCases({
+            supertest,
+            query: { searchFields: [field], search: 'some search string*' },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      for (const scenario of [
+        { fieldName: 'category', sizeLimit: MAX_CATEGORY_FILTER_LENGTH },
+        { fieldName: 'tags', sizeLimit: MAX_TAGS_FILTER_LENGTH },
+        { fieldName: 'assignees', sizeLimit: MAX_ASSIGNEES_FILTER_LENGTH },
+        { fieldName: 'reporters', sizeLimit: MAX_REPORTERS_FILTER_LENGTH },
+      ]) {
+        it(`unhappy path - 400s when the field ${scenario.fieldName} exceeds the size limit`, async () => {
+          const value = Array(scenario.sizeLimit + 1).fill('foobar');
+
+          await findCases({
+            supertest,
+            query: { [scenario.fieldName]: value },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      it(`400s when perPage > ${MAX_CASES_PER_PAGE} supplied`, async () => {
+        await findCases({
+          supertest,
+          query: { perPage: MAX_CASES_PER_PAGE + 1 },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch more than 10,000 documents', async () => {
+        await findCases({ supertest, query: { page: 209, perPage: 100 }, expectedHttpCode: 400 });
       });
     });
 
