@@ -59,6 +59,16 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'google_cloud_storage',
   },
   {
+    iconPath: 'google_drive.svg',
+    isBeta: true,
+    isNative: false,
+    keywords: ['google', 'drive', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleDrive.name', {
+      defaultMessage: 'Google Drive',
+    }),
+    serviceType: 'google_drive',
+  },
+  {
     iconPath: 'mongodb.svg',
     isBeta: false,
     isNative: true,
