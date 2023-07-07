@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Props, SelectSystemPrompt } from '.';
+import { TEST_IDS } from '../../../constants';
 
 const props: Props = {
   conversation: undefined,
@@ -51,13 +52,13 @@ describe('SelectSystemPrompt', () => {
   it('renders the prompt super select when isEditing is true', () => {
     const { getByTestId } = render(<SelectSystemPrompt {...props} isEditing={true} />);
 
-    expect(getByTestId('promptSuperSelect')).toBeInTheDocument();
+    expect(getByTestId(TEST_IDS.PROMPT_SUPERSELECT)).toBeInTheDocument();
   });
 
   it('does NOT render the prompt super select when isEditing is false', () => {
     const { queryByTestId } = render(<SelectSystemPrompt {...props} isEditing={false} />);
 
-    expect(queryByTestId('promptSuperSelect')).not.toBeInTheDocument();
+    expect(queryByTestId(TEST_IDS.PROMPT_SUPERSELECT)).not.toBeInTheDocument();
   });
 
   it('does NOT render the clear system prompt button when isEditing is true', () => {

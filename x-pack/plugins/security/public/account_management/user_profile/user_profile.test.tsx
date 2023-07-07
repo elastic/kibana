@@ -292,7 +292,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists('EuiButtonGroup[data-test-subj="themeMenu"]')).toBeFalsy();
+      expect(testWrapper.exists('EuiKeyPadMenu[data-test-subj="themeMenu"]')).toBeFalsy();
     });
 
     it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {

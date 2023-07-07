@@ -58,9 +58,7 @@ describe('AddEventNoteAction', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('timeline-notes-button-small')).not.toHaveClass(
-        'euiButtonIcon-isDisabled'
-      );
+      expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
     });
   });
 });
