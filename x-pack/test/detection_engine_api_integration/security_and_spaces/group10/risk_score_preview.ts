@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await getRiskScores({ body: { debug: true } });
   };
 
-  describe('Risk engine', () => {
+  describe('Risk Engine Scoring - Preview', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
