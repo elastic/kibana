@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { EuiBasicTableColumn, EuiSelectableProps } from '@elastic/eui';
 import {
@@ -29,6 +29,7 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { EndpointListNavLink } from './components/endpoint_list_nav_link';
 import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
@@ -36,7 +37,6 @@ import { getEndpointPendingActionsCallback } from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
-import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
   HostInfo,
@@ -79,27 +79,6 @@ const StyledDatePicker = styled.div`
     background-color: rgba(0, 119, 204, 0.2);
   }
 `;
-const EndpointListNavLink = memo<{
-  name: string;
-  href: string;
-  route: string;
-  dataTestSubj: string;
-}>(({ name, href, route, dataTestSubj }) => {
-  const clickHandler = useNavigateByRouterEventHandler(route);
-
-  return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      data-test-subj={dataTestSubj}
-      className="eui-displayInline eui-textTruncate"
-      href={href}
-      onClick={clickHandler}
-    >
-      {name}
-    </EuiLink>
-  );
-});
-EndpointListNavLink.displayName = 'EndpointListNavLink';
 
 // FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
