@@ -11,18 +11,18 @@ import { TableListViewTable } from '@kbn/content-management-table-list-view-tabl
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { EuiButton, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
-} from '@kbn/event-annotation-plugin/common';
+  EventAnnotationServiceType,
+} from '../types';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';

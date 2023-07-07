@@ -48,7 +48,8 @@
     "@kbn/object-versioning",
     "@kbn/config-schema",
     "@kbn/content-management-plugin",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/event-annotation-components"
   ],
   "exclude": [
     "target/**/*",

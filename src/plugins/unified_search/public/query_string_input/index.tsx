@@ -31,6 +31,6 @@ export const QueryStringInput = (props: QueryStringInputProps) => (
   </React.Suspense>
 );
 
-type QueryStringInputComponent = React.FC<QueryStringInputProps>;
+type QueryStringInputComponentType = React.FC<QueryStringInputProps>;
 
-export type { QueryStringInputProps, QueryStringInputComponent };
+export type { QueryStringInputProps, QueryStringInputComponentType };

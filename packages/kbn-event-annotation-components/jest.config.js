@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { AnnotationEditorControls, annotationsIconSet } from './annotation_editor_controls';
-
-export * from './group_editor_controls';
-
-export * from './get_annotation_accessor';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-event-annotation-components'],
+};

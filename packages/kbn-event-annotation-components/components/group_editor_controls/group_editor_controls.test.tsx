@@ -7,10 +7,8 @@
  */
 
 import React, { ChangeEvent, FormEvent } from 'react';
-import {
-  type EventAnnotationGroupConfig,
-  getDefaultManualAnnotation,
-} from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationGroupConfig } from '../../types';
+import { getDefaultManualAnnotation } from '../../util';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { GroupEditorControls } from './group_editor_controls';

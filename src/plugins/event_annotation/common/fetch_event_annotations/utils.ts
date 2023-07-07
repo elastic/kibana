@@ -13,18 +13,14 @@ import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { LineStyle } from '@kbn/visualization-ui-components';
+import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-components';
 import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
   ManualRangeEventAnnotationOutput,
 } from '../manual_event_annotation/types';
 import { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
-import {
-  annotationColumns,
-  AvailableAnnotationIcon,
-  EventAnnotationOutput,
-  PointStyleProps,
-} from '../types';
+import { annotationColumns, EventAnnotationOutput } from '../types';
 
 export const isRangeAnnotation = (
   annotation: EventAnnotationOutput

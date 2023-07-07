@@ -8,12 +8,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -23,7 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-plugin/common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '../constants';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
   uiSettings,

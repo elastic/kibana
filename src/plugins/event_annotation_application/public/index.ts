@@ -12,15 +12,3 @@ export type {
   EventAnnotationApplicationPluginSetup,
   EventAnnotationApplicationPluginStart,
 } from './plugin';
-export {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
-  isRangeAnnotationConfig,
-  isManualPointAnnotationConfig,
-  isQueryAnnotationConfig,
-} from './event_annotation_service/helpers';
-export {
-  AnnotationEditorControls,
-  annotationsIconSet,
-} from './components/annotation_editor_controls';
-export { getAnnotationAccessor } from './components/get_annotation_accessor';

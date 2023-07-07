@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import type {
   UnifiedSearchPublicPluginStart,
-  QueryStringInputComponent,
+  QueryStringInputComponentType,
 } from '@kbn/unified-search-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -56,7 +56,7 @@ export const QueryInput = ({
   'data-test-subj'?: string;
   placeholder?: string;
   appName: string;
-  QueryStringInput: QueryStringInputComponent;
+  QueryStringInput: QueryStringInputComponentType;
   services: QueryInputServices;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });

@@ -7,12 +7,12 @@
  */
 
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import type { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationConfig } from '../types';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
-} from '../event_annotation_service/helpers';
+} from '../util';
 import { annotationsIconSet } from './annotation_editor_controls/icon_set';
 
 export const getAnnotationAccessor = (annotation: EventAnnotationConfig): AccessorConfig => {

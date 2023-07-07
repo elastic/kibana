@@ -17,7 +17,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { EventAnnotationGroupTableList } from './components/table_list';
+import { EventAnnotationGroupTableList } from '@kbn/event-annotation-components';
 
 export interface EventAnnotationListingPageServices {
   core: CoreStart;

@@ -16,12 +16,12 @@ import {
   FieldOptionValue,
   FieldPicker,
   FilterQueryInput,
+  isFieldLensCompatible,
   type QueryInputServices,
 } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
-import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { QueryPointEventAnnotationConfig } from '../../types';
 
 export const defaultQuery: Query = {
   query: '',

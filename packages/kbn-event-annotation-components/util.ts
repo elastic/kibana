@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 import { euiLightVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
-} from '../../common';
+} from './types';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
 // Do not compute it live as dependencies will add tens of Kbs to the plugin
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
@@ -33,3 +34,38 @@ export const isQueryAnnotationConfig = (
 ): annotation is QueryPointEventAnnotationConfig => {
   return Boolean(annotation && annotation.type === 'query');
 };
+
+export const createCopiedAnnotation = (
+  newId: string,
+  timestamp: string,
+  source?: EventAnnotationConfig
+): EventAnnotationConfig => {
+  if (!source) {
+    return getDefaultManualAnnotation(newId, timestamp);
+  }
+  return {
+    ...source,
+    id: newId,
+  };
+};
+
+export const defaultAnnotationLabel = i18n.translate(
+  'eventAnnotation.manualAnnotation.defaultAnnotationLabel',
+  {
+    defaultMessage: 'Event',
+  }
+);
+
+export const getDefaultManualAnnotation = (
+  id: string,
+  timestamp: string
+): EventAnnotationConfig => ({
+  label: defaultAnnotationLabel,
+  type: 'manual',
+  key: {
+    type: 'point_in_time',
+    timestamp,
+  },
+  icon: 'triangle',
+  id,
+});

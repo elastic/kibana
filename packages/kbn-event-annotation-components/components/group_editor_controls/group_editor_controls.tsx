@@ -19,17 +19,14 @@ import { css } from '@emotion/react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-} from '@kbn/event-annotation-plugin/common';
+import { EVENT_ANNOTATION_APP_NAME } from '../../constants';
+import type { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../types';
 import { AnnotationEditorControls } from '../annotation_editor_controls';
 import { AnnotationList } from './annotation_list';
-import { EVENT_ANNOTATION_APP_NAME } from '../../constants';
 
 export const ENABLE_INDIVIDUAL_ANNOTATION_EDITING = false;
 

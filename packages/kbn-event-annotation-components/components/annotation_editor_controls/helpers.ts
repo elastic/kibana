@@ -16,7 +16,7 @@ import type {
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
+} from '../../types';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;

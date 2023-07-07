@@ -16,13 +16,11 @@ import {
   TableListViewTable,
   type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public/event_annotation_service/types';
+import type { EventAnnotationServiceType } from '../types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { shallow, ShallowWrapper } from 'enzyme';
-import {
-  type EventAnnotationGroupConfig,
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-plugin/common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '../constants';
+import { EventAnnotationGroupConfig } from '../types';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 
 import { act } from 'react-dom/test-utils';

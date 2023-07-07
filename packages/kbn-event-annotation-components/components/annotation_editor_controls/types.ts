@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  PointInTimeEventAnnotationConfig,
-  RangeEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
+import type { PointInTimeEventAnnotationConfig, RangeEventAnnotationConfig } from '../../types';
 
 export type ManualEventAnnotationType =
   | PointInTimeEventAnnotationConfig

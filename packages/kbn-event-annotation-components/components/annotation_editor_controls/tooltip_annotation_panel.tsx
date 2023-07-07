@@ -22,7 +22,7 @@ import {
 } from '@kbn/visualization-ui-components';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
-import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { QueryPointEventAnnotationConfig } from '../../types';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 2;
 
