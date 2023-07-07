@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import {
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type {
   FormulaPublicApi,
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
-import { ChartColumn, ChartLayer, FormulaConfig } from '../../../types';
+import type { ChartColumn, ChartLayer, FormulaConfig } from '../../../types';
 import { getDefaultReferences, getHistogramColumn } from '../../utils';
 import { FormulaColumn } from './column/formula';
 

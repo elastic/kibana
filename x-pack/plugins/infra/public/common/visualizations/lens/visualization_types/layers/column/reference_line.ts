@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import { FormulaConfig, ChartColumn } from '../../../../types';
+import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
+import type { FormulaConfig, ChartColumn } from '../../../../types';
 
 export class ReferenceLineColumn implements ChartColumn {
   constructor(private formulaConfig: FormulaConfig) {}

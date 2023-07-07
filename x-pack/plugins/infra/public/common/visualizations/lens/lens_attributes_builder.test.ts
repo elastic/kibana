@@ -20,7 +20,6 @@ import {
 import type { FormulaPublicApi, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import type { FormulaConfig } from '../types';
-import type { FormulaParams, StaticValueParams } from '@kbn/visualizations-plugin/common';
 
 const mockDataView = {
   id: 'mock-id',
@@ -35,7 +34,7 @@ const mockDataView = {
 
 const lensPluginMockStart = lensPluginMock.createStartContract();
 
-const getMetricLayer = (formula: string): GenericIndexPatternColumn => ({
+const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
   customLabel: false,
   dataType: 'number',
   filter: undefined,
@@ -48,7 +47,7 @@ const getMetricLayer = (formula: string): GenericIndexPatternColumn => ({
     },
     formula,
     isFormulaBroken: true,
-  } as FormulaParams,
+  } as any,
   reducedTimeRange: undefined,
   references: [],
   timeScale: undefined,
@@ -81,7 +80,7 @@ const REFERENCE_LINE_LAYER: ReferenceBasedIndexPatternColumn = {
       id: 'percent',
     },
     value: '1',
-  } as StaticValueParams,
+  } as any,
   references: [],
   scale: 'ratio',
 };
@@ -126,7 +125,7 @@ describe('lens_attributes_builder', () => {
         layer: {
           columnOrder: ['metric_formula_accessor'],
           columns: {
-            metric_formula_accessor: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
+            metric_formula_accessor: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
           indexPatternId: 'mock-id',
         },
@@ -168,14 +167,14 @@ describe('lens_attributes_builder', () => {
         layer: {
           columnOrder: ['metric_formula_accessor'],
           columns: {
-            metric_formula_accessor: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
+            metric_formula_accessor: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
           indexPatternId: 'mock-id',
         },
         layer_trendline: {
           columnOrder: ['x_date_histogram', 'metric_formula_accessor_trendline'],
           columns: {
-            metric_formula_accessor_trendline: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
+            metric_formula_accessor_trendline: getDataLayer(AVERAGE_CPU_USER_FORMULA),
             x_date_histogram: getHistogramLayer('auto', true),
           },
           indexPatternId: 'mock-id',
@@ -225,7 +224,7 @@ describe('lens_attributes_builder', () => {
           columnOrder: ['x_date_histogram', 'formula_accessor_0_0'],
           columns: {
             x_date_histogram: getHistogramLayer('auto'),
-            formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
+            formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
           indexPatternId: 'mock-id',
         },
@@ -272,7 +271,7 @@ describe('lens_attributes_builder', () => {
           columnOrder: ['x_date_histogram', 'formula_accessor_0_0'],
           columns: {
             x_date_histogram: getHistogramLayer('auto'),
-            formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
+            formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
           indexPatternId: 'mock-id',
         },
@@ -337,8 +336,8 @@ describe('lens_attributes_builder', () => {
           columnOrder: ['x_date_histogram', 'formula_accessor_0_0', 'formula_accessor_0_1'],
           columns: {
             x_date_histogram: getHistogramLayer('auto'),
-            formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
-            formula_accessor_0_1: getMetricLayer(AVERAGE_CPU_SYSTEM_FORMULA),
+            formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
+            formula_accessor_0_1: getDataLayer(AVERAGE_CPU_SYSTEM_FORMULA),
           },
           indexPatternId: 'mock-id',
         },

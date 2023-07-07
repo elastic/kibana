@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FormulaConfig, ChartColumn } from '../../../../types';
+import type { FormulaConfig, ChartColumn } from '../../../../types';
 
 export class FormulaColumn implements ChartColumn {
   constructor(private formulaConfig: FormulaConfig, private formulaAPI: FormulaPublicApi) {}
