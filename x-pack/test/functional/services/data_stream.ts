@@ -5,39 +5,53 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const waitFor = (time: number = 1000) => new Promise((r) => setTimeout(r, time));
 
-export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getService'>) {
+/**
+ * High level interface to operate with Elasticsearch data stream and TSDS.
+ */
+export function DataStreamProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
+  const downsampleDefaultOptions = {
+    isStream: true,
+    interval: '1h',
+    deleteOriginal: false,
+  };
+
+  /**
+   * Downsample a data-stream or a specific backing index
+   * @param indexOrStream An index or a data stream
+   * @param options A set of options to configure the downsample.
+   * @param options.isStream The most important option which is used to correctly handle data streams when passed (otherwise it will throw). Default is true.
+   * @param options.interval The interval size for the downsampling. Default value is '1h'.
+   * @param options.deleteOriginal Whether the original backing index (not data stream!) should be deleted after downsampling. Default to false.
+   * @returns the name of the downsampled index
+   */
   async function downsampleTSDBIndex(
-    index: string,
+    indexOrStream: string,
     {
-      isStream,
-      interval,
-      deleteOriginal,
-    }: { isStream: boolean; interval?: string; deleteOriginal?: boolean } = {
-      isStream: true,
-      interval: '1h',
-      deleteOriginal: false,
-    }
+      isStream = downsampleDefaultOptions.isStream,
+      interval = downsampleDefaultOptions.interval,
+      deleteOriginal = downsampleDefaultOptions.deleteOriginal,
+    }: { isStream: boolean; interval?: string; deleteOriginal?: boolean } = downsampleDefaultOptions
   ) {
-    let sourceIndex = index;
+    let sourceIndex = indexOrStream;
     // block and downsample work only at index level, so no direct data stream access
     // there's some more work to do if a data stream is passed
     if (isStream) {
       log.info('Force a rollover for the data stream to get the backing "old_index"');
       const res = await es.indices.rollover({
-        alias: index,
+        alias: indexOrStream,
       });
       sourceIndex = res.old_index;
     }
 
-    const downsampledTargetIndex = `${index}_downsampled`;
+    const downsampledTargetIndex = `${indexOrStream}_downsampled`;
     log.info(`add write block to "${sourceIndex}" index...`);
     await es.indices.addBlock({ index: sourceIndex, block: 'write' });
 
@@ -49,17 +63,17 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
       await es.indices.downsample({
         index: sourceIndex,
         target_index: downsampledTargetIndex,
-        config: { fixed_interval: interval || '1h' },
+        config: { fixed_interval: interval || downsampleDefaultOptions.interval },
       });
     } catch (err) {
       if (isStream) {
         const [exists, oldIndexExists] = await Promise.all([
-          es.indices.getDataStream({ name: index }),
+          es.indices.getDataStream({ name: indexOrStream }),
           es.indices.exists({ index: sourceIndex }),
         ]);
         log.debug(`Data stream exists: ${Boolean(exists)}; old_index exists: ${oldIndexExists}`);
       } else {
-        const exists = await es.indices.exists({ index });
+        const exists = await es.indices.exists({ index: indexOrStream });
         log.debug(`Index exists: ${exists}`);
       }
       if (!err.message.match(/resource_already_exists_exception/)) {
@@ -76,6 +90,7 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
     return downsampledTargetIndex;
   }
 
+  // @internal
   async function updateDataStreamTemplate(
     stream: string,
     mapping: Record<string, MappingProperty>,
@@ -107,6 +122,11 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
     });
   }
 
+  /**
+   * "Upgrade" a given data stream into a time series data series (TSDB/TSDS)
+   * @param stream the data stream name
+   * @param newMapping the new mapping already with time series metrics/dimensions configured
+   */
   async function upgradeStreamToTSDB(stream: string, newMapping: Record<string, MappingProperty>) {
     // rollover to upgrade the index type to time_series
     // uploading a new mapping for the stream index using the provided metric/dimension list
@@ -119,12 +139,17 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
     });
   }
 
+  /**
+   * "Downgrade" a TSDB/TSDS data stream into a regular data stream
+   * @param tsdbStream the TSDB/TSDS data stream to "downgrade"
+   * @param oldMapping the new mapping already with time series metrics/dimensions already removed
+   */
   async function downgradeTSDBtoStream(
     tsdbStream: string,
-    oldMapping: Record<string, MappingProperty>
+    newMapping: Record<string, MappingProperty>
   ) {
     // strip out any time-series specific mapping
-    for (const fieldMapping of Object.values(oldMapping || {})) {
+    for (const fieldMapping of Object.values(newMapping || {})) {
       if ('time_series_metric' in fieldMapping) {
         delete fieldMapping.time_series_metric;
       }
@@ -133,7 +158,7 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
       }
     }
     log.info(`Updating ${tsdbStream} data stream component template with TSDB stuff...`);
-    await updateDataStreamTemplate(tsdbStream, oldMapping, false);
+    await updateDataStreamTemplate(tsdbStream, newMapping, false);
     // rollover to downgrade the index type to regular stream
     log.info(`Rolling over the ${tsdbStream} data stream into a regular data stream...`);
     await es.indices.rollover({
@@ -141,6 +166,12 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
     });
   }
 
+  /**
+   * Takes care of the entire process to create a data stream
+   * @param streamIndex name of the new data stream to create
+   * @param mappings the mapping to associate with the data stream
+   * @param tsdb when enabled it will configure the data stream as a TSDB/TSDS
+   */
   async function createDataStream(
     streamIndex: string,
     mappings: Record<string, MappingProperty>,
@@ -156,6 +187,10 @@ export function createTSDBHelper({ getService }: Pick<FtrProviderContext, 'getSe
     });
   }
 
+  /**
+   * Takes care of deleting a data stream and cleaning up everything associated to it
+   * @param streamIndex name of the data stream
+   */
   async function deleteDataStream(streamIndex: string) {
     log.info(`Delete ${streamIndex} data stream index...`);
     await es.indices.deleteDataStream({ name: streamIndex });
