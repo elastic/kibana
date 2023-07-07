@@ -135,13 +135,11 @@ export const createLogExplorerProfileStateMachine = ({
 export const initializeLogExplorerProfileStateService = (
   deps: LogExplorerProfileStateMachineDependencies
 ) => {
-  const service = interpret(createLogExplorerProfileStateMachine(deps));
+  const machine = createLogExplorerProfileStateMachine(deps);
 
-  service.start();
-
-  return service;
+  return interpret(machine).start();
 };
 
 export type LogExplorerProfileStateService = InterpreterFrom<
-  ReturnType<typeof createLogExplorerProfileStateMachine>
+  typeof createLogExplorerProfileStateMachine
 >;
