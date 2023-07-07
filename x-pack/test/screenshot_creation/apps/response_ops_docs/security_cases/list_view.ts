@@ -16,6 +16,7 @@ export default function ({ getPageObject, getService, getPageObjects }: FtrProvi
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
   const supertest = getService('supertest');
+  const testSubjects = getService('testSubjects');
   let caseIdSuspiciousEmail: string;
   let caseOwnerSuspiciousEmail: string;
 
@@ -76,6 +77,10 @@ export default function ({ getPageObject, getService, getPageObjects }: FtrProvi
         path: `cases/${caseIdSuspiciousEmail}`,
       });
       await commonScreenshots.takeScreenshot('cases-ui-open', screenshotDirectories, 1400, 1024);
+
+      const filesTab = await testSubjects.find('case-view-tab-title-files');
+      await filesTab.click();
+      await commonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);
     });
   });
 }
