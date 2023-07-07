@@ -15,7 +15,7 @@ export interface RiskScoreService {
   calculateAndPersistScores: (params: unknown) => Promise<unknown>;
 }
 
-export const riskScoreService = ({
+export const riskScoreServiceFactory = ({
   esClient,
   logger,
 }: {

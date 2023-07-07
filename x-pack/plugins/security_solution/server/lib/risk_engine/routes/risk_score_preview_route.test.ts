@@ -14,7 +14,7 @@ import {
   requestContextMock,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
-import { riskScoreService } from '../risk_score_service';
+import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScorePreviewRoute } from './risk_score_preview_route';
 
@@ -35,7 +35,7 @@ describe('POST risk_engine/preview route', () => {
     mockRiskScoreService = riskScoreServiceMock.create();
 
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
-    (riskScoreService as jest.Mock).mockReturnValue(mockRiskScoreService);
+    (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
     riskScorePreviewRoute(server.router, logger);
   });

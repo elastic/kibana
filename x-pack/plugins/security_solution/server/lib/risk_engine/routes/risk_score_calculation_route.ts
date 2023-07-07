@@ -15,7 +15,7 @@ import {
 import { riskScoreCalculationRequestSchema } from '../../../../common/risk_engine/risk_score_calculation/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { riskScoreService } from '../risk_score_service';
+import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { DATAVIEW_NOT_FOUND } from './translations';
 
@@ -32,7 +32,7 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
       const siemResponse = buildSiemResponse(response);
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const soClient = (await context.core).savedObjects.client;
-      const riskScore = riskScoreService({
+      const riskScoreService = riskScoreServiceFactory({
         esClient,
         logger,
       });
@@ -65,7 +65,7 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
         const afterKeys = userAfterKeys ?? {};
         const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
 
-        const result = await riskScore.calculateAndPersistScores({
+        const result = await riskScoreService.calculateAndPersistScores({
           afterKeys,
           debug,
           pageSize,
