@@ -30,7 +30,10 @@ import {
 } from '../../../common/types/api';
 import type { ConnectorMappings, ConnectorMappingResponse } from '../../../common/api';
 import { FindActionConnectorResponseRt, decodeWithExcessOrThrow } from '../../../common/api';
-import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import {
+  MAX_CONCURRENT_SEARCHES,
+  MAX_SUPPORTED_CONNECTORS_RETURNED,
+} from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
@@ -207,9 +210,9 @@ export async function getConnectors({
       return types;
     }, {} as Record<string, ActionType>);
 
-    const res = (await actionsClient.getAll()).filter((action) =>
-      isConnectorSupported(action, actionTypes)
-    );
+    const res = (await actionsClient.getAll())
+      .filter((action) => isConnectorSupported(action, actionTypes))
+      .slice(0, MAX_SUPPORTED_CONNECTORS_RETURNED);
 
     return decodeOrThrow(FindActionConnectorResponseRt)(res);
   } catch (error) {

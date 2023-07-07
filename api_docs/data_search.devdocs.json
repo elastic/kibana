@@ -16712,7 +16712,7 @@
           "\nThis method parses a string into a time shift duration.\nIf parsing fails, 'invalid' is returned.\nAllowed values are the string 'previous' and an integer followed by the units s,m,h,d,w,M,y"
         ],
         "signature": [
-          "(val: string) => moment.Duration | \"previous\" | \"invalid\""
+          "(val: string) => \"invalid\" | moment.Duration | \"previous\""
         ],
         "path": "src/plugins/data/common/search/aggs/utils/parse_time_shift.ts",
         "deprecated": false,
