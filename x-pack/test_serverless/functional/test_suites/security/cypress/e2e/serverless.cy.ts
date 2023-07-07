@@ -11,6 +11,6 @@ import { navigatesToLandingPage } from '../tasks/navigation';
 describe('Serverless', () => {
   it('Should navigate to the landing page', () => {
     navigatesToLandingPage();
-    cy.get(LEFT_NAVIGATION).should('exist');
+    cy.get(LEFT_NAVIGATION).should('have.text', 'Making the test fail');
   });
 });
