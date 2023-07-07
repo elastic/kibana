@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import type { EuiBasicTableColumn, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiBasicTable,
+  type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
   EuiLink,
+  type EuiSelectableProps,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
@@ -29,6 +30,7 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
 import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { EndpointDetailsFlyout } from './details';
@@ -74,6 +76,232 @@ const StyledDatePicker = styled.div`
     background-color: rgba(0, 119, 204, 0.2);
   }
 `;
+
+const getEndpointListColumns = ({
+  canReadPolicyManagement,
+  backToEndpointList,
+  getHostPendingActions,
+  queryParams,
+  search,
+  getAppUrl,
+}: {
+  canReadPolicyManagement: boolean;
+  backToEndpointList: PolicyDetailsRouteState['backLink'];
+  getHostPendingActions: ReturnType<typeof getEndpointPendingActionsCallback>;
+  queryParams: Immutable<EndpointIndexUIQueryParams>;
+  search: string;
+  getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
+}): Array<EuiBasicTableColumn<Immutable<HostInfo>>> => {
+  const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
+    defaultMessage: 'Last active',
+  });
+  const padLeft: CSSProperties = { paddingLeft: '6px' };
+
+  return [
+    {
+      field: 'metadata',
+      width: '15%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
+        defaultMessage: 'Endpoint',
+      }),
+      render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
+        const toRoutePath = getEndpointDetailsPath(
+          {
+            ...queryParams,
+            name: 'endpointDetails',
+            selected_endpoint: id,
+          },
+          search
+        );
+        const toRouteUrl = getAppUrl({ path: toRoutePath });
+        return (
+          <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
+            <EndpointListNavLink
+              name={hostname}
+              href={toRouteUrl}
+              route={toRoutePath}
+              dataTestSubj="hostnameCellLink"
+            />
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      field: 'host_status',
+      width: '14%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
+        defaultMessage: 'Agent status',
+      }),
+      render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
+        return (
+          <EndpointAgentStatus
+            endpointHostInfo={endpointInfo}
+            pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
+            data-test-subj="rowHostStatus"
+          />
+        );
+      },
+    },
+    {
+      field: 'metadata.Endpoint.policy.applied',
+      width: '15%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
+        defaultMessage: 'Policy',
+      }),
+      truncateText: true,
+      render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
+        return (
+          <>
+            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
+              {canReadPolicyManagement ? (
+                <EndpointPolicyLink
+                  policyId={policy.id}
+                  className="eui-textTruncate"
+                  data-test-subj="policyNameCellLink"
+                  backLink={backToEndpointList}
+                >
+                  {policy.name}
+                </EndpointPolicyLink>
+              ) : (
+                <>{policy.name}</>
+              )}
+            </EuiToolTip>
+            {policy.endpoint_policy_version && (
+              <EuiText
+                color="subdued"
+                size="xs"
+                style={{ whiteSpace: 'nowrap', ...padLeft }}
+                className="eui-textTruncate"
+                data-test-subj="policyListRevNo"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
+                  defaultMessage="rev. {revNumber}"
+                  values={{ revNumber: policy.endpoint_policy_version }}
+                />
+              </EuiText>
+            )}
+            {isPolicyOutOfDate(policy, item.policy_info) && (
+              <OutOfDate style={padLeft} data-test-subj="rowPolicyOutOfDate" />
+            )}
+          </>
+        );
+      },
+    },
+    {
+      field: 'metadata.Endpoint.policy.applied',
+      width: '9%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
+        defaultMessage: 'Policy status',
+      }),
+      render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
+        const toRoutePath = getEndpointDetailsPath({
+          name: 'endpointPolicyResponse',
+          ...queryParams,
+          selected_endpoint: item.metadata.agent.id,
+        });
+        const toRouteUrl = getAppUrl({ path: toRoutePath });
+        return (
+          <EuiToolTip
+            content={POLICY_STATUS_TO_TEXT[policy.status]}
+            anchorClassName="eui-textTruncate"
+          >
+            <EuiHealth
+              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+              className="eui-textTruncate eui-fullWidth"
+              data-test-subj="rowPolicyStatus"
+            >
+              <EndpointListNavLink
+                name={POLICY_STATUS_TO_TEXT[policy.status]}
+                href={toRouteUrl}
+                route={toRoutePath}
+                dataTestSubj="policyStatusCellLink"
+              />
+            </EuiHealth>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      field: 'metadata.host.os.name',
+      width: '9%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
+        defaultMessage: 'OS',
+      }),
+      render: (os: string) => {
+        return (
+          <EuiToolTip content={os} anchorClassName="eui-textTruncate">
+            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+              <p className="eui-displayInline eui-TextTruncate">{os}</p>
+            </EuiText>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      field: 'metadata.host.ip',
+      width: '12%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
+        defaultMessage: 'IP address',
+      }),
+      render: (ip: string[]) => {
+        return (
+          <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-textTruncate">
+            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+              <p className="eui-displayInline eui-textTruncate">
+                {ip.toString().replace(',', ', ')}
+              </p>
+            </EuiText>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      field: 'metadata.agent.version',
+      width: '9%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
+        defaultMessage: 'Version',
+      }),
+      render: (version: string) => {
+        return (
+          <EuiToolTip content={version} anchorClassName="eui-textTruncate">
+            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+              <p className="eui-displayInline eui-TextTruncate">{version}</p>
+            </EuiText>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      field: 'metadata.@timestamp',
+      name: lastActiveColumnName,
+      width: '9%',
+      render(dateValue: HostInfo['metadata']['@timestamp']) {
+        return (
+          <FormattedDate
+            fieldName={lastActiveColumnName}
+            value={dateValue}
+            className="eui-textTruncate"
+          />
+        );
+      },
+    },
+    {
+      field: '',
+      width: '8%',
+      name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          render: (item: HostInfo) => {
+            return <TableRowActions endpointMetadata={item.metadata} />;
+          },
+        },
+      ],
+    },
+  ];
+};
 
 // FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
@@ -226,8 +454,6 @@ export const EndpointList = () => {
 
   const NOOP = useCallback(() => {}, []);
 
-  const PAD_LEFT: React.CSSProperties = useMemo(() => ({ paddingLeft: '6px' }), []);
-
   const handleDeployEndpointsClick =
     useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
@@ -271,227 +497,25 @@ export const EndpointList = () => {
     };
   }, []);
 
-  const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
-    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
-      defaultMessage: 'Last active',
-    });
-
-    return [
-      {
-        field: 'metadata',
-        width: '15%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
-          defaultMessage: 'Endpoint',
-        }),
-        render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
-          const toRoutePath = getEndpointDetailsPath(
-            {
-              ...queryParams,
-              name: 'endpointDetails',
-              selected_endpoint: id,
-            },
-            search
-          );
-          const toRouteUrl = getAppUrl({ path: toRoutePath });
-          return (
-            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
-              <EndpointListNavLink
-                name={hostname}
-                href={toRouteUrl}
-                route={toRoutePath}
-                dataTestSubj="hostnameCellLink"
-              />
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'host_status',
-        width: '14%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
-          defaultMessage: 'Agent status',
-        }),
-        render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
-          return (
-            <EndpointAgentStatus
-              endpointHostInfo={endpointInfo}
-              pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
-              data-test-subj="rowHostStatus"
-            />
-          );
-        },
-      },
-      {
-        field: 'metadata.Endpoint.policy.applied',
-        width: '15%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
-          defaultMessage: 'Policy',
-        }),
-        truncateText: true,
-        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          return (
-            <>
-              <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
-                {canReadPolicyManagement ? (
-                  <EndpointPolicyLink
-                    policyId={policy.id}
-                    className="eui-textTruncate"
-                    data-test-subj="policyNameCellLink"
-                    backLink={backToEndpointList}
-                  >
-                    {policy.name}
-                  </EndpointPolicyLink>
-                ) : (
-                  <>{policy.name}</>
-                )}
-              </EuiToolTip>
-              {policy.endpoint_policy_version && (
-                <EuiText
-                  color="subdued"
-                  size="xs"
-                  style={{ whiteSpace: 'nowrap', ...PAD_LEFT }}
-                  className="eui-textTruncate"
-                  data-test-subj="policyListRevNo"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
-                    defaultMessage="rev. {revNumber}"
-                    values={{ revNumber: policy.endpoint_policy_version }}
-                  />
-                </EuiText>
-              )}
-              {isPolicyOutOfDate(policy, item.policy_info) && (
-                <OutOfDate style={PAD_LEFT} data-test-subj="rowPolicyOutOfDate" />
-              )}
-            </>
-          );
-        },
-      },
-      {
-        field: 'metadata.Endpoint.policy.applied',
-        width: '9%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
-          defaultMessage: 'Policy status',
-        }),
-        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          const toRoutePath = getEndpointDetailsPath({
-            name: 'endpointPolicyResponse',
-            ...queryParams,
-            selected_endpoint: item.metadata.agent.id,
-          });
-          const toRouteUrl = getAppUrl({ path: toRoutePath });
-          return (
-            <EuiToolTip
-              content={POLICY_STATUS_TO_TEXT[policy.status]}
-              anchorClassName="eui-textTruncate"
-            >
-              <EuiHealth
-                color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
-                className="eui-textTruncate eui-fullWidth"
-                data-test-subj="rowPolicyStatus"
-              >
-                <EndpointListNavLink
-                  name={POLICY_STATUS_TO_TEXT[policy.status]}
-                  href={toRouteUrl}
-                  route={toRoutePath}
-                  dataTestSubj="policyStatusCellLink"
-                />
-              </EuiHealth>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'metadata.host.os.name',
-        width: '9%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
-          defaultMessage: 'OS',
-        }),
-        render: (os: string) => {
-          return (
-            <EuiToolTip content={os} anchorClassName="eui-textTruncate">
-              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
-                <p className="eui-displayInline eui-TextTruncate">{os}</p>
-              </EuiText>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'metadata.host.ip',
-        width: '12%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
-          defaultMessage: 'IP address',
-        }),
-        render: (ip: string[]) => {
-          return (
-            <EuiToolTip
-              content={ip.toString().replace(',', ', ')}
-              anchorClassName="eui-textTruncate"
-            >
-              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
-                <p className="eui-displayInline eui-textTruncate">
-                  {ip.toString().replace(',', ', ')}
-                </p>
-              </EuiText>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'metadata.agent.version',
-        width: '9%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
-          defaultMessage: 'Version',
-        }),
-        render: (version: string) => {
-          return (
-            <EuiToolTip content={version} anchorClassName="eui-textTruncate">
-              <EuiText size="s" className="eui-textTruncate eui-fullWidth">
-                <p className="eui-displayInline eui-TextTruncate">{version}</p>
-              </EuiText>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'metadata.@timestamp',
-        name: lastActiveColumnName,
-        width: '9%',
-        render(dateValue: HostInfo['metadata']['@timestamp']) {
-          return (
-            <FormattedDate
-              fieldName={lastActiveColumnName}
-              value={dateValue}
-              className="eui-textTruncate"
-            />
-          );
-        },
-      },
-      {
-        field: '',
-        width: '8%',
-        name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            render: (item: HostInfo) => {
-              return <TableRowActions endpointMetadata={item.metadata} />;
-            },
-          },
-        ],
-      },
-    ];
-  }, [
-    queryParams,
-    search,
-    getAppUrl,
-    getHostPendingActions,
-    canReadPolicyManagement,
-    backToEndpointList,
-    PAD_LEFT,
-  ]);
+  const columns = useMemo(
+    () =>
+      getEndpointListColumns({
+        canReadPolicyManagement,
+        backToEndpointList,
+        getAppUrl,
+        getHostPendingActions,
+        queryParams,
+        search,
+      }),
+    [
+      backToEndpointList,
+      canReadPolicyManagement,
+      getAppUrl,
+      getHostPendingActions,
+      queryParams,
+      search,
+    ]
+  );
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist) {
