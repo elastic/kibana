@@ -39,5 +39,9 @@
     "@kbn/generate-csv",
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
+    "@kbn/reporting-export-types-plugin",
+  ],
+  "exclude": [
+    "target/**/*"
   ]
 }

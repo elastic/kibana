@@ -17,7 +17,6 @@
     "@kbn/screenshotting-plugin",
     "@kbn/generate-csv",
     "@kbn/licensing-plugin",
-    "@kbn/spaces-plugin",
     "@kbn/utility-types",
   ],
   "exclude": ["target/**/*"]
