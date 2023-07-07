@@ -24,6 +24,7 @@ import type {
   EuiDataGridColumnCellAction,
   EuiDataGridToolBarVisibilityOptions,
   EuiSuperSelectOption,
+  EuiDataGridOnColumnResizeHandler,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
@@ -536,8 +537,8 @@ export type AlertsTableProps = {
   browserFields: any;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
+  onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   showInspectButton?: boolean;
