@@ -19,7 +19,6 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Link, useParams, generatePath } from 'react-router-dom';
-import { css } from '@emotion/react';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../../common/constants';
 import { useCloudPostureTable } from '../../../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from '../../hooks/use_latest_vulnerabilities';
@@ -320,14 +319,7 @@ export const ResourceVulnerabilities = ({ dataView }: { dataView: DataView }) =>
         placeholder={SEARCH_BAR_PLACEHOLDER}
       />
       <Link to={generatePath(findingsNavigation.vulnerabilities_by_resource.path)}>
-        <EuiButtonEmpty
-          iconType="arrowLeft"
-          css={css`
-            & .euiButtonEmpty__content {
-              padding: 0;
-            }
-          `}
-        >
+        <EuiButtonEmpty iconType="arrowLeft" flush="both">
           <FormattedMessage
             id="xpack.csp.vulnerabilities.resourceVulnerabilities.backToResourcesPageButtonLabel"
             defaultMessage="Back to resources"

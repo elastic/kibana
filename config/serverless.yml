@@ -2,9 +2,11 @@ interactiveSetup.enabled: false
 newsfeed.enabled: false
 xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
+# Fleet settings
 xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.disableProxies: true
+xpack.fleet.internal.activeAgentsSoftLimit: 25000
 
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
@@ -13,7 +15,7 @@ migrations.algorithm: zdt
 # until the controller is able to spawn the migrator job/pod
 migrations.zdt:
   metaPickupSyncDelaySec: 5
-  runOnRoles: ["ui"]
+  runOnRoles: ['ui']
 
 # Ess plugins
 xpack.securitySolutionEss.enabled: false
