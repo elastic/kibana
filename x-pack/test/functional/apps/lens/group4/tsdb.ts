@@ -9,7 +9,6 @@ import expect from '@kbn/expect/expect';
 import { partition } from 'lodash';
 import moment from 'moment';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { createTSDBHelper } from './_tsdb_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_DOC_COUNT = 100;
@@ -225,6 +224,19 @@ function getDataMapping(
   return dataStreamMapping;
 }
 
+function sumFirstNValues(n: number, bars: Array<{ y: number }>): number {
+  const indexes = Array(n)
+    .fill(1)
+    .map((_, i) => i);
+  let countSum = 0;
+  for (const index of indexes) {
+    if (bars[index]) {
+      countSum += bars[index].y;
+    }
+  }
+  return countSum;
+}
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
@@ -232,7 +244,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const log = getService('log');
-  const TSDBHelper = createTSDBHelper({ getService });
+  const dataStreams = getService('dataStreams');
   const elasticChart = getService('elasticChart');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
@@ -242,6 +254,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     { isStream, removeTSDBFields }: { isStream: boolean; removeTSDBFields?: boolean },
     startTime: string
   ) => {
+    log.info(
+      `Adding ${TEST_DOC_COUNT} to ${esIndex} with starting time from ${moment
+        .utc(startTime, TIME_PICKER_FORMAT)
+        .format(TIME_PICKER_FORMAT)} to ${moment
+        .utc(startTime, TIME_PICKER_FORMAT)
+        .add(2 * TEST_DOC_COUNT, 'seconds')
+        .format(TIME_PICKER_FORMAT)}`
+    );
     const docs = Array<TestDoc>(TEST_DOC_COUNT)
       .fill(testDocTemplate)
       .map((templateDoc, i) => {
@@ -325,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('downsampling', () => {
       const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
       before(async () => {
-        const downsampledTargetIndex = await TSDBHelper.downsampleTSDBIndex(tsdbIndex, {
+        const downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(tsdbIndex, {
           isStream: false,
         });
         downsampleDataView.index = downsampledTargetIndex;
@@ -529,8 +549,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Scenarios with changing stream type', () => {
       const now = moment().utc();
-      const fromTimeForScenarios = now.subtract(1, 'hour').format(TIME_PICKER_FORMAT);
-      const toTimeForScenarios = now.add(1, 'hour').format(TIME_PICKER_FORMAT);
+      const fromMoment = now.clone().subtract(1, 'hour');
+      const toMoment = now.clone();
+      const fromTimeForScenarios = fromMoment.format(TIME_PICKER_FORMAT);
+      const toTimeForScenarios = toMoment.format(TIME_PICKER_FORMAT);
 
       const getScenarios = (
         initialIndex: string
@@ -597,7 +619,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               for (const { index, create, downsample, tsdb, removeTSDBFields } of indexes) {
                 if (create) {
                   if (tsdb) {
-                    await TSDBHelper.createDataStream(
+                    await dataStreams.createDataStream(
                       index,
                       getDataMapping({ tsdb, removeTSDBFields }),
                       tsdb
@@ -612,10 +634,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     });
                   }
                   // add data to the newly created index
-                  await createDocs(index, { isStream: Boolean(tsdb), removeTSDBFields }, toTime);
+                  await createDocs(
+                    index,
+                    { isStream: Boolean(tsdb), removeTSDBFields },
+                    fromTimeForScenarios
+                  );
                 }
                 if (downsample) {
-                  downsampledTargetIndex = await TSDBHelper.downsampleTSDBIndex(index, {
+                  downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(index, {
                     isStream: Boolean(tsdb),
                   });
                 }
@@ -638,7 +664,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 fromTimeForScenarios,
                 moment
                   .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
-                  .add(1, 'hour')
+                  .add(2, 'hour')
                   .format(TIME_PICKER_FORMAT) // consider also new documents
               );
             });
@@ -647,7 +673,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               for (const { index, create, tsdb } of indexes) {
                 if (create) {
                   if (tsdb) {
-                    await TSDBHelper.deleteDataStream(index);
+                    await dataStreams.deleteDataStream(index);
                   } else {
                     log.info(`deleting the index "${index}"...`);
                     await es.indices.delete({
@@ -677,7 +703,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${streamIndex}" data stream...`);
-          await TSDBHelper.createDataStream(streamIndex, getDataMapping(), false);
+          await dataStreams.createDataStream(streamIndex, getDataMapping(), false);
 
           // add some data to the stream
           await createDocs(streamIndex, { isStream: true }, fromTimeForScenarios);
@@ -690,20 +716,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.info(`Upgrade "${streamIndex}" stream to TSDB...`);
 
           const tsdbMapping = getDataMapping({ tsdb: true });
-          await TSDBHelper.upgradeStreamToTSDB(streamIndex, tsdbMapping);
+          await dataStreams.upgradeStreamToTSDB(streamIndex, tsdbMapping);
           log.info(
             `Add more data to new "${streamConvertedToTsdbIndex}" dataView (now with TSDB backing index)...`
           );
           // add some more data when upgraded
-          await createDocs(streamConvertedToTsdbIndex, { isStream: true }, toTime);
+          await createDocs(streamConvertedToTsdbIndex, { isStream: true }, toTimeForScenarios);
         });
 
         after(async () => {
-          try {
-            await TSDBHelper.deleteDataStream(streamIndex);
-          } catch {
-            log.error(`Error while deleting ${streamIndex}`);
-          }
+          await dataStreams.deleteDataStream(streamIndex);
         });
 
         runTestsForEachScenario(streamConvertedToTsdbIndex, (indexes) => {
@@ -752,24 +774,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
             const counterBars = data.bars![0].bars;
             const countBars = data.bars![1].bars;
+
+            log.info('Check counter data before the upgrade');
             // check there's some data before the upgrade
-            expect(counterBars[0]).to.eql({ x: 1688653980000, y: 5000, mark: null });
-            expect(countBars[0]).to.eql({
-              x: 1688653980000,
-              y: TEST_DOC_COUNT, // initially there's the upgraded stream only
-              mark: null,
-            });
+            expect(counterBars[0].y).to.eql(5000);
+            log.info('Check counter data after the upgrade');
             // check there's some data after the upgrade
-            expect(counterBars[counterBars.length - 1]).to.eql({
-              x: 1686873600000,
-              y: 5000,
-              mark: null,
-            });
-            expect(countBars[countBars.length - 1]).to.eql({
-              x: 1686873600000,
-              y: indexes.length * TEST_DOC_COUNT, // at the end there are multiple documents based on the number of indexes
-              mark: null,
-            });
+            expect(counterBars[counterBars.length - 1].y).to.eql(5000);
+
+            log.info('Check count before the upgrade');
+            // Before the upgrade the count is N times the indexes
+            expect(
+              sumFirstNValues(
+                3,
+                countBars.filter(({ x }) => x < now.valueOf())
+              )
+            ).to.eql(indexes.length * TEST_DOC_COUNT);
+            log.info('Check count after the upgrade');
+            // later there are only documents for the upgraded stream
+            expect(
+              sumFirstNValues(3, [...countBars].filter(({ x }) => x > now.valueOf()).reverse())
+            ).to.eql(TEST_DOC_COUNT);
           });
         });
       });
@@ -781,10 +806,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         before(async () => {
           log.info(`Creating "${tsdbStream}" data stream...`);
-          await TSDBHelper.createDataStream(tsdbStream, getDataMapping({ tsdb: true }), true);
+          await dataStreams.createDataStream(tsdbStream, getDataMapping({ tsdb: true }), true);
 
           // add some data to the stream
-          await createDocs(tsdbStream, { isStream: true }, fromTime);
+          await createDocs(tsdbStream, { isStream: true }, fromTimeForScenarios);
 
           log.info(`Update settings for "${tsdbStream}" dataView...`);
           await kibanaServer.uiSettings.update({
@@ -795,18 +820,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `Dowgrade "${tsdbStream}" stream into regular stream "${tsdbConvertedToStream}"...`
           );
 
-          await TSDBHelper.downgradeTSDBtoStream(tsdbStream, getDataMapping({ tsdb: true }));
+          await dataStreams.downgradeTSDBtoStream(tsdbStream, getDataMapping({ tsdb: true }));
           log.info(`Add more data to new "${tsdbConvertedToStream}" dataView (no longer TSDB)...`);
           // add some more data when upgraded
           await createDocs(tsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
         });
 
         after(async () => {
-          try {
-            await TSDBHelper.deleteDataStream(tsdbConvertedToStream);
-          } catch {
-            log.error(`Error while deleting ${tsdbConvertedToStream}`);
-          }
+          await dataStreams.deleteDataStream(tsdbConvertedToStream);
         });
 
         runTestsForEachScenario(tsdbConvertedToStream, (indexes) => {
@@ -847,18 +868,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
             const bars = data.bars![0].bars;
-            // check there's some data before the upgrade
-            expect(bars[0]).to.eql({
-              x: 1688653980000,
-              y: TEST_DOC_COUNT, // initially there's the TSDB stream
-              mark: null,
-            });
-            // then the dowgraded stream
-            expect(bars[bars.length - 1]).to.eql({
-              x: 1686873600000,
-              y: indexes.length * TEST_DOC_COUNT,
-              mark: null,
-            });
+            log.info('Check count before the downgrade');
+            // Before the upgrade the count is N times the indexes
+            expect(
+              sumFirstNValues(
+                3,
+                bars.filter(({ x }) => x < now.valueOf())
+              )
+            ).to.eql(indexes.length * TEST_DOC_COUNT);
+            log.info('Check count after the downgrade');
+            // later there are only documents for the upgraded stream
+            expect(
+              sumFirstNValues(3, [...bars].filter(({ x }) => x > now.valueOf()).reverse())
+            ).to.eql(TEST_DOC_COUNT);
           });
 
           it('should visualize data when moving the time window around the downgrade moment', async () => {
