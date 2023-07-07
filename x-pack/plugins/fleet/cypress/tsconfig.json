@@ -26,6 +26,7 @@
     {
       "path": "../tsconfig.json",
       "force": true
-    }
+    },
+    "@kbn/rison"
   ]
 }
