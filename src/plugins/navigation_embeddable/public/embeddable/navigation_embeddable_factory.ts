@@ -23,6 +23,7 @@ import { coreServices, untilPluginStartServicesReady } from '../services/kibana_
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
+// TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant as part of https://github.com/elastic/kibana/issues/154381
 const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableInput, 'id'> => ({
   links: {},
   disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
