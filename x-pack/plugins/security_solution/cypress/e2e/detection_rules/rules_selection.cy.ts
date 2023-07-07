@@ -16,7 +16,6 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import {
-  excessivelyInstallAllPrebuiltRules,
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
 } from '../../tasks/api_calls/prebuilt_rules';
@@ -47,7 +46,6 @@ describe('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
-    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     selectNumberOfRules(2);
@@ -60,7 +58,6 @@ describe('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then bulk un-selected', () => {
-    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();
@@ -81,7 +78,6 @@ describe('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then unselected via the table select all checkbox', () => {
-    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();
