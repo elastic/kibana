@@ -77,7 +77,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   );
 
   return (
-    <CodeEditor // TODO theme provided in context by x-pack/plugins/osquery/public/application.tsx
+    <CodeEditor
       languageId={'sql'}
       value={editorValue}
       onChange={setEditorValue}
