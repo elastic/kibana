@@ -64,10 +64,11 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       services,
     })
   );
-  const customizationService = useDiscoverCustomizationService({
-    customizationCallbacks,
-    stateContainer,
-  });
+  const { customizationService, isInitialized: isCustomizationServiceInitialized } =
+    useDiscoverCustomizationService({
+      customizationCallbacks,
+      stateContainer,
+    });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -131,7 +132,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
-      if (!customizationService) return;
+      if (!isCustomizationServiceInitialized) return;
 
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
@@ -198,7 +199,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       }
     },
     [
-      customizationService,
+      isCustomizationServiceInitialized,
       checkData,
       stateContainer,
       savedSearchId,
