@@ -6,11 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import type { PolicyFormComponentCommonProps } from '../types';
 import type { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
-import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import type { EventFormOption, SupplementalEventFormOption } from './event_collection_card';
 import { EventCollectionCard } from './event_collection_card';
 
@@ -127,7 +126,7 @@ export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>((pro
   return (
     <EventCollectionCard<OperatingSystem.LINUX>
       {...props}
-      os={PolicyOperatingSystem.linux}
+      os={OperatingSystem.LINUX}
       selection={props.policy.linux.events}
       supplementalOptions={supplementalOptions}
       options={OPTIONS}

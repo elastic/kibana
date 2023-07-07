@@ -6,9 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
-import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import type { EventFormOption } from './event_collection_card';
 import { EventCollectionCard } from './event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../types';
@@ -40,7 +39,7 @@ export const MacEventCollectionCard = memo<MacEventCollectionCardProps>((props) 
   return (
     <EventCollectionCard<OperatingSystem.MAC>
       {...props}
-      os={PolicyOperatingSystem.mac}
+      os={OperatingSystem.MAC}
       selection={props.policy.mac.events}
       options={OPTIONS}
     />
