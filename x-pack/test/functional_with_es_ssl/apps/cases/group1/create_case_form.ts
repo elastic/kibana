@@ -40,6 +40,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         description: 'test description',
         tag: 'tagme',
         severity: CaseSeverity.HIGH,
+        category: 'new',
       });
 
       await testSubjects.existOrFail('case-view-title', {
@@ -57,9 +58,45 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       // validate tag exists
       await testSubjects.existOrFail('tag-tagme');
 
+      // validate category exists
+      await testSubjects.existOrFail('category-viewer-new');
+
       // validate no connector added
       const button = await find.byCssSelector('[data-test-subj*="case-callout"] button');
       expect(await button.getVisibleText()).equal('Add connector');
+    });
+
+    it('displays errors correctly while creating a case', async () => {
+      const caseTitle = Array(161).fill('x').toString();
+      const longTag = Array(256).fill('a').toString();
+      const longCategory = Array(51).fill('x').toString();
+
+      await cases.create.openCreateCasePage();
+      await cases.create.createCase({
+        title: caseTitle,
+        description: '',
+        tag: longTag,
+        severity: CaseSeverity.HIGH,
+        category: longCategory,
+      });
+
+      const title = await find.byCssSelector('[data-test-subj="caseTitle"]');
+      expect(await title.getVisibleText()).contain(
+        'The length of the name is too long. The maximum length is 160.'
+      );
+
+      const description = await testSubjects.find('caseDescription');
+      expect(await description.getVisibleText()).contain('A description is required.');
+
+      const tags = await testSubjects.find('caseTags');
+      expect(await tags.getVisibleText()).contain(
+        'The length of the tag is too long. The maximum length is 256.'
+      );
+
+      const category = await testSubjects.find('case-create-form-category');
+      expect(await category.getVisibleText()).contain(
+        'The length of the category is too long. The maximum length is 50.'
+      );
     });
 
     describe('Assignees', function () {
@@ -85,8 +122,8 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
-        await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
       });
     });
   });

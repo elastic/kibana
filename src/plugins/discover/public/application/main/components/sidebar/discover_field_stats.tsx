@@ -7,12 +7,11 @@
  */
 
 import React, { useMemo } from 'react';
+import { FieldStats, FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
 import {
-  FieldStats,
-  FieldStatsProps,
   useQuerySubscriber,
   hasQuerySubscriberData,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 

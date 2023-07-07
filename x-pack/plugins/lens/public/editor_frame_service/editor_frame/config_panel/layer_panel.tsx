@@ -34,6 +34,7 @@ import {
   VisualizationDimensionGroupConfig,
   UserMessagesGetter,
   AddLayerFunction,
+  RegisterLibraryAnnotationGroupFunction,
 } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
@@ -63,6 +64,7 @@ export function LayerPanel(
     layerIndex: number;
     isOnlyLayer: boolean;
     addLayer: AddLayerFunction;
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (
       datasourceId: string | undefined,
@@ -87,8 +89,9 @@ export function LayerPanel(
       datasourceId?: string;
       visualizationId?: string;
     }) => void;
-    indexPatternService: IndexPatternServiceAPI;
-    getUserMessages: UserMessagesGetter;
+    indexPatternService?: IndexPatternServiceAPI;
+    getUserMessages?: UserMessagesGetter;
+    displayLayerSettings: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -146,7 +149,16 @@ export function LayerPanel(
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
   const datasourceId = datasourcePublicAPI?.datasourceId;
-  const layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  let layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  // try again with aliases
+  if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
+    const aliasId = datasourcePublicAPI.datasourceAliasIds.find(
+      (id) => datasourceStates?.[id]?.state
+    );
+    if (aliasId) {
+      layerDatasourceState = datasourceStates[aliasId].state;
+    }
+  }
   const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
@@ -162,7 +174,10 @@ export function LayerPanel(
   const columnLabelMap =
     !layerDatasource && activeVisualization.getUniqueLabels
       ? activeVisualization.getUniqueLabels(props.visualizationState)
-      : layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
+      : layerDatasource?.uniqueLabels?.(
+          layerDatasourceConfigProps?.state,
+          framePublicAPI.dataViews.indexPatterns
+        );
 
   const isEmptyLayer = !dimensionGroups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
@@ -339,6 +354,7 @@ export function LayerPanel(
             layerId,
             visualizationState,
             updateVisualization,
+            props.registerLibraryAnnotationGroup,
             isSaveable
           )
           .map((action) => ({
@@ -351,7 +367,6 @@ export function LayerPanel(
         ...getSharedActions({
           layerId,
           activeVisualization,
-          visualizationState,
           core,
           layerIndex,
           layerType: activeVisualization.getLayerType(layerId, visualizationState),
@@ -365,22 +380,27 @@ export function LayerPanel(
           openLayerSettings: () => setPanelSettingsOpen(true),
           onCloneLayer,
           onRemoveLayer: () => onRemoveLayer(layerId),
+          customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
+            layerId,
+            visualizationState
+          ),
         }),
       ].filter((i) => i.isCompatible),
     [
       activeVisualization,
+      layerId,
+      visualizationState,
+      updateVisualization,
+      props.registerLibraryAnnotationGroup,
+      isSaveable,
       core,
+      layerIndex,
       isOnlyLayer,
       isTextBasedLanguage,
+      visualizationLayerSettings,
       layerDatasource?.renderLayerSettings,
-      layerId,
-      layerIndex,
       onCloneLayer,
       onRemoveLayer,
-      updateVisualization,
-      visualizationLayerSettings,
-      visualizationState,
-      isSaveable,
     ]
   );
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
@@ -406,17 +426,20 @@ export function LayerPanel(
                   activeVisualization={activeVisualization}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LayerActions
-                  actions={compatibleActions}
-                  layerIndex={layerIndex}
-                  mountingPoint={layerActionsFlyoutRef.current}
-                />
-                <div ref={layerActionsFlyoutRef} />
-              </EuiFlexItem>
+              {props.displayLayerSettings && (
+                <EuiFlexItem grow={false}>
+                  <LayerActions
+                    actions={compatibleActions}
+                    layerIndex={layerIndex}
+                    mountingPoint={layerActionsFlyoutRef.current}
+                  />
+                  <div ref={layerActionsFlyoutRef} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
-            {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
-            {layerDatasource && (
+            {props.indexPatternService &&
+              (layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
+            {layerDatasource && props.indexPatternService && (
               <NativeRenderer
                 render={layerDatasource.renderLayerPanel}
                 nativeProps={{
@@ -532,9 +555,10 @@ export function LayerPanel(
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
 
-                        const messages = props.getUserMessages('dimensionButton', {
-                          dimensionId: columnId,
-                        });
+                        const messages =
+                          props?.getUserMessages?.('dimensionButton', {
+                            dimensionId: columnId,
+                          }) ?? [];
 
                         return (
                           <DraggableDimensionButton

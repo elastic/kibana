@@ -35,7 +35,7 @@ import { IndexPattern } from '../../../../../types';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
-jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     topValues: {
       buckets: [
@@ -50,7 +50,7 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   }),
 }));
 
-jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
   useExistingFieldsReader: jest.fn(() => {
     return {
       hasFieldData: (dataViewId: string, fieldName: string) => {

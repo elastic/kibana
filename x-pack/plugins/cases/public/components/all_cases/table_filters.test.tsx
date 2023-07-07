@@ -32,7 +32,6 @@ jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 
 const onFilterChanged = jest.fn();
-const refetch = jest.fn();
 const setFilterRefetch = jest.fn();
 
 const props = {
@@ -53,8 +52,11 @@ describe('CasesTableFilters ', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
-    (useGetCategories as jest.Mock).mockReturnValue({ data: ['twix', 'snickers'], refetch });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
+    (useGetCategories as jest.Mock).mockReturnValue({
+      data: ['twix', 'snickers'],
+      isLoading: false,
+    });
     (useSuggestUserProfiles as jest.Mock).mockReturnValue({ data: userProfiles, isLoading: false });
   });
 

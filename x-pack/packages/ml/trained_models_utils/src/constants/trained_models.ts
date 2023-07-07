@@ -61,12 +61,8 @@ export const ELASTIC_MODEL_DEFINITIONS = {
 
 export const MODEL_STATE = {
   ...DEPLOYMENT_STATE,
-  DOWNLOADING: i18n.translate('xpack.ml.trainedModels.modelsList.downloadingStateLabel', {
-    defaultMessage: 'downloading',
-  }),
-  DOWNLOADED: i18n.translate('xpack.ml.trainedModels.modelsList.downloadedStateLabel', {
-    defaultMessage: 'downloaded',
-  }),
+  DOWNLOADING: 'downloading',
+  DOWNLOADED: 'downloaded',
 } as const;
 
-export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE];
+export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;

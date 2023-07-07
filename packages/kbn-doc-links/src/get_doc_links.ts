@@ -20,6 +20,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const DOC_LINK_VERSION = meta.version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
+  const ELASTIC_GITHUB = meta.elasticGithubUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
@@ -29,6 +30,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
   const APP_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
+  const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
   const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
   const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
@@ -134,7 +136,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsAzureBlobStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-azure-blob.html`,
       connectorsClients: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-build`,
       connectorsConfluence: `${ENTERPRISE_SEARCH_DOCS}connectors-confluence.html`,
+      connectorsDropbox: `${ENTERPRISE_SEARCH_DOCS}connectors-dropbox.html`,
+      connectorsContentExtraction: `${ENTERPRISE_SEARCH_DOCS}connectors-content-extraction.html`,
       connectorsGoogleCloudStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-google-cloud.html`,
+      connectorsGoogleDrive: `${ENTERPRISE_SEARCH_DOCS}connectors-google-drive.html`,
       connectorsJira: `${ENTERPRISE_SEARCH_DOCS}connectors-jira.html`,
       connectorsMicrosoftSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-ms-sql.html`,
       connectorsMongoDB: `${ENTERPRISE_SEARCH_DOCS}connectors-mongodb.html`,
@@ -144,6 +149,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsOracle: `${ENTERPRISE_SEARCH_DOCS}connectors-oracle.html`,
       connectorsPostgreSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-postgresql.html`,
       connectorsS3: `${ENTERPRISE_SEARCH_DOCS}connectors-s3.html`,
+      connectorsServiceNow: `${ENTERPRISE_SEARCH_DOCS}connectors-servicenow.html`,
       connectorsSharepoint: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint.html`,
       connectorsSharepointOnline: `${ENTERPRISE_SEARCH_DOCS}connectors-sharepoint-online.html`,
       connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-workplace-search`,
@@ -152,11 +158,17 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       deployTrainedModels: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-models.html`,
       documentLevelSecurity: `${ELASTICSEARCH_DOCS}document-level-security.html`,
-      elser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
+      elser: `${ENTERPRISE_SEARCH_DOCS}elser-text-expansion.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
+      esre: `${ESRE_DOCS}index.html`,
+      esreFaq: `${ESRE_DOCS}faq.html`,
+      esreHelp: `${ESRE_DOCS}help.html`,
+      esreLearn: `${ESRE_DOCS}learn.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
       ingestionApis: `${ENTERPRISE_SEARCH_DOCS}ingestion-apis.html`,
       ingestPipelines: `${ENTERPRISE_SEARCH_DOCS}ingest-pipelines.html`,
+      knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
+      knnSearchCombine: `${ELASTICSEARCH_DOCS}knn-search.html#_combine_approximate_knn_with_other_features`,
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
@@ -164,10 +176,15 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ENTERPRISE_SEARCH_DOCS}document-enrichment.html`,
       searchApplicationsTemplates: `${ENTERPRISE_SEARCH_DOCS}search-applications-templates.html`,
+      searchApplicationsSearchApi: `${ENTERPRISE_SEARCH_DOCS}search-applications-safe-search.html`,
       searchApplications: `${ENTERPRISE_SEARCH_DOCS}search-applications.html`,
+      searchApplicationsSearch: `${ENTERPRISE_SEARCH_DOCS}search-applications-search.html`,
       searchTemplates: `${ELASTICSEARCH_DOCS}search-template.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
+      supportedNlpModels: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html`,
       syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
+      trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
+      textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
@@ -290,6 +307,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
     kibana: {
+      askElastic: `${ELASTIC_WEBSITE_URL}products/kibana/ask-elastic?blade=kibanaaskelastic`,
+      createGithubIssue: `${ELASTIC_GITHUB}kibana/issues/new/choose`,
+      feedback: `${ELASTIC_WEBSITE_URL}products/kibana/feedback?blade=kibanafeedback`,
       guide: `${KIBANA_DOCS}index.html`,
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
@@ -370,6 +390,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
       remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
       remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
+      rrf: `${ELASTICSEARCH_DOCS}rrf.html`,
       scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
       secureCluster: `${ELASTICSEARCH_DOCS}secure-cluster.html`,
       shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
@@ -468,7 +489,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       classificationAucRoc: `${MACHINE_LEARNING_DOCS}ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
-      startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-models.html#ml-nlp-deploy-model`,
+      startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -488,6 +509,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       infrastructureThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
       logsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
       metricsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
+      threshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/threshold-alert.html`,
       monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
       monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
       tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
@@ -500,6 +522,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       syntheticsCommandReference: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-configuration.html#synthetics-configuration-playwright-options`,
       syntheticsProjectMonitors: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetic-run-tests.html#synthetic-monitor-choose-project`,
       syntheticsMigrateFromIntegration: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-migrate-from-integration.html`,
+      sloBurnRateRule: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/slo-burn-rate-alert.html`,
     },
     alerting: {
       guide: `${KIBANA_DOCS}create-and-manage-rules.html`,

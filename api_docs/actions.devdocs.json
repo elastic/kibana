@@ -2412,6 +2412,17 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionResult.isSystemAction",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSystemAction",
+            "description": [],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2653,6 +2664,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionType.isSystemAction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSystemAction",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionType.renderParameterTemplates",
             "type": "Function",
             "tags": [],
@@ -2869,6 +2894,21 @@
             "description": [],
             "signature": [
               "ActionsConfigurationUtilities"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "ActionExecutionSource",
+              "<unknown> | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
@@ -3498,6 +3538,23 @@
           "description": [],
           "signature": [
             "() => { hasPermanentEncryptionKey: boolean; }"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.getActionsConfigurationUtilities",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionsConfigurationUtilities",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ActionsConfigurationUtilities"
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,

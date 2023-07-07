@@ -15,7 +15,7 @@ import { HostsState } from './use_unified_search_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { AlertStatus } from '../types';
 import { ALERT_STATUS_QUERY } from '../constants';
-import { createHostsFilter } from '../utils';
+import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 export interface AlertsEsQuery {
   bool: BoolQuery;
@@ -69,7 +69,10 @@ const createAlertsEsQuery = ({
   const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
-  const hostsFilter = createHostsFilter(hostNodes.map((p) => p.name));
+  const hostsFilter = buildCombinedHostsFilter({
+    field: 'host.name',
+    values: hostNodes.map((p) => p.name),
+  });
 
   const filters = [alertStatusFilter, dateFilter, hostsFilter].filter(Boolean) as Filter[];
 

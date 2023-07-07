@@ -18,9 +18,9 @@ import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FieldItemButton } from '@kbn/unified-field-list-plugin/public';
+import { FieldItemButton } from '@kbn/unified-field-list';
 
-jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     totalDocuments: 1624,
     sampledDocuments: 1624,

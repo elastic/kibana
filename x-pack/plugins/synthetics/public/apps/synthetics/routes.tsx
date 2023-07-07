@@ -7,9 +7,9 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiButtonEmpty, EuiLink, useEuiTheme } from '@elastic/eui';
-import { Route } from '@kbn/shared-ux-router';
-import { Switch, useHistory, useLocation } from 'react-router-dom';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -103,26 +103,6 @@ const getRoutes = (
           />
         ),
         rightSideItems: [<OutPortal node={InspectMonitorPortalNode} />],
-        children: (
-          <FormattedMessage
-            id="xpack.synthetics.addMonitor.pageHeader.description"
-            defaultMessage="For more information about available monitor types and other options, see our {docs}."
-            values={{
-              docs: (
-                <EuiLink
-                  data-test-subj="syntheticsGetRoutesDocumentationLink"
-                  target="_blank"
-                  href="https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html"
-                >
-                  <FormattedMessage
-                    id="xpack.synthetics.addMonitor.pageHeader.docsLink"
-                    defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
       },
     },
     {
@@ -211,7 +191,7 @@ export const PageRouter: FC = () => {
   const isUnPrivileged = useSyntheticsPrivileges();
 
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -258,6 +238,6 @@ export const PageRouter: FC = () => {
           </SyntheticsPageTemplateComponent>
         )}
       />
-    </Switch>
+    </Routes>
   );
 };

@@ -6,9 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { queryPings } from '../../common/pings/query_pings';
 
 export const getPingsRouteQuerySchema = schema.object({
@@ -24,7 +23,7 @@ export const getPingsRouteQuerySchema = schema.object({
   status: schema.maybe(schema.string()),
 });
 
-export const syntheticsGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PINGS,
   validate: {

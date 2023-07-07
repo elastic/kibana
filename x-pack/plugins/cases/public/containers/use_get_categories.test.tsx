@@ -31,7 +31,10 @@ describe('useGetCategories', () => {
 
     await waitForNextUpdate();
 
-    expect(spyOnGetCategories).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+    expect(spyOnGetCategories).toBeCalledWith({
+      signal: abortCtrl.signal,
+      owner: [SECURITY_SOLUTION_OWNER],
+    });
   });
 
   it('displays an error toast when an error occurs', async () => {

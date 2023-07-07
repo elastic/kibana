@@ -19,6 +19,7 @@ import { SeverityBadge } from '../../../../../detections/components/rules/severi
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
+import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
@@ -84,14 +85,20 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const createUpgradeButtonColumn = (
   upgradeOneRule: UpgradePrebuiltRulesTableActions['upgradeOneRule'],
-  loadingRules: RuleSignatureId[]
+  loadingRules: RuleSignatureId[],
+  isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (ruleId: RuleUpgradeInfoForReview['rule_id']) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
+    const isUpgradeButtonDisabled = isRuleUpgrading || isDisabled;
     return (
-      <EuiButtonEmpty size="s" disabled={isRuleUpgrading} onClick={() => upgradeOneRule(ruleId)}>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isUpgradeButtonDisabled}
+        onClick={() => upgradeOneRule(ruleId)}
+      >
         {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -105,9 +112,11 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules },
+    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { upgradeOneRule },
   } = useUpgradePrebuiltRulesTableContext();
+
+  const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
   return useMemo(
     () => [
@@ -130,12 +139,15 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         field: 'rule.severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: true,
+        sortable: ({ rule: { severity } }: RuleUpgradeInfoForReview) =>
+          getNormalizedSeverity(severity),
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules)] : []),
+      ...(hasCRUDPermissions
+        ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules, isDisabled)]
+        : []),
     ],
-    [hasCRUDPermissions, loadingRules, showRelatedIntegrations, upgradeOneRule]
+    [hasCRUDPermissions, loadingRules, isDisabled, showRelatedIntegrations, upgradeOneRule]
   );
 };

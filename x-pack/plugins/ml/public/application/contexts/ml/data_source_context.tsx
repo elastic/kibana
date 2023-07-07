@@ -13,16 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import { DataViewAndSavedSearch } from '../../util/index_utils';
+import { DataViewAndSavedSearch, getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import { useMlKibana } from '../kibana';
 import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
 
 export interface DataSourceContextValue {
   combinedQuery: any;
-  currentDataView: DataView; // TODO this should be DataView or null
-  // @deprecated currentSavedSearch is of SavedSearchSavedObject type, change to selectedSavedSearch
-  deprecatedSavedSearchObj: SavedSearchSavedObject | null;
+  selectedDataView: DataView;
   selectedSavedSearch: SavedSearch | null;
 }
 
@@ -53,26 +50,12 @@ export const DataSourceContextProvider: FC = ({ children }) => {
     sort: false,
   }) as { index: string; savedSearchId: string };
 
-  const getDataViewAndSavedSearchCallback = useCallback(
-    async (ssId: string) => {
-      const resp: DataViewAndSavedSearch = {
-        savedSearch: null,
-        dataView: null,
-      };
-
-      if (ssId === undefined) {
-        return resp;
-      }
-
-      const ss = await savedSearchService.get(ssId);
-      if (ss === null) {
-        return resp;
-      }
-      const dataViewIdTemp = ss.references?.find((r) => r.type === 'index-pattern')?.id;
-      resp.dataView = await dataViews.get(dataViewIdTemp!);
-      resp.savedSearch = ss;
-      return resp;
-    },
+  const getDataViewAndSavedSearchCb = useCallback(
+    (ssId: string) =>
+      getDataViewAndSavedSearchCallback({
+        savedSearchService,
+        dataViewsService: dataViews,
+      })(ssId),
     [savedSearchService, dataViews]
   );
 
@@ -92,37 +75,27 @@ export const DataSourceContextProvider: FC = ({ children }) => {
       savedSearch: null,
       dataView: null,
     };
-    let savedSearch = null;
 
     if (savedSearchId !== undefined) {
-      savedSearch = await savedSearchService.get(savedSearchId);
-      dataViewAndSavedSearch = await getDataViewAndSavedSearchCallback(savedSearchId);
+      dataViewAndSavedSearch = await getDataViewAndSavedSearchCb(savedSearchId);
     } else if (dataViewId !== undefined) {
       dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
     }
 
-    const { savedSearch: deprecatedSavedSearchObj, dataView } = dataViewAndSavedSearch;
+    const { savedSearch, dataView } = dataViewAndSavedSearch;
 
     const { combinedQuery } = createSearchItems(
       uiSettings,
       dataView !== null ? dataView : undefined,
-      deprecatedSavedSearchObj
+      savedSearch
     );
 
     return {
       combinedQuery,
-      currentDataView: dataView,
-      deprecatedSavedSearchObj,
+      selectedDataView: dataView,
       selectedSavedSearch: savedSearch,
     };
-  }, [
-    dataViewId,
-    savedSearchId,
-    uiSettings,
-    dataViews,
-    savedSearchService,
-    getDataViewAndSavedSearchCallback,
-  ]);
+  }, [dataViewId, savedSearchId, uiSettings, dataViews, getDataViewAndSavedSearchCb]);
 
   useEffect(() => {
     resolveDataSource()

@@ -255,21 +255,27 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
 export function processFieldsWithWildcard(fields: Fields): Fields {
   const newFields: Fields = [];
   for (const field of fields) {
-    const hasWildcard = field.name.includes('*');
-    const hasObjectType = field.object_type;
-    if (hasWildcard && !hasObjectType) {
-      newFields.push({ ...field, type: 'object', object_type: field.type });
-    } else {
-      newFields.push({ ...field });
-    }
+    const objectTypeField = processFieldWithoutObjectType(field);
+    newFields.push({ ...objectTypeField });
   }
   return newFields;
+}
+
+export function processFieldWithoutObjectType(field: Field): Field {
+  const hasWildcard = field.name.includes('*');
+  const hasObjectType = field.object_type;
+  if (hasWildcard && !hasObjectType) {
+    return { ...field, type: 'object', object_type: field.type };
+  } else {
+    return { ...field };
+  }
 }
 
 export function processFields(fields: Fields): Fields {
   const processedFields = processFieldsWithWildcard(fields);
   const expandedFields = expandFields(processedFields);
   const dedupedFields = dedupFields(expandedFields);
+
   return validateFields(dedupedFields, dedupedFields);
 }
 

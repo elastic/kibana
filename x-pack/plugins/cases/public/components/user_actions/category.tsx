@@ -21,7 +21,7 @@ const getLabelTitle = (userAction: UserActionResponse<CategoryUserAction>) => {
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
-      data-test-subj={`${userAction.id}-user-action`}
+      data-test-subj={`${userAction.id}-category-user-action-title`}
       responsive={false}
     >
       {userAction.action === Actions.update ? (

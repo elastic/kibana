@@ -44,7 +44,8 @@ describe('POST custom element', () => {
     const routerDeps = getMockedRouterDeps();
     initializeCreateCustomElementRoute(routerDeps);
 
-    routeHandler = routerDeps.router.post.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterEach(() => {

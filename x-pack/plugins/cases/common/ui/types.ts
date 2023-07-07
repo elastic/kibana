@@ -176,7 +176,7 @@ export interface FetchCasesProps extends ApiProps {
 }
 
 export interface ApiProps {
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ActionLicense {

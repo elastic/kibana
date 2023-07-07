@@ -66,8 +66,8 @@ const hoveredProcessBackgroundTitle = i18n.translate(
  * PaintServers: Where color palettes, gradients, patterns and other similar concerns
  * are exposed to the component
  */
-const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
-  const paintServerIDs = usePaintServerIDs();
+const PaintServers = memo(({ id, isDarkMode }: { id: string; isDarkMode: boolean }) => {
+  const paintServerIDs = usePaintServerIDs({ id });
   return (
     <>
       <linearGradient
@@ -165,9 +165,9 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
 /**
  * Defs entries that define shapes, masks and other spatial elements
  */
-const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
-  const symbolIDs = useSymbolIDs();
-  const paintServerIDs = usePaintServerIDs();
+const SymbolsAndShapes = memo(({ id, isDarkMode }: { id: string; isDarkMode: boolean }) => {
+  const symbolIDs = useSymbolIDs({ id });
+  const paintServerIDs = usePaintServerIDs({ id });
   return (
     <>
       <symbol
@@ -433,13 +433,13 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
  *  2. Separation of concerns between creative assets and more functional areas of the app
  *  3. `<use>` elements can be handled by compositor (faster)
  */
-export const SymbolDefinitions = memo(() => {
+export const SymbolDefinitions = memo(({ id }: { id: string }) => {
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   return (
     <HiddenSVG>
       <defs>
-        <PaintServers isDarkMode={isDarkMode} />
-        <SymbolsAndShapes isDarkMode={isDarkMode} />
+        <PaintServers id={id} isDarkMode={isDarkMode} />
+        <SymbolsAndShapes id={id} isDarkMode={isDarkMode} />
       </defs>
     </HiddenSVG>
   );

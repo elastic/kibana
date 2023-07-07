@@ -20,7 +20,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   setSignalStatus,
-  getSignalStatusEmptyResponse,
+  getAlertUpdateByQueryEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
@@ -41,33 +41,106 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
-      it('should not give errors when querying and the signals index does not exist yet', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
-          .expect(200);
+      describe('update by ids', () => {
+        it('should not give errors when querying and the signals index does not exist yet', async () => {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
+            .expect(200);
 
-        // remove any server generated items that are indeterministic
-        delete body.took;
+          // remove any server generated items that are nondeterministic
+          body.items.forEach((_: any, index: number) => {
+            delete body.items[index].update.error.index_uuid;
+          });
+          delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+          expect(body).to.eql({
+            errors: true,
+            items: [
+              {
+                update: {
+                  _id: '123',
+                  _index: '.internal.alerts-security.alerts-default-000001',
+                  error: {
+                    index: '.internal.alerts-security.alerts-default-000001',
+                    reason: '[123]: document missing',
+                    shard: '0',
+                    type: 'document_missing_exception',
+                  },
+                  status: 404,
+                },
+              },
+            ],
+          });
+        });
+
+        it('should not give errors when querying and the signals index does exist and is empty', async () => {
+          await createSignalsIndex(supertest, log);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
+            .expect(200);
+
+          // remove any server generated items that are nondeterministic
+          body.items.forEach((_: any, index: number) => {
+            delete body.items[index].update.error.index_uuid;
+          });
+          delete body.took;
+
+          expect(body).to.eql({
+            errors: true,
+            items: [
+              {
+                update: {
+                  _id: '123',
+                  _index: '.internal.alerts-security.alerts-default-000001',
+                  error: {
+                    index: '.internal.alerts-security.alerts-default-000001',
+                    reason: '[123]: document missing',
+                    shard: '0',
+                    type: 'document_missing_exception',
+                  },
+                  status: 404,
+                },
+              },
+            ],
+          });
+
+          await deleteAllAlerts(supertest, log, es);
+        });
       });
 
-      it('should not give errors when querying and the signals index does exist and is empty', async () => {
-        await createSignalsIndex(supertest, log);
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds: ['123'], status: 'open' }))
-          .expect(200);
+      describe('update by query', () => {
+        it('should not give errors when querying and the signals index does not exist yet', async () => {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setSignalStatus({ query: { match_all: {} }, status: 'open' }))
+            .expect(200);
 
-        // remove any server generated items that are indeterministic
-        delete body.took;
+          // remove any server generated items that are indeterministic
+          delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
+        });
 
-        await deleteAllAlerts(supertest, log, es);
+        it('should not give errors when querying and the signals index does exist and is empty', async () => {
+          await createSignalsIndex(supertest, log);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setSignalStatus({ query: { match_all: {} }, status: 'open' }))
+            .expect(200);
+
+          // remove any server generated items that are indeterministic
+          delete body.took;
+
+          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
+
+          await deleteAllAlerts(supertest, log, es);
+        });
       });
 
       describe('tests with auditbeat data', () => {

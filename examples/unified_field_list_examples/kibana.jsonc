@@ -13,7 +13,6 @@
       "inspector",
       "kibanaUtils",
       "unifiedSearch",
-      "unifiedFieldList",
       "data",
       "dataViews",
       "dataViewFieldEditor",

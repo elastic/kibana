@@ -607,23 +607,7 @@
             "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
-          ">]>; registerPrebootRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
-          ">) => void]>; } & Omit<",
+          ">]>; } & Omit<",
           "InternalHttpServiceSetup",
           ", \"createRouter\" | \"basePath\" | \"auth\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
           {

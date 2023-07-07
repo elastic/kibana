@@ -35,6 +35,8 @@ const configSchema = schema.object({
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
+  serviceMapTerminateAfter: schema.number({ defaultValue: 100_000 }),
+  serviceMapMaxTraces: schema.number({ defaultValue: 1000 }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     maxTraceItems: schema.number({ defaultValue: 5000 }),
@@ -86,6 +88,15 @@ const configSchema = schema.object({
     migrationToFleetAvailable: disabledOnServerless,
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
+  }),
+  serverless: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.literal(true),
+      schema.never(),
+      { defaultValue: schema.contextRef('serverless') }
+    ),
   }),
 });
 
@@ -148,6 +159,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     managedServiceUrl: true,
     serverlessOnboarding: true,
     featureFlags: true,
+    serverless: true,
   },
   schema: configSchema,
 };

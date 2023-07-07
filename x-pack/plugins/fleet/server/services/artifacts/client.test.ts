@@ -7,6 +7,8 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common/constants';
+
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
 import { appContextService } from '../app_context';
@@ -152,6 +154,25 @@ describe('When using the Fleet Artifacts Client', () => {
       setEsClientMethodResponseToError(esClientMock, 'get', { statusCode: 404 });
       await artifactClient.deleteArtifact('123');
       expect(esClientMock.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('and calling `bulkDeleteArtifacts()`', () => {
+    it('should bulk delete the artifact', async () => {
+      setEsClientGetMock();
+      await artifactClient.bulkDeleteArtifacts(['123']);
+      expect(esClientMock.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: [
+            {
+              delete: {
+                _id: 'endpoint:123',
+                _index: FLEET_SERVER_ARTIFACTS_INDEX,
+              },
+            },
+          ],
+        })
+      );
     });
   });
 

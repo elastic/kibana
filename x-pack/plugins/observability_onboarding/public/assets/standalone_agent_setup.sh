@@ -9,11 +9,12 @@ AUTO_DOWNLOAD_CONFIG=$5
 updateStepProgress() {
   local STEPNAME="$1"
   local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
-  curl --request GET \
-    --url "${API_ENDPOINT}/custom_logs/${ONBOARDING_ID}/step/${STEPNAME}?status=${STATUS}" \
+  curl --request POST \
+    --url "${API_ENDPOINT}/custom_logs/${ONBOARDING_ID}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
+    --data "{\"status\":\"${STATUS}\"}" \
     --output /dev/null \
     --no-progress-meter
 }
@@ -94,7 +95,7 @@ downloadElasticAgentConfig() {
   echo "Downloading elastic-agent.yml"
   updateStepProgress "ea-config" "loading"
   curl --request GET \
-    --url "${API_ENDPOINT}/elastic_agent/config?id=${ONBOARDING_ID}" \
+    --url "${API_ENDPOINT}/elastic_agent/config?onboardingId=${ONBOARDING_ID}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \

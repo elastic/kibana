@@ -26,7 +26,7 @@ import {
   FieldsGroupNames,
   useExistingFieldsFetcher,
   useGroupedFields,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { ChildDragDropProvider, DragContextState } from '@kbn/dom-drag-drop';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {

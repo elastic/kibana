@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  EuiBasicTableColumn,
+  CriteriaWithPagination,
+  EuiTableSelectionType,
+  type EuiBasicTable,
+} from '@elastic/eui';
+import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
-import createContainer from 'constate';
 import { hostLensFormulas } from '../../../../common/visualizations';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
-import {
+import type {
   InfraAssetMetadataType,
   InfraAssetMetricsItem,
   InfraAssetMetricType,
@@ -23,8 +28,11 @@ import { useHostFlyoutUrlState } from './use_host_flyout_url_state';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
-import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
+import { TABLE_COLUMN_LABEL } from '../translations';
+import { TOOLTIP } from '../../../../common/visualizations/lens/translations';
+import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types
@@ -118,16 +126,46 @@ const sortTableData =
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
+  const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
-    services: { telemetry },
+    services: {
+      telemetry,
+      data: {
+        query: { filterManager: filterManagerService },
+      },
+    },
   } = useKibanaContextForPlugin();
+  const { dataView } = useMetricsDataViewContext();
+
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
-  const popoverContainerRef = React.createRef<HTMLDivElement>();
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<EuiBasicTable | null>(null);
 
   const closeFlyout = useCallback(() => setHostFlyoutState(null), [setHostFlyoutState]);
+
+  const onSelectionChange = (newSelectedItems: HostNodeRow[]) => {
+    setSelectedItems(newSelectedItems);
+  };
+
+  const filterSelectedHosts = useCallback(() => {
+    if (!selectedItems.length) {
+      return [];
+    }
+    const selectedHostNames = selectedItems.map(({ name }) => name);
+    const newFilter = buildCombinedHostsFilter({
+      field: 'host.name',
+      values: selectedHostNames,
+      dataView,
+    });
+
+    filterManagerService.addFilters(newFilter);
+    setSelectedItems([]);
+    tableRef.current?.setSelection([]);
+  }, [dataView, filterManagerService, selectedItems]);
+
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
       telemetry.reportHostEntryClicked({
@@ -157,8 +195,8 @@ export const useHostsTable = () => {
 
   const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
-    () => items.find(({ id }) => id === hostFlyoutState?.clickedItemId),
-    [hostFlyoutState?.clickedItemId, items]
+    () => items.find(({ id }) => id === hostFlyoutState?.itemId),
+    [hostFlyoutState?.itemId, items]
   );
 
   const currentPage = useMemo(() => {
@@ -181,19 +219,17 @@ export const useHostsTable = () => {
             name: TABLE_COLUMN_LABEL.toggleDialogAction,
             description: TABLE_COLUMN_LABEL.toggleDialogAction,
             icon: ({ id }) =>
-              hostFlyoutState?.clickedItemId && id === hostFlyoutState?.clickedItemId
-                ? 'minimize'
-                : 'expand',
+              hostFlyoutState?.itemId && id === hostFlyoutState?.itemId ? 'minimize' : 'expand',
             type: 'icon',
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {
               setHostFlyoutState({
-                clickedItemId: id,
+                itemId: id,
               });
-              if (id === hostFlyoutState?.clickedItemId) {
+              if (id === hostFlyoutState?.itemId) {
                 setHostFlyoutState(null);
               } else {
-                setHostFlyoutState({ clickedItemId: id });
+                setHostFlyoutState({ itemId: id });
               }
             },
           },
@@ -323,7 +359,7 @@ export const useHostsTable = () => {
       },
     ],
     [
-      hostFlyoutState?.clickedItemId,
+      hostFlyoutState?.itemId,
       reportHostEntryClick,
       searchCriteria.dateRange,
       setHostFlyoutState,
@@ -331,18 +367,27 @@ export const useHostsTable = () => {
     ]
   );
 
+  const selection: EuiTableSelectionType<HostNodeRow> = {
+    onSelectionChange,
+    selectable: (item: HostNodeRow) => !!item.name,
+  };
+
   return {
     columns,
     clickedItem,
     currentPage,
     closeFlyout,
     items,
-    isFlyoutOpen: !!hostFlyoutState?.clickedItemId,
+    isFlyoutOpen: !!hostFlyoutState?.itemId,
     onTableChange,
     pagination,
     sorting,
+    selection,
+    selectedItemsCount: selectedItems.length,
+    filterSelectedHosts,
     refs: {
       popoverContainerRef,
+      tableRef,
     },
   };
 };

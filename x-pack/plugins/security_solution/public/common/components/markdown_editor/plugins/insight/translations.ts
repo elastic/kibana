@@ -82,13 +82,6 @@ export const CANCEL_FORM_BUTTON = i18n.translate(
   }
 );
 
-export const TECH_PREVIEW = i18n.translate(
-  'xpack.securitySolution.markdown.insight.technicalPreview',
-  {
-    defaultMessage: 'Technical Preview',
-  }
-);
-
 export const PARSE_ERROR = i18n.translate(
   'xpack.securitySolution.markdownEditor.plugins.insightProviderError',
   {

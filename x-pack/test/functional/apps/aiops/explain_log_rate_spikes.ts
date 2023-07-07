@@ -221,13 +221,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
 
           await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
-          await aiops.logPatternAnalysisPageProvider.assertLogCategorizationPageExists();
-          await aiops.logPatternAnalysisPageProvider.assertTotalDocumentCount(
+          await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
+          await aiops.logPatternAnalysisPage.assertTotalDocumentCount(
             testData.action.expected.totalDocCount
           );
-          await aiops.logPatternAnalysisPageProvider.assertQueryInput(
-            testData.action.expected.queryBar
-          );
+          await aiops.logPatternAnalysisPage.assertQueryInput(testData.action.expected.queryBar);
         }
       }
     });

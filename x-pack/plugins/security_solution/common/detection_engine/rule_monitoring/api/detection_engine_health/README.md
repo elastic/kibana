@@ -364,6 +364,7 @@ Response:
 
 ```txt
 POST /internal/detection_engine/health/_space
+GET /internal/detection_engine/health/_space
 ```
 
 Get health overview of the current Kibana space. Scope: all detection rules in the space.
@@ -374,11 +375,17 @@ Returns:
 - health stats history within the same interval in the form of a histogram
   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
 
-Minimal required parameters: empty object.
+Minimal required parameters for the `POST` route: empty object.
 
 ```json
 {}
 ```
+
+The `GET` route doesn't accept any parameters and uses the default parameters instead:
+
+- interval: `last_day`
+- granularity: `hour`
+- debug: `false`
 
 Response:
 
@@ -721,13 +728,20 @@ Response:
 
 ```txt
 POST /internal/detection_engine/health/_cluster
+GET /internal/detection_engine/health/_cluster
 ```
 
-Minimal required parameters: empty object.
+Minimal required parameters for the `POST` route: empty object.
 
 ```json
 {}
 ```
+
+The `GET` route doesn't accept any parameters and uses the default parameters instead:
+
+- interval: `last_day`
+- granularity: `hour`
+- debug: `false`
 
 Response:
 

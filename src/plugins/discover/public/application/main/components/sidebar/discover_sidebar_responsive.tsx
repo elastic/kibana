@@ -23,10 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  useExistingFieldsFetcher,
-  useQuerySubscriber,
-} from '@kbn/unified-field-list-plugin/public';
+import { useExistingFieldsFetcher, useQuerySubscriber } from '@kbn/unified-field-list';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverSidebar } from './discover_sidebar';

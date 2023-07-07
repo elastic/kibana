@@ -20,7 +20,7 @@ import {
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverFooter,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { PLUGIN_ID } from '../../../../../common';

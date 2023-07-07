@@ -33,6 +33,13 @@ const configSchema = schema.object({
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
   }),
+  appendServerlessChannelsSuffix: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.literal(true),
+    schema.literal(false),
+    { defaultValue: schema.contextRef('serverless') }
+  ),
   // Used for extra enrichment of telemetry
   labels: labelsSchema,
 });
@@ -44,6 +51,7 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   exposeToBrowser: {
     banner: true,
     allowChangingOptInStatus: true,
+    appendServerlessChannelsSuffix: true,
     optIn: true,
     sendUsageFrom: true,
     sendUsageTo: true,
