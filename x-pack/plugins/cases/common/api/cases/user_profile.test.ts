@@ -46,6 +46,21 @@ describe('userProfile', () => {
       });
     });
 
+    it('missing size parameter works correctly', () => {
+      const query = SuggestUserProfilesRequestRt.decode({
+        name: 'di maria',
+        owners: ['benfica'],
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          name: 'di maria',
+          owners: ['benfica'],
+        },
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = SuggestUserProfilesRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 

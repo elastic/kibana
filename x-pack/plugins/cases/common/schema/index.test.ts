@@ -289,6 +289,16 @@ describe('schema', () => {
   });
 
   describe('limitedNumberSchema', () => {
+    it('works correctly the number is between min and max', () => {
+      expect(
+        PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 0, max: 2 }).decode(1))
+      ).toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
     it('fails when given a number that is lower than the minimum', () => {
       expect(
         PathReporter.report(limitedNumberSchema({ fieldName: 'foo', min: 1, max: 2 }).decode(0))
