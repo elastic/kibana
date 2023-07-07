@@ -12,10 +12,9 @@ import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import type { RecordsFetchResponse, EsHitRecord } from '../../../types';
 import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
 import { FetchDeps } from './fetch_all';
-
-const DISABLE_SHARD_FAILURE_WARNING = true;
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve

@@ -53,6 +53,7 @@ import {
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
+import { DISABLE_SHARD_FAILURE_WARNING } from '../../common/constants';
 import * as columnActions from '../components/doc_table/actions/columns';
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
@@ -284,7 +285,7 @@ export class SavedSearchEmbeddable
             }),
           },
           executionContext,
-          disableShardFailureWarning: true,
+          disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
         })
       );
 
@@ -293,7 +294,7 @@ export class SavedSearchEmbeddable
           services: this.services,
           adapter: this.inspectorAdapters.requests,
           options: {
-            disableShardFailureWarning: true,
+            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
           },
         });
       }

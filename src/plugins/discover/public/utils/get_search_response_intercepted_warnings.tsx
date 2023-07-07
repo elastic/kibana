@@ -23,14 +23,19 @@ export const getSearchResponseInterceptedWarnings = ({
     disableShardFailureWarning?: boolean;
   };
 }): SearchResponseInterceptedWarning[] | undefined => {
+  if (!options?.disableShardFailureWarning) {
+    return undefined;
+  }
+
   const interceptedWarnings: SearchResponseInterceptedWarning[] = [];
 
   services.data.search.showWarnings(adapter, (warning, meta) => {
     const { request, response } = meta;
-    if (options?.disableShardFailureWarning && warning.type === 'shard_failure') {
-      interceptedWarnings.push({
-        originalWarning: warning,
-        action: (
+
+    interceptedWarnings.push({
+      originalWarning: warning,
+      action:
+        warning.type === 'shard_failure' && warning.text && warning.message ? (
           <ShardFailureOpenModalButton
             theme={services.theme}
             title={warning.message}
@@ -42,10 +47,9 @@ export const getSearchResponseInterceptedWarnings = ({
             color="primary"
             isButtonEmpty={true}
           />
-        ),
-      });
-      return true; // suppress the default behaviour
-    }
+        ) : undefined,
+    });
+    return true; // suppress the default behaviour
   });
 
   return interceptedWarnings.length ? interceptedWarnings : undefined;
