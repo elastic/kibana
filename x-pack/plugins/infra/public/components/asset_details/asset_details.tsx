@@ -48,6 +48,7 @@ export const AssetDetails = ({
   return (
     <TabSwitcherProvider
       initialActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
+      onTabsStateChange={onTabsStateChange}
     >
       <ContentTemplate
         header={
@@ -59,7 +60,6 @@ export const AssetDetails = ({
             tabs={tabs}
             links={links}
             overrides={overrides}
-            onTabsStateChange={onTabsStateChange}
           />
         }
         body={

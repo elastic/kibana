@@ -106,7 +106,7 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import type { XYState } from './types';
+import type { XYByValueAnnotationLayerConfig, XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { defaultAnnotationLabel } from './annotations/helpers';
@@ -174,10 +174,25 @@ export const getXyVisualization = ({
       if (isAnnotationsLayer(toCopyLayer)) {
         toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
       }
-      const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
+
+      let newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
         clonedIDsMap.get(id)
       );
+
       newLayer.layerId = newLayerId;
+
+      if (isAnnotationsLayer(newLayer) && isByReferenceAnnotationsLayer(newLayer)) {
+        const byValueVersion: XYByValueAnnotationLayerConfig = {
+          annotations: newLayer.annotations,
+          ignoreGlobalFilters: newLayer.ignoreGlobalFilters,
+          layerId: newLayer.layerId,
+          layerType: newLayer.layerType,
+          indexPatternId: newLayer.indexPatternId,
+        };
+
+        newLayer = byValueVersion;
+      }
+
       return {
         ...state,
         layers: [...state.layers, newLayer],
@@ -283,7 +298,13 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state, setState, isSaveable) {
+  getSupportedActionsForLayer(
+    layerId,
+    state,
+    setState,
+    registerLibraryAnnotationGroup,
+    isSaveable
+  ) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
@@ -293,6 +314,7 @@ export const getXyVisualization = ({
           state,
           layer,
           setState,
+          registerLibraryAnnotationGroup,
           core,
           isSaveable,
           eventAnnotationService,

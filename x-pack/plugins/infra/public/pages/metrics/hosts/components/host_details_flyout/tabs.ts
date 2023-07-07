@@ -10,6 +10,13 @@ import { FlyoutTabIds, type Tab } from '../../../../../components/asset_details/
 
 export const orderedFlyoutTabs: Tab[] = [
   {
+    id: FlyoutTabIds.OVERVIEW,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
+      defaultMessage: 'Overview',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-overview',
+  },
+  {
     id: FlyoutTabIds.METADATA,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
       defaultMessage: 'Metadata',

@@ -13,6 +13,7 @@ import {
   METRICSET_NAME,
   METRICSET_INTERVAL,
   TRANSACTION_DURATION_SUMMARY,
+  INDEX,
 } from '../../../../common/es_fields/apm';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getTypedSearch, TypedSearch } from '../create_typed_es_client';
@@ -24,7 +25,7 @@ export interface ApmEvent {
   kuery: string;
   index: string[];
   docCount: number;
-  intervals?: Record<string, number>;
+  intervals?: Record<string, { metricDocCount: number; eventDocCount: number }>;
 }
 
 export async function getApmEvents({
@@ -93,19 +94,19 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Span breakdown',
-      index: getApmIndexPatterns([apmIndices.metric]),
-      kuery: mergeKueries(
-        `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "span_breakdown"`,
-        kuery
-      ),
-    }),
-    getEventWithMetricsetInterval({
-      ...commonProps,
       name: 'Metric: Service summary',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_summary"`,
+        kuery
+      ),
+    }),
+    getEvent({
+      ...commonProps,
+      name: 'Metric: Span breakdown',
+      index: getApmIndexPatterns([apmIndices.metric]),
+      kuery: mergeKueries(
+        `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "span_breakdown"`,
         kuery
       ),
     }),
@@ -165,20 +166,33 @@ async function getEventWithMetricsetInterval({
           size: 1000,
           field: METRICSET_INTERVAL,
         },
+        aggs: {
+          metric_doc_count: {
+            value_count: {
+              field: INDEX,
+            },
+          },
+        },
       },
     },
   });
 
-  const defaultIntervals = { '1m': 0, '10m': 0, '60m': 0 };
+  const defaultIntervals = {
+    '1m': { metricDocCount: 0, eventDocCount: 0 },
+    '10m': { metricDocCount: 0, eventDocCount: 0 },
+    '60m': { metricDocCount: 0, eventDocCount: 0 },
+  };
   const foundIntervals = res.aggregations?.metricset_intervals.buckets.reduce<
-    Record<string, number>
+    Record<string, { metricDocCount: number; eventDocCount: number }>
   >((acc, item) => {
-    acc[item.key] = item.doc_count;
+    acc[item.key] = {
+      metricDocCount: item.metric_doc_count.value,
+      eventDocCount: item.doc_count,
+    };
     return acc;
   }, {});
 
   const intervals = merge(defaultIntervals, foundIntervals);
-
   return {
     legacy,
     name,
