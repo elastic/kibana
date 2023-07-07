@@ -11,11 +11,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import {
-  MlModelDeploymentStatus,
-  MlModelDeploymentState,
-  MlTrainedModelConfigWithDefined,
-} from '../../../common/types/ml';
+import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
 import { isNotFoundExceptionError } from './ml_model_deployment_common';
 
@@ -41,8 +37,8 @@ export const getMlModelDeploymentStatus = async (
     }
 
     const firstTrainedModelConfig = modelDetailsResponse.trained_model_configs
-      ? (modelDetailsResponse.trained_model_configs[0] as MlTrainedModelConfigWithDefined)
-      : (undefined as unknown as MlTrainedModelConfigWithDefined);
+      ? modelDetailsResponse.trained_model_configs[0]
+      : undefined;
 
     // are we downloaded?
     if (!firstTrainedModelConfig || !firstTrainedModelConfig.fully_defined) {

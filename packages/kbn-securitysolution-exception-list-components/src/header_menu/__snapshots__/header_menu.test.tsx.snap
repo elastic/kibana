@@ -17,7 +17,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Icon"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
               data-test-subj="ButtonIcon"
               type="button"
             >
@@ -46,7 +46,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Icon"
-            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="ButtonIcon"
             type="button"
           >
@@ -132,7 +132,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Icon"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
               data-test-subj="ButtonIcon"
               type="button"
             >
@@ -242,7 +242,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Icon"
-            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="ButtonIcon"
             type="button"
           >
@@ -328,7 +328,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Icon"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
               data-test-subj="ButtonIcon"
               type="button"
             >
@@ -357,7 +357,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Icon"
-            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="ButtonIcon"
             type="button"
           >
@@ -443,20 +443,19 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
                   color="inherit"
                   data-euiicon-type="boxesHorizontal"
                 />
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 />
               </span>
             </button>
@@ -478,20 +477,19 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty css-9t7nyf-empty-primary"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonContent__icon"
                 color="inherit"
                 data-euiicon-type="boxesHorizontal"
               />
               <span
-                class="euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text"
               />
             </span>
           </button>
@@ -570,20 +568,19 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="cheer"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 />
                 <span
-                  class="euiButtonEmpty__text"
+                  color="inherit"
+                  data-euiicon-type="cheer"
                 />
               </span>
             </button>
@@ -605,20 +602,19 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty css-9t7nyf-empty-primary"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonContent__icon"
-                color="inherit"
-                data-euiicon-type="cheer"
+                class="eui-textTruncate euiButtonEmpty__text"
               />
               <span
-                class="euiButtonEmpty__text"
+                color="inherit"
+                data-euiicon-type="cheer"
               />
             </span>
           </button>
@@ -697,21 +693,20 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty css-1at5a38-empty-disabled"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
               data-test-subj="EmptyButton"
               disabled=""
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="cheer"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 />
                 <span
-                  class="euiButtonEmpty__text"
+                  color="inherit"
+                  data-euiicon-type="cheer"
                 />
               </span>
             </button>
@@ -733,21 +728,20 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty css-1at5a38-empty-disabled"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-disabled-isDisabled"
             data-test-subj="EmptyButton"
             disabled=""
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonContent__icon"
-                color="inherit"
-                data-euiicon-type="cheer"
+                class="eui-textTruncate euiButtonEmpty__text"
               />
               <span
-                class="euiButtonEmpty__text"
+                color="inherit"
+                data-euiicon-type="cheer"
               />
             </span>
           </button>
@@ -826,20 +820,19 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="cheer"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 />
                 <span
-                  class="euiButtonEmpty__text"
+                  color="inherit"
+                  data-euiicon-type="cheer"
                 />
               </span>
             </button>
@@ -861,20 +854,19 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty css-9t7nyf-empty-primary"
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonContent__icon"
-                color="inherit"
-                data-euiicon-type="cheer"
+                class="eui-textTruncate euiButtonEmpty__text"
               />
               <span
-                class="euiButtonEmpty__text"
+                color="inherit"
+                data-euiicon-type="cheer"
               />
             </span>
           </button>

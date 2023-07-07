@@ -48,9 +48,10 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       waitForRulesTableToBeLoaded();
 
       /* Assert that there are no installation or update notifications */
-      /* Add Elastic Rules button and Rule Upgrade tabs should not contain a number badge */
+      /* Add Elastic Rules button should not contain a number badge */
+      /* and Rule Upgrade tab should not be displayed */
       cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules');
-      cy.get(RULES_UPDATES_TAB).should('have.text', 'Rule Updates');
+      cy.get(RULES_UPDATES_TAB).should('not.exist');
     });
   });
 

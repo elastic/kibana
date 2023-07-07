@@ -117,6 +117,7 @@ describe('remove890Indices migration', () => {
       attributes: {
         ...doc.attributes,
         heartbeatIndices: 'heartbeat-8*,something_else',
+        syntheticsIndexRemoved: true,
       },
     });
   });
@@ -129,6 +130,7 @@ describe('remove890Indices migration', () => {
       attributes: {
         ...doc.attributes,
         heartbeatIndices: 'something_else,heartbeat-8*',
+        syntheticsIndexRemoved: true,
       },
     });
   });
