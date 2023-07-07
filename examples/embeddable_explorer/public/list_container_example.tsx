@@ -7,43 +7,26 @@
  */
 
 import React from 'react';
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiPageTemplate,
-  EuiCodeBlock,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText, EuiPageTemplate, EuiCodeBlock } from '@elastic/eui';
 import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  MULTI_TASK_TODO_EMBEDDABLE,
   TODO_EMBEDDABLE,
   ListContainerFactory,
-  SearchableListContainerFactory,
 } from '@kbn/embeddable-examples-plugin/public';
-import { SearchableContainerInput } from '@kbn/embeddable-examples-plugin/public/searchable_list_container/searchable_list_container';
 import { TodoInput } from '@kbn/embeddable-examples-plugin/public/todo';
-import { MultiTaskTodoInput } from '@kbn/embeddable-examples-plugin/public/multi_task_todo';
 
 interface Props {
   listContainerEmbeddableFactory: ListContainerFactory;
 }
 
-export function ListContainerExample({
-  listContainerEmbeddableFactory,
-}: Props) {
+export function ListContainerExample({ listContainerEmbeddableFactory }: Props) {
   return (
     <>
-      <EuiPageTemplate.Header
-        pageTitle="Groups of embeddables"
-      />
+      <EuiPageTemplate.Header pageTitle="Groups of embeddables" />
       <EuiPageTemplate.Section grow={false}>
         <>
-          <EuiText>
-            Use container embeddable to render a group of embeddables.
-          </EuiText>
+          <EuiText>Use container embeddable to render a group of embeddables.</EuiText>
           <EuiSpacer />
           <EuiPanel data-test-subj="listContainerEmbeddablePanel" paddingSize="none" role="figure">
             <EmbeddableRenderer
@@ -82,8 +65,7 @@ export function ListContainerExample({
           </EuiPanel>
           <EuiSpacer />
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-            {
-`<EmbeddableRenderer
+            {`<EmbeddableRenderer
   factory={listContainerEmbeddableFactory}
   input={{
     id: 'hello',
@@ -115,8 +97,7 @@ export function ListContainerExample({
       },
     },
   }}
-/>`
-}
+/>`}
           </EuiCodeBlock>
         </>
       </EuiPageTemplate.Section>
