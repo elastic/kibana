@@ -1,0 +1,10 @@
+---
+description: Pipeline for processing sample logs
+processors:
+- set:
+    field: sample_field
+    value: "1"
+on_failure:
+- set:
+    field: error.message
+    value: '{{ _ingest.on_failure_message }}'

@@ -1073,6 +1073,7 @@ describe('EPM template', () => {
   fields:
     - name: day_of_week
       type: date
+      date_format: date_optional_time
       runtime: |
         emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
 `;
@@ -1081,6 +1082,7 @@ describe('EPM template', () => {
       runtime: {
         'responses.day_of_week': {
           type: 'date',
+          format: 'date_optional_time',
           script: {
             source:
               "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",

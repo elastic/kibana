@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable no-console */
 
 import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
@@ -388,7 +387,6 @@ export function buildComponentTemplates(params: {
     _meta,
   };
 
-  console.log('>> installing -> templatesMap', JSON.stringify(templatesMap, null, 2));
   return templatesMap;
 }
 

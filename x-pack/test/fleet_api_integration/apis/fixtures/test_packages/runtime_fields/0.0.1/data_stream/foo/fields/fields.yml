@@ -1,0 +1,25 @@
+- name: bar
+  type: boolean
+- name: runtime_boolean
+  type: boolean
+  runtime: true
+- name: runtime.day
+  type: keyword
+  runtime: >-
+    emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
+- name: runtime.date
+  type: date
+  date_format: date_optional_time
+  runtime: >-
+    emit(doc['@timestamp'].value)
+- name: labels.*
+  type: keyword
+  runtime: true
+- name: responses
+  type: group
+  fields:
+    - name: runtime_group_boolean
+      type: boolean
+      runtime: true
+    - name: foo
+      type: boolean
