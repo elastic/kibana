@@ -76,7 +76,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           params: { sloId: slo.id },
         },
         {
-          replace: true,
+          replace: false,
         }
       );
     }

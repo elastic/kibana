@@ -8,12 +8,11 @@
 import type { BrowserField, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback, useMemo } from 'react';
-import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
-import type { TableId } from '@kbn/securitysolution-data-table';
+import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
-import { SecurityCellActionsTrigger } from '../../../actions/constants';
+import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -89,12 +88,16 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       [finalData]
     );
 
+    const disabledActionTypes =
+      tableId === TableId.alertsOnCasePage ? [SecurityCellActionType.FILTER] : undefined;
+
     const cellActions = useDataGridColumnsSecurityCellActions({
       triggerId: SecurityCellActionsTrigger.DEFAULT,
       fields: cellActionsFields,
       getCellValue,
       metadata: cellActionsMetadata,
       dataGridRef,
+      disabledActionTypes,
     });
 
     const getCellActions = useCallback(
