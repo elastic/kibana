@@ -231,10 +231,8 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(container.getElementsByClassName('euiButtonContent__icon')[0]).toHaveAttribute(
-        'data-euiicon-type',
-        'eyeClosed'
-      );
+      expect(container.querySelector('[data-euiicon-type="eyeClosed"]')).not.toBeNull();
+      expect(container.querySelector('[data-euiicon-type="eye"]')).toBeNull();
     });
 
     it('displays a open eye icon when the field is NOT anonymized', () => {
@@ -247,10 +245,8 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(container.getElementsByClassName('euiButtonContent__icon')[0]).toHaveAttribute(
-        'data-euiicon-type',
-        'eye'
-      );
+      expect(container.querySelector('[data-euiicon-type="eyeClosed"]')).toBeNull();
+      expect(container.querySelector('[data-euiicon-type="eye"]')).not.toBeNull();
     });
 
     it('displays Yes when the field is anonymized', () => {
