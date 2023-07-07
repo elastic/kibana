@@ -23,7 +23,7 @@ export interface UseAccordionStateValue {
   /**
    * Use this to control the accordion visual state
    */
-  state: typeof CLOSED | typeof OPEN;
+  state: ToggleReducerState;
 
   /**
    * Handler function for cycling between the states
