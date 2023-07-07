@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
@@ -16,6 +16,7 @@ import {
 } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { TopNFunctionsTable } from '../../../components/topn_functions';
+import { TopNFunctionsSummary } from '../../../components/topn_functions_summary';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -154,6 +155,8 @@ export function DifferentialTopNFunctionsView() {
               options={normalizationOptions}
               onChange={onChangeNormalizationMode}
             />
+            <EuiSpacer />
+            <TopNFunctionsSummary />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false} />

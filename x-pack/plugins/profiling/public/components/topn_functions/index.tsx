@@ -227,15 +227,24 @@ export function TopNFunctionsTable({
             scaleFactor: comparisonScaleFactor,
           });
 
+          const diffInclusiveCPU =
+            (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100;
+          const diffExclusiveCPU =
+            (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100;
+
+          const diffImpactEstimates = calculateImpactEstimates({
+            countExclusive: diffExclusiveCPU,
+            countInclusive: diffInclusiveCPU,
+            totalSamples: comparisonRow.CountExclusive,
+            totalSeconds,
+          });
+
           return {
             rank: topN.Rank - comparisonRow.Rank,
             samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-            exclusiveCPU:
-              exclusiveCPU -
-              (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-            inclusiveCPU:
-              inclusiveCPU -
-              (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+            exclusiveCPU: exclusiveCPU - diffExclusiveCPU,
+            inclusiveCPU: inclusiveCPU - diffInclusiveCPU,
+            impactEstimates: diffImpactEstimates,
           };
         }
       }
