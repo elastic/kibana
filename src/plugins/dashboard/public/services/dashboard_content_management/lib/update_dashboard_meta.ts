@@ -20,13 +20,12 @@ type UpdateDashboardMetaProps = Pick<
 >;
 interface UpdateDashboardMetaDependencies {
   contentManagement: DashboardStartDependencies['contentManagement'];
-  embeddable: DashboardContentManagementRequiredServices['embeddable'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
 }
 
 export const updateDashboardMeta = async (
   { id, title, description = '', tags }: UpdateDashboardMetaProps,
-  { contentManagement, savedObjectsTagging, embeddable }: UpdateDashboardMetaDependencies
+  { contentManagement, savedObjectsTagging }: UpdateDashboardMetaDependencies
 ) => {
   const [dashboard] = await findDashboardsByIds(contentManagement, [id]);
   if (dashboard.status === 'error') {
