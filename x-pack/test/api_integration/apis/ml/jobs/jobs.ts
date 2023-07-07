@@ -124,6 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects([idSpace1]);
     });
 
     it('returns expected list of combined jobs with stats in default space', async () => {
