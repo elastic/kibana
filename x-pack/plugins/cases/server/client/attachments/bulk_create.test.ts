@@ -7,7 +7,7 @@
 
 import { comment, actionComment } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { MAX_COMMENT_LENGTH } from '../../../common/constants';
+import { MAX_COMMENT_LENGTH, MAX_BULK_CREATE_ATTACHMENTS } from '../../../common/constants';
 import { bulkCreate } from './bulk_create';
 
 describe('bulkCreate', () => {
@@ -22,6 +22,14 @@ describe('bulkCreate', () => {
       // @ts-expect-error: excess attribute
       bulkCreate({ attachments: [{ ...comment, foo: 'bar' }], caseId: 'test-case' }, clientArgs)
     ).rejects.toThrow('invalid keys "foo"');
+  });
+
+  it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, async () => {
+    const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
+
+    await expect(bulkCreate({ attachments, caseId: 'test-case' }, clientArgs)).rejects.toThrow(
+      `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
+    );
   });
 
   describe('comments', () => {
