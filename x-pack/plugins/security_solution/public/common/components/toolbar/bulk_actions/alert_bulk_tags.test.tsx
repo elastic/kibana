@@ -174,6 +174,12 @@ describe('BulkAlertTagsPanel', () => {
       mockedOnSubmit,
       mockedSetIsLoading
     );
+    act(() => {
+      fireEvent.click(wrapper.getByText('default-test-tag-1'));
+    });
+    act(() => {
+      fireEvent.click(wrapper.getByText('default-test-tag-2'));
+    });
 
     act(() => {
       fireEvent.click(wrapper.getByTestId('alert-tags-update-button'));
