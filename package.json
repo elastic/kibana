@@ -758,7 +758,6 @@
     "@opentelemetry/exporter-metrics-otlp-grpc": "^0.34.0",
     "@opentelemetry/exporter-prometheus": "^0.30.0",
     "@opentelemetry/resources": "^1.4.0",
-    "@opentelemetry/sdk-metrics-base": "^0.31.0",
     "@opentelemetry/semantic-conventions": "^1.4.0",
     "@reduxjs/toolkit": "1.7.2",
     "@slack/webhook": "^5.0.4",
