@@ -9,7 +9,9 @@
 import React, { useState } from 'react';
 import {
   EuiCallOut,
+  EuiEmptyPrompt,
   EuiText,
+  EuiTextProps,
   EuiFlexGroup,
   EuiFlexGroupProps,
   EuiFlexItem,
@@ -27,7 +29,7 @@ import './warnings_callout.scss';
 
 export interface WarningsCalloutProps {
   interceptedWarnings?: SearchResponseInterceptedWarning[];
-  variant: 'inline' | 'badge';
+  variant: 'inline' | 'badge' | 'empty_prompt';
   'data-test-subj': string;
 }
 
@@ -54,6 +56,7 @@ export const WarningsCallout = ({
               <WarningContent
                 warning={warning}
                 groupStyles={{ alignItems: 'center', direction: 'row' }}
+                data-test-subj={dataTestSubj}
               />
             }
             color="warning"
@@ -69,6 +72,44 @@ export const WarningsCallout = ({
           />
         ))}
       </>
+    );
+  }
+
+  if (variant === 'empty_prompt') {
+    return (
+      <EuiEmptyPrompt
+        color="warning"
+        title={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" color="warning" size="l" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <h2>
+                {i18n.translate('discover.warningsCallout.noResultsTitle', {
+                  defaultMessage: 'No results found',
+                })}
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        body={
+          <p>
+            {interceptedWarnings.map((warning, index) => (
+              <WarningContent
+                key={`warning-${index}`}
+                warning={warning}
+                textSize="m"
+                groupStyles={{ direction: 'column' }}
+                data-test-subj={dataTestSubj}
+              />
+            ))}
+          </p>
+        }
+        css={css`
+          text-align: left;
+        `}
+      />
     );
   }
 
@@ -119,7 +160,7 @@ export const WarningsCallout = ({
           {interceptedWarnings.map((warning, index) => (
             <li
               key={`warning-${index}`}
-              data-test-subj={`${dataTestSubj}_warnings`}
+              data-test-subj={`${dataTestSubj}_item`}
               className="dscWarningsCalloutWarningList__item"
             >
               <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -127,7 +168,11 @@ export const WarningsCallout = ({
                   <EuiIcon type="warning" color="warning" />
                 </EuiFlexItem>
                 <EuiFlexItem className="dscWarningsCalloutWarningList__itemDescription">
-                  <WarningContent warning={warning} groupStyles={{ direction: 'column' }} />
+                  <WarningContent
+                    warning={warning}
+                    groupStyles={{ direction: 'column' }}
+                    data-test-subj={dataTestSubj}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </li>
@@ -142,21 +187,25 @@ export const WarningsCallout = ({
 
 function WarningContent({
   warning: { originalWarning, action },
+  textSize = 's',
   groupStyles,
+  'data-test-subj': dataTestSubj,
 }: {
   warning: SearchResponseInterceptedWarning;
+  textSize?: EuiTextProps['size'];
   groupStyles?: Partial<EuiFlexGroupProps>;
+  'data-test-subj': string;
 }) {
   return (
     <EuiFlexGroup gutterSize="xs" {...groupStyles}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
+        <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningTitle`}>
           <strong>{originalWarning.message}</strong>
         </EuiText>
       </EuiFlexItem>
       {'text' in originalWarning ? (
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningMessage`}>
             <p>{originalWarning.text}</p>
           </EuiText>
         </EuiFlexItem>

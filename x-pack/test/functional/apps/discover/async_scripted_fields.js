@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.restoreDefaults();
     });
 
-    it('query should show failed shards pop up', async function () {
+    it('query should show failed shards callout', async function () {
       if (false) {
         /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
          */
@@ -69,7 +69,9 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.tryForTime(20000, async function () {
         // wait for shards failed message
-        const shardMessage = await testSubjects.getVisibleText('euiToastHeader');
+        const shardMessage = await testSubjects.getVisibleText(
+          'dscNoResultsInterceptedWarningsCallout_warningTitle'
+        );
         log.debug(shardMessage);
         expect(shardMessage).to.be('1 of 3 shards failed');
       });

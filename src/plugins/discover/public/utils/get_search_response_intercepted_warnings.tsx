@@ -34,7 +34,7 @@ export const getSearchResponseInterceptedWarnings = ({
           <ShardFailureOpenModalButton
             theme={services.theme}
             title={warning.message}
-            size="m"
+            size="s"
             getRequestMeta={() => ({
               request: request as ShardFailureRequest,
               response,

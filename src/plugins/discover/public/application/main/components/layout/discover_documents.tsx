@@ -208,7 +208,7 @@ function DiscoverDocumentsComponent({
         <WarningsCallout
           variant="inline"
           interceptedWarnings={documentState.interceptedWarnings}
-          data-test-subj="dscWarningsCallout"
+          data-test-subj="dscInterceptedWarningsCallout"
         />
       )}
       {isLegacy && rows && rows.length && (
