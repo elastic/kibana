@@ -7,16 +7,12 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const containerCss = (theme: EuiThemeComputed) => {
-  console.log({ theme });
-
-  return {
-    minHeight: `calc(100vh - ${parseFloat(theme.size.xxxl) * 2}px)`,
-    background: theme.colors.emptyShade,
-    display: 'flex',
-    flexDirection: 'column',
-  };
-};
+export const containerCss = (theme: EuiThemeComputed) => ({
+  minHeight: `calc(100vh - ${parseFloat(theme.size.xxxl) * 2}px)`,
+  background: theme.colors.emptyShade,
+  display: 'flex',
+  flexDirection: 'column',
+});
 
 export const wrapperCss = {
   display: 'flex',
