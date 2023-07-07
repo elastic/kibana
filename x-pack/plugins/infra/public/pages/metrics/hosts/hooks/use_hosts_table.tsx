@@ -30,7 +30,8 @@ import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
-import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
+import { TABLE_COLUMN_LABEL } from '../translations';
+import { TOOLTIP } from '../../../../common/visualizations/lens/translations';
 import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 /**

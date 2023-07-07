@@ -7,67 +7,10 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { type KPIChartProps, Tile } from './tile';
-import { TOOLTIP } from './translations';
+import { Tile } from './tile';
+import { KPI_CHARTS } from '../../../../common/visualizations/lens/kpi_grid_config';
 import type { KPIProps } from './overview';
 import type { StringDateRange } from '../../types';
-
-const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
-  {
-    type: 'cpuUsage',
-    trendLine: true,
-    backgroundColor: '#F1D86F',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.cpuUsage.title',
-      {
-        defaultMessage: 'CPU Usage',
-      }
-    ),
-    toolTip: TOOLTIP.cpuUsage,
-  },
-  {
-    type: 'normalizedLoad1m',
-    trendLine: true,
-    backgroundColor: '#79AAD9',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.normalizedLoad1m.title',
-      {
-        defaultMessage: 'Normalized Load',
-      }
-    ),
-    toolTip: TOOLTIP.rx,
-  },
-  {
-    type: 'memoryUsage',
-    trendLine: true,
-    backgroundColor: '#A987D1',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.memoryUsage.title',
-      {
-        defaultMessage: 'Memory Usage',
-      }
-    ),
-    toolTip: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.memoryUsage.tooltip',
-      {
-        defaultMessage: 'Main memory usage excluding page cache.',
-      }
-    ),
-  },
-  {
-    type: 'diskSpaceUsage',
-    trendLine: true,
-    backgroundColor: '#F5A35C',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.diskSpaceUsage.title',
-      {
-        defaultMessage: 'Disk Space Usage',
-      }
-    ),
-    toolTip: TOOLTIP.tx,
-  },
-];
 
 export interface KPIGridProps extends KPIProps {
   nodeName: string;

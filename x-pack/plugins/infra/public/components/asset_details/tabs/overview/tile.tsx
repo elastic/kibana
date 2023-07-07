@@ -18,22 +18,12 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { KPIChartProps } from '../../../../common/visualizations/lens/kpi_grid_config';
 import { useLensAttributes } from '../../../../hooks/use_lens_attributes';
-import type { HostsLensMetricChartFormulas } from '../../../../common/visualizations';
 import { LensWrapper } from '../../../../common/visualizations/lens/lens_wrapper';
 import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 import { TooltipContent } from '../../../../common/visualizations/metric_explanation/tooltip_content';
 import type { KPIGridProps } from './kpi_grid';
-
-export interface KPIChartProps {
-  title: string;
-  subtitle?: string;
-  trendLine?: boolean;
-  backgroundColor: string;
-  type: HostsLensMetricChartFormulas;
-  decimals?: number;
-  toolTip: string;
-}
 
 const MIN_HEIGHT = 150;
 
