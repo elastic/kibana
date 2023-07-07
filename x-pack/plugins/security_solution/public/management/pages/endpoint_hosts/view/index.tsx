@@ -49,11 +49,7 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { SecurityPageName } from '../../../../app/types';
-import {
-  getEndpointDetailsPath,
-  getEndpointListPath,
-  getPoliciesPath,
-} from '../../../common/routing';
+import { getEndpointDetailsPath, getEndpointListPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import type { EndpointAction } from '../store/action';
@@ -65,11 +61,10 @@ import { TableRowActions } from './components/table_row_actions';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 import { APP_UI_ID, WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
-import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
-import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
+import { BackToPolicyListButton } from './components/back_to_policy_list_button';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -121,36 +116,6 @@ export const EndpointList = () => {
   const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
-
-  const backLinkOptions = useMemo<BackToExternalAppButtonProps>(() => {
-    if (routeState?.backLink) {
-      return {
-        onBackButtonNavigateTo: routeState.backLink.navigateTo,
-        backButtonLabel: routeState.backLink.label,
-        backButtonUrl: routeState.backLink.href,
-      };
-    }
-
-    // the default back button is to the policy list
-    const policyListPath = getPoliciesPath();
-
-    return {
-      backButtonLabel: i18n.translate('xpack.securitySolution.endpoint.list.backToPolicyButton', {
-        defaultMessage: 'Back to policy list',
-      }),
-      backButtonUrl: getAppUrl({ path: policyListPath }),
-      onBackButtonNavigateTo: [
-        APP_UI_ID,
-        {
-          path: policyListPath,
-        },
-      ],
-    };
-  }, [getAppUrl, routeState?.backLink]);
-
-  const backToPolicyList = (
-    <BackToExternalAppButton {...backLinkOptions} data-test-subj="endpointListBackLink" />
-  );
 
   useEffect(() => {
     // if no endpoint policy, skip transform check
@@ -694,7 +659,7 @@ export const EndpointList = () => {
           defaultMessage="Hosts running Elastic Defend"
         />
       }
-      headerBackComponent={routeState.backLink && backToPolicyList}
+      headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
