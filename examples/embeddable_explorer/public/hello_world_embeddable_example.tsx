@@ -28,17 +28,16 @@ interface Props {
 export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Props) {
   return (
     <>
-      <EuiPageTemplate.Header
-        pageTitle="Render embeddable"
-      />
+      <EuiPageTemplate.Header pageTitle="Render embeddable" />
       <EuiPageTemplate.Section grow={false} bottomBorder="extended">
         <>
           <EuiTitle size="xs">
             <h2>Embeddable prop</h2>
           </EuiTitle>
           <EuiText>
-            Use embeddable constructor to pass embeddable directly to <strong>EmbeddableRenderer</strong>.
-            Use <strong>input</strong> prop to declaratively update embeddable input.
+            Use embeddable constructor to pass embeddable directly to{' '}
+            <strong>EmbeddableRenderer</strong>. Use <strong>input</strong> prop to declaratively
+            update embeddable input.
           </EuiText>
           <EuiSpacer />
           <EuiPanel data-test-subj="helloWorldEmbeddablePanel" role="figure">
@@ -59,10 +58,7 @@ export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Pro
             Use <strong>factory</strong> prop to programatically instantiate embeddable.
           </EuiText>
           <EuiSpacer />
-          <EuiPanel
-            data-test-subj="helloWorldEmbeddableFromFactory"
-            role="figure"
-          >
+          <EuiPanel data-test-subj="helloWorldEmbeddableFromFactory" role="figure">
             <EmbeddableRenderer factory={helloWorldEmbeddableFactory} input={{ id: '1234' }} />
           </EuiPanel>
           <EuiSpacer />

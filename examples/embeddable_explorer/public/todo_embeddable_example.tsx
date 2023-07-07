@@ -15,12 +15,10 @@ import {
   EuiPanel,
   EuiText,
   EuiTextArea,
-  EuiTitle,
   EuiPageTemplate,
   EuiSpacer,
   EuiSelect,
 } from '@elastic/eui';
-import { TodoInput } from '@kbn/embeddable-examples-plugin/public/todo';
 import { TodoEmbeddableFactory } from '@kbn/embeddable-examples-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
@@ -41,7 +39,7 @@ const ICON_OPTIONS = [
   { value: 'broom', text: 'broom' },
   { value: 'bug', text: 'bug' },
   { value: 'bullseye', text: 'bullseye' },
-]
+];
 
 export class TodoEmbeddableExample extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -57,9 +55,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
   public render() {
     return (
       <>
-        <EuiPageTemplate.Header
-          pageTitle="Update embeddable state"
-        />
+        <EuiPageTemplate.Header pageTitle="Update embeddable state" />
         <EuiPageTemplate.Section grow={false}>
           <>
             <EuiText>
@@ -105,16 +101,14 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
             </EuiPanel>
             <EuiSpacer />
             <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-              {
-`<EmbeddableRenderer
+              {`<EmbeddableRenderer
   factory={this.props.todoEmbeddableFactory}
   input={{
     task: this.state.task,
     title: this.state.title,
     icon: this.state.icon,
   }}
-/>`
-}
+/>`}
             </EuiCodeBlock>
           </>
         </EuiPageTemplate.Section>

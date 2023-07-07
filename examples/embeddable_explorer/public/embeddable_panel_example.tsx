@@ -7,12 +7,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiPageTemplate } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
@@ -113,9 +108,7 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
 
   return (
     <>
-      <EuiPageTemplate.Header
-        pageTitle="Context menu"
-      />
+      <EuiPageTemplate.Header pageTitle="Context menu" />
       <EuiPageTemplate.Section grow={false}>
         <>
           <EuiText>
