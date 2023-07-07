@@ -67,7 +67,10 @@ export function useChartConfigPanel({
           dataView={dataView}
           adaptersTables={lensTablesAdapter}
           updateAll={updateSuggestion}
-          setIsFlyoutVisible={setIsFlyoutVisible}
+          closeFlyout={() => {
+            setIsFlyoutVisible(false);
+          }}
+          wrapInFlyout
           datasourceId="textBased"
         />
       );

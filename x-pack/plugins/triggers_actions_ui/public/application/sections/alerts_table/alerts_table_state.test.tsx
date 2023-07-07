@@ -762,9 +762,15 @@ describe('AlertsTableState', () => {
       storageMock.mockImplementation(() => ({
         get: () => {
           return {
-            columns: [{ displayAsText: 'Reason', id: 'kibana.alert.reason', schema: undefined }],
-            sort: [],
-            visibleColumns: ['kibana.alert.reason'],
+            columns: [{ displayAsText: 'Reason', id: AlertsField.reason, schema: undefined }],
+            sort: [
+              {
+                [AlertsField.reason]: {
+                  order: 'asc',
+                },
+              },
+            ],
+            visibleColumns: [AlertsField.reason],
           };
         },
         set: jest.fn(),
@@ -780,11 +786,11 @@ describe('AlertsTableState', () => {
 
       await waitFor(() => {
         expect(queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
-        expect(
-          getByTestId('dataGridHeader')
-            .querySelectorAll('.euiDataGridHeaderCell__content')[1]
-            .getAttribute('title')
-        ).toBe('Name');
+        const titles: string[] = [];
+        getByTestId('dataGridHeader')
+          .querySelectorAll('.euiDataGridHeaderCell__content')
+          .forEach((n) => titles.push(n?.getAttribute('title') ?? ''));
+        expect(titles).toContain('Name');
       });
     });
 

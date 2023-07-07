@@ -755,7 +755,7 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"This mySuperRadTestPreconfiguredId already exist in preconfigured action."`
+      `"This mySuperRadTestPreconfiguredId already exists in a preconfigured action."`
     );
   });
 
@@ -2675,7 +2675,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Preconfigured action testPreconfigured is not allowed to update."`
+      `"Preconfigured action testPreconfigured can not be updated."`
     );
   });
 
@@ -2719,7 +2719,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"System action system-connector-.cases is not allowed to update."`
+      `"System action system-connector-.cases can not be updated."`
     );
   });
 });
