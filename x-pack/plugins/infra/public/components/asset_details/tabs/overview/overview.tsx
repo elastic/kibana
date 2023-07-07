@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
@@ -18,6 +18,7 @@ import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummary } from './metadata_summary';
 import { KPIGrid } from './kpi_grid';
 import type { StringDateRange } from '../../types';
+import { AlertsSummaryContent } from './alerts';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -56,7 +57,7 @@ export const Overview = ({
   } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <KPIGrid
           nodeName={nodeName}
@@ -95,6 +96,9 @@ export const Overview = ({
           <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
         )}
       </EuiFlexItem>
+      <EuiHorizontalRule margin="xs" />
+      <AlertsSummaryContent nodeName={nodeName} />
+      <EuiHorizontalRule margin="xs" />
     </EuiFlexGroup>
   );
 };
