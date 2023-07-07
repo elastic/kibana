@@ -11,10 +11,7 @@ import React from 'react';
 import { EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageHeader,
-  EuiPageSection,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 
 export const StepTwo = () => {
   return (

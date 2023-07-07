@@ -12,10 +12,7 @@ import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/e
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageHeader,
-  EuiPageSection,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 
 interface StepThreeProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
