@@ -50,6 +50,8 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     {
       ...initialState,
       selectableAlertTags: createInitialTagsState(existingTags, defaultAlertTagOptions),
+      tagsToAdd: new Set<string>(),
+      tagsToRemove: new Set<string>(),
     }
   );
 
