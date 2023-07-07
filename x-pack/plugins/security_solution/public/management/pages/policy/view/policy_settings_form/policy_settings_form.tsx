@@ -69,7 +69,6 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       <EuiSpacer size="l" />
 
       <AntivirusRegistrationCard {...props} data-test-subj={getTestId('antivirusRegistration')} />
-      <EuiSpacer size="l" />
 
       <EuiSpacer size="m" />
       <AdvancedSection {...props} data-test-subj={getTestId('advancedSection')} />

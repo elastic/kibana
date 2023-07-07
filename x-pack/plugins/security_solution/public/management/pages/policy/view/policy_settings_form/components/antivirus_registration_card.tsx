@@ -13,30 +13,30 @@ import { cloneDeep } from 'lodash';
 import { SettingCard } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 
-const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string }> = {
-  title: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
-    {
-      defaultMessage: 'Register as antivirus',
-    }
-  ),
-  description: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.explanation',
-    {
-      defaultMessage:
-        'Toggle on to register Elastic as an official Antivirus solution for Windows OS. ' +
-        'This will also disable Windows Defender.',
-    }
-  ),
-  label: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.registeredLabel',
-    {
-      defaultMessage: 'Register as antivirus',
-    }
-  ),
-};
+const CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
+  {
+    defaultMessage: 'Register as antivirus',
+  }
+);
 
-const DO_NOT_REGISTER_LABEL = i18n.translate(
+const DESCRIPTON = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.explanation',
+  {
+    defaultMessage:
+      'Toggle on to register Elastic as an official Antivirus solution for Windows OS. ' +
+      'This will also disable Windows Defender.',
+  }
+);
+
+const REGISTERED_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
+  {
+    defaultMessage: 'Register as antivirus',
+  }
+);
+
+const NOT_REGISTERED_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.notRegisteredLabel',
   {
     defaultMessage: 'Do not register as antivirus',
@@ -49,7 +49,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isChecked = policy.windows.antivirus_registration.enabled;
     const isEditMode = mode === 'edit';
-    const label = isChecked ? TRANSLATIONS.label : DO_NOT_REGISTER_LABEL;
+    const label = isChecked ? REGISTERED_LABEL : NOT_REGISTERED_LABEL;
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -63,7 +63,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
 
     return (
       <SettingCard
-        type={TRANSLATIONS.title}
+        type={CARD_TITLE}
         supportedOss={[OperatingSystem.WINDOWS]}
         dataTestSubj="antivirusRegistrationForm"
         osRestriction={i18n.translate(
@@ -74,7 +74,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
           }
         )}
       >
-        {isEditMode && <EuiText size="s">{TRANSLATIONS.description}</EuiText>}
+        {isEditMode && <EuiText size="s">{DESCRIPTON}</EuiText>}
 
         <EuiSpacer size="s" />
 
