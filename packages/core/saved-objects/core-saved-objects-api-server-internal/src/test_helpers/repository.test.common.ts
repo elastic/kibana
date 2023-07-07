@@ -53,7 +53,6 @@ import {
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { option } from 'fp-ts/lib/Option';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import { SavedObjectsRepository } from '../lib/repository';
 
