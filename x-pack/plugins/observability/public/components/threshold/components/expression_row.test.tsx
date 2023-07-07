@@ -109,7 +109,10 @@ describe('ExpressionRow', () => {
 
     const { wrapper } = await setup(expression as MetricExpression);
 
-    const helpText = wrapper.find('[data-test-subj="ofExpression"]').at(0).prop('helpText');
+    const helpText = wrapper
+      .find('[data-test-subj="thresholdRuleOfExpression"]')
+      .at(0)
+      .prop('helpText');
 
     expect(helpText).toMatchSnapshot();
   });

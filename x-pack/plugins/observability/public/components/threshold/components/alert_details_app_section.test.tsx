@@ -69,7 +69,7 @@ describe('AlertDetailsAppSection', () => {
   it('should render rule and alert data', async () => {
     const result = renderComponent();
 
-    expect((await result.findByTestId('metricThresholdAppSection')).children.length).toBe(3);
+    expect((await result.findByTestId('thresholdRuleAppSection')).children.length).toBe(3);
     expect(result.getByTestId('threshold-2000-2500')).toBeTruthy();
   });
 
@@ -81,7 +81,7 @@ describe('AlertDetailsAppSection', () => {
       {
         label: 'Rule',
         value: (
-          <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
+          <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
             Monitoring hosts
           </EuiLink>
         ),

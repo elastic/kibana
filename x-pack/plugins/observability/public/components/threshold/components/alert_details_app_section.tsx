@@ -117,7 +117,7 @@ export default function AlertDetailsAppSection({
   }, [alert, rule, ruleLink, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
-    <EuiFlexGroup direction="column" data-test-subj="thresholdAppSection">
+    <EuiFlexGroup direction="column" data-test-subj="thresholdRuleAppSection">
       {rule.params.criteria.map((criterion, index) => (
         <EuiFlexItem key={generateUniqueKey(criterion)}>
           <EuiPanel hasBorder hasShadow={false}>
