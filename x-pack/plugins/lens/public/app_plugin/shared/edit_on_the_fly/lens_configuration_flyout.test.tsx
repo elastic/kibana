@@ -120,22 +120,22 @@ describe('LensEditConfigurationFlyout', () => {
       startDependencies,
       visualizationMap,
       datasourceMap,
-      setIsFlyoutVisible: jest.fn(),
+      closeFlyout: jest.fn(),
       datasourceId: 'testDatasource',
     } as unknown as EditConfigPanelProps;
   }
 
-  it('should call the setIsFlyout callback if collapse button is clicked', async () => {
-    const setIsFlyoutVisibleSpy = jest.fn();
+  it('should call the closeFlyout callback if collapse button is clicked', async () => {
+    const closeFlyoutSpy = jest.fn();
     const props = getDefaultProps();
     const newProps = {
       ...props,
-      setIsFlyoutVisible: setIsFlyoutVisibleSpy,
+      closeFlyout: closeFlyoutSpy,
     };
     const { instance } = await prepareAndMountComponent(newProps);
     expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
     instance.find('[data-test-subj="collapseFlyoutButton"]').at(1).simulate('click');
-    expect(setIsFlyoutVisibleSpy).toHaveBeenCalled();
+    expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
   it('should compute the frame public api correctly', async () => {

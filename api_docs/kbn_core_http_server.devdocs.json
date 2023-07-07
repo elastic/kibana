@@ -3688,6 +3688,26 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/flamechart.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/functions.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+              },
+              {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/topn.ts"
+              },
+              {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/ping.ts"
               },
@@ -4332,26 +4352,6 @@
                 "path": "x-pack/plugins/monitoring/server/plugin.ts"
               },
               {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/flamechart.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/functions.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/topn.ts"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
@@ -4466,10 +4466,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/tags/routes/get_tags_by_name.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -6474,6 +6470,10 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "profiling",
+                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
+              },
+              {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/sample_assets.ts"
               },
@@ -7032,10 +7032,6 @@
               {
                 "plugin": "painlessLab",
                 "path": "x-pack/plugins/painless_lab/server/routes/api/execute.ts"
-              },
-              {
-                "plugin": "profiling",
-                "path": "x-pack/plugins/profiling/server/routes/setup.ts"
               },
               {
                 "plugin": "reporting",
@@ -14164,6 +14160,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/details.ts"
               },
               {
@@ -14645,6 +14645,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/swap_references.ts"
               },
               {
                 "plugin": "dataViews",
