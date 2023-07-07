@@ -169,7 +169,7 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
       name: i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.sourceFieldHeader',
         {
-          defaultMessage: 'Source fields',
+          defaultMessage: 'Source field',
         }
       ),
     },
@@ -180,11 +180,12 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
       width: '60px',
     },
     {
+      align: 'right',
       field: 'targetField',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.targetFieldHeader',
         {
-          defaultMessage: 'Target fields',
+          defaultMessage: 'Target field',
         }
       ),
     },
