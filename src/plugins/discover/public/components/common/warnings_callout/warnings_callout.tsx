@@ -212,14 +212,16 @@ function WarningContent({
   groupStyles?: Partial<EuiFlexGroupProps>;
   'data-test-subj': string;
 }) {
+  const hasDescription = 'text' in originalWarning;
+
   return (
     <EuiFlexGroup gutterSize="xs" {...groupStyles}>
       <EuiFlexItem grow={false}>
         <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningTitle`}>
-          <strong>{originalWarning.message}</strong>
+          {hasDescription ? <strong>{originalWarning.message}</strong> : originalWarning.message}
         </EuiText>
       </EuiFlexItem>
-      {'text' in originalWarning ? (
+      {hasDescription ? (
         <EuiFlexItem grow={false}>
           <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningMessage`}>
             <p>{originalWarning.text}</p>
