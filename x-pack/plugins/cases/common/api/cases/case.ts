@@ -28,6 +28,7 @@ import {
   MAX_ASSIGNEES_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
+  MAX_CASES_TO_UPDATE,
   MAX_BULK_GET_CASES,
   MAX_CASES_PER_PAGE,
 } from '../../constants';
@@ -461,7 +462,15 @@ export const CasePatchRequestRt = rt.intersection([
   rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
-export const CasesPatchRequestRt = rt.strict({ cases: rt.array(CasePatchRequestRt) });
+export const CasesPatchRequestRt = rt.strict({
+  cases: limitedArraySchema({
+    codec: CasePatchRequestRt,
+    min: 1,
+    max: MAX_CASES_TO_UPDATE,
+    fieldName: 'cases',
+  }),
+});
+
 export const CasesRt = rt.array(CaseRt);
 
 export const CasePushRequestParamsRt = rt.strict({
