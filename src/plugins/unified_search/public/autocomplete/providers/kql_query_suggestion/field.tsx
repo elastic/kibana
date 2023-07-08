@@ -60,10 +60,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
     const { escapeKuery } = await import('@kbn/es-query');
     const suggestions: QuerySuggestionField[] = sortedFields.map((field) => {
       const isNested = field.subType && field.subType.nested;
-      const isSuggestionsAbstractionOn =
-        suggestionsAbstraction &&
-        suggestionsAbstraction?.fields &&
-        suggestionsAbstraction?.fields[field.name];
+      const isSuggestionsAbstractionOn = !!suggestionsAbstraction?.fields?.[field.name];
 
       const remainingPath =
         field.subType && field.subType.nested
