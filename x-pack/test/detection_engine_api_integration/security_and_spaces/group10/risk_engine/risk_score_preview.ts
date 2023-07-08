@@ -10,40 +10,10 @@ import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  createSignalsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-  createRule,
-  waitForSignalsToBePresent,
-  waitForRuleSuccess,
-  getRuleForSignalTesting,
-} from '../../utils';
-import { dataGeneratorFactory } from '../../utils/data_generator';
-
-const removeFields = (scores: any[]) =>
-  scores.map((item) => {
-    delete item['@timestamp'];
-    delete item.riskiestInputs;
-    delete item.notes;
-    delete item.alertsScore;
-    delete item.otherScore;
-    return item;
-  });
-
-const buildDocument = (body: any, id?: string) => {
-  const firstTimestamp = Date.now();
-  const doc = {
-    id: id || uuidv4(),
-    '@timestamp': firstTimestamp,
-    agent: {
-      name: 'agent-12345',
-    },
-    ...body,
-  };
-  return doc;
-};
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { createSignalsIndex, deleteAllAlerts, deleteAllRules } from '../../../utils';
+import { dataGeneratorFactory } from '../../../utils/data_generator';
+import { buildDocument, createAndSyncRuleAndAlertsFactory, sanitizeScores } from './utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -52,37 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const createAndSyncRuleAndAlerts = async ({
-    alerts = 1,
-    riskScore = 21,
-    maxSignals = 100,
-    query,
-    riskScoreOverride,
-  }: {
-    alerts?: number;
-    riskScore?: number;
-    maxSignals?: number;
-    query: string;
-    riskScoreOverride?: string;
-  }): Promise<void> => {
-    const rule = getRuleForSignalTesting(['ecs_compliant']);
-    const { id } = await createRule(supertest, log, {
-      ...rule,
-      risk_score: riskScore,
-      query,
-      max_signals: maxSignals,
-      ...(riskScoreOverride
-        ? {
-            risk_score_mapping: [
-              { field: riskScoreOverride, operator: 'equals', value: '', risk_score: undefined },
-            ],
-          }
-        : {}),
-    });
-    await waitForRuleSuccess({ supertest, log, id });
-    await waitForSignalsToBePresent(supertest, log, alerts, [id]);
-  };
-
+  const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: RiskScore[] }> => {
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
@@ -142,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId);
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Unknown',
               totalScore: 21,
@@ -164,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Unknown',
               totalScore: 21,
@@ -193,7 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Unknown',
               totalScore: 28.42462120245875,
@@ -213,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 30,
           });
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Unknown',
               totalScore: 47.25513506055279,
@@ -236,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 31,
           });
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Unknown',
               totalScore: 47.25513506055279,
@@ -263,7 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
           });
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Unknown',
               totalScore: 50.67035607277805,
@@ -286,7 +226,7 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 100,
           });
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Critical',
               totalScore: 241.2874098703716,
@@ -315,7 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
             maxSignals: 1000,
           });
 
-          expect(removeFields(body.scores)).to.eql([
+          expect(sanitizeScores(body.scores)).to.eql([
             {
               level: 'Critical',
               totalScore: 254.91456029175757,
@@ -409,7 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           const { scores } = await getRiskScores({ body: {} });
 
-          expect(removeFields(scores)).to.eql([
+          expect(sanitizeScores(scores)).to.eql([
             {
               level: 'High',
               totalScore: 225.1106801442913,
@@ -436,7 +376,7 @@ export default ({ getService }: FtrProviderContext): void => {
             body: { weights: [{ type: 'global_identifier', host: 0.5 }] },
           });
 
-          expect(removeFields(scores)).to.eql([
+          expect(sanitizeScores(scores)).to.eql([
             {
               level: 'Moderate',
               totalScore: 120.6437049351858,
@@ -461,7 +401,7 @@ export default ({ getService }: FtrProviderContext): void => {
             body: { weights: [{ type: 'global_identifier', user: 0.7 }] },
           });
 
-          expect(removeFields(scores)).to.eql([
+          expect(sanitizeScores(scores)).to.eql([
             {
               level: 'Moderate',
               totalScore: 168.9011869092601,
@@ -488,7 +428,7 @@ export default ({ getService }: FtrProviderContext): void => {
             body: { weights: [{ type: 'global_identifier', host: 0.4, user: 0.8 }] },
           });
 
-          expect(removeFields(scores)).to.eql([
+          expect(sanitizeScores(scores)).to.eql([
             {
               level: 'High',
               totalScore: 186.47518232942502,
@@ -531,7 +471,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          expect(removeFields(scores)).to.eql([
+          expect(sanitizeScores(scores)).to.eql([
             {
               level: 'High',
               totalScore: 186.475182329425,
