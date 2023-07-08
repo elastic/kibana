@@ -144,7 +144,7 @@ export class ProfilingPlugin implements Plugin {
         ),
       },
       hasSetup: async () => {
-        const response = (await coreSetup.http.get('/api/profiling/v1/setup/es_resources')) as {
+        const response = (await coreSetup.http.get('/internal/profiling/setup/es_resources')) as {
           has_setup: boolean;
           has_data: boolean;
         };

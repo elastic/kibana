@@ -354,7 +354,7 @@ describe('Execution Handler', () => {
   });
 
   test('throw error message when action type is disabled', async () => {
-    mockActionsPlugin.preconfiguredActions = [];
+    mockActionsPlugin.inMemoryConnectors = [];
     mockActionsPlugin.isActionExecutable.mockReturnValue(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
     const executionHandler = new ExecutionHandler(

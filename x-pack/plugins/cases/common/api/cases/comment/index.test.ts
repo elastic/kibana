@@ -31,7 +31,7 @@ import {
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
 } from '.';
-import { MAX_COMMENT_LENGTH } from '../../../constants';
+import { MAX_COMMENT_LENGTH, MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
 
 describe('Comments', () => {
   describe('CommentAttributesBasicRt', () => {
@@ -841,6 +841,27 @@ describe('Comments', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, () => {
+        const comment = {
+          comment: 'Solve this fast!',
+          type: CommentType.user,
+          owner: 'cases',
+        };
+        const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
+
+        expect(PathReporter.report(BulkCreateCommentRequestRt.decode(attachments))).toContain(
+          `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
+        );
+      });
+
+      it(`no errors when empty array of attachments`, () => {
+        expect(PathReporter.report(BulkCreateCommentRequestRt.decode([]))).toStrictEqual([
+          'No errors!',
+        ]);
       });
     });
   });
