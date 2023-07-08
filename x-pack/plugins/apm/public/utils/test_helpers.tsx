@@ -13,7 +13,7 @@ import { render, waitFor } from '@testing-library/react';
 import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import enzymeToJson from 'enzyme-to-json';
-import { Location } from 'history';
+import { createMemoryHistory, Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
@@ -62,13 +62,15 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MemoryRouter initialEntries={[location]}>
-      <MockApmPluginContextWrapper>
-        <UrlParamsProvider>
-          <Component />
-        </UrlParamsProvider>
-      </MockApmPluginContextWrapper>
-    </MemoryRouter>
+    <MockApmPluginContextWrapper
+      history={createMemoryHistory({
+        initialEntries: [location],
+      })}
+    >
+      <UrlParamsProvider>
+        <Component />
+      </UrlParamsProvider>
+    </MockApmPluginContextWrapper>
   );
   const a = el.container.querySelector('a');
 
