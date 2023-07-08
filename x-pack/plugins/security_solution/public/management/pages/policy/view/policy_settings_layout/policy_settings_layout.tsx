@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { useFetchAgentByAgentPolicySummary } from '../../../../hooks/policy/use_fetch_endpoint_policy_agent_summary';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicySettingsFormProps } from '../policy_settings_form/policy_settings_form';
 import { PolicySettingsForm } from '../policy_settings_form';
@@ -50,8 +51,8 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
   const isEditMode = useShowEditableFormFields();
   const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
+  const { data: agentSummaryData } = useFetchAgentByAgentPolicySummary(policy.policy_id);
 
-  // Local state
   const [policySettings, setPolicySettings] = useState<PolicyConfig>(
     cloneDeep(policy.inputs[0].config.policy.value)
   );
@@ -144,7 +145,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
     <>
       {showConfirm && (
         <ConfirmUpdate
-          endpointCount={/* FIXME:PT implement policyAgentStatusSummary?.total ??*/ 0}
+          endpointCount={agentSummaryData ? agentSummaryData.all : 0}
           onCancel={handleSaveCancel}
           onConfirm={handleSaveConfirmation}
         />
