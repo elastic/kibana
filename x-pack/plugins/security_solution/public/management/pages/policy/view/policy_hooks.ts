@@ -99,6 +99,8 @@ export const useIsPolicySettingsBarVisible = () => {
  * pages if the user does not have privileges to security solution policy management.
  */
 export const useShowEditableFormFields = (): boolean => {
+  // FIXME:PT Delete once references are removed
+
   const { canWritePolicyManagement, canAccessFleet } = useUserPrivileges().endpointPrivileges;
   const { getUrlForApp } = useKibana().services.application;
 

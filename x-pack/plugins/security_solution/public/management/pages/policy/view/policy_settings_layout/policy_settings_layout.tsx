@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useFetchAgentByAgentPolicySummary } from '../../../../hooks/policy/use_fetch_endpoint_policy_agent_summary';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicySettingsFormProps } from '../policy_settings_form/policy_settings_form';
@@ -30,7 +31,6 @@ import type {
   PolicyDetailsRouteState,
 } from '../../../../../../common/endpoint/types';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
-import { useShowEditableFormFields } from '../policy_hooks';
 import { APP_UI_ID } from '../../../../../../common';
 import { getPoliciesPath } from '../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -49,7 +49,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
   } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
-  const isEditMode = useShowEditableFormFields();
+  const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
   const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
   const { data: agentSummaryData } = useFetchAgentByAgentPolicySummary(policy.policy_id);
 
@@ -58,6 +58,8 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
   );
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
+
+  const isEditMode = canWritePolicyManagement;
   const policyName = policy?.name ?? '';
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
 
@@ -155,6 +157,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
         policy={policySettings}
         onChange={handleSettingsOnChange}
         mode={isEditMode ? 'edit' : 'view'}
+        data-test-subj="endpointPolicyForm"
       />
 
       <EuiSpacer size="xxl" />
