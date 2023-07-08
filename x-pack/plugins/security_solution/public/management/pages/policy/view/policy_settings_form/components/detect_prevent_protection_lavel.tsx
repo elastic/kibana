@@ -11,6 +11,7 @@ import type { EuiFlexItemProps } from '@elastic/eui';
 import { EuiRadio, EuiSpacer, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { SettingCardHeader } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 import type {
@@ -38,6 +39,7 @@ export type DetectPreventProtectionLavelProps = PolicyFormComponentCommonProps &
 export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelProps>(
   ({ policy, protection, osList, mode, onChange, 'data-test-subj': dataTestSubj }) => {
     const isEditMode = mode === 'edit';
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     // FIXME:PT remove this. Make it module global const
     const radios: Immutable<
@@ -72,7 +74,7 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelPro
     }, [policy.windows, protection, radios]);
 
     return (
-      <>
+      <div data-test-subj={getTestId()}>
         <SettingCardHeader>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel"
@@ -93,6 +95,7 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelPro
                     protectionMode={id}
                     osList={osList}
                     label={label}
+                    data-test-subj={getTestId(`${id}Radio`)}
                   />
                 </EuiFlexItem>
               );
@@ -101,7 +104,7 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelPro
             <>{currentProtectionLevelLabel}</>
           )}
         </EuiFlexGroup>
-      </>
+      </div>
     );
   }
 );
@@ -176,7 +179,7 @@ const ProtectionRadio = React.memo(
         checked={selected === protectionMode}
         onChange={handleRadioChange}
         disabled={!showEditableFormFields || selected === ProtectionModes.off}
-        data-test-subj={`${protection}ProtectionMode_${protectionMode}`}
+        data-test-subj={dataTestSubj}
       />
     );
   }
