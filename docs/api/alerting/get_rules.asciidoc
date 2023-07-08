@@ -103,7 +103,7 @@ The API returns the following:
     "id":"1007a0c0-7a6e-11ed-89d5-abec321c0def",
     "params":{
       "level":"info",
-      "message":"alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+      "message":"Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
     },
     "connector_type_id":".server-log"
   }],
