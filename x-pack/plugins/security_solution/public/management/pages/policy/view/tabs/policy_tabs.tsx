@@ -77,7 +77,11 @@ export const PolicyTabs = React.memo(() => {
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
-  const policyItem = usePolicyDetailsSelector(policyDetails);
+
+  // By the time the tabs load, we know that we already have a `policyItem` since a conditional
+  // check is done at the `PageDetails` component level. So asserting to non-null/undefined here.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const policyItem = usePolicyDetailsSelector(policyDetails)!;
   const {
     canReadTrustedApplications,
     canWriteTrustedApplications,
