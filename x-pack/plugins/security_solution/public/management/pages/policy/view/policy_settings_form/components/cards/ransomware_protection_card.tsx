@@ -10,18 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
-import { NotifyUserOption } from './notify_user_option';
-import { DetectPreventProtectionLevel } from './detect_prevent_protection_lavel';
-import { SettingCard } from './setting_card';
-import type { PolicyFormComponentCommonProps } from '../types';
-import type { Immutable } from '../../../../../../../common/endpoint/types';
-import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
-import type { RansomwareProtectionOSes } from '../../../types';
-import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
-import { APP_UI_ID, SecurityPageName } from '../../../../../../../common';
-import { useLicense } from '../../../../../../common/hooks/use_license';
-import { SettingLockedCard } from './setting_locked_card';
+import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
+import { NotifyUserOption } from '../notify_user_option';
+import { DetectPreventProtectionLevel } from '../detect_prevent_protection_lavel';
+import { SettingCard } from '../setting_card';
+import type { PolicyFormComponentCommonProps } from '../../types';
+import type { Immutable } from '../../../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem } from '../../../../../../../../common/endpoint/types';
+import type { RansomwareProtectionOSes } from '../../../../types';
+import { LinkToApp } from '../../../../../../../common/components/endpoint/link_to_app';
+import { APP_UI_ID, SecurityPageName } from '../../../../../../../../common';
+import { useLicense } from '../../../../../../../common/hooks/use_license';
+import { SettingLockedCard } from '../setting_locked_card';
 
 const RANSOMEWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.windows,

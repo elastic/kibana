@@ -10,7 +10,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import type { EventFormOption } from './event_collection_card';
 import { EventCollectionCard } from './event_collection_card';
-import type { PolicyFormComponentCommonProps } from '../types';
+import type { PolicyFormComponentCommonProps } from '../../types';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
   {

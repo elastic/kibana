@@ -10,10 +10,10 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import { useLicense } from '../../../../../../common/hooks/use_license';
-import { SettingLockedCard } from './setting_locked_card';
-import type { PolicyFormComponentCommonProps } from '../types';
-import { SettingCard } from './setting_card';
+import { useLicense } from '../../../../../../../common/hooks/use_license';
+import { SettingLockedCard } from '../setting_locked_card';
+import type { PolicyFormComponentCommonProps } from '../../types';
+import { SettingCard } from '../setting_card';
 
 const ATTACK_SURFACE_OS_LIST = [OperatingSystem.WINDOWS];
 

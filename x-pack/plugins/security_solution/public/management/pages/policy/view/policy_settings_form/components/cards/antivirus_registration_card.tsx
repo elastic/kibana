@@ -10,8 +10,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { SettingCard } from './setting_card';
-import type { PolicyFormComponentCommonProps } from '../types';
+import { SettingCard } from '../setting_card';
+import type { PolicyFormComponentCommonProps } from '../../types';
 
 const CARD_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',

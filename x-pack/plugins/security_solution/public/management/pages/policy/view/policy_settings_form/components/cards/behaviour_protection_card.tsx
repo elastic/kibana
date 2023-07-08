@@ -10,56 +10,56 @@ import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NotifyUserOption } from './notify_user_option';
-import { DetectPreventProtectionLevel } from './detect_prevent_protection_lavel';
-import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
-import { SettingLockedCard } from './setting_locked_card';
-import type { Immutable } from '../../../../../../../common/endpoint/types';
-import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
-import type { MemoryProtectionOSes } from '../../../types';
-import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
-import { APP_UI_ID, SecurityPageName } from '../../../../../../../common';
-import { useLicense } from '../../../../../../common/hooks/use_license';
-import type { PolicyFormComponentCommonProps } from '../types';
-import { SettingCard } from './setting_card';
+import { SettingCard } from '../setting_card';
+import { NotifyUserOption } from '../notify_user_option';
+import { DetectPreventProtectionLevel } from '../detect_prevent_protection_lavel';
+import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
+import type { Immutable } from '../../../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem } from '../../../../../../../../common/endpoint/types';
+import type { BehaviorProtectionOSes } from '../../../../types';
+import { LinkToApp } from '../../../../../../../common/components/endpoint/link_to_app';
+import { APP_UI_ID, SecurityPageName } from '../../../../../../../../common';
+import { useLicense } from '../../../../../../../common/hooks/use_license';
+import { SettingLockedCard } from '../setting_locked_card';
+import type { PolicyFormComponentCommonProps } from '../../types';
 
-const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.memory',
+const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.behavior',
   {
-    defaultMessage: 'Memory Threat',
+    defaultMessage: 'Malicious Behavior',
   }
 );
 
-const MEMORY_PROTECTION_OS_VALUES: Immutable<MemoryProtectionOSes[]> = [
+const BEHAVIOUR_OS_VALUES: Immutable<BehaviorProtectionOSes[]> = [
   PolicyOperatingSystem.windows,
   PolicyOperatingSystem.mac,
   PolicyOperatingSystem.linux,
 ];
 
-type MemoryProtectionCardProps = PolicyFormComponentCommonProps;
+type BehaviourProtectionCardProps = PolicyFormComponentCommonProps;
 
-export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
+export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
   ({ policy, onChange, mode }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const protection = 'memory_protection';
+    const protection = 'behavior_protection';
     const protectionLabel = i18n.translate(
-      'xpack.securitySolution.endpoint.policy.protections.memory',
+      'xpack.securitySolution.endpoint.policy.protections.behavior',
       {
-        defaultMessage: 'Memory threat protections',
+        defaultMessage: 'Malicious behavior protections',
       }
     );
 
     if (!isPlatinumPlus) {
-      return <SettingLockedCard title={LOCKED_CARD_MEMORY_TITLE} />;
+      return <SettingLockedCard title={LOCKED_CARD_BEHAVIOR_TITLE} />;
     }
 
     return (
       <SettingCard
-        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
-          defaultMessage: 'Memory threat',
+        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {
+          defaultMessage: 'Malicious behavior',
         })}
         supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
-        dataTestSubj="memoryProtectionsForm"
+        dataTestSubj="behaviorProtectionsForm"
         rightCorner={
           <ProtectionSettingCardSwitch
             policy={policy}
@@ -67,7 +67,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
             mode={mode}
             protection={protection}
             protectionLabel={protectionLabel}
-            osList={MEMORY_PROTECTION_OS_VALUES}
+            osList={BEHAVIOUR_OS_VALUES}
           />
         }
       >
@@ -76,7 +76,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
           onChange={onChange}
           mode={mode}
           protection={protection}
-          osList={MEMORY_PROTECTION_OS_VALUES}
+          osList={BEHAVIOUR_OS_VALUES}
         />
 
         <NotifyUserOption
@@ -84,7 +84,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
           onChange={onChange}
           mode={mode}
           protection={protection}
-          osList={MEMORY_PROTECTION_OS_VALUES}
+          osList={BEHAVIOUR_OS_VALUES}
         />
 
         <EuiSpacer size="m" />
@@ -108,4 +108,4 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
     );
   }
 );
-MemoryProtectionCard.displayName = 'MemoryProtectionCard';
+BehaviourProtectionCard.displayName = 'BehaviourProtectionCard';
