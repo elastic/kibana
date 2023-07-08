@@ -18,7 +18,7 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { activeStep },
       },
-    } = renderHook(() => useStepFromQueryString(history));
+    } = renderHook(() => useStepFromQueryString());
 
     expect(activeStep).not.toBeDefined();
   });
@@ -31,7 +31,7 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { activeStep },
       },
-    } = renderHook(() => useStepFromQueryString(history));
+    } = renderHook(() => useStepFromQueryString());
 
     expect(activeStep).toBe('mappings');
   });
@@ -44,7 +44,7 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { updateStep },
       },
-    } = renderHook(() => useStepFromQueryString(history));
+    } = renderHook(() => useStepFromQueryString());
 
     updateStep('aliases');
 
@@ -59,7 +59,7 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { updateStep },
       },
-    } = renderHook(() => useStepFromQueryString(history));
+    } = renderHook(() => useStepFromQueryString());
 
     updateStep('aliases');
     expect(history.location.search).toBe('?step=aliases');

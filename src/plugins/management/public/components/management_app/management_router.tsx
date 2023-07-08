@@ -49,22 +49,17 @@ export const ManagementRouter = memo(
       <Router history={history}>
         <Routes>
           {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .map((app) => (
-                <Route
-                  path={`${app.basePath}`}
-                  component={() => (
-                    <ManagementAppWrapper
-                      app={app}
-                      setBreadcrumbs={setBreadcrumbs}
-                      onAppMounted={onAppMounted}
-                      history={history}
-                      theme$={theme$}
-                    />
-                  )}
+            section.getAppsEnabled().map((app) => (
+              <Route path={`${app.basePath}`}>
+                <ManagementAppWrapper
+                  app={app}
+                  setBreadcrumbs={setBreadcrumbs}
+                  onAppMounted={onAppMounted}
+                  history={history}
+                  theme$={theme$}
                 />
-              ))
+              </Route>
+            ))
           )}
           {sections.map((section) =>
             section

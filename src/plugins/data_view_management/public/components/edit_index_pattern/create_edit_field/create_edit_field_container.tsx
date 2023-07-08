@@ -15,7 +15,7 @@ import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadc
 import { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
-const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = () => {
+const CreateEditFieldCont = () => {
   const params = useParams<{ id: string; fieldName?: string }>();
   const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<DataView>();

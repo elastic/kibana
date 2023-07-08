@@ -9,12 +9,16 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
+import { ScopedHistory } from '@kbn/core-application-browser';
 import { AppDependencies } from './app_context';
 import { AppProviders } from './app_providers';
-// @ts-ignore
-import { App } from './app.container';
+import { App } from './app';
 
-const AppWithRouter = (props: { [key: string]: any }) => (
+const AppWithRouter = (props: {
+  history: ScopedHistory;
+  telemetry: any;
+  executionContext: any;
+}) => (
   <Router history={props.history}>
     <App {...props} />
   </Router>

@@ -29,7 +29,7 @@ export const CanvasRouter: FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    //   // If it looks like the hash is a route then we will do a redirect
+    // If it looks like the hash is a route then we will do a redirect
     if (isHashPath(location.hash) && !location.pathname?.length) {
       const [hashPath, hashQuery] = location.hash.split('?');
       let search = location.search || '?';
@@ -47,11 +47,11 @@ export const CanvasRouter: FC = () => {
   return (
     <Routes>
       <Route
-        path={'/export/workpad/pdf/:id/page/:pageNumber'}
+        path={'/export/workpad/pdf/:id/page/:pageNumber?'}
         component={ExportWorkpadRouteComponent}
       />
       <Route
-        path={'/workpad/:id/page/:pageNumber'}
+        path={'/workpad/:id/page/:pageNumber?'}
         exact={true}
         component={WorkpadRouteComponent}
       />

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
 
 import { useExecutionContext } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -18,7 +19,7 @@ interface MatchParams {
 }
 
 export const ComponentTemplateListContainer: React.FunctionComponent = () => {
-  const { componentTemplateName } = useParams<{ componentTemplateName?: string }>();
+  const { componentTemplateName } = useParams<MatchParams>();
   const { executionContext } = useComponentTemplatesContext();
 
   useExecutionContext(executionContext, {

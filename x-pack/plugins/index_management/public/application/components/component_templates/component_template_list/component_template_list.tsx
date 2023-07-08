@@ -186,7 +186,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       </>
     );
   } else if (data && data.length === 0) {
-    content = <EmptyPrompt history={history} />;
+    content = <EmptyPrompt />;
   } else if (error) {
     content = (
       <PageError

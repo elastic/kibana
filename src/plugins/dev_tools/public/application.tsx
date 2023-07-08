@@ -194,7 +194,6 @@ export function renderApp(
                   render={(props) => (
                     <DevToolsWrapper
                       updateRoute={props.history.push}
-                      location={props.location}
                       activeDevTool={devTool}
                       devTools={devTools}
                       theme$={theme$}

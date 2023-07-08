@@ -67,7 +67,6 @@ const getCompositeRuntimeFields = (dataView: DataView) =>
 
 export const EditIndexPattern = React.memo(({ indexPattern }: EditIndexPatternProps) => {
   const history = useHistory();
-  const location = useLocation();
   const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
@@ -261,8 +260,6 @@ export const EditIndexPattern = React.memo(({ indexPattern }: EditIndexPatternPr
         fields={fields}
         relationships={relationships}
         allowedTypes={allowedTypes}
-        history={history}
-        location={location}
         compositeRuntimeFields={compositeRuntimeFields}
         refreshFields={() => {
           setFields(indexPattern.getNonScriptedFields());

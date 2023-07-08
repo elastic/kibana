@@ -20,7 +20,6 @@ import {
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
 
 import {
   PageLoading,
@@ -279,7 +278,6 @@ export const DataStreamList: React.FunctionComponent = () => {
           }
           dataStreams={filteredDataStreams}
           reload={reload}
-          history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
       </EuiPageContent>

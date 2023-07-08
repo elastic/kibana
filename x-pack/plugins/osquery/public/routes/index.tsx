@@ -18,17 +18,19 @@ const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
 
   return (
-    <Routes compat={false}>
-      <Route path={`/packs`}>
+    <Routes>
+      <Route path={`/packs*`}>
         <Packs />
       </Route>
-      <Route path={`/saved_queries`}>
+      <Route path={`/saved_queries*`}>
         <SavedQueries />
       </Route>
-      <Route path="/live_queries">
+      <Route path="/live_queries*">
         <LiveQueries />
       </Route>
-      <Redirect to="/live_queries" />
+      <Route path="*">
+        <Redirect to="/live_queries" />
+      </Route>
     </Routes>
   );
 };

@@ -16,6 +16,7 @@ import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/publ
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -60,8 +61,20 @@ function setAppChrome() {
   });
 }
 
-const MapApp = () => {
-  const { savedMapId } = useParams();
+type MapAppProps = Pick<
+  AppMountParameters,
+  'history' | 'setHeaderActionMenu' | 'setHeaderActionMenu' | 'onAppLeave'
+> & {
+  stateTransfer: EmbeddableStateTransfer;
+};
+
+const MapApp: React.FC<MapAppProps> = ({
+  history,
+  stateTransfer,
+  onAppLeave,
+  setHeaderActionMenu,
+}) => {
+  const { savedMapId } = useParams<{ savedMapId?: string }>();
   const { embeddableId, originatingApp, valueInput, originatingPath } =
     stateTransfer.getIncomingEditorState(APP_ID) || {};
 
@@ -108,6 +121,13 @@ export async function renderApp(
   registerLayerWizards();
   setAppChrome();
 
+  const mapAppProps = {
+    history,
+    stateTransfer,
+    onAppLeave,
+    setHeaderActionMenu,
+  };
+
   const I18nContext = getCoreI18n().Context;
   render(
     <AppUsageTracker>
@@ -124,10 +144,10 @@ export async function renderApp(
             <Router history={history}>
               <Routes>
                 <Route path={`/map/:savedMapId`}>
-                  <MapApp />
+                  <MapApp {...mapAppProps} />
                 </Route>
                 <Route exact path={`/map`}>
-                  <MapApp />
+                  <MapApp {...mapAppProps} />
                 </Route>
                 // Redirect other routes to list, or if hash-containing, their non-hash equivalents
                 <Route
