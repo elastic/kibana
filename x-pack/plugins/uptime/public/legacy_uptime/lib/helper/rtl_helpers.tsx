@@ -204,7 +204,7 @@ export function MockRouter<ExtraCore>({
   return (
     <Router history={history}>
       <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
-        <Routes>
+        <Routes compat={false}>
           <Route path={path}>{children}</Route>
         </Routes>
       </MockKibanaProvider>
