@@ -314,6 +314,119 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.isTextBasedLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "isTextBasedLanguage",
+            "description": [],
+            "signature": [
+              "() => boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getTextBasedLanguage",
+            "type": "Function",
+            "tags": [],
+            "label": "getTextBasedLanguage",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.updateVisualization",
+            "type": "Function",
+            "tags": [],
+            "label": "updateVisualization",
+            "description": [],
+            "signature": [
+              "(datasourceState: unknown, visualizationState: unknown) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateVisualization.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "datasourceState",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.updateVisualization.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "visualizationState",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Embeddable.openConfingPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "openConfingPanel",
+            "description": [],
+            "signature": [
+              "(startDependencies: ",
+              "LensPluginStartDependencies",
+              ") => Promise<JSX.Element | null>"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.openConfingPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "startDependencies",
+                "description": [],
+                "signature": [
+                  "LensPluginStartDependencies"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.initializeSavedVis",
             "type": "Function",
             "tags": [],
@@ -5834,7 +5947,9 @@
             "signature": [
               "((layerId: string, state: T, setState: ",
               "StateSetter",
-              "<T, unknown>, isSaveable?: boolean | undefined) => ",
+              "<T, unknown>, registerLibraryAnnotationGroup: ",
+              "RegisterLibraryAnnotationGroupFunction",
+              ", isSaveable?: boolean | undefined) => ",
               "LayerAction",
               "[]) | undefined"
             ],
@@ -5891,6 +6006,21 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.getSupportedActionsForLayer.$4",
+                "type": "Function",
+                "tags": [],
+                "label": "registerLibraryAnnotationGroup",
+                "description": [],
+                "signature": [
+                  "RegisterLibraryAnnotationGroupFunction"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$5",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "isSaveable",
@@ -6920,15 +7050,9 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ") => Promise<void>; registerLibraryAnnotationGroup: (groupInfo: { id: string; group: ",
-              {
-                "pluginId": "eventAnnotation",
-                "scope": "common",
-                "docId": "kibEventAnnotationPluginApi",
-                "section": "def-common.EventAnnotationGroupConfig",
-                "text": "EventAnnotationGroupConfig"
-              },
-              "; }) => void; }) => JSX.Element | null) | undefined"
+              ") => Promise<void>; registerLibraryAnnotationGroup: ",
+              "RegisterLibraryAnnotationGroupFunction",
+              "; }) => JSX.Element | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -7089,6 +7213,7 @@
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false,
+                    "returnComment": [],
                     "children": [
                       {
                         "parentPluginId": "lens",
@@ -7097,45 +7222,22 @@
                         "tags": [],
                         "label": "groupInfo",
                         "description": [],
+                        "signature": [
+                          "{ id: string; group: ",
+                          {
+                            "pluginId": "eventAnnotation",
+                            "scope": "common",
+                            "docId": "kibEventAnnotationPluginApi",
+                            "section": "def-common.EventAnnotationGroupConfig",
+                            "text": "EventAnnotationGroupConfig"
+                          },
+                          "; }"
+                        ],
                         "path": "x-pack/plugins/lens/public/types.ts",
                         "deprecated": false,
-                        "trackAdoption": false,
-                        "children": [
-                          {
-                            "parentPluginId": "lens",
-                            "id": "def-public.Visualization.getAddLayerButtonComponent.$1.registerLibraryAnnotationGroup.$1.id",
-                            "type": "string",
-                            "tags": [],
-                            "label": "id",
-                            "description": [],
-                            "path": "x-pack/plugins/lens/public/types.ts",
-                            "deprecated": false,
-                            "trackAdoption": false
-                          },
-                          {
-                            "parentPluginId": "lens",
-                            "id": "def-public.Visualization.getAddLayerButtonComponent.$1.registerLibraryAnnotationGroup.$1.group",
-                            "type": "Object",
-                            "tags": [],
-                            "label": "group",
-                            "description": [],
-                            "signature": [
-                              {
-                                "pluginId": "eventAnnotation",
-                                "scope": "common",
-                                "docId": "kibEventAnnotationPluginApi",
-                                "section": "def-common.EventAnnotationGroupConfig",
-                                "text": "EventAnnotationGroupConfig"
-                              }
-                            ],
-                            "path": "x-pack/plugins/lens/public/types.ts",
-                            "deprecated": false,
-                            "trackAdoption": false
-                          }
-                        ]
+                        "trackAdoption": false
                       }
-                    ],
-                    "returnComment": []
+                    ]
                   }
                 ]
               }
