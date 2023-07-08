@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as H from 'history';
 import { memo, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
@@ -17,7 +16,6 @@ import { useRouteSpy } from './use_route_spy';
 import type { RouteSpyState } from './types';
 
 interface SpyRouteProps {
-  location: H.Location;
   state?: Record<string, string | boolean | undefined>;
   pageName?: SecurityPageName;
 }
