@@ -25,7 +25,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiSelect,
   EuiSpacer,
   EuiPageHeader,
@@ -269,7 +269,7 @@ class PipelineEditorUi extends React.Component {
     const { intl } = this.props;
 
     return (
-      <EuiPageContentBody
+      <EuiPageSection
         style={{ width: '100%' }}
         restrictWidth
         data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}
@@ -481,7 +481,7 @@ class PipelineEditorUi extends React.Component {
             confirmDeletePipeline={this.deletePipeline}
           />
         )}
-      </EuiPageContentBody>
+      </EuiPageSection>
     );
   }
 }
