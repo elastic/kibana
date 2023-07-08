@@ -41,7 +41,7 @@ const DO_NOT_NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
 );
 
 const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
+  'xpack.securitySolution.endpoint.policyDetailsConfig.notificationMessage',
   {
     defaultMessage: 'Notification message',
   }

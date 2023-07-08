@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { NotifyUserOption } from '../notify_user_option';
 import { DetectPreventProtectionLevel } from '../detect_prevent_protection_lavel';
 import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
@@ -39,8 +40,9 @@ const MEMORY_PROTECTION_OS_VALUES: Immutable<MemoryProtectionOSes[]> = [
 type MemoryProtectionCardProps = PolicyFormComponentCommonProps;
 
 export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
-  ({ policy, onChange, mode }) => {
+  ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const protection = 'memory_protection';
     const protectionLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.protections.memory',
@@ -59,7 +61,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
           defaultMessage: 'Memory threat',
         })}
         supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
-        dataTestSubj="memoryProtectionsForm"
+        dataTestSubj={getTestId()}
         rightCorner={
           <ProtectionSettingCardSwitch
             policy={policy}

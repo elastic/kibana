@@ -10,6 +10,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { SettingCard } from '../setting_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 
@@ -47,6 +48,7 @@ type AntivirusRegistrationCardProps = PolicyFormComponentCommonProps;
 
 export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const isChecked = policy.windows.antivirus_registration.enabled;
     const isEditMode = mode === 'edit';
     const label = isChecked ? REGISTERED_LABEL : NOT_REGISTERED_LABEL;
@@ -65,7 +67,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
       <SettingCard
         type={CARD_TITLE}
         supportedOss={[OperatingSystem.WINDOWS]}
-        dataTestSubj="antivirusRegistrationForm"
+        dataTestSubj={getTestId()}
         osRestriction={i18n.translate(
           'xpack.securitySolution.endpoint.policy.details.av.windowsServerNotSupported',
           {

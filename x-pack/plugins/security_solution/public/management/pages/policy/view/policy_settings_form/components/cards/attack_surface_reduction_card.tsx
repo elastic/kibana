@@ -10,6 +10,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
@@ -48,8 +49,9 @@ const SWITCH_DISABLED_LABEL = i18n.translate(
 type AttackSurfaceReductionCardProps = PolicyFormComponentCommonProps;
 
 export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
-  ({ policy, onChange, mode }) => {
+  ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const isChecked = policy.windows.attack_surface_reduction.credential_hardening.enabled;
     const isEditMode = mode === 'edit';
     const label = isChecked ? SWITCH_ENABLED_LABEL : SWITCH_DISABLED_LABEL;
@@ -71,7 +73,11 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
     }
 
     return (
-      <SettingCard type={CARD_TITLE} supportedOss={ATTACK_SURFACE_OS_LIST}>
+      <SettingCard
+        type={CARD_TITLE}
+        supportedOss={ATTACK_SURFACE_OS_LIST}
+        dataTestSubj={getTestId()}
+      >
         {isEditMode ? (
           <EuiSwitch label={label} checked={isChecked} onChange={handleSwitchChange} />
         ) : (
