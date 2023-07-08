@@ -11,8 +11,11 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
+import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../use_fetch_browser_fields_capabilities');
 
 const setItemStorageMock = jest.fn();
 const mockStorage = {
@@ -33,11 +36,13 @@ describe('useColumn', () => {
       sort: [],
     },
   };
+
   const defaultColumns: EuiDataGridColumn[] = [
     {
       id: 'event.action',
       displayAsText: 'Alert status',
       initialWidth: 150,
+      schema: 'string',
     },
     {
       id: '@timestamp',
@@ -54,29 +59,60 @@ describe('useColumn', () => {
     {
       id: 'kibana.alert.reason',
       displayAsText: 'Reason',
+      schema: 'string',
     },
   ];
+  const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
+  const browserFields: BrowserFields = {
+    kibana: {
+      fields: {
+        ['event.action']: {
+          category: 'event',
+          name: 'event.action',
+          type: 'string',
+        },
+        ['@timestamp']: {
+          category: 'base',
+          name: '@timestamp',
+          type: 'date',
+        },
+        ['kibana.alert.duration.us']: {
+          category: 'kibana',
+          name: 'kibana.alert.duration.us',
+          type: 'number',
+        },
+        ['kibana.alert.reason']: {
+          category: 'kibana',
+          name: 'kibana.alert.reason',
+          type: 'string',
+        },
+      },
+    },
+  };
 
   beforeEach(() => {
+    hookUseFetchBrowserFieldCapabilities.mockClear();
+    hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
+
     setItemStorageMock.mockClear();
     storage = { current: new Storage(mockStorage) };
   });
 
   test('hide all columns with onChangeVisibleColumns', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
       useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
     );
 
     act(() => {
       result.current.onChangeVisibleColumns([]);
     });
-    await waitForNextUpdate();
+
     expect(result.current.visibleColumns).toEqual([]);
     expect(result.current.columns).toEqual(defaultColumns);
   });
 
   test('show all columns with onChangeVisibleColumns', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
       useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
     );
 
@@ -87,7 +123,6 @@ describe('useColumn', () => {
     act(() => {
       result.current.onChangeVisibleColumns(defaultColumns.map((dc) => dc.id));
     });
-    await waitForNextUpdate();
     expect(result.current.visibleColumns).toEqual([
       'event.action',
       '@timestamp',
@@ -98,7 +133,7 @@ describe('useColumn', () => {
   });
 
   test('onColumnResize', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
       useColumns({ defaultColumns, featureIds, id, storageAlertsTable, storage })
     );
 
@@ -106,10 +141,9 @@ describe('useColumn', () => {
       result.current.onColumnResize({ columnId: '@timestamp', width: 100 });
     });
 
-    await waitForNextUpdate();
     expect(setItemStorageMock).toHaveBeenCalledWith(
       'useColumnTest',
-      '{"columns":[{"id":"event.action","displayAsText":"Alert status","initialWidth":150},{"id":"@timestamp","displayAsText":"Last updated","initialWidth":100,"schema":"datetime"},{"id":"kibana.alert.duration.us","displayAsText":"Duration","initialWidth":150,"schema":"numeric"},{"id":"kibana.alert.reason","displayAsText":"Reason"}],"visibleColumns":["event.action","@timestamp","kibana.alert.duration.us","kibana.alert.reason"],"sort":[]}'
+      '{"columns":[{"id":"event.action","displayAsText":"Alert status","initialWidth":150,"schema":"string"},{"id":"@timestamp","displayAsText":"Last updated","initialWidth":100,"schema":"datetime"},{"id":"kibana.alert.duration.us","displayAsText":"Duration","initialWidth":150,"schema":"numeric"},{"id":"kibana.alert.reason","displayAsText":"Reason","schema":"string"}],"visibleColumns":["event.action","@timestamp","kibana.alert.duration.us","kibana.alert.reason"],"sort":[]}'
     );
     expect(result.current.columns.find((c) => c.id === '@timestamp')).toEqual({
       displayAsText: 'Last updated',
