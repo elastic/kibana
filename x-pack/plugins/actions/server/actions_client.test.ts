@@ -928,40 +928,6 @@ describe('get()', () => {
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
     });
 
-    test('ensures user is authorised to get a system action', async () => {
-      actionsClient = new ActionsClient({
-        logger,
-        actionTypeRegistry,
-        unsecuredSavedObjectsClient,
-        scopedClusterClient,
-        kibanaIndices,
-        actionExecutor,
-        executionEnqueuer,
-        ephemeralExecutionEnqueuer,
-        bulkExecutionEnqueuer,
-        request,
-        authorization: authorization as unknown as ActionsAuthorization,
-        inMemoryConnectors: [
-          {
-            actionTypeId: '.cases',
-            config: {},
-            id: 'system-connector-.cases',
-            name: 'System action: .cases',
-            secrets: {},
-            isPreconfigured: false,
-            isDeprecated: false,
-            isSystemAction: true,
-          },
-        ],
-        connectorTokenClient: connectorTokenClientMock.create(),
-        getEventLogClient,
-      });
-
-      await actionsClient.get({ id: 'system-connector-.cases' });
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
-    });
-
     test('throws when user is not authorised to get the type of action', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
@@ -1070,48 +1036,6 @@ describe('get()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
-    });
-
-    test('throws when user is not authorised to get a system action', async () => {
-      actionsClient = new ActionsClient({
-        logger,
-        actionTypeRegistry,
-        unsecuredSavedObjectsClient,
-        scopedClusterClient,
-        kibanaIndices,
-        actionExecutor,
-        executionEnqueuer,
-        ephemeralExecutionEnqueuer,
-        bulkExecutionEnqueuer,
-        request,
-        authorization: authorization as unknown as ActionsAuthorization,
-        inMemoryConnectors: [
-          {
-            actionTypeId: '.cases',
-            config: {},
-            id: 'system-connector-.cases',
-            name: 'System action: .cases',
-            secrets: {},
-            isPreconfigured: false,
-            isDeprecated: false,
-            isSystemAction: true,
-          },
-        ],
-        connectorTokenClient: connectorTokenClientMock.create(),
-        getEventLogClient,
-      });
-
-      authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "system-connector-.cases" action`)
-      );
-
-      await expect(
-        actionsClient.get({ id: 'system-connector-.cases' })
-      ).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "system-connector-.cases" action]`
-      );
-
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
   });
 
