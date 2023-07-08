@@ -66,7 +66,7 @@ updateStepProgress() {
 ELASTIC_AGENT_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/beats/elastic-agent/${artifact}.tar.gz"
 echo "Downloading Elastic Agent archive from ${ELASTIC_AGENT_DOWNLOAD_URL}"
 updateStepProgress "ea-download" "loading"
-curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL --fail --continue-at -
+curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL --fail
 if [ "$?" -eq 0 ]; then
   echo "Downloaded Elastic Agent"
   updateStepProgress "ea-download" "complete"
