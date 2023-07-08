@@ -169,6 +169,7 @@ export const performUpdate = async <T>(
 
   // UPSERT CASE START
   let rawUpsert: SavedObjectsRawDoc | undefined;
+  // ignore attributes if creating a new doc: only use the upsert attributes
   // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
   // replace inners of conditional with helper function
   if (
@@ -253,12 +254,13 @@ export const performUpdate = async <T>(
       namespaces,
       ...(originId && { originId }),
       references,
-      attributes: upsert,
+      attributes: upsert, // these ignore the attribute values provided in the main request body.
     } as SavedObject<T>;
   }
   // UPSERT CASE END
   let docToSend: SavedObjectsRawDoc | undefined;
-  // UPDATE CASE START
+  // UPDATE CASE START:
+  // Doc already exists, we use both the attributes from the main request body and any extra ones from upsert. We need to ignore duplicate attribute fields if given in both attributes and upsert
   // DO CLIENT_SIDE UPDATE DOC: I'm assuming that if we reach this point, there hasn't been an error
   if (
     (registry.isMultiNamespace(type) &&
@@ -281,7 +283,6 @@ export const performUpdate = async <T>(
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
-
     // validationHelper.validateObjectForCreate(
     //   type,
     //   migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc<T>
@@ -323,6 +324,7 @@ export const performUpdate = async <T>(
     }
     // client.index doesn't return the indexed document.
     // Rather than making anouther round trip to elasticsearch to fetch the doc, we use the SO we sent
+    // rawToSavedObject adds references as [] if undefined
     const updatedSavedObject = serializer.rawToSavedObject<T>(
       {
         ...docToSend,

@@ -4904,7 +4904,7 @@ describe('SavedObjectsRepository', () => {
         await test([{ type: 'foo', id: '42', name: 'some ref' }]);
         await test([]);
       });
-
+      // @TINA: Test for upsert
       it(`uses the 'upsertAttributes' option when specified for a single-namespace type`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {
           upsert: {

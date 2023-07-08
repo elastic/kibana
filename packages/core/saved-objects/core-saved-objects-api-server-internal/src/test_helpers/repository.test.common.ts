@@ -537,6 +537,9 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
   } = {},
   objNamespaces?: string[]
 ) => {
+  console.log('what is the type?', type);
+  console.log('what are the options?', options);
+  console.log('internalOptions', internalOptions);
   const { mockGetResponseValue, originId } = internalOptions;
   const mockGetResponse =
     mockGetResponseValue ??
@@ -544,7 +547,7 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
   client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
   // mockUpdateResponse(client, type, id, options, objNamespaces, originId); // mocks client.update response
   if (!mockGetResponseValue) {
-    // create doc from existing doc
+    // index doc from existing doc
     client.index.mockResponseImplementation((params) => {
       return {
         body: {
@@ -555,7 +558,7 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
     });
   }
   if (mockGetResponseValue) {
-    // upsert case
+    // upsert case: create the doc. (be careful here, we're also sending mockGetResponseValue as { found: false })
     client.create.mockResponseImplementation((params) => {
       return {
         body: {
