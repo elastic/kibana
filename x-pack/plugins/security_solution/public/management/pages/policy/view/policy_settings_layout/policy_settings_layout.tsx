@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
 import type { PolicySettingsFormProps } from '../policy_settings_form/policy_settings_form';
 import { PolicySettingsForm } from '../policy_settings_form';
@@ -42,18 +43,13 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
   const policy = _policy as PolicyData;
   const {
     services: {
-      theme,
       application: { navigateToApp },
     },
   } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
   const isEditMode = useShowEditableFormFields();
-  const {
-    isLoading: isUpdating,
-    error: udpateError,
-    mutate: sendPolicyUpdate,
-  } = useUpdateEndpointPolicy();
+  const { isLoading: isUpdating, mutateAsync: sendPolicyUpdate } = useUpdateEndpointPolicy();
 
   // Local state
   const [policySettings, setPolicySettings] = useState<PolicyConfig>(
@@ -61,12 +57,9 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
   );
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
-
-  // const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
-  // const policyUpdateStatus = usePolicyDetailsSelector(updateStatus);
   const policyName = policy?.name ?? '';
-
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
+
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
     if (routingOnCancelNavigateTo) {
       return routingOnCancelNavigateTo;
@@ -84,62 +77,62 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
     setPolicySettings(updates.updatedPolicy);
   }, []);
 
-  // Handle showing update statuses
-
-  // FIXME:PT implement
-  // useEffect(() => {
-  //   if (policyUpdateStatus) {
-  //     if (policyUpdateStatus.success) {
-  //       toasts.addSuccess({
-  //         title: i18n.translate(
-  //           'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
-  //           {
-  //             defaultMessage: 'Success!',
-  //           }
-  //         ),
-  //         text: toMountPoint(
-  //           <span data-test-subj="policyDetailsSuccessMessage">
-  //             <FormattedMessage
-  //               id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
-  //               defaultMessage="Integration {name} has been updated."
-  //               values={{ name: policyName }}
-  //             />
-  //           </span>,
-  //           { theme$: theme.theme$ }
-  //         ),
-  //       });
-  //
-  //       if (routeState && routeState.onSaveNavigateTo) {
-  //         navigateToApp(...routeState.onSaveNavigateTo);
-  //       }
-  //     } else {
-  //       toasts.addDanger({
-  //         title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
-  //           defaultMessage: 'Failed!',
-  //         }),
-  //         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  //         text: policyUpdateStatus.error!.message,
-  //       });
-  //     }
-  //   }
-  // }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState, theme.theme$]);
-
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
   }, []);
 
+  const handleSaveCancel = useCallback(() => {
+    setShowConfirm(false);
+  }, []);
+
   const handleSaveConfirmation = useCallback(() => {
     const update = cloneDeep(policy);
 
     update.inputs[0].config.policy.value = policySettings;
-    sendPolicyUpdate({ policy: update });
-  }, [policy, policySettings, sendPolicyUpdate]);
+    sendPolicyUpdate({ policy: update })
+      .then(() => {
+        toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
+            {
+              defaultMessage: 'Success!',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.endpoint.policy.details.updateSuccessMessage',
+            {
+              defaultMessage: 'Integration {name} has been updated.',
+              values: { name: policyName },
+            }
+          ),
+        });
 
-  const handleSaveCancel = useCallback(() => {
-    setShowConfirm(false);
-  }, []);
+        if (routeState && routeState.onSaveNavigateTo) {
+          navigateToApp(...routeState.onSaveNavigateTo);
+        }
+      })
+      .catch((err) => {
+        toasts.addDanger({
+          title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
+            defaultMessage: 'Failed!',
+          }),
+          text: err.message,
+        });
+      });
+
+    handleSaveCancel();
+  }, [
+    handleSaveCancel,
+    navigateToApp,
+    policy,
+    policyName,
+    policySettings,
+    routeState,
+    sendPolicyUpdate,
+    toasts,
+  ]);
 
   useEffect(() => {
     if (!routeState && locationRouteState) {
