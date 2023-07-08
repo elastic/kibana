@@ -120,7 +120,7 @@ export const spacesManagementApp = Object.freeze({
               <KibanaThemeProvider theme$={theme$}>
                 <RedirectAppLinks coreStart={coreStart}>
                   <Router history={history}>
-                    <Routes>
+                    <Routes compat={false}>
                       <Route path={'/'} exact>
                         <SpacesGridPageWithBreadcrumbs />
                       </Route>

@@ -42,6 +42,8 @@ export const App: React.FunctionComponent = () => {
     sections.push('policies' as Section);
   }
 
+  const sectionsRegex = sections.join('|');
+
   return apiError ? (
     <PageError
       title={
@@ -69,7 +71,7 @@ export const App: React.FunctionComponent = () => {
               <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
               <Route
                 exact
-                path={`/:section/:repositoryName/:snapshotId*`}
+                path={`/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
                 component={SnapshotRestoreHome}
               />
               <Route exact path="/restore/:repositoryName">
@@ -77,12 +79,11 @@ export const App: React.FunctionComponent = () => {
               </Route>
               <Route
                 exact
-                path="/restore/:repositoryName/:snapshotId"
+                path="/restore/:repositoryName/:snapshotId*"
                 component={RestoreSnapshot}
               />
               {slmUi.enabled && <Route exact path="/add_policy" component={PolicyAdd} />}
-              {slmUi.enabled && <Route exact path="/edit_policy/:name" component={PolicyEdit} />}
-              <Route exact path={`/:section/*`} component={SnapshotRestoreHome} />
+              {slmUi.enabled && <Route exact path="/edit_policy/:name*" component={PolicyEdit} />}
               <Route path="/">
                 <Redirect to={`/${DEFAULT_SECTION}`} />
               </Route>

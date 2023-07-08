@@ -42,7 +42,7 @@ describe('MostRecentError component', () => {
         />
       </Router>
     );
-    expect(component).toMatchSnapshot();
+    expect(component.dive()).toMatchSnapshot();
   });
 
   it('renders properly with mock data', () => {

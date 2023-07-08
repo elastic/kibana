@@ -91,8 +91,12 @@ AppRootProvider.displayName = 'AppRootProvider';
  * for further customization.
  */
 
-export const createAppRootMockRenderer = (): AppContextTestRender => {
-  const history = createMemoryHistory<never>();
+export const createAppRootMockRenderer = ({
+  initialEntries,
+}: {
+  initialEntries: string[];
+}): AppContextTestRender => {
+  const history = createMemoryHistory<never>({ initialEntries });
   const coreStart = createCoreStartMock(history);
 
   const queryClient = new QueryClient({

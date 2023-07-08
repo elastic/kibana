@@ -144,10 +144,12 @@ export function MockApmPluginContextWrapper({
   children,
   value = {} as ApmPluginContextValue,
   history,
+  initialEntries,
 }: {
   children?: ReactNode;
   value?: ApmPluginContextValue;
   history?: History;
+  initialEntries?: string[];
 }) {
   const contextValue = merge({}, mockApmPluginContextValue, value);
 
@@ -162,10 +164,13 @@ export function MockApmPluginContextWrapper({
       history ||
       contextHistory ||
       createMemoryHistory({
-        initialEntries: ['/services/?rangeFrom=now-15m&rangeTo=now'],
+        initialEntries: initialEntries ?? [
+          '/services/?rangeFrom=now-15m&rangeTo=now',
+        ],
       })
     );
-  }, [history, contextHistory]);
+  }, [history, contextHistory, initialEntries]);
+
   return (
     <ApmPluginContext.Provider value={contextValue}>
       <RouterProvider router={apmRouter as any} history={usedHistory}>

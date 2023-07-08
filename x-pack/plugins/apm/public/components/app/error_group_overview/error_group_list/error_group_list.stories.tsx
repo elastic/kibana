@@ -7,7 +7,6 @@
 
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { MemoryRouter } from '@kbn/shared-ux-router';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 
@@ -21,17 +20,15 @@ const stories: Meta<Args> = {
   decorators: [
     (StoryComponent) => {
       return (
-        <MemoryRouter
+        <MockApmPluginContextWrapper
           initialEntries={[
             '/services/{serviceName}/errors?rangeFrom=now-15m&rangeTo=now',
           ]}
         >
-          <MockApmPluginContextWrapper>
-            <MockUrlParamsContextProvider>
-              <StoryComponent />
-            </MockUrlParamsContextProvider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <MockUrlParamsContextProvider>
+            <StoryComponent />
+          </MockUrlParamsContextProvider>
+        </MockApmPluginContextWrapper>
       );
     },
   ],

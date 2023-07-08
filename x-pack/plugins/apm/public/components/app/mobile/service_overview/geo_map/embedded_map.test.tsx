@@ -11,7 +11,6 @@ import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
-import { MemoryRouter } from '@kbn/shared-ux-router';
 import { MapTypes } from '../../../../../../common/mobile/constants';
 
 describe('Embedded Map', () => {
@@ -32,22 +31,20 @@ describe('Embedded Map', () => {
     }));
 
     const { findByTestId } = render(
-      <MemoryRouter
+      <MockApmPluginContextWrapper
         initialEntries={[
           '/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&',
         ]}
       >
-        <MockApmPluginContextWrapper>
-          <KibanaContextProvider services={{ embeddable: mockEmbeddable }}>
-            <EmbeddedMap
-              selectedMap={MapTypes.Http}
-              filters={[]}
-              start="2022-12-20T10:00:00.000Z"
-              end="2022-12-20T10:15:00.000Z"
-            />
-          </KibanaContextProvider>
-        </MockApmPluginContextWrapper>
-      </MemoryRouter>
+        <KibanaContextProvider services={{ embeddable: mockEmbeddable }}>
+          <EmbeddedMap
+            selectedMap={MapTypes.Http}
+            filters={[]}
+            start="2022-12-20T10:00:00.000Z"
+            end="2022-12-20T10:15:00.000Z"
+          />
+        </KibanaContextProvider>
+      </MockApmPluginContextWrapper>
     );
     expect(
       await findByTestId('serviceOverviewEmbeddedMap')

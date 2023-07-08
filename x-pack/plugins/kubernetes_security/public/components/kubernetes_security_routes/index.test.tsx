@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { MemoryRouterProps } from 'react-router';
+import { MemoryRouterProps } from 'react-router-dom';
 import { screen } from '@testing-library/react';
-import { MemoryRouter } from '@kbn/shared-ux-router';
 import { KubernetesSecurityRoutes } from '.';
 import { createAppRootMockRenderer } from '../../test';
 
@@ -53,19 +51,17 @@ const renderWithRouter = (
       },
     };
   });
-  const mockedContext = createAppRootMockRenderer();
+  const mockedContext = createAppRootMockRenderer({ initialEntries });
   return mockedContext.render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <KubernetesSecurityRoutes
-        filter={<div>{'Mock filters'}</div>}
-        globalFilter={{
-          filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
-          startDate: '2022-03-08T18:52:15.532Z',
-          endDate: '2022-06-09T17:52:15.532Z',
-        }}
-        renderSessionsView={jest.fn()}
-      />
-    </MemoryRouter>
+    <KubernetesSecurityRoutes
+      filter={<div>{'Mock filters'}</div>}
+      globalFilter={{
+        filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
+        startDate: '2022-03-08T18:52:15.532Z',
+        endDate: '2022-06-09T17:52:15.532Z',
+      }}
+      renderSessionsView={jest.fn()}
+    />
   );
 };
 

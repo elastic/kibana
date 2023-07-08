@@ -8,7 +8,6 @@
 import { act, render, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from '@kbn/shared-ux-router';
 import { TraceLink } from '.';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -20,21 +19,19 @@ import * as useApmParamsHooks from '../../../hooks/use_apm_params';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper
-        value={
-          {
-            ...mockApmPluginContextValue,
-            core: {
-              ...mockApmPluginContextValue.core,
-              http: { ...mockApmPluginContextValue.core.http, get: jest.fn() },
-            },
-          } as unknown as ApmPluginContextValue
-        }
-      >
-        {children}
-      </MockApmPluginContextWrapper>
-    </MemoryRouter>
+    <MockApmPluginContextWrapper
+      value={
+        {
+          ...mockApmPluginContextValue,
+          core: {
+            ...mockApmPluginContextValue.core,
+            http: { ...mockApmPluginContextValue.core.http, get: jest.fn() },
+          },
+        } as unknown as ApmPluginContextValue
+      }
+    >
+      {children}
+    </MockApmPluginContextWrapper>
   );
 }
 

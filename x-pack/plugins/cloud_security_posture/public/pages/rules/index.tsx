@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { generatePath, Link } from 'react-router-dom';
+import { generatePath, Link, useParams } from 'react-router-dom';
 import {
   EuiButtonEmpty,
   type EuiDescriptionListProps,

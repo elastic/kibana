@@ -7,7 +7,6 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from '@kbn/shared-ux-router';
 import { CustomLinkMenuSection } from '.';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -18,11 +17,7 @@ import {
 } from '../../../../utils/test_helpers';
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-    </MemoryRouter>
-  );
+  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
 }
 
 const transaction = {
