@@ -26,19 +26,15 @@ const tooltipContent = {
   custom: i18n.translate('visualizationUiComponents.colorPicker.tooltip.custom', {
     defaultMessage: 'Clear the custom color to return to “Auto” mode.',
   }),
-  disabled: i18n.translate('visualizationUiComponents.colorPicker.tooltip.disabled', {
-    defaultMessage:
-      'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
-  }),
 };
 
 export const ColorPicker = ({
+  overwriteColor,
+  defaultColor,
+  setConfig,
   label,
   disableHelpTooltip,
-  disabled,
-  setConfig,
-  defaultColor,
-  overwriteColor,
+  disabledMessage,
   showAlpha,
 }: {
   overwriteColor?: string | null;
@@ -46,13 +42,15 @@ export const ColorPicker = ({
   setConfig: (config: { color?: string }) => void;
   label?: string;
   disableHelpTooltip?: boolean;
-  disabled?: boolean;
+  disabledMessage?: string;
   showAlpha?: boolean;
 }) => {
   const [colorText, setColorText] = useState(overwriteColor || defaultColor);
   const [validatedColor, setValidatedColor] = useState(overwriteColor || defaultColor);
   const [currentColorAlpha, setCurrentColorAlpha] = useState(getColorAlpha(colorText));
   const unflushedChanges = useRef(false);
+
+  const isDisabled = Boolean(disabledMessage);
 
   useEffect(() => {
     //  only the changes from outside the color picker should be applied
@@ -97,8 +95,8 @@ export const ColorPicker = ({
       compressed
       isClearable={Boolean(overwriteColor)}
       onChange={handleColor}
-      color={disabled ? '' : colorText}
-      disabled={disabled}
+      color={isDisabled ? '' : colorText}
+      disabled={isDisabled}
       placeholder={
         defaultColor?.toUpperCase() ||
         i18n.translate('visualizationUiComponents.colorPicker.seriesColor.auto', {
@@ -123,7 +121,7 @@ export const ColorPicker = ({
         <TooltipWrapper
           delay="long"
           position="top"
-          tooltipContent={colorText && !disabled ? tooltipContent.custom : tooltipContent.auto}
+          tooltipContent={colorText && !isDisabled ? tooltipContent.custom : tooltipContent.auto}
           condition={!disableHelpTooltip}
         >
           <span>
@@ -142,10 +140,10 @@ export const ColorPicker = ({
         </TooltipWrapper>
       }
     >
-      {disabled ? (
+      {isDisabled ? (
         <EuiToolTip
           position="top"
-          content={tooltipContent.disabled}
+          content={disabledMessage}
           delay="long"
           anchorClassName="eui-displayBlock"
         >

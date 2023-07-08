@@ -220,6 +220,16 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         return v.node.number_of_pending_requests;
       },
     },
+    {
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.errorCountHeader', {
+        defaultMessage: 'Errors',
+      }),
+      width: '60px',
+      'data-test-subj': 'mlAllocatedModelsTableErrorCount',
+      render: (v: AllocatedModel) => {
+        return v.node.error_count ?? 0;
+      },
+    },
   ].filter((v) => !hideColumns.includes(v.id!));
 
   return (

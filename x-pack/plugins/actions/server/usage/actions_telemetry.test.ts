@@ -269,6 +269,7 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         config: {
           tenantId: 'sdsd',
           clientId: 'sdfsdf',
@@ -283,6 +284,7 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
       },
     ]);
@@ -421,6 +423,7 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
       },
       {
@@ -429,6 +432,7 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
       },
     ]);
@@ -535,6 +539,7 @@ Object {
         name: 'test',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
         secrets: {},
       },
     ]);

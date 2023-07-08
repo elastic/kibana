@@ -283,7 +283,7 @@ export const ModelsList: FC<Props> = ({
             (v) => v.state === DEPLOYMENT_STATE.STARTED
           )
             ? DEPLOYMENT_STATE.STARTED
-            : '';
+            : null;
         });
 
         const elasticModels = models.filter((model) =>

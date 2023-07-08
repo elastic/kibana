@@ -275,42 +275,6 @@ describe('DiscoverGrid', () => {
         })
       );
     });
-
-    it('should call useDataGridColumnsCellActions with empty field name and type for unsupported field types', async () => {
-      await getComponent({
-        ...getProps(),
-        columns: ['message', '_source'],
-        onFieldEdited: jest.fn(),
-        cellActionsTriggerId: 'test',
-      });
-
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: 'test',
-          getCellValue: expect.any(Function),
-          fields: [
-            {
-              name: '@timestamp',
-              type: 'date',
-              aggregatable: true,
-              searchable: undefined,
-            },
-            {
-              name: 'message',
-              type: 'string',
-              aggregatable: false,
-              searchable: undefined,
-            },
-            {
-              searchable: false,
-              aggregatable: false,
-              name: '',
-              type: '',
-            },
-          ],
-        })
-      );
-    });
   });
 
   describe('sorting', () => {

@@ -73,10 +73,12 @@ export const NotificationsList: FC = () => {
   const timeRange = useTimeRangeUpdates();
 
   useMount(function setTimeRangeOnMount() {
-    timeFilter.setTime({
-      from: moment(latestRequestedAt).toISOString(),
-      to: 'now',
-    });
+    if (latestRequestedAt !== null) {
+      timeFilter.setTime({
+        from: moment(latestRequestedAt).toISOString(),
+        to: 'now',
+      });
+    }
   });
 
   const [isLoading, setIsLoading] = useState(true);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { LogViewReference } from '../../../common/log_views';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
@@ -25,6 +26,7 @@ export type HostNodeRow = HostMetadata &
   };
 
 export enum FlyoutTabIds {
+  OVERVIEW = 'overview',
   METRICS = 'metrics',
   METADATA = 'metadata',
   PROCESSES = 'processes',
@@ -37,7 +39,17 @@ export enum FlyoutTabIds {
 
 export type TabIds = `${FlyoutTabIds}`;
 
+export interface StringDateRange {
+  from: string;
+  to: string;
+  mode?: 'absolute' | 'relative' | undefined;
+}
+
 export interface TabState {
+  overview?: {
+    dateRange: StringDateRange;
+    dataView?: DataView;
+  };
   metadata?: {
     query?: string;
     showActionsColumn?: boolean;
