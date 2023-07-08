@@ -10,7 +10,6 @@ import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import type { CellActionFieldValue } from '@kbn/cell-actions';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -121,12 +120,3 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
 export function buildCellActions(field: DataViewField, onFilter?: DocViewFilterFn) {
   return [...(onFilter && field.filterable ? [FilterInBtn, FilterOutBtn] : []), CopyBtn];
 }
-
-// Converts the cell action value to the type expected by CellActions component
-export const convertCellActionValue = (rawValue: unknown): CellActionFieldValue => {
-  const value = rawValue as CellActionFieldValue | number | number[];
-  if (Array.isArray(value)) {
-    return value.map((val) => (val != null ? val.toString() : val));
-  }
-  return value != null ? value.toString() : value;
-};

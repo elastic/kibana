@@ -7,6 +7,7 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import {
@@ -206,18 +207,24 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
+      // log and capture error
       this.log.error(e);
+      apm.captureError(e);
+
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(e)) {
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
         );
       }
+
+      // return a generic 500 to avoid error info / stack trace surfacing
       return hapiResponseAdapter.toInternalError();
     }
   }
 
   private versionedRouter: undefined | VersionedRouter<Context> = undefined;
+
   public get versioned(): VersionedRouter<Context> {
     if (this.versionedRouter === undefined) {
       this.versionedRouter = CoreVersionedRouter.from({

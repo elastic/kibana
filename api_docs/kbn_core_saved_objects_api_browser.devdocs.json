@@ -3092,12 +3092,12 @@
             "path": "x-pack/plugins/graph/public/types/app_state.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
           },
           {
             "plugin": "graph",
@@ -3732,14 +3732,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
           }
         ],
         "initialIsOpen": false

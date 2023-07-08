@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { RRule } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { isSnoozeExpired } from './is_snooze_expired';
 import { RRuleRecord } from '../../types';
 
@@ -84,7 +84,7 @@ describe('isSnoozeExpired', () => {
       rRule: {
         dtstart: DATE_2019,
         tzid: 'UTC',
-        freq: RRule.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
       } as RRuleRecord,
     };
@@ -95,7 +95,7 @@ describe('isSnoozeExpired', () => {
       rRule: {
         dtstart: DATE_2019_PLUS_6_HOURS,
         tzid: 'UTC',
-        freq: RRule.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
       } as RRuleRecord,
     };
@@ -105,7 +105,7 @@ describe('isSnoozeExpired', () => {
       rRule: {
         dtstart: DATE_2020_MINUS_1_HOUR,
         tzid: 'UTC',
-        freq: RRule.HOURLY,
+        freq: Frequency.HOURLY,
         interval: 1,
       } as RRuleRecord,
     };
@@ -116,7 +116,7 @@ describe('isSnoozeExpired', () => {
     const snoozeA = {
       duration: 60 * 1000,
       rRule: {
-        freq: RRule.HOURLY,
+        freq: Frequency.HOURLY,
         interval: 1,
         tzid: 'UTC',
         count: 8761,
@@ -128,7 +128,7 @@ describe('isSnoozeExpired', () => {
       duration: 60 * 1000,
 
       rRule: {
-        freq: RRule.HOURLY,
+        freq: Frequency.HOURLY,
         interval: 1,
         tzid: 'UTC',
         count: 25,
@@ -140,7 +140,7 @@ describe('isSnoozeExpired', () => {
       duration: 60 * 1000,
 
       rRule: {
-        freq: RRule.YEARLY,
+        freq: Frequency.YEARLY,
         interval: 1,
         tzid: 'UTC',
         count: 30,
@@ -155,7 +155,7 @@ describe('isSnoozeExpired', () => {
     const snoozeA = {
       duration: 60 * 1000,
       rRule: {
-        freq: RRule.HOURLY,
+        freq: Frequency.HOURLY,
         interval: 1,
         tzid: 'UTC',
         until: DATE_9999,
@@ -166,7 +166,7 @@ describe('isSnoozeExpired', () => {
     const snoozeB = {
       duration: 60 * 1000,
       rRule: {
-        freq: RRule.HOURLY,
+        freq: Frequency.HOURLY,
         interval: 1,
         tzid: 'UTC',
         until: DATE_2020_MINUS_1_HOUR,

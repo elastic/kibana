@@ -51,7 +51,7 @@ export const SessionView = ({
   jumpToCursor,
   investigatedAlertId,
   loadAlertDetails,
-  canAccessEndpointManagement,
+  canReadPolicyManagement,
 }: SessionViewDeps) => {
   // don't engage jumpTo if jumping to session leader.
   if (jumpToEntityId === sessionEntityId) {
@@ -435,7 +435,7 @@ export const SessionView = ({
         isFullscreen={isFullScreen}
         onJumpToEvent={onJumpToEvent}
         autoSeekToEntityId={currentJumpToOutputEntityId}
-        canAccessEndpointManagement={canAccessEndpointManagement}
+        canReadPolicyManagement={canReadPolicyManagement}
       />
     </div>
   );

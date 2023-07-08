@@ -29,14 +29,12 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
-  type CellActionFieldValue,
 } from '@kbn/cell-actions';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
-import { isTypeSupportedByCellActions } from '@kbn/cell-actions/src/utils';
+import { Serializable } from '@kbn/utility-types';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -61,7 +59,6 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
-import { convertCellActionValue } from './discover_grid_cell_actions';
 
 const themeDefault = { darkMode: false };
 
@@ -451,8 +448,8 @@ export const DiscoverGrid = ({
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
-    (fieldName, rowIndex): CellActionFieldValue =>
-      convertCellActionValue(displayedRows[rowIndex % displayedRows.length].flattened[fieldName]),
+    (fieldName, rowIndex) =>
+      displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
     [displayedRows]
   );
 
@@ -461,8 +458,7 @@ export const DiscoverGrid = ({
       cellActionsTriggerId && !isPlainRecord
         ? visibleColumns.map((columnName) => {
             const field = dataView.getFieldByName(columnName);
-            if (!field || !isTypeSupportedByCellActions(field.type as KBN_FIELD_TYPES)) {
-              // disable custom actions on object columns
+            if (!field) {
               return {
                 name: '',
                 type: '',

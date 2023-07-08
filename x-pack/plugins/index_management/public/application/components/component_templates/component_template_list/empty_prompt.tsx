@@ -9,11 +9,12 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
 
 import { reactRouterNavigate } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
-export const EmptyPrompt: FunctionComponent<> = () => {
+export const EmptyPrompt: FunctionComponent = () => {
   const history = useHistory();
   const { documentation } = useComponentTemplatesContext();
 

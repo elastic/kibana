@@ -12,11 +12,11 @@ import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
 import { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
+import { SyntheticsServerSetup } from '../types';
 import {
   convertToDataStreamFormat,
   DataStreamConfig,
 } from './formatters/public_formatters/convert_to_data_stream';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
 import { ServiceConfig } from '../../common/config';
@@ -55,9 +55,9 @@ export class ServiceAPIClient {
   private logger: Logger;
   private readonly config?: ServiceConfig;
   private readonly stackVersion: string;
-  private readonly server: UptimeServerSetup;
+  private readonly server: SyntheticsServerSetup;
 
-  constructor(logger: Logger, config: ServiceConfig, server: UptimeServerSetup) {
+  constructor(logger: Logger, config: ServiceConfig, server: SyntheticsServerSetup) {
     this.config = config;
     const { username, password } = config ?? {};
     this.username = username;

@@ -24,13 +24,12 @@ interface StatusPopoverButtonProps {
   eventId: string;
   contextId: string;
   enrichedFieldInfo: EnrichedFieldInfoWithValues;
-  indexName: string;
   scopeId: string;
   handleOnEventClosed: () => void;
 }
 
 export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
-  ({ eventId, contextId, enrichedFieldInfo, indexName, scopeId, handleOnEventClosed }) => {
+  ({ eventId, contextId, enrichedFieldInfo, scopeId, handleOnEventClosed }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -51,7 +50,6 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       closePopover: closeAfterAction,
       eventId,
       scopeId,
-      indexName,
       alertStatus: enrichedFieldInfo.values[0] as Status,
       refetch: refetchGlobalQuery,
     });

@@ -15,6 +15,8 @@ import { DataQuality } from './data_quality';
 import { HOT, WARM, UNMANAGED } from './translations';
 
 const mockedUseKibana = mockUseKibana();
+
+jest.mock('../../common/components/landing_page');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 

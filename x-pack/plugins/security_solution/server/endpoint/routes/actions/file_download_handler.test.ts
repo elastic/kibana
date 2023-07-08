@@ -50,7 +50,11 @@ describe('Response Actions file download API', () => {
 
     it('should register the route', () => {
       expect(
-        apiTestSetup.getRegisteredRouteHandler('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE)
+        apiTestSetup.getRegisteredVersionedRoute(
+          'get',
+          ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+          '2023-10-31'
+        )
       ).toBeDefined();
     });
 
@@ -59,11 +63,9 @@ describe('Response Actions file download API', () => {
         (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
       ).mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteFileOperations: false }));
 
-      await apiTestSetup.getRegisteredRouteHandler('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE)(
-        httpHandlerContextMock,
-        httpRequestMock,
-        httpResponseMock
-      );
+      await apiTestSetup
+        .getRegisteredVersionedRoute('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE, '2023-10-31')
+        .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.forbidden).toHaveBeenCalledWith({
         body: expect.any(EndpointAuthorizationError),

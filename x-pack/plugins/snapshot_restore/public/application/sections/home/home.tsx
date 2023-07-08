@@ -27,7 +27,7 @@ interface MatchParams {
 
 export const SnapshotRestoreHome: React.FunctionComponent = () => {
   const history = useHistory();
-  const { section } = useParams();
+  const { section } = useParams<MatchParams>();
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
 

@@ -2532,7 +2532,7 @@
     "schemas": {
       "notify_when": {
         "type": "string",
-        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.\n",
+        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "enum": [
           "onActionGroupChange",
           "onActiveAlert",
@@ -2542,7 +2542,7 @@
       },
       "throttle": {
         "type": "string",
-        "description": "The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.",
+        "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "nullable": true,
         "default": null,
         "example": "10m"
@@ -6139,7 +6139,9 @@
             "example": "2022-12-06T00:14:43.818Z"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when"
+            "type": "string",
+            "description": "Indicates how often alerts generate actions.",
+            "nullable": true
           },
           "params": {
             "type": "object",
@@ -6233,7 +6235,7 @@
       },
       "update_rule_request": {
         "title": "Update rule request",
-        "description": "The update rule API request body varies depending on the type of rule and actions.",
+        "description": "The update rule API request body varies depending on the type of rule and actions.\n",
         "type": "object",
         "required": [
           "name",
@@ -6387,7 +6389,7 @@
         "value": {
           "actions": [
             {
-              "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+              "id": "48de3460-f401-11ed-9f8e-399c75a2deeb",
               "frequency": {
                 "notify_when": "onActionGroupChange",
                 "summary": false
@@ -6395,7 +6397,7 @@
               "group": "threshold met",
               "params": {
                 "level": "info",
-                "message": "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                "message": "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
               }
             }
           ],
@@ -6435,6 +6437,7 @@
               "group": "threshold met",
               "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
               "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
+              "connector_type_id": ".server-log",
               "frequency": {
                 "notify_when": "onActionGroupChange",
                 "summary": false,
@@ -6442,7 +6445,7 @@
               },
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                "message": "Rule {{rule.name}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
               }
             }
           ],
@@ -6460,7 +6463,7 @@
           "muted_alert_ids": [],
           "mute_all": false,
           "name": "my rule",
-          "notify_when": "onActionGroupChange",
+          "notify_when": null,
           "params": {
             "aggType": "avg",
             "termSize": 6,
@@ -6531,7 +6534,7 @@
           "created_at": "2022-12-13T22:33:41.163Z",
           "updated_at": "2022-12-13T22:33:41.163Z",
           "api_key_owner": "elastic",
-          "notify_when": "onActionGroupChange",
+          "notify_when": null,
           "muted_alert_ids": [],
           "mute_all": false,
           "scheduled_task_id": "31697a40-7b36-11ed-aa79-f742c05329b2",
@@ -6547,8 +6550,14 @@
               "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}",
+                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}",
                 "connector_type_id": ".server-log"
+              },
+              "connector_type_id": ".server-log",
+              "frequency": {
+                "throttle": null,
+                "summary": false,
+                "notify_when": "onActionGroupChange"
               }
             }
           ],
@@ -6580,7 +6589,7 @@
               "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
               }
             }
           ],
@@ -6659,7 +6668,7 @@
               "group": "threshold met",
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
+                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}"
               },
               "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
               "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
@@ -6729,7 +6738,6 @@
               "created_at": "2022-12-05T23:40:33.132Z",
               "updated_at": "2022-12-05T23:40:33.132Z",
               "api_key_owner": "elastic",
-              "notify_when": "onActionGroupChange",
               "mute_all": false,
               "muted_alert_ids": [],
               "scheduled_task_id": "3583a470-74f6-11ed-9801-35303b735aef",
@@ -6745,8 +6753,13 @@
                   "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
                   "params": {
                     "level": "info",
-                    "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
+                    "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
                     "connector_type_id": ".server-log"
+                  },
+                  "frequency": {
+                    "summary": false,
+                    "notify_when": "onActionGroupChange",
+                    "throttle": null
                   }
                 }
               ],

@@ -379,7 +379,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"eql\" | \"json\" | \"kql\" | \"dsl\" | \"no-type\""
+              "\"eql\" | \"kql\" | \"dsl\" | \"json\" | \"no-type\""
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
             "deprecated": false,
@@ -470,15 +470,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId?: string | undefined; defaultSystemPrompt?: ",
-              {
-                "pluginId": "@kbn/elastic-assistant",
-                "scope": "public",
-                "docId": "kibKbnElasticAssistantPluginApi",
-                "section": "def-public.Prompt",
-                "text": "Prompt"
-              },
-              " | undefined; provider?: ",
+              "{ connectorId?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
               "OpenAiProviderType",
               " | undefined; }"
             ],
@@ -928,7 +920,7 @@
         "label": "QueryType",
         "description": [],
         "signature": [
-          "\"eql\" | \"json\" | \"kql\" | \"dsl\" | \"no-type\""
+          "\"eql\" | \"kql\" | \"dsl\" | \"json\" | \"no-type\""
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
         "deprecated": false,

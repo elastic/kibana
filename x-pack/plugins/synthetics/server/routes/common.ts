@@ -7,11 +7,11 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
-import { RouteContext } from '../legacy_uptime/routes';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])

@@ -115,7 +115,7 @@ const defaultProps: Props = {
   openCreateCaseFlyout: jest.fn(),
   pattern,
   patternRollup,
-  theme: DARK_THEME,
+  baseTheme: DARK_THEME,
   updatePatternRollup: jest.fn(),
 };
 

@@ -42,8 +42,6 @@ export const App: React.FunctionComponent = () => {
     sections.push('policies' as Section);
   }
 
-  const sectionsRegex = sections.join('|');
-
   return apiError ? (
     <PageError
       title={

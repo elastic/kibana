@@ -11,6 +11,8 @@ import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } f
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { outputType } from '../../../../../../../common/constants';
+
 import { useLink } from '../../../../hooks';
 import type { Output } from '../../../../types';
 
@@ -136,6 +138,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
                     defaultMessage: 'Edit',
                   })}
                   data-test-subj="editOutputBtn"
+                  isDisabled={output.type === outputType.Kafka} // Kafka output is not supported yet but can be created via api
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

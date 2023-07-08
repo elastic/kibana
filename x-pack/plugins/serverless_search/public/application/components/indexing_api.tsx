@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiLink,
   EuiPageTemplate,
   EuiSpacer,
+  EuiStat,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useQuery } from '@tanstack/react-query';
 
+import { IndexData, FetchIndicesResult } from '../../../common/types';
+import { FETCH_INDICES_PATH } from '../routes';
+import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
+import { useKibanaServices } from '../hooks/use_kibana';
 import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { LanguageDefinition } from './languages/types';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
 
 import { OverviewPanel } from './overview_panels/overview_panel';
 import { LanguageClientPanel } from './overview_panels/language_client_panel';
@@ -48,9 +58,88 @@ const NoIndicesContent = () => (
   </>
 );
 
+interface IndicesContentProps {
+  indices: IndexData[];
+  isLoading: boolean;
+  onChange: (selectedOptions: Array<EuiComboBoxOptionOption<IndexData>>) => void;
+  selectedIndex?: IndexData;
+  setSearchValue: (searchValue?: string) => void;
+}
+const IndicesContent = ({
+  indices,
+  isLoading,
+  onChange,
+  selectedIndex,
+  setSearchValue,
+}: IndicesContentProps) => {
+  const toOption = (index: IndexData) => ({ label: index.name, value: index });
+  const options: Array<EuiComboBoxOptionOption<IndexData>> = indices.map(toOption);
+  return (
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate(
+              'xpack.serverlessSearch.content.indexingApi.index.comboBox.title',
+              { defaultMessage: 'Index' }
+            )}
+          >
+            <EuiComboBox
+              async
+              fullWidth
+              isLoading={isLoading}
+              singleSelection={{ asPlainText: true }}
+              onChange={onChange}
+              onSearchChange={setSearchValue}
+              options={options}
+              selectedOptions={selectedIndex ? [toOption(selectedIndex)] : undefined}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            // TODO: format count based on locale
+            title={selectedIndex ? selectedIndex.count.toLocaleString() : '--'}
+            titleColor="primary"
+            description={i18n.translate(
+              'xpack.serverlessSearch.content.indexingApi.index.documentCount.description',
+              { defaultMessage: 'Documents' }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
+
 export const ElasticsearchIndexingApi = () => {
+  const { cloud, http } = useKibanaServices();
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
+  const [indexSearchQuery, setIndexSearchQuery] = useState<string | undefined>(undefined);
+  const [selectedIndex, setSelectedIndex] = useState<IndexData | undefined>(undefined);
+  const elasticsearchURL = useMemo(() => {
+    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  }, [cloud]);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['indices', { searchQuery: indexSearchQuery }],
+    queryFn: async () => {
+      const query = {
+        search_query: indexSearchQuery || null,
+      };
+      const result = await http.get<FetchIndicesResult>(FETCH_INDICES_PATH, { query });
+      return result;
+    },
+  });
+
+  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
+    url: elasticsearchURL,
+    apiKey: API_KEY_PLACEHOLDER,
+    indexName: selectedIndex?.name,
+  };
+  const showNoIndices = !isLoading && data?.indices?.length === 0 && indexSearchQuery === undefined;
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchIndexingApiPage">
@@ -67,6 +156,17 @@ export const ElasticsearchIndexingApi = () => {
         )}
         bottomBorder="extended"
       />
+      {isError && (
+        <EuiPageTemplate.Section>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate(
+              'xpack.serverlessSearch.content.indexingApi.fetchIndices.error.title',
+              { defaultMessage: 'Error fetching indices' }
+            )}
+          />
+        </EuiPageTemplate.Section>
+      )}
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <OverviewPanel
           title={i18n.translate('xpack.serverlessSearch.content.indexingApi.clientPanel.title', {
@@ -106,16 +206,41 @@ export const ElasticsearchIndexingApi = () => {
               </EuiFlexGroup>
               <EuiSpacer />
               <CodeBox
-                code="ingestData"
-                codeArgs={{ url: '', apiKey: '' }}
+                code="ingestDataIndex"
+                codeArgs={codeSnippetArguments}
                 languages={languageDefinitions}
                 selectedLanguage={selectedLanguage}
                 setSelectedLanguage={setSelectedLanguage}
               />
             </>
           }
+          links={
+            showNoIndices
+              ? undefined
+              : [
+                  {
+                    label: i18n.translate(
+                      'xpack.serverlessSearch.content.indexingApi.ingestDocsLink',
+                      { defaultMessage: 'Ingestion documentation' }
+                    ),
+                    href: '#', // TODO: get doc links ?
+                  },
+                ]
+          }
         >
-          <NoIndicesContent />
+          {showNoIndices ? (
+            <NoIndicesContent />
+          ) : (
+            <IndicesContent
+              isLoading={isLoading}
+              indices={data?.indices ?? []}
+              onChange={(options) => {
+                setSelectedIndex(options?.[0]?.value);
+              }}
+              setSearchValue={setIndexSearchQuery}
+              selectedIndex={selectedIndex}
+            />
+          )}
         </OverviewPanel>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

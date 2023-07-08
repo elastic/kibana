@@ -240,7 +240,7 @@ export const useCasesColumns = ({
     sortable: true,
     render: (category: CaseUI['category']) => {
       if (category != null) {
-        return category;
+        return <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>;
       }
       return getEmptyTagValue();
     },
