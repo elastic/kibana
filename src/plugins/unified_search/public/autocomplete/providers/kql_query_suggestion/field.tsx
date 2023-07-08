@@ -40,9 +40,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
       const subTypeNested = indexPatternsUtils.getFieldSubtypeNested(field);
-      if (
-        suggestionsAbstraction?.fields?.[field.name]
-      ) {
+      if (suggestionsAbstraction?.fields?.[field.name]) {
         return (
           (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
           (suggestionsAbstraction?.fields[field.name]?.displayField ?? '')
