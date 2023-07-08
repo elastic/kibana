@@ -8,13 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+
 import { DEFAULT_RISK_SCORE_PAGE_SIZE, RISK_SCORE_PREVIEW_URL } from '../../../../common/constants';
 import { riskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
-import { OPTIONAL_DATAVIEW_NOT_FOUND } from './translations';
 
 export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
@@ -31,7 +31,6 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
       const coreContext = await context.core;
       const esClient = coreContext.elasticsearch.client.asCurrentUser;
       const soClient = coreContext.savedObjects.client;
-      const siemClient = securityContext.getAppClient();
       const spaceId = securityContext.getSpaceId();
       const riskEngineDataClient = securityContext.getRiskEngineDataClient();
 
@@ -54,23 +53,11 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
       } = request.body;
 
       try {
-        let index: string;
-        if (dataViewId) {
-          const dataViewIndex = await getRiskInputsIndex({
-            dataViewId,
-            logger,
-            soClient,
-          });
-
-          if (!dataViewIndex) {
-            return siemResponse.error({
-              statusCode: 404,
-              body: OPTIONAL_DATAVIEW_NOT_FOUND(dataViewId),
-            });
-          }
-          index = dataViewIndex;
-        }
-        index ??= siemClient.getAlertsIndex();
+        const { index, runtimeMappings } = await getRiskInputsIndex({
+          dataViewId,
+          logger,
+          soClient,
+        });
 
         const afterKeys = userAfterKeys ?? {};
         const range = userRange ?? { start: 'now-15d', end: 'now' };
@@ -79,11 +66,12 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
         const result = await riskScoreService.calculateScores({
           afterKeys,
           debug,
-          pageSize,
+          filter,
           identifierType,
           index,
-          filter,
+          pageSize,
           range,
+          runtimeMappings,
           weights,
         });
 

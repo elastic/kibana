@@ -17,7 +17,6 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
-import { DATAVIEW_NOT_FOUND } from './translations';
 
 export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
@@ -56,18 +55,11 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
       } = request.body;
 
       try {
-        const index = await getRiskInputsIndex({
+        const { index, runtimeMappings } = await getRiskInputsIndex({
           dataViewId,
           logger,
           soClient,
         });
-
-        if (!index) {
-          return siemResponse.error({
-            statusCode: 404,
-            body: DATAVIEW_NOT_FOUND(dataViewId),
-          });
-        }
 
         const afterKeys = userAfterKeys ?? {};
         const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
@@ -80,6 +72,7 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
           index,
           filter,
           range,
+          runtimeMappings,
           weights,
         });
 

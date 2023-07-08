@@ -191,6 +191,7 @@ export const calculateRiskScores = async ({
   logger,
   pageSize,
   range,
+  runtimeMappings,
   weights,
 }: {
   esClient: ElasticsearchClient;
@@ -209,6 +210,7 @@ export const calculateRiskScores = async ({
       size: 0,
       _source: false,
       index,
+      runtime_mappings: runtimeMappings,
       query: {
         bool: {
           filter,

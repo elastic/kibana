@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
+
+interface RiskInputsIndexResponse {
+  index: string;
+  runtimeMappings: MappingRuntimeFields;
+}
 
 export const getRiskInputsIndex = async ({
   dataViewId,
@@ -16,11 +22,23 @@ export const getRiskInputsIndex = async ({
   dataViewId: string;
   logger: Logger;
   soClient: SavedObjectsClientContract;
-}): Promise<string | undefined> => {
+}): Promise<RiskInputsIndexResponse> => {
   try {
     const dataView = await soClient.get<DataViewAttributes>('index-pattern', dataViewId);
-    return dataView.attributes.title;
+    const index = dataView.attributes.title;
+    const runtimeMappings =
+      dataView.attributes.runtimeFieldMap != null
+        ? JSON.parse(dataView.attributes.runtimeFieldMap)
+        : {};
+
+    return {
+      index,
+      runtimeMappings,
+    };
   } catch (e) {
-    logger.debug(`No dataview found for ID '${dataViewId}'`);
+    logger.info(
+      `No dataview found for ID '${dataViewId}'; using ID instead as simple index pattern`
+    );
+    return { index: dataViewId, runtimeMappings: {} };
   }
 };

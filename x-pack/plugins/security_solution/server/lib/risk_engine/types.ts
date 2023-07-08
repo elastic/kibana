@@ -6,7 +6,7 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AfterKey, AfterKeys, IdentifierType, RiskWeights } from '../../../common/risk_engine';
 
 export interface CalculateScoresParams {
@@ -17,6 +17,7 @@ export interface CalculateScoresParams {
   identifierType?: IdentifierType;
   pageSize: number;
   range: { start: string; end: string };
+  runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
 }
 
@@ -28,6 +29,7 @@ export interface CalculateAndPersistScoresParams {
   identifierType: IdentifierType;
   pageSize: number;
   range: { start: string; end: string };
+  runtimeMappings: MappingRuntimeFields;
   weights?: RiskWeights;
 }
 
