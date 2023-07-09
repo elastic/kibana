@@ -48,7 +48,6 @@ export const SearchApplicationRouter: React.FC = () => {
             searchApplicationName,
             tabId: SearchApplicationViewTabs.PREVIEW,
           })}
-          exact
         />
       </Route>
       <Route path={SEARCH_APPLICATION_TAB_PATH}>

@@ -49,7 +49,7 @@ const PortableDashboardsDemos = ({
   return (
     <Router history={history}>
       <Routes>
-        <Route exact path="/">
+        <Route path="*">
           <Redirect to={DASHBOARD_DEMO_PATH} />
         </Route>
         <Route path={DASHBOARD_LIST_PATH}>

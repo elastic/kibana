@@ -111,7 +111,9 @@ export const InfrastructurePage = () => {
                     <Route path="/detail/:type/:node" component={MetricDetail} />
                     <Route path={'/hosts'} component={HostsLandingPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
-                    <Route render={() => <NotFoundPage title="Infrastructure" />} />
+                    <Route path="*">
+                      <NotFoundPage title="Infrastructure" />
+                    </Route>
                   </Routes>
                 </InfraMLCapabilitiesProvider>
               </ReactQueryProvider>

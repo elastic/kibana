@@ -59,7 +59,9 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
       <Route path={prefixPath('')} exact>
         <DiscoverMainRoute {...mainRouteProps} />
       </Route>
-      <NotFoundRoute />
+      <Route path="*">
+        <NotFoundRoute />
+      </Route>
     </Routes>
   );
 };

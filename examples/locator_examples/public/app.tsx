@@ -47,7 +47,7 @@ export const Routes: React.FC<{}> = () => {
                 lastName={query.get('lastName') || ''}
               />
             </Route>
-            <Route path="/">
+            <Route path="*">
               <Redirect to="/hello" />
             </Route>
           </RouterRoutes>

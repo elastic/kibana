@@ -349,6 +349,7 @@ export const AppRoutes = memo(
           </Route>
 
           <Route
+            path="*"
             render={({ location }) => {
               // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
               const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;

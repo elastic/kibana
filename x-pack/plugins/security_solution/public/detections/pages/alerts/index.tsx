@@ -35,7 +35,7 @@ const AlertsContainerComponent: React.FC = () => {
       <Route path={ALERTS_PATH} exact component={AlertsRoute} />
       {/* Redirect to the alerts page filtered for the given alert id */}
       <Route path={`${ALERT_DETAILS_REDIRECT_PATH}/:alertId`} component={AlertDetailsRedirect} />
-      <Route component={NotFoundPage} />
+      <Route path="*" component={NotFoundPage} />
     </Routes>
   );
 };

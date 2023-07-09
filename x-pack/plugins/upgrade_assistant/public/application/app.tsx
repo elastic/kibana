@@ -149,7 +149,7 @@ export const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
       <Route exact path="/es_deprecations" component={EsDeprecations} />
       <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
-      <Route path="/">
+      <Route path="*">
         <Redirect to="/overview" />
       </Route>
     </Routes>

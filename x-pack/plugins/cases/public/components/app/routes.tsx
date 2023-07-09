@@ -105,7 +105,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           </Suspense>
         </Route>
 
-        <Route path={basePath}>
+        <Route path="*">
           <Redirect to={basePath} />
         </Route>
       </Routes>

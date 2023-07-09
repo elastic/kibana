@@ -149,7 +149,9 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       <Route exact path={VisualizeConstants.LANDING_PAGE_PATH_WITH_TAB}>
         <VisualizeListing />
       </Route>
-      <VisualizeNoMatch />
+      <Route path="*">
+        <VisualizeNoMatch />
+      </Route>
     </Routes>
   );
 };

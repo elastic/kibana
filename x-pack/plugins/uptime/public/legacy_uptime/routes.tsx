@@ -197,7 +197,7 @@ export const PageRouter: FC = () => {
           </Route>
         )
       )}
-      <Route component={NotFoundPage} />
+      <Route path="*" component={NotFoundPage} />
     </Routes>
   );
 };

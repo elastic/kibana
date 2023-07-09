@@ -53,7 +53,7 @@ export const renderApp = (
 
           <EuiPageTemplate.Section>
             <Routes>
-              <Route path="/" exact>
+              <Route path="*">
                 <Redirect to="/todos" />
               </Route>
               <Route path="/todos">

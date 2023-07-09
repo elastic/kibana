@@ -31,7 +31,7 @@ const SavedQueriesComponent = () => {
       <Route path={`/saved_queries/:savedQueryId`}>
         <EditSavedQueryPage />
       </Route>
-      <Route path={`/saved_queries`}>
+      <Route path={`/saved_queries*`}>
         <QueriesPage />
       </Route>
     </Routes>

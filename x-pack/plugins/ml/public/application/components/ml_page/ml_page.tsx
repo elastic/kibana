@@ -200,7 +200,9 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
               />
             );
           })}
-          <Redirect to="/overview" />
+          <Route path="*">
+            <Redirect to="/overview" />
+          </Route>
         </Routes>
       </EuiPageSection>
     </RedirectAppLinks>

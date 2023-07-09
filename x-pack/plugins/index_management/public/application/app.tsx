@@ -52,7 +52,7 @@ export const AppWithoutRouter = () => (
     />
     <Route exact path="/edit_component_template/:name*" component={ComponentTemplateEdit} />
     <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
-    <Route path="/">
+    <Route path="*">
       <Redirect to={`/indices`} />
     </Route>
   </Routes>

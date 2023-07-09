@@ -36,7 +36,7 @@ const LiveQueriesComponent = () => {
       <Route path="/live_queries/:actionId">
         <LiveQueryDetailsPage />
       </Route>
-      <Route path="/live_queries">
+      <Route path="/live_queries*">
         <LiveQueriesPage />
       </Route>
     </Routes>

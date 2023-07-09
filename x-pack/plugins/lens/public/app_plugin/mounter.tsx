@@ -413,7 +413,7 @@ export async function mountApp(
                 <Route exact path="/">
                   <EditorRenderer />
                 </Route>
-                <Route path="/" component={NotFound} />
+                <Route path="*" component={NotFound} />
               </Routes>
             </HashRouter>
           </PresentationUtilContext>

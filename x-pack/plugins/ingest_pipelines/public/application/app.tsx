@@ -38,7 +38,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={ROUTES.edit} component={PipelinesEdit} />
     <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
     {/* Catch all */}
-    <Route component={PipelinesList} />
+    <Route path="*" component={PipelinesList} />
   </Routes>
 );
 

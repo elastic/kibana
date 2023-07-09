@@ -33,7 +33,7 @@ export const Timelines = React.memo(() => (
     <Route exact path={`${TIMELINES_PATH}/${TimelineType.template}`}>
       <TimelinesPage />
     </Route>
-    <Route path={TIMELINES_PATH}>
+    <Route path="*">
       <RedirectRoute />
     </Route>
   </Routes>

@@ -202,7 +202,7 @@ export function renderApp(
                   )}
                 />
               ))}
-            <Route path="/">
+            <Route path="*">
               <Redirect to={`/${devTools[0].id}`} />
             </Route>
           </Routes>

@@ -29,7 +29,7 @@ exports[`Route render prop renders 1`] = `
 `;
 
 exports[`Route renders 1`] = `
-<Route path="*">
+<Route>
   <MatchPropagator />
 </Route>
 `;

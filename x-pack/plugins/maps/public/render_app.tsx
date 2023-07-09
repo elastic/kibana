@@ -149,9 +149,9 @@ export async function renderApp(
                 <Route exact path={`/map`}>
                   <MapApp {...mapAppProps} />
                 </Route>
-                // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+                {/* // Redirect other routes to list, or if hash-containing, their non-hash equivalents */}
                 <Route
-                  path={``}
+                  path="*"
                   render={({ location: { pathname, hash } }) => {
                     if (hash) {
                       // Remove leading hash

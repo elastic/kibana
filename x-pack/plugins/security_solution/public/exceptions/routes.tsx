@@ -45,7 +45,7 @@ const ExceptionsContainerComponent: React.FC = () => {
     <Routes>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
       <Route path={EXCEPTION_LIST_DETAIL_PATH} component={ExceptionsListDetailRoute} />
-      <Route component={NotFoundPage} />
+      <Route path="*" component={NotFoundPage} />
     </Routes>
   );
 };

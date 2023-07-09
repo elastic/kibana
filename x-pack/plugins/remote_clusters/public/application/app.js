@@ -54,7 +54,9 @@ class AppComponent extends Component {
           <Route exact path={'/'} component={RemoteClusterList} />
           <Route path={`/add`} component={RemoteClusterAdd} />
           <Route path={`/edit/:name`} component={RemoteClusterEdit} />
-          <Redirect from={`/:anything`} to="/list" />
+          <Route path="*">
+            <Redirect to="/list" />
+          </Route>
         </Routes>
       </Router>
     );

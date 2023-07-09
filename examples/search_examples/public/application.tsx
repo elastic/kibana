@@ -70,7 +70,7 @@ export const renderApp = (
                 />
               </Route>
 
-              <Route path="/" exact={true}>
+              <Route path="*">
                 <Redirect to={LINKS[0].path} />
               </Route>
             </Routes>

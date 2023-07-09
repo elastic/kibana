@@ -57,9 +57,11 @@ export class App extends Component {
       <Router history={this.props.history}>
         <ShareRouter>
           <Routes>
-            <Redirect exact from="/" to="/job_list" />
             <Route exact path="/job_list" component={JobList} />
             <Route exact path="/create" component={JobCreate} />
+            <Route path="*">
+              <Redirect to="/job_list" />
+            </Route>
           </Routes>
         </ShareRouter>
       </Router>
