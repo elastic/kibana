@@ -25,7 +25,7 @@ import {
   ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  PreConfiguredAction,
+  InMemoryConnector,
   RawAction,
   ValidatorServices,
   ActionTypeSecrets,
@@ -48,7 +48,7 @@ export interface ActionExecutorContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export interface TaskInfo {
@@ -117,8 +117,14 @@ export class ActionExecutor {
         },
       },
       async (span) => {
-        const { spaces, getServices, actionTypeRegistry, eventLogger, security } =
-          this.actionExecutorContext!;
+        const {
+          spaces,
+          getServices,
+          actionTypeRegistry,
+          eventLogger,
+          inMemoryConnectors,
+          security,
+        } = this.actionExecutorContext!;
 
         const services = getServices(request);
         const spaceId = spaces && spaces.getSpaceId(request);
@@ -126,7 +132,12 @@ export class ActionExecutor {
 
         const actionInfo =
           actionInfoFromTaskRunner ||
-          (await this.getActionInfoInternal(actionId, request, namespace.namespace));
+          (await this.getActionInfoInternal(
+            actionId,
+            request,
+            namespace.namespace,
+            inMemoryConnectors
+          ));
 
         const { actionTypeId, name, config, secrets } = actionInfo;
 
@@ -204,7 +215,7 @@ export class ActionExecutor {
           relatedSavedObjects,
           name,
           actionExecutionId,
-          isPreconfigured: this.actionInfo.isPreconfigured,
+          isInMemory: this.actionInfo.isInMemory,
           ...(source ? { source } : {}),
         });
 
@@ -236,14 +247,18 @@ export class ActionExecutor {
             source,
           });
         } catch (err) {
-          rawResult = {
-            actionId,
-            status: 'error',
-            message: 'an error occurred while running the action',
-            serviceMessage: err.message,
-            error: err,
-            retry: true,
-          };
+          if (err.reason === ActionExecutionErrorReason.Validation) {
+            rawResult = err.result;
+          } else {
+            rawResult = {
+              actionId,
+              status: 'error',
+              message: 'an error occurred while running the action',
+              serviceMessage: err.message,
+              error: err,
+              retry: true,
+            };
+          }
         }
 
         eventLogger.stopTiming(event);
@@ -343,12 +358,17 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const { spaces, eventLogger } = this.actionExecutorContext!;
+    const { spaces, inMemoryConnectors, eventLogger } = this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
-      this.actionInfo = await this.getActionInfoInternal(actionId, request, namespace.namespace);
+      this.actionInfo = await this.getActionInfoInternal(
+        actionId,
+        request,
+        namespace.namespace,
+        inMemoryConnectors
+      );
     }
     const task = taskInfo
       ? {
@@ -380,7 +400,7 @@ export class ActionExecutor {
       ],
       relatedSavedObjects,
       actionExecutionId,
-      isPreconfigured: this.actionInfo.isPreconfigured,
+      isInMemory: this.actionInfo.isInMemory,
       ...(source ? { source } : {}),
     });
 
@@ -390,23 +410,24 @@ export class ActionExecutor {
   public async getActionInfoInternal(
     actionId: string,
     request: KibanaRequest,
-    namespace: string | undefined
+    namespace: string | undefined,
+    inMemoryConnectors: InMemoryConnector[]
   ): Promise<ActionInfo> {
-    const { encryptedSavedObjectsClient, preconfiguredActions } = this.actionExecutorContext!;
+    const { encryptedSavedObjectsClient } = this.actionExecutorContext!;
 
-    // check to see if it's a pre-configured action first
-    const pcAction = preconfiguredActions.find(
-      (preconfiguredAction) => preconfiguredAction.id === actionId
+    // check to see if it's in memory action first
+    const inMemoryAction = inMemoryConnectors.find(
+      (inMemoryConnector) => inMemoryConnector.id === actionId
     );
-    if (pcAction) {
+    if (inMemoryAction) {
       return {
-        actionTypeId: pcAction.actionTypeId,
-        name: pcAction.name,
-        config: pcAction.config,
-        secrets: pcAction.secrets,
+        actionTypeId: inMemoryAction.actionTypeId,
+        name: inMemoryAction.name,
+        config: inMemoryAction.config,
+        secrets: inMemoryAction.secrets,
         actionId,
-        isPreconfigured: true,
-        rawAction: { ...pcAction, isMissingSecrets: false },
+        isInMemory: true,
+        rawAction: { ...inMemoryAction, isMissingSecrets: false },
       };
     }
 
@@ -445,7 +466,7 @@ export interface ActionInfo {
   config: ActionTypeConfig;
   secrets: ActionTypeSecrets;
   actionId: string;
-  isPreconfigured?: boolean;
+  isInMemory?: boolean;
   rawAction: RawAction;
 }
 

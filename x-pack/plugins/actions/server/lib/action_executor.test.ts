@@ -51,7 +51,7 @@ actionExecutor.initialize({
   actionTypeRegistry,
   encryptedSavedObjectsClient,
   eventLogger,
-  preconfiguredActions: [
+  inMemoryConnectors: [
     {
       id: 'preconfigured',
       name: 'Preconfigured',
@@ -65,6 +65,16 @@ actionExecutor.initialize({
       isPreconfigured: true,
       isDeprecated: false,
       isSystemAction: false,
+    },
+    {
+      actionTypeId: '.cases',
+      config: {},
+      id: 'system-connector-.cases',
+      name: 'System action: .cases',
+      secrets: {},
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: true,
     },
   ],
 });
@@ -665,6 +675,133 @@ test('successfully executes with preconfigured connector', async () => {
   `);
 });
 
+test('successfully executes with system connector', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('.cases');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith(
+    'system-connector-.cases',
+    '.cases',
+    {
+      notifyUsage: true,
+    }
+  );
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: 'system-connector-.cases',
+    services: expect.anything(),
+    config: {},
+    secrets: {},
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith(
+    'executing action .cases:system-connector-.cases: System action: .cases'
+  );
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: .cases:system-connector-.cases: System action: .cases",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: .cases:system-connector-.cases: System action: .cases",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
+        },
+      ],
+    ]
+  `);
+});
+
 test('successfully executes as a task', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
@@ -959,6 +1096,51 @@ test('should not throws an error if actionType is preconfigured', async () => {
   });
 });
 
+test('should not throws an error if actionType is system action', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: '.cases',
+      config: {},
+      secrets: {},
+    },
+    references: [],
+  };
+
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+    throw new Error('not enabled for test');
+  });
+  actionTypeRegistry.isActionExecutable.mockImplementationOnce(() => true);
+  await actionExecutor.execute(executeParams);
+
+  expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledTimes(0);
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {},
+    secrets: {},
+    params: { foo: true },
+    logger: loggerMock,
+  });
+});
+
 test('throws an error when passing isESOCanEncrypt with value of false', async () => {
   const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
   customActionExecutor.initialize({
@@ -968,7 +1150,7 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
   });
   await expect(
     customActionExecutor.execute(executeParams)
@@ -986,7 +1168,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
-    preconfiguredActions: [
+    inMemoryConnectors: [
       {
         id: 'preconfigured',
         name: 'Preconfigured',
@@ -1117,6 +1299,155 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             ],
           },
           "message": "action executed: test:preconfigured: Preconfigured",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
+        },
+      ],
+    ]
+  `);
+});
+
+test('should not throw error if action is system action and isESOCanEncrypt is false', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+  customActionExecutor.initialize({
+    logger: loggingSystemMock.create().get(),
+    spaces: spacesMock,
+    getServices: () => services,
+    actionTypeRegistry,
+    encryptedSavedObjectsClient,
+    eventLogger: eventLoggerMock.create(),
+    inMemoryConnectors: [
+      {
+        actionTypeId: '.cases',
+        config: {},
+        id: 'system-connector-.cases',
+        name: 'System action: .cases',
+        secrets: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ],
+  });
+
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('.cases');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith(
+    'system-connector-.cases',
+    '.cases',
+    {
+      notifyUsage: true,
+    }
+  );
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: 'system-connector-.cases',
+    services: expect.anything(),
+    config: {},
+    secrets: {},
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith(
+    'executing action .cases:system-connector-.cases: System action: .cases'
+  );
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: .cases:system-connector-.cases: System action: .cases",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: .cases:system-connector-.cases: System action: .cases",
           "user": Object {
             "id": "123",
             "name": "coolguy",
