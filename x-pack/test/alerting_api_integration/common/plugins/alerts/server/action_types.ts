@@ -74,7 +74,6 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
-  actions.registerType(getSystemActionType());
 
   /**
    * System actions
@@ -443,7 +442,7 @@ function getSystemActionTypeWithKibanaPrivileges() {
      * Requires all access to the case feature
      * in Stack management
      */
-    kibanaPrivileges: ['cases:cases/createCase'],
+    getKibanaPrivileges: () => ['cases:cases/createCase'],
     validate: {
       params: {
         schema: schema.any(),
