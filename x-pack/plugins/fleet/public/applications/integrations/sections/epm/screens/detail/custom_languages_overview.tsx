@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
 import { capitalize } from 'lodash';
 
 import { getCustomIntegrationsStart } from '../../../../../../services/custom_integrations';
@@ -26,11 +25,5 @@ export const CustomLanguagesOverview = () => {
 
   const Component = getCustomIntegrationsStart().languageClientsUiComponents[pkgkey];
 
-  return Component ? (
-    <Component />
-  ) : (
-    <Route path="*">
-      <Redirect to={getPath('integrations_all')} />
-    </Route>
-  );
+  return Component ? <Component /> : <Redirect to={getPath('integrations_all')} />;
 };

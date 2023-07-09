@@ -95,7 +95,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
   return (
     <DefaultLayout section="settings">
-      <Routes>
+      <Routes compat={false}>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
           {(route: { match: { params: { itemId: string } } }) => {
             const fleetServerHost = fleetServerHosts.data?.items.find(

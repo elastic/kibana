@@ -7,7 +7,7 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -21,7 +21,7 @@ import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const match = useRouteMatch<{ uuid: string | undefined }>();
+  const params = useParams<{ uuid: string | undefined }>();
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
@@ -53,7 +53,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}/pipelines`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${params.uuid}/pipelines`;
     const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
@@ -75,7 +75,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
     services.http,
     getPaginationRouteOptions,
     updateTotalItemCount,
-    match.params.uuid,
+    params.uuid,
   ]);
 
   useEffect(() => {

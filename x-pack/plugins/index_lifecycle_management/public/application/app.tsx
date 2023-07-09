@@ -17,18 +17,22 @@ import { PolicyList } from './sections/policy_list';
 import { trackUiMetric } from './services/ui_metric';
 import { ROUTES } from './services/navigation';
 
+export const AppRoutes = () => (
+  <Routes>
+    <Route exact path={ROUTES.list} component={PolicyList} />
+    <Route path={ROUTES.edit} component={EditPolicy} />
+    <Route path="*">
+      <Redirect to={ROUTES.list} />
+    </Route>
+  </Routes>
+);
+
 export const App = ({ history }: { history: ScopedHistory }) => {
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
   return (
     <Router history={history}>
-      <Routes>
-        <Route exact path="*">
-          <Redirect to={ROUTES.list} />
-        </Route>
-        <Route exact path={ROUTES.list} component={PolicyList} />
-        <Route path={ROUTES.edit} component={EditPolicy} />
-      </Routes>
+      <AppRoutes />
     </Router>
   );
 };

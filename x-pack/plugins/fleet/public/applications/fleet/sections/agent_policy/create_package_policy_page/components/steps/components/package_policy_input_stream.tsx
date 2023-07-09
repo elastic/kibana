@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -84,9 +84,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isExperimentalDataStreamSettingsEnabled =
       config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
 
-    const {
-      params: { packagePolicyId },
-    } = useRouteMatch<{ packagePolicyId?: string }>();
+    const { packagePolicyId } = useParams<{ packagePolicyId?: string }>();
     const defaultDataStreamId = useDataStreamId();
     const containerRef = useRef<HTMLDivElement>(null);
 

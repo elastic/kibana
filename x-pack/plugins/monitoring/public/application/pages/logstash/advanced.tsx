@@ -16,7 +16,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
@@ -32,7 +32,7 @@ import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const match = useRouteMatch<{ uuid: string | undefined }>();
+  const params = useParams<{ uuid: string | undefined }>();
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const { zoomInfo, onBrush } = useCharts();
@@ -62,7 +62,7 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${params.uuid}`;
     if (services.http?.fetch && clusterUuid) {
       const response = await services.http?.fetch(url, {
         method: 'POST',
@@ -87,13 +87,7 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
       });
       setAlerts(alertsResponse);
     }
-  }, [
-    ccs,
-    clusterUuid,
-    services.data?.query.timefilter.timefilter,
-    services.http,
-    match.params.uuid,
-  ]);
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, params.uuid]);
 
   const metricsToShow = useMemo(() => {
     if (!data.metrics) return [];

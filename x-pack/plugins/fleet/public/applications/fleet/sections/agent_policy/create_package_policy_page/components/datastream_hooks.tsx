@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
 import { sendRequestForRq, useLink } from '../../../../hooks';
 
 export function usePackagePolicyEditorPageUrl(dataStreamId?: string) {
-  const {
-    params: { packagePolicyId, policyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+  const { packagePolicyId, policyId } = useParams<{ policyId: string; packagePolicyId: string }>();
   const { getHref } = useLink();
 
   const baseUrl =

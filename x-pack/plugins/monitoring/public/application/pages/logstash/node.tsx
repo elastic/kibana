@@ -7,7 +7,7 @@
 import React, { useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -31,7 +31,7 @@ import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
-  const match = useRouteMatch<{ uuid: string | undefined }>();
+  const params = useParams<{ uuid: string | undefined }>();
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
@@ -68,7 +68,7 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   }, [cluster, data, generateBreadcrumbs]);
 
   const getPageData = useCallback(async () => {
-    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}`;
+    const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${params.uuid}`;
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     if (services.http?.fetch && clusterUuid) {
       const response = await services.http?.fetch(url, {
@@ -94,7 +94,7 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
       });
       setAlerts(alertsResponse);
     }
-  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, match.params]);
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, params.uuid]);
 
   const metricsToShow = useMemo(() => {
     if (!data.metrics) return [];
