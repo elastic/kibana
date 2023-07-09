@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('Skips non-recurring tasks that returns a SkipError and sets status as "dead_letter" after 1 reschedule attempt', async () => {
+    it('Skips non-recurring tasks that have invalid indirect params and sets status as "dead_letter" after 1 reschedule attempt', async () => {
       const createdTask = await supertest
         .post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')

@@ -327,12 +327,11 @@ export class TaskManagerRunner implements TaskRunner {
         }
       }
 
-      const result =
-        taskParamsValidation && taskParamsValidation.error
-          ? taskParamsValidation
-          : await this.executionContext.withContext(ctx, () =>
-              withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
-            );
+      const result = taskParamsValidation?.error
+        ? taskParamsValidation
+        : await this.executionContext.withContext(ctx, () =>
+            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+          );
 
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
