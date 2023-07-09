@@ -14,7 +14,7 @@ import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { ADD_SOURCE_PATH, PRIVATE_SOURCES_PATH, getSourcesPath } from '../../routes';
+import { PRIVATE_SOURCES_PATH } from '../../routes';
 
 import { SourcesRouter } from './sources_router';
 
