@@ -2831,7 +2831,7 @@ describe('execute()', () => {
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
-        kibanaPrivileges: ['test/create'],
+        getKibanaPrivileges: () => ['test/create'],
         validate: {
           config: { schema: schema.object({}) },
           secrets: { schema: schema.object({}) },
@@ -2896,7 +2896,7 @@ describe('execute()', () => {
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
-        kibanaPrivileges: ['test/create'],
+        getKibanaPrivileges: () => ['test/create'],
         validate: {
           config: { schema: schema.object({}) },
           secrets: { schema: schema.object({}) },
@@ -2915,6 +2915,72 @@ describe('execute()', () => {
         operation: 'execute',
         additionalPrivileges: [],
       });
+    });
+
+    test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        getKibanaPrivileges,
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'system-connector-.cases',
+        params: { foo: 'bar' },
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: ['test/create'],
+      });
+
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({ metadata: { foo: 'bar' } });
     });
   });
 

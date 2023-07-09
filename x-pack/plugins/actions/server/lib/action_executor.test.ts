@@ -812,7 +812,7 @@ test('successfully authorize system actions', async () => {
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
-    kibanaPrivileges: ['test/create'],
+    getKibanaPrivileges: () => ['test/create'],
     isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
@@ -827,6 +827,42 @@ test('successfully authorize system actions', async () => {
   actionTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
   await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    operation: 'execute',
+    additionalPrivileges: ['test/create'],
+  });
+});
+
+test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    getKibanaPrivileges: () => ['test/create'],
+    isSystemActionType: true,
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
+  actionTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+
+  await actionExecutor.execute({
+    ...executeParams,
+    params: { foo: 'bar' },
+    actionId: 'system-connector-.cases',
+  });
+
+  expect(actionTypeRegistry.getSystemActionKibanaPrivileges).toHaveBeenCalledWith('.cases', {
+    foo: 'bar',
+  });
 
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
     operation: 'execute',

@@ -165,8 +165,11 @@ export class ActionExecutor {
          *
          */
         if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
-          const additionalPrivileges =
-            actionTypeRegistry.getSystemActionKibanaPrivileges(actionTypeId);
+          const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
+            actionTypeId,
+            params
+          );
+
           authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
         }
 
