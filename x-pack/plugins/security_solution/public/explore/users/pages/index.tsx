@@ -63,7 +63,7 @@ export const UsersContainer = React.memo(() => {
       />
 
       <Route // Compatibility redirect for the old user detail path.
-        path={`${USERS_PATH}/:detailName/:tabName`}
+        path={`${USERS_PATH}/:detailName/:tabName?`}
         render={({
           match: {
             params: { detailName, tabName = UsersTableType.authentications },

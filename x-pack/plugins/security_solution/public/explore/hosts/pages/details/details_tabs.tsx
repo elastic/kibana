@@ -49,32 +49,32 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     };
 
     return (
-      <Routes>
-        <Route path={`${hostDetailsPagePath}/${HostsTableType.authentications}`}>
+      <Routes compat={false}>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
           <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostDetailsPagePath}/${HostsTableType.uncommonProcesses}`}>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostDetailsPagePath}/${HostsTableType.anomalies}`}>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
 
-        <Route path={`${hostDetailsPagePath}/${HostsTableType.events}`}>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
             additionalFilters={hostDetailsFilter}
             tableId={TableId.hostsPageEvents}
             {...tabProps}
           />
         </Route>
-        <Route path={`${hostDetailsPagePath}/${HostsTableType.risk}`}>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
           <RiskDetailsTabBody
             {...tabProps}
             riskEntity={RiskScoreEntity.host}
             entityName={tabProps.hostName}
           />
         </Route>
-        <Route path={`${hostDetailsPagePath}/${HostsTableType.sessions}`}>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
           <SessionsTabBody {...tabProps} />
         </Route>
       </Routes>

@@ -42,7 +42,7 @@ const ExceptionsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
       <Route path={EXCEPTION_LIST_DETAIL_PATH} component={ExceptionsListDetailRoute} />
       <Route path="*" component={NotFoundPage} />

@@ -16,7 +16,7 @@ import { NotFoundPage } from '../../../app/404';
  */
 export const EndpointsContainer = memo(() => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} exact component={EndpointList} />
       <Route path="*" component={NotFoundPage} />
     </Routes>

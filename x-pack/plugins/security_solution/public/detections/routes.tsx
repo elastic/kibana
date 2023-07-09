@@ -20,10 +20,16 @@ const AlertsRoutes = () => (
 
 const DetectionsRedirects = () => {
   const location = useLocation();
-  return location.pathname === DETECTIONS_PATH ? (
-    <Redirect to={{ ...location, pathname: ALERTS_PATH }} />
-  ) : (
-    <Redirect to={{ ...location, pathname: location.pathname.replace(DETECTIONS_PATH, '') }} />
+  return (
+    <Redirect
+      to={{
+        ...location,
+        pathname:
+          location.pathname === DETECTIONS_PATH
+            ? ALERTS_PATH
+            : location.pathname.replace(DETECTIONS_PATH, ''),
+      }}
+    />
   );
 };
 

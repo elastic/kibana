@@ -24,7 +24,7 @@ import { getPolicyDetailPath } from '../../common/routing';
 
 export const PolicyContainer = memo(() => {
   return (
-    <Routes>
+    <Routes compat={false}>
       {[
         MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
         MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,

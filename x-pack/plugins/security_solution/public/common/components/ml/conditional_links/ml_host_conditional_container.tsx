@@ -26,7 +26,7 @@ interface QueryStringType {
 export const MlHostConditionalContainer = React.memo(() => {
   const { path } = useRouteMatch();
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         strict
         exact

@@ -34,20 +34,20 @@ export const UsersTabs = memo<UsersTabsProps>(
     };
 
     return (
-      <Routes>
-        <Route path={`${USERS_PATH}/${UsersTableType.allUsers}`}>
+      <Routes compat={false}>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
           <AllUsersQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${USERS_PATH}/${UsersTableType.authentications}`}>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.authentications})`}>
           <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${USERS_PATH}/${UsersTableType.anomalies}`}>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
         </Route>
-        <Route path={`${USERS_PATH}/${UsersTableType.risk}`}>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.risk})`}>
           <UserRiskScoreQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${USERS_PATH}/${UsersTableType.events}`}>
+        <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
             additionalFilters={userNameExistsFilter}
             tableId={TableId.usersPageEvents}

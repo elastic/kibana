@@ -29,7 +29,7 @@ export const HostIsolationExceptionsContainer = memo(() => {
   }
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         exact

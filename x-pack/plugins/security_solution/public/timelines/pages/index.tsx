@@ -17,6 +17,7 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 
 import { TIMELINES_PATH } from '../../../common/constants';
 
+const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineType.default}|${TimelineType.template})`;
 const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineType.default}`;
 
 const RedirectRoute = () => {
@@ -26,14 +27,11 @@ const RedirectRoute = () => {
 };
 
 export const Timelines = React.memo(() => (
-  <Routes>
-    <Route exact path={`${TIMELINES_PATH}/${TimelineType.default}`}>
+  <Routes compat={false}>
+    <Route exact path={timelinesPagePath}>
       <TimelinesPage />
     </Route>
-    <Route exact path={`${TIMELINES_PATH}/${TimelineType.template}`}>
-      <TimelinesPage />
-    </Route>
-    <Route path="*">
+    <Route path={TIMELINES_PATH}>
       <RedirectRoute />
     </Route>
   </Routes>

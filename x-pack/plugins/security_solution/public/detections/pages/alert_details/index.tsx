@@ -75,7 +75,7 @@ export const AlertDetailsPage = memo(() => {
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
           <TabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
-          <Routes>
+          <Routes compat={false}>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
               <DetailsSummaryTab
                 eventId={eventId}

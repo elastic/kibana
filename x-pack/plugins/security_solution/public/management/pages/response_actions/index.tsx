@@ -13,7 +13,7 @@ import { ResponseActionsListPage } from './view/response_actions_list_page';
 
 export const ResponseActionsContainer = memo(() => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
         exact

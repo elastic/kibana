@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Switch, MemoryRouter } from 'react-router-dom';
+import { Routes, MemoryRouter } from '@kbn/shared-ux-router';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { PrivilegedRoute } from './privileged_route';
@@ -39,9 +39,9 @@ describe('PrivilegedRoute', () => {
     render = () => {
       renderResult = renderer.render(
         <MemoryRouter initialEntries={[currentPath]}>
-          <Switch>
+          <Routes compat={false}>
             <PrivilegedRoute {...renderProps} />
-          </Switch>
+          </Routes>
         </MemoryRouter>
       );
     };

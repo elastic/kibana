@@ -36,7 +36,7 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.sessions})`;
 
 export const HostsContainer = React.memo(() => (
-  <Routes>
+  <Routes compat={false}>
     <Route path={`${HOSTS_PATH}/ml-hosts`}>
       <MlHostConditionalContainer />
     </Route>

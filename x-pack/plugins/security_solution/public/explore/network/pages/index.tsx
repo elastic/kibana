@@ -19,7 +19,11 @@ import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { NETWORK_PATH } from '../../../../common/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { NETWORK_DETAILS_PAGE_PATH, NETWORK_DETAILS_TAB_PATH } from './constants';
+import {
+  FLOW_TARGET_PARAM,
+  NETWORK_DETAILS_PAGE_PATH,
+  NETWORK_DETAILS_TAB_PATH,
+} from './constants';
 
 const getPathWithFlowType = (detailName: string, flowTarget?: FlowTargetSourceDest) =>
   `${NETWORK_PATH}/ip/${detailName}/${flowTarget || FlowTargetSourceDest.source}/${
@@ -61,7 +65,7 @@ const NetworkContainerComponent = () => {
         <NetworkDetails />
       </Route>
       <Route
-        path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget`}
+        path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget(${FLOW_TARGET_PARAM})?`}
         render={({
           match: {
             params: { detailName, flowTarget },

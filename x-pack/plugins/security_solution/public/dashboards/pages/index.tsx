@@ -15,7 +15,7 @@ import { DashboardContextProvider } from '../context/dashboard_context';
 const DashboardsContainerComponent = () => {
   return (
     <DashboardContextProvider>
-      <Routes>
+      <Routes compat={false}>
         <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
           <DashboardView />
         </Route>

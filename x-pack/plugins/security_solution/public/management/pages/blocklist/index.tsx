@@ -20,7 +20,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 export const BlocklistContainer = memo(() => {
   return (
     <TrackApplicationView viewId={SecurityPageName.blocklist}>
-      <Routes>
+      <Routes compat={false}>
         <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} exact component={Blocklist} />
         <Route path="*" component={NotFoundPage} />
       </Routes>

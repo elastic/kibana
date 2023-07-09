@@ -37,15 +37,24 @@ describe('Spy Routes', () => {
     test('Make sure we update search state first', async () => {
       const pathname = '/';
       mount(
-        <MemoryRouter
-          initialEntries={[
-            { hash: '', pathname, search: '?importantQueryString="really"', state: '' },
-          ]}
-        >
-          <ManageRoutesSpy>
-            <SpyRouteComponent pageName={undefined} />
-          </ManageRoutesSpy>
-        </MemoryRouter>
+        <ManageRoutesSpy>
+          <SpyRouteComponent
+            location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
+            history={mockHistoryValue}
+            match={{
+              isExact: false,
+              path: pathname,
+              url: pathname,
+              params: {
+                detailName: '',
+                tabName: HostsTableType.hosts,
+                search: '',
+                flowTarget: undefined,
+              },
+            }}
+            pageName={undefined}
+          />
+        </ManageRoutesSpy>
       );
 
       expect(dispatchMock.mock.calls[0]).toEqual([
@@ -59,15 +68,24 @@ describe('Spy Routes', () => {
     test('Make sure we update search state first and then update the route but keeping the initial search', () => {
       const pathname = '/hosts/allHosts';
       mount(
-        <MemoryRouter
-          initialEntries={[
-            { hash: '', pathname, search: '?importantQueryString="really"', state: '' },
-          ]}
-        >
-          <ManageRoutesSpy>
-            <SpyRouteComponent pageName={SecurityPageName.hosts} />
-          </ManageRoutesSpy>
-        </MemoryRouter>
+        <ManageRoutesSpy>
+          <SpyRouteComponent
+            location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
+            history={mockHistoryValue}
+            match={{
+              isExact: false,
+              path: pathname,
+              url: pathname,
+              params: {
+                detailName: undefined,
+                tabName: HostsTableType.hosts,
+                search: '?IdoNotWantToSeeYou="true"',
+                flowTarget: undefined,
+              },
+            }}
+            pageName={SecurityPageName.hosts}
+          />
+        </ManageRoutesSpy>
       );
 
       expect(dispatchMock.mock.calls[0]).toEqual([
@@ -97,28 +115,22 @@ describe('Spy Routes', () => {
       const pathname = '/hosts/allHosts';
       const newPathname = `hosts/${HostsTableType.authentications}`;
       const wrapper = mount(
-        <MemoryRouter
-          initialEntries={[
-            { hash: '', pathname, search: '?importantQueryString="really"', state: '' },
-          ]}
-        >
-          <SpyRouteComponent
-            location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
-            history={mockHistoryValue}
-            match={{
-              isExact: false,
-              path: pathname,
-              url: pathname,
-              params: {
-                detailName: undefined,
-                tabName: HostsTableType.hosts,
-                search: '?IdoNotWantToSeeYou="true"',
-                flowTarget: undefined,
-              },
-            }}
-            pageName={SecurityPageName.hosts}
-          />
-        </MemoryRouter>
+        <SpyRouteComponent
+          location={{ hash: '', pathname, search: '?importantQueryString="really"', state: '' }}
+          history={mockHistoryValue}
+          match={{
+            isExact: false,
+            path: pathname,
+            url: pathname,
+            params: {
+              detailName: undefined,
+              tabName: HostsTableType.hosts,
+              search: '?IdoNotWantToSeeYou="true"',
+              flowTarget: undefined,
+            },
+          }}
+          pageName={SecurityPageName.hosts}
+        />
       );
 
       dispatchMock.mockReset();

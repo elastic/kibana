@@ -829,8 +829,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              <Routes>
-                <Route path={`/rules/id/:detailName/${RuleDetailTabs.alerts}`}>
+              <Routes compat={false}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>
@@ -872,7 +872,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     )}
                   </>
                 </Route>
-                <Route path={`/rules/id/:detailName/${RuleDetailTabs.exceptions}`}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     rule={rule}
                     listTypes={[
@@ -884,7 +884,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     data-test-subj="exceptionTab"
                   />
                 </Route>
-                <Route path={`/rules/id/:detailName/${RuleDetailTabs.endpointExceptions}`}>
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
+                >
                   <ExceptionsViewer
                     rule={rule}
                     listTypes={[ExceptionListTypeEnum.ENDPOINT]}
@@ -893,10 +895,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>
-                <Route path={`/rules/id/:detailName/${RuleDetailTabs.executionResults}`}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
                   <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
                 </Route>
-                <Route path={`/rules/id/:detailName/${RuleDetailTabs.executionEvents}`}>
+                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />
                 </Route>
               </Routes>
