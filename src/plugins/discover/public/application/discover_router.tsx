@@ -117,7 +117,7 @@ export const DiscoverRouter = ({
             <Route path={addProfile('', ':profile')}>
               <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
             </Route>
-            <Route path="*">
+            <Route path="/">
               <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
             </Route>
           </Routes>

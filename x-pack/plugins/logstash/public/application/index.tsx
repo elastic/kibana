@@ -45,28 +45,6 @@ export const renderApp = async (
       <KibanaThemeProvider theme$={theme$}>
         <Router history={history}>
           <Routes>
-            <Route
-              path={'/'}
-              exact
-              render={() => {
-                setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());
-                return (
-                  <PipelineList
-                    clusterService={clusterService}
-                    isReadOnly={logstashLicenseService.isReadOnly}
-                    isForbidden={true}
-                    isLoading={false}
-                    licenseService={logstashLicenseService}
-                    monitoringService={monitoringService}
-                    openPipeline={(id: string) => history.push(`/pipeline/${id}/edit`)}
-                    clonePipeline={(id: string) => history.push(`/pipeline/${id}/edit?clone`)}
-                    createPipeline={() => history.push(`pipeline/new-pipeline`)}
-                    pipelinesService={pipelinesService}
-                    toastNotifications={core.notifications.toasts}
-                  />
-                );
-              }}
-            />
             <Route path="/pipeline/new-pipeline" exact>
               <PipelineEditView
                 history={history}
@@ -94,6 +72,28 @@ export const renderApp = async (
                   id={match.params.id}
                 />
               )}
+            />
+            <Route
+              path={'*'}
+              exact
+              render={() => {
+                setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());
+                return (
+                  <PipelineList
+                    clusterService={clusterService}
+                    isReadOnly={logstashLicenseService.isReadOnly}
+                    isForbidden={true}
+                    isLoading={false}
+                    licenseService={logstashLicenseService}
+                    monitoringService={monitoringService}
+                    openPipeline={(id: string) => history.push(`/pipeline/${id}/edit`)}
+                    clonePipeline={(id: string) => history.push(`/pipeline/${id}/edit?clone`)}
+                    createPipeline={() => history.push(`pipeline/new-pipeline`)}
+                    pipelinesService={pipelinesService}
+                    toastNotifications={core.notifications.toasts}
+                  />
+                );
+              }}
             />
           </Routes>
         </Router>

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import Chance from 'chance';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
@@ -20,6 +21,13 @@ import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+
+const mockedUseParams = useParams as jest.MockedFunction<typeof useParams>;
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+}));
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
@@ -40,6 +48,7 @@ const queryClient = new QueryClient({
 const getTestComponent =
   (params: PageUrlParams): React.FC =>
   () => {
+    mockedUseParams.mockReturnValue(params);
     const coreStart = coreMock.createStart();
     const core = {
       ...coreStart,

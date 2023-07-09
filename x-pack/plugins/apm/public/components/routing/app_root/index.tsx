@@ -88,6 +88,7 @@ export function ApmAppRoot({
 
                                             <Routes>
                                               <Route
+                                                path="*"
                                                 component={
                                                   ScrollToTopOnPathChange
                                                 }

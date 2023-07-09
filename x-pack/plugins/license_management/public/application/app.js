@@ -31,7 +31,7 @@ export const App = ({ telemetry, executionContext }) => {
   const permissionsError = useSelector(getPermissionsError);
 
   const dispatch = useDispatch();
-  const loadPermissions = useCallback(() => dispatch(loadPermissionsAction), [dispatch]);
+  const loadPermissions = useCallback(() => dispatch(loadPermissionsAction()), [dispatch]);
 
   useExecutionContext(executionContext, {
     type: 'application',
@@ -110,7 +110,7 @@ export const App = ({ telemetry, executionContext }) => {
     <EuiPageBody>
       <Routes>
         <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
-        <Route path={'/'} component={withTelemetry(LicenseDashboard)} />
+        <Route path="*" component={withTelemetry(LicenseDashboard)} />
       </Routes>
     </EuiPageBody>
   );

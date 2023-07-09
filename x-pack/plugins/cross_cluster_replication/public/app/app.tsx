@@ -168,14 +168,14 @@ class AppComponent extends Component<AppProps, AppState> {
     return (
       <Router history={this.props.history}>
         <Routes>
-          <Route path="*" exact>
-            <Redirect to="/follower_indices" />
-          </Route>
           <Route exact path="/auto_follow_patterns/add" component={AutoFollowPatternAdd} />
           <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
           <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />
           <Route exact path="/follower_indices/edit/:id" component={FollowerIndexEdit} />
           <Route exact path={'/:section'} component={CrossClusterReplicationHome} />
+          <Route path="*">
+            <Redirect to="/follower_indices" />
+          </Route>
         </Routes>
       </Router>
     );

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { Location } from 'history';
 import { Redirect, useLocation } from 'react-router-dom';
 
 /**
@@ -13,8 +14,8 @@ import { Redirect, useLocation } from 'react-router-dom';
  * @param pathname
  */
 export function redirectTo(pathname: string) {
-  return () => {
-    return <RenderRedirectTo pathname={pathname} />;
+  return ({ location }: RouteComponentProps<{}>) => {
+    return <RenderRedirectTo location={location} pathname={pathname} />;
   };
 }
 
@@ -24,10 +25,11 @@ export function redirectTo(pathname: string) {
  */
 export function RedirectTo({ pathname }: { pathname: string }) {
   const location = useLocation();
-  return <RenderRedirectTo pathname={pathname} />;
+  return <RenderRedirectTo location={location} pathname={pathname} />;
 }
 
 interface Props {
+  location: Location;
   pathname: string;
 }
 
@@ -36,7 +38,7 @@ interface Props {
  * backward-compatibilty with legacy (pre-7.9) hash-based URLs.
  */
 export function RenderRedirectTo(props: Props) {
-  const location = useLocation();
+  const { location } = props;
   let search = location.search;
   let pathname = props.pathname;
 

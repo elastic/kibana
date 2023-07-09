@@ -47,28 +47,34 @@ export const ManagementRouter = memo(
 
     return (
       <Router history={history}>
-        <Routes>
+        <Routes compat={false}>
           {sections.map((section) =>
-            section.getAppsEnabled().map((app) => (
-              <Route path={`${app.basePath}`}>
-                <ManagementAppWrapper
-                  app={app}
-                  setBreadcrumbs={setBreadcrumbs}
-                  onAppMounted={onAppMounted}
-                  history={history}
-                  theme$={theme$}
+            section
+              .getAppsEnabled()
+              .map((app) => (
+                <Route
+                  path={`${app.basePath}`}
+                  component={() => (
+                    <ManagementAppWrapper
+                      app={app}
+                      setBreadcrumbs={setBreadcrumbs}
+                      onAppMounted={onAppMounted}
+                      history={history}
+                      theme$={theme$}
+                    />
+                  )}
                 />
-              </Route>
-            ))
+              ))
           )}
           {sections.map((section) =>
             section
               .getAppsEnabled()
               .filter((app) => app.redirectFrom)
               .map((app) => (
-                <Route path={`/${app.redirectFrom}*`}>
-                  <Redirect to={`${app.basePath}*`} />
-                </Route>
+                <Route
+                  path={`/${app.redirectFrom}*`}
+                  component={() => <Redirect to={`${app.basePath}*`} />}
+                />
               ))
           )}
 

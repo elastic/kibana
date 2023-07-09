@@ -22,7 +22,7 @@ const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
 export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         path={`${props.match.url}/:nodeType(${ITEM_TYPES})-detail/:nodeId`}
         component={RedirectToNodeDetail}

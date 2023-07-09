@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -16,83 +17,68 @@ import { routing } from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { FollowerIndicesList } from './follower_indices_list';
 
-export class CrossClusterReplicationHome extends PureComponent {
-  state = {
-    activeSection: 'follower_indices',
-  };
+const TABS = [
+  {
+    id: 'follower_indices',
+    name: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
+        defaultMessage="Follower indices"
+      />
+    ),
+    testSubj: 'followerIndicesTab',
+  },
+  {
+    id: 'auto_follow_patterns',
+    name: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
+        defaultMessage="Auto-follow patterns"
+      />
+    ),
+    testSubj: 'autoFollowPatternsTab',
+  },
+];
 
-  tabs = [
-    {
-      id: 'follower_indices',
-      name: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
-          defaultMessage="Follower indices"
-        />
-      ),
-      testSubj: 'followerIndicesTab',
-    },
-    {
-      id: 'auto_follow_patterns',
-      name: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
-          defaultMessage="Auto-follow patterns"
-        />
-      ),
-      testSubj: 'autoFollowPatternsTab',
-    },
-  ];
+export const CrossClusterReplicationHome = () => {
+  const { section: activeSection = 'follower_indices' } = useParams();
 
-  componentDidMount() {
+  useEffect(() => {
     setBreadcrumbs([listBreadcrumb()]);
-  }
+  }, []);
 
-  static getDerivedStateFromProps(props) {
-    const {
-      match: {
-        params: { section },
-      },
-    } = props;
-    return {
-      activeSection: section,
-    };
-  }
-
-  onSectionChange = (section) => {
+  const onSectionChange = useCallback((section) => {
     setBreadcrumbs([listBreadcrumb(`/${section}`)]);
     routing.navigate(`/${section}`);
-  };
+  }, []);
 
-  render() {
-    return (
-      <>
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <span data-test-subj="appTitle">
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                defaultMessage="Cross-Cluster Replication"
-              />
-            </span>
-          }
-          tabs={this.tabs.map((tab) => ({
-            onClick: () => this.onSectionChange(tab.id),
-            isSelected: tab.id === this.state.activeSection,
-            key: tab.id,
-            'data-test-subj': tab.testSubj,
-            label: tab.name,
-          }))}
-        />
+  return (
+    <>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <span data-test-subj="appTitle">
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
+              defaultMessage="Cross-Cluster Replication"
+            />
+          </span>
+        }
+        tabs={TABS.map((tab) => ({
+          onClick: () => onSectionChange(tab.id),
+          isSelected: tab.id === activeSection,
+          key: tab.id,
+          'data-test-subj': tab.testSubj,
+          label: tab.name,
+        }))}
+      />
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
 
-        <Routes>
-          <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
-          <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
-        </Routes>
-      </>
-    );
-  }
-}
+      <Routes compat={false}>
+        <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
+        <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
+      </Routes>
+    </>
+  );
+};

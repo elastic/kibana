@@ -13,7 +13,7 @@ import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { Route, Router } from '@kbn/shared-ux-router';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { SecurityLicense } from '../../../common/licensing';
 import {
@@ -130,20 +130,22 @@ export const rolesManagementApp = Object.freeze({
                     onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
                   >
                     <Breadcrumb text={title} href="/">
-                      <Route path={'/'} exact={true}>
-                        <RolesGridPage
-                          notifications={notifications}
-                          rolesAPIClient={rolesAPIClient}
-                          history={history}
-                          readOnly={!startServices.application.capabilities.roles.save}
-                        />
-                      </Route>
-                      <Route path="/edit/:roleName?">
-                        <EditRolePageWithBreadcrumbs action="edit" />
-                      </Route>
-                      <Route path="/clone/:roleName">
-                        <EditRolePageWithBreadcrumbs action="clone" />
-                      </Route>
+                      <Routes>
+                        <Route path={'/'} exact={true}>
+                          <RolesGridPage
+                            notifications={notifications}
+                            rolesAPIClient={rolesAPIClient}
+                            history={history}
+                            readOnly={!startServices.application.capabilities.roles.save}
+                          />
+                        </Route>
+                        <Route path="/edit/:roleName?">
+                          <EditRolePageWithBreadcrumbs action="edit" />
+                        </Route>
+                        <Route path="/clone/:roleName">
+                          <EditRolePageWithBreadcrumbs action="clone" />
+                        </Route>
+                      </Routes>
                     </Breadcrumb>
                   </BreadcrumbsProvider>
                 </Router>

@@ -145,7 +145,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       <DashboardMountContext.Provider value={mountContext}>
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <HashRouter>
-            <Routes>
+            <Routes compat={false}>
               <Route path={CREATE_NEW_DASHBOARD_URL} render={renderDashboard} />
               <Route path={`${VIEW_DASHBOARD_URL}/:id`} render={renderDashboard} />
               <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
