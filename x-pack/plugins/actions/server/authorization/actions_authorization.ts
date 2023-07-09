@@ -29,10 +29,9 @@ export interface ConstructorOptions {
 }
 
 const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz']) => string[]> = {
-  execute: (authorization, additionalPrivileges: string[] = []) => [
+  execute: (authorization) => [
     authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'get'),
     authorization.actions.savedObject.get(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
-    ...additionalPrivileges,
   ],
   list: (authorization) => [
     authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'find'),

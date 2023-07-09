@@ -19,32 +19,3 @@ export const NumberFromString = new rt.Type<number, string, unknown>(
     }),
   String
 );
-
-export const PaginationSchema = new rt.Type<
-  { page?: number; perPage?: number },
-  { page?: number; perPage?: number },
-  unknown
->(
-  'Test',
-  rt.partial({ page: rt.number, perPage: rt.number }).is,
-  (u, c) =>
-    either.chain(rt.partial({ page: rt.number, perPage: rt.number }).validate(u, c), (params) => {
-      if (params.page == null && params.perPage) {
-        return rt.success(params);
-      }
-
-      const pageAsNumber = params.page ?? 0;
-      const perPageAsNumber = params.perPage ?? 0;
-
-      if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > 10) {
-        return rt.failure(
-          u,
-          c,
-          `The number of documents is too high. Paginating through more than ${10} documents is not possible.`
-        );
-      }
-
-      return rt.success(params);
-    }),
-  rt.identity
-);

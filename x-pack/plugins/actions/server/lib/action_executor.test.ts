@@ -812,7 +812,7 @@ test('successfully authorize system actions', async () => {
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
-    kibanaPrivileges: ['cases/create'],
+    kibanaPrivileges: ['test/create'],
     isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
@@ -824,13 +824,13 @@ test('successfully authorize system actions', async () => {
 
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   actionTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
-  actionTypeRegistry.getSystemActionRequiredKibanaPrivileges.mockReturnValueOnce(['cases/create']);
+  actionTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
   await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
 
   expect(authorizationMock.ensureAuthorized).toBeCalledWith({
     operation: 'execute',
-    additionalPrivileges: ['cases/create'],
+    additionalPrivileges: ['test/create'],
   });
 });
 

@@ -501,7 +501,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should authenticate correctly system actions with kibana privileges', async () => {
+        it('should authorize system actions correctly', async () => {
           const connectorId = 'system-connector-test.system-action-kibana-privileges';
           const name = 'System action: test.system-action-kibana-privileges';
 

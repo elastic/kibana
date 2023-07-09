@@ -103,7 +103,7 @@ export class ActionTypeRegistry {
   /**
    * Returns the kibana privileges of an action type
    */
-  public getSystemActionRequiredKibanaPrivileges(actionTypeId: string): string[] {
+  public getSystemActionKibanaPrivileges(actionTypeId: string): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
     if (!actionType?.isSystemActionType) {

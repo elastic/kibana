@@ -207,7 +207,7 @@ describe('ensureAuthorized', () => {
     await actionsAuthorization.ensureAuthorized({
       operation: 'execute',
       actionTypeId: 'myType',
-      additionalPrivileges: ['cases/create'],
+      additionalPrivileges: ['test/create'],
     });
 
     expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
@@ -224,7 +224,7 @@ describe('ensureAuthorized', () => {
       kibana: [
         mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
         mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
-        'cases/create',
+        'test/create',
       ],
     });
   });

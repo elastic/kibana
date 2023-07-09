@@ -718,15 +718,13 @@ export class ActionsClient {
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
-  private getSystemActionRequiredKibanaPrivileges(actionId: string) {
+  private getSystemActionKibanaPrivileges(actionId: string) {
     const inMemoryConnector = this.inMemoryConnectors.find(
       (connector) => connector.id === actionId
     );
 
     const additionalPrivileges = inMemoryConnector?.isSystemAction
-      ? this.actionTypeRegistry.getSystemActionRequiredKibanaPrivileges(
-          inMemoryConnector.actionTypeId
-        )
+      ? this.actionTypeRegistry.getSystemActionKibanaPrivileges(inMemoryConnector.actionTypeId)
       : [];
 
     return additionalPrivileges;
@@ -744,7 +742,7 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      const additionalPrivileges = this.getSystemActionRequiredKibanaPrivileges(actionId);
+      const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId);
       await this.authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
@@ -768,7 +766,8 @@ export class ActionsClient {
     ) {
       /**
        * For scheduled executions the additional authorization check
-       * will be performed inside the ActionExecutor at execution time
+       * for system actions (kibana privileges) will be performed
+       * inside the ActionExecutor at execution time
        */
       await this.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
@@ -791,7 +790,8 @@ export class ActionsClient {
     if (authCounts[AuthorizationMode.RBAC] > 0) {
       /**
        * For scheduled executions the additional authorization check
-       * will be performed inside the ActionExecutor at execution time
+       * for system actions (kibana privileges) will be performed
+       * inside the ActionExecutor at execution time
        */
       await this.authorization.ensureAuthorized({ operation: 'execute' });
     }

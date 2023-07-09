@@ -2831,7 +2831,7 @@ describe('execute()', () => {
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
-        kibanaPrivileges: ['cases/create'],
+        kibanaPrivileges: ['test/create'],
         validate: {
           config: { schema: schema.object({}) },
           secrets: { schema: schema.object({}) },
@@ -2848,7 +2848,7 @@ describe('execute()', () => {
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: 'execute',
-        additionalPrivileges: ['cases/create'],
+        additionalPrivileges: ['test/create'],
       });
     });
 
@@ -2896,7 +2896,7 @@ describe('execute()', () => {
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['alerting'],
-        kibanaPrivileges: ['cases/create'],
+        kibanaPrivileges: ['test/create'],
         validate: {
           config: { schema: schema.object({}) },
           secrets: { schema: schema.object({}) },
