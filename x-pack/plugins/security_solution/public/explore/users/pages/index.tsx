@@ -17,7 +17,7 @@ import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './const
 
 export const UsersContainer = React.memo(() => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={usersTabPath}>
         <Users />
       </Route>

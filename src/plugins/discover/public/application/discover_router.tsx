@@ -35,7 +35,7 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
   );
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={prefixPath('context/:dataViewId/:id')}>
         <ContextAppRoute />
       </Route>
@@ -113,7 +113,7 @@ export const DiscoverRouter = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <Routes>
+          <Routes compat={false}>
             <Route path={addProfile('', ':profile')}>
               <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
             </Route>
