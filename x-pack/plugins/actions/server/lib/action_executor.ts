@@ -117,14 +117,8 @@ export class ActionExecutor {
         },
       },
       async (span) => {
-        const {
-          spaces,
-          getServices,
-          actionTypeRegistry,
-          eventLogger,
-          inMemoryConnectors,
-          security,
-        } = this.actionExecutorContext!;
+        const { spaces, getServices, actionTypeRegistry, eventLogger, security } =
+          this.actionExecutorContext!;
 
         const services = getServices(request);
         const spaceId = spaces && spaces.getSpaceId(request);
@@ -132,12 +126,7 @@ export class ActionExecutor {
 
         const actionInfo =
           actionInfoFromTaskRunner ||
-          (await this.getActionInfoInternal(
-            actionId,
-            request,
-            namespace.namespace,
-            inMemoryConnectors
-          ));
+          (await this.getActionInfoInternal(actionId, request, namespace.namespace));
 
         const { actionTypeId, name, config, secrets } = actionInfo;
 
@@ -358,17 +347,12 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const { spaces, inMemoryConnectors, eventLogger } = this.actionExecutorContext!;
+    const { spaces, eventLogger } = this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
-      this.actionInfo = await this.getActionInfoInternal(
-        actionId,
-        request,
-        namespace.namespace,
-        inMemoryConnectors
-      );
+      this.actionInfo = await this.getActionInfoInternal(actionId, request, namespace.namespace);
     }
     const task = taskInfo
       ? {
@@ -410,10 +394,9 @@ export class ActionExecutor {
   public async getActionInfoInternal(
     actionId: string,
     request: KibanaRequest,
-    namespace: string | undefined,
-    inMemoryConnectors: InMemoryConnector[]
+    namespace: string | undefined
   ): Promise<ActionInfo> {
-    const { encryptedSavedObjectsClient } = this.actionExecutorContext!;
+    const { encryptedSavedObjectsClient, inMemoryConnectors } = this.actionExecutorContext!;
 
     // check to see if it's in memory action first
     const inMemoryAction = inMemoryConnectors.find(
