@@ -92,7 +92,7 @@ const RulesContainerComponent: React.FC = () => {
               <route.main />
             </Route>
           ))}
-          <Route component={NotFoundPage} />
+          <Route path="*" component={NotFoundPage} />
           <SpyRoute pageName={SecurityPageName.rules} />
         </Routes>
       </TrackApplicationView>

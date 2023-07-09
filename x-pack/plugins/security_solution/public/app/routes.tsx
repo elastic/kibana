@@ -58,7 +58,7 @@ const PageRouterComponent: FC<RouterProps> = ({
                 <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
               </CasesContext>
             </Route>
-            <Route>
+            <Route path="*">
               <NotFoundPage />
             </Route>
           </Routes>

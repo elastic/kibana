@@ -17,17 +17,6 @@ import { waitFor } from '@testing-library/dom';
 
 jest.mock('../../containers/api');
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
-
 const defaultProps = {
   caseData: basicCase,
   currentExternalIncident: null,

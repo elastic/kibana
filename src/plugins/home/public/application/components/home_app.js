@@ -87,7 +87,7 @@ export function HomeApp({ directories, solutions }) {
               isCloudEnabled={isCloudEnabled}
             />
           </Route>
-          <Route>
+          <Route path="*">
             <Redirect to="/" />
           </Route>
         </Routes>

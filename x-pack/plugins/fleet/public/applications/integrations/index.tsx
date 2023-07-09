@@ -32,7 +32,7 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
   return isAllowed ? (
     <Route {...routeProps} />
   ) : (
-    <Route>
+    <Route path="*">
       <Redirect to={{ pathname: restrictedPath }} />
     </Route>
   );

@@ -28,7 +28,7 @@ export const renderApp = (
         <Router history={history}>
           <Routes>
             <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
-            <Route>
+            <Route path="*">
               <Main basename={appBasePath} {...coreStart} {...deps} />
             </Route>
           </Routes>

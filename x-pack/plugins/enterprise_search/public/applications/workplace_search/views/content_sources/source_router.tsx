@@ -66,7 +66,7 @@ export const SourceRouter: React.FC = () => {
   const showSynchronization = !isCustomSource && isOrganization;
 
   return (
-    <Routes compat={false}>
+    <Routes>
       <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
         <Overview />
       </Route>
@@ -96,7 +96,7 @@ export const SourceRouter: React.FC = () => {
       <Route exact path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}>
         <SourceSettings />
       </Route>
-      <Route>
+      <Route path="*">
         <NotFound isOrganization={isOrganization} pageChrome={[NAV.SOURCES]} />
       </Route>
     </Routes>

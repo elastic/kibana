@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
@@ -36,16 +36,17 @@ interface MatchParams {
 
 export function useStepFromQueryString() {
   const history = useHistory();
+  const location = useLocation();
   const activeStep = useMemo(() => {
-    const params = new URLSearchParams(history.location.search);
+    const params = new URLSearchParams(location.search);
     if (params.has('step')) {
       return params.get('step') as WizardSection;
     }
-  }, [history.location.search]);
+  }, [location.search]);
 
   const updateStep = useCallback(
     (stepId: string) => {
-      const params = new URLSearchParams(history.location.search);
+      const params = new URLSearchParams(location.search);
       if (params.has('step')) {
         params.set('step', stepId);
         history.push({
@@ -53,7 +54,7 @@ export function useStepFromQueryString() {
         });
       }
     },
-    [history]
+    [history, location]
   );
 
   return { activeStep, updateStep };

@@ -13,7 +13,7 @@ import { basicCase } from '../../containers/mock';
 
 import { Description } from '.';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
@@ -147,11 +147,10 @@ describe('Description', () => {
   });
 
   it('should hide the edit button when the user does not have update permissions', () => {
-    appMockRender.render(
-      <TestProviders permissions={noUpdateCasesPermissions()}>
-        <Description {...defaultProps} onUpdateField={onUpdateField} />
-      </TestProviders>
-    );
+    appMockRender = createAppMockRenderer({
+      permissions: noUpdateCasesPermissions(),
+    });
+    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
     expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();

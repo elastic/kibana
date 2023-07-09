@@ -40,7 +40,7 @@ export const renderApp = ({
           {subPluginRoutes.map((route, index) => {
             return <Route key={`route-${index}`} {...route} />;
           })}
-          <Route>
+          <Route path="*">
             <NotFoundPage />
           </Route>
         </Routes>

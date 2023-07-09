@@ -55,7 +55,7 @@ const App = React.memo(() => {
           </Suspense>
         </Route>
       ) : null}
-      <Route>
+      <Route path="*">
         <Suspense fallback={<EuiLoadingSpinner />}>
           <MaintenanceWindowsLazy />
         </Suspense>

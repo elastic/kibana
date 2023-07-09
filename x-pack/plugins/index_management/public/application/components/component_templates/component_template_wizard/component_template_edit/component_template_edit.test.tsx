@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import { useStepFromQueryString } from './component_template_edit';
+import { Router } from '@kbn/shared-ux-router';
 
 describe('useStepFromQueryString', () => {
   it('should return undefined if no step is set in the url', () => {
@@ -18,7 +20,9 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { activeStep },
       },
-    } = renderHook(() => useStepFromQueryString());
+    } = renderHook(() => useStepFromQueryString(), {
+      wrapper: ({ children }) => <Router history={history}>{children}</Router>,
+    });
 
     expect(activeStep).not.toBeDefined();
   });
@@ -31,7 +35,9 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { activeStep },
       },
-    } = renderHook(() => useStepFromQueryString());
+    } = renderHook(() => useStepFromQueryString(), {
+      wrapper: ({ children }) => <Router history={history}>{children}</Router>,
+    });
 
     expect(activeStep).toBe('mappings');
   });
@@ -44,7 +50,9 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { updateStep },
       },
-    } = renderHook(() => useStepFromQueryString());
+    } = renderHook(() => useStepFromQueryString(), {
+      wrapper: ({ children }) => <Router history={history}>{children}</Router>,
+    });
 
     updateStep('aliases');
 
@@ -59,7 +67,9 @@ describe('useStepFromQueryString', () => {
       result: {
         current: { updateStep },
       },
-    } = renderHook(() => useStepFromQueryString());
+    } = renderHook(() => useStepFromQueryString(), {
+      wrapper: ({ children }) => <Router history={history}>{children}</Router>,
+    });
 
     updateStep('aliases');
     expect(history.location.search).toBe('?step=aliases');

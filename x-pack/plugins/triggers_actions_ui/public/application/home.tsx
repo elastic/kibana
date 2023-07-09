@@ -137,7 +137,7 @@ export const TriggersActionsUIHome: React.FunctionComponent = () => {
                 </EuiPageTemplate.Section>
               </Route>
             ) : (
-              <Route>
+              <Route path="*">
                 <Redirect to={routeToRules} />
               </Route>
             )}

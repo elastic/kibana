@@ -26,7 +26,7 @@ export const graphRouter = (deps: GraphServices) => {
         <Route path="/workspace/:id?">
           <WorkspaceRoute deps={deps} />
         </Route>
-        <Route>
+        <Route path="*">
           <Redirect exact to="/home" />
         </Route>
       </Routes>

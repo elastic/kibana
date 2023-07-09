@@ -29,7 +29,7 @@ export const CustomLanguagesOverview = () => {
   return Component ? (
     <Component />
   ) : (
-    <Route>
+    <Route path="*">
       <Redirect to={getPath('integrations_all')} />
     </Route>
   );

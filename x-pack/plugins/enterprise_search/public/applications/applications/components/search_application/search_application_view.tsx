@@ -88,23 +88,25 @@ export const SearchApplicationView: React.FC = () => {
           onClose={closeDeleteSearchApplicationModal}
         />
       ) : null}
-      <Routes compat={false}>
+      <Routes>
         <Route
           exact
           path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.PREVIEW}`}
           component={SearchApplicationSearchPreview}
         />
         <Route path={SEARCH_APPLICATION_CONTENT_PATH} component={SearchApplicationContent} />
-        <Redirect
-          from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}`}
-          to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}/${SearchApplicationContentTabs.INDICES}`}
-        />
+        <Route path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}`}>
+          <Redirect
+            to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}/${SearchApplicationContentTabs.INDICES}`}
+          />
+        </Route>
         <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={SearchApplicationConnect} />
-        <Redirect
-          from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}`}
-          to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
-        />
-        <Route>
+        <Route path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}`}>
+          <Redirect
+            to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
+          />
+        </Route>
+        <Route path="*">
           <EnterpriseSearchApplicationsPageTemplate
             isEmptyState
             pageChrome={[searchApplicationName]}

@@ -22,7 +22,7 @@ import { SearchApplicationsList } from './search_applications_list';
 
 export const SearchApplicationsRouter: React.FC = () => {
   return (
-    <Routes compat={false}>
+    <Routes>
       <Route exact path={SEARCH_APPLICATIONS_PATH}>
         <SearchApplicationsList />
       </Route>
@@ -32,7 +32,7 @@ export const SearchApplicationsRouter: React.FC = () => {
       <Route path={SEARCH_APPLICATION_PATH}>
         <SearchApplicationRouter />
       </Route>
-      <Route>
+      <Route path="*">
         <NotFound />
       </Route>
     </Routes>

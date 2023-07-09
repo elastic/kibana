@@ -76,7 +76,7 @@ const NetworkContainerComponent = () => {
           />
         )}
       />
-      <Route>
+      <Route path="*">
         <Redirect
           to={{
             pathname: NETWORK_PATH,

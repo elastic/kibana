@@ -27,11 +27,9 @@ describe('HeaderPage', () => {
 
   it('renders', () => {
     const result = appMock.render(
-      <TestProviders>
-        <HeaderPage border title="Test title">
-          <p>{'Test supplement'}</p>
-        </HeaderPage>
-      </TestProviders>
+      <HeaderPage border title="Test title">
+        <p>{'Test supplement'}</p>
+      </HeaderPage>
     );
 
     expect(result.getByText('Test title')).toBeInTheDocument();

@@ -152,7 +152,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
               <Route exact path="/">
                 <Redirect to={LANDING_PAGE_PATH} />
               </Route>
-              <Route>
+              <Route path="*">
                 <DashboardNoMatch />
               </Route>
             </Routes>

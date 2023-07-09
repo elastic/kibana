@@ -66,9 +66,9 @@ export const App: React.FunctionComponent = () => {
           </PageLoading>
         ) : hasPrivileges ? (
           <div data-test-subj="snapshotRestoreApp" className={APP_WRAPPER_CLASS}>
-            <Routes compat={false}>
+            <Routes>
               <Route exact path="/add_repository" component={RepositoryAdd} />
-              <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
+              <Route exact path="/edit_repository/:name?" component={RepositoryEdit} />
               <Route
                 exact
                 path={`/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
@@ -79,15 +79,12 @@ export const App: React.FunctionComponent = () => {
               </Route>
               <Route
                 exact
-                path="/restore/:repositoryName/:snapshotId*"
+                path="/restore/:repositoryName?/:snapshotId?"
                 component={RestoreSnapshot}
               />
               {slmUi.enabled && <Route exact path="/add_policy" component={PolicyAdd} />}
-              {slmUi.enabled && <Route exact path="/edit_policy/:name*" component={PolicyEdit} />}
-              <Route path="/">
-                <Redirect to={`/${DEFAULT_SECTION}`} />
-              </Route>
-              <Route path="">
+              {slmUi.enabled && <Route exact path="/edit_policy/:name?" component={PolicyEdit} />}
+              <Route path="*">
                 <Redirect to={`/${DEFAULT_SECTION}`} />
               </Route>
             </Routes>

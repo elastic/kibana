@@ -128,10 +128,10 @@ export const SnapshotRestoreHome: React.FunctionComponent = () => {
 
       <EuiSpacer size="l" />
 
-      <Routes compat={false}>
+      <Routes>
         <Route
           exact
-          path={`${BASE_PATH}/repositories/:repositoryName`}
+          path={`${BASE_PATH}/repositories/:repositoryName?`}
           component={RepositoryList}
         />
         {/* We have two separate SnapshotList routes because repository names could have slashes in
@@ -139,12 +139,12 @@ export const SnapshotRestoreHome: React.FunctionComponent = () => {
          */}
         <Route exact path={`${BASE_PATH}/snapshots`} component={SnapshotList} />
         <Route
-          exact
-          path={`${BASE_PATH}/snapshots/:repositoryName/:snapshotId`}
+          // exact
+          path={`${BASE_PATH}/snapshots/:repositoryName?/:snapshotId?`}
           component={SnapshotList}
         />
         <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
-        <Route exact path={`${BASE_PATH}/policies/:policyName`} component={PolicyList} />
+        <Route exact path={`${BASE_PATH}/policies/:policyName?`} component={PolicyList} />
       </Routes>
     </>
   );
