@@ -97,7 +97,6 @@ export const createPureLogExplorerProfileStateMachine = (
     },
     {
       actions: {
-        notifyDatasetSelectionRestoreFailed: actions.pure(() => undefined),
         storeDatasetSelection: actions.assign((_context, event) =>
           'data' in event && isDatasetSelection(event.data)
             ? {
