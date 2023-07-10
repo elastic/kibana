@@ -20,7 +20,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template'
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
@@ -190,7 +190,7 @@ export const PolicyFormLayout = React.memo(() => {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        </KibanaPageTemplate.BottomBar>
+      </KibanaPageTemplate.BottomBar>
     </>
   );
 });
