@@ -77,9 +77,15 @@ export const TestProvidersComponent: React.FC<Props> = ({
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
               augmentMessageCodeBlocks={jest.fn()}
+              baseAllow={[]}
+              baseAllowReplacement={[]}
+              defaultAllow={[]}
+              defaultAllowReplacement={[]}
               getComments={mockGetComments}
               getInitialConversations={mockGetInitialConversations}
               setConversations={jest.fn()}
+              setDefaultAllow={jest.fn()}
+              setDefaultAllowReplacement={jest.fn()}
               http={mockHttp}
             >
               <QueryClientProvider client={queryClient}>
@@ -124,9 +130,15 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
               augmentMessageCodeBlocks={jest.fn()}
+              baseAllow={[]}
+              baseAllowReplacement={[]}
+              defaultAllow={[]}
+              defaultAllowReplacement={[]}
               getComments={mockGetComments}
               getInitialConversations={mockGetInitialConversations}
               setConversations={jest.fn()}
+              setDefaultAllow={jest.fn()}
+              setDefaultAllowReplacement={jest.fn()}
               http={mockHttp}
             >
               <UserPrivilegesProvider

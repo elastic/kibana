@@ -6,7 +6,6 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
-import { INSUFFICIENT_FLEET_PERMISSIONS } from '@kbn/synthetics-plugin/server/synthetics_service/project_monitor/project_monitor_formatter';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -406,7 +405,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
               '-' +
               testPolicyId
         );
@@ -440,7 +439,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
+            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
               '-' +
               testPolicyId
         );
@@ -505,17 +504,14 @@ export default function ({ getService }: FtrProviderContext) {
         const { total } = savedObjectsResponse.body;
         expect(total).to.eql(2);
 
-        const {
-          body: { message },
-        } = await supertestWithoutAuth
+        await supertestWithoutAuth
           .delete(
             SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
           )
           .set('kbn-xsrf', 'true')
           .auth(username, password)
           .send({ monitors: monitorsToDelete })
-          .expect(403);
-        expect(message).to.eql(INSUFFICIENT_FLEET_PERMISSIONS);
+          .expect(200);
       } finally {
         await supertest
           .delete(

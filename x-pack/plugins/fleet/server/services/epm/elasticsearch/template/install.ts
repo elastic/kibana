@@ -11,18 +11,9 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
-import {
-  FILE_STORAGE_INTEGRATION_INDEX_NAMES,
-  FILE_STORAGE_INTEGRATION_NAMES,
-} from '../../../../../common/constants';
-
 import { ElasticsearchAssetType } from '../../../../types';
 import {
-  getFileWriteIndexName,
-  getFileStorageWriteIndexBody,
   getPipelineNameForDatastream,
-  getFileDataIndexName,
-  getFileMetadataIndexName,
   getRegistryDataStreamAssetBaseName,
 } from '../../../../../common/services';
 import type {
@@ -440,63 +431,6 @@ export async function ensureDefaultComponentTemplates(
   );
 }
 
-/*
- * Given a list of integration names, if the integrations support file upload
- * then ensure that the alias has a matching write index, as we use "plain" indices
- * not data streams.
- * e.g .fleet-file-data-agent must have .fleet-file-data-agent-00001 as the write index
- * before files can be uploaded.
- */
-export async function ensureFileUploadWriteIndices(opts: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  integrationNames: string[];
-}) {
-  const { esClient, logger, integrationNames } = opts;
-
-  const integrationsWithFileUpload = integrationNames.filter((integration) =>
-    FILE_STORAGE_INTEGRATION_NAMES.includes(integration as any)
-  );
-
-  if (!integrationsWithFileUpload.length) return [];
-
-  const ensure = (aliasName: string) =>
-    ensureAliasHasWriteIndex({
-      esClient,
-      logger,
-      aliasName,
-      writeIndexName: getFileWriteIndexName(aliasName),
-      body: getFileStorageWriteIndexBody(aliasName),
-    });
-
-  return Promise.all(
-    integrationsWithFileUpload.flatMap((integrationName) => {
-      const {
-        name: indexName,
-        fromHost,
-        toHost,
-      } = FILE_STORAGE_INTEGRATION_INDEX_NAMES[integrationName];
-      const indexCreateRequests: Array<Promise<void>> = [];
-
-      if (fromHost) {
-        indexCreateRequests.push(
-          ensure(getFileDataIndexName(indexName)),
-          ensure(getFileMetadataIndexName(indexName))
-        );
-      }
-
-      if (toHost) {
-        indexCreateRequests.push(
-          ensure(getFileDataIndexName(indexName, true)),
-          ensure(getFileMetadataIndexName(indexName, true))
-        );
-      }
-
-      return indexCreateRequests;
-    })
-  );
-}
-
 export async function ensureComponentTemplate(
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -571,11 +505,12 @@ export function prepareTemplate({
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;
   const fields = loadFieldsFromYaml(pkg, dataStream.path);
-  const validFields = processFields(fields);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     experimentalDataStreamFeature?.features.tsdb;
+
+  const validFields = processFields(fields);
 
   const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
@@ -636,7 +571,6 @@ async function installTemplate({
     name: template.templateName,
     body: template.indexTemplate,
   };
-
   await retryTransientEsErrors(
     () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
     { logger }

@@ -7,7 +7,7 @@
 import CspRouter from './csp_router';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import type { CspPage, CspPageNavigationItem } from '../common/navigation/types';
 import { CspSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';

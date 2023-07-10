@@ -17,19 +17,16 @@ import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCode,
 } from '@elastic/eui';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 interface StepFourProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
-export const StepFour = (props: StepFourProps & RouteComponentProps<{ indexName: string }>) => {
-  const {
-    guidedOnboarding: { guidedOnboardingApi },
-    match: {
-      params: { indexName },
-    },
-  } = props;
+export const StepFour: React.FC<StepFourProps> = ({
+  guidedOnboarding: { guidedOnboardingApi },
+}) => {
+  const { indexName } = useParams<{ indexName: string }>();
 
   const [, setIsTourStepOpen] = useState<boolean>(false);
 

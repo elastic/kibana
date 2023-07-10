@@ -30,9 +30,10 @@ export interface Props {
   };
   totalSamples: number;
   totalSeconds: number;
+  samplingRate: number;
 }
 
-export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Props) {
+export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samplingRate }: Props) {
   const coPilotService = useCoPilot();
 
   const promptParams = useMemo(() => {
@@ -84,11 +85,16 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
     sourceLine,
   });
 
+  // Are the results sampled? If yes, prepend a '~'.
+  const isApproximate = (samplingRate ?? 1.0) === 1.0;
+  const prependString = isApproximate ? undefined : '~';
+
   const impactRows = getImpactRows({
     countInclusive,
     countExclusive,
     totalSamples,
     totalSeconds,
+    isApproximate,
   });
 
   return (
@@ -138,7 +144,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KeyValueList rows={impactRows} />
+              <KeyValueList rows={impactRows} prependString={prependString} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

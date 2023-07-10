@@ -14,7 +14,10 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationServiceType,
+  getAnnotationAccessor,
+} from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -24,7 +27,8 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { isEqual } from 'lodash';
-import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -36,8 +40,8 @@ import {
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import {
+  DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
-  DimensionEditor,
 } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import type {
@@ -79,7 +83,6 @@ import {
   getUniqueLabels,
   onAnnotationDrop,
   isDateHistogram,
-  getSingleColorAnnotationConfig,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -94,6 +97,7 @@ import {
   getVisualizationType,
   isAnnotationsLayer,
   isBucketed,
+  isByReferenceAnnotationsLayer,
   isDataLayer,
   isNumericDynamicMetric,
   isReferenceLayer,
@@ -102,10 +106,9 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import type { XYState } from './types';
+import type { XYByValueAnnotationLayerConfig, XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
-import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
@@ -127,6 +130,7 @@ export const getXyVisualization = ({
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
+  dataViewsService,
   savedObjectsTagging,
 }: {
   core: CoreStart;
@@ -138,6 +142,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): Visualization<State, PersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
@@ -169,10 +174,25 @@ export const getXyVisualization = ({
       if (isAnnotationsLayer(toCopyLayer)) {
         toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
       }
-      const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
+
+      let newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
         clonedIDsMap.get(id)
       );
+
       newLayer.layerId = newLayerId;
+
+      if (isAnnotationsLayer(newLayer) && isByReferenceAnnotationsLayer(newLayer)) {
+        const byValueVersion: XYByValueAnnotationLayerConfig = {
+          annotations: newLayer.annotations,
+          ignoreGlobalFilters: newLayer.ignoreGlobalFilters,
+          layerId: newLayer.layerId,
+          layerType: newLayer.layerType,
+          indexPatternId: newLayer.indexPatternId,
+        };
+
+        newLayer = byValueVersion;
+      }
+
       return {
         ...state,
         layers: [...state.layers, newLayer],
@@ -278,7 +298,13 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state, setState, isSaveable) {
+  getSupportedActionsForLayer(
+    layerId,
+    state,
+    setState,
+    registerLibraryAnnotationGroup,
+    isSaveable
+  ) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
@@ -288,15 +314,25 @@ export const getXyVisualization = ({
           state,
           layer,
           setState,
+          registerLibraryAnnotationGroup,
           core,
           isSaveable,
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,
+          kibanaTheme,
         })
       );
     }
     return actions;
+  },
+
+  getCustomRemoveLayerText(layerId, state) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    if (layer && isByReferenceAnnotationsLayer(layer)) {
+      return { title: `Delete "${layer.__lastSaved.title}"` };
+    }
   },
 
   hasLayerSettings({ state, layerId: currentLayerId }) {
@@ -651,9 +687,9 @@ export const getXyVisualization = ({
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
-      <AnnotationsPanel {...allProps} />
+      <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DimensionEditor {...allProps} />
+      <DataDimensionEditor {...allProps} />
     );
 
     render(
@@ -1142,7 +1178,7 @@ function getVisualizationInfo(
       palette.push(
         ...layer.annotations
           .filter(({ isHidden }) => !isHidden)
-          .map((annotation) => getSingleColorAnnotationConfig(annotation).color)
+          .map((annotation) => getAnnotationAccessor(annotation).color)
       );
     }
 

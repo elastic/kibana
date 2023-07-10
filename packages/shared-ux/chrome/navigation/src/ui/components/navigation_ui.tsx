@@ -6,32 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavGroup, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { FC } from 'react';
-import { NavHeader } from './navigation_header';
 
 interface Props {
-  homeRef: string;
   unstyled?: boolean;
   footerChildren?: React.ReactNode;
   dataTestSubj?: string;
 }
 
-export const NavigationUI: FC<Props> = ({
-  children,
-  unstyled,
-  footerChildren,
-  homeRef,
-  dataTestSubj,
-}) => {
-  const { euiTheme } = useEuiTheme();
-
+export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, dataTestSubj }) => {
   return (
     <>
-      <EuiCollapsibleNavGroup css={{ background: euiTheme.colors.darkestShade, height: '50px' }}>
-        <NavHeader homeHref={homeRef} />
-      </EuiCollapsibleNavGroup>
-
       {unstyled ? (
         <>{children}</>
       ) : (

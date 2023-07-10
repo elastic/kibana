@@ -7,9 +7,9 @@
 
 import React, { useCallback, useState, type FC } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { FieldStatsProps } from '@kbn/unified-field-list-plugin/public';
+import type { FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
 import { MLFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsFlyout } from './field_stats_flyout';
 

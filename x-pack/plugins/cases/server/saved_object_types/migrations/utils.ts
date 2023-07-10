@@ -13,6 +13,13 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import { isFunction, mapValues } from 'lodash';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
+import { CommentType } from '../../../common/api';
+import type { AttributesTypePersistableState, AttributesTypeUser } from '../../../common/api';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {
@@ -63,3 +70,38 @@ export const isDeferredMigration = (
       valid(minDeferredKibanaVersion) &&
       gte(migrationVersion, minDeferredKibanaVersion)
   );
+
+export const isUserCommentSO = (
+  doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
+): doc is SavedObjectUnsanitizedDoc<AttributesTypeUser> => {
+  return doc.attributes.type === CommentType.user;
+};
+
+export const isPersistableStateAttachmentSO = (
+  doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
+): doc is SavedObjectUnsanitizedDoc<AttributesTypePersistableState> => {
+  return doc.attributes.type === CommentType.persistableState;
+};
+
+interface GetLensMigrationsArgs<T> {
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  migratorFactory: (
+    migrate: MigrateFunction,
+    migrationVersion: string
+  ) => SavedObjectMigrationParams<T, T>;
+}
+
+export const getLensMigrations = <T>({
+  lensEmbeddableFactory,
+  migratorFactory,
+}: GetLensMigrationsArgs<T>) => {
+  const lensMigrations = lensEmbeddableFactory().migrations;
+  const lensMigrationObject = isFunction(lensMigrations) ? lensMigrations() : lensMigrations || {};
+
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationParams<T, T>>(
+    lensMigrationObject,
+    migratorFactory
+  );
+
+  return embeddableMigrations;
+};

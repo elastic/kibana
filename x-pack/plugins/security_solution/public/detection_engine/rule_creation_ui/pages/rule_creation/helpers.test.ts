@@ -85,6 +85,12 @@ describe('helpers', () => {
 
       expect(result).toEqual({ unit: 'ms', value: 0 });
     });
+
+    test('returns timeObj with unit of d and value 5 when time is 5d ', () => {
+      const result = getTimeTypeValue('5d');
+
+      expect(result).toEqual({ unit: 'd', value: 5 });
+    });
   });
 
   describe('filterEmptyThreats', () => {

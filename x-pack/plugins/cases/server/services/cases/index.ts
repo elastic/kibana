@@ -69,6 +69,7 @@ import type {
   PostCaseArgs,
   PatchCaseArgs,
   PatchCasesArgs,
+  GetCategoryArgs,
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
@@ -553,6 +554,36 @@ export class CasesService {
       return results?.aggregations?.tags?.buckets.map(({ key }) => key) ?? [];
     } catch (error) {
       this.log.error(`Error on GET tags: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getCategories({ filter }: GetCategoryArgs): Promise<string[]> {
+    try {
+      this.log.debug(`Attempting to GET all categories`);
+
+      const results = await this.unsecuredSavedObjectsClient.find<
+        unknown,
+        { categories: { buckets: Array<{ key: string }> } }
+      >({
+        type: CASE_SAVED_OBJECT,
+        page: 1,
+        perPage: 1,
+        filter,
+        aggs: {
+          categories: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.category`,
+              size: MAX_DOCS_PER_PAGE,
+              order: { _key: 'asc' },
+            },
+          },
+        },
+      });
+
+      return results?.aggregations?.categories?.buckets.map(({ key }) => key) ?? [];
+    } catch (error) {
+      this.log.error(`Error on GET categories: ${error}`);
       throw error;
     }
   }

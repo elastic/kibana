@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
   popover: {
-    getClearRangeButtonTitle: () =>
-      i18n.translate('controls.rangeSlider.popover.clearRangeTitle', {
-        defaultMessage: 'Clear range',
-      }),
     getNoDataHelpText: () =>
       i18n.translate('controls.rangeSlider.popover.noDataHelpText', {
         defaultMessage: 'Selected range resulted in no data. No filter was applied.',

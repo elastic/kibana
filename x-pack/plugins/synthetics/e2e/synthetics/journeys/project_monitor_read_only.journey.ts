@@ -65,7 +65,11 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
     // config in the process takes precedence
-    expect(newConfiguration).toEqual({ ...originalMonitorConfiguration, hash: '', revision: 2 });
+    expect(newConfiguration).toEqual({
+      ...originalMonitorConfiguration,
+      hash: '',
+      revision: 2,
+    });
   });
 
   step('Navigate to edit monitor', async () => {
@@ -89,6 +93,9 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
       alert: {
         status: {
           enabled: !(originalMonitorConfiguration?.alert?.status?.enabled as boolean),
+        },
+        tls: {
+          enabled: originalMonitorConfiguration?.alert?.tls?.enabled as boolean,
         },
       },
       enabled: !originalMonitorConfiguration?.enabled,

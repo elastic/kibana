@@ -13,9 +13,10 @@ import {
   EuiText,
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonIcon,
+  copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 function ConfigurationValueColumn({
   columnKey,
   value,
@@ -46,9 +47,19 @@ function ConfigurationValueColumn({
   }
 
   return (
-    <EuiText size="s" color="accent">
-      {value}
-    </EuiText>
+    <>
+      <EuiText size="s" color="accent">
+        {value}
+      </EuiText>
+      {value && (
+        <EuiButtonIcon
+          aria-label="Copy to clipboard"
+          color="text"
+          iconType="copy"
+          onClick={() => copyToClipboard(value)}
+        />
+      )}
+    </>
   );
 }
 

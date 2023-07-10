@@ -14,7 +14,7 @@ export const CLEAR_CHAT = i18n.translate('xpack.elasticAssistant.assistant.clear
 export const DEFAULT_ASSISTANT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.defaultAssistantTitle',
   {
-    defaultMessage: 'Elastic Assistant',
+    defaultMessage: 'Elastic AI Assistant',
   }
 );
 
@@ -47,7 +47,7 @@ export const SETTINGS_CONNECTOR_TITLE = i18n.translate(
 export const SETTINGS_PROMPT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.promptTitle',
   {
-    defaultMessage: 'System Prompt',
+    defaultMessage: 'System prompt',
   }
 );
 
@@ -55,6 +55,20 @@ export const SETTINGS_PROMPT_HELP_TEXT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.promptHelpTextTitle',
   {
     defaultMessage: 'Context provided before every conversation',
+  }
+);
+
+export const SHOW_ANONYMIZED = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleLabel',
+  {
+    defaultMessage: 'Show anonymized',
+  }
+);
+
+export const SHOW_ANONYMIZED_TOOLTIP = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showAnonymizedTooltip',
+  {
+    defaultMessage: 'Show the anonymized values sent to and from the assistant',
   }
 );
 

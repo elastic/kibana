@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { IExecutionKPIResult } from '@kbn/alerting-plugin/common';
 import {
   ComponentOpts as RuleApis,
@@ -130,12 +130,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
   const isLoadingData = useMemo(() => isLoading || !kpi, [isLoading, kpi]);
 
   const getStatDescription = (element: React.ReactNode) => {
-    return (
-      <>
-        {element}
-        <EuiSpacer size="s" />
-      </>
-    );
+    return <span style={{ paddingBottom: '8px', display: 'flex' }}>{element}</span>;
   };
 
   return (

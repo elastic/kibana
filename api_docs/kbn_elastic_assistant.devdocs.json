@@ -87,7 +87,7 @@
         "tags": [],
         "label": "AssistantOverlay",
         "description": [
-          "\nModal container for Security Assistant conversations, receiving the page contents as context, plus whatever\ncomponent currently has focus and any specific context it may provide through the SAssInterface."
+          "\nModal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever\ncomponent currently has focus and any specific context it may provide through the SAssInterface."
         ],
         "signature": [
           "React.FunctionComponent<{}>"
@@ -136,7 +136,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, augmentMessageCodeBlocks, basePromptContexts, baseQuickPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, title, }: React.PropsWithChildren<AssistantProviderProps>) => JSX.Element"
+          "({ actionTypeRegistry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, }: React.PropsWithChildren<AssistantProviderProps>) => JSX.Element"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/index.tsx",
         "deprecated": false,
@@ -147,7 +147,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  augmentMessageCodeBlocks,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = 'elasticAssistantDefault',\n  setConversations,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
+            "label": "{\n  actionTypeRegistry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AssistantProviderProps>"
@@ -243,7 +243,7 @@
           "\n`useAssistantOverlay` is a hook that registers context with the assistant overlay, and\nreturns an optional `showAssistantOverlay` function to display the assistant overlay.\nAs an alterative to using the `showAssistantOverlay` returned from this hook, you may\nuse the `NewChatById` component and pass it the `promptContextId` returned by this hook.\n\nUSE THIS WHEN: You want to register context in one part of the tree, and then show\na _New chat_ button in another part of the tree without passing around the data, or when\nyou want to build a custom `New chat` button with features not not provided by the\n`NewChat` component."
         ],
         "signature": [
-          "(category: string, conversationId: string | null, description: string, getPromptContext: () => Promise<string>, id: string | null, suggestedUserPrompt: string | null | undefined, tooltip: React.ReactNode) => UseAssistantOverlay"
+          "(category: string, conversationId: string | null, description: string, getPromptContext: () => Promise<string> | Promise<Record<string, string[]>>, id: string | null, suggestedUserPrompt: string | null | undefined, tooltip: React.ReactNode) => UseAssistantOverlay"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_assistant_overlay/index.tsx",
         "deprecated": false,
@@ -302,7 +302,7 @@
             "label": "getPromptContext",
             "description": [],
             "signature": [
-              "() => Promise<string>"
+              "() => Promise<string> | Promise<Record<string, string[]>>"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_assistant_overlay/index.tsx",
             "deprecated": false,
@@ -379,7 +379,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"eql\" | \"json\" | \"kql\" | \"dsl\" | \"no-type\""
+              "\"eql\" | \"kql\" | \"dsl\" | \"json\" | \"no-type\""
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
             "deprecated": false,
@@ -470,7 +470,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId?: string | undefined; provider?: ",
+              "{ connectorId?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
               "OpenAiProviderType",
               " | undefined; }"
             ],
@@ -512,6 +512,20 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Conversation.replacements",
+            "type": "Object",
+            "tags": [],
+            "label": "replacements",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.Conversation.theme",
             "type": "Object",
             "tags": [],
@@ -520,6 +534,20 @@
             "signature": [
               "ConversationTheme",
               " | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Conversation.isDefault",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -595,12 +623,101 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.Prompt",
+        "type": "Interface",
+        "tags": [],
+        "label": "Prompt",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.promptType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "promptType",
+            "description": [],
+            "signature": [
+              "\"user\" | \"system\""
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.isDefault",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.isNewConversationDefault",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNewConversationDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.PromptContext",
         "type": "Interface",
         "tags": [],
         "label": "PromptContext",
         "description": [
-          "\nThis interface is used to pass context to the Elastic Assistant,\nfor the purpose of building prompts. Examples of context include:\n- a single alert\n- multiple alerts\n- a single event\n- multiple events\n- markdown\n- csv\n- anything else that the LLM can interpret"
+          "\nThis interface is used to pass context to the Elastic AI Assistant,\nfor the purpose of building prompts. Examples of context include:\n- a single alert\n- multiple alerts\n- a single event\n- multiple events\n- markdown\n- csv\n- anything else that the LLM can interpret"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
         "deprecated": false,
@@ -613,7 +730,7 @@
             "tags": [],
             "label": "category",
             "description": [
-              "\nThe category of data, e.g. `alert | alerts | event | events | string`\n\n`category` helps the Elastic Assistant display the most relevant user prompts"
+              "\nThe category of data, e.g. `alert | alerts | event | events | string`\n\n`category` helps the Elastic AI Assistant display the most relevant user prompts"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
             "deprecated": false,
@@ -626,7 +743,7 @@
             "tags": [],
             "label": "description",
             "description": [
-              "\nThe Elastic Assistant will display this **short**, static description\nin the context pill"
+              "\nThe Elastic AI Assistant will display this **short**, static description\nin the context pill"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
             "deprecated": false,
@@ -639,10 +756,10 @@
             "tags": [],
             "label": "getPromptContext",
             "description": [
-              "\nThe Elastic Assistant will invoke this function to retrieve the context data,\nwhich will be included in a prompt (e.g. the contents of an alert or an event)"
+              "\nThe Elastic AI Assistant will invoke this function to retrieve the context data,\nwhich will be included in a prompt (e.g. the contents of an alert or an event)"
             ],
             "signature": [
-              "() => Promise<string>"
+              "() => Promise<string> | Promise<Record<string, string[]>>"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/prompt_context/types.ts",
             "deprecated": false,
@@ -670,7 +787,7 @@
             "tags": [],
             "label": "suggestedUserPrompt",
             "description": [
-              "\nAn optional user prompt that's filled in, but not sent, when the Elastic Assistant opens"
+              "\nAn optional user prompt that's filled in, but not sent, when the Elastic AI Assistant opens"
             ],
             "signature": [
               "string | undefined"
@@ -686,7 +803,7 @@
             "tags": [],
             "label": "tooltip",
             "description": [
-              "\nThe Elastic Assistant will display this tooltip when the user hovers over the context pill"
+              "\nThe Elastic AI Assistant will display this tooltip when the user hovers over the context pill"
             ],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
@@ -785,7 +902,7 @@
         "tags": [],
         "label": "PromptContextTemplate",
         "description": [
-          "\nThis interface is used to pass a default or base set of contexts to the Elastic Assistant when\ninitializing it. This is used to provide 'category' options when users create Quick Prompts.\nAlso, useful for collating all of a solutions' prompts in one place.\n\ne.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx"
+          "\nThis interface is used to pass a default or base set of contexts to the Elastic AI Assistant when\ninitializing it. This is used to provide 'category' options when users create Quick Prompts.\nAlso, useful for collating all of a solutions' prompts in one place.\n\ne.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx"
         ],
         "signature": [
           "{ description: string; category: string; tooltip: React.ReactNode; suggestedUserPrompt?: string | undefined; }"
@@ -803,7 +920,7 @@
         "label": "QueryType",
         "description": [],
         "signature": [
-          "\"eql\" | \"json\" | \"kql\" | \"dsl\" | \"no-type\""
+          "\"eql\" | \"kql\" | \"dsl\" | \"json\" | \"no-type\""
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
         "deprecated": false,

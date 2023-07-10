@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import {
-  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
+  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   FILTER_GROUP_ADD_CONTROL,
   FILTER_GROUP_CONTEXT_EDIT_CONTROLS,
@@ -23,11 +24,18 @@ import {
   OPTION_LISTS_LOADING,
   FILTER_GROUP_CONTEXT_DISCARD_CHANGES,
   FILTER_GROUP_CONTROL_ACTION_EDIT,
+  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
 } from '../../screens/common/filter_group';
 import { waitForPageFilters } from '../alerts';
 
 export const openFilterGroupContextMenu = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
+  recurse(
+    () => {
+      cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN).click();
+      return cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).should(Cypress._.noop);
+    },
+    ($el) => $el.length === 1
+  );
 };
 
 export const waitForFilterGroups = () => {
@@ -41,7 +49,7 @@ export const waitForFilterGroups = () => {
 
 export const resetFilterGroup = () => {
   openFilterGroupContextMenu();
-  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
+  cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click();
 };
 
 export const editFilterGroupControls = () => {
@@ -64,11 +72,11 @@ export const saveFilterGroupControls = () => {
 
 export const discardFilterGroupControls = () => {
   openFilterGroupContextMenu();
-  cy.get(FILTER_GROUP_CONTEXT_DISCARD_CHANGES).click({ force: true });
+  cy.get(FILTER_GROUP_CONTEXT_DISCARD_CHANGES).click();
 };
 
 export const openAddFilterGroupControlPanel = () => {
-  cy.get(FILTER_GROUP_ADD_CONTROL).click({ force: true });
+  cy.get(FILTER_GROUP_ADD_CONTROL).click();
   cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('be.visible');
 };
 
@@ -96,7 +104,7 @@ export const addNewFilterGroupControlValues = ({
 
 export const deleteFilterGroupControl = (idx: number) => {
   cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
-  cy.get(FILTER_GROUP_CONTROL_ACTION_DELETE(idx)).click({ force: true });
+  cy.get(FILTER_GROUP_CONTROL_ACTION_DELETE(idx)).click();
   cy.get(FILTER_GROUP_CONTROL_CONFIRM_DIALOG).should('be.visible');
   cy.get(FILTER_GROUP_CONTROL_CONFIRM_BTN).click();
 };
@@ -111,7 +119,7 @@ export const editFilterGroupControl = ({
   label: string;
 }) => {
   cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
-  cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click({ force: true });
+  cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click();
   const { FIELD_SEARCH, FIELD_PICKER, FIELD_LABEL, SAVE } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
   cy.get(FIELD_SEARCH).type(fieldName);
   cy.get(FIELD_PICKER(fieldName)).should('exist').click();

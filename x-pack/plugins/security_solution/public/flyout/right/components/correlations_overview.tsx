@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useCorrelations } from '../hooks/use_correlations';
+import { useCorrelations } from '../../shared/hooks/use_correlations';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
 import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
@@ -33,9 +33,10 @@ export const CorrelationsOverview: React.FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   const { loading, error, data } = useCorrelations({
     eventId,

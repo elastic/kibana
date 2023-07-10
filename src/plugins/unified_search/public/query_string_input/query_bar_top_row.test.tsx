@@ -345,6 +345,22 @@ describe('QueryBarTopRowTopRow', () => {
       }
     `);
   });
+
+  it('Should render custom data view picker', () => {
+    const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
+    const { getByTestId } = render(
+      wrapQueryBarTopRowInContext({
+        query: kqlQuery,
+        screenTitle: 'Another Screen',
+        isDirty: false,
+        indexPatterns: [stubIndexPattern],
+        timeHistory: mockTimeHistory,
+        dataViewPickerOverride,
+      })
+    );
+
+    expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
+  });
 });
 
 describe('SharingMetaFields', () => {

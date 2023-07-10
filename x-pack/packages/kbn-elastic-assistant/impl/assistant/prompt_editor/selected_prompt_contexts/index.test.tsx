@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import { mockAlertPromptContext, mockEventPromptContext } from '../../../mock/prompt_context';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
+import type { SelectedPromptContext } from '../../prompt_context/types';
 import { Props, SelectedPromptContexts } from '.';
 
 const defaultProps: Props = {
@@ -19,8 +20,22 @@ const defaultProps: Props = {
     [mockAlertPromptContext.id]: mockAlertPromptContext,
     [mockEventPromptContext.id]: mockEventPromptContext,
   },
-  selectedPromptContextIds: [],
-  setSelectedPromptContextIds: jest.fn(),
+  selectedPromptContexts: {},
+  setSelectedPromptContexts: jest.fn(),
+};
+
+const mockSelectedAlertPromptContext: SelectedPromptContext = {
+  allow: [],
+  allowReplacement: [],
+  promptContextId: mockAlertPromptContext.id,
+  rawData: 'test-raw-data',
+};
+
+const mockSelectedEventPromptContext: SelectedPromptContext = {
+  allow: [],
+  allowReplacement: [],
+  promptContextId: mockEventPromptContext.id,
+  rawData: 'test-raw-data',
 };
 
 describe('SelectedPromptContexts', () => {
@@ -44,7 +59,9 @@ describe('SelectedPromptContexts', () => {
         <SelectedPromptContexts
           {...defaultProps}
           isNewConversation={false} // <--
-          selectedPromptContextIds={[mockAlertPromptContext.id]} // <-- length 1
+          selectedPromptContexts={{
+            [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
+          }} // <-- length 1
         />
       </TestProviders>
     );
@@ -60,7 +77,9 @@ describe('SelectedPromptContexts', () => {
         <SelectedPromptContexts
           {...defaultProps}
           isNewConversation={true} // <--
-          selectedPromptContextIds={[mockAlertPromptContext.id]} // <-- length 1
+          selectedPromptContexts={{
+            [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
+          }} // <-- length 1
         />
       </TestProviders>
     );
@@ -76,7 +95,10 @@ describe('SelectedPromptContexts', () => {
         <SelectedPromptContexts
           {...defaultProps}
           isNewConversation={false} // <--
-          selectedPromptContextIds={[mockAlertPromptContext.id, mockEventPromptContext.id]} // <-- length 2
+          selectedPromptContexts={{
+            [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
+            [mockEventPromptContext.id]: mockSelectedEventPromptContext,
+          }} // <-- length 2
         />
       </TestProviders>
     );
@@ -87,57 +109,67 @@ describe('SelectedPromptContexts', () => {
   });
 
   it('renders the selected prompt contexts', async () => {
-    const selectedPromptContextIds = [mockAlertPromptContext.id, mockEventPromptContext.id];
+    const selectedPromptContexts = {
+      [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
+      [mockEventPromptContext.id]: mockSelectedEventPromptContext,
+    };
 
     render(
       <TestProviders>
-        <SelectedPromptContexts
-          {...defaultProps}
-          selectedPromptContextIds={selectedPromptContextIds}
-        />
+        <SelectedPromptContexts {...defaultProps} selectedPromptContexts={selectedPromptContexts} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      selectedPromptContextIds.forEach((id) =>
+      Object.keys(selectedPromptContexts).forEach((id) =>
         expect(screen.getByTestId(`selectedPromptContext-${id}`)).toBeInTheDocument()
       );
     });
   });
 
   it('removes a prompt context when the remove button is clicked', async () => {
-    const setSelectedPromptContextIds = jest.fn();
+    const setSelectedPromptContexts = jest.fn();
     const promptContextId = mockAlertPromptContext.id;
+    const selectedPromptContexts = {
+      [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
+      [mockEventPromptContext.id]: mockSelectedEventPromptContext,
+    };
 
     render(
-      <SelectedPromptContexts
-        {...defaultProps}
-        selectedPromptContextIds={[promptContextId, mockEventPromptContext.id]}
-        setSelectedPromptContextIds={setSelectedPromptContextIds}
-      />
+      <TestProviders>
+        <SelectedPromptContexts
+          {...defaultProps}
+          selectedPromptContexts={selectedPromptContexts}
+          setSelectedPromptContexts={setSelectedPromptContexts}
+        />
+      </TestProviders>
     );
 
     userEvent.click(screen.getByTestId(`removePromptContext-${promptContextId}`));
 
     await waitFor(() => {
-      expect(setSelectedPromptContextIds).toHaveBeenCalled();
+      expect(setSelectedPromptContexts).toHaveBeenCalled();
     });
   });
 
   it('displays the correct accordion content', async () => {
     render(
-      <SelectedPromptContexts
-        {...defaultProps}
-        selectedPromptContextIds={[mockAlertPromptContext.id]}
-      />
+      <TestProviders>
+        <SelectedPromptContexts
+          {...defaultProps}
+          selectedPromptContexts={{
+            [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
+          }}
+        />
+      </TestProviders>
     );
 
     userEvent.click(screen.getByText(mockAlertPromptContext.description));
 
-    const codeBlock = screen.getByTestId('promptCodeBlock');
+    const codeBlock = screen.getByTestId('readOnlyContextViewer');
 
     await waitFor(() => {
-      expect(codeBlock).toHaveTextContent('alert data');
+      expect(codeBlock).toHaveTextContent('CONTEXT: """ test-raw-data """');
     });
   });
 });

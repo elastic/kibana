@@ -73,6 +73,8 @@ import {
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
+import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
+import { riskScorePreviewRoute } from '../lib/risk_engine/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -92,7 +94,7 @@ export const initRoutes = (
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router, config, security);
+  registerPrebuiltRulesRoutes(router, security);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -134,6 +136,7 @@ export const initRoutes = (
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router, logger, security, telemetrySender);
+  setAlertTagsRoute(router);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
@@ -168,5 +171,9 @@ export const initRoutes = (
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
+
+  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
+    riskScorePreviewRoute(router, logger);
   }
 };

@@ -25,7 +25,7 @@
         "tags": [],
         "label": "Duration",
         "description": [],
-        "path": "packages/kbn-slo-schema/src/models/duration.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,7 +53,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,7 +74,7 @@
                     "text": "DurationUnit"
                   }
                 ],
-                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -107,7 +107,7 @@
                 "text": "Duration"
               }
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -127,7 +127,7 @@
                     "text": "Duration"
                   }
                 ],
-                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -153,7 +153,7 @@
               },
               ") => boolean"
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -173,7 +173,7 @@
                     "text": "Duration"
                   }
                 ],
-                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -199,7 +199,7 @@
               },
               ") => boolean"
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -219,7 +219,7 @@
                     "text": "Duration"
                   }
                 ],
-                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -245,7 +245,7 @@
               },
               ") => boolean"
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -265,7 +265,7 @@
                     "text": "Duration"
                   }
                 ],
-                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -283,7 +283,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -311,7 +311,7 @@
             "text": "DurationUnit"
           }
         ],
-        "path": "packages/kbn-slo-schema/src/models/duration.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -325,7 +325,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -352,7 +352,7 @@
           },
           ") => moment.unitOfTime.Diff"
         ],
-        "path": "packages/kbn-slo-schema/src/models/duration.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -372,7 +372,7 @@
                 "text": "DurationUnit"
               }
             ],
-            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -391,7 +391,7 @@
         "tags": [],
         "label": "DurationUnit",
         "description": [],
-        "path": "packages/kbn-slo-schema/src/models/duration.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -408,37 +408,37 @@
         "signature": [
           "\"*\""
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.APMTransactionDurationIndicatorSchema",
+        "id": "def-common.APMTransactionDurationIndicator",
         "type": "Type",
         "tags": [],
-        "label": "APMTransactionDurationIndicatorSchema",
+        "label": "APMTransactionDurationIndicator",
         "description": [],
         "signature": [
           "{ type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.APMTransactionErrorRateIndicatorSchema",
+        "id": "def-common.APMTransactionErrorRateIndicator",
         "type": "Type",
         "tags": [],
-        "label": "APMTransactionErrorRateIndicatorSchema",
+        "label": "APMTransactionErrorRateIndicator",
         "description": [],
         "signature": [
           "{ type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -453,7 +453,7 @@
         "signature": [
           "\"occurrences\" | \"timeslices\""
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -468,7 +468,7 @@
         "signature": [
           "{ name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -507,7 +507,7 @@
           },
           " | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -522,7 +522,7 @@
         "signature": [
           "{ id: string; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -535,9 +535,9 @@
         "label": "CreateSLOInput",
         "description": [],
         "signature": [
-          "{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; } & { id?: string | undefined; settings?: { syncDelay?: string | undefined; frequency?: string | undefined; } | undefined; tags?: string[] | undefined; }"
+          "{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; } & { id?: string | undefined; settings?: { syncDelay?: string | undefined; frequency?: string | undefined; } | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -550,7 +550,7 @@
         "label": "CreateSLOParams",
         "description": [],
         "signature": [
-          "{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: ",
+          "{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -592,7 +592,7 @@
           },
           " | undefined; } | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -607,7 +607,7 @@
         "signature": [
           "{ id: string; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -622,7 +622,7 @@
         "signature": [
           "{ sloIds: string[]; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -637,7 +637,7 @@
         "signature": [
           "{ [x: string]: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -652,7 +652,7 @@
         "signature": [
           "{ name?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -667,7 +667,7 @@
         "signature": [
           "{ page: number; perPage: number; total: number; results: ({ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -682,7 +682,7 @@
         "signature": [
           "{ name?: string | undefined; indicatorTypes?: string[] | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"creationTime\" | \"indicatorType\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -695,9 +695,9 @@
         "label": "FindSLOResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }"
+          "{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -712,7 +712,52 @@
         "signature": [
           "{ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetPreviewDataParams",
+        "type": "Type",
+        "tags": [],
+        "label": "GetPreviewDataParams",
+        "description": [],
+        "signature": [
+          "{ indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetPreviewDataResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetPreviewDataResponse",
+        "description": [],
+        "signature": [
+          "{ date: string; sliValue: number; }[]"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOBurnRatesResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetSLOBurnRatesResponse",
+        "description": [],
+        "signature": [
+          "{ burnRates: { name: string; burnRate: number; sli: number; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -725,9 +770,9 @@
         "label": "GetSLOResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -742,22 +787,52 @@
         "signature": [
           "{ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.KQLCustomIndicatorSchema",
+        "id": "def-common.Indicator",
         "type": "Type",
         "tags": [],
-        "label": "KQLCustomIndicatorSchema",
+        "label": "Indicator",
+        "description": [],
+        "signature": [
+          "{ type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.IndicatorType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndicatorType",
+        "description": [],
+        "signature": [
+          "\"sli.apm.transactionDuration\" | \"sli.apm.transactionErrorRate\" | \"sli.kql.custom\" | \"sli.metric.custom\""
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.KQLCustomIndicator",
+        "type": "Type",
+        "tags": [],
+        "label": "KQLCustomIndicator",
         "description": [],
         "signature": [
           "{ type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -772,22 +847,22 @@
         "signature": [
           "{ id: string; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.MetricCustomIndicatorSchema",
+        "id": "def-common.MetricCustomIndicator",
         "type": "Type",
         "tags": [],
-        "label": "MetricCustomIndicatorSchema",
+        "label": "MetricCustomIndicator",
         "description": [],
         "signature": [
-          "{ type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }"
+          "{ type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -800,9 +875,9 @@
         "label": "SLOResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -815,9 +890,9 @@
         "label": "SLOWithSummaryResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -832,7 +907,22 @@
         "signature": [
           "{ status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.TimeWindow",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeWindow",
+        "description": [],
+        "signature": [
+          "\"rolling\" | \"calendarAligned\""
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -847,7 +937,7 @@
         "signature": [
           "{ name?: string | undefined; compositeMethod?: \"weightedAverage\" | undefined; sources?: { id: string; revision: number; weight: number; }[] | undefined; timeWindow?: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }) | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -886,7 +976,7 @@
           },
           " | undefined; }) | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -901,7 +991,7 @@
         "signature": [
           "{ id: string; name: string; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; tags: string[]; createdAt: string; updatedAt: string; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -914,9 +1004,9 @@
         "label": "UpdateSLOInput",
         "description": [],
         "signature": [
-          "{ name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; } | undefined; timeWindow?: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }) | undefined; settings?: { syncDelay?: string | undefined; frequency?: string | undefined; } | undefined; tags?: string[] | undefined; }"
+          "{ name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | undefined; timeWindow?: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; } | undefined; budgetingMethod?: \"occurrences\" | \"timeslices\" | undefined; objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }) | undefined; settings?: { syncDelay?: string | undefined; frequency?: string | undefined; } | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -929,7 +1019,7 @@
         "label": "UpdateSLOParams",
         "description": [],
         "signature": [
-          "{ name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; } | undefined; timeWindow?: { duration: ",
+          "{ name?: string | undefined; description?: string | undefined; indicator?: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; } | undefined; timeWindow?: { duration: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -971,7 +1061,7 @@
           },
           " | undefined; } | undefined; tags?: string[] | undefined; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -984,9 +1074,9 @@
         "label": "UpdateSLOResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; total: { metrics: ({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | undefined; })[]; equation: string; }; timestampField: string; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1008,7 +1098,7 @@
           "StringC",
           "]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1062,7 +1152,7 @@
           "StringC",
           "; }>]>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1078,7 +1168,7 @@
           "LiteralC",
           "<\"sli.apm.transactionDuration\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1130,7 +1220,7 @@
           "StringC",
           "; }>]>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1146,7 +1236,7 @@
           "LiteralC",
           "<\"sli.apm.transactionErrorRate\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1166,7 +1256,7 @@
           "LiteralC",
           "<\"timeslices\">]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1194,7 +1284,7 @@
           "LiteralC",
           "<\"calendarAligned\">; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/time_window.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1210,7 +1300,7 @@
           "LiteralC",
           "<\"calendarAligned\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/time_window.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1225,7 +1315,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1321,7 +1411,7 @@
           "Type",
           "<Date, string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1417,7 +1507,7 @@
           "Type",
           "<Date, string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1515,7 +1605,7 @@
           "StringC",
           ">; }>]>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1648,6 +1738,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -1655,13 +1747,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -1669,7 +1767,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -1761,7 +1863,7 @@
           "StringC",
           ">; }>]>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1781,7 +1883,7 @@
           "Type",
           "<Date, string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1797,7 +1899,7 @@
           "Type",
           "<Date, string, unknown>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1817,7 +1919,7 @@
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1837,7 +1939,7 @@
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1861,7 +1963,7 @@
           },
           ", string, unknown>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/duration.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/duration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1885,7 +1987,7 @@
           "BooleanC",
           "; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1907,7 +2009,7 @@
           "StringC",
           ">; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1957,7 +2059,7 @@
           "BooleanC",
           "; }>; }>]>>>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1989,7 +2091,7 @@
           "LiteralC",
           "<\"desc\">]>; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2123,7 +2225,7 @@
           "BooleanC",
           "; }>; }>; }>]>>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2161,7 +2263,7 @@
           "LiteralC",
           "<\"desc\">]>; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2304,6 +2406,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -2311,13 +2415,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -2325,7 +2435,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -2447,7 +2561,7 @@
           "BooleanC",
           "; }>; }>; }>]>>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2467,7 +2581,259 @@
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getPreviewDataParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getPreviewDataParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ indicator: ",
+          "UnionC",
+          "<[",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.apm.transactionDuration\">; params: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; service: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transactionType: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transactionName: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; threshold: ",
+          "NumberC",
+          "; index: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.apm.transactionErrorRate\">; params: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; service: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transactionType: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; transactionName: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; index: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.kql.custom\">; params: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; filter: ",
+          "StringC",
+          "; good: ",
+          "StringC",
+          "; total: ",
+          "StringC",
+          "; timestampField: ",
+          "StringC",
+          "; }>; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"sli.metric.custom\">; params: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; filter: ",
+          "StringC",
+          "; good: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
+          "StringC",
+          "; }>; total: ",
+          "TypeC",
+          "<{ metrics: ",
+          "ArrayC",
+          "<",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; aggregation: ",
+          "KeyofC",
+          "<{ sum: boolean; }>; field: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
+          "StringC",
+          "; }>; timestampField: ",
+          "StringC",
+          "; }>; }>]>; }>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getPreviewDataResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getPreviewDataResponseSchema",
+        "description": [],
+        "signature": [
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; sliValue: ",
+          "NumberC",
+          "; }>>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOBurnRatesParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOBurnRatesParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; body: ",
+          "TypeC",
+          "<{ windows: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; }>>; }>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOBurnRatesResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOBurnRatesResponseSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ burnRates: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; burnRate: ",
+          "NumberC",
+          "; sli: ",
+          "NumberC",
+          "; }>>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2487,7 +2853,7 @@
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2507,7 +2873,7 @@
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2640,6 +3006,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -2647,13 +3015,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -2661,7 +3035,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -2783,7 +3161,7 @@
           "BooleanC",
           "; }>; }>; }>]>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2827,7 +3205,7 @@
           "BooleanC",
           "; }>; }>]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2853,7 +3231,7 @@
           "NumberC",
           "; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2976,6 +3354,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -2983,13 +3363,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -2997,13 +3383,17 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
           "; }>; }>]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3019,7 +3409,7 @@
           "Type",
           "<string[], string, unknown>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3043,7 +3433,7 @@
           "LiteralC",
           "<\"sli.metric.custom\">]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3073,7 +3463,7 @@
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3089,7 +3479,7 @@
           "LiteralC",
           "<\"sli.kql.custom\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3109,7 +3499,7 @@
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3136,6 +3526,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -3143,13 +3535,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -3157,13 +3555,17 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3179,7 +3581,7 @@
           "LiteralC",
           "<\"sli.metric.custom\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/indicators.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3213,7 +3615,7 @@
           },
           ", string, unknown>; }>]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3229,7 +3631,7 @@
           "LiteralC",
           "<\"occurrences\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3265,7 +3667,27 @@
           },
           ", string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.previewDataSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "previewDataSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ date: ",
+          "Type",
+          "<Date, string, unknown>; sliValue: ",
+          "NumberC",
+          "; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3293,7 +3715,7 @@
           "LiteralC",
           "<\"rolling\">; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/time_window.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3309,7 +3731,7 @@
           "LiteralC",
           "<\"rolling\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/time_window.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3345,7 +3767,7 @@
           },
           ", string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3360,7 +3782,7 @@
         "signature": [
           "StringC"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3491,6 +3913,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -3498,13 +3922,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -3512,7 +3942,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -3608,7 +4042,7 @@
           "Type",
           "<Date, string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3739,6 +4173,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -3746,13 +4182,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -3760,7 +4202,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -3856,7 +4302,7 @@
           "Type",
           "<Date, string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3989,6 +4435,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -3996,13 +4444,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -4010,7 +4464,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -4132,7 +4590,7 @@
           "BooleanC",
           "; }>; }>; }>]>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4265,6 +4723,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -4272,13 +4732,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -4286,7 +4752,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -4408,7 +4878,7 @@
           "BooleanC",
           "; }>; }>; }>]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4432,7 +4902,7 @@
           "LiteralC",
           "<\"VIOLATED\">]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4470,7 +4940,7 @@
           "BooleanC",
           "; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/common.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4488,7 +4958,7 @@
           "StringC",
           ">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4506,7 +4976,7 @@
           "NumberC",
           "; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4522,7 +4992,7 @@
           "LiteralC",
           "<\"timeslices\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4566,7 +5036,27 @@
           "LiteralC",
           "<\"calendarAligned\">; }>]>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/time_window.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.timeWindowTypeSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "timeWindowTypeSchema",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"rolling\">, ",
+          "LiteralC",
+          "<\"calendarAligned\">]>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4662,7 +5152,7 @@
           "StringC",
           ">; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4758,7 +5248,7 @@
           "Type",
           "<Date, string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4893,6 +5383,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -4900,13 +5392,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -4914,7 +5412,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -5002,7 +5504,7 @@
           "StringC",
           ">; }>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5133,6 +5635,8 @@
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -5140,13 +5644,19 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; total: ",
           "TypeC",
           "<{ metrics: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -5154,7 +5664,11 @@
           "KeyofC",
           "<{ sum: boolean; }>; field: ",
           "StringC",
-          "; }>>; equation: ",
+          "; }>, ",
+          "PartialC",
+          "<{ filter: ",
+          "StringC",
+          "; }>]>>; equation: ",
           "StringC",
           "; }>; timestampField: ",
           "StringC",
@@ -5250,7 +5764,7 @@
           "Type",
           "<Date, string, unknown>; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5266,7 +5780,7 @@
           "LiteralC",
           "<\"weightedAverage\">"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5288,7 +5802,7 @@
           "NumberC",
           "; }>"
         ],
-        "path": "packages/kbn-slo-schema/src/schema/composite_slo.ts",
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/composite_slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

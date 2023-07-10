@@ -15,6 +15,7 @@ import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
+import { addProfile } from './customizations';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -43,8 +44,8 @@ describe('Discover url generator', () => {
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(app).toBe('discover');
-    expect(_a).toEqual({});
-    expect(_g).toEqual({});
+    expect(_a).toEqual(undefined);
+    expect(_g).toEqual(undefined);
   });
 
   test('can create a link to a saved search in Discover', async () => {
@@ -53,8 +54,15 @@ describe('Discover url generator', () => {
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(path.startsWith(`#/view/${savedSearchId}`)).toBe(true);
-    expect(_a).toEqual({});
-    expect(_g).toEqual({});
+    expect(_a).toEqual(undefined);
+    expect(_g).toEqual(undefined);
+  });
+
+  test('can specify profile', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({ profile: 'test', dataViewId: '123' });
+
+    expect(path).toBe(`${addProfile('#/', 'test')}?_a=(index:'123')`);
   });
 
   test('can specify specific data view', async () => {
@@ -65,7 +73,7 @@ describe('Discover url generator', () => {
     expect(_a).toEqual({
       index: dataViewId,
     });
-    expect(_g).toEqual({});
+    expect(_g).toEqual(undefined);
   });
 
   test('can specify specific time range', async () => {
@@ -75,7 +83,7 @@ describe('Discover url generator', () => {
     });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
-    expect(_a).toEqual({});
+    expect(_a).toEqual(undefined);
     expect(_g).toEqual({
       time: {
         from: 'now-15m',
@@ -101,7 +109,7 @@ describe('Discover url generator', () => {
         query: 'foo',
       },
     });
-    expect(_g).toEqual({});
+    expect(_g).toEqual(undefined);
   });
 
   test('can specify local and global filters', async () => {
@@ -172,7 +180,7 @@ describe('Discover url generator', () => {
     });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
-    expect(_a).toEqual({});
+    expect(_a).toEqual(undefined);
     expect(_g).toEqual({
       refreshInterval: {
         pause: false,
@@ -191,7 +199,7 @@ describe('Discover url generator', () => {
     });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
-    expect(_a).toEqual({});
+    expect(_a).toEqual(undefined);
     expect(_g).toEqual({
       time: {
         from: 'now-3h',
@@ -206,7 +214,7 @@ describe('Discover url generator', () => {
       searchSessionId: '__test__',
     });
 
-    expect(path).toMatchInlineSnapshot(`"#/?_g=()&_a=()&searchSessionId=__test__"`);
+    expect(path).toMatchInlineSnapshot(`"#/?searchSessionId=__test__"`);
     expect(path).toContain('__test__');
   });
 
@@ -220,7 +228,7 @@ describe('Discover url generator', () => {
     });
 
     expect(path).toMatchInlineSnapshot(
-      `"#/?_g=()&_a=(columns:!(_source),interval:auto,savedQuery:__savedQueryId__,sort:!(!('timestamp,%20asc')))"`
+      `"#/?_a=(columns:!(_source),interval:auto,savedQuery:__savedQueryId__,sort:!(!('timestamp,%20asc')))"`
     );
   });
 

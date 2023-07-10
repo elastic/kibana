@@ -32,7 +32,6 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/shared-ux-page-analytics-no-data",
-    "@kbn/content-management-table-list",
     "@kbn/content-management-plugin",
     "@kbn/content-management-utils",
     "@kbn/i18n-react",
@@ -60,7 +59,10 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/object-versioning",
-    "@kbn/core-saved-objects-api-server"
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/shared-ux-prompt-not-found"
   ],
   "exclude": ["target/**/*"]
 }

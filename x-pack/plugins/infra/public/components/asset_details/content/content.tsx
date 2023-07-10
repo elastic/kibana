@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs } from '../tabs';
+import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs, Overview } from '../tabs';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 
 type Props = Pick<
@@ -19,8 +19,8 @@ export const Content = ({
   overrides,
   currentTimeRange,
   node,
-  nodeType = 'host',
   onTabsStateChange,
+  nodeType = 'host',
 }: Props) => {
   const onChange = (state: TabState) => {
     if (!onTabsStateChange) {
@@ -35,8 +35,25 @@ export const Content = ({
       <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
         <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
       </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
+        <Overview
+          currentTimeRange={currentTimeRange}
+          nodeName={node.name}
+          nodeType={nodeType}
+          dataView={overrides?.overview?.dataView}
+          dateRange={overrides?.overview?.dateRange}
+        />
+      </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>
-        <Logs nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
+        <Logs
+          nodeName={node.name}
+          nodeType={nodeType}
+          currentTime={currentTimeRange.to}
+          logViewReference={overrides?.logs?.logView?.reference}
+          logViewLoading={overrides?.logs?.logView?.loading}
+          search={overrides?.logs?.query}
+          onSearchChange={(query) => onChange({ logs: { query } })}
+        />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
@@ -66,7 +83,7 @@ export const Content = ({
           nodeName={node.name}
           nodeType={nodeType}
           currentTime={currentTimeRange.to}
-          searchFilter={overrides?.processes?.query}
+          search={overrides?.processes?.query}
           onSearchFilterChange={(query) => onChange({ processes: { query } })}
         />
       </TabPanel>

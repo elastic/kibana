@@ -69,6 +69,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           minor === 0 ? minor : minor - 1
         }.${patch}`;
 
+        // Navigating first, so we can dismiss the welcome prompt, before deleting the telemetry SO.
+        await PageObjects.common.navigateToApp('home');
+
         await kbnClient.savedObjects.delete({ type: TELEMETRY_SO_TYPE, id: TELEMETRY_SO_ID });
       });
 

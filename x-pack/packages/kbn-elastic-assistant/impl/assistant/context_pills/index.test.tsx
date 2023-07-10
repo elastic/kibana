@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import type { PromptContext } from '../prompt_context/types';
+import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 import { ContextPills } from '.';
 
 const mockPromptContexts: Record<string, PromptContext> = {
@@ -30,6 +30,12 @@ const mockPromptContexts: Record<string, PromptContext> = {
   },
 };
 
+const defaultProps = {
+  defaultAllow: [],
+  defaultAllowReplacement: [],
+  promptContexts: mockPromptContexts,
+};
+
 describe('ContextPills', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -37,9 +43,9 @@ describe('ContextPills', () => {
     render(
       <TestProviders>
         <ContextPills
-          promptContexts={mockPromptContexts}
-          selectedPromptContextIds={[]}
-          setSelectedPromptContextIds={jest.fn()}
+          {...defaultProps}
+          selectedPromptContexts={{}}
+          setSelectedPromptContexts={jest.fn()}
         />
       </TestProviders>
     );
@@ -49,35 +55,45 @@ describe('ContextPills', () => {
     });
   });
 
-  it('invokes setSelectedPromptContextIds() when the prompt is NOT already selected', () => {
+  it('invokes setSelectedPromptContexts() when the prompt is NOT already selected', async () => {
     const context = mockPromptContexts.context1;
-    const setSelectedPromptContextIds = jest.fn();
+    const setSelectedPromptContexts = jest.fn();
 
     render(
       <TestProviders>
         <ContextPills
-          promptContexts={mockPromptContexts}
-          selectedPromptContextIds={[]} // <-- the prompt is NOT selected
-          setSelectedPromptContextIds={setSelectedPromptContextIds}
+          {...defaultProps}
+          selectedPromptContexts={{}} // <-- the prompt is NOT selected
+          setSelectedPromptContexts={setSelectedPromptContexts}
         />
       </TestProviders>
     );
 
     userEvent.click(screen.getByTestId(`pillButton-${context.id}`));
 
-    expect(setSelectedPromptContextIds).toBeCalled();
+    await waitFor(() => {
+      expect(setSelectedPromptContexts).toBeCalled();
+    });
   });
 
-  it('it does NOT invoke setSelectedPromptContextIds() when the prompt is already selected', () => {
+  it('it does NOT invoke setSelectedPromptContexts() when the prompt is already selected', async () => {
     const context = mockPromptContexts.context1;
-    const setSelectedPromptContextIds = jest.fn();
+    const mockSelectedPromptContext: SelectedPromptContext = {
+      allow: [],
+      allowReplacement: [],
+      promptContextId: context.id,
+      rawData: 'test-raw-data',
+    };
+    const setSelectedPromptContexts = jest.fn();
 
     render(
       <TestProviders>
         <ContextPills
-          promptContexts={mockPromptContexts}
-          selectedPromptContextIds={[context.id]} // <-- the context is already selected
-          setSelectedPromptContextIds={setSelectedPromptContextIds}
+          {...defaultProps}
+          selectedPromptContexts={{
+            [context.id]: mockSelectedPromptContext,
+          }} // <-- the context is already selected
+          setSelectedPromptContexts={setSelectedPromptContexts}
         />
       </TestProviders>
     );
@@ -85,18 +101,28 @@ describe('ContextPills', () => {
     // NOTE: this test uses `fireEvent` instead of `userEvent` to bypass the disabled button:
     fireEvent.click(screen.getByTestId(`pillButton-${context.id}`));
 
-    expect(setSelectedPromptContextIds).not.toBeCalled();
+    await waitFor(() => {
+      expect(setSelectedPromptContexts).not.toBeCalled();
+    });
   });
 
   it('disables selected context pills', () => {
     const context = mockPromptContexts.context1;
+    const mockSelectedPromptContext: SelectedPromptContext = {
+      allow: [],
+      allowReplacement: [],
+      promptContextId: context.id,
+      rawData: 'test-raw-data',
+    };
 
     render(
       <TestProviders>
         <ContextPills
-          promptContexts={mockPromptContexts}
-          selectedPromptContextIds={[context.id]} // <-- context1 is selected
-          setSelectedPromptContextIds={jest.fn()}
+          {...defaultProps}
+          selectedPromptContexts={{
+            [context.id]: mockSelectedPromptContext,
+          }} // <-- the context is selected
+          setSelectedPromptContexts={jest.fn()}
         />
       </TestProviders>
     );
@@ -110,9 +136,9 @@ describe('ContextPills', () => {
     render(
       <TestProviders>
         <ContextPills
-          promptContexts={mockPromptContexts}
-          selectedPromptContextIds={['context2']} // context1 is NOT selected
-          setSelectedPromptContextIds={jest.fn()}
+          {...defaultProps}
+          selectedPromptContexts={{}} // context1 is NOT selected
+          setSelectedPromptContexts={jest.fn()}
         />
       </TestProviders>
     );

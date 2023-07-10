@@ -18,8 +18,16 @@ export type {
   QueryPointEventAnnotationArgs,
   QueryPointEventAnnotationOutput,
 } from './query_point_event_annotation/types';
-export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
-export { queryPointEventAnnotation } from './query_point_event_annotation';
+export {
+  manualPointEventAnnotation,
+  manualRangeEventAnnotation,
+  getDefaultManualAnnotation,
+} from './manual_event_annotation';
+export {
+  queryPointEventAnnotation,
+  getDefaultQueryAnnotation,
+} from './query_point_event_annotation';
+export { createCopiedAnnotation } from './create_copied_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 
@@ -36,4 +44,5 @@ export type {
   EventAnnotationGroupAttributes,
 } from './types';
 
-export { EVENT_ANNOTATION_GROUP_TYPE } from './constants';
+export type { EventAnnotationGroupSavedObjectAttributes } from './content_management';
+export { EVENT_ANNOTATION_GROUP_TYPE, ANNOTATIONS_LISTING_VIEW_ID } from './constants';

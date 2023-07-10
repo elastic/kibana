@@ -16,22 +16,22 @@ import type {
 } from '@kbn/timelines-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
-  metadataCurrentIndexPattern,
-  METADATA_UNITED_INDEX,
   METADATA_TRANSFORMS_STATUS_ROUTE,
-  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  METADATA_UNITED_INDEX,
+  metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import type {
   GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
-  ResponseActionApiResponse,
   HostResultList,
   Immutable,
   ImmutableObject,
   MetadataListResponse,
+  ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
@@ -59,9 +59,9 @@ import type {
 } from '../types';
 import type { EndpointPackageInfoStateChanged } from './action';
 import {
-  detailsData,
   endpointPackageInfo,
   endpointPackageVersion,
+  fullDetailsHostInfo,
   getCurrentIsolationRequestState,
   getIsEndpointPackageInfoUninitialized,
   getIsIsolationRequestPending,
@@ -86,7 +86,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   depsStart
 ) => {
   // this needs to be called after endpointPackageVersion is loaded (getEndpointPackageInfo)
-  // or else wrong pattern might be loaded
+  // or else the wrong pattern might be loaded
   async function fetchIndexPatterns(
     state: ImmutableObject<EndpointState>
   ): Promise<DataViewBase[]> {
@@ -115,6 +115,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     };
     return [indexPattern];
   }
+
   return (store) => (next) => async (action) => {
     next(action);
 
@@ -221,6 +222,7 @@ const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
       await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        version: '2023-10-31',
         query: {
           page: 0,
           pageSize: 1,
@@ -328,13 +330,13 @@ const loadEndpointsPendingActions = async ({
   dispatch,
 }: EndpointPageStore): Promise<void> => {
   const state = getState();
-  const detailsEndpoint = detailsData(state);
+  const detailsEndpoint = fullDetailsHostInfo(state);
   const listEndpoints = listData(state);
   const agentsIds = new Set<string>();
 
   // get all agent ids for the endpoints in the list
   if (detailsEndpoint) {
-    agentsIds.add(detailsEndpoint.elastic.agent.id);
+    agentsIds.add(detailsEndpoint.metadata.elastic.agent.id);
   }
 
   for (const endpointInfo of listEndpoints) {
@@ -382,6 +384,7 @@ async function endpointDetailsListMiddleware({
     const decodedQuery: Query = searchBarQuery(getState());
 
     endpointResponse = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+      version: '2023-10-31',
       query: {
         page: pageIndex,
         pageSize,
@@ -484,7 +487,8 @@ async function loadEndpointDetails({
   // call the endpoint details api
   try {
     const response = await coreStart.http.get<HostInfo>(
-      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
+      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string }),
+      { version: '2023-10-31' }
     );
     dispatch({
       type: 'serverReturnedEndpointDetails',
@@ -528,7 +532,10 @@ async function loadEndpointDetails({
   try {
     const policyResponse = await coreStart.http.get<GetHostPolicyResponse>(
       BASE_POLICY_RESPONSE_ROUTE,
-      { query: { agentId: selectedEndpoint } }
+      {
+        version: '2023-10-31',
+        query: { agentId: selectedEndpoint },
+      }
     );
     dispatch({
       type: 'serverReturnedEndpointPolicyResponse',
@@ -561,6 +568,7 @@ async function endpointDetailsMiddleware({
     const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
     try {
       const response = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        version: '2023-10-31',
         query: {
           page: pageIndex,
           pageSize,
@@ -607,7 +615,8 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORMS_STATUS_ROUTE
+      METADATA_TRANSFORMS_STATUS_ROUTE,
+      { version: '2023-10-31' }
     );
 
     dispatch({

@@ -12,27 +12,24 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { getRuleTagsRoute } from './get_rule_tags';
 
-import {} from '../../common/rule_tags_aggregation';
-
 const rulesClient = rulesClientMock.create();
 
 jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('../../common/rule_tags_aggregation', () => ({
-  ...jest.requireActual('../../common/rule_tags_aggregation'),
-  formatRuleTagsAggregationResult: jest.fn(),
-}));
-
 beforeEach(() => {
   jest.resetAllMocks();
+  rulesClient.getTags.mockResolvedValueOnce({
+    data: ['a', 'b', 'c'],
+    page: 1,
+    perPage: 10,
+    total: 3,
+  });
 });
 
-const { formatRuleTagsAggregationResult } = jest.requireMock('../../common/rule_tags_aggregation');
-
 describe('getRuleTagsRoute', () => {
-  it('aggregates rule tags with proper parameters', async () => {
+  it('gets rule tags with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -42,19 +39,13 @@ describe('getRuleTagsRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/_tags"`);
 
-    const aggregateResult = { ruleTags: ['a', 'b', 'c'] };
-
-    formatRuleTagsAggregationResult.mockReturnValueOnce(aggregateResult);
-
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
         query: {
-          filter: 'test',
-          search: 'search text',
-          after: {
-            tags: 'c',
-          },
+          search: 'test',
+          per_page: 10,
+          page: 1,
         },
       },
       ['ok']
@@ -63,60 +54,28 @@ describe('getRuleTagsRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "rule_tags": Array [
+          "data": Array [
             "a",
             "b",
             "c",
           ],
+          "page": 1,
+          "per_page": 10,
+          "total": 3,
         },
       }
     `);
-    expect(rulesClient.aggregate).toHaveBeenCalledTimes(1);
-    expect(rulesClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "aggs": Object {
-            "tags": Object {
-              "composite": Object {
-                "after": Object {
-                  "tags": "c",
-                },
-                "size": 50,
-                "sources": Array [
-                  Object {
-                    "tags": Object {
-                      "terms": Object {
-                        "field": "alert.attributes.tags",
-                        "order": "asc",
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          "options": Object {
-            "after": Object {
-              "tags": "c",
-            },
-            "defaultSearchOperator": "AND",
-            "filter": "test",
-            "search": "search text",
-            "searchFields": Array [
-              "tags",
-            ],
-          },
-        },
-      ]
-    `);
     expect(res.ok).toHaveBeenCalledWith({
       body: {
-        rule_tags: ['a', 'b', 'c'],
+        data: ['a', 'b', 'c'],
+        page: 1,
+        per_page: 10,
+        total: 3,
       },
     });
   });
 
-  it('ensures the license allows aggregating rule tags', async () => {
+  it('ensures the license allows getting rule tags', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -124,17 +83,13 @@ describe('getRuleTagsRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    formatRuleTagsAggregationResult.mockReturnValueOnce({ ruleTags: ['a', 'b', 'c', 'd'] });
-
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
         query: {
-          filter: 'test',
-          search: 'search text',
-          after: {
-            tags: 'c',
-          },
+          search: 'test',
+          per_page: 10,
+          page: 1,
         },
       }
     );
@@ -144,7 +99,7 @@ describe('getRuleTagsRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  it('ensures the license check prevents aggregating rule tags', async () => {
+  it('ensures the license check prevents getting rule tags', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 

@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -115,13 +117,9 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuidv4()}`;
-      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       let monitorId = '';
 
       try {
-        await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-
         // use a user without fleet permissions to cause an error
         await security.role.create(roleName, {
           kibana: [
@@ -140,6 +138,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
         const { id } = await saveMonitor(newMonitor as MonitorFields);
         monitorId = id;
+
+        // delete the integration policy to cause an error
+        await kibanaServer.savedObjects.clean({ types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE] });
+
         await supertestWithoutAuth
           .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .auth(username, password)
@@ -149,14 +151,11 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not deleted
-        expect(response.body.attributes.urls).eql(newMonitor.urls);
+        expect(response.body.urls).eql(newMonitor.urls);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
-        await supertest
-          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
       }
     });
   });

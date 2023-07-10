@@ -69,9 +69,15 @@ export const StorybookProviders: React.FC = ({ children }) => {
               <AssistantProvider
                 actionTypeRegistry={actionTypeRegistry}
                 augmentMessageCodeBlocks={jest.fn()}
+                baseAllow={[]}
+                baseAllowReplacement={[]}
+                defaultAllow={[]}
+                defaultAllowReplacement={[]}
                 getComments={mockGetComments}
                 getInitialConversations={mockGetInitialConversations}
                 setConversations={jest.fn()}
+                setDefaultAllow={jest.fn()}
+                setDefaultAllowReplacement={jest.fn()}
                 http={mockHttp}
               >
                 {children}

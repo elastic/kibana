@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import {

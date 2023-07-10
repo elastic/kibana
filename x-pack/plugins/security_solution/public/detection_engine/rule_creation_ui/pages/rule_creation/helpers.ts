@@ -62,7 +62,7 @@ export const getTimeTypeValue = (time: string): { unit: Unit; value: number } =>
   if (
     !isEmpty(filterTimeType) &&
     filterTimeType != null &&
-    ['s', 'm', 'h'].includes(filterTimeType[0])
+    ['s', 'm', 'h', 'd'].includes(filterTimeType[0])
   ) {
     timeObj.unit = filterTimeType[0] as Unit;
   }

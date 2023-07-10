@@ -35,10 +35,10 @@ export const ADD_TO_CASE_EXISTING_CASE = i18n.translate(
   }
 );
 
-export const ELASTIC_SECURITY_ASSISTANT = i18n.translate(
-  'xpack.securitySolution.assistant.commentActions.elasticSecurityAssistantTitle',
+export const ELASTIC_AI_ASSISTANT = i18n.translate(
+  'xpack.securitySolution.assistant.commentActions.elasticAiAssistantTitle',
   {
-    defaultMessage: 'Elastic Security Assistant',
+    defaultMessage: 'Elastic AI Assistant',
   }
 );
 

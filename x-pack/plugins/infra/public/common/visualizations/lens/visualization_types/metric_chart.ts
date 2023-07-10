@@ -12,16 +12,16 @@ import {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import {
-  DEFAULT_LAYER_ID,
-  getAdhocDataView,
-  getDefaultReferences,
-  getHistogramColumn,
-} from '../utils';
+import { DEFAULT_LAYER_ID, getDefaultReferences, getHistogramColumn } from '../utils';
 
-import type { VisualizationAttributes, LensChartConfig, MetricChartOptions } from '../../types';
+import type {
+  VisualizationAttributes,
+  LensChartConfig,
+  MetricChartOptions,
+  Formula,
+} from '../../types';
 
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'trendline_layer';
@@ -43,7 +43,7 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
   getTrendLineLayer(baseLayer: PersistedIndexPatternLayer): FormBasedPersistedState['layers'] {
     const trendLineLayer = this.formulaAPI.insertOrReplaceFormulaColumn(
       TRENDLINE_ACCESSOR,
-      this.chartConfig.formula,
+      this.getFormulaWithOverride(),
       baseLayer,
       this.dataView
     );
@@ -57,6 +57,26 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
         linkToLayers: [DEFAULT_LAYER_ID],
         ...trendLineLayer,
       },
+    };
+  }
+
+  getFormulaWithOverride(): Formula {
+    const { formula } = this.chartConfig;
+    const { decimals = formula.format?.params?.decimals, title = this.chartConfig.title } =
+      this.options ?? {};
+    return {
+      ...this.chartConfig.formula,
+      ...(formula.format && decimals
+        ? {
+            format: {
+              ...formula.format,
+              params: {
+                decimals,
+              },
+            },
+          }
+        : {}),
+      label: title,
     };
   }
 
@@ -79,10 +99,7 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
 
     const baseLayerDetails = this.formulaAPI.insertOrReplaceFormulaColumn(
       ACCESSOR,
-      {
-        ...this.chartConfig.formula,
-        label: this.options?.title ?? this.chartConfig.title,
-      },
+      this.getFormulaWithOverride(),
       { columnOrder: [], columns: {} },
       this.dataView
     );
@@ -125,8 +142,8 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
     ];
   }
 
-  getAdhocDataView(): Record<string, DataViewSpec> {
-    return getAdhocDataView(this.dataView);
+  getDataView(): DataView {
+    return this.dataView;
   }
 
   getTitle(): string {

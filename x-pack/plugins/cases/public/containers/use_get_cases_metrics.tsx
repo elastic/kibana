@@ -22,14 +22,12 @@ export const useGetCasesMetrics = () => {
 
   return useQuery<CasesMetrics, ServerError>(
     casesQueriesKeys.casesMetrics(),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return getCasesMetrics({
+    ({ signal }) =>
+      getCasesMetrics({
         http,
-        signal: abortCtrlRef.signal,
         query: { owner, features: ['mttr'] },
-      });
-    },
+        signal,
+      }),
     {
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });

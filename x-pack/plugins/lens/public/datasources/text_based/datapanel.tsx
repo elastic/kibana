@@ -23,7 +23,7 @@ import {
   FieldsGroupNames,
   GetCustomFieldType,
   useGroupedFields,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';

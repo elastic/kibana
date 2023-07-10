@@ -58,7 +58,6 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
-  value?: string[] | string | null;
 }
 
 const TopNComponent: React.FC<Props> = ({

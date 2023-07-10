@@ -32,9 +32,9 @@ import type {
   UpdatePackageResponse,
   GetVerificationKeyIdResponse,
   GetBulkAssetsResponse,
-  SimpleSOAssetType,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
+  AssetSOObject,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -65,6 +65,7 @@ import {
   removeInstallation,
   getLimitedPackages,
   getInstallation,
+  getBulkAssets,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
@@ -76,15 +77,12 @@ import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
-  SimpleSOAssetAttributes,
   PackageListItem,
   PackageList,
   PackageInfo,
   InstallationInfo,
 } from '../../types';
-import type { KibanaSavedObjectType, ElasticsearchAssetType } from '../../../common/types/models';
 import { getDataStreams } from '../../services/epm/data_streams';
-import { allowedAssetTypesLookup } from '../../../common/constants';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -317,30 +315,12 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   TypeOf<typeof GetBulkAssetsRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).internalSoClient;
     const { assetIds } = request.body;
+    const savedObjectsClient = (await context.fleet).internalSoClient;
+    const assets = await getBulkAssets(savedObjectsClient, assetIds as AssetSOObject[]);
 
-    const { resolved_objects: resolvedObjects } =
-      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(assetIds);
-    const res: SimpleSOAssetType[] = resolvedObjects
-      .map(({ saved_object: savedObject }) => savedObject)
-      .filter(
-        (savedObject) =>
-          savedObject?.error?.statusCode !== 404 && allowedAssetTypesLookup.has(savedObject.type)
-      )
-      .map((obj) => {
-        return {
-          id: obj.id,
-          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
-          updatedAt: obj.updated_at,
-          attributes: {
-            title: obj.attributes.title,
-            description: obj.attributes.description,
-          },
-        };
-      });
     const body: GetBulkAssetsResponse = {
-      items: res,
+      items: assets,
     };
     return response.ok({ body });
   } catch (error) {

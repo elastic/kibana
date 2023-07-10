@@ -220,7 +220,6 @@ export const ExpandableEvent = React.memo<Props>(
             detailsEcsData={detailsEcsData}
             id={event.eventId}
             isAlert={isAlert}
-            indexName={event.indexName}
             isDraggable={isDraggable}
             rawEventData={rawEventData}
             scopeId={scopeId}

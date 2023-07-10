@@ -12,7 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
-import { getPromptContextFromEventDetailsItem } from '../../../../assistant/helpers';
+import { getRawData } from '../../../../assistant/helpers';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -102,10 +102,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const view = useMemo(() => (isFlyoutView ? SUMMARY_VIEW : TIMELINE_VIEW), [isFlyoutView]);
 
-  const getPromptContext = useCallback(
-    async () => getPromptContextFromEventDetailsItem(detailsData ?? []),
-    [detailsData]
-  );
+  const getPromptContext = useCallback(async () => getRawData(detailsData ?? []), [detailsData]);
 
   const { promptContextId } = useAssistant(
     isAlert ? 'alert' : 'event',
@@ -260,7 +257,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       <FlyoutFooter
         detailsData={detailsData}
         detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
         refetchFlyoutData={refetchFlyoutData}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}

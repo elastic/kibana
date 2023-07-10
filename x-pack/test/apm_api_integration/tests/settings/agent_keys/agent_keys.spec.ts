@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function createAgentKey(apiClient: ApmApiSupertest, privileges = allApplicationPrivileges) {
     return await apiClient({
-      endpoint: 'POST /api/apm/agent_keys 2023-05-22',
+      endpoint: 'POST /api/apm/agent_keys 2023-10-31',
       params: {
         body: {
           name: agentKeyName,

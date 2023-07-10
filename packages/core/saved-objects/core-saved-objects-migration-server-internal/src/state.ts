@@ -374,6 +374,7 @@ export interface CheckTargetMappingsState extends PostInitState {
 export interface UpdateTargetMappingsPropertiesState extends PostInitState {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES';
+  readonly updatedTypesQuery: Option.Option<QueryDslQueryContainer>;
 }
 
 export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInitState {

@@ -34,6 +34,11 @@ export const getAllFields = (data: TimelineEventsDetailsItem[]): QueryField[] =>
     .filter(({ field }) => !field.startsWith('signal.'))
     .map(({ field, values }) => ({ field, values: values?.join(',') ?? '' }));
 
+export const getRawData = (data: TimelineEventsDetailsItem[]): Record<string, string[]> =>
+  data
+    .filter(({ field }) => !field.startsWith('signal.'))
+    .reduce((acc, { field, values }) => ({ ...acc, [field]: values ?? [] }), {});
+
 export const getFieldsAsCsv = (queryFields: QueryField[]): string =>
   queryFields.map(({ field, values }) => `${field},${values}`).join('\n');
 

@@ -451,6 +451,7 @@ export function SuggestionPanel({
     <div className="lnsSuggestionPanel">
       <EuiAccordion
         id="lensSuggestionsPanel"
+        buttonProps={{ 'data-test-subj': 'lensSuggestionsPanelToggleButton' }}
         buttonContent={
           <EuiTitle size="xxs">
             <h3>

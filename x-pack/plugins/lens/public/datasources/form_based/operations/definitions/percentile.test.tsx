@@ -17,7 +17,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { percentileOperation } from '.';
+import { LastValueIndexPatternColumn, percentileOperation } from '.';
 import { FormBasedLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { TermsIndexPatternColumn } from './terms';
@@ -552,6 +552,24 @@ describe('percentile', () => {
       expect(percentileColumn.params.percentile).toEqual(75);
       expect(percentileColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
       expect(percentileColumn.label).toEqual('75th percentile of test');
+    });
+
+    it('should not keep a filter if coming from last value', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
+      const percentileColumn = percentileOperation.buildColumn({
+        indexPattern,
+        field: bytesField,
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
+        previousColumn: {
+          operationType: 'last_value',
+          sourceField: 'bytes',
+          label: 'Last bytes',
+          filter: { language: 'kuery', query: 'bytes: *' },
+        } as LastValueIndexPatternColumn,
+      });
+      expect(percentileColumn.filter).toEqual(undefined);
     });
   });
 

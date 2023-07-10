@@ -86,7 +86,7 @@ const actionExecutorInitializerParams = {
   getActionsClientWithRequest: jest.fn(async () => actionsClientMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger,
-  preconfiguredActions: [],
+  inMemoryConnectors: [],
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,

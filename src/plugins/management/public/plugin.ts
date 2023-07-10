@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { CloudChatProviderPluginStart } from '@kbn/cloud-chat-provider-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -23,7 +22,7 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { ManagementSetup, ManagementStart } from './types';
+import { ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
@@ -40,7 +39,6 @@ interface ManagementSetupDependencies {
 
 interface ManagementStartDependencies {
   share: SharePluginStart;
-  cloudChatProvider?: CloudChatProviderPluginStart;
 }
 
 export class ManagementPlugin
@@ -74,6 +72,11 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+  private landingPageRedirect$ = new BehaviorSubject<string | undefined>(undefined);
+  private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
+    enabled: false,
+    hideLinksTo: [],
+  });
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -113,14 +116,16 @@ export class ManagementPlugin
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
-        const [coreStart, plugins] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
+          coreStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
-          cloudChat: plugins.cloudChatProvider,
+          cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+          landingPageRedirect$: managementPlugin.landingPageRedirect$,
         });
       },
     });
@@ -149,6 +154,10 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setupCardsNavigation: ({ enabled, hideLinksTo }) =>
+        this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
+      setLandingPageRedirect: (landingPageRedirect: string) =>
+        this.landingPageRedirect$.next(landingPageRedirect),
     };
   }
 }

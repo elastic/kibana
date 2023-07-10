@@ -190,7 +190,8 @@ describe('ruleType', () => {
       services: alertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
@@ -257,7 +258,8 @@ describe('ruleType', () => {
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
@@ -324,7 +326,8 @@ describe('ruleType', () => {
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
@@ -390,7 +393,8 @@ describe('ruleType', () => {
       services: alertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {

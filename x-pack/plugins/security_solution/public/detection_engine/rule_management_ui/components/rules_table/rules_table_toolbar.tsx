@@ -7,30 +7,66 @@
 
 import React, { useMemo } from 'react';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
+import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
+import * as i18n from './translations';
 
 export enum AllRulesTabs {
   management = 'management',
   monitoring = 'monitoring',
+  updates = 'updates',
 }
 
 export const RulesTableToolbar = React.memo(() => {
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
+  const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
+
+  const installedTotal =
+    (ruleManagementFilters?.rules_summary.custom_count ?? 0) +
+    (ruleManagementFilters?.rules_summary.prebuilt_installed_count ?? 0);
+  const updateTotal = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
+
+  const ruleUpdateTab = useMemo(
+    () => ({
+      [AllRulesTabs.updates]: {
+        id: AllRulesTabs.updates,
+        name: i18n.RULE_UPDATES_TAB,
+        disabled: false,
+        href: `/rules/${AllRulesTabs.updates}`,
+        isBeta: updateTotal > 0,
+        betaOptions: {
+          text: `${updateTotal}`,
+        },
+      },
+    }),
+    [updateTotal]
+  );
+
   const ruleTabs = useMemo(
     () => ({
       [AllRulesTabs.management]: {
         id: AllRulesTabs.management,
-        name: i18n.RULES_TAB,
+        name: i18n.INSTALLED_RULES_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.management}`,
+        isBeta: installedTotal > 0,
+        betaOptions: {
+          text: `${installedTotal}`,
+        },
       },
       [AllRulesTabs.monitoring]: {
         id: AllRulesTabs.monitoring,
-        name: i18n.MONITORING_TAB,
+        name: i18n.RULE_MONITORING_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.monitoring}`,
+        isBeta: installedTotal > 0,
+        betaOptions: {
+          text: `${installedTotal}`,
+        },
       },
+      ...(updateTotal > 0 ? ruleUpdateTab : {}),
     }),
-    []
+    [installedTotal, ruleUpdateTab, updateTotal]
   );
 
   return <TabNavigation navTabs={ruleTabs} />;

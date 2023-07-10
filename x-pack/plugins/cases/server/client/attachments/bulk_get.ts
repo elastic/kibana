@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { partition } from 'lodash';
-import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
 import {
   decodeWithExcessOrThrow,
@@ -45,8 +42,6 @@ export async function bulkGet(
   try {
     const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: attachmentIDs });
 
-    throwErrorIfIdsExceedTheLimit(request.ids);
-
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
 
@@ -82,14 +77,6 @@ export async function bulkGet(
     });
   }
 }
-
-const throwErrorIfIdsExceedTheLimit = (ids: string[]) => {
-  if (ids.length > MAX_BULK_GET_ATTACHMENTS) {
-    throw Boom.badRequest(
-      `Maximum request limit of ${MAX_BULK_GET_ATTACHMENTS} attachments reached`
-    );
-  }
-};
 
 interface PartitionedAttachments {
   validAttachments: AttachmentSavedObject[];
