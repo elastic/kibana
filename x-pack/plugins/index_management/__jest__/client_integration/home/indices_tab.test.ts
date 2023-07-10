@@ -225,7 +225,9 @@ describe('<IndexManagementHome />', () => {
       ]);
       httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
-      testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup, {
+        enableIndexActions: true,
+      });
       const { component, find } = testBed;
 
       component.update();
