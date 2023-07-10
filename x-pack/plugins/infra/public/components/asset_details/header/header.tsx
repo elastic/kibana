@@ -63,7 +63,11 @@ export const Header = ({
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = {
     nodeDetails: (
-      <LinkToNodeDetails nodeId={node.name} nodeType={nodeType} currentTime={currentTimeRange.to} />
+      <LinkToNodeDetails
+        nodeName={node.name}
+        nodeType={nodeType}
+        currentTime={currentTimeRange.to}
+      />
     ),
     alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
     apmServices: <LinkToApmServices nodeName={node.name} apmField={APM_FIELD} />,
