@@ -97,7 +97,11 @@ export const Overview = ({
         )}
       </EuiFlexItem>
       <EuiHorizontalRule margin="xs" />
-      <AlertsSummaryContent nodeName={nodeName} />
+      <AlertsSummaryContent
+        nodeName={nodeName}
+        nodeType={nodeType}
+        currentTimeRange={currentTimeRange}
+      />
       <EuiHorizontalRule margin="xs" />
     </EuiFlexGroup>
   );

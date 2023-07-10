@@ -14,6 +14,7 @@ import { TimeRange } from '@kbn/es-query';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import type { AlertStatus } from '../../../../pages/metrics/hosts/types';
 import {
@@ -31,10 +32,19 @@ import type { AlertsEsQuery } from '../../../../pages/metrics/hosts/hooks/use_al
 import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LinkToAlertsRule } from '../../links/link_to_alerts';
+import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 
 const ALERT_STATUS: AlertStatus = 'all';
 
-export const AlertsSummaryContent = ({ nodeName }: { nodeName: string }) => {
+export const AlertsSummaryContent = ({
+  nodeName,
+  nodeType,
+  currentTimeRange,
+}: {
+  nodeName: string;
+  nodeType: string;
+  currentTimeRange: MetricsTimeInput;
+}) => {
   // TODO replace once https://github.com/elastic/kibana/pull/160924 is ready
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
 
@@ -50,6 +60,26 @@ export const AlertsSummaryContent = ({ nodeName }: { nodeName: string }) => {
 
   return (
     <ContainerPanel>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem>
+          <EuiText style={{ fontWeight: 700, textTransform: 'uppercase' }} size="s">
+            <FormattedMessage
+              id="xpack.infra.assetDetails.overview.alertsSectionTitle"
+              defaultMessage="Alerts"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LinkToAlertsRule inHostFlyout />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LinkToAlertsPage
+            nodeName={nodeName}
+            queryField={`${nodeType}.name`}
+            currentTimeRange={currentTimeRange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <MemoAlertSummaryWidget
         alertsQuery={alertsEsQueryByStatus}
         dateRange={searchCriteria.dateRange}
@@ -81,19 +111,6 @@ const MemoAlertSummaryWidget = React.memo(
 
     return (
       <>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>
-            <EuiText style={{ fontWeight: 700, textTransform: 'uppercase' }} size="s">
-              <FormattedMessage
-                id="xpack.infra.assetDetails.overview.alertsSectionTitle"
-                defaultMessage="Alerts"
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LinkToAlertsRule inHostFlyout />
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <AlertSummaryWidget
           chartProps={chartProps}
           featureIds={infraAlertFeatureIds}
