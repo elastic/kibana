@@ -173,13 +173,15 @@ export const NavigationEmbeddableLinkEditor = ({
               onClick={() => {
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety
                 if (linkDestination) {
+                  const linkId = idToEdit && linkToEdit ? idToEdit : uuidv4();
                   onSave({
                     ...links,
-                    [idToEdit && linkToEdit ? idToEdit : uuidv4()]: {
-                      destination: linkDestination,
-                      label: linkLabel,
+                    [linkId]: {
                       order: 0,
+                      id: linkId,
+                      label: linkLabel,
                       type: selectedLinkType,
+                      destination: linkDestination,
                     },
                   });
 

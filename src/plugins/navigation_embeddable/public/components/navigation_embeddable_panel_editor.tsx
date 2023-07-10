@@ -7,41 +7,31 @@
  */
 
 import { isEmpty, omit } from 'lodash';
-import useAsync from 'react-use/lib/useAsync';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiText,
-  EuiIcon,
   EuiForm,
   EuiTitle,
   EuiPanel,
-  IconType,
   EuiSpacer,
   EuiButton,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlyoutBody,
-  EuiButtonIcon,
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  NavigationLinkInfo,
-  EXTERNAL_LINK_TYPE,
-  DASHBOARD_LINK_TYPE,
-  NavigationEmbeddableInput,
-  NavigationEmbeddableLinkList,
-} from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
+import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
+import { NavigationEmbeddableInput, NavigationEmbeddableLinkList } from '../embeddable/types';
+import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
 
 import './navigation_embeddable.scss';
-import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
 
 export const NavigationEmbeddablePanelEditor = ({
   onSave,
@@ -55,7 +45,6 @@ export const NavigationEmbeddablePanelEditor = ({
   parentDashboard?: DashboardContainer;
 }) => {
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-
   const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
 
   const addOrEditLink = useCallback(
@@ -63,8 +52,8 @@ export const NavigationEmbeddablePanelEditor = ({
       const newLinks = await openLinkEditorFlyout({
         links,
         parentDashboard,
-        idToEdit: linkToEditId, // if this is defined, then we are editing; otherwise, we are adding
         ref: editLinkFlyoutRef,
+        idToEdit: linkToEditId, // if this is defined, then we are editing; otherwise, we are adding
       });
       if (newLinks) setLinks(newLinks);
     },
@@ -75,37 +64,8 @@ export const NavigationEmbeddablePanelEditor = ({
     (linkId: string) => {
       setLinks(omit(links, [linkId]));
     },
-    [links]
+    [links, setLinks]
   );
-
-  /**
-   * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
-   * panels and only fetching the dashboard saved objects when first loading this flyout.
-   *
-   * Will need to think this through and fix as part of the editing process - not worth holding this PR, since it's
-   * blocking so much other work :)
-   */
-  const { value: linkList } = useAsync(async () => {
-    if (!links || isEmpty(links)) return [];
-
-    const newLinks: Array<{ id: string; icon: IconType; label: string }> = await Promise.all(
-      Object.keys(links).map(async (panelId) => {
-        let label = links[panelId].label;
-        let icon = NavigationLinkInfo[EXTERNAL_LINK_TYPE].icon;
-
-        if (links[panelId].type === DASHBOARD_LINK_TYPE) {
-          icon = NavigationLinkInfo[DASHBOARD_LINK_TYPE].icon;
-          if (!label) {
-            const dashboard = await memoizedFetchDashboard(links[panelId].destination);
-            label = dashboard.attributes.title;
-          }
-        }
-
-        return { id: panelId, label: label || links[panelId].destination, icon };
-      })
-    );
-    return newLinks;
-  }, [links]);
 
   return (
     <>
@@ -139,57 +99,14 @@ export const NavigationEmbeddablePanelEditor = ({
                 </EuiPanel>
               ) : (
                 <>
-                  {linkList?.map((link) => {
+                  {Object.keys(links).map((linkId) => {
                     return (
-                      <div key={link.id}>
-                        <EuiPanel
-                          className="navEmbeddablePanelEditor"
-                          hasBorder
-                          hasShadow={false}
-                          paddingSize="s"
-                        >
-                          <EuiFlexGroup
-                            gutterSize="s"
-                            responsive={false}
-                            wrap={false}
-                            alignItems="center"
-                          >
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type={link.icon} color="text" />
-                            </EuiFlexItem>
-                            <EuiFlexItem className="linkText">
-                              <div className="wrapText">{link.label}</div>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiFlexGroup
-                                gutterSize="none"
-                                className="navEmbeddable_hoverActions"
-                              >
-                                <EuiFlexItem>
-                                  <EuiButtonIcon
-                                    size="xs"
-                                    iconType="pencil"
-                                    aria-label="Edit"
-                                    onClick={() => {
-                                      addOrEditLink(link.id);
-                                    }}
-                                  />
-                                </EuiFlexItem>
-                                <EuiFlexItem>
-                                  <EuiButtonIcon
-                                    size="xs"
-                                    iconType="trash"
-                                    aria-label="Delete"
-                                    color="danger"
-                                    onClick={() => {
-                                      deleteLink(link.id);
-                                    }}
-                                  />
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiPanel>
+                      <div key={linkId}>
+                        <NavigationEmbeddablePanelEditorLink
+                          editLink={() => addOrEditLink(linkId)}
+                          link={links[linkId]}
+                          deleteLink={() => deleteLink(linkId)}
+                        />
                         <EuiSpacer size="s" />
                       </div>
                     );
