@@ -12,5 +12,3 @@ export {
   withKibanaContextProvider,
   type KibanaContextProviderProps,
 } from './provider';
-
-export { composeProviders } from './utils';

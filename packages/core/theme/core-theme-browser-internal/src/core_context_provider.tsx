@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { composeProviders, KibanaThemeProvider } from '@kbn/react-kibana-context';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context';
 import { ThemeServiceStart } from '@kbn/core-theme-browser/src/types';
 
 interface CoreContextProviderProps {
@@ -18,7 +18,7 @@ interface CoreContextProviderProps {
 }
 
 /**
- * Utility component exposing all the context providers required by core when integrating with React.
+ * Utility component exposing all the context providers required by Kibana when integrating with React.
  **/
 export const CoreContextProvider: FC<CoreContextProviderProps> = ({
   i18n,
@@ -26,11 +26,11 @@ export const CoreContextProvider: FC<CoreContextProviderProps> = ({
   theme,
   globalStyles = false,
 }) => {
-  const Provider = composeProviders([i18n.Context, KibanaThemeProvider]);
-
   return (
-    <Provider theme$={theme.theme$} {...{ globalStyles }}>
-      {children}
-    </Provider>
+    <i18n.Context>
+      <KibanaThemeProvider theme$={theme.theme$} {...{ globalStyles }}>
+        {children}
+      </KibanaThemeProvider>
+    </i18n.Context>
   );
 };
