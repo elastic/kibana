@@ -157,9 +157,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshBadges() {
-    if (!this.mounted) {
-      return;
-    }
     if (this.props.showBadges === false) {
       return;
     }
@@ -172,6 +169,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ((await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
         embeddable: this.props.embeddable,
       })) as BadgeAction[]) ?? [];
+
+    if (!this.mounted) {
+      return;
+    }
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -186,9 +187,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshNotifications() {
-    if (!this.mounted) {
-      return;
-    }
     if (this.props.showNotifications === false) {
       return;
     }
@@ -201,6 +199,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ((await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
         embeddable: this.props.embeddable,
       })) as NotificationAction[]) ?? [];
+
+    if (!this.mounted) {
+      return;
+    }
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -353,20 +355,28 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.subscription.add(
       this.props.embeddable.getOutput$().subscribe(
         (output: EmbeddableOutput) => {
-          this.setState({
-            error: output.error,
-            loading: output.loading,
-          });
+          if (this.mounted) {
+            this.setState({
+              error: output.error,
+              loading: output.loading,
+            });
+          }
         },
         (error) => {
-          this.setState({ error });
+          if (this.mounted) {
+            this.setState({ error });
+          }
         }
       )
     );
 
     const node = this.props.embeddable.render(this.embeddableRoot.current) ?? undefined;
     if (isPromise(node)) {
-      node.then((resolved) => this.setState({ node: resolved }));
+      node.then((resolved) => {
+        if (this.mounted) {
+          this.setState({ node: resolved });
+        }
+      });
     } else {
       this.setState({ node });
     }
