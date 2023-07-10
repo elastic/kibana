@@ -23,7 +23,7 @@ export interface UseAccordionStateValue {
   /**
    * Use this to control the accordion visual state
    */
-  state: typeof CLOSED | typeof OPEN;
+  state: ToggleReducerState;
 
   /**
    * Handler function for cycling between the states
@@ -32,7 +32,7 @@ export interface UseAccordionStateValue {
 }
 
 /**
- * Tiny hook for controlled useAccordionState
+ * Tiny hook for controlled AccordionState
  * @param expandedInitially - is accordion expanded on first render
  */
 export const useAccordionState = (expandedInitially: boolean): UseAccordionStateValue => {
