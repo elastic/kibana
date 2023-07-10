@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { FilterableEmbeddableInput } from './types';
-import { shouldFetch$ } from  './should_fetch';
+import { shouldFetch$ } from './should_fetch';
 
 describe('shouldFetch$', () => {
   let input: FilterableEmbeddableInput = {
@@ -58,4 +58,3 @@ describe('shouldFetch$', () => {
     expect(shouldFetchCount).toBe(initialCount + 1);
   });
 });
-
