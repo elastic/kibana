@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-
 import {
   FieldMapping,
   formatPipelineName,
@@ -95,10 +93,6 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
   pipelineName: '',
   sourceField: '',
-};
-
-const isNotTextExpansionModel = (model: MLInferencePipelineOption): boolean => {
-  return model.modelType !== SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
@@ -597,16 +591,18 @@ export const MLInferenceLogic = kea<
               destination_field: destinationField,
               model_id: modelId,
               source_field: sourceField,
+              field_mappings: fieldMappings,
             } = pipelineParams;
 
+            const missingSourceFields =
+              fieldMappings?.map((f) => f.sourceField).filter((f) => !sourceFields?.includes(f)) ??
+              [];
             const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
             const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
             const disabledReason = getDisabledReason(
-              sourceFields,
-              sourceField,
+              missingSourceFields,
               indexProcessorNames,
-              pipelineName,
-              modelType
+              pipelineName
             );
 
             return {
@@ -619,9 +615,7 @@ export const MLInferenceLogic = kea<
               sourceField,
             };
           })
-          .filter(
-            (p): p is MLInferencePipelineOption => p !== undefined && isNotTextExpansionModel(p)
-          );
+          .filter((p): p is MLInferencePipelineOption => p !== undefined);
 
         return existingPipelines;
       },

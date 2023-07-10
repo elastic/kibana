@@ -208,7 +208,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -216,7 +216,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -238,7 +238,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -246,7 +246,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -487,6 +487,8 @@
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
+              " | undefined; suggestionsAbstraction?: ",
+              "SuggestionsAbstraction",
               " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; onFiltersUpdated?: ((filters: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1160,6 +1162,23 @@
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.FilterItemsProps.suggestionsAbstraction",
+            "type": "Object",
+            "tags": [],
+            "label": "suggestionsAbstraction",
+            "description": [
+              "Array of suggestion abstraction that controls the render of the field"
+            ],
+            "signature": [
+              "SuggestionsAbstraction",
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1818,6 +1837,21 @@
             "description": [],
             "signature": [
               "SuggestionsListSize",
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QueryStringInputProps.suggestionsAbstraction",
+            "type": "Object",
+            "tags": [],
+            "label": "suggestionsAbstraction",
+            "description": [],
+            "signature": [
+              "SuggestionsAbstraction",
               " | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
