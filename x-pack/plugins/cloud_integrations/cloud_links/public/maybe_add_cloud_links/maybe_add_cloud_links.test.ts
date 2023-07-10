@@ -77,8 +77,71 @@ describe('maybeAddCloudLinks', () => {
           },
           Object {
             "content": <ThemDarkModeToggle
-              getSpaceDarkModeValue={[Function]}
-              useUpdateUserProfile={[MockFunction]}
+              security={
+                Object {
+                  "authc": Object {
+                    "areAPIKeysEnabled": [MockFunction],
+                    "getCurrentUser": [MockFunction] {
+                      "calls": Array [
+                        Array [],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": Promise {},
+                        },
+                      ],
+                    },
+                  },
+                  "hooks": Object {
+                    "useUpdateUserProfile": [MockFunction],
+                  },
+                  "navControlService": Object {
+                    "addUserMenuLinks": [MockFunction] {
+                      "calls": Array [
+                        [Circular],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": undefined,
+                        },
+                      ],
+                    },
+                    "getUserMenuLinks$": [MockFunction],
+                  },
+                  "uiApi": Object {
+                    "components": Object {
+                      "getChangePassword": [MockFunction],
+                      "getPersonalInfo": [MockFunction],
+                    },
+                  },
+                  "userProfiles": Object {
+                    "bulkGet": [MockFunction],
+                    "getCurrent": [MockFunction],
+                    "suggest": [MockFunction],
+                    "update": [MockFunction],
+                    "userProfile$": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                }
+              }
+              uiSettingsClient={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
             />,
             "href": "",
             "iconType": "",
@@ -159,8 +222,71 @@ describe('maybeAddCloudLinks', () => {
           },
           Object {
             "content": <ThemDarkModeToggle
-              getSpaceDarkModeValue={[Function]}
-              useUpdateUserProfile={[MockFunction]}
+              security={
+                Object {
+                  "authc": Object {
+                    "areAPIKeysEnabled": [MockFunction],
+                    "getCurrentUser": [MockFunction] {
+                      "calls": Array [
+                        Array [],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": Promise {},
+                        },
+                      ],
+                    },
+                  },
+                  "hooks": Object {
+                    "useUpdateUserProfile": [MockFunction],
+                  },
+                  "navControlService": Object {
+                    "addUserMenuLinks": [MockFunction] {
+                      "calls": Array [
+                        [Circular],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": undefined,
+                        },
+                      ],
+                    },
+                    "getUserMenuLinks$": [MockFunction],
+                  },
+                  "uiApi": Object {
+                    "components": Object {
+                      "getChangePassword": [MockFunction],
+                      "getPersonalInfo": [MockFunction],
+                    },
+                  },
+                  "userProfiles": Object {
+                    "bulkGet": [MockFunction],
+                    "getCurrent": [MockFunction],
+                    "suggest": [MockFunction],
+                    "update": [MockFunction],
+                    "userProfile$": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                }
+              }
+              uiSettingsClient={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
             />,
             "href": "",
             "iconType": "",

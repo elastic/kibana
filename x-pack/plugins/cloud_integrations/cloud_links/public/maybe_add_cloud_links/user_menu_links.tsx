@@ -22,9 +22,6 @@ export const createUserMenuLinks = ({
   uiSettingsClient: IUiSettingsClient;
 }): UserMenuLink[] => {
   const { profileUrl, billingUrl, organizationUrl } = cloud;
-  const {
-    hooks: { useUpdateUserProfile },
-  } = security;
 
   const userMenuLinks = [] as UserMenuLink[];
 
@@ -63,14 +60,7 @@ export const createUserMenuLinks = ({
   }
 
   userMenuLinks.push({
-    content: (
-      <ThemDarkModeToggle
-        useUpdateUserProfile={useUpdateUserProfile}
-        getSpaceDarkModeValue={() => {
-          return uiSettingsClient.get('theme:darkMode');
-        }}
-      />
-    ),
+    content: <ThemDarkModeToggle security={security} uiSettingsClient={uiSettingsClient} />,
     order: 400,
     label: '',
     iconType: '',

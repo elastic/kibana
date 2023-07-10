@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiContextMenuItem,
   EuiFlexGroup,
@@ -15,64 +15,25 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { UpdateUserProfileHook } from '@kbn/security-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { useThemeDarkmodeToggle } from './theme_darkmode_hook';
 
 interface Props {
-  useUpdateUserProfile: UpdateUserProfileHook;
-  getSpaceDarkModeValue: () => boolean | undefined;
+  uiSettingsClient: IUiSettingsClient;
+  security: SecurityPluginStart;
 }
 
-export const ThemDarkModeToggle = ({ useUpdateUserProfile, getSpaceDarkModeValue }: Props) => {
+export const ThemDarkModeToggle = ({ security, uiSettingsClient }: Props) => {
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
   const { euiTheme } = useEuiTheme();
-  const [checked, setChecked] = useState(false);
 
-  const { userProfileData, isLoading, update } = useUpdateUserProfile({
-    notificationSuccess: {
-      title: i18n.translate('xpack.cloudLinks.userMenuLinks.darkMode.successNotificationTitle', {
-        defaultMessage: 'Color theme updated',
-      }),
-      pageReloadText: i18n.translate(
-        'xpack.cloudLinks.userMenuLinks.darkMode.successNotificationText',
-        {
-          defaultMessage: 'Reload the page to see the changes',
-        }
-      ),
-    },
-    pageReloadChecker: (prev, next) => {
-      return prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
-    },
+  const { isVisible, toggle, isDarkModeOn, colorScheme } = useThemeDarkmodeToggle({
+    security,
+    uiSettingsClient,
   });
 
-  const { userSettings: { darkMode } = { darkMode: undefined } } = userProfileData ?? {};
-
-  const toggleDarkMode = useCallback(
-    (on: boolean) => {
-      if (isLoading) {
-        return;
-      }
-      update({
-        userSettings: {
-          darkMode: on ? 'dark' : 'light',
-        },
-      });
-    },
-    [isLoading, update]
-  );
-
-  useEffect(() => {
-    let updatedValue = false;
-
-    if (typeof darkMode !== 'string') {
-      // User profile does not have yet any preference -> default to space dark mode value
-      updatedValue = getSpaceDarkModeValue() ?? false;
-    } else {
-      updatedValue = darkMode === 'dark';
-    }
-    setChecked(updatedValue);
-  }, [darkMode, getSpaceDarkModeValue]);
-
-  if (!userProfileData) {
+  if (!isVisible) {
     return null;
   }
 
@@ -80,11 +41,11 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile, getSpaceDarkModeValue
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xs">
       <EuiFlexItem>
         <EuiContextMenuItem
-          icon={darkMode === 'dark' ? 'moon' : 'sun'}
+          icon={colorScheme === 'dark' ? 'moon' : 'sun'}
           size="s"
           onClick={() => {
-            const on = darkMode === 'light' ? true : false;
-            toggleDarkMode(on);
+            const on = colorScheme === 'light' ? true : false;
+            toggle(on);
           }}
           data-test-subj="darkModeToggle"
         >
@@ -96,7 +57,7 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile, getSpaceDarkModeValue
       <EuiFlexItem grow={false} css={{ paddingRight: euiTheme.size.m }}>
         <EuiSwitch
           label={
-            checked
+            isDarkModeOn
               ? i18n.translate('xpack.cloudLinks.userMenuLinks.darkModeOnLabel', {
                   defaultMessage: 'on',
                 })
@@ -105,9 +66,9 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile, getSpaceDarkModeValue
                 })
           }
           showLabel={false}
-          checked={checked}
+          checked={isDarkModeOn}
           onChange={(e) => {
-            toggleDarkMode(e.target.checked);
+            toggle(e.target.checked);
           }}
           aria-describedby={toggleTextSwitchId}
           data-test-subj="darkModeToggleSwitch"
