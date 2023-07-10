@@ -68,6 +68,7 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
             protection={protection}
             protectionLabel={protectionLabel}
             osList={RANSOMEWARE_OS_VALUES}
+            data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
       >
@@ -77,6 +78,7 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
           onChange={onChange}
           policy={policy}
           mode={mode}
+          data-test-subj={getTestId('protectionLevel')}
         />
 
         <NotifyUserOption
@@ -85,6 +87,7 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
           mode={mode}
           protection={protection}
           osList={RANSOMEWARE_OS_VALUES}
+          data-test-subj={getTestId('notifyUser')}
         />
         <EuiSpacer size="m" />
 

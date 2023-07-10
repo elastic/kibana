@@ -157,7 +157,7 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                   title={calloutTitle}
                   color="warning"
                   iconType="warning"
-                  data-test-subj="policyAdvancedSettingsWarning"
+                  data-test-subj={getTestId('warning')}
                 >
                   <p>{warningMessage}</p>
                 </EuiCallOut>
@@ -174,7 +174,7 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
               </h4>
             </EuiText>
 
-            <EuiPanel data-test-subj="advancedPolicyPanel" paddingSize="s">
+            <EuiPanel data-test-subj={getTestId('settings')} paddingSize="s">
               {AdvancedPolicySchema.map(
                 (
                   {

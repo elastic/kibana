@@ -70,6 +70,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
             protection={protection}
             protectionLabel={protectionLabel}
             osList={MEMORY_PROTECTION_OS_VALUES}
+            data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
       >
@@ -79,6 +80,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
           mode={mode}
           protection={protection}
           osList={MEMORY_PROTECTION_OS_VALUES}
+          data-test-subj={getTestId('protectionLevel')}
         />
 
         <NotifyUserOption
@@ -87,6 +89,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
           mode={mode}
           protection={protection}
           osList={MEMORY_PROTECTION_OS_VALUES}
+          data-test-subj={getTestId('notifyUser')}
         />
 
         <EuiSpacer size="m" />

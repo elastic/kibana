@@ -23,6 +23,7 @@ import {
 
 import { ThemeContext } from 'styled-components';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { OS_TITLES } from '../../../../../common/translations';
 
 const TITLES = {
@@ -49,18 +50,22 @@ interface SettingCardProps {
   rightCorner?: ReactNode;
 }
 
-export const SettingCardHeader: FC = memo(({ children }) => (
-  <EuiTitle size="xxs">
-    <h5>{children}</h5>
-  </EuiTitle>
-));
+export const SettingCardHeader = memo<{ children: React.ReactNode; 'data-test-subj'?: string }>(
+  ({ children, 'data-test-subj': dataTestSubj }) => (
+    <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
+      <h5>{children}</h5>
+    </EuiTitle>
+  )
+);
 SettingCardHeader.displayName = 'SettingCardHeader';
 
 export const SettingCard: FC<SettingCardProps> = memo(
   ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => {
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     return (
-      <EuiPanel data-test-subj={dataTestSubj} hasBorder={true} hasShadow={false} paddingSize="none">
+      <EuiPanel data-test-subj={getTestId()} hasBorder={true} hasShadow={false} paddingSize="none">
         <EuiFlexGroup
           direction="row"
           gutterSize="none"
@@ -68,14 +73,16 @@ export const SettingCard: FC<SettingCardProps> = memo(
           style={{ padding: `${paddingSize} ${paddingSize} 0 ${paddingSize}` }}
         >
           <EuiFlexItem grow={1}>
-            <SettingCardHeader>{TITLES.type}</SettingCardHeader>
+            <SettingCardHeader data-test-subj={getTestId('title')}>{TITLES.type}</SettingCardHeader>
             <EuiText size="s">{type}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
-            <SettingCardHeader>{TITLES.os}</SettingCardHeader>
+            <SettingCardHeader data-test-subj={getTestId('osTitle')}>{TITLES.os}</SettingCardHeader>
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
+                <EuiText size="s" data-test-subj={getTestId('osValues')}>
+                  {supportedOss.map((os) => OS_TITLES[os]).join(', ')}{' '}
+                </EuiText>
               </EuiFlexItem>
               {osRestriction && (
                 <EuiFlexItem grow={false}>

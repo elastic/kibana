@@ -43,6 +43,7 @@ export const ProtectionSettingCardSwitch = React.memo(
     onChange,
     policy,
     mode,
+    'data-test-subj': dataTestSubj,
   }: ProtectionSettingCardSwitchProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
@@ -130,7 +131,7 @@ export const ProtectionSettingCardSwitch = React.memo(
         checked={selected !== ProtectionModes.off}
         onChange={handleSwitchChange}
         disabled={!isEditMode}
-        data-test-subj={`${protection}ProtectionSwitch`}
+        data-test-subj={dataTestSubj}
       />
     );
   }

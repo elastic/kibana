@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { SettingCardHeader } from './setting_card';
@@ -60,8 +61,16 @@ interface NotifyUserOptionProps extends PolicyFormComponentCommonProps {
 }
 
 export const NotifyUserOption = React.memo(
-  ({ policy, onChange, mode, protection, osList }: NotifyUserOptionProps) => {
+  ({
+    policy,
+    onChange,
+    mode,
+    protection,
+    osList,
+    'data-test-subj': dataTestSubj,
+  }: NotifyUserOptionProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const isEditMode = mode === 'edit';
     const selected = policy.windows[protection].mode;
@@ -149,7 +158,7 @@ export const NotifyUserOption = React.memo(
     }
 
     return (
-      <>
+      <div data-test-subj={getTestId()}>
         <EuiSpacer size="m" />
         <SettingCardHeader>
           <FormattedMessage
@@ -158,13 +167,16 @@ export const NotifyUserOption = React.memo(
           />
         </SettingCardHeader>
 
-        <SupportedVersionForProtectionNotice protection={protection} />
+        <SupportedVersionForProtectionNotice
+          protection={protection}
+          data-test-subj={getTestId('supportedVersion')}
+        />
 
         <EuiSpacer size="s" />
 
         {isEditMode ? (
           <EuiCheckbox
-            data-test-subj={`${protection}UserNotificationCheckbox`}
+            data-test-subj={getTestId('checkbox')}
             id={`${protection}UserNotificationCheckbox}`}
             onChange={handleUserNotificationCheckbox}
             checked={userNotificationSelected}
@@ -185,10 +197,10 @@ export const NotifyUserOption = React.memo(
                     <h4>{CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL}</h4>
                   </EuiText>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} data-test-subj={`${protection}TooltipIcon`}>
+                <EuiFlexItem grow={false} data-test-subj={getTestId('tooltipIconContainer')}>
                   <EuiIconTip
                     position="right"
-                    data-test-subj={`${protection}Tooltip`}
+                    data-test-subj={getTestId('tooltip')}
                     content={
                       <>
                         <FormattedMessage
@@ -224,7 +236,7 @@ export const NotifyUserOption = React.memo(
                 onChange={handleCustomUserNotification}
                 fullWidth={true}
                 disabled={!isEditMode}
-                data-test-subj={`${protection}UserNotificationCustomMessage`}
+                data-test-subj={getTestId('customMessage')}
               />
             </>
           ) : (
@@ -237,14 +249,20 @@ export const NotifyUserOption = React.memo(
               <>{userNotificationMessage || getEmptyValue()}</>
             </>
           ))}
-      </>
+      </div>
     );
   }
 );
 NotifyUserOption.displayName = 'NotifyUserOption';
 
 export const SupportedVersionForProtectionNotice = React.memo(
-  ({ protection }: { protection: string }) => {
+  ({
+    protection,
+    'data-test-subj': dataTestSubj,
+  }: {
+    protection: string;
+    'data-test-subj'?: string;
+  }) => {
     const version = useMemo(() => {
       return {
         malware: '7.11+',
@@ -259,7 +277,7 @@ export const SupportedVersionForProtectionNotice = React.memo(
     }
 
     return (
-      <EuiText color="subdued" size="xs" data-test-subj="policySupportedVersions">
+      <EuiText color="subdued" size="xs" data-test-subj={dataTestSubj}>
         <i>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetails.supportedVersion"
