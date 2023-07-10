@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>Slack</titleabbrev>
 ++++
+:frontmatter-description: Create and test a connector that sends Slack messages.
+:frontmatter-tags-products: [alerting] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 The Slack connector uses incoming webhooks or an API method to send Slack messages.
 
