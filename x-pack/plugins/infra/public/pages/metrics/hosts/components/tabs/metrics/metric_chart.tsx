@@ -22,9 +22,9 @@ import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { buildCombinedHostsFilter } from '../../../utils';
+import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
-import { LensWrapper } from '../../chart/lens_wrapper';
+import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
@@ -65,21 +65,23 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const filters = useMemo(() => {
     return [
+      ...searchCriteria.filters,
       buildCombinedHostsFilter({
         field: 'host.name',
         values: currentPage.map((p) => p.name),
         dataView,
       }),
     ];
-  }, [currentPage, dataView]);
+  }, [currentPage, dataView, searchCriteria.filters]);
 
   const extraActions: Action[] = useMemo(
     () =>
       getExtraActions({
         timeRange: afterLoadedState.dateRange,
+        query: afterLoadedState.query,
         filters,
       }),
-    [afterLoadedState.dateRange, filters, getExtraActions]
+    [afterLoadedState.dateRange, afterLoadedState.query, filters, getExtraActions]
   );
 
   const handleBrushEnd = useCallback(
@@ -137,6 +139,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
           dateRange={afterLoadedState.dateRange}
           filters={filters}
+          query={afterLoadedState.query}
           onBrushEnd={handleBrushEnd}
           loading={loading}
           hasTitle

@@ -11,10 +11,13 @@ import {
   EuiProgress,
   EuiSkeletonTitle,
   EuiSkeletonText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
 
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { RulesChangelogLink } from '../rules_changelog_link';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesTableFilters } from './add_prebuilt_rules_table_filters';
@@ -67,7 +70,14 @@ export const AddPrebuiltRulesTable = React.memo(() => {
             <AddPrebuiltRulesTableNoItemsMessage />
           ) : (
             <>
-              <AddPrebuiltRulesTableFilters />
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem grow={false}>
+                  <RulesChangelogLink />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <AddPrebuiltRulesTableFilters />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiInMemoryTable
                 items={filteredRules}
                 sorting

@@ -11,6 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
+import { LayerActions } from './layer_actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
@@ -114,8 +115,10 @@ describe('LayerPanel', () => {
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),
+      registerLibraryAnnotationGroup: jest.fn(),
       indexPatternService: createIndexPatternServiceMock(),
       getUserMessages: () => [],
+      displayLayerSettings: true,
     };
   }
 
@@ -201,6 +204,13 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
       const optionalLabel = instance.find('[data-test-subj="lnsGroup_optional"]').first();
       expect(optionalLabel.text()).toEqual('Optional');
+    });
+
+    it('should hide the layer actions if displayLayerSettings is set to false', async () => {
+      const { instance } = await mountWithProvider(
+        <LayerPanel {...getDefaultProps()} displayLayerSettings={false} />
+      );
+      expect(instance.find(LayerActions).exists()).toBe(false);
     });
 
     it('should render the group with a way to add a new column', async () => {

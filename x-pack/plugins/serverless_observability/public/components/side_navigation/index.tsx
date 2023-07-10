@@ -11,7 +11,6 @@ import {
   DefaultNavigation,
   NavigationKibanaProvider,
   NavigationTreeDefinition,
-  getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +27,7 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'discover-dashboard-viz',
+          id: 'discover-dashboard-alerts-slos',
           children: [
             {
               link: 'discover',
@@ -40,6 +39,70 @@ const navigationTree: NavigationTreeDefinition = {
               link: 'dashboards',
             },
             {
+              link: 'observability-overview:alerts',
+            },
+            {
+              link: 'observability-overview:slos',
+            },
+            {
+              id: 'aiops',
+              title: 'AIOps',
+              children: [
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
+                    defaultMessage: 'Anomaly detection',
+                  }),
+                  link: 'ml:anomalyDetection',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.ml.spike.analysis', {
+                    defaultMessage: 'Spike analysis',
+                  }),
+                  link: 'ml:explainLogRateSpikes',
+                  icon: 'beaker',
+                },
+                {
+                  link: 'ml:changePointDetections',
+                  icon: 'beaker',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
+                    defaultMessage: 'Job notifications',
+                  }),
+                  link: 'ml:notifications',
+                },
+              ],
+            },
+          ],
+        },
+
+        {
+          id: 'applications',
+          children: [
+            {
+              id: 'apm',
+              title: 'Applications',
+              children: [
+                {
+                  link: 'apm:services',
+                },
+                {
+                  link: 'apm:traces',
+                },
+                {
+                  link: 'apm:dependencies',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'cases-vis',
+          children: [
+            {
+              link: 'observability-overview:cases',
+            },
+            {
               title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
                 defaultMessage: 'Visualizations',
               }),
@@ -48,46 +111,12 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'alerts-cases-slos',
-          children: [
-            {
-              link: 'observability-overview:alerts',
-            },
-            {
-              link: 'observability-overview:cases',
-            },
-            {
-              link: 'observability-overview:slos',
-            },
-          ],
-        },
-        {
-          id: 'apm',
-          title: 'APM',
-          children: [
-            { link: 'apm:services' },
-            {
-              link: 'apm:traces',
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.logs', {
-                defaultMessage: 'Logs',
-              }),
-              link: 'logs:stream',
-            },
-            {
-              link: 'apm:dependencies',
-            },
-          ],
-        },
-        {
           id: 'on-boarding',
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-                defaultMessage: 'Get started',
+                defaultMessage: 'Add data',
               }),
-              icon: 'launch',
               link: 'observabilityOnboarding',
             },
           ],
@@ -98,7 +127,30 @@ const navigationTree: NavigationTreeDefinition = {
   footer: [
     {
       type: 'navGroup',
-      ...getPresets('management'),
+      id: 'projest_settings_project_nav',
+      title: 'Project settings',
+      icon: 'gear',
+      defaultIsCollapsed: true,
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'settings',
+          children: [
+            {
+              link: 'management',
+              title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
+                defaultMessage: 'Management',
+              }),
+            },
+            {
+              link: 'integrations',
+            },
+            {
+              link: 'fleet',
+            },
+          ],
+        },
+      ],
     },
   ],
 };

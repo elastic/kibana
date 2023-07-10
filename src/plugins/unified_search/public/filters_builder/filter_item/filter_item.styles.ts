@@ -36,10 +36,8 @@ export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
   margin: 0 ${euiTheme.size.xxs};
 `;
 
-export const actionButtonCss = css`
-  &.euiButtonEmpty .euiButtonEmpty__content {
-    padding: 0 4px;
-  }
+export const actionButtonCss = (euiTheme: EuiThemeComputed) => css`
+  padding-inline: ${euiTheme.size.xs};
 `;
 
 export const disabledDraggableCss = css`

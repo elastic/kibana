@@ -55,7 +55,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -2326,6 +2326,17 @@
             "signature": [
               "string[]"
             ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.isSystemActionType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSystemActionType",
+            "description": [],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5616,6 +5627,8 @@
         "signature": [
           "PreConfiguredActionConnector",
           " | ",
+          "SystemAction",
+          " | ",
           "UserConfiguredActionConnector",
           "<Config, Secrets>"
         ],
@@ -5806,9 +5819,9 @@
           "EuiDataGridControlColumn",
           "[]; useFetchAlertsData: () => ",
           "FetchAlertData",
-          "; visibleColumns: string[]; 'data-test-subj': string; updatedAt: number; browserFields: any; onToggleColumn: (columnId: string) => void; onResetColumns: () => void; onColumnsChange: (columns: ",
-          "EuiDataGridColumn",
-          "[], visibleColumns: string[]) => void; onChangeVisibleColumns: (newColumns: string[]) => void; query: Pick<",
+          "; visibleColumns: string[]; 'data-test-subj': string; updatedAt: number; browserFields: any; onToggleColumn: (columnId: string) => void; onResetColumns: () => void; onChangeVisibleColumns: (newColumns: string[]) => void; onColumnResize?: ",
+          "EuiDataGridOnColumnResizeHandler",
+          " | undefined; query: Pick<",
           "QueryDslQueryContainer",
           ", \"ids\" | \"bool\">; controls?: ",
           "EuiDataGridToolBarAdditionalControlsOptions",
@@ -8827,7 +8840,7 @@
           "\nParses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
         ],
         "signature": [
-          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; ruleUseExecutionStatus: boolean; }>"
+          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; ruleUseExecutionStatus: boolean; ruleKqlBar: boolean; }>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9427,7 +9440,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9491,7 +9504,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,

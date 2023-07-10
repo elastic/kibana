@@ -11,4 +11,4 @@ export { ColorSchemas, vislibColorMaps, colorSchemas, getHeatmapColors } from '.
 
 export { ColorMode, LabelRotation, defaultCountLabel } from './components';
 export * from './styles';
-export type { AllowedSettingsOverrides } from './overrides';
+export type { AllowedSettingsOverrides, AllowedChartOverrides } from './overrides';

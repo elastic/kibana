@@ -24,11 +24,11 @@ import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { HostsLensMetricChartFormulas } from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { LensWrapper } from '../chart/lens_wrapper';
-import { buildCombinedHostsFilter } from '../../utils';
+import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { TooltipContent } from '../metric_explanation/tooltip_content';
+import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
 export interface KPIChartProps {
@@ -85,13 +85,14 @@ export const Tile = ({
 
   const filters = useMemo(() => {
     return [
+      ...searchCriteria.filters,
       buildCombinedHostsFilter({
         field: 'host.name',
         values: hostNodes.map((p) => p.name),
         dataView,
       }),
     ];
-  }, [hostNodes, dataView]);
+  }, [searchCriteria.filters, hostNodes, dataView]);
 
   const handleBrushEnd = useCallback(
     ({ range }: BrushTriggerEvent['data']) => {
@@ -122,9 +123,10 @@ export const Tile = ({
     () =>
       getExtraActions({
         timeRange: afterLoadedState.dateRange,
+        query: searchCriteria.query,
         filters,
       }),
-    [afterLoadedState.dateRange, filters, getExtraActions]
+    [afterLoadedState.dateRange, filters, getExtraActions, searchCriteria.query]
   );
 
   return (
@@ -168,6 +170,7 @@ export const Tile = ({
               lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
               dateRange={afterLoadedState.dateRange}
               filters={afterLoadedState.filters}
+              query={afterLoadedState.query}
               onBrushEnd={handleBrushEnd}
               loading={loading}
             />
