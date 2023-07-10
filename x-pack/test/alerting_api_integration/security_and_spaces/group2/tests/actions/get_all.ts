@@ -126,6 +126,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: 'test.system-action',
+                  id: 'system-connector-test.system-action',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'System action: test.system-action',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
                   is_system_action: false,
@@ -286,6 +295,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: 'test.system-action',
+                  id: 'system-connector-test.system-action',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'System action: test.system-action',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
                   is_system_action: false,
@@ -406,6 +424,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
+                  referenced_by_count: 0,
+                },
+                {
+                  connector_type_id: 'test.system-action',
+                  id: 'system-connector-test.system-action',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'System action: test.system-action',
                   referenced_by_count: 0,
                 },
                 {
