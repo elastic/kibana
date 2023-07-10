@@ -518,7 +518,7 @@ describe('Event Annotation Service', () => {
       const searchTerm = 'my search';
 
       const content = await eventAnnotationService.findAnnotationGroupContent(searchTerm, 20, [
-        { type: 'mytype', id: '1234' },
+        '1234',
       ]);
 
       expect(content).toMatchSnapshot();
@@ -529,6 +529,13 @@ describe('Event Annotation Service', () => {
             Object {
               "contentTypeId": "event-annotation-group",
               "query": Object {
+                "limit": 20,
+                "tags": Object {
+                  "excluded": undefined,
+                  "included": Array [
+                    "1234",
+                  ],
+                },
                 "text": "my search*",
               },
             },

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
-import type { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';

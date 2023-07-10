@@ -9,7 +9,7 @@
     ]
   },
   "include": [
-    "**/*",
+    "**/*", "../kbn-event-annotation-common/util.ts",
   ],
   "exclude": [
     "target/**/*"

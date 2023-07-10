@@ -166,6 +166,14 @@ export class RulesClient {
     return this.context.spaceId;
   }
 
+  public getAuthorization() {
+    return this.context.authorization;
+  }
+
+  public getAuditLogger() {
+    return this.context.auditLogger;
+  }
+
   public getTags = (params: GetTagsParams) => getTags(this.context, params);
 
   public getAlertFromRaw = (params: GetAlertFromRawParams) =>

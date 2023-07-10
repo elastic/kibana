@@ -13,7 +13,7 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
+} from '@kbn/event-annotation-common';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';

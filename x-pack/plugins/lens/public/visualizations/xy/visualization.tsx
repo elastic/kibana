@@ -15,7 +15,7 @@ import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-i
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { getAnnotationAccessor } from '@kbn/event-annotation-application-plugin/public';
+import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -23,7 +23,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -296,7 +296,13 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state, setState, isSaveable) {
+  getSupportedActionsForLayer(
+    layerId,
+    state,
+    setState,
+    registerLibraryAnnotationGroup,
+    isSaveable
+  ) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
@@ -306,6 +312,7 @@ export const getXyVisualization = ({
           state,
           layer,
           setState,
+          registerLibraryAnnotationGroup,
           core,
           isSaveable,
           eventAnnotationService,

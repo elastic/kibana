@@ -12,18 +12,19 @@ import type { FileStatus } from '@kbn/files-plugin/common/types';
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
   FILE_STORAGE_METADATA_INDEX_PATTERN,
+  FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN,
+  FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN,
 } from '../../../common/constants';
 
-import {
-  getFileMetadataIndexName,
-  getIntegrationNameFromFileDataIndexName,
-  getIntegrationNameFromIndexName,
-} from '../../../common/services';
+import { getFileMetadataIndexName } from '../../../common/services';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
 
+import { parseFileStorageIndex } from './utils';
+
 /**
- * Gets files with given status
+ * Gets files with given status from the files metadata index. Includes both files
+ * `tohost` and files `fromhost`
  *
  * @param esClient
  * @param abortController
@@ -37,7 +38,7 @@ export async function getFilesByStatus(
   const result = await esClient
     .search(
       {
-        index: FILE_STORAGE_METADATA_INDEX_PATTERN,
+        index: [FILE_STORAGE_METADATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN],
         body: {
           size: ES_SEARCH_LIMIT,
           query: {
@@ -79,20 +80,18 @@ export async function fileIdsWithoutChunksByIndex(
   const noChunkFileIdsByIndex = files.reduce((acc, file) => {
     allFileIds.add(file._id);
 
-    const integration = getIntegrationNameFromIndexName(
-      file._index,
-      FILE_STORAGE_METADATA_INDEX_PATTERN
-    );
-    const metadataIndex = getFileMetadataIndexName(integration);
+    const { index: metadataIndex } = parseFileStorageIndex(file._index);
     const fileIds = acc[metadataIndex];
+
     acc[metadataIndex] = fileIds ? fileIds.add(file._id) : new Set([file._id]);
+
     return acc;
   }, {} as FileIdsByIndex);
 
   const chunks = await esClient
     .search<{ bid: string }>(
       {
-        index: FILE_STORAGE_DATA_INDEX_PATTERN,
+        index: [FILE_STORAGE_DATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN],
         body: {
           size: ES_SEARCH_LIMIT,
           query: {
@@ -113,6 +112,7 @@ export async function fileIdsWithoutChunksByIndex(
           },
           _source: ['bid'],
         },
+        ignore_unavailable: true,
       },
       { signal: abortController.signal }
     )
@@ -123,9 +123,12 @@ export async function fileIdsWithoutChunksByIndex(
 
   chunks.hits.hits.forEach((hit) => {
     const fileId = hit._source?.bid;
+
     if (!fileId) return;
-    const integration = getIntegrationNameFromFileDataIndexName(hit._index);
-    const metadataIndex = getFileMetadataIndexName(integration);
+
+    const { integration, direction } = parseFileStorageIndex(hit._index);
+    const metadataIndex = getFileMetadataIndexName(integration, direction === 'to-host');
+
     if (noChunkFileIdsByIndex[metadataIndex]?.delete(fileId)) {
       allFileIds.delete(fileId);
     }

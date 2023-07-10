@@ -39,7 +39,7 @@ import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type {
   DraggingIdentifier,
   DragDropIdentifier,
@@ -1027,6 +1027,11 @@ export interface VisualizationLayerDescription {
     autoTimeField?: boolean;
   }>;
 }
+
+export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
+  id: string;
+  group: EventAnnotationGroupConfig;
+}) => void;
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -1115,6 +1120,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     layerId: string,
     state: T,
     setState: StateSetter<T>,
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction,
     isSaveable?: boolean
   ) => LayerAction[];
 
@@ -1251,10 +1257,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     supportedLayers: VisualizationLayerDescription[];
     addLayer: AddLayerFunction;
     ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
-    registerLibraryAnnotationGroup: (groupInfo: {
-      id: string;
-      group: EventAnnotationGroupConfig;
-    }) => void;
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers

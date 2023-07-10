@@ -10,7 +10,7 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import {
   EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { v4 as uuidv4 } from 'uuid';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';

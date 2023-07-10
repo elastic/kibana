@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type {
@@ -21,8 +20,8 @@ export interface EventAnnotationServiceType {
   findAnnotationGroupContent: (
     searchTerm: string,
     pageSize: number,
-    references?: SavedObjectsFindOptionsReference[],
-    referencesToExclude?: SavedObjectsFindOptionsReference[]
+    tagsToInclude?: string[],
+    tagsToExclude?: string[]
   ) => Promise<{ total: number; hits: EventAnnotationGroupContent[] }>;
   deleteAnnotationGroups: (ids: string[]) => Promise<void>;
   createAnnotationGroup: (group: EventAnnotationGroupConfig) => Promise<{ id: string }>;

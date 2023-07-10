@@ -42,9 +42,8 @@ describe('Higher version doc conversion', () => {
         changes: [
           {
             type: 'data_backfill',
-            transform: (document) => {
-              document.attributes.newField = 'someValue';
-              return { document };
+            backfillFn: (document) => {
+              return { attributes: { newField: 'someValue' } };
             },
           },
         ],

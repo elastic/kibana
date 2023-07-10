@@ -152,7 +152,11 @@ export const MultiFieldMapping: React.FC = () => {
   );
 };
 
-export const SelectedFieldMappings: React.FC = () => {
+export interface SelectedFieldMappingsProps {
+  isReadOnly?: boolean;
+}
+
+export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ isReadOnly }) => {
   const { removeFieldFromMapping } = useActions(MLInferenceLogic);
   const {
     addInferencePipelineModal: { configuration },
@@ -165,7 +169,7 @@ export const SelectedFieldMappings: React.FC = () => {
       name: i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.sourceFieldHeader',
         {
-          defaultMessage: 'Source fields',
+          defaultMessage: 'Source field',
         }
       ),
     },
@@ -176,49 +180,55 @@ export const SelectedFieldMappings: React.FC = () => {
       width: '60px',
     },
     {
+      align: 'right',
       field: 'targetField',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.fieldMappings.targetFieldHeader',
         {
-          defaultMessage: 'Target fields',
+          defaultMessage: 'Target field',
         }
       ),
     },
-    {
-      actions: [
-        {
-          color: 'danger',
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping',
-            {
-              defaultMessage: 'Delete this mapping',
-            }
-          ),
-          icon: 'trash',
-          isPrimary: true,
-          name: (fieldMapping) =>
-            i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping.caption',
+    // Do not add action column in read-only mode
+    ...(isReadOnly
+      ? []
+      : [
+          {
+            actions: [
               {
-                defaultMessage: `Delete mapping '{sourceField}' - '{targetField}'`,
-                values: {
-                  sourceField: fieldMapping.sourceField,
-                  targetField: fieldMapping.targetField,
-                },
+                color: 'danger',
+                description: i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping',
+                  {
+                    defaultMessage: 'Delete this mapping',
+                  }
+                ),
+                icon: 'trash',
+                isPrimary: true,
+                name: (fieldMapping) =>
+                  i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions.deleteMapping.caption',
+                    {
+                      defaultMessage: `Delete mapping '{sourceField}' - '{targetField}'`,
+                      values: {
+                        sourceField: fieldMapping.sourceField,
+                        targetField: fieldMapping.targetField,
+                      },
+                    }
+                  ),
+                onClick: (fieldMapping) => removeFieldFromMapping(fieldMapping.sourceField),
+                type: 'icon',
+              },
+            ],
+            name: i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions',
+              {
+                defaultMessage: 'Actions',
               }
             ),
-          onClick: (fieldMapping) => removeFieldFromMapping(fieldMapping.sourceField),
-          type: 'icon',
-        },
-      ],
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.actions',
-        {
-          defaultMessage: 'Actions',
-        }
-      ),
-      width: '10%',
-    },
+            width: '10%',
+          } as EuiBasicTableColumn<FieldMapping>,
+        ]),
   ];
 
   return (

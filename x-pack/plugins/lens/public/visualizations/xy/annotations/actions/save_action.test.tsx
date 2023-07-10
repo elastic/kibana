@@ -16,7 +16,10 @@ import {
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import {
+  EventAnnotationGroupConfig,
+  PointInTimeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -145,6 +148,7 @@ describe('annotation group save action', () => {
           layers: [{ layerId } as XYAnnotationLayerConfig],
         } as XYState,
         layer: byValueLayer,
+        registerLibraryAnnotationGroup: jest.fn(),
         setState: jest.fn(),
         eventAnnotationService: {
           createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
@@ -178,13 +182,22 @@ describe('annotation group save action', () => {
     test('successful initial save', async () => {
       await onSave(props);
 
-      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+      const expectedConfig: EventAnnotationGroupConfig = {
         annotations: props.layer.annotations,
         indexPatternId: props.layer.indexPatternId,
         ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
         title: props.modalOnSaveProps.newTitle,
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
+      };
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith(
+        expectedConfig
+      );
+
+      expect(props.registerLibraryAnnotationGroup).toHaveBeenCalledWith({
+        id: savedId,
+        group: expectedConfig,
       });
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
@@ -206,7 +219,7 @@ describe('annotation group save action', () => {
 
       await onSave(props);
 
-      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+      const expectedConfig: EventAnnotationGroupConfig = {
         annotations: props.layer.annotations,
         indexPatternId: props.layer.indexPatternId,
         ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
@@ -214,6 +227,15 @@ describe('annotation group save action', () => {
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
         dataViewSpec,
+      };
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith(
+        expectedConfig
+      );
+
+      expect(props.registerLibraryAnnotationGroup).toHaveBeenCalledWith({
+        id: savedId,
+        group: expectedConfig,
       });
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
@@ -240,6 +262,8 @@ describe('annotation group save action', () => {
       });
 
       expect(props.toasts.addError).toHaveBeenCalledTimes(1);
+
+      expect(props.registerLibraryAnnotationGroup).not.toHaveBeenCalled();
 
       expect(props.modalOnSaveProps.closeModal).not.toHaveBeenCalled();
 
@@ -307,13 +331,22 @@ describe('annotation group save action', () => {
 
       expect(props.eventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
 
-      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+      const expectedConfig: EventAnnotationGroupConfig = {
         annotations: props.layer.annotations,
         indexPatternId: props.layer.indexPatternId,
         ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
         title: props.modalOnSaveProps.newTitle,
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
+      };
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith(
+        expectedConfig
+      );
+
+      expect(props.registerLibraryAnnotationGroup).toHaveBeenCalledWith({
+        id: savedId,
+        group: expectedConfig,
       });
 
       expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();

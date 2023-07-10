@@ -6397,7 +6397,7 @@
               "group": "threshold met",
               "params": {
                 "level": "info",
-                "message": "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                "message": "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
               }
             }
           ],
@@ -6445,7 +6445,7 @@
               },
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                "message": "Rule {{rule.name}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
               }
             }
           ],
@@ -6550,7 +6550,7 @@
               "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}",
+                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}",
                 "connector_type_id": ".server-log"
               },
               "connector_type_id": ".server-log",
@@ -6589,7 +6589,7 @@
               "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
               }
             }
           ],
@@ -6668,7 +6668,7 @@
               "group": "threshold met",
               "params": {
                 "level": "info",
-                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
+                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}"
               },
               "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
               "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
@@ -6753,7 +6753,7 @@
                   "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
                   "params": {
                     "level": "info",
-                    "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
+                    "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
                     "connector_type_id": ".server-log"
                   },
                   "frequency": {

@@ -40,7 +40,7 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
@@ -3633,7 +3633,7 @@ describe('xy_visualization', () => {
   describe('getSupportedActionsForLayer', () => {
     it('should return no actions for a data layer', () => {
       expect(
-        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
+        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn(), jest.fn())
       ).toHaveLength(0);
     });
 
@@ -3655,6 +3655,7 @@ describe('xy_visualization', () => {
               ...baseState,
               layers: [annotationLayer],
             },
+            jest.fn(),
             jest.fn()
           )
         ).toEqual([]);
@@ -3687,6 +3688,7 @@ describe('xy_visualization', () => {
                 ...baseState,
                 layers: [annotationLayer],
               },
+              jest.fn(),
               jest.fn(),
               true
             )
@@ -3736,6 +3738,7 @@ describe('xy_visualization', () => {
                   layers: [annotationLayer],
                 },
                 jest.fn(),
+                jest.fn(),
                 false
               )
               .some((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary')
@@ -3757,6 +3760,7 @@ describe('xy_visualization', () => {
                     },
                   ],
                 },
+                jest.fn(),
                 jest.fn(),
                 false
               )

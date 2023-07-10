@@ -11,7 +11,7 @@ import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -30,6 +30,20 @@ import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_fra
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import type { LensAppServices } from '../app_plugin/types';
+
+const getQueryFromContext = (
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  data: LensAppServices['data']
+) => {
+  if ('searchQuery' in context && context.searchQuery) {
+    return context.searchQuery;
+  }
+  if ('query' in context && context.query) {
+    return context.query;
+  }
+  return data.query.queryString.getQuery();
+};
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -93,16 +107,16 @@ export const getPreloadedState = ({
     };
   }
 
+  const query = !initialContext
+    ? data.query.queryString.getDefaultQuery()
+    : getQueryFromContext(initialContext, data);
+
   const state = {
     ...initialState,
     isLoading: true,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    query: !initialContext
-      ? data.query.queryString.getDefaultQuery()
-      : 'searchQuery' in initialContext && initialContext.searchQuery
-      ? initialContext.searchQuery
-      : (data.query.queryString.getQuery() as Query),
+    query: query as Query,
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters

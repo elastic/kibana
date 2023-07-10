@@ -2934,6 +2934,21 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.APP_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "APP_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/security\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.APP_UI_ID",
         "type": "string",
         "tags": [],
@@ -3029,6 +3044,21 @@
           "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.MANAGE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MANAGE_PATH",
+        "description": [],
+        "signature": [
+          "\"/manage\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
