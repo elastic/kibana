@@ -55,7 +55,7 @@ const ActionTypeFieldComponent = ({
         return {
           value: name,
           inputDisplay: name,
-          dropdownDisplay: <EndpointActionText name={name} />,
+          dropdownDisplay: <EndpointActionText name={name} isDisabled={isDisabled} />,
           disabled: isDisabled,
           'data-test-subj': `command-type-${name}`,
         };
