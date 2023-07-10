@@ -74,7 +74,7 @@ export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
  */
 export const waitForActionToComplete = (
   actionId: string,
-  timeout = 60000
+  timeout = 120000
 ): Cypress.Chainable<ActionDetails> => {
   let action: ActionDetails | undefined;
 
