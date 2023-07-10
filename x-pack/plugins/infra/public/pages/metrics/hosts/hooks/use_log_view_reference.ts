@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
