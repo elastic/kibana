@@ -10,6 +10,7 @@ import {
   MAX_BULK_GET_ATTACHMENTS,
   MAX_COMMENTS_PER_PAGE,
   MAX_COMMENT_LENGTH,
+  MAX_BULK_CREATE_ATTACHMENTS,
 } from '../../../constants';
 import { limitedArraySchema, paginationSchema, limitedStringSchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
@@ -328,7 +329,12 @@ export const FindCommentsQueryParamsRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
 ]);
 
-export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
+export const BulkCreateCommentRequestRt = limitedArraySchema({
+  codec: CommentRequestRt,
+  min: 0,
+  max: MAX_BULK_CREATE_ATTACHMENTS,
+  fieldName: 'attachments',
+});
 
 export const BulkGetAttachmentsRequestRt = rt.strict({
   ids: limitedArraySchema({

@@ -36,7 +36,7 @@ describe('actionTypeRegistry', () => {
       ),
       actionsConfigUtils: mockedActionsConfig,
       licenseState: mockedLicenseState,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           actionTypeId: 'foo',
           config: {},
@@ -46,6 +46,16 @@ describe('actionTypeRegistry', () => {
           isPreconfigured: true,
           isDeprecated: false,
           isSystemAction: false,
+        },
+        {
+          actionTypeId: '.cases',
+          config: {},
+          id: 'system-connector-.cases',
+          name: 'System action: .cases',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
         },
       ],
     };
@@ -217,7 +227,7 @@ describe('actionTypeRegistry', () => {
       expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
     });
 
-    test('does not allows registering system actions', () => {
+    test('allows registering system actions', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       expect(() =>
@@ -226,7 +236,7 @@ describe('actionTypeRegistry', () => {
           name: 'My action type',
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
-          isSystemAction: true,
+          isSystemActionType: true,
           validate: {
             config: { schema: schema.object({}) },
             secrets: { schema: schema.object({}) },
@@ -234,7 +244,7 @@ describe('actionTypeRegistry', () => {
           },
           executor,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"System actions are not supported"`);
+      ).not.toThrow();
     });
   });
 
@@ -302,6 +312,7 @@ describe('actionTypeRegistry', () => {
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -345,10 +356,45 @@ describe('actionTypeRegistry', () => {
           enabledInLicense: true,
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('sets the isSystemActionType correctly for system actions', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const actionTypes = actionTypeRegistry.list();
+
+      expect(actionTypes).toEqual([
+        {
+          id: '.cases',
+          name: 'Cases',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          isSystemActionType: true,
+        },
+      ]);
     });
   });
 
@@ -378,6 +424,7 @@ describe('actionTypeRegistry', () => {
 
   describe('isActionTypeEnabled', () => {
     let actionTypeRegistry: ActionTypeRegistry;
+
     const fooActionType: ActionType = {
       id: 'foo',
       name: 'Foo',
@@ -393,9 +440,17 @@ describe('actionTypeRegistry', () => {
       },
     };
 
+    const systemActionType: ActionType = {
+      ...fooActionType,
+      id: 'system-action-type',
+      name: 'System action type',
+      isSystemActionType: true,
+    };
+
     beforeEach(() => {
       actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(fooActionType);
+      actionTypeRegistry.register(systemActionType);
     });
 
     test('should call isActionTypeEnabled of the actions config', async () => {
@@ -415,6 +470,15 @@ describe('actionTypeRegistry', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
       expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
+    });
+
+    test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has system connectors', async () => {
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      expect(
+        actionTypeRegistry.isActionExecutable('system-connector-.cases', 'system-action-type')
+      ).toEqual(true);
     });
 
     test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
@@ -565,6 +629,64 @@ describe('actionTypeRegistry', () => {
       });
       const result = registry.getAllTypes();
       expect(result).toEqual(['foo']);
+    });
+  });
+
+  describe('isSystemActionType()', () => {
+    it('should return true if the action type is a system action type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.isSystemActionType('.cases');
+      expect(result).toBe(true);
+    });
+
+    it('should return false if the action type is not a system action type', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      const allTypes = registry.getAllTypes();
+      expect(allTypes.length).toBe(1);
+
+      const result = registry.isSystemActionType('foo');
+      expect(result).toBe(false);
+    });
+
+    it('should return false if the action type does not exists', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      const allTypes = registry.getAllTypes();
+      expect(allTypes.length).toBe(0);
+
+      const result = registry.isSystemActionType('not-exist');
+      expect(result).toBe(false);
     });
   });
 });

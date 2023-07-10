@@ -39,7 +39,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
@@ -111,6 +111,7 @@ export class ReportingCore {
   private csvV2ExportType: CsvV2ExportType;
   private pdfExport: PdfExportType;
   private pngExport: PngExportType;
+
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -137,11 +138,11 @@ export class ReportingCore {
     this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.csvV2ExportType);
 
-    this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.pngExport);
-
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
+      
+    this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.pngExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -170,9 +171,7 @@ export class ReportingCore {
 
     this.csvSearchSourceExport.setup(setupDeps);
     this.csvV2ExportType.setup(setupDeps);
-
     this.pdfExport.setup(setupDeps);
-
     this.pngExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
