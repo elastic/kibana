@@ -147,13 +147,14 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     }),
     body: t.type({
       status: t.string,
+      message: t.union([t.string, t.undefined]),
     }),
   }),
   async handler(resources): Promise<object> {
     const {
       params: {
         path: { id, name },
-        body: { status },
+        body: { status, message = '' },
       },
       core,
     } = resources;
@@ -186,11 +187,11 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         ...observabilityOnboardingState,
         progress: {
           ...observabilityOnboardingState.progress,
-          [name]: status,
+          [name]: { status, message },
         },
       },
     });
-    return { name, status };
+    return { name, status, message };
   },
 });
 
@@ -203,7 +204,9 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
       onboardingId: t.string,
     }),
   }),
-  async handler(resources): Promise<{ progress: Record<string, string> }> {
+  async handler(resources): Promise<{
+    progress: Record<string, { status: string; message: string }>;
+  }> {
     const {
       params: {
         path: { onboardingId },
@@ -233,7 +236,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     const {
       state: { datasetName: dataset, namespace },
     } = savedObservabilityOnboardingState;
-    if (progress['ea-status'] === 'complete') {
+    if (progress['ea-status']?.status === 'complete') {
       try {
         const hasLogs = await getHasLogs({
           dataset,
@@ -241,15 +244,15 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
           esClient,
         });
         if (hasLogs) {
-          progress['logs-ingest'] = 'complete';
+          progress['logs-ingest'] = { status: 'complete', message: '' };
         } else {
-          progress['logs-ingest'] = 'loading';
+          progress['logs-ingest'] = { status: 'loading', message: '' };
         }
       } catch (error) {
-        progress['logs-ingest'] = 'warning';
+        progress['logs-ingest'] = { status: 'warning', message: error.message };
       }
     } else {
-      progress['logs-ingest'] = 'incomplete';
+      progress['logs-ingest'] = { status: 'incomplete', message: '' };
     }
 
     return { progress };

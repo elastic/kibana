@@ -14,14 +14,14 @@ import {
   EuiFlexItem,
   EuiSkeletonRectangle,
   EuiSpacer,
-  EuiStep,
   EuiSteps,
   EuiStepsProps,
-  EuiSubSteps,
+  EuiPanel,
   EuiSwitch,
   EuiText,
+  EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Buffer } from 'buffer';
 import { flatten, zip } from 'lodash';
@@ -215,9 +215,8 @@ export function InstallElasticAgent() {
     ({ id, incompleteTitle, loadingTitle, completedTitle }) => {
       const progress = progressData?.progress;
       if (progress) {
-        const stepStatus = progress[
-          id
-        ] as EuiStepsProps['steps'][number]['status'];
+        const stepStatus = progress?.[id]
+          ?.status as EuiStepsProps['steps'][number]['status'];
         const title =
           stepStatus === 'loading'
             ? loadingTitle
@@ -228,19 +227,22 @@ export function InstallElasticAgent() {
           title,
           children: null,
           status: stepStatus ?? ('incomplete' as const),
+          message: progress?.[id]?.message ?? '',
         };
       }
       return {
         title: incompleteTitle,
         children: null,
         status: 'incomplete' as const,
+        message: '',
       };
     },
     [progressData?.progress]
   );
 
   const isInstallStarted = progressData?.progress['ea-download'] !== undefined;
-  const isInstallCompleted = progressData?.progress['ea-status'] === 'complete';
+  const isInstallCompleted =
+    progressData?.progress?.['ea-status']?.status === 'complete';
 
   const autoDownloadConfigStep = getStep({
     id: 'ea-config',
@@ -425,7 +427,7 @@ export function InstallElasticAgent() {
                   {isInstallStarted && (
                     <>
                       <EuiSpacer size="m" />
-                      <EuiSubSteps>
+                      <EuiFlexGroup direction="column" gutterSize="m">
                         {[
                           {
                             id: 'ea-download',
@@ -494,36 +496,26 @@ export function InstallElasticAgent() {
                             ),
                           },
                         ].map((step, index) => {
-                          const { title, status } = getStep(step);
+                          const { title, status, message } = getStep(step);
                           return (
-                            <EuiStep
-                              key={step.id}
-                              titleSize="xs"
-                              step={index + 1}
-                              title={title}
+                            <StepStatus
                               status={status}
-                              children={null}
-                              css={css({
-                                '> .euiStep__content': {
-                                  paddingBottom: 0,
-                                },
-                              })}
+                              title={title}
+                              message={message}
                             />
                           );
                         })}
-                      </EuiSubSteps>
+                      </EuiFlexGroup>
                     </>
                   )}
                 </>
               ),
             },
             {
-              title: wizardState.autoDownloadConfig
-                ? autoDownloadConfigStep.title
-                : i18n.translate(
-                    'xpack.observability_onboarding.installElasticAgent.progress.eaConfig.incompleteTitle',
-                    { defaultMessage: 'Configure the agent' }
-                  ),
+              title: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.progress.eaConfig.incompleteTitle',
+                { defaultMessage: 'Configure the Elastic agent' }
+              ),
               status:
                 yamlConfigStatus === FETCH_STATUS.LOADING
                   ? 'loading'
@@ -595,6 +587,14 @@ export function InstallElasticAgent() {
                       { defaultMessage: 'Download config file' }
                     )}
                   </EuiButton>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup direction="column">
+                    <StepStatus
+                      status={autoDownloadConfigStep.status}
+                      title={autoDownloadConfigStep.title}
+                      message={autoDownloadConfigStep.message}
+                    />
+                  </EuiFlexGroup>
                 </>
               ),
             },
@@ -665,4 +665,59 @@ function oneLine(parts: TemplateStringsArray, ...args: string[]) {
 type WizardState = ReturnType<ReturnType<typeof useWizard>['getState']>;
 function hasAlreadySavedFlow({ apiKeyEncoded, onboardingId }: WizardState) {
   return Boolean(apiKeyEncoded && onboardingId);
+}
+
+function StepStatus({
+  status,
+  title,
+  message,
+}: {
+  status: EuiStepsProps['steps'][number]['status'];
+  title: string;
+  message: string;
+}) {
+  if (status === 'loading') {
+    return (
+      <EuiFlexItem>
+        <EuiPanel color="transparent">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued">{title}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+    );
+  }
+  if (status === 'complete') {
+    return (
+      <EuiFlexItem>
+        <EuiCallOut title={title} color="success" iconType="check">
+          {message}
+        </EuiCallOut>
+      </EuiFlexItem>
+    );
+  }
+  if (status === 'danger') {
+    return (
+      <EuiFlexItem>
+        <EuiCallOut title={title} color="danger" iconType="warning">
+          {message}
+        </EuiCallOut>
+      </EuiFlexItem>
+    );
+  }
+  if (status === 'warning') {
+    return (
+      <EuiFlexItem>
+        <EuiCallOut title={title} color="warning" iconType="warning">
+          {message}
+        </EuiCallOut>
+      </EuiFlexItem>
+    );
+  }
+  return null;
 }
