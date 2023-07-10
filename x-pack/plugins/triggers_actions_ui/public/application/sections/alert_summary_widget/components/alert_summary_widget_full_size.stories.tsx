@@ -17,17 +17,7 @@ export default {
 export const FullSize = {
   args: {
     ...mockedAlertSummaryResponse,
-    chartProps: {
-      ...mockedChartProps,
-      onBrushEnd: action('brushEvent'),
-    },
-  },
-};
-
-export const FullSizeWithoutChart = {
-  args: {
-    ...mockedAlertSummaryResponse,
-    shouldHideCharts: true,
+    hideChart: false,
     chartProps: {
       ...mockedChartProps,
       onBrushEnd: action('brushEvent'),

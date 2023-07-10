@@ -59,7 +59,7 @@ describe('AlertSummaryWidgetFullSize', () => {
 
   it('should render AlertSummaryWidgetFullSize without a chart', async () => {
     const alertSummaryWidget = renderComponent({
-      shouldHideCharts: true,
+      hideChart: true,
     });
 
     expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();

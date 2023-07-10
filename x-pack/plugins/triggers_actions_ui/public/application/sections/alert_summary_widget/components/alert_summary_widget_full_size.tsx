@@ -28,7 +28,7 @@ export interface AlertSummaryWidgetFullSizeProps {
   chartProps: ChartProps;
   recoveredAlertCount: number;
   dateFormat?: string;
-  shouldHideCharts?: boolean;
+  hideChart?: boolean;
 }
 
 export const AlertSummaryWidgetFullSize = ({
@@ -37,7 +37,7 @@ export const AlertSummaryWidgetFullSize = ({
   chartProps: { theme, baseTheme, onBrushEnd },
   dateFormat,
   recoveredAlertCount,
-  shouldHideCharts,
+  hideChart,
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartTheme = [
     theme,
@@ -61,7 +61,7 @@ export const AlertSummaryWidgetFullSize = ({
           recoveredAlertCount={recoveredAlertCount}
         />
       </EuiFlexItem>
-      {!shouldHideCharts && (
+      {!hideChart && (
         <div data-test-subj="alertSummaryWidgetFullSizeChartContainer">
           <EuiSpacer size="l" />
           <Chart size={['100%', 170]}>
