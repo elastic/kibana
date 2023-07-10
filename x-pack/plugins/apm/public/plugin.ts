@@ -63,6 +63,10 @@ import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import {
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+} from '@kbn/profiling-plugin/public';
+import {
   DiscoverStart,
   DiscoverSetup,
 } from '@kbn/discover-plugin/public/plugin';
@@ -98,6 +102,7 @@ export interface ApmPluginSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
+  profiling?: ProfilingPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -124,6 +129,7 @@ export interface ApmPluginStartDeps {
   storage: IStorageWrapper;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
+  profiling?: ProfilingPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {

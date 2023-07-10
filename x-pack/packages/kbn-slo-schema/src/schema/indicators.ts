@@ -60,11 +60,16 @@ const metricCustomValidAggregations = t.keyof({
 });
 const metricCustomMetricDef = t.type({
   metrics: t.array(
-    t.type({
-      name: t.string,
-      aggregation: metricCustomValidAggregations,
-      field: t.string,
-    })
+    t.intersection([
+      t.type({
+        name: t.string,
+        aggregation: metricCustomValidAggregations,
+        field: t.string,
+      }),
+      t.partial({
+        filter: t.string,
+      }),
+    ])
   ),
   equation: t.string,
 });

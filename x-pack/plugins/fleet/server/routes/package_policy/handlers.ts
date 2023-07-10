@@ -244,7 +244,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
-  const { force, package: pkg, ...newPolicy } = request.body;
+  const { force, id, package: pkg, ...newPolicy } = request.body;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   if ('output_id' in newPolicy) {
@@ -276,13 +276,12 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     }
 
     // Create package policy
-
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
       esClient,
       newPackagePolicy,
       {
-        user,
+        id,
         force,
         spaceId,
         authorizationHeader,

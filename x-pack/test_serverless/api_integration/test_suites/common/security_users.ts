@@ -11,7 +11,9 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('security/users', function () {
+  // Test should be unskipped when the API is disabled
+  // https://github.com/elastic/kibana/issues/161337
+  describe.skip('security/users', function () {
     it('rejects request to create user', async () => {
       const { body, status } = await supertest
         .post(`/internal/security/users/some_testuser`)

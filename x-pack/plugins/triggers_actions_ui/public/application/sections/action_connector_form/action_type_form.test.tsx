@@ -605,6 +605,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
     '.server-log': {
       id: '.server-log',
@@ -614,6 +615,7 @@ function getActionTypeForm({
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
   };
 
