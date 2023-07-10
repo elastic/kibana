@@ -11,16 +11,14 @@ import { EuiButtonIcon, EuiPopover, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DiscoverField, DiscoverFieldProps } from './discover_field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FieldItemButton } from '@kbn/unified-field-list';
+import { getServicesMock } from '../../../__mocks__/services.mock';
+import { UnifiedFieldListItem, UnifiedFieldListItemProps } from './field_list_item';
+import { FieldItemButton } from '../../components/field_item_button';
+import { createStateService } from '../services/state_service';
 
-jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
+jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     totalDocuments: 1624,
     sampledDocuments: 1624,
@@ -40,22 +38,14 @@ jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   }),
 }));
 
-jest.mock('../../../../kibana_services', () => ({
-  getUiActions: jest.fn(() => {
-    return {
-      getTriggerCompatibleActions: jest.fn(() => []),
-    };
-  }),
-}));
-
 async function getComponent({
   selected = false,
   field,
-  onAddFilterExists = true,
+  canFilter = true,
 }: {
   selected?: boolean;
   field?: DataViewField;
-  onAddFilterExists?: boolean;
+  canFilter?: boolean;
 }) {
   const finalField =
     field ??
@@ -72,62 +62,45 @@ async function getComponent({
   const dataView = stubDataView;
   dataView.toSpec = () => ({});
 
-  const props: DiscoverFieldProps = {
+  const stateService = createStateService({
+    options: {
+      originatingApp: 'test',
+    },
+  });
+
+  const props: UnifiedFieldListItemProps = {
+    services: getServicesMock(),
+    stateService,
+    searchMode: 'documents',
     dataView: stubDataView,
     field: finalField,
-    ...(onAddFilterExists && { onAddFilter: jest.fn() }),
-    onAddField: jest.fn(),
+    ...(canFilter && { onAddFilter: jest.fn() }),
+    onAddFieldToWorkspace: jest.fn(),
+    onRemoveFieldFromWorkspace: jest.fn(),
     onEditField: jest.fn(),
-    onRemoveField: jest.fn(),
     isSelected: selected,
     isEmpty: false,
     groupIndex: 1,
     itemIndex: 0,
-    contextualFields: [],
+    workspaceSelectedFieldNames: [],
   };
-  const services = {
-    ...createDiscoverServicesMock(),
-    capabilities: {
-      visualize: {
-        show: true,
-      },
-    },
-    uiSettings: {
-      get: (key: string) => {
-        if (key === 'fields:popularLimit') {
-          return 5;
-        }
-      },
-    },
-  };
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-  appStateContainer.set({
-    query: { query: '', language: 'lucene' },
-    filters: [],
-  });
-  const comp = await mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <DiscoverAppStateProvider value={appStateContainer}>
-        <DiscoverField {...props} />
-      </DiscoverAppStateProvider>
-    </KibanaContextProvider>
-  );
+  const comp = await mountWithIntl(<UnifiedFieldListItem {...props} />);
   // wait for lazy modules
   await new Promise((resolve) => setTimeout(resolve, 0));
   await comp.update();
   return { comp, props };
 }
 
-describe('discover sidebar field', function () {
+describe('UnifiedFieldListItem', function () {
   it('should allow selecting fields', async function () {
     const { comp, props } = await getComponent({});
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
-    expect(props.onAddField).toHaveBeenCalledWith('bytes');
+    expect(props.onAddFieldToWorkspace).toHaveBeenCalledWith(props.field);
   });
   it('should allow deselecting fields', async function () {
     const { comp, props } = await getComponent({ selected: true });
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
-    expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
+    expect(props.onRemoveFieldFromWorkspace).toHaveBeenCalledWith(props.field);
   });
   it('displays warning for conflicting fields', async function () {
     const field = new DataViewField({
@@ -157,7 +130,7 @@ describe('discover sidebar field', function () {
     const { comp } = await getComponent({
       selected: true,
       field,
-      onAddFilterExists: false,
+      canFilter: false,
     });
 
     expect(comp.find(FieldItemButton).prop('onClick')).toBeUndefined();
@@ -171,7 +144,7 @@ describe('discover sidebar field', function () {
       searchable: true,
     });
 
-    const { comp } = await getComponent({ field, onAddFilterExists: true });
+    const { comp } = await getComponent({ field, canFilter: true });
 
     await act(async () => {
       const fieldItem = findTestSubject(comp, 'field-machine.os.raw-showDetails');
@@ -186,13 +159,13 @@ describe('discover sidebar field', function () {
     await new Promise((resolve) => setTimeout(resolve, 0));
     await comp.update();
 
-    expect(findTestSubject(comp, 'dscFieldStats-title').text()).toBe('Top values');
-    expect(findTestSubject(comp, 'dscFieldStats-topValues-bucket')).toHaveLength(2);
-    expect(
-      findTestSubject(comp, 'dscFieldStats-topValues-formattedFieldValue').first().text()
-    ).toBe('osx');
+    expect(findTestSubject(comp, 'fieldStats-title').text()).toBe('Top values');
+    expect(findTestSubject(comp, 'fieldStats-topValues-bucket')).toHaveLength(2);
+    expect(findTestSubject(comp, 'fieldStats-topValues-formattedFieldValue').first().text()).toBe(
+      'osx'
+    );
     expect(comp.find(EuiProgress)).toHaveLength(2);
-    expect(findTestSubject(comp, 'dscFieldStats-topValues').find(EuiButtonIcon)).toHaveLength(4);
+    expect(findTestSubject(comp, 'fieldStats-topValues').find(EuiButtonIcon)).toHaveLength(4);
   });
   it('should include popover actions', async function () {
     const field = new DataViewField({
@@ -203,7 +176,7 @@ describe('discover sidebar field', function () {
       searchable: true,
     });
 
-    const { comp, props } = await getComponent({ field, onAddFilterExists: true });
+    const { comp, props } = await getComponent({ field, canFilter: true });
 
     await act(async () => {
       const fieldItem = findTestSubject(comp, 'field-extension.keyword-showDetails');
@@ -218,15 +191,13 @@ describe('discover sidebar field', function () {
       comp.find('[data-test-subj="fieldPopoverHeader_addField-extension.keyword"]').exists()
     ).toBeTruthy();
     expect(
-      comp
-        .find('[data-test-subj="discoverFieldListPanelAddExistFilter-extension.keyword"]')
-        .exists()
+      comp.find('[data-test-subj="fieldPopoverHeader_addExistsFilter-extension.keyword"]').exists()
     ).toBeTruthy();
     expect(
-      comp.find('[data-test-subj="discoverFieldListPanelEdit-extension.keyword"]').exists()
+      comp.find('[data-test-subj="fieldPopoverHeader_editField-extension.keyword"]').exists()
     ).toBeTruthy();
     expect(
-      comp.find('[data-test-subj="discoverFieldListPanelDelete-extension.keyword"]').exists()
+      comp.find('[data-test-subj="fieldPopoverHeader_deleteField-extension.keyword"]').exists()
     ).toBeFalsy();
 
     await act(async () => {
@@ -235,7 +206,7 @@ describe('discover sidebar field', function () {
       await comp.update();
     });
 
-    expect(props.onAddField).toHaveBeenCalledWith('extension.keyword');
+    expect(props.onAddFieldToWorkspace).toHaveBeenCalledWith(field);
 
     await comp.update();
 
@@ -253,7 +224,7 @@ describe('discover sidebar field', function () {
 
     const { comp } = await getComponent({
       field,
-      onAddFilterExists: true,
+      canFilter: true,
       selected: true,
     });
 
