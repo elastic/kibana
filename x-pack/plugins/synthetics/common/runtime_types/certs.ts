@@ -36,6 +36,7 @@ export const CertType = t.intersection([
     sha256: t.string,
   }),
   t.partial({
+    configId: t.string,
     not_after: t.string,
     not_before: t.string,
     common_name: t.string,
@@ -45,6 +46,7 @@ export const CertType = t.intersection([
     monitorType: t.string,
     monitorUrl: t.string,
     locationName: t.string,
+    '@timestamp': t.string,
   }),
 ]);
 
