@@ -3,15 +3,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 
-
 import {
   EuiButton,
   EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageSection,
   EuiPageHeader,
   EuiTitle,
   EuiText,
@@ -69,8 +66,8 @@ export const <%= upperCamelCase(name) %>App = ({ basename, notifications, http, 
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
+              <EuiPageSection>
+                <EuiPageHeader>
                   <EuiTitle>
                     <h2>
                       <FormattedMessage
@@ -79,8 +76,8 @@ export const <%= upperCamelCase(name) %>App = ({ basename, notifications, http, 
                       />
                     </h2>
                   </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
+                </EuiPageHeader>
+                <EuiPageSection>
                   <EuiText>
                     <p>
                       <FormattedMessage
@@ -103,8 +100,8 @@ export const <%= upperCamelCase(name) %>App = ({ basename, notifications, http, 
                       />
                     </EuiButton>
                   </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
+                </EuiPageSection>
+              </EuiPageSection>
             </EuiPageBody>
           </EuiPage>
         </>

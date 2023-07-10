@@ -12,10 +12,10 @@ import { AppMountParameters } from '@kbn/core/public';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiText,
   EuiHorizontalRule,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageHeader,
   EuiListGroup,
 } from '@elastic/eui';
 import { RandomNumberRouteExample } from './random_number_example';
@@ -36,12 +36,12 @@ function RoutingExplorer({
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageContentHeader>
+        <EuiPageSection>
+          <EuiPageHeader>
             <EuiText>
               <h1>Routing examples</h1>
             </EuiText>
-          </EuiPageContentHeader>
+          </EuiPageHeader>
           <EuiText>
             <EuiListGroup
               listItems={[
@@ -79,7 +79,7 @@ function RoutingExplorer({
 
           <EuiHorizontalRule />
           <GetMessageRouteExample getMessageById={getMessageById} />
-        </EuiPageContent>
+        </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
   );
