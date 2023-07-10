@@ -17,6 +17,7 @@ import type {
 import type { RequestError } from '../../../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../mock';
 import {
+  useGetUninstallToken,
   useGetUninstallTokens,
   sendGetUninstallToken,
 } from '../../../../../hooks/use_request/uninstall_tokens';
@@ -28,6 +29,7 @@ import type {
 import { UninstallTokenListPage } from '.';
 
 jest.mock('../../../../../hooks/use_request/uninstall_tokens', () => ({
+  useGetUninstallToken: jest.fn(),
   useGetUninstallTokens: jest.fn(),
   sendGetUninstallToken: jest.fn(),
 }));
@@ -44,8 +46,13 @@ describe('UninstallTokenList page', () => {
     return renderer.render(<UninstallTokenListPage />);
   };
 
+  const useGetUninstallTokenMock = useGetUninstallToken as jest.Mock;
   const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
   const sendGetUninstallTokenMock = sendGetUninstallToken as jest.Mock;
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('when loading tokens', () => {
     it('should show loading message', () => {
@@ -96,18 +103,24 @@ describe('UninstallTokenList page', () => {
       token: '123456789',
     };
 
-    beforeEach(() => {
-      const getTokensResponseFixture: MockResponseType<GetUninstallTokensMetadataResponse> = {
-        isLoading: false,
-        error: null,
-        data: {
-          items: [uninstallTokenMetadataFixture1, uninstallTokenMetadataFixture2],
-          total: 2,
-          page: 1,
-          perPage: 20,
-        },
-      };
+    const getTokensResponseFixture: MockResponseType<GetUninstallTokensMetadataResponse> = {
+      isLoading: false,
+      error: null,
+      data: {
+        items: [uninstallTokenMetadataFixture1, uninstallTokenMetadataFixture2],
+        total: 2,
+        page: 1,
+        perPage: 20,
+      },
+    };
 
+    const getTokenResponseFixture: MockResponseType<GetUninstallTokenResponse> = {
+      error: null,
+      isLoading: false,
+      data: { item: uninstallTokenFixture },
+    };
+
+    beforeEach(() => {
       useGetUninstallTokensMock.mockReturnValue(getTokensResponseFixture);
     });
 
@@ -126,11 +139,6 @@ describe('UninstallTokenList page', () => {
     });
 
     it('should fetch and show token when clicking on the "Show" button', async () => {
-      const getTokenResponseFixture: MockResponseType<GetUninstallTokenResponse> = {
-        error: null,
-        isLoading: false,
-        data: { item: uninstallTokenFixture },
-      };
       sendGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
 
       const renderResult = render();
@@ -141,6 +149,26 @@ describe('UninstallTokenList page', () => {
         expect(renderResult.queryByText(uninstallTokenFixture.token)).toBeInTheDocument();
       });
       expect(sendGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenMetadataFixture1.id);
+    });
+
+    it('should show flyout for uninstall command when clicking on the "Get uninstall command" button', async () => {
+      useGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
+      const renderResult = render();
+
+      renderResult.getAllByTestId('uninstallTokenListTableUninstallButton')[0].click();
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
+        expect(
+          renderResult.queryByText(`--uninstall-token ${uninstallTokenFixture.token}`, {
+            exact: false,
+          })
+        ).toBeInTheDocument();
+      });
+      expect(useGetUninstallTokensMock).toHaveBeenLastCalledWith({
+        policyId: uninstallTokenFixture.policy_id,
+      });
+      expect(useGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenFixture.id);
     });
   });
 });
