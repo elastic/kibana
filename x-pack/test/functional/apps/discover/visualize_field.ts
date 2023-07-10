@@ -258,7 +258,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('embeddablePanelToggleMenuIcon');
       await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
-
+      expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.configureTextBasedLanguagesDimension({
