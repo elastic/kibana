@@ -124,7 +124,7 @@ export function HistogramIndicatorTypeForm() {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpac.observability.slo.sloEdit.sliType.histogram.goodTitle"
+              id="xpack.observability.slo.sloEdit.sliType.histogram.goodTitle"
               defaultMessage="Good events"
             />
           </h3>
@@ -137,7 +137,7 @@ export function HistogramIndicatorTypeForm() {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpac.observability.slo.sloEdit.sliType.histogram.totalTitle"
+              id="xpack.observability.slo.sloEdit.sliType.histogram.totalTitle"
               defaultMessage="Total events"
             />
           </h3>
