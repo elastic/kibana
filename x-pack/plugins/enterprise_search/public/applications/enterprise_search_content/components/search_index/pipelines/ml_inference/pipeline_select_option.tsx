@@ -27,7 +27,9 @@ export interface PipelineSelectOptionProps {
   pipeline: MLInferencePipelineOption;
 }
 
-export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }> = ({ disabledReason }) => {
+export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }> = ({
+  disabledReason,
+}) => {
   return (
     <>
       <EuiSpacer size="xs" />
@@ -78,7 +80,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color={pipeline.disabled ? "subdued" : "normal"}>
+            <EuiText size="s" color={pipeline.disabled ? 'subdued' : 'normal'}>
               {modelIdDisplay}
             </EuiText>
           </EuiFlexItem>
@@ -96,14 +98,16 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color={pipeline.disabled ? "subdued" : "normal"} textAlign="right">
+            <EuiText size="s" color={pipeline.disabled ? 'subdued' : 'normal'} textAlign="right">
               {pipeline.sourceFields.join(', ')}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="s" />
-      {pipeline.disabled && <PipelineSelectOptionDisabled disabledReason={pipeline.disabledReason} />}
+      {pipeline.disabled && (
+        <PipelineSelectOptionDisabled disabledReason={pipeline.disabledReason} />
+      )}
     </EuiFlexGroup>
   );
 };
