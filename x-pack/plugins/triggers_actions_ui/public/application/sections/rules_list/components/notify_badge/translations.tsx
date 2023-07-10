@@ -7,12 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SNOOZE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess',
-  {
-    defaultMessage: 'Rule successfully snoozed',
-  }
-);
+export const SNOOZE_SUCCESS_MESSAGE = (duration: string) =>
+  i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess', {
+    defaultMessage: 'Rule notification successfully snoozed for {snoozeDuration}.',
+    values: {
+      snoozeDuration: duration,
+    },
+  });
 
 export const UNSNOOZE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.unsnoozeSuccess',

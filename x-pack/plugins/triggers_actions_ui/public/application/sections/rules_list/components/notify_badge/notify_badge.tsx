@@ -303,11 +303,13 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {
       try {
+        const snoozeDuration = moment.duration(schedule.duration).humanize();
+
         setRequestInFlightLoading(true);
         closePopover();
         await snoozeRule(schedule);
         await onRuleChanged();
-        toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
+        toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE(snoozeDuration));
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
