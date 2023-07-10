@@ -587,10 +587,7 @@ export const MLInferenceLogic = kea<
             if (!pipeline) return undefined;
             const pipelineParams = parseMlInferenceParametersFromPipeline(pipelineName, pipeline);
             if (!pipelineParams) return undefined;
-            const {
-              model_id: modelId,
-              field_mappings: fieldMappings,
-            } = pipelineParams;
+            const { model_id: modelId, field_mappings: fieldMappings } = pipelineParams;
 
             const sourceFields = fieldMappings?.map((m) => m.sourceField) ?? [];
             const missingSourceFields = sourceFields.filter((f) => !indexFields?.includes(f)) ?? [];

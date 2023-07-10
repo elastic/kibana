@@ -90,8 +90,7 @@ export const EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS = (
   i18n.translate(
     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.missingSourceFieldsDescription',
     {
-      defaultMessage:
-        "Fields missing in this index: {commaSeparatedMissingSourceFields}",
+      defaultMessage: 'Fields missing in this index: {commaSeparatedMissingSourceFields}',
       values: { commaSeparatedMissingSourceFields },
     }
   );
