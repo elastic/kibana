@@ -10,9 +10,11 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { setupFleetAndAgents } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
-const TEST_INDEX = 'logs-log.log-test';
+const TEST_WRITE_INDEX = 'logs-routing_rules.test-test';
+const TEST_REROUTE_INDEX = 'logs-routing_rules.reroute-test';
 
-const CUSTOM_PIPELINE = 'logs-log.log@custom';
+const ROUTING_RULES_PKG_NAME = 'routing_rules';
+const ROUTING_RULES_PKG_VERSION = '1.0.0';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -21,8 +23,8 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   // TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
-  const LOG_INTEGRATION_VERSION = '1.1.2';
-  describe('custom ingest pipeline for fleet managed datastreams', () => {
+
+  describe('routing rules for fleet managed datastreams', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -31,14 +33,14 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await supertest
-        .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
+        .post(`/api/fleet/epm/packages/${ROUTING_RULES_PKG_NAME}/${ROUTING_RULES_PKG_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
+        .delete(`/api/fleet/epm/packages/${ROUTING_RULES_PKG_NAME}/${ROUTING_RULES_PKG_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -50,7 +52,8 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       const res = await es.search({
-        index: TEST_INDEX,
+        index: TEST_REROUTE_INDEX,
+        ignore_unavailable: true,
       });
 
       for (const hit of res.hits.hits) {
@@ -61,58 +64,26 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    describe('Without custom pipeline', () => {
-      it('Should write doc correctly', async () => {
-        const res = await es.index({
-          index: 'logs-log.log-test',
-          body: {
-            '@timestamp': '2020-01-01T09:09:00',
-            message: 'hello',
+    it('Should write doc correctly and apply the routing rule', async () => {
+      const res = await es.index({
+        index: TEST_WRITE_INDEX,
+        body: {
+          '@timestamp': '2020-01-01T09:09:00',
+          message: 'hello',
+          data_stream: {
+            dataset: 'routing_rules.test',
+            namespace: 'test',
+            type: 'logs',
           },
-        });
-
-        await es.get({
-          id: res._id,
-          index: res._index,
-        });
+        },
       });
-    });
 
-    describe('With custom pipeline', () => {
-      before(() =>
-        es.ingest.putPipeline({
-          id: CUSTOM_PIPELINE,
-          processors: [
-            {
-              set: {
-                field: 'test',
-                value: 'itworks',
-              },
-            },
-          ],
-        })
-      );
-
-      after(() =>
-        es.ingest.deletePipeline({
-          id: CUSTOM_PIPELINE,
-        })
-      );
-      it('Should write doc correctly', async () => {
-        const res = await es.index({
-          index: 'logs-log.log-test',
-          body: {
-            '@timestamp': '2020-01-01T09:09:00',
-            message: 'hello',
-          },
-        });
-
-        const doc = await es.get<{ test: string }>({
-          id: res._id,
-          index: res._index,
-        });
-        expect(doc._source?.test).to.eql('itworks');
+      const resWrite = await es.get({
+        id: res._id,
+        index: res._index,
       });
+
+      expect(resWrite._index.match(/logs-routing_rules.reroute-test/));
     });
   });
 }
