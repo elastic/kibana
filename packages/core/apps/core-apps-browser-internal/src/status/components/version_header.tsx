@@ -7,7 +7,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ServerVersion } from '@kbn/core-status-common-internal';
 
@@ -18,7 +18,7 @@ interface VersionHeaderProps {
 export const VersionHeader: FC<VersionHeaderProps> = ({ version }) => {
   const { build_hash: buildHash, build_number: buildNumber, number } = version;
   return (
-    <EuiPageSection grow={false}>
+    <EuiPanel grow={false}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -60,6 +60,6 @@ export const VersionHeader: FC<VersionHeaderProps> = ({ version }) => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageSection>
+    </EuiPanel>
   );
 };
