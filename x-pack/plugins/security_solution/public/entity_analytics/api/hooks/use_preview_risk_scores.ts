@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import dateMath from '@kbn/datemath';
-import { fetchPreviewRiskScore } from '../api';
+import { fetchRiskScorePreview } from '../api';
 import type { RiskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
 
 export const useRiskScorePreview = ({ range, filter }: RiskScorePreviewRequestSchema) => {
@@ -34,7 +34,7 @@ export const useRiskScorePreview = ({ range, filter }: RiskScorePreviewRequestSc
       params.filter = filter;
     }
 
-    const response = await fetchPreviewRiskScore({ signal, params });
+    const response = await fetchRiskScorePreview({ signal, params });
 
     return response;
   });

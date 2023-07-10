@@ -14,7 +14,7 @@ import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/
 /**
  * Fetches preview risks scores
  */
-export const fetchPreviewRiskScore = async ({
+export const fetchRiskScorePreview = async ({
   signal,
   params,
 }: {
@@ -23,9 +23,7 @@ export const fetchPreviewRiskScore = async ({
 }): Promise<GetScoresResponse> => {
   return KibanaServices.get().http.fetch<GetScoresResponse>(RISK_SCORE_PREVIEW_URL, {
     method: 'POST',
-    body: JSON.stringify({
-      ...params,
-    }),
+    body: JSON.stringify(params),
     signal,
   });
 };
