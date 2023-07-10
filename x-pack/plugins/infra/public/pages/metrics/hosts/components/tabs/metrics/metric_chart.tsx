@@ -21,12 +21,7 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useLensAttributes, Layer, LayerType } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import {
-  FormulaConfig,
-  hostLensFormulas,
-  HostsLensLineChartFormulas,
-  XYLayerOptions,
-} from '../../../../../../common/visualizations';
+import { FormulaConfig, XYLayerOptions } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter, buildExistsHostsFilter } from '../../../utils';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
@@ -34,25 +29,17 @@ import { LensWrapper } from '../../chart/lens_wrapper';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
-export interface MetricChartProps extends Pick<TypedLensByValueInput, 'overrides'> {
+export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
-  type: HostsLensLineChartFormulas;
-  breakdownSize: number;
-  render?: boolean;
-  extraLayers?: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
+  layers: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
+  'data-test-subj'?: string;
 }
 
 const lensStyle: CSSProperties = {
   height: METRIC_CHART_MIN_HEIGHT,
 };
 
-export const MetricChart = ({
-  title,
-  type,
-  extraLayers,
-  overrides,
-  breakdownSize,
-}: MetricChartProps) => {
+export const MetricChart = ({ id, title, layers, overrides, ...props }: MetricChartProps) => {
   const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
@@ -68,19 +55,7 @@ export const MetricChart = ({
 
   const { attributes, getExtraActions, error } = useLensAttributes({
     dataView,
-    layers: [
-      {
-        data: [hostLensFormulas[type]],
-        layerType: 'data',
-        options: {
-          breakdown: {
-            size: breakdownSize,
-            sourceField: 'host.name',
-          },
-        },
-      },
-      ...(extraLayers ?? []),
-    ],
+    layers,
     title,
     visualizationType: 'lnsXY',
   });
@@ -131,7 +106,7 @@ export const MetricChart = ({
         min-height: calc(${METRIC_CHART_MIN_HEIGHT}px + ${euiTheme.size.l});
         position: relative;
       `}
-      data-test-subj={`hostsView-metricChart-${type}`}
+      data-test-subj={props['data-test-subj']}
     >
       {error ? (
         <EuiFlexGroup
@@ -155,7 +130,7 @@ export const MetricChart = ({
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={`hostsViewsmetricsChart-${type}`}
+          id={id}
           attributes={attributes}
           style={lensStyle}
           extraActions={extraActions}

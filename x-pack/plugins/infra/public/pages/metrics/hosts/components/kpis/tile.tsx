@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { CSSProperties, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
@@ -19,13 +19,11 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { useLensAttributes, type Layer } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import {
-  hostLensFormulas,
-  HostsLensMetricChartFormulas,
-} from '../../../../../common/visualizations';
+import { FormulaConfig, MetricLayerOptions } from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { LensWrapper } from '../chart/lens_wrapper';
 import { buildCombinedHostsFilter, buildExistsHostsFilter } from '../../utils';
@@ -34,25 +32,13 @@ import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 import { TooltipContent } from '../metric_explanation/tooltip_content';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-export interface KPIChartProps {
-  title: string;
-  subtitle?: string;
-  trendLine?: boolean;
-  backgroundColor: string;
-  type: HostsLensMetricChartFormulas;
-  decimals?: number;
+export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides' | 'style'> {
+  layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
   toolTip: string;
-  style?: CSSProperties;
+  'data-test-subj'?: string;
 }
 
-export const Tile = ({
-  type,
-  backgroundColor,
-  toolTip,
-  style,
-  decimals = 1,
-  trendLine = false,
-}: KPIChartProps) => {
+export const Tile = ({ id, layers, style, toolTip, ...props }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
@@ -73,23 +59,7 @@ export const Tile = ({
 
   const { formula, attributes, getExtraActions, error } = useLensAttributes({
     dataView,
-    layers: {
-      data: {
-        ...hostLensFormulas[type],
-        format: {
-          ...hostLensFormulas[type].format,
-          params: {
-            decimals,
-          },
-        },
-      },
-      layerType: 'data',
-      options: {
-        backgroundColor,
-        subtitle: getSubtitle(),
-        showTrendLine: trendLine,
-      },
-    },
+    layers: { ...layers, options: { ...layers.options, subtitle: getSubtitle() } },
     visualizationType: 'lnsMetric',
   });
 
@@ -144,7 +114,7 @@ export const Tile = ({
     <EuiPanelStyled
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
-      data-test-subj={`hostsViewKPI-${type}`}
+      data-test-subj={props['data-test-subj']}
     >
       {error ? (
         <EuiFlexGroup
@@ -174,7 +144,7 @@ export const Tile = ({
         >
           <div>
             <LensWrapper
-              id={`hostsViewKPIGrid${type}Tile`}
+              id={id}
               attributes={afterLoadedState.attributes}
               style={style}
               extraActions={extraActions}
