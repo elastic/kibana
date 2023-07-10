@@ -177,7 +177,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const { actionItems: statusActionItems } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
-    indexName: ecsRowData?._index ?? '',
     scopeId,
     refetch: refetchAll,
     closePopover,

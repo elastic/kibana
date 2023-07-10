@@ -14,12 +14,12 @@ import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useSetAlertTags } from './use_set_alert_tags';
-import { getUpdateAlertsQuery } from '../../../../detections/components/alerts_table/actions';
+import { getUpdateAlertsQuery } from './helpers';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_app_toasts');
 jest.mock('./use_set_alert_tags');
-jest.mock('../../../../detections/components/alerts_table/actions');
+jest.mock('./helpers');
 
 const mockTagItems = [
   {

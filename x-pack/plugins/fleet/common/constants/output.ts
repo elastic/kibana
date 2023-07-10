@@ -12,6 +12,50 @@ export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',
+  Kafka: 'kafka',
+} as const;
+
+export const kafkaCompressionType = {
+  None: 'none',
+  Snappy: 'snappy',
+  Lz4: 'lz4',
+  Gzip: 'gzip',
+} as const;
+
+export const kafkaAuthType = {
+  Userpass: 'user_pass',
+  Ssl: 'ssl',
+  Kerberos: 'kerberos',
+} as const;
+
+export const kafkaSaslMechanism = {
+  Plain: 'PLAIN',
+  ScramSha256: 'SCRAM-SHA-256',
+  ScramSha512: 'SCRAM-SHA-512',
+} as const;
+
+export const kafkaPartitionType = {
+  Random: 'random',
+  RoundRobin: 'round_robin',
+  Hash: 'hash',
+} as const;
+
+export const kafkaTopicWhenType = {
+  Equals: 'equals',
+  Contains: 'contains',
+  Regexp: 'regexp',
+  Range: 'range',
+  Network: 'network',
+  HasFields: 'has_fields',
+  Or: 'or',
+  And: 'and',
+  Not: 'not',
+} as const;
+
+export const kafkaAcknowledgeReliabilityLevel = {
+  Commit: 'Wait for local commit',
+  Replica: 'Wait for all replicas to commit',
+  DoNotWait: 'Do not wait',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';

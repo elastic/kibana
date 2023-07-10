@@ -4359,7 +4359,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/output"
+                        "$ref": "#/components/schemas/output_create_request"
                       }
                     },
                     "total": {
@@ -4396,7 +4396,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/output"
+                      "$ref": "#/components/schemas/output_create_request"
                     }
                   }
                 }
@@ -4408,46 +4408,11 @@
           }
         },
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "elasticsearch"
-                    ]
-                  },
-                  "is_default": {
-                    "type": "boolean"
-                  },
-                  "is_default_monitoring": {
-                    "type": "boolean"
-                  },
-                  "hosts": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "ca_sha256": {
-                    "type": "string"
-                  },
-                  "config_yaml": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "type"
-                ]
+                "$ref": "#/components/schemas/output_create_request"
               }
             }
           }
@@ -4467,15 +4432,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "item": {
-                      "$ref": "#/components/schemas/output"
-                    }
-                  },
-                  "required": [
-                    "item"
-                  ]
+                  "$ref": "#/components/schemas/output_create_request"
                 }
               }
             }
@@ -4541,43 +4498,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "type": "string",
-                    "enum": [
-                      "elasticsearch"
-                    ]
-                  },
-                  "is_default": {
-                    "type": "boolean"
-                  },
-                  "is_default_monitoring": {
-                    "type": "boolean"
-                  },
-                  "hosts": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "ca_sha256": {
-                    "type": "string"
-                  },
-                  "ca_trusted_fingerprint": {
-                    "type": "string"
-                  },
-                  "config_yaml": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "type"
-                ]
+                "$ref": "#/components/schemas/output_update_request"
               }
             }
           }
@@ -4588,15 +4509,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "item": {
-                      "$ref": "#/components/schemas/output"
-                    }
-                  },
-                  "required": [
-                    "item"
-                  ]
+                  "$ref": "#/components/schemas/output_update_request"
                 }
               }
             }
@@ -7595,8 +7508,8 @@
           }
         }
       },
-      "output": {
-        "title": "Output",
+      "output_create_request_elasticsearch": {
+        "title": "elasticsearch",
         "type": "object",
         "properties": {
           "id": {
@@ -7614,7 +7527,291 @@
           "type": {
             "type": "string",
             "enum": [
-              "elasticsearch",
+              "elasticsearch"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string"
+          },
+          "ca_trusted_fingerprint": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "config_yaml": {
+            "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "certificate": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "shipper": {
+            "type": "object",
+            "properties": {
+              "disk_queue_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_path": {
+                "type": "string"
+              },
+              "disk_queue_max_size": {
+                "type": "number"
+              },
+              "disk_queue_encryption_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_compression_enabled": {
+                "type": "boolean"
+              },
+              "compression_level": {
+                "type": "number"
+              },
+              "loadbalance": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "output_create_request_kafka": {
+        "title": "kafka",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "kafka"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string"
+          },
+          "ca_trusted_fingerprint": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "config_yaml": {
+            "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "certificate": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "shipper": {
+            "type": "object",
+            "properties": {
+              "disk_queue_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_path": {
+                "type": "string"
+              },
+              "disk_queue_max_size": {
+                "type": "number"
+              },
+              "disk_queue_encryption_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_compression_enabled": {
+                "type": "boolean"
+              },
+              "compression_level": {
+                "type": "number"
+              },
+              "loadbalance": {
+                "type": "boolean"
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "compression": {
+            "type": "string"
+          },
+          "compression_level": {
+            "type": "number"
+          },
+          "client_id": {
+            "type": "string"
+          },
+          "auth_type": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "sasl": {
+            "type": "object",
+            "properties": {
+              "mechanism": {
+                "type": "string"
+              }
+            }
+          },
+          "partition": {
+            "type": "string"
+          },
+          "random": {
+            "type": "object",
+            "properties": {
+              "group_events": {
+                "type": "number"
+              }
+            }
+          },
+          "round_robin": {
+            "type": "object",
+            "properties": {
+              "group_events": {
+                "type": "number"
+              }
+            }
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "topic": {
+                  "type": "string"
+                },
+                "when": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "condition": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "timeout": {
+            "type": "number"
+          },
+          "broker_timeout": {
+            "type": "number"
+          },
+          "broker_buffer_size": {
+            "type": "number"
+          },
+          "broker_ack_reliability": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "topics",
+          "auth_type",
+          "hosts"
+        ]
+      },
+      "output_create_request_logstash": {
+        "title": "logstash",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
               "logstash"
             ]
           },
@@ -7684,11 +7881,428 @@
           }
         },
         "required": [
-          "id",
-          "is_default",
           "name",
+          "hosts",
           "type"
         ]
+      },
+      "output_create_request": {
+        "title": "Output",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/output_create_request_elasticsearch"
+          },
+          {
+            "$ref": "#/components/schemas/output_create_request_kafka"
+          },
+          {
+            "$ref": "#/components/schemas/output_create_request_logstash"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "elasticsearch": "#/components/schemas/output_create_request_elasticsearch",
+            "kafka": "#/components/schemas/output_create_request_kafka",
+            "logstash": "#/components/schemas/output_create_request_logstash"
+          }
+        }
+      },
+      "output_update_request_elasticsearch": {
+        "title": "elasticsearch",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "elasticsearch"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string"
+          },
+          "ca_trusted_fingerprint": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "config_yaml": {
+            "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "certificate": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "shipper": {
+            "type": "object",
+            "properties": {
+              "disk_queue_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_path": {
+                "type": "string"
+              },
+              "disk_queue_max_size": {
+                "type": "number"
+              },
+              "disk_queue_encryption_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_compression_enabled": {
+                "type": "boolean"
+              },
+              "compression_level": {
+                "type": "number"
+              },
+              "loadbalance": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "name",
+          "hosts",
+          "type"
+        ]
+      },
+      "output_update_request_kafka": {
+        "title": "kafka",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "kafka"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string"
+          },
+          "ca_trusted_fingerprint": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "config_yaml": {
+            "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "certificate": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "shipper": {
+            "type": "object",
+            "properties": {
+              "disk_queue_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_path": {
+                "type": "string"
+              },
+              "disk_queue_max_size": {
+                "type": "number"
+              },
+              "disk_queue_encryption_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_compression_enabled": {
+                "type": "boolean"
+              },
+              "compression_level": {
+                "type": "number"
+              },
+              "loadbalance": {
+                "type": "boolean"
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "compression": {
+            "type": "string"
+          },
+          "compression_level": {
+            "type": "number"
+          },
+          "client_id": {
+            "type": "string"
+          },
+          "auth_type": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "sasl": {
+            "type": "object",
+            "properties": {
+              "mechanism": {
+                "type": "string"
+              }
+            }
+          },
+          "partition": {
+            "type": "string"
+          },
+          "random": {
+            "type": "object",
+            "properties": {
+              "group_events": {
+                "type": "number"
+              }
+            }
+          },
+          "round_robin": {
+            "type": "object",
+            "properties": {
+              "group_events": {
+                "type": "number"
+              }
+            }
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "topic": {
+                  "type": "string"
+                },
+                "when": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "condition": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "timeout": {
+            "type": "number"
+          },
+          "broker_timeout": {
+            "type": "number"
+          },
+          "broker_ack_reliability": {
+            "type": "string"
+          },
+          "broker_buffer_size": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "output_update_request_logstash": {
+        "title": "logstash",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "logstash"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string"
+          },
+          "ca_trusted_fingerprint": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "config_yaml": {
+            "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "certificate": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "shipper": {
+            "type": "object",
+            "properties": {
+              "disk_queue_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_path": {
+                "type": "string"
+              },
+              "disk_queue_max_size": {
+                "type": "number"
+              },
+              "disk_queue_encryption_enabled": {
+                "type": "boolean"
+              },
+              "disk_queue_compression_enabled": {
+                "type": "boolean"
+              },
+              "compression_level": {
+                "type": "number"
+              },
+              "loadbalance": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "output_update_request": {
+        "title": "Output",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/output_update_request_elasticsearch"
+          },
+          {
+            "$ref": "#/components/schemas/output_update_request_kafka"
+          },
+          {
+            "$ref": "#/components/schemas/output_update_request_logstash"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "elasticsearch": "#/components/schemas/output_update_request_elasticsearch",
+            "kafka": "#/components/schemas/output_update_request_kafka",
+            "logstash": "#/components/schemas/output_update_request_logstash"
+          }
+        }
       },
       "download_sources": {
         "title": "Download Source",

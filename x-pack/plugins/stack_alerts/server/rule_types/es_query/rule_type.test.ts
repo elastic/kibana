@@ -699,7 +699,8 @@ async function invokeExecutor({
     services: ruleServices as unknown as RuleExecutorServices<
       EsQueryRuleState,
       ActionContext,
-      typeof ActionGroupId
+      typeof ActionGroupId,
+      never
     >,
     params: params as EsQueryRuleParams,
     state: {

@@ -611,7 +611,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendPosition: args.legend.position,
           }}
         >
-          <Chart ref={chartRef}>
+          <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
             <ChartSplit
               splitColumnAccessor={splitChartColumnAccessor}
               splitRowAccessor={splitChartRowAccessor}

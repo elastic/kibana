@@ -50,6 +50,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       enabledInLicense: true,
       minimumLicenseRequired: 'platinum',
       supportedFeatureIds: ['general'],
+      isSystemActionType: false,
       id: '.gen-ai',
       name: 'Generative AI',
       enabled: true,
