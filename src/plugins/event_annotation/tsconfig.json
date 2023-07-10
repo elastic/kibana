@@ -28,7 +28,6 @@
     "@kbn/i18n-react",
     "@kbn/core-saved-objects-server",
     "@kbn/unified-search-plugin",
-    "@kbn/content-management-table-list-view",
     "@kbn/core-saved-objects-server",
     "@kbn/object-versioning",
     "@kbn/config-schema",

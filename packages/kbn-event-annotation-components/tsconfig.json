@@ -37,7 +37,6 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-notifications-browser",
     "@kbn/core-saved-objects-api-browser",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/expressions-plugin",
   ]
 }
