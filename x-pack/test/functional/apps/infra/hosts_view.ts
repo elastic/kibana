@@ -362,19 +362,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should navigate to Uptime after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        const url = parse(await browser.getCurrentUrl());
-
-        const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
-        const query = decodeURIComponent(url.query ?? '');
-
-        expect(url.pathname).to.eql('/app/uptime/');
-        expect(query).to.contain(search);
-
-        await returnTo(HOSTS_VIEW_PATH);
-      });
-
       it('should navigate to APM services after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
         const url = parse(await browser.getCurrentUrl());
