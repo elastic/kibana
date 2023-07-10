@@ -412,9 +412,8 @@ describe('split .kibana index into multiple system indices', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/157510
-  // This test takes too long. Can be manually executed to verify the correct behavior.
-  describe.skip('when multiple Kibana migrators run in parallel', () => {
+  describe('when multiple Kibana migrators run in parallel', () => {
+    jest.setTimeout(1200000);
     it('correctly migrates 7.7.2_xpack_100k_obj.zip archive', async () => {
       esServer = await startElasticsearch({
         dataArchive: Path.join(__dirname, '..', 'archives', '7.7.2_xpack_100k_obj.zip'),
@@ -491,7 +490,7 @@ describe('split .kibana index into multiple system indices', () => {
           task: 5,
         },
       });
-    }, 1200000);
+    });
 
     afterEach(async () => {
       await esServer?.stop();

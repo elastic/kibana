@@ -6,7 +6,6 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
@@ -69,19 +68,19 @@ export const deleteMonitor = async ({
   routeContext: RouteContext;
   monitorId: string;
 }) => {
-  const { savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
+  const { spaceId, savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
   const { logger, telemetry, stackVersion } = server;
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
     monitorId,
     savedObjectsClient,
-    server
+    server,
+    spaceId
   );
 
   let deletePromise;
 
   try {
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
@@ -140,7 +139,8 @@ export const deleteMonitor = async ({
 const getMonitorToDelete = async (
   monitorId: string,
   soClient: SavedObjectsClientContract,
-  server: SyntheticsServerSetup
+  server: SyntheticsServerSetup,
+  spaceId: string
 ) => {
   const encryptedSOClient = server.encryptedSavedObjects.getClient();
 
@@ -148,7 +148,10 @@ const getMonitorToDelete = async (
     const monitor =
       await encryptedSOClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
         syntheticsMonitorType,
-        monitorId
+        monitorId,
+        {
+          namespace: spaceId,
+        }
       );
     return { monitor: normalizeSecrets(monitor), monitorWithSecret: normalizeSecrets(monitor) };
   } catch (e) {

@@ -72,6 +72,7 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+  private landingPageRedirect$ = new BehaviorSubject<string | undefined>(undefined);
   private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
     enabled: false,
     hideLinksTo: [],
@@ -124,6 +125,7 @@ export class ManagementPlugin
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+          landingPageRedirect$: managementPlugin.landingPageRedirect$,
         });
       },
     });
@@ -154,6 +156,8 @@ export class ManagementPlugin
         this.isSidebarEnabled$.next(isSidebarEnabled),
       setupCardsNavigation: ({ enabled, hideLinksTo }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
+      setLandingPageRedirect: (landingPageRedirect: string) =>
+        this.landingPageRedirect$.next(landingPageRedirect),
     };
   }
 }

@@ -7,11 +7,9 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
-  CONNECTORS_INDEX,
-  CONNECTORS_JOBS_INDEX,
-} from '../..';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../common/constants';
+
 import { SyncJobType, SyncStatus, TriggerMethod } from '../../../common/types/connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';

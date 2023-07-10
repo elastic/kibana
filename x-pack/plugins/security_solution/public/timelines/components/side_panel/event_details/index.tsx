@@ -257,7 +257,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       <FlyoutFooter
         detailsData={detailsData}
         detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
         refetchFlyoutData={refetchFlyoutData}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
