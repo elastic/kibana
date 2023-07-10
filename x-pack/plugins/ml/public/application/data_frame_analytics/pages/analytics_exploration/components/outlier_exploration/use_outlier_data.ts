@@ -152,7 +152,7 @@ export const useOutlierData = (
     jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,
     (columnId, cellValue, fullItem, setCellProps) => {
       const resultsField = jobConfig?.dest.results_field ?? '';
-      let backgroundColor;
+      let backgroundColor: string | undefined;
 
       const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}`];
 
@@ -166,11 +166,16 @@ export const useOutlierData = (
         }
       }
 
-      if (backgroundColor !== undefined) {
-        setCellProps({
-          style: { backgroundColor: String(backgroundColor) },
-        });
-      }
+      // From EUI docs: Treated as React component allowing hooks, context, and other React concepts to be used.
+      // This is the recommended use of setCellProps: https://github.com/elastic/eui/blob/main/src/components/datagrid/data_grid_types.ts#L521-L525
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useEffect(() => {
+        if (backgroundColor) {
+          setCellProps({
+            style: { backgroundColor: String(backgroundColor) },
+          });
+        }
+      }, [backgroundColor, setCellProps]);
     }
   );
 

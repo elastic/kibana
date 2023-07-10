@@ -468,7 +468,7 @@
           },
           " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\"> & React.RefAttributes<",
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"dataView\" | \"services\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\"> & React.RefAttributes<",
           {
             "pluginId": "unifiedHistogram",
             "scope": "public",
@@ -586,52 +586,6 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               }
-            ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramServices.theme",
-            "type": "Object",
-            "tags": [],
-            "label": "theme",
-            "description": [],
-            "signature": [
-              "{ readonly chartsDefaultTheme: ",
-              "RecursivePartial",
-              "<",
-              "Theme",
-              ">; readonly chartsDefaultBaseTheme: ",
-              "Theme",
-              "; chartsTheme$: ",
-              "Observable",
-              "<",
-              "RecursivePartial",
-              "<",
-              "Theme",
-              ">>; chartsBaseTheme$: ",
-              "Observable",
-              "<",
-              "Theme",
-              ">; readonly darkModeEnabled$: ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">; useDarkMode: () => boolean; useChartsTheme: () => ",
-              "RecursivePartial",
-              "<",
-              "Theme",
-              ">; useChartsBaseTheme: () => ",
-              "Theme",
-              "; }"
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",
             "deprecated": false,
@@ -940,6 +894,30 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramState.lensTablesAdapter",
+            "type": "Object",
+            "tags": [],
+            "label": "lensTablesAdapter",
+            "description": [
+              "\nThe current Lens request table"
+            ],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
             "id": "def-public.UnifiedHistogramState.timeInterval",
             "type": "string",
             "tags": [],
@@ -1200,7 +1178,7 @@
           },
           " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\">"
+          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"timeRange\" | \"dataView\" | \"services\" | \"relativeTimeRange\" | \"resizeRef\" | \"appendHitsCounter\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

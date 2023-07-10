@@ -116,7 +116,10 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
 
   const isGated = !hasPlatinumLicense && type === SyncJobType.ACCESS_CONTROL;
   const isDocumentLevelSecurityDisabled =
-    !index.connector.configuration.document_level_security?.value;
+    !index.connector.configuration.use_document_level_security?.value;
+
+  const isEnableSwitchDisabled =
+    type === SyncJobType.ACCESS_CONTROL && (!hasPlatinumLicense || isDocumentLevelSecurityDisabled);
 
   return (
     <>
@@ -165,7 +168,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EnableSwitch
-                    disabled={isGated || isDocumentLevelSecurityDisabled}
+                    disabled={isEnableSwitchDisabled}
                     checked={scheduling[type].enabled}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -187,7 +190,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
               </EuiFlexGroup>
             ) : (
               <EnableSwitch
-                disabled={isGated || isDocumentLevelSecurityDisabled}
+                disabled={isEnableSwitchDisabled}
                 checked={scheduling[type].enabled}
                 onChange={(e) => {
                   if (e.target.checked) {
@@ -212,6 +215,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
             <EuiFlexItem>
               <ConnectorCronEditor
                 disabled={isGated}
+                frequencyBlockList={type === SyncJobType.ACCESS_CONTROL ? [] : undefined}
                 scheduling={scheduling[type]}
                 type={type}
                 onReset={() => {

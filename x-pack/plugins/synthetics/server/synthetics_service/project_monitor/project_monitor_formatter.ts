@@ -12,8 +12,9 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SyntheticsServerSetup } from '../../types';
+import { RouteContext } from '../../routes/types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { RouteContext } from '../../legacy_uptime/routes';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
@@ -29,7 +30,6 @@ import {
   MonitorFields,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
   validateProjectMonitor,
@@ -65,7 +65,7 @@ export class ProjectMonitorFormatter {
   public createdMonitors: string[] = [];
   public updatedMonitors: string[] = [];
   public failedMonitors: FailedError = [];
-  private server: UptimeServerSetup;
+  private server: SyntheticsServerSetup;
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
   private routeContext: RouteContext;

@@ -8,25 +8,6 @@
 import { GlobalSearchResult } from '@kbn/global-search-plugin/public';
 
 /* @internal */
-export enum COUNT_METRIC {
-  UNHANDLED_ERROR = 'unhandled_error',
-  SEARCH_REQUEST = 'search_request',
-  SHORTCUT_USED = 'shortcut_used',
-  SEARCH_FOCUS = 'search_focus',
-}
-
-/* @internal */
-export enum CLICK_METRIC {
-  USER_NAVIGATED_TO_APPLICATION = 'user_navigated_to_application',
-  USER_NAVIGATED_TO_SAVED_OBJECT = 'user_navigated_to_saved_object',
-}
-
-/* @internal */
-export const getClickMetric = (metric: CLICK_METRIC, context: string) => {
-  return [metric, `${metric}_${context}`];
-};
-
-/* @internal */
 export const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 /* @internal */

@@ -10,10 +10,13 @@ import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../common/constants';
+import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchSearchResults } from '../../lib/fetch_search_results';
 import { RouteDependencies } from '../../plugin';
+import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
+import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 const calculateMeta = (searchResults: SearchResponseBody, page: number, size: number) => {
   let totalResults = 0;
@@ -64,21 +67,33 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
-      const searchResults: SearchResponseBody = await fetchSearchResults(
-        client,
-        indexName,
-        searchQuery,
-        from,
-        size
-      );
+      try {
+        const searchResults: SearchResponseBody = await fetchSearchResults(
+          client,
+          indexName,
+          searchQuery,
+          from,
+          size
+        );
 
-      return response.ok({
-        body: {
-          meta: calculateMeta(searchResults, page, size),
-          results: searchResults,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: {
+            meta: calculateMeta(searchResults, page, size),
+            results: searchResults,
+          },
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not found index',
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 }

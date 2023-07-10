@@ -7,7 +7,6 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import pMap from 'p-map';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { GetCspRuleTemplateRequest, GetCspRuleTemplateResponse } from '../../../common/types';
 import { CspRuleTemplate } from '../../../common/schemas';
@@ -61,12 +60,8 @@ const findCspRuleTemplateHandler = async (
     filter: getBenchmarkTypeFilter(benchmarkId),
   });
 
-  const cspRulesTemplates = await pMap(
-    cspRulesTemplatesSo.saved_objects,
-    async (cspRuleTemplate) => {
-      return { ...cspRuleTemplate.attributes };
-    },
-    { concurrency: 50 }
+  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
+    (cspRuleTemplate) => cspRuleTemplate.attributes
   );
 
   return {

@@ -11,7 +11,7 @@ import { max } from 'lodash';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogEntriesSummaryBucket } from '../../../../common/http_api';
+import { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';
 
 interface DensityChartProps {
   buckets: LogEntriesSummaryBucket[];

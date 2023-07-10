@@ -18,7 +18,7 @@ import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../routes/paths';
 import {
   transformSloResponseToCreateSloForm,
   transformCreateSLOFormToCreateSLOInput,
@@ -76,7 +76,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           params: { sloId: slo.id },
         },
         {
-          replace: true,
+          replace: false,
         }
       );
     }

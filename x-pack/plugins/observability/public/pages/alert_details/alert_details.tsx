@@ -21,12 +21,12 @@ import { PageTitle, pageTitleContent } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
 import { AlertSummary, AlertSummaryField } from './components/alert_summary';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import { FeedbackButton } from './components/feedback_button';
 import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
-import { paths } from '../../config/paths';
-import { FeedbackButton } from './components/feedback_button';
+import { paths } from '../../routes/paths';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -60,7 +60,6 @@ export function AlertDetails() {
   const userCasesPermissions = canUseCases();
   const { rule } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID],
-    http,
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
 

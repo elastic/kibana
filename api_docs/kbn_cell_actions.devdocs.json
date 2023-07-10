@@ -35,7 +35,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; fieldName: string; value: string | string[] | null | undefined; }) => void"
+          " | undefined; fieldName: string; value: ",
+          "DefaultActionsSupportedValue",
+          "; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
         "deprecated": false,
@@ -92,7 +94,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "string | string[] | null | undefined"
+                  "string[] | boolean[] | number[]"
                 ],
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
                 "deprecated": false,
@@ -120,7 +122,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; fieldName: string; value: string | string[] | null | undefined; }) => void"
+          " | undefined; fieldName: string; value: ",
+          "DefaultActionsSupportedValue",
+          "; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
         "deprecated": false,
@@ -177,7 +181,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "string | string[] | null | undefined"
+                  "string[] | boolean[] | number[]"
                 ],
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
                 "deprecated": false,
@@ -444,6 +448,14 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
+          "; notifications: ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.NotificationsStart",
+            "text": "NotificationsStart"
+          },
           "; }) => ",
           {
             "pluginId": "@kbn/cell-actions",
@@ -507,6 +519,14 @@
             "docId": "kibDataQueryPluginApi",
             "section": "def-public.FilterManager",
             "text": "FilterManager"
+          },
+          "; notifications: ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.NotificationsStart",
+            "text": "NotificationsStart"
           },
           "; }) => ",
           {
@@ -1257,7 +1277,15 @@
         "label": "CellActionFieldValue",
         "description": [],
         "signature": [
-          "string | string[] | null | undefined"
+          "string[] | undefined[] | boolean[] | number[] | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Serializable",
+            "text": "Serializable"
+          },
+          " | null[]"
         ],
         "path": "packages/kbn-cell-actions/src/types.ts",
         "deprecated": false,

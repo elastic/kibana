@@ -65,17 +65,10 @@ export type ConnectorConfiguration = Record<
   string,
   ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
 > & {
-  document_level_security?: ConnectorConfigProperties;
   extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
+  use_document_level_security?: ConnectorConfigProperties;
   use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
 };
-
-export interface ConnectorSyncConfigProperties {
-  label: string;
-  value: string | number | boolean | null;
-}
-
-export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigProperties | null>;
 
 export interface ConnectorScheduling {
   enabled: boolean;
@@ -249,7 +242,7 @@ export interface ConnectorSyncJob {
   canceled_at: string | null;
   completed_at: string | null;
   connector: {
-    configuration: ConnectorSyncConfiguration;
+    configuration: ConnectorConfiguration;
     filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;

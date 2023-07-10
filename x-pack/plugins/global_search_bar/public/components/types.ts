@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { Observable } from 'rxjs';
-import { TrackUiMetricFn } from '../types';
+import type { Observable } from 'rxjs';
+import { EventReporter } from '../telemetry';
 
 /* @internal */
 export interface SearchBarProps {
   globalSearch: GlobalSearchPluginStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
-  trackUiMetric: TrackUiMetricFn;
+  reportEvent: EventReporter;
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
   darkMode: boolean;

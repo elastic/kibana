@@ -162,8 +162,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       }
       const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-      const [, , { logViews }] = await libs.getStartServices();
-      const logQueryFields: LogQueryFields | undefined = await logViews
+      const [, { logsShared }] = await libs.getStartServices();
+      const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
         .getClient(savedObjectsClient, esClient)
         .getResolvedLogView({
           type: 'log-view-reference',

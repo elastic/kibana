@@ -82,7 +82,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
   }
 
   const isDocumentLevelSecurityDisabled =
-    !index.connector.configuration.document_level_security?.value;
+    !index.connector.configuration.use_document_level_security?.value;
 
   if (
     index.connector.status === ConnectorStatus.CREATED ||

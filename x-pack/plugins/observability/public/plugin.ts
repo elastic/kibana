@@ -54,14 +54,22 @@ import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public'
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
-import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
+import { observabilityAppId, observabilityFeatureId } from '../common';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
+import {
+  ALERTS_PATH,
+  CASES_PATH,
+  OBSERVABILITY_BASE_PATH,
+  OVERVIEW_PATH,
+  RULES_PATH,
+  SLOS_PATH,
+} from './routes/paths';
 import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
 import { type CoPilotService } from './typings/co_pilot';
 
@@ -149,7 +157,7 @@ export class Plugin
         defaultMessage: 'Alerts',
       }),
       order: 8001,
-      path: '/alerts',
+      path: ALERTS_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
       deepLinks: [
         {
@@ -157,7 +165,7 @@ export class Plugin
           title: i18n.translate('xpack.observability.rulesLinkTitle', {
             defaultMessage: 'Rules',
           }),
-          path: '/alerts/rules',
+          path: RULES_PATH,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
       ],
@@ -169,10 +177,10 @@ export class Plugin
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       order: 8002,
-      path: '/slos',
+      path: SLOS_PATH,
     },
     getCasesDeepLinks({
-      basePath: casesPath,
+      basePath: CASES_PATH,
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
@@ -224,21 +232,21 @@ export class Plugin
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
       return renderApp({
-        core: coreStart,
-        config,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
-        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        usageCollection: pluginsSetup.usageCollection,
+        config,
+        core: coreStart,
         isDev: this.initContext.env.mode.dev,
         kibanaVersion,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        usageCollection: pluginsSetup.usageCollection,
       });
     };
 
     const appUpdater$ = this.appUpdater$;
     const app = {
-      appRoute: '/app/observability',
+      appRoute: OBSERVABILITY_BASE_PATH,
       category,
       deepLinks: this.deepLinks,
       euiIconType,
@@ -280,7 +288,7 @@ export class Plugin
             'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
         }),
         icon: 'logoObservability',
-        path: '/app/observability/',
+        path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
       });
     }
@@ -295,7 +303,7 @@ export class Plugin
               defaultMessage: 'Overview',
             }),
             app: observabilityAppId,
-            path: '/overview',
+            path: OVERVIEW_PATH,
           };
 
           // Reformat the visible links to be NavigationEntry objects instead of

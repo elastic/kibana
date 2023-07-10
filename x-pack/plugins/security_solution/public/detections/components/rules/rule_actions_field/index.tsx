@@ -23,6 +23,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
@@ -244,13 +245,13 @@ export const RuleActionsField: React.FC<Props> = ({
         setActionFrequencyProperty: setActionFrequency,
         setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
+        producerId: AlertConsumers.SIEM,
         defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
         defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
-        showActionAlertsFilter: true,
         disableErrorMessages: !isFormValidated,
       }),
     [

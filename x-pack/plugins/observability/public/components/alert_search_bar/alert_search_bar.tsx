@@ -11,7 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
 import { AlertsStatusFilter } from './components';
-import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
+import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';

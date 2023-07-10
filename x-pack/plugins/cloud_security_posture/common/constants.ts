@@ -8,11 +8,18 @@
 import { PostureTypes, VulnSeverity } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
+export const STATUS_API_CURRENT_VERSION = '1';
+
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
+
 export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =
   '/internal/cloud_security_posture/vulnerabilities_dashboard';
+
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
+export const BENCHMARKS_API_CURRENT_VERSION = '1';
+
 export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
+export const FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION = '1';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 // TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN

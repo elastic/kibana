@@ -10,7 +10,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
-import { RULES_PATH, SecurityPageName } from '../../common/constants';
+import { RULES_LANDING_PATH, RULES_PATH, SecurityPageName } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
@@ -24,6 +24,8 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { RulesLandingPage } from './landing';
 
 const RulesSubRoutes = [
   {
@@ -100,11 +102,13 @@ const RulesContainerComponent: React.FC = () => {
 
 const Rules = React.memo(RulesContainerComponent);
 
-const renderRulesRoutes = () => <Rules />;
-
-export const routes = [
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: RULES_LANDING_PATH,
+    component: RulesLandingPage,
+  },
   {
     path: RULES_PATH,
-    render: renderRulesRoutes,
+    component: Rules,
   },
 ];

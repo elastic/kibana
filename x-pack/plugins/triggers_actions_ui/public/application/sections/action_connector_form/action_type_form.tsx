@@ -8,6 +8,7 @@
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -88,7 +89,10 @@ export type ActionTypeFormProps = {
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
-  showActionAlertsFilter?: boolean;
+  featureId: string;
+  producerId: string;
+  ruleTypeId?: string;
+  hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<
   ActionAccordionFormProps,
@@ -136,7 +140,10 @@ export const ActionTypeForm = ({
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
-  showActionAlertsFilter,
+  producerId,
+  featureId,
+  ruleTypeId,
+  hasFieldsForAAD,
   disableErrorMessages,
 }: ActionTypeFormProps) => {
   const {
@@ -351,6 +358,8 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
+  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
+
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
       <EuiSplitPanel.Inner
@@ -437,6 +446,9 @@ export const ActionTypeForm = ({
               <ActionAlertsFilterQuery
                 state={actionItem.alertsFilter?.query}
                 onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
+                featureIds={[producerId as ValidFeatureId]}
+                appName={featureId!}
+                ruleTypeId={ruleTypeId}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />

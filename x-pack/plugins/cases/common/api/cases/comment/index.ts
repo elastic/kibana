@@ -6,8 +6,14 @@
  */
 
 import * as rt from 'io-ts';
+import {
+  MAX_BULK_GET_ATTACHMENTS,
+  MAX_COMMENTS_PER_PAGE,
+  MAX_COMMENT_LENGTH,
+  MAX_BULK_CREATE_ATTACHMENTS,
+} from '../../../constants';
+import { limitedArraySchema, paginationSchema, limitedStringSchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
-import { NumberFromString } from '../../saved_object';
 
 import { UserRt } from '../../user';
 
@@ -192,7 +198,31 @@ const BasicCommentRequestRt = rt.union([
   PersistableStateAttachmentRt,
 ]);
 
-export const CommentRequestRt = rt.union([BasicCommentRequestRt, ExternalReferenceSORt]);
+export const CommentRequestRt = rt.union([
+  rt.strict({
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    type: rt.literal(CommentType.user),
+    owner: rt.string,
+  }),
+  AlertCommentRequestRt,
+  rt.strict({
+    type: rt.literal(CommentType.actions),
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    actions: rt.strict({
+      targets: rt.array(
+        rt.strict({
+          hostname: rt.string,
+          endpointId: rt.string,
+        })
+      ),
+      type: rt.string,
+    }),
+    owner: rt.string,
+  }),
+  ExternalReferenceNoSORt,
+  ExternalReferenceSORt,
+  PersistableStateAttachmentRt,
+]);
 
 export const CommentRequestWithoutRefsRt = rt.union([
   BasicCommentRequestRt,
@@ -287,27 +317,32 @@ export const CommentsFindResponseRt = rt.strict({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const FindCommentsQueryParamsRt = rt.exact(
-  rt.partial({
-    /**
-     * The page of objects to return
-     */
-    page: rt.union([rt.number, NumberFromString]),
-    /**
-     * The number of objects to return for a page
-     */
-    perPage: rt.union([rt.number, NumberFromString]),
-    /**
-     * Order to sort the response
-     */
-    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-  })
-);
+export const FindCommentsQueryParamsRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      /**
+       * Order to sort the response
+       */
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
+]);
 
-export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
+export const BulkCreateCommentRequestRt = limitedArraySchema({
+  codec: CommentRequestRt,
+  min: 0,
+  max: MAX_BULK_CREATE_ATTACHMENTS,
+  fieldName: 'attachments',
+});
 
 export const BulkGetAttachmentsRequestRt = rt.strict({
-  ids: rt.array(rt.string),
+  ids: limitedArraySchema({
+    codec: rt.string,
+    min: 1,
+    max: MAX_BULK_GET_ATTACHMENTS,
+    fieldName: 'ids',
+  }),
 });
 
 export const BulkGetAttachmentsResponseRt = rt.strict({

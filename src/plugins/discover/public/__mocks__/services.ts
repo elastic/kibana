@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { Observable, of } from 'rxjs';
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -93,8 +92,15 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return searchSource;
   });
 
+  const theme = {
+    theme$: of({ darkMode: false }),
+  };
+
   return {
-    core: coreMock.createStart(),
+    core: {
+      ...coreMock.createStart(),
+      theme,
+    },
     charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),
     history: () => ({
@@ -174,10 +180,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     metadata: {
       branch: 'test',
     },
-    theme: {
-      useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
-      useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
-    },
+    theme,
     storage: new LocalStorageMock({}) as unknown as Storage,
     addBasePath: jest.fn(),
     toastNotifications: {

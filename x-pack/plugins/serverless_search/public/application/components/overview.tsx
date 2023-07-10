@@ -23,6 +23,7 @@ import React, { useMemo, useState } from 'react';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
+import { API_KEY_PLACEHOLDER, ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
 import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
@@ -34,9 +35,6 @@ import { IngestData } from './overview_panels/ingest_data';
 import { SelectClientPanel } from './overview_panels/select_client';
 import { ApiKeyPanel } from './api_key/api_key';
 import { LanguageClientPanel } from './overview_panels/language_client_panel';
-
-const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
-const API_KEY_PLACEHOLDER = 'your_api_key';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
