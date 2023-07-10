@@ -874,7 +874,6 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/uptime
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/uptime
 
-
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
@@ -883,6 +882,9 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 # Observability onboarding tour
 /x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
+
+# Observability settings
+/x-pack/plugins/observability/server/ui_settings.ts @elastic/obs-docs
 
 ### END Observability Plugins
 
