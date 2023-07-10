@@ -115,7 +115,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
       const config = this.initializerContext.config.get();
-      const navLinkStatus = AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus]
+      const navLinkStatus =
+        AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
 
       this.appStateUpdater.next(() => {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]

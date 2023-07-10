@@ -11,9 +11,9 @@ import { ScopedHistory, Capabilities } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type { AppId } from '@kbn/management-cards-navigation';
+import { AppNavLinkStatus } from '@kbn/core/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
-import { AppNavLinkStatus } from '@kbn/core/public';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;

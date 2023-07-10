@@ -54,7 +54,8 @@ export class ManagementPlugin
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
     const config = this.initializerContext.config.get();
-    const navLinkStatus = AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus]
+    const navLinkStatus =
+      AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
 
     const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
