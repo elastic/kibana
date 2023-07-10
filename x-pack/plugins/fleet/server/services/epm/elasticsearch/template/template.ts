@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable no-console */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -165,7 +164,6 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   if (Object.keys(runtimeFields).length > 0) {
     indexTemplateMappings.runtime = runtimeFields;
   }
-  console.log('Final index template mappings: ', JSON.stringify(indexTemplateMappings, null, 2));
   return indexTemplateMappings;
 }
 
@@ -236,7 +234,6 @@ function _generateMappings(
               properties: dynProperties,
               runtimeProperties: fieldProps,
             });
-            // ctx.addRuntimeField({ path, properties: fieldProps });
           }
           return;
         }
