@@ -1,0 +1,11 @@
+title: Connector request properties for a Slack API connector
+description: Defines properties for connectors when type is `.slack_api`.
+type: object
+properties:
+  allowedChannels:
+    description: >
+      The list of channels that the connector can access.
+      By default, it can access all channels within the scope of the Slack app.
+    type: array
+    items:
+      type: string

@@ -1,0 +1,3 @@
+title: Connector request properties for a Slack connector
+description: Defines properties for connectors when type is `.slack`.
+type: object

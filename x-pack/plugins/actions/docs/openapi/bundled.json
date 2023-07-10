@@ -2144,9 +2144,23 @@
           }
         }
       },
+      "config_properties_slack_api": {
+        "title": "Connector request properties for a Slack API connector",
+        "description": "Defines properties for connectors when type is `.slack_api`.",
+        "type": "object",
+        "properties": {
+          "allowedChannels": {
+            "description": "The list of channels that the connector can access. By default, it can access all channels within the scope of the Slack app.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "secrets_properties_slack_api": {
-        "title": "Connector secrets properties for a Web API Slack connector",
-        "description": "Defines secrets for connectors when type is `.slack`.",
+        "title": "Connector secrets properties for a Slack API connector",
+        "description": "Defines secrets for connectors when type is `.slack_api`.",
         "required": [
           "token"
         ],
@@ -2159,8 +2173,8 @@
         }
       },
       "create_connector_request_slack_api": {
-        "title": "Create Slack connector request",
-        "description": "The Slack connector uses Slack Incoming Webhooks.",
+        "title": "Create Slack API connector request",
+        "description": "The Slack connector uses an API method to send Slack messages.",
         "type": "object",
         "required": [
           "connector_type_id",
@@ -2168,6 +2182,9 @@
           "secrets"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_api"
+          },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
@@ -2186,8 +2203,13 @@
           }
         }
       },
+      "config_properties_slack_webhook": {
+        "title": "Connector request properties for a Slack connector",
+        "description": "Defines properties for connectors when type is `.slack`.",
+        "type": "object"
+      },
       "secrets_properties_slack_webhook": {
-        "title": "Connector secrets properties for a Webhook Slack connector",
+        "title": "Connector secrets properties for a Slack connector",
         "description": "Defines secrets for connectors when type is `.slack`.",
         "required": [
           "webhookUrl"
@@ -2202,7 +2224,7 @@
       },
       "create_connector_request_slack_webhook": {
         "title": "Create Slack connector request",
-        "description": "The Slack connector uses Slack Incoming Webhooks.",
+        "description": "The Slack connector uses incoming webhooks to send Slack messages.",
         "type": "object",
         "required": [
           "connector_type_id",
@@ -2210,6 +2232,9 @@
           "secrets"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_webhook"
+          },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
@@ -3144,7 +3169,7 @@
         }
       },
       "connector_response_properties_slack_api": {
-        "title": "Connector response properties for a Slack connector",
+        "title": "Connector response properties for a Slack API connector",
         "type": "object",
         "required": [
           "connector_type_id",
@@ -3154,6 +3179,9 @@
           "name"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_api"
+          },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
@@ -3191,6 +3219,10 @@
           "name"
         ],
         "properties": {
+          "config": {
+            "type": "object",
+            "description": "Configuration properties for the connector."
+          },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
@@ -3638,20 +3670,21 @@
         }
       },
       "update_connector_request_slack_api": {
-        "title": "Update Slack connector request",
+        "title": "Update Slack API connector request",
         "type": "object",
         "required": [
           "name",
           "secrets"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_api"
+          },
           "name": {
             "type": "string",
             "description": "The display name for the connector."
           },
           "secrets": {
-            "type": "object",
-            "description": "The secrets object containing the necessary fields for authentication.",
             "$ref": "#/components/schemas/secrets_properties_slack_api"
           }
         }
@@ -3664,13 +3697,14 @@
           "secrets"
         ],
         "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_slack_webhook"
+          },
           "name": {
             "type": "string",
             "description": "The display name for the connector."
           },
           "secrets": {
-            "type": "object",
-            "description": "The secrets object containing the necessary fields for authentication.",
             "$ref": "#/components/schemas/secrets_properties_slack_webhook"
           }
         }

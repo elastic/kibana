@@ -7,6 +7,9 @@ required:
   - is_preconfigured
   - name
 properties:
+  config:
+    type: object
+    description: Configuration properties for the connector.
   connector_type_id:
     type: string
     description: The type of connector.
