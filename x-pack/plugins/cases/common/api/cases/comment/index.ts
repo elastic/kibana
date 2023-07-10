@@ -6,8 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_BULK_GET_ATTACHMENTS, MAX_COMMENTS_PER_PAGE } from '../../../constants';
-import { limitedArraySchema, paginationSchema } from '../../../schema';
+import {
+  MAX_BULK_GET_ATTACHMENTS,
+  MAX_COMMENTS_PER_PAGE,
+  MAX_COMMENT_LENGTH,
+  MAX_BULK_CREATE_ATTACHMENTS,
+} from '../../../constants';
+import { limitedArraySchema, paginationSchema, limitedStringSchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
 
 import { UserRt } from '../../user';
@@ -193,7 +198,31 @@ const BasicCommentRequestRt = rt.union([
   PersistableStateAttachmentRt,
 ]);
 
-export const CommentRequestRt = rt.union([BasicCommentRequestRt, ExternalReferenceSORt]);
+export const CommentRequestRt = rt.union([
+  rt.strict({
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    type: rt.literal(CommentType.user),
+    owner: rt.string,
+  }),
+  AlertCommentRequestRt,
+  rt.strict({
+    type: rt.literal(CommentType.actions),
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    actions: rt.strict({
+      targets: rt.array(
+        rt.strict({
+          hostname: rt.string,
+          endpointId: rt.string,
+        })
+      ),
+      type: rt.string,
+    }),
+    owner: rt.string,
+  }),
+  ExternalReferenceNoSORt,
+  ExternalReferenceSORt,
+  PersistableStateAttachmentRt,
+]);
 
 export const CommentRequestWithoutRefsRt = rt.union([
   BasicCommentRequestRt,
@@ -300,7 +329,12 @@ export const FindCommentsQueryParamsRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
 ]);
 
-export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
+export const BulkCreateCommentRequestRt = limitedArraySchema({
+  codec: CommentRequestRt,
+  min: 0,
+  max: MAX_BULK_CREATE_ATTACHMENTS,
+  fieldName: 'attachments',
+});
 
 export const BulkGetAttachmentsRequestRt = rt.strict({
   ids: limitedArraySchema({
