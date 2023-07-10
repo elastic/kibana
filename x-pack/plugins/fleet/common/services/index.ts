@@ -15,7 +15,6 @@ export {
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
-export { decodeCloudId } from './decode_cloud_id';
 export { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
@@ -65,3 +64,13 @@ export { getAllowedOutputTypeForPolicy } from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
 
 export { policyHasFleetServer, policyHasAPMIntegration } from './agent_policies_helpers';
+
+export {
+  generateNewAgentPolicyWithDefaults,
+  agentPolicyWithoutPaidFeatures,
+} from './generate_new_agent_policy';
+
+export {
+  isAgentPolicyValidForLicense,
+  unsetAgentPolicyAccordingToLicenseLevel,
+} from './agent_policy_config';

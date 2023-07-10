@@ -67,6 +67,8 @@ function validateState(
     source: filterFromUrl?.source ?? filterFromStorage?.source,
     tags: filterFromUrl?.tags ?? filterFromStorage?.tags,
     enabled: filterFromUrl?.enabled ?? filterFromStorage?.enabled,
+    ruleExecutionStatus:
+      filterFromUrl?.ruleExecutionStatus ?? filterFromStorage?.ruleExecutionStatus,
   };
 
   const [sortingFromUrl] = validateNonExact(urlState, RulesTableSavedSorting);

@@ -7,6 +7,8 @@
 
 import { isEqual } from 'lodash';
 
+import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+
 import { Dictionary } from '../../../../../../../common/types/common';
 import { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
 import {
@@ -30,7 +32,6 @@ import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
 import { StepDefineFormProps } from '../step_define_form';
 import { validateLatestConfig } from '../hooks/use_latest_function_config';
 import { validatePivotConfig } from '../hooks/use_pivot_config';
-import { getCombinedRuntimeMappings } from '../../../../../common/request';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,

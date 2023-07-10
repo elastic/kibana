@@ -42,6 +42,22 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const ESRE_PLUGIN = {
+  ID: 'enterpriseSearchEsre',
+  NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
+    defaultMessage: 'ESRE',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
+    defaultMessage: 'ESRE',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.esre.description', {
+    defaultMessage:
+      'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
+  }),
+  URL: '/app/enterprise_search/esre',
+  LOGO: 'logoEnterpriseSearch',
+};
+
 export const ANALYTICS_PLUGIN = {
   ID: 'enterpriseSearchAnalytics',
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
@@ -131,6 +147,23 @@ export const APPLICATIONS_PLUGIN = {
   URL: '/app/enterprise_search/applications',
 };
 
+export const VECTOR_SEARCH_PLUGIN = {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.vectorSearch.description', {
+    defaultMessage:
+      'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
+  }),
+  ID: 'enterpriseSearchVectorSearch',
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
+    defaultMessage: 'Vector Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.vectorSearch.navTitle', {
+    defaultMessage: 'Vector Search',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/vector_search',
+};
+
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
 
 export const JSON_HEADER = {
@@ -177,3 +210,5 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasNativeConnectors: true,
   hasWebCrawler: true,
 };
+
+export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';

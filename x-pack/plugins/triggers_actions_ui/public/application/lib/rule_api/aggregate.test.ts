@@ -288,23 +288,39 @@ describe('loadRuleAggregations', () => {
     `);
   });
 
-  test('loadRuleTags should call the aggregate API with no filters', async () => {
+  test('loadRuleTags should call the getTags API', async () => {
     const resolvedValue = {
-      rule_tags: ['a', 'b', 'c'],
+      data: ['a', 'b', 'c'],
+      total: 3,
+      page: 2,
+      per_page: 30,
     };
     http.get.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadRuleTags({
       http,
+      search: 'test',
+      page: 2,
+      perPage: 30,
     });
 
     expect(result).toEqual({
-      ruleTags: ['a', 'b', 'c'],
+      data: ['a', 'b', 'c'],
+      page: 2,
+      perPage: 30,
+      total: 3,
     });
 
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/internal/alerting/rules/_aggregate",
+        "/internal/alerting/rules/_tags",
+        Object {
+          "query": Object {
+            "page": 2,
+            "per_page": 30,
+            "search": "test",
+          },
+        },
       ]
     `);
   });

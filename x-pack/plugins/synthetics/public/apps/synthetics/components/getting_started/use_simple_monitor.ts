@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../contexts';
 import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
 import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
-import { fetchCreateMonitor } from '../../state';
+import { createGettingStartedMonitor } from '../../state';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import {
@@ -41,7 +41,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
     }
     const { urls, locations } = monitorData;
 
-    return fetchCreateMonitor({
+    return createGettingStartedMonitor({
       monitor: {
         ...DEFAULT_FIELDS.browser,
         'source.inline.script': `step('Go to ${urls}', async () => {

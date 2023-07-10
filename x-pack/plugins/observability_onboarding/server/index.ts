@@ -14,7 +14,16 @@ import { ObservabilityOnboardingPlugin } from './plugin';
 
 const configSchema = schema.object({
   ui: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  serverless: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.literal(true),
+      schema.never(),
+      { defaultValue: schema.contextRef('serverless') }
+    ),
   }),
 });
 
@@ -24,6 +33,7 @@ export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
   exposeToBrowser: {
     ui: true,
+    serverless: true,
   },
   schema: configSchema,
 };

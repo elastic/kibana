@@ -8,6 +8,7 @@
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import type { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
@@ -40,9 +41,6 @@ import type {
 import type { EsIndex } from '../../../../common/types/es_index';
 
 import type { SavedSearchQuery } from '../use_search_items';
-
-// Default sampler shard size used for field histograms
-export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
 
 export interface FieldHistogramRequestConfig {
   fieldName: string;

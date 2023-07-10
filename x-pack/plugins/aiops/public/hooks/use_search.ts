@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import type { AiOpsIndexBasedAppState } from '../application/utils/url_state';

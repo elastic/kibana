@@ -171,7 +171,7 @@ export const InstalledPackages: React.FC<{
     () =>
       installedPackages.filter(
         (item) =>
-          'savedObject' in item && semverLt(item.savedObject.attributes.version, item.version)
+          item?.installationInfo?.version && semverLt(item.installationInfo.version, item.version)
       ),
     [installedPackages]
   );

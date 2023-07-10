@@ -14,9 +14,8 @@ import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import {
-  detailsData,
-  detailsError,
-  hostStatusInfo,
+  fullDetailsHostInfo,
+  hostInfoError,
   policyVersionInfo,
   showView,
   uiQueryParams,
@@ -26,8 +25,8 @@ import * as i18 from '../translations';
 import { ActionsMenu } from './components/actions_menu';
 import {
   EndpointDetailsFlyoutTabs,
-  EndpointDetailsTabsTypes,
   type EndpointDetailsTabs,
+  EndpointDetailsTabsTypes,
 } from './components/endpoint_details_tabs';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
@@ -37,11 +36,10 @@ export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const hostDetails = useEndpointSelector(detailsData);
-  const hostDetailsError = useEndpointSelector(detailsError);
+  const hostInfo = useEndpointSelector(fullDetailsHostInfo);
+  const hostDetailsError = useEndpointSelector(hostInfoError);
 
   const policyInfo = useEndpointSelector(policyVersionInfo);
-  const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
   const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -68,14 +66,10 @@ export const EndpointDetails = memo(() => {
             selected_endpoint: id,
           }),
           content:
-            hostDetails === undefined ? (
+            hostInfo === undefined ? (
               ContentLoadingMarkup
             ) : (
-              <EndpointDetailsContent
-                details={hostDetails}
-                policyInfo={policyInfo}
-                hostStatus={hostStatus}
-              />
+              <EndpointDetailsContent hostInfo={hostInfo} policyInfo={policyInfo} />
             ),
         },
       ];
@@ -96,14 +90,7 @@ export const EndpointDetails = memo(() => {
       }
       return tabs;
     },
-    [
-      canAccessEndpointActionsLogManagement,
-      ContentLoadingMarkup,
-      hostDetails,
-      policyInfo,
-      hostStatus,
-      queryParams,
-    ]
+    [canAccessEndpointActionsLogManagement, ContentLoadingMarkup, hostInfo, policyInfo, queryParams]
   );
 
   const showFlyoutFooter =
@@ -127,11 +114,11 @@ export const EndpointDetails = memo(() => {
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
         <EndpointDetailsFlyoutHeader
           hasBorder
-          endpointId={hostDetails?.agent.id}
-          hostname={hostDetails?.host?.hostname}
+          endpointId={hostInfo?.metadata?.agent.id}
+          hostname={hostInfo?.metadata?.host?.hostname}
         />
       )}
-      {hostDetails === undefined ? (
+      {hostInfo === undefined ? (
         <EuiFlyoutBody>
           <EuiSkeletonText lines={3} /> <EuiSpacer size="l" /> <EuiSkeletonText lines={3} />
         </EuiFlyoutBody>
@@ -139,18 +126,18 @@ export const EndpointDetails = memo(() => {
         <>
           {(show === 'details' || show === 'activity_log') && (
             <EndpointDetailsFlyoutTabs
-              hostname={hostDetails.host.hostname}
+              hostname={hostInfo.metadata.host.hostname}
               // show overview tab if forcing response actions history
               // tab via URL without permission
               show={!canAccessEndpointActionsLogManagement ? 'details' : show}
-              tabs={getTabs(hostDetails.agent.id)}
+              tabs={getTabs(hostInfo.metadata.agent.id)}
             />
           )}
 
-          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostDetails} />}
+          {show === 'policy_response' && <PolicyResponseFlyoutPanel hostMeta={hostInfo.metadata} />}
 
           {(show === 'isolate' || show === 'unisolate') && (
-            <EndpointIsolationFlyoutPanel hostMeta={hostDetails} />
+            <EndpointIsolationFlyoutPanel hostMeta={hostInfo.metadata} />
           )}
 
           {showFlyoutFooter && (

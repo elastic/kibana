@@ -9,7 +9,8 @@
 import { ReactElement } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { getSavedSearchUrl, SearchInput } from '..';
+import { SearchInput } from '..';
+import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../build_services';
 import { dataViewMock } from '../__mocks__/data_view';
 import { discoverServiceMock } from '../__mocks__/services';

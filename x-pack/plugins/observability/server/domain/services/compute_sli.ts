@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { IndicatorData } from '../models';
 import { toHighPrecision } from '../../utils/number';
 
 const NO_DATA = -1;
 
-export function computeSLI(sliData: Pick<IndicatorData, 'good' | 'total'>): number {
-  const { good, total } = sliData;
+export function computeSLI(good: number, total: number): number {
   if (total === 0) {
     return NO_DATA;
   }

@@ -8,14 +8,32 @@
 
 import React from 'react';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { AccessorConfig } from './types';
 
 export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorConfig }) {
   if (accessorConfig.triggerIconType !== 'colorBy' || !accessorConfig.palette) return null;
   return (
-    <div className="lnsLayerPanel__paletteContainer">
+    <div
+      css={css`
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      `}
+    >
       <EuiColorPaletteDisplay
         className="lnsLayerPanel__palette"
+        css={css`
+          height: ${euiThemeVars.euiSizeXS} / 2;
+          border-radius: 0 0 (${euiThemeVars.euiBorderRadius} - 1px)
+            (${euiThemeVars.euiBorderRadius} - 1px);
+
+          &::after {
+            border: none;
+          }
+        `}
         size="xs"
         palette={accessorConfig.palette}
       />

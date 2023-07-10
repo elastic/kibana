@@ -170,6 +170,54 @@
           "an props object to use directly with the component"
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.isOnAggBasedEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "isOnAggBasedEditor",
+        "description": [],
+        "signature": [
+          "(context?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.isOnAggBasedEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

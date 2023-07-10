@@ -20,7 +20,8 @@ describe('TopN function operations', () => {
       stackFrames,
       executables,
       0,
-      maxTopN
+      maxTopN,
+      1.0
     );
 
     expect(topNFunctions.TotalCount).toEqual(totalSamples);

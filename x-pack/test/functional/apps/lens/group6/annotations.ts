@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toastsService = getService('toasts');
   const testSubjects = getService('testSubjects');
+  const listingTable = getService('listingTable');
   const from = 'Sep 19, 2015 @ 06:31:44.000';
   const to = 'Sep 23, 2015 @ 18:31:44.000';
 
@@ -156,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toastContents = await toastsService.getToastContent(1);
 
         expect(toastContents).to.be(
-          `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library`
+          `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`
         );
 
         await PageObjects.lens.save(FIRST_VIS_TITLE);
@@ -181,15 +182,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should remove layer for deleted annotation group', async () => {
-        // TODO - delete from listing page instead
-
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.savedObjects.searchForObject(ANNOTATION_GROUP_TITLE);
-        await PageObjects.savedObjects.clickCheckboxByTitle(ANNOTATION_GROUP_TITLE);
-        await PageObjects.savedObjects.clickDelete({ confirmDelete: true });
-
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.selectAnnotationsTab();
+        await listingTable.deleteItem(ANNOTATION_GROUP_TITLE);
+        await PageObjects.visualize.selectVisualizationsTab();
         await PageObjects.visualize.loadSavedVisualization(FIRST_VIS_TITLE, {
           navigateToVisualize: false,
         });

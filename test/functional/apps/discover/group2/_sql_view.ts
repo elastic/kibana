@@ -77,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
-        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);

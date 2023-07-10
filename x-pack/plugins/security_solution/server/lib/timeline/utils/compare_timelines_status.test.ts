@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 import type { FrameworkRequest } from '../../framework';
 
 import {

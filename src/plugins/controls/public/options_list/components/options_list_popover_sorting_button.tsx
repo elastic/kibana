@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import {
   EuiButtonGroupOptionProps,
@@ -33,9 +33,25 @@ import { useOptionsList } from '../embeddable/options_list_embeddable';
 interface OptionsListSortingPopoverProps {
   showOnlySelected: boolean;
 }
+
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: OptionsListSortBy };
 };
+
+const sortOrderOptions: EuiButtonGroupOptionProps[] = [
+  {
+    id: 'asc',
+    iconType: `sortAscending`,
+    'data-test-subj': `optionsList__sortOrder_asc`,
+    label: OptionsListStrings.editorAndPopover.sortOrder.asc.getSortOrderLabel(),
+  },
+  {
+    id: 'desc',
+    iconType: `sortDescending`,
+    'data-test-subj': `optionsList__sortOrder_desc`,
+    label: OptionsListStrings.editorAndPopover.sortOrder.desc.getSortOrderLabel(),
+  },
+];
 
 export const OptionsListPopoverSortingButton = ({
   showOnlySelected,
@@ -59,28 +75,16 @@ export const OptionsListPopoverSortingButton = ({
     });
   });
 
-  const sortOrderOptions: EuiButtonGroupOptionProps[] = [
-    {
-      id: 'asc',
-      iconType: `sortAscending`,
-      'data-test-subj': `optionsList__sortOrder_asc`,
-      label: OptionsListStrings.editorAndPopover.sortOrder.asc.getSortOrderLabel(),
+  const onSortByChange = useCallback(
+    (updatedOptions: SortByItem[]) => {
+      setSortByOptions(updatedOptions);
+      const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
+      if (selectedOption) {
+        optionsList.dispatch.setSort({ by: selectedOption.data.sortBy });
+      }
     },
-    {
-      id: 'desc',
-      iconType: `sortDescending`,
-      'data-test-subj': `optionsList__sortOrder_desc`,
-      label: OptionsListStrings.editorAndPopover.sortOrder.desc.getSortOrderLabel(),
-    },
-  ];
-
-  const onSortByChange = (updatedOptions: SortByItem[]) => {
-    setSortByOptions(updatedOptions);
-    const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
-    if (selectedOption) {
-      optionsList.dispatch.setSort({ by: selectedOption.data.sortBy });
-    }
-  };
+    [optionsList.dispatch]
+  );
 
   const SortButton = () => (
     <EuiButtonEmpty

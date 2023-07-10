@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -76,6 +77,7 @@ interface Props {
   };
   ilmPhases: string[];
   indexNames: string[] | undefined;
+  isAssistantEnabled: boolean;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -87,7 +89,8 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -106,12 +109,14 @@ const PatternComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   indexNames,
   ilmPhases,
+  isAssistantEnabled,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
   selectedIndex,
   setSelectedIndex,
   theme,
+  baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
@@ -150,10 +155,12 @@ const PatternComponent: React.FC<Props> = ({
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
                 ilmPhase={ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined}
                 indexName={indexName}
+                isAssistantEnabled={isAssistantEnabled}
                 openCreateCaseFlyout={openCreateCaseFlyout}
                 pattern={pattern}
                 patternRollup={patternRollup}
                 theme={theme}
+                baseTheme={baseTheme}
                 updatePatternRollup={updatePatternRollup}
               />
             </IndexPropertiesContainer>
@@ -168,12 +175,14 @@ const PatternComponent: React.FC<Props> = ({
       formatNumber,
       getGroupByFieldsOnClick,
       ilmExplain,
+      isAssistantEnabled,
       itemIdToExpandedRowMap,
       openCreateCaseFlyout,
       pattern,
       patternRollup,
       stats,
       theme,
+      baseTheme,
       updatePatternRollup,
     ]
   );

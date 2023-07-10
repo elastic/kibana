@@ -51,7 +51,6 @@ export const DiscoverHistogramLayout = ({
   return (
     <UnifiedHistogramContainer
       {...unifiedHistogramProps}
-      dataView={dataView}
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
       resizeRef={resizeRef}

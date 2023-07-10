@@ -9,7 +9,10 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { SavedObjectsTypeValidator } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  SavedObjectsTypeValidator,
+  modelVersionToVirtualVersion,
+} from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsErrorHelpers,
   type SavedObjectSanitizedDoc,
@@ -91,7 +94,7 @@ export class ValidationHelper {
     }
     const validator = this.getTypeValidator(type);
     try {
-      validator.validate(doc, this.kibanaVersion);
+      validator.validate(doc);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
@@ -100,10 +103,30 @@ export class ValidationHelper {
   private getTypeValidator(type: string): SavedObjectsTypeValidator {
     if (!this.typeValidatorMap[type]) {
       const savedObjectType = this.registry.getType(type);
+
+      const stackVersionSchemas =
+        typeof savedObjectType?.schemas === 'function'
+          ? savedObjectType.schemas()
+          : savedObjectType?.schemas ?? {};
+
+      const modelVersionCreateSchemas =
+        typeof savedObjectType?.modelVersions === 'function'
+          ? savedObjectType.modelVersions()
+          : savedObjectType?.modelVersions ?? {};
+
+      const combinedSchemas = { ...stackVersionSchemas };
+      Object.entries(modelVersionCreateSchemas).reduce((map, [key, modelVersion]) => {
+        if (modelVersion.schemas?.create) {
+          const virtualVersion = modelVersionToVirtualVersion(key);
+          combinedSchemas[virtualVersion] = modelVersion.schemas!.create!;
+        }
+        return map;
+      }, {});
+
       this.typeValidatorMap[type] = new SavedObjectsTypeValidator({
         logger: this.logger.get('type-validator'),
         type,
-        validationMap: savedObjectType!.schemas ?? {},
+        validationMap: combinedSchemas,
         defaultVersion: this.kibanaVersion,
       });
     }

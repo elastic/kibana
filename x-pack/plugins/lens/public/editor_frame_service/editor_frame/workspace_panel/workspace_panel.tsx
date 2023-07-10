@@ -301,6 +301,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
           dateRange: framePublicAPI.dateRange,
+          nowInstant: plugins.data.nowProvider.get(),
           searchSessionId,
         });
 
@@ -347,6 +348,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     dataViews.indexPatterns,
     framePublicAPI.dateRange,
+    plugins.data.nowProvider,
     searchSessionId,
     addUserMessages,
   ]);

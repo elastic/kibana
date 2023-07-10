@@ -43,7 +43,6 @@ export const ServiceLocationsField = ({
           <EuiComboBox
             fullWidth
             aria-label={SELECT_ONE_OR_MORE_LOCATIONS}
-            placeholder={SELECT_ONE_OR_MORE_LOCATIONS}
             options={locations.map((location) => ({
               ...location,
               'data-test-subj': `syntheticsServiceLocation--${location.id}`,

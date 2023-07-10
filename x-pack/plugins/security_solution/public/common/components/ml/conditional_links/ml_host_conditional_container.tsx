@@ -8,8 +8,8 @@
 import { parse, stringify } from 'query-string';
 import React from 'react';
 
-import { Redirect, Switch, useRouteMatch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { addEntitiesToKql } from './add_entities_to_kql';
@@ -26,7 +26,7 @@ interface QueryStringType {
 export const MlHostConditionalContainer = React.memo(() => {
   const { path } = useRouteMatch();
   return (
-    <Switch>
+    <Routes>
       <Route
         strict
         exact
@@ -101,7 +101,7 @@ export const MlHostConditionalContainer = React.memo(() => {
           <Redirect from={`${HOSTS_PATH}/ml-hosts/`} to={`${HOSTS_PATH}/ml-hosts${search}`} />
         )}
       />
-    </Switch>
+    </Routes>
   );
 });
 

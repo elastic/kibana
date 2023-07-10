@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -66,6 +67,7 @@ export const getTabs = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  isAssistantEnabled,
   onAddToNewCase,
   partitionedFieldMetadata,
   pattern,
@@ -73,6 +75,7 @@ export const getTabs = ({
   setSelectedTabId,
   stats,
   theme,
+  baseTheme,
 }: {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
@@ -94,13 +97,15 @@ export const getTabs = ({
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   pattern: string;
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }) => [
   {
     content: (
@@ -113,6 +118,7 @@ export const getTabs = ({
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhase={ilmPhase}
         indexName={indexName}
+        isAssistantEnabled={isAssistantEnabled}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
         pattern={pattern}
@@ -120,6 +126,7 @@ export const getTabs = ({
         setSelectedTabId={setSelectedTabId}
         sizeInBytes={getSizeInBytes({ indexName, stats })}
         theme={theme}
+        baseTheme={baseTheme}
       />
     ),
     id: SUMMARY_TAB_ID,
@@ -140,6 +147,7 @@ export const getTabs = ({
         formatNumber={formatNumber}
         ilmPhase={ilmPhase}
         indexName={indexName}
+        isAssistantEnabled={isAssistantEnabled}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
         patternDocsCount={patternDocsCount}

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { CSSProperties, useCallback, useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import {
@@ -22,10 +22,11 @@ import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { createHostsFilter } from '../../../utils';
+import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
-import { LensWrapper } from '../../chart/lens_wrapper';
+import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
+import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps {
   title: string;
@@ -34,7 +35,9 @@ export interface MetricChartProps {
   render?: boolean;
 }
 
-const MIN_HEIGHT = 300;
+const lensStyle: CSSProperties = {
+  height: METRIC_CHART_MIN_HEIGHT,
+};
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
   const { euiTheme } = useEuiTheme();
@@ -43,7 +46,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
 
-  // prevents updates on requestTs and serchCriteria states from relaoding the chart
+  // prevents requestTs and serchCriteria states from reloading the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,
@@ -62,30 +65,38 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const filters = useMemo(() => {
     return [
-      createHostsFilter(
-        currentPage.map((p) => p.name),
-        dataView
-      ),
+      ...searchCriteria.filters,
+      buildCombinedHostsFilter({
+        field: 'host.name',
+        values: currentPage.map((p) => p.name),
+        dataView,
+      }),
     ];
-  }, [currentPage, dataView]);
+  }, [currentPage, dataView, searchCriteria.filters]);
 
-  const extraActionOptions = getExtraActions({
-    timeRange: afterLoadedState.dateRange,
-    filters,
-  });
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: afterLoadedState.dateRange,
+        query: afterLoadedState.query,
+        filters,
+      }),
+    [afterLoadedState.dateRange, afterLoadedState.query, filters, getExtraActions]
+  );
 
-  const extraActions: Action[] = [extraActionOptions.openInLens];
-
-  const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
-    const [min, max] = range;
-    onSubmit({
-      dateRange: {
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-        mode: 'absolute',
-      },
-    });
-  };
+  const handleBrushEnd = useCallback(
+    ({ range }: BrushTriggerEvent['data']) => {
+      const [min, max] = range;
+      onSubmit({
+        dateRange: {
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+          mode: 'absolute',
+        },
+      });
+    },
+    [onSubmit]
+  );
 
   return (
     <EuiPanel
@@ -94,8 +105,8 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasBorder
       paddingSize={error ? 'm' : 'none'}
       css={css`
-        min-height: calc(${MIN_HEIGHT} + ${euiTheme.size.l});
-        position: 'relative';
+        min-height: calc(${METRIC_CHART_MIN_HEIGHT}px + ${euiTheme.size.l});
+        position: relative;
       `}
       data-test-subj={`hostsView-metricChart-${type}`}
     >
@@ -123,11 +134,12 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
         <LensWrapper
           id={`hostsViewsmetricsChart-${type}`}
           attributes={attributes}
-          style={{ height: MIN_HEIGHT }}
+          style={lensStyle}
           extraActions={extraActions}
           lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
           dateRange={afterLoadedState.dateRange}
           filters={filters}
+          query={afterLoadedState.query}
           onBrushEnd={handleBrushEnd}
           loading={loading}
           hasTitle

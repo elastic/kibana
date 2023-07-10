@@ -46,8 +46,10 @@ async function getActiveAlert({
   const response = await esClient.search(searchParams);
   const firstHit = response.hits.hits[0];
   if (!firstHit) {
+    log.debug(`No active alert found for rule ${ruleId}`);
     throw new Error(`No active alert found for rule ${ruleId}`);
   }
+  log.debug(`Get active alert for the rule ${ruleId}`);
   return firstHit;
 }
 
@@ -61,6 +63,7 @@ export function waitForActiveAlert({
   esClient: Client;
   log: ToolingLog;
 }): Promise<Record<string, any>> {
+  log.debug(`Wait for the rule ${ruleId} to be active`);
   return pRetry(() => getActiveAlert({ ruleId, esClient, log }), {
     retries: 10,
     factor: 1.5,

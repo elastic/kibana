@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { openTableTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { closeTimeline, openActiveTimeline } from '../../../../tasks/timeline';
 import { PROVIDER_BADGE } from '../../../../screens/timeline';
 import { removeKqlFilter } from '../../../../tasks/search_bar';
@@ -13,17 +15,15 @@ import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW,
-} from '../../../../screens/document_expandable_flyout';
+} from '../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
 import {
   addToTimelineTableTabTable,
   clearFilterTableTabTable,
   copyToClipboardTableTabTable,
-  expandFirstAlertExpandableFlyout,
   filterInTableTabTable,
   filterOutTableTabTable,
   filterTableTabTable,
-  openTableTab,
-} from '../../../../tasks/document_expandable_flyout';
+} from '../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -31,13 +31,11 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-// Skipping these for now as the feature is protected behind a feature flag set to false by default
-// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip(
-  'Alert details expandable flyout right panel',
+describe(
+  'Alert details expandable flyout right panel table tab',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       createRule(getNewRule());
@@ -55,26 +53,28 @@ describe.skip(
       clearFilterTableTabTable();
     });
 
-    it('should test filter in cell actions', () => {
+    it('should test cell actions', () => {
+      cy.log('cell actions filter in');
+
       filterInTableTabTable();
       cy.get(FILTER_BADGE).first().should('contain.text', '@timestamp:');
       removeKqlFilter();
-    });
 
-    it('should test filter out cell actions', () => {
+      cy.log('cell actions filter out');
+
       filterOutTableTabTable();
       cy.get(FILTER_BADGE).first().should('contain.text', 'NOT @timestamp:');
       removeKqlFilter();
-    });
 
-    it('should test add to timeline cell actions', () => {
+      cy.log('cell actions add to timeline');
+
       addToTimelineTableTabTable();
       openActiveTimeline();
       cy.get(PROVIDER_BADGE).first().should('contain.text', '@timestamp');
       closeTimeline();
-    });
 
-    it('should test copy to clipboard cell actions', () => {
+      cy.log('cell actions copy to clipboard');
+
       copyToClipboardTableTabTable();
       cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD).should('be.visible');
     });

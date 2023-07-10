@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -198,7 +198,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">
+              <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
                 <FormattedMessage
                   id="xpack.aiops.categorizeFlyout.title"
                   defaultMessage="Pattern analysis of {name}"
@@ -216,7 +216,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
+      <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
 
         <InformationText

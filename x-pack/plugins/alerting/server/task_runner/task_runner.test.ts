@@ -17,6 +17,7 @@ import {
   Rule,
   RuleAction,
   MaintenanceWindow,
+  RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -280,6 +281,7 @@ describe('Task Runner', () => {
     expect(call.rule.ruleTypeName).toBe('My test rule');
     expect(call.rule.actions).toEqual(RULE_ACTIONS);
     expect(call.services.alertFactory.create).toBeTruthy();
+    expect(call.services.alertsClient).toBe(null);
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
@@ -320,51 +322,6 @@ describe('Task Runner', () => {
     ).toHaveBeenCalled();
   });
 
-  test('checks alertsService context initialized if rule type has registered alerts with framework', async () => {
-    const ruleTypeWithAlerts = {
-      ...ruleType,
-      alerts: { context: 'test', mappings: { fieldMap: {} } },
-    };
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeWithAlerts);
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
-
-    expect(ruleType.executor).toHaveBeenCalledTimes(1);
-    expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
-      logger,
-      ruleType: ruleTypeWithAlerts,
-      namespace: 'default',
-      rule: {
-        consumer: 'bar',
-        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-        id: '1',
-        name: 'rule-name',
-        parameters: {
-          bar: true,
-        },
-        revision: 0,
-        spaceId: 'default',
-        tags: ['rule-', '-tags'],
-      },
-    });
-  });
-
   test.each(ephemeralTestParams)(
     'actionsPlugin.execute is called per alert alert that is scheduled %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
@@ -383,7 +340,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -466,7 +424,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -592,7 +551,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -638,7 +598,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -716,7 +677,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
@@ -783,7 +745,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
@@ -846,7 +809,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
@@ -888,7 +852,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -961,7 +926,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1037,7 +1003,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1129,7 +1096,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1270,7 +1238,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
 
@@ -1379,7 +1348,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1479,7 +1449,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1556,7 +1527,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1628,7 +1600,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -1743,7 +1716,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -1851,7 +1825,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -2019,7 +1994,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -2110,7 +2086,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -2194,7 +2171,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -2343,7 +2321,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         return { state: {} };
       }
@@ -2513,7 +2492,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -2545,7 +2525,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -2601,7 +2582,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -2671,7 +2653,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -2839,7 +2822,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -3005,7 +2989,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error('OMG');
       }
@@ -3032,7 +3017,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -3155,6 +3141,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
@@ -3187,6 +3174,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
@@ -3215,6 +3203,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,

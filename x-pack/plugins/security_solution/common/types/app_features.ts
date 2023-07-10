@@ -10,6 +10,14 @@ export enum AppFeatureSecurityKey {
    * Enables Advanced Insights (Entity Risk, GenAI)
    */
   advancedInsights = 'advanced_insights',
+  /**
+   * Enables Endpoint Response Actions like isolate host, trusted apps, blocklist, etc.
+   */
+  endpointResponseActions = 'endpoint_response_actions',
+  /**
+   * Enables Endpoint Exceptions like isolate host, trusted apps, blocklist, etc.
+   */
+  endpointExceptions = 'endpoint_exceptions',
 }
 
 export enum AppFeatureCasesKey {
@@ -20,10 +28,9 @@ export enum AppFeatureCasesKey {
 }
 
 // Merges the two enums.
+export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey;
+export type AppFeatureKeys = AppFeatureKey[];
+
 // We need to merge the value and the type and export both to replicate how enum works.
 export const AppFeatureKey = { ...AppFeatureSecurityKey, ...AppFeatureCasesKey };
-export type AppFeatureKey = AppFeatureSecurityKey | AppFeatureCasesKey;
-
-type AppFeatureSecurityKeys = { [key in AppFeatureSecurityKey]: boolean };
-type AppFeatureCasesKeys = { [key in AppFeatureCasesKey]: boolean };
-export type AppFeatureKeys = AppFeatureSecurityKeys & AppFeatureCasesKeys;
+export const ALL_APP_FEATURE_KEYS = Object.freeze(Object.values(AppFeatureKey));

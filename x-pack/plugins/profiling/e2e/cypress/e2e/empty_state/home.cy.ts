@@ -11,7 +11,7 @@ describe('Home page with empty state', () => {
   });
 
   it('shows the empty state when Profiling has not been set up', () => {
-    cy.intercept('GET', '/api/profiling/v1/setup/es_resources', {
+    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
       fixture: 'es_resources_setup_false.json',
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');
@@ -21,7 +21,7 @@ describe('Home page with empty state', () => {
   });
 
   it('shows the tutorial after Profiling has been set up', () => {
-    cy.intercept('GET', '/api/profiling/v1/setup/es_resources', {
+    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
       fixture: 'es_resources_data_false.json',
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');

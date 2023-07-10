@@ -62,7 +62,6 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import type { FormatSelectorOptions } from './datasources/form_based/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
@@ -319,6 +318,7 @@ export function isMessageRemovable(message: UserMessage): message is RemovableUs
  */
 export interface Datasource<T = unknown, P = unknown> {
   id: string;
+  alias?: string[];
 
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
@@ -437,6 +437,7 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
+    nowInstant: Date,
     searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
@@ -468,7 +469,7 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
-  uniqueLabels: (state: T) => Record<string, string>;
+  uniqueLabels: (state: T, indexPatterns: IndexPatternMap) => Record<string, string>;
   /**
    * Check the internal state integrity and returns a list of missing references
    */
@@ -539,6 +540,7 @@ export interface DatasourceFixAction<T> {
  */
 export interface DatasourcePublicAPI {
   datasourceId: string;
+  datasourceAliasIds?: string[];
   getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
   getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
@@ -668,7 +670,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
   dataSectionExtra?: React.ReactNode;
-  formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
@@ -844,7 +845,6 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   isMetricDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
-  formatSelectorOptions?: FormatSelectorOptions; // only relevant if supportFieldFormat is true
   labels?: { buttonAriaLabel: string; buttonLabel: string };
 };
 
@@ -1027,9 +1027,15 @@ export interface VisualizationLayerDescription {
     autoTimeField?: boolean;
   }>;
 }
+
+export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
+  id: string;
+  group: EventAnnotationGroupConfig;
+}) => void;
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
+  alias?: string[];
 
   /**
    * Initialize is allowed to modify the state stored in memory. The initialize function
@@ -1114,8 +1120,18 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     layerId: string,
     state: T,
     setState: StateSetter<T>,
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction,
     isSaveable?: boolean
   ) => LayerAction[];
+
+  /**
+   * This method is a clunky solution to the problem, but I'm banking on the confirm modal being removed
+   * with undo/redo anyways
+   */
+  getCustomRemoveLayerText?: (
+    layerId: string,
+    state: T
+  ) => { title?: string; description?: string } | undefined;
 
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -1241,10 +1257,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     supportedLayers: VisualizationLayerDescription[];
     addLayer: AddLayerFunction;
     ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
-    registerLibraryAnnotationGroup: (groupInfo: {
-      id: string;
-      group: EventAnnotationGroupConfig;
-    }) => void;
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers

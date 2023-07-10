@@ -30,7 +30,7 @@ import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
-import { isApiIndex } from '../../../utils/indices';
+import { getContentExtractionDisabled, isApiIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
 
@@ -58,6 +58,7 @@ export const SearchIndexPipelines: React.FC = () => {
   const { status: revertStatus } = useValues(RevertConnectorPipelineApilogic);
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
+  const extractionDisabled = getContentExtractionDisabled(index);
 
   const pipelinesTabs: EuiTabbedContentTab[] = [
     {
@@ -186,7 +187,7 @@ export const SearchIndexPipelines: React.FC = () => {
               )
             }
           >
-            <IngestPipelinesCard />
+            <IngestPipelinesCard extractionDisabled={extractionDisabled} />
           </DataPanel>
           <EuiSpacer />
           <DataPanel

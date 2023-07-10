@@ -33,12 +33,15 @@ import type {
 import { i18n } from '@kbn/i18n';
 import {
   BrowserFields,
-  CellValueElementProps,
+  DeprecatedCellValueElementProps,
   ColumnHeaderOptions,
-  RowRenderer,
+  DeprecatedRowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
-import { useDataGridColumnsCellActions } from '@kbn/cell-actions';
+import {
+  useDataGridColumnsCellActions,
+  UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
@@ -84,8 +87,8 @@ interface BaseDataTableProps {
   id: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   loadPage: (newActivePage: number) => void;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
+  renderCellValue: (props: DeprecatedCellValueElementProps) => React.ReactNode;
+  rowRenderers: DeprecatedRowRenderer[];
   hasCrudPermissions?: boolean;
   unitCountText: string;
   pagination: EuiDataGridPaginationProps;
@@ -327,30 +330,39 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const columnsCellActionsProps = useMemo(() => {
-      const fields = !cellActionsTriggerId
-        ? []
-        : columnHeaders.map((column) => ({
-            name: column.id,
-            type: column.type ?? 'keyword',
-            values: data.map(
-              ({ data: columnData }) =>
-                columnData.find((rowData) => rowData.field === column.id)?.value
-            ),
-            aggregatable: column.aggregatable,
-          }));
+    const cellActionsMetadata = useMemo(() => ({ scopeId: id }), [id]);
 
-      return {
-        triggerId: cellActionsTriggerId || '',
-        fields,
-        metadata: {
-          scopeId: id,
-        },
-        dataGridRef,
-      };
-    }, [columnHeaders, cellActionsTriggerId, id, data]);
+    const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+      () =>
+        cellActionsTriggerId
+          ? // TODO use FieldSpec object instead of column
+            columnHeaders.map((column) => ({
+              name: column.id,
+              type: column.type ?? '', // When type is an empty string all cell actions are incompatible
+              aggregatable: column.aggregatable ?? false,
+              searchable: column.searchable ?? false,
+              esTypes: column.esTypes ?? [],
+              subType: column.subType,
+            }))
+          : undefined,
+      [cellActionsTriggerId, columnHeaders]
+    );
 
-    const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
+    const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+      (fieldName, rowIndex) => {
+        const pageIndex = rowIndex % data.length;
+        return data[pageIndex].data.find((rowData) => rowData.field === fieldName)?.value;
+      },
+      [data]
+    );
+
+    const columnsCellActions = useDataGridColumnsCellActions({
+      triggerId: cellActionsTriggerId,
+      fields: cellActionsFields,
+      getCellValue,
+      metadata: cellActionsMetadata,
+      dataGridRef,
+    });
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
@@ -463,5 +475,3 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
   }
 );
-
-DataTableComponent.displayName = 'DataTableComponent';

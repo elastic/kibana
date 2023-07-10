@@ -21,6 +21,8 @@ export const OPTION_LIST_LABELS = '.controlFrame__labelToolTip';
 
 export const OPTION_LIST_VALUES = (idx: number) => `[data-test-subj="optionsList-control-${idx}"]`;
 
+export const OPTION_LIST_CLEAR_BTN = '.presentationUtil__floatingActions [aria-label="Clear"]';
+
 export const OPTION_LIST_NUMBER_OFF = '.euiFilterButton__notification';
 
 export const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
@@ -36,13 +38,23 @@ export const OPTION_SELECTABLE = (popoverIndex: number, value: string) =>
 export const OPTION_IGNORED = (popoverIndex: number, value: string) =>
   `#control-popover-${popoverIndex} [data-test-subj="optionsList-control-ignored-selection-${value}"]`;
 
+export const OPTION_SELECTABLE_COUNT = getDataTestSubjectSelector(
+  'optionsList-document-count-badge'
+);
+
+export const CONTROL_POPOVER = (popoverIdx: number) => `#control-popover-${popoverIdx}`;
+
 export const DETECTION_PAGE_FILTER_GROUP_WRAPPER = '.filter-group__wrapper';
 
 export const DETECTION_PAGE_FILTERS_LOADING = '.securityPageWrapper .controlFrame--controlLoading';
 
 export const DETECTION_PAGE_FILTER_GROUP_LOADING = '[data-test-subj="filter-group__loading"]';
 
-export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU = '[data-test-subj="filter-group__context"]';
+export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN =
+  '[data-test-subj="filter-group__context"]';
+
+export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU =
+  '[data-test-subj="filter-group__context-menu"]';
 
 export const DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON =
   '[data-test-subj="filter-group__context--reset"]';

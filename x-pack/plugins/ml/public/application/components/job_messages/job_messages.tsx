@@ -18,11 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
+import { timeFormatter } from '@kbn/ml-date-utils';
 
 import { JobMessage } from '../../../../common/types/audit_message';
-import { JobIcon } from '../job_message_icon';
-import { timeFormatter } from '../../../../common/util/date_utils';
+
 import { blurButtonOnClick } from '../../util/component_utils';
+
+import { JobIcon } from '../job_message_icon';
 
 interface JobMessagesProps {
   messages: JobMessage[];

@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
+import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -28,7 +29,6 @@ import {
   getField,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
-  PreIndexedShape,
   TotalHits,
 } from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -47,7 +47,6 @@ import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-import { registerSource } from '../source_registry';
 import {
   DataRequestMeta,
   ESSearchSourceDescriptor,
@@ -79,6 +78,7 @@ import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
+  | 'geoField'
   | 'filterByMapBounds'
   | 'sortField'
   | 'sortOrder'
@@ -212,10 +212,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     }
   }
 
-  getFieldNames(): string[] {
-    return [this._descriptor.geoField];
-  }
-
   isMvt() {
     return this._descriptor.scalingType === SCALING_TYPES.MVT;
   }
@@ -283,12 +279,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: DataView = await this.getIndexPattern();
 
-    const fieldNames = requestMeta.fieldNames.filter(
-      (fieldName) => fieldName !== this._descriptor.geoField
-    );
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
-      fieldNames,
+      requestMeta.fieldNames,
       'epoch_millis'
     );
     const topHits: {
@@ -399,7 +392,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
-  // requestMeta.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
   async _getSearchHits(
     layerName: string,
@@ -409,12 +401,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   ) {
     const indexPattern = await this.getIndexPattern();
 
-    const fieldNames = requestMeta.fieldNames.filter(
-      (fieldName) => fieldName !== this._descriptor.geoField
-    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      fieldNames,
+      requestMeta.fieldNames,
       'epoch_millis'
     );
 
@@ -536,6 +525,15 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const dataView = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
     return indexSettings.maxResultWindow;
+  }
+
+  /*
+   * Changes in requestMeta.fieldNames requires re-fetch.
+   * requestMeta.fieldNames are used to acheive smallest response possible.
+   * Response only includes fields required for client usage.
+   */
+  isFieldAware(): boolean {
+    return true;
   }
 
   async getGeoJsonWithMeta(
@@ -791,6 +789,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   getSyncMeta(): ESSearchSourceSyncMeta {
     return {
+      geoField: this._descriptor.geoField,
       filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
       sortOrder: this._descriptor.sortOrder,
@@ -801,7 +800,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async _getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
+  async _getPreIndexedShape(properties: GeoJsonProperties): Promise<QueryDslFieldLookup | null> {
     if (properties === null) {
       return null;
     }
@@ -880,19 +879,15 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     // use fields API
     searchSource.setField(
       'fields',
-      requestMeta.fieldNames
-        .filter((fieldName) => {
-          return fieldName !== this._descriptor.geoField;
-        })
-        .map((fieldName) => {
-          const field = dataView.fields.getByName(fieldName);
-          return field && field.type === 'date'
-            ? {
-                field: fieldName,
-                format: 'epoch_millis',
-              }
-            : fieldName;
-        })
+      requestMeta.fieldNames.map((fieldName) => {
+        const field = dataView.fields.getByName(fieldName);
+        return field && field.type === 'date'
+          ? {
+              field: fieldName,
+              format: 'epoch_millis',
+            }
+          : fieldName;
+      })
     );
 
     const mvtUrlServicePath = getHttp().basePath.prepend(`${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`);
@@ -1021,8 +1016,3 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       : [];
   }
 }
-
-registerSource({
-  ConstructorFunction: ESSearchSource,
-  type: SOURCE_TYPES.ES_SEARCH,
-});

@@ -108,7 +108,6 @@ export const referenceLineFunction: ReferenceLineFn = {
     forAccessor: {
       types: ['string'],
       help: '',
-      default: '',
     },
   },
   fn(table, args) {

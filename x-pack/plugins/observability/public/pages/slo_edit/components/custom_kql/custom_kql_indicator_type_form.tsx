@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -15,15 +14,16 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CreateSLOInput } from '@kbn/slo-schema';
-
 import {
   Field,
   useFetchIndexPatternFields,
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { IndexSelection } from '../custom_common/index_selection';
+import { CreateSLOForm } from '../../types';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
+import { IndexSelection } from '../custom_common/index_selection';
 
 interface Option {
   label: string;
@@ -31,11 +31,10 @@ interface Option {
 }
 
 export function CustomKqlIndicatorTypeForm() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
 
-  const { isLoading, data: indexFields } = useFetchIndexPatternFields(
-    watch('indicator.params.index')
-  );
+  const index = watch('indicator.params.index');
+  const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
   const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
 
   return (
@@ -54,7 +53,6 @@ export function CustomKqlIndicatorTypeForm() {
           >
             <Controller
               name="indicator.params.timestampField"
-              shouldUnregister
               defaultValue=""
               rules={{ required: true }}
               control={control}
@@ -72,9 +70,9 @@ export function CustomKqlIndicatorTypeForm() {
                   )}
                   data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
                   isClearable
-                  isDisabled={!watch('indicator.params.index')}
+                  isDisabled={!index}
                   isInvalid={fieldState.invalid}
-                  isLoading={!!watch('indicator.params.index') && isLoading}
+                  isLoading={!!index && isLoading}
                   onChange={(selected: EuiComboBoxOptionOption[]) => {
                     if (selected.length) {
                       return field.onChange(selected[0].value);
@@ -84,16 +82,10 @@ export function CustomKqlIndicatorTypeForm() {
                   }}
                   options={createOptions(timestampFields)}
                   selectedOptions={
-                    !!watch('indicator.params.index') &&
+                    !!index &&
                     !!field.value &&
                     timestampFields.some((timestampField) => timestampField.name === field.value)
-                      ? [
-                          {
-                            value: field.value,
-                            label: field.value,
-                            'data-test-subj': `customKqlIndicatorFormTimestampFieldSelectedValue`,
-                          },
-                        ]
+                      ? [{ value: field.value, label: field.value }]
                       : []
                   }
                   singleSelection={{ asPlainText: true }}
@@ -106,7 +98,6 @@ export function CustomKqlIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customKqlIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.queryFilter', {
@@ -134,7 +125,6 @@ export function CustomKqlIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customKqlIndicatorFormGoodQueryInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.goodQuery', {
@@ -165,7 +155,6 @@ export function CustomKqlIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customKqlIndicatorFormTotalQueryInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.totalQuery', {
@@ -192,6 +181,8 @@ export function CustomKqlIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
+
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }

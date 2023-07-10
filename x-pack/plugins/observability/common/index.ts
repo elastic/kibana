@@ -11,8 +11,10 @@ export {
   formatDurationFromTimeUnitChar,
   asPercent,
   getDurationFormatter,
+  asDuration,
 } from './utils/formatters';
 export { getInspectResponse } from './utils/get_inspect_response';
+export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
 
 export { ProcessorEvent } from './processor_event';
 
@@ -43,7 +45,6 @@ export {
 } from './progressive_loading';
 
 export const sloFeatureId = 'slo';
-
 export const casesFeatureId = 'observabilityCases';
 
 // The ID of the observability app. Should more appropriately be called
@@ -53,9 +54,6 @@ export const observabilityAppId = 'observability-overview';
 
 // Used by feature and "solution" registration
 export const observabilityFeatureId = 'observability';
-
-// Used by Cases to install routes
-export const casesPath = '/cases';
 
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
@@ -82,3 +80,5 @@ export {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
+
+export { CoPilotPromptId, coPilotPrompts } from './co_pilot';

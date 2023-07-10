@@ -13,6 +13,7 @@
     "@kbn/ui-theme",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/deeplinks-devtools",
   ],
   "exclude": [
     "target/**/*",

@@ -20,6 +20,7 @@ import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_action_license', () => {
   return {

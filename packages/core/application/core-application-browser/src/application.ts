@@ -286,9 +286,9 @@ export type PublicAppDeepLinkInfo = Omit<
  * user-accessible.
  * @public
  */
-export type AppDeepLink = {
+export type AppDeepLink<Id extends string = string> = {
   /** Identifier to represent this sublink, should be unique for this application */
-  id: string;
+  id: Id;
   /** Title to label represent this deep link */
   title: string;
   /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
@@ -303,13 +303,13 @@ export type AppDeepLink = {
         /** URL path to access this link, relative to the application's appRoute. */
         path: string;
         /** Optional array of links that are 'underneath' this section in the hierarchy */
-        deepLinks?: AppDeepLink[];
+        deepLinks?: Array<AppDeepLink<Id>>;
       }
     | {
         /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
         path?: string;
         /** Array links that are 'underneath' this section in this hierarchy. */
-        deepLinks: AppDeepLink[];
+        deepLinks: Array<AppDeepLink<Id>>;
       }
   );
 

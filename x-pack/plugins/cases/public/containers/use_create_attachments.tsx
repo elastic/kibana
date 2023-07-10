@@ -23,13 +23,12 @@ export const useCreateAttachments = () => {
 
   return useMutation(
     (request: PostComment) => {
-      const abortCtrlRef = new AbortController();
       const attachments = request.attachments.map((attachment) => ({
         ...attachment,
         owner: request.caseOwner,
       }));
 
-      return createAttachments(attachments, request.caseId, abortCtrlRef.signal);
+      return createAttachments({ attachments, caseId: request.caseId });
     },
     {
       mutationKey: casesMutationsKeys.bulkCreateAttachments,

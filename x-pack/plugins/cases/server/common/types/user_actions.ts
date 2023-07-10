@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type { UserActionAttributes } from '../../../common/api';
-import { UserActionAttributesRt } from '../../../common/api';
+import { CaseUserActionWithoutReferenceIdsRt, UserActionAttributesRt } from '../../../common/api';
 import type { User } from './user';
 
 interface UserActionCommonPersistedAttributes {
@@ -23,6 +23,7 @@ export interface UserActionPersistedAttributes extends UserActionCommonPersisted
 }
 
 export const UserActionTransformedAttributesRt = UserActionAttributesRt;
+export const UserActionPersistedAttributesRt = CaseUserActionWithoutReferenceIdsRt;
 
 export type UserActionTransformedAttributes = UserActionAttributes;
 export type UserActionSavedObjectTransformed = SavedObject<UserActionTransformedAttributes>;

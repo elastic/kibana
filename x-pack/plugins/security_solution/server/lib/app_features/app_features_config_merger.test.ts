@@ -9,59 +9,190 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AppFeaturesConfigMerger } from './app_features_config_merger';
 import type { Logger } from '@kbn/core/server';
 import type { AppFeatureKibanaConfig } from './types';
-import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
+
+const category = {
+  id: 'security',
+  label: 'Security app category',
+};
+
+const baseKibanaFeature: KibanaFeatureConfig = {
+  id: 'FEATURE_ID',
+  name: 'Base Feature',
+  order: 1100,
+  category,
+  app: ['FEATURE_ID', 'kibana'],
+  catalogue: ['APP_ID'],
+  privileges: {
+    all: {
+      api: ['api-read', 'api-write'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['write', 'read'],
+    },
+    read: {
+      api: ['api-read'],
+      app: ['FEATURE_ID', 'kibana'],
+      catalogue: ['APP_ID'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['read'],
+    },
+  },
+};
+const subFeature1: SubFeatureConfig = {
+  requireAllSpaces: true,
+  name: 'subFeature1',
+  description: 'Perform subFeature1 actions.',
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: ['api-subFeature1'],
+          id: 'sub-feature-1_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['subFeature1'],
+        },
+      ],
+    },
+  ],
+};
+const subFeature2: SubFeatureConfig = {
+  requireAllSpaces: true,
+  name: 'subFeature2',
+  description: 'Perform subFeature2 actions.',
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: ['api-readSubFeature2', 'api-writeSubFeature2'],
+          id: 'sub-feature-2_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readSubFeature2', 'writeSubFeature2'],
+        },
+        {
+          api: ['api-readSubFeature2'],
+          id: 'sub-feature-2_read',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readSubFeature2'],
+        },
+      ],
+    },
+  ],
+};
+const subFeature3: SubFeatureConfig = {
+  requireAllSpaces: true,
+  name: 'subFeature3',
+  description: 'Perform subFeature3 actions.',
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: ['api-readSubFeature3', 'api-writeSubFeature3'],
+          id: 'sub-feature-3_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readSubFeature3', 'writeSubFeature3'],
+        },
+      ],
+    },
+  ],
+};
+
+// Defines the order of the Security Cases sub features
+export const subFeaturesMap = Object.freeze(
+  new Map<string, SubFeatureConfig>([
+    ['subFeature1', subFeature1],
+    ['subFeature2', subFeature2],
+    ['subFeature3', subFeature3],
+  ])
+);
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('AppFeaturesConfigMerger', () => {
-  // We don't need to update this test when cases config change
-  // It mocks simplified versions of cases config
-  it('merges a mocked version of cases config', () => {
-    const merger = new AppFeaturesConfigMerger(mockLogger);
+  const merger = new AppFeaturesConfigMerger(mockLogger, subFeaturesMap);
 
-    const category = {
-      id: 'security',
-      label: 'Security app category',
-    };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    const securityCasesBaseKibanaFeature: KibanaFeatureConfig = {
-      id: 'CASES_FEATURE_ID',
-      name: 'Cases',
-      order: 1100,
-      category,
-      app: ['CASES_FEATURE_ID', 'kibana'],
-      catalogue: ['APP_ID'],
-      privileges: {
-        all: {
-          api: [],
-          app: ['CASES_FEATURE_ID', 'kibana'],
-          catalogue: ['APP_ID'],
-          savedObject: {
-            all: [],
-            read: [],
+  describe('main privileges', () => {
+    it('should merge enabled main privileges into base config', () => {
+      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+        {
+          privileges: {
+            all: {
+              api: ['api-write', 'api-extra-all'],
+              ui: ['extra-all'],
+              cases: {
+                create: ['APP_ID'],
+                read: ['APP_ID'],
+                update: ['APP_ID'],
+                push: ['APP_ID'],
+              },
+              savedObject: {
+                all: ['someSavedObjectType'],
+                read: ['someSavedObjectType'],
+              },
+            },
+            read: {
+              api: ['api-extra-read'],
+              ui: ['extra-read'],
+              cases: {
+                read: ['APP_ID'],
+              },
+              savedObject: {
+                all: [],
+                read: ['someSavedObjectType'],
+              },
+            },
           },
-          ui: [],
         },
-        read: {
-          api: [],
-          app: ['CASES_FEATURE_ID', 'kibana'],
-          catalogue: ['APP_ID'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-      },
-    };
+      ];
 
-    const enabledCasesAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
-      {
-        cases: ['APP_ID'],
+      const merged = merger.mergeAppFeatureConfigs(
+        baseKibanaFeature,
+        [],
+        enabledAppFeaturesConfigs
+      );
+
+      expect(merged).toEqual({
+        ...baseKibanaFeature,
         privileges: {
           all: {
-            api: ['casesApiTags.all'],
-            ui: ['casesCapabilities.all'],
+            api: ['api-read', 'api-write', 'api-extra-all'],
+            app: ['FEATURE_ID', 'kibana'],
+            catalogue: ['APP_ID'],
+            ui: ['write', 'read', 'extra-all'],
             cases: {
               create: ['APP_ID'],
               read: ['APP_ID'],
@@ -69,69 +200,215 @@ describe('AppFeaturesConfigMerger', () => {
               push: ['APP_ID'],
             },
             savedObject: {
-              all: ['filesSavedObjectTypes'],
-              read: ['filesSavedObjectTypes'],
+              all: ['someSavedObjectType'],
+              read: ['someSavedObjectType'],
             },
           },
           read: {
-            api: ['casesApiTags.read'],
-            ui: ['casesCapabilities.read'],
+            api: ['api-read', 'api-extra-read'],
+            app: ['FEATURE_ID', 'kibana'],
+            catalogue: ['APP_ID'],
+            ui: ['read', 'extra-read'],
             cases: {
               read: ['APP_ID'],
             },
             savedObject: {
               all: [],
-              read: ['filesSavedObjectTypes'],
+              read: ['someSavedObjectType'],
             },
           },
         },
+        subFeatures: [],
+      });
+    });
+  });
+
+  describe('subFeatureIds', () => {
+    it('adds base subFeatures in the correct order', () => {
+      const baseKibanaSubFeatureIds = ['subFeature2', 'subFeature3', 'subFeature1'];
+
+      const merged = merger.mergeAppFeatureConfigs(baseKibanaFeature, baseKibanaSubFeatureIds, []);
+      expect(merged.subFeatures).toEqual([subFeature1, subFeature2, subFeature3]);
+    });
+
+    it('should merge enabled subFeatures into base config in the correct order', () => {
+      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+        {
+          subFeatureIds: ['subFeature3', 'subFeature1'],
+        },
+      ];
+
+      const merged = merger.mergeAppFeatureConfigs(
+        baseKibanaFeature,
+        ['subFeature2'],
+        enabledAppFeaturesConfigs
+      );
+
+      expect(merged).toEqual({
+        ...baseKibanaFeature,
+        subFeatures: [subFeature1, subFeature2, subFeature3],
+      });
+    });
+  });
+
+  describe('subFeaturePrivileges', () => {
+    it('should merge enabled subFeatures with extra subFeaturePrivileges into base config in the correct order', () => {
+      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+        {
+          subFeaturesPrivileges: [
+            {
+              id: 'sub-feature-1_all',
+              api: ['api-subFeature1-extra1', 'api-subFeature1-extra2'],
+              ui: ['subFeature1-extra1', 'subFeature1-extra2'],
+            },
+            {
+              id: 'sub-feature-2_read',
+              api: ['api-readSubFeature2-extra1', 'api-readSubFeature2-extra2'],
+              ui: ['readSubFeature2-extra1', 'readSubFeature2-extra2'],
+            },
+          ],
+        },
+        {
+          subFeatureIds: ['subFeature3', 'subFeature1'],
+        },
+      ];
+
+      const merged = merger.mergeAppFeatureConfigs(
+        baseKibanaFeature,
+        ['subFeature2'],
+        enabledAppFeaturesConfigs
+      );
+      expect(merged).toEqual({
+        ...baseKibanaFeature,
         subFeatures: [
           {
-            name: 'Delete',
+            ...subFeature1,
             privilegeGroups: [
               {
-                groupType: 'independent',
+                ...subFeature1.privilegeGroups[0],
                 privileges: [
                   {
-                    api: ['casesApiTags.delete'],
-                    id: 'cases_delete',
-                    name: 'Delete cases and comments',
-                    includeIn: 'all',
-                    savedObject: {
-                      all: ['filesSavedObjectTypes'],
-                      read: ['filesSavedObjectTypes'],
-                    },
-                    cases: {
-                      delete: ['APP_ID'],
-                    },
-                    ui: ['casesCapabilities.delete'],
+                    ...subFeature1.privilegeGroups[0].privileges[0],
+                    api: ['api-subFeature1', 'api-subFeature1-extra1', 'api-subFeature1-extra2'],
+                    ui: ['subFeature1', 'subFeature1-extra1', 'subFeature1-extra2'],
                   },
                 ],
               },
             ],
           },
+          {
+            ...subFeature2,
+            privilegeGroups: [
+              {
+                ...subFeature2.privilegeGroups[0],
+                privileges: [
+                  subFeature2.privilegeGroups[0].privileges[0],
+                  {
+                    ...subFeature2.privilegeGroups[0].privileges[1],
+                    api: [
+                      'api-readSubFeature2',
+                      'api-readSubFeature2-extra1',
+                      'api-readSubFeature2-extra2',
+                    ],
+                    ui: ['readSubFeature2', 'readSubFeature2-extra1', 'readSubFeature2-extra2'],
+                  },
+                ],
+              },
+            ],
+          },
+          subFeature3,
+        ],
+      });
+    });
+
+    it('should warn if there are subFeaturesPrivileges for a subFeature id that is not found', () => {
+      const subFeaturesPrivilegesId = 'sub-feature-1_all';
+      const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+        {
+          subFeaturesPrivileges: [
+            {
+              id: subFeaturesPrivilegesId,
+              api: ['api-subFeature1-extra1', 'api-subFeature1-extra2'],
+              ui: ['subFeature1-extra1', 'subFeature1-extra2'],
+            },
+          ],
+        },
+      ];
+
+      const merged = merger.mergeAppFeatureConfigs(
+        baseKibanaFeature,
+        ['subFeature2', 'subFeature3'],
+        enabledAppFeaturesConfigs
+      );
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `Trying to merge subFeaturesPrivileges ${subFeaturesPrivilegesId} but the subFeature privilege was not found`
+      );
+      expect(merged).toEqual({ ...baseKibanaFeature, subFeatures: [subFeature2, subFeature3] });
+    });
+  });
+
+  it('should merge everything at the same time', () => {
+    const enabledAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
+      {
+        privileges: {
+          all: {
+            api: ['api-write', 'api-extra-all'],
+            ui: ['extra-all'],
+            cases: {
+              create: ['APP_ID'],
+              read: ['APP_ID'],
+              update: ['APP_ID'],
+              push: ['APP_ID'],
+            },
+            savedObject: {
+              all: ['someSavedObjectType'],
+              read: ['someSavedObjectType'],
+            },
+          },
+          read: {
+            api: ['api-extra-read'],
+            ui: ['extra-read'],
+            cases: {
+              read: ['APP_ID'],
+            },
+            savedObject: {
+              all: [],
+              read: ['someSavedObjectType'],
+            },
+          },
+        },
+        subFeatureIds: ['subFeature3', 'subFeature1'],
+        subFeaturesPrivileges: [
+          {
+            id: 'sub-feature-1_all',
+            api: ['api-subFeature1-extra1', 'api-subFeature1-extra2'],
+            ui: ['subFeature1-extra1', 'subFeature1-extra2'],
+          },
+          {
+            id: 'sub-feature-2_all',
+            api: ['api-writeSubFeature2-extra1', 'api-writeSubFeature2-extra2'],
+            ui: ['writeSubFeature2-extra1', 'writeSubFeature2-extra2'],
+          },
         ],
       },
     ];
+    const baseKibanaSubFeatureIds = ['subFeature2'];
 
     const merged = merger.mergeAppFeatureConfigs(
-      securityCasesBaseKibanaFeature,
-      enabledCasesAppFeaturesConfigs
+      baseKibanaFeature,
+      baseKibanaSubFeatureIds,
+      enabledAppFeaturesConfigs
     );
 
     expect(merged).toEqual({
-      id: 'CASES_FEATURE_ID',
-      name: 'Cases',
-      order: 1100,
-      category,
-      app: ['CASES_FEATURE_ID', 'kibana'],
-      catalogue: ['APP_ID'],
-      cases: ['APP_ID'],
+      ...baseKibanaFeature,
       privileges: {
         all: {
-          api: ['casesApiTags.all'],
-          app: ['CASES_FEATURE_ID', 'kibana'],
+          api: ['api-read', 'api-write', 'api-extra-all'],
+          app: ['FEATURE_ID', 'kibana'],
           catalogue: ['APP_ID'],
+          ui: ['write', 'read', 'extra-all'],
           cases: {
             create: ['APP_ID'],
             read: ['APP_ID'],
@@ -139,241 +416,67 @@ describe('AppFeaturesConfigMerger', () => {
             push: ['APP_ID'],
           },
           savedObject: {
-            all: ['filesSavedObjectTypes'],
-            read: ['filesSavedObjectTypes'],
+            all: ['someSavedObjectType'],
+            read: ['someSavedObjectType'],
           },
-          ui: ['casesCapabilities.all'],
         },
         read: {
-          api: ['casesApiTags.read'],
-          app: ['CASES_FEATURE_ID', 'kibana'],
+          api: ['api-read', 'api-extra-read'],
+          app: ['FEATURE_ID', 'kibana'],
           catalogue: ['APP_ID'],
+          ui: ['read', 'extra-read'],
           cases: {
             read: ['APP_ID'],
           },
           savedObject: {
             all: [],
-            read: ['filesSavedObjectTypes'],
+            read: ['someSavedObjectType'],
           },
-          ui: ['casesCapabilities.read'],
         },
       },
       subFeatures: [
         {
-          name: 'Delete',
+          ...subFeature1,
           privilegeGroups: [
             {
-              groupType: 'independent',
+              ...subFeature1.privilegeGroups[0],
               privileges: [
                 {
-                  api: ['casesApiTags.delete'],
-                  id: 'cases_delete',
-                  name: 'Delete cases and comments',
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['filesSavedObjectTypes'],
-                    read: ['filesSavedObjectTypes'],
-                  },
-                  cases: {
-                    delete: ['APP_ID'],
-                  },
-                  ui: ['casesCapabilities.delete'],
+                  ...subFeature1.privilegeGroups[0].privileges[0],
+                  api: ['api-subFeature1', 'api-subFeature1-extra1', 'api-subFeature1-extra2'],
+                  ui: ['subFeature1', 'subFeature1-extra1', 'subFeature1-extra2'],
                 },
               ],
             },
           ],
         },
-      ],
-    });
-  });
-
-  it('merges a mocked version of security basic config', () => {
-    const merger = new AppFeaturesConfigMerger(mockLogger);
-
-    const category = {
-      id: 'security',
-      label: 'Security app category',
-    };
-
-    const securityCasesBaseKibanaFeature: KibanaFeatureConfig = {
-      id: 'SERVER_APP_ID',
-      name: 'Security',
-      order: 1100,
-      category,
-      app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
-      catalogue: ['APP_ID'],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
-      alerting: ['THRESHOLD_RULE_TYPE_ID', 'NEW_TERMS_RULE_TYPE_ID'],
-      privileges: {
-        all: {
-          app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
-          catalogue: ['APP_ID'],
-          api: ['APP_ID', 'cloud-security-posture-read'],
-          savedObject: {
-            all: ['alert', 'CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE'],
-            read: [],
-          },
-          alerting: {
-            rule: {
-              all: ['SECURITY_RULE_TYPES'],
-            },
-            alert: {
-              all: ['SECURITY_RULE_TYPES'],
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show', 'crud'],
-        },
-        read: {
-          app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
-          catalogue: ['APP_ID'],
-          api: ['APP_ID', 'lists-read', 'rac', 'cloud-security-posture-read'],
-          savedObject: {
-            all: [],
-            read: ['CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE'],
-          },
-          alerting: {
-            rule: {
-              read: ['SECURITY_RULE_TYPES'],
-            },
-            alert: {
-              all: ['SECURITY_RULE_TYPES'],
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show'],
-        },
-      },
-      subFeatures: [
         {
-          requireAllSpaces: true,
-          privilegesTooltip: 'All Spaces is required for Host Isolation access.',
-          name: 'Host Isolation',
-          description: 'Perform the "isolate" and "release" response actions.',
+          ...subFeature2,
           privilegeGroups: [
             {
-              groupType: 'mutually_exclusive',
+              ...subFeature2.privilegeGroups[0],
               privileges: [
                 {
-                  api: [`APP_ID-writeHostIsolation`],
-                  id: 'host_isolation_all',
-                  includeIn: 'none',
-                  name: 'All',
-                  savedObject: {
-                    all: [],
-                    read: [],
-                  },
-                  ui: ['writeHostIsolation'],
+                  ...subFeature2.privilegeGroups[0].privileges[0],
+                  api: [
+                    'api-readSubFeature2',
+                    'api-writeSubFeature2',
+                    'api-writeSubFeature2-extra1',
+                    'api-writeSubFeature2-extra2',
+                  ],
+                  ui: [
+                    'readSubFeature2',
+                    'writeSubFeature2',
+                    'writeSubFeature2-extra1',
+                    'writeSubFeature2-extra2',
+                  ],
                 },
+                subFeature2.privilegeGroups[0].privileges[1],
               ],
             },
           ],
         },
-      ],
-    };
-
-    const enabledCasesAppFeaturesConfigs: AppFeatureKibanaConfig[] = [
-      {
-        privileges: {
-          all: {
-            api: ['rules_load_prepackaged'],
-            ui: ['rules_load_prepackaged'],
-          },
-        },
-      },
-    ];
-
-    const merged = merger.mergeAppFeatureConfigs(
-      securityCasesBaseKibanaFeature,
-      enabledCasesAppFeaturesConfigs
-    );
-
-    expect(merged).toEqual({
-      id: 'SERVER_APP_ID',
-      name: 'Security',
-      order: 1100,
-      category,
-      app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
-      catalogue: ['APP_ID'],
-      management: {
-        insightsAndAlerting: ['triggersActions'],
-      },
-      alerting: ['THRESHOLD_RULE_TYPE_ID', 'NEW_TERMS_RULE_TYPE_ID'],
-      privileges: {
-        all: {
-          app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
-          catalogue: ['APP_ID'],
-          api: ['APP_ID', 'cloud-security-posture-read', 'rules_load_prepackaged'],
-          savedObject: {
-            all: ['alert', 'CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE'],
-            read: [],
-          },
-          alerting: {
-            rule: {
-              all: ['SECURITY_RULE_TYPES'],
-            },
-            alert: {
-              all: ['SECURITY_RULE_TYPES'],
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show', 'crud', 'rules_load_prepackaged'],
-        },
-        read: {
-          app: ['APP_ID', 'CLOUD_POSTURE_APP_ID', 'kibana'],
-          catalogue: ['APP_ID'],
-          api: ['APP_ID', 'lists-read', 'rac', 'cloud-security-posture-read'],
-          savedObject: {
-            all: [],
-            read: ['CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE'],
-          },
-          alerting: {
-            rule: {
-              read: ['SECURITY_RULE_TYPES'],
-            },
-            alert: {
-              all: ['SECURITY_RULE_TYPES'],
-            },
-          },
-          management: {
-            insightsAndAlerting: ['triggersActions'],
-          },
-          ui: ['show'],
-        },
-      },
-      subFeatures: [
-        {
-          requireAllSpaces: true,
-          privilegesTooltip: 'All Spaces is required for Host Isolation access.',
-          name: 'Host Isolation',
-          description: 'Perform the "isolate" and "release" response actions.',
-          privilegeGroups: [
-            {
-              groupType: 'mutually_exclusive',
-              privileges: [
-                {
-                  api: [`APP_ID-writeHostIsolation`],
-                  id: 'host_isolation_all',
-                  includeIn: 'none',
-                  name: 'All',
-                  savedObject: {
-                    all: [],
-                    read: [],
-                  },
-                  ui: ['writeHostIsolation'],
-                },
-              ],
-            },
-          ],
-        },
+        subFeature3,
       ],
     });
   });

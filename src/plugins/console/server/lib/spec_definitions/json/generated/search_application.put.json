@@ -1,0 +1,14 @@
+{
+  "search_application.put": {
+    "url_params": {
+      "create": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_application/search_application/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-search-application.html"
+  }
+}

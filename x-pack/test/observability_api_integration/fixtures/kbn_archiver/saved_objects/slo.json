@@ -27,7 +27,7 @@
     "tags": [],
     "timeWindow": {
       "duration": "7d",
-      "isRolling": true
+      "type": "rolling"
     },
     "updatedAt": "2023-05-23T15:18:31.650Z"
   },
@@ -70,7 +70,7 @@
     "tags": [],
     "timeWindow": {
       "duration": "7d",
-      "isRolling": true
+      "type": "rolling"
     },
     "updatedAt": "2023-05-23T15:18:39.734Z"
   },

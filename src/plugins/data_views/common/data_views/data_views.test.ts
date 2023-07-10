@@ -375,7 +375,7 @@ describe('IndexPatterns', () => {
     expect(savedObjectsClient.find).lastCalledWith({
       fields: ['title'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'name'],
       perPage: size,
     });
   });

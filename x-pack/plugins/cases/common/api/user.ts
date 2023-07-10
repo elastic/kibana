@@ -25,7 +25,13 @@ export const UserWithProfileInfoRt = rt.intersection([
   rt.exact(rt.partial({ uid: rt.string })),
   rt.exact(
     rt.partial({
-      avatar: rt.exact(rt.partial({ initials: rt.string, color: rt.string, imageUrl: rt.string })),
+      avatar: rt.exact(
+        rt.partial({
+          initials: rt.union([rt.string, rt.null]),
+          color: rt.union([rt.string, rt.null]),
+          imageUrl: rt.union([rt.string, rt.null]),
+        })
+      ),
     })
   ),
 ]);

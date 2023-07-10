@@ -9,7 +9,7 @@ import { InfraTelemetryEventTypes, InfraTelemetryEvent } from './types';
 const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
   eventType: InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED,
   schema: {
-    control_filters: {
+    control_filter_fields: {
       type: 'array',
       items: {
         type: 'text',
@@ -19,7 +19,7 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         },
       },
     },
-    filters: {
+    filter_fields: {
       type: 'array',
       items: {
         type: 'text',
@@ -36,8 +36,8 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         optional: false,
       },
     },
-    query: {
-      type: 'text',
+    with_query: {
+      type: 'boolean',
       _meta: {
         description: 'KQL query search for hosts',
         optional: false,

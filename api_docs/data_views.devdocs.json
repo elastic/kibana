@@ -72,6 +72,30 @@
                 "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
               },
               {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/components/alert_details_app_section.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -89,10 +113,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -102,6 +122,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -152,12 +176,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -324,32 +348,36 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_existing/field_existing_utils.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "aiops",
@@ -376,8 +404,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -396,6 +424,10 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -410,6 +442,46 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -516,10 +588,6 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -589,59 +657,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "transform",
@@ -662,6 +682,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "ux",
@@ -2613,7 +2641,9 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+              "MappingTimeSeriesMetricType",
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -2980,7 +3010,8 @@
               "\nreturns type of TSDB metric or undefined"
             ],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -4891,7 +4922,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4933,10 +4964,8 @@
                 "id": "def-public.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -5000,7 +5029,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5042,10 +5071,8 @@
                 "id": "def-public.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -7769,7 +7796,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -7840,6 +7867,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.SavedObjectsClientCommon.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/common/types.ts",
                     "deprecated": false,
@@ -8114,7 +8155,9 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+          "MappingTimeSeriesMetricType",
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -8344,6 +8387,30 @@
                 "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
               },
               {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/components/alert_details_app_section.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -8361,10 +8428,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -8374,6 +8437,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8424,12 +8491,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8596,32 +8663,36 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_existing/field_existing_utils.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "aiops",
@@ -8648,8 +8719,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -8668,6 +8739,10 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -8682,6 +8757,46 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -8788,10 +8903,6 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -8861,59 +8972,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "transform",
@@ -8934,6 +8997,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "ux",
@@ -12207,7 +12278,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -12249,10 +12320,8 @@
                 "id": "def-server.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -12316,7 +12385,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -12358,10 +12427,8 @@
                 "id": "def-server.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -13447,7 +13514,8 @@
             "label": "timeSeriesMetric",
             "description": [],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -13807,7 +13875,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -13878,6 +13946,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.SavedObjectsClientCommon.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/common/types.ts",
                     "deprecated": false,
@@ -13960,6 +14042,20 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-server.DATA_VIEW_SWAP_REFERENCES_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_VIEW_SWAP_REFERENCES_PATH",
+        "description": [
+          "\nPath to swap references"
+        ],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-server.FieldSpec",
         "type": "Type",
         "tags": [],
@@ -13999,7 +14095,9 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+          "MappingTimeSeriesMetricType",
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -14461,37 +14559,7 @@
                 "SearchResponse",
                 "<TDocument, TAggregations>>; }; helpers: ",
                 "default",
-                "; name: string | symbol; security: ",
-                "default",
-                "; monitoring: ",
-                "default",
-                "; count: { (this: That, params?: ",
-                "CountRequest",
-                " | ",
-                "CountRequest",
-                " | undefined, options?: ",
-                "TransportRequestOptionsWithOutMeta",
-                " | undefined): Promise<",
-                "CountResponse",
-                ">; (this: That, params?: ",
-                "CountRequest",
-                " | ",
-                "CountRequest",
-                " | undefined, options?: ",
-                "TransportRequestOptionsWithMeta",
-                " | undefined): Promise<",
-                "TransportResult",
-                "<",
-                "CountResponse",
-                ", unknown>>; (this: That, params?: ",
-                "CountRequest",
-                " | ",
-                "CountRequest",
-                " | undefined, options?: ",
-                "TransportRequestOptions",
-                " | undefined): Promise<",
-                "CountResponse",
-                ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
                 "; child: (opts: ",
                 "ClientOptions",
@@ -14585,7 +14653,33 @@
                 "ClosePointInTimeResponse",
                 ">; }; cluster: ",
                 "default",
-                "; danglingIndices: ",
+                "; count: { (this: That, params?: ",
+                "CountRequest",
+                " | ",
+                "CountRequest",
+                " | undefined, options?: ",
+                "TransportRequestOptionsWithOutMeta",
+                " | undefined): Promise<",
+                "CountResponse",
+                ">; (this: That, params?: ",
+                "CountRequest",
+                " | ",
+                "CountRequest",
+                " | undefined, options?: ",
+                "TransportRequestOptionsWithMeta",
+                " | undefined): Promise<",
+                "TransportResult",
+                "<",
+                "CountResponse",
+                ", unknown>>; (this: That, params?: ",
+                "CountRequest",
+                " | ",
+                "CountRequest",
+                " | undefined, options?: ",
+                "TransportRequestOptions",
+                " | undefined): Promise<",
+                "CountResponse",
+                ">; }; danglingIndices: ",
                 "default",
                 "; deleteByQuery: { (this: That, params: ",
                 "DeleteByQueryRequest",
@@ -15009,6 +15103,8 @@
                 "default",
                 "; ml: ",
                 "default",
+                "; monitoring: ",
+                "default",
                 "; msearch: { <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
                 ">>(this: That, params: ",
@@ -15413,6 +15509,8 @@
                 "SearchTemplateResponse",
                 "<TDocument>>; }; searchableSnapshots: ",
                 "default",
+                "; security: ",
+                "default",
                 "; shutdown: ",
                 "default",
                 "; slm: ",
@@ -15673,6 +15771,30 @@
                 "path": "src/plugins/visualization_ui_components/public/components/query_input/filter_query_input.tsx"
               },
               {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/hooks/use_metrics_explorer_data.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/threshold/components/alert_details_app_section.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
@@ -15690,10 +15812,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -15703,6 +15821,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/components/filter_group/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/components/detection_page_filters/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15753,12 +15875,12 @@
                 "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
               },
               {
-                "plugin": "threatIntelligence",
-                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/flyout/left/hooks/use_threat_intelligence_details.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/flyout/left/components/hooks/use_threat_intelligence_details.test.ts"
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/mocks/mock_security_context.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15925,32 +16047,36 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_existing/field_existing_utils.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/group_editor_controls/group_editor_controls.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/components/table_list.tsx"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
               {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "aiops",
@@ -15977,8 +16103,8 @@
                 "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+                "plugin": "logsShared",
+                "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -15997,6 +16123,10 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -16011,6 +16141,46 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -16117,10 +16287,6 @@
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
-              },
-              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
               },
@@ -16190,59 +16356,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "transform",
@@ -16263,6 +16381,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "ux",
@@ -18214,7 +18340,9 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+              "MappingTimeSeriesMetricType",
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -18581,7 +18709,8 @@
               "\nreturns type of TSDB metric or undefined"
             ],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -20197,7 +20326,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20239,10 +20368,8 @@
                 "id": "def-common.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -20306,7 +20433,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20348,10 +20475,8 @@
                 "id": "def-common.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -21646,7 +21771,7 @@
                 "signature": [
                   "Pick<",
                   "Toast",
-                  ", \"prefix\" | \"defaultValue\" | \"children\" | \"onChange\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
+                  ", \"prefix\" | \"defaultValue\" | \"security\" | \"children\" | \"onChange\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
                     "scope": "common",
@@ -22094,7 +22219,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<",
+              ", overwrite?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22134,10 +22259,8 @@
                 "id": "def-common.DataViewsServicePublicMethods.createSavedObject.$2",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "- If true, save over existing data view"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean | undefined"
                 ],
@@ -24503,6 +24626,10 @@
                 "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
               },
@@ -25006,7 +25133,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -25077,6 +25204,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-common.SavedObjectsClientCommon.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/common/types.ts",
                     "deprecated": false,
@@ -25766,7 +25907,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25782,7 +25923,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", override?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26008,7 +26149,9 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+          "MappingTimeSeriesMetricType",
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -26226,7 +26369,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"prefix\" | \"defaultValue\" | \"children\" | \"onChange\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
+              ", \"prefix\" | \"defaultValue\" | \"security\" | \"children\" | \"onChange\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"css\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
                 "scope": "common",

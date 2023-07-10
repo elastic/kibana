@@ -22,6 +22,7 @@ import {
   type HostsState,
   type StringDateRangeTimestamp,
 } from './use_unified_search_url_state';
+import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
@@ -29,10 +30,10 @@ const buildQuerySubmittedPayload = (
   const { panelFilters, filters, parsedDateRange, query: queryObj, limit } = hostState;
 
   return {
-    control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
-    filters: filters.map((filter) => JSON.stringify(filter)),
+    control_filter_fields: retrieveFieldsFromFilter(panelFilters),
+    filter_fields: retrieveFieldsFromFilter(filters),
     interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
-    query: queryObj.query,
+    with_query: !!queryObj.query,
     limit,
   };
 };

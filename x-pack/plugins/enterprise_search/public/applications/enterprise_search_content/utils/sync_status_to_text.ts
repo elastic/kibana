@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncStatus } from '../../../../common/types/connectors';
+import { SyncJobType, SyncStatus } from '../../../../common/types/connectors';
 
 export function syncStatusToText(status: SyncStatus): string {
   switch (status) {
@@ -56,3 +56,18 @@ export function syncStatusToColor(status: SyncStatus): string {
       return 'warning';
   }
 }
+
+export const syncJobTypeToText = (syncType: SyncJobType): string => {
+  switch (syncType) {
+    case SyncJobType.FULL:
+      return i18n.translate('xpack.enterpriseSearch.content.syncJobType.full', {
+        defaultMessage: 'Full content',
+      });
+    case SyncJobType.INCREMENTAL:
+      return i18n.translate('xpack.enterpriseSearch.content.syncJobType.incremental', {
+        defaultMessage: 'Incremental content',
+      });
+    default:
+      return '';
+  }
+};

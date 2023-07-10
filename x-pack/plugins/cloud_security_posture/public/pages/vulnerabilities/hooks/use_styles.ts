@@ -24,6 +24,11 @@ export const useStyles = () => {
     }
     & .euiDataGrid__controls {
       border-bottom: none;
+      margin-bottom: ${euiTheme.size.s};
+
+      & .euiButtonEmpty {
+        font-weight: ${euiTheme.font.weight.bold};
+      }
     }
     & .euiButtonIcon {
       color: ${euiTheme.colors.primary};
@@ -34,8 +39,15 @@ export const useStyles = () => {
     & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
       display: none;
     }
+    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+      padding: 0;
+    }
+
     & .euiDataGridRowCell__expandFlex {
       align-items: center;
+    }
+    & .euiDataGridRowCell.euiDataGridRowCell--numeric {
+      text-align: left;
     }
   `;
 
@@ -46,8 +58,13 @@ export const useStyles = () => {
     }
   `;
 
+  const groupBySelector = css`
+    width: 188px;
+  `;
+
   return {
     highlightStyle,
     gridStyle,
+    groupBySelector,
   };
 };

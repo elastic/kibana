@@ -25,7 +25,7 @@ export const useGetActionState = (): UseQueryResult<GetActionStateResponse, IHtt
   return useQuery<GetActionStateResponse, IHttpFetchError>({
     queryKey: ['get-action-state'],
     queryFn: () => {
-      return http.get<GetActionStateResponse>(ACTION_STATE_ROUTE);
+      return http.get<GetActionStateResponse>(ACTION_STATE_ROUTE, { version: '2023-10-31' });
     },
   });
 };

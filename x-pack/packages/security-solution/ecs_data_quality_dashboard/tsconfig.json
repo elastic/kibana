@@ -22,5 +22,7 @@
     "@kbn/ui-theme",
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
+    "@kbn/elastic-assistant",
+    "@kbn/triggers-actions-ui-plugin",
   ]
 }

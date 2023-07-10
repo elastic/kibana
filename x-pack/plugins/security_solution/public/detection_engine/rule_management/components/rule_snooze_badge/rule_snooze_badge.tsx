@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -32,20 +31,12 @@ export function RuleSnoozeBadge({
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
 
-  if (error) {
-    return (
-      <EuiToolTip content={error}>
-        <EuiButtonIcon size="s" iconType="bellSlash" disabled />
-      </EuiToolTip>
-    );
-  }
-
   return (
     <RulesListNotifyBadge
       ruleId={ruleId}
       snoozeSettings={snoozeSettings}
-      loading={!snoozeSettings}
-      disabled={!hasCRUDPermissions}
+      loading={!snoozeSettings && !error}
+      disabled={!hasCRUDPermissions || error}
       showTooltipInline={showTooltipInline}
       onRuleChanged={invalidateFetchRuleSnoozeSettings}
     />

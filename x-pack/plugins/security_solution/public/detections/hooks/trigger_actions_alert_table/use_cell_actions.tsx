@@ -8,12 +8,11 @@
 import type { BrowserField, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback, useMemo } from 'react';
-import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
-import type { TableId } from '@kbn/securitysolution-data-table';
+import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
-import { SecurityCellActionsTrigger } from '../../../actions/constants';
+import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -61,34 +60,45 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
       tableDefaults.viewMode;
 
-    const cellActionProps = useMemo<UseDataGridColumnsSecurityCellActionsProps>(() => {
-      const fields =
-        viewMode === VIEW_SELECTION.eventRenderedView
-          ? []
-          : columns.map((col) => {
-              const fieldMeta: Partial<BrowserField> | undefined = browserFieldsByName[col.id];
-              return {
-                name: col.id,
-                type: fieldMeta?.type ?? 'keyword',
-                values: (finalData as TimelineNonEcsData[][]).map(
-                  (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
-                ),
-                aggregatable: fieldMeta?.aggregatable ?? false,
-              };
-            });
+    const cellActionsMetadata = useMemo(() => ({ scopeId: tableId }), []);
 
-      return {
-        triggerId: SecurityCellActionsTrigger.DEFAULT,
-        fields,
-        metadata: {
-          // cell actions scope
-          scopeId: tableId,
-        },
-        dataGridRef,
-      };
-    }, [viewMode, browserFieldsByName, columns, finalData, dataGridRef]);
+    const cellActionsFields = useMemo<UseDataGridColumnsSecurityCellActionsProps['fields']>(() => {
+      if (viewMode === VIEW_SELECTION.eventRenderedView) {
+        return undefined;
+      }
+      return columns.map((column) => {
+        // TODO use FieldSpec object instead of browserField
+        const browserField: Partial<BrowserField> | undefined = browserFieldsByName[column.id];
+        return {
+          name: column.id,
+          type: browserField?.type ?? '', // When type is an empty string all cell actions are incompatible
+          esTypes: browserField?.esTypes ?? [],
+          aggregatable: browserField?.aggregatable ?? false,
+          searchable: browserField?.searchable ?? false,
+          subType: browserField?.subType,
+        };
+      });
+    }, [browserFieldsByName, columns, viewMode]);
 
-    const cellActions = useDataGridColumnsSecurityCellActions(cellActionProps);
+    const getCellValue = useCallback<UseDataGridColumnsSecurityCellActionsProps['getCellValue']>(
+      (fieldName, rowIndex) => {
+        const pageRowIndex = rowIndex % finalData.length;
+        return finalData[pageRowIndex].find((rowData) => rowData.field === fieldName)?.value ?? [];
+      },
+      [finalData]
+    );
+
+    const disabledActionTypes =
+      tableId === TableId.alertsOnCasePage ? [SecurityCellActionType.FILTER] : undefined;
+
+    const cellActions = useDataGridColumnsSecurityCellActions({
+      triggerId: SecurityCellActionsTrigger.DEFAULT,
+      fields: cellActionsFields,
+      getCellValue,
+      metadata: cellActionsMetadata,
+      dataGridRef,
+      disabledActionTypes,
+    });
 
     const getCellActions = useCallback(
       (_columnId: string, columnIndex: number) => {

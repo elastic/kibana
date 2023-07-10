@@ -44,3 +44,12 @@ export const GenAiRunActionResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+// Run action schema
+export const GenAiDashboardActionParamsSchema = schema.object({
+  dashboardId: schema.string(),
+});
+
+export const GenAiDashboardActionResponseSchema = schema.object({
+  available: schema.boolean(),
+});

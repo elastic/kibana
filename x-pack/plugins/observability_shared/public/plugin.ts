@@ -57,6 +57,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     return {
       navigation: {
         PageTemplate,
+        registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
       setIsSidebarEnabled: (isEnabled: boolean) => this.isSidebarEnabled$.next(isEnabled),

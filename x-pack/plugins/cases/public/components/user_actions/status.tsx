@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Status } from '@kbn/cases-components';
+import { Status } from '@kbn/cases-components/src/status/status';
 import type { CaseStatuses, StatusUserAction } from '../../../common/api';
 import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';

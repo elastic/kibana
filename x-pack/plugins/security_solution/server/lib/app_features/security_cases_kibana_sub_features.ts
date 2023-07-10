@@ -17,7 +17,7 @@ import { APP_ID } from '../../../common/constants';
 const casesCapabilities = createCasesUICapabilities();
 const casesApiTags = getCasesApiTags(APP_ID);
 
-export const casesSubFeatureDelete: SubFeatureConfig = {
+const deleteCasesSubFeature: SubFeatureConfig = {
   name: i18n.translate('xpack.securitySolution.featureRegistry.deleteSubFeatureName', {
     defaultMessage: 'Delete',
   }),
@@ -45,3 +45,14 @@ export const casesSubFeatureDelete: SubFeatureConfig = {
     },
   ],
 };
+
+export enum CasesSubFeatureId {
+  deleteCases = 'deleteCasesSubFeature',
+}
+
+// Defines all the ordered Security Cases subFeatures available
+export const casesSubFeaturesMap = Object.freeze(
+  new Map<CasesSubFeatureId, SubFeatureConfig>([
+    [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
+  ])
+);

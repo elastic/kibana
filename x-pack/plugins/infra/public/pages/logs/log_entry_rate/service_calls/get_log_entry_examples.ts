@@ -6,13 +6,13 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 
 import {
   getLogEntryExamplesRequestPayloadRT,
-  getLogEntryExamplesSuccessReponsePayloadRT,
+  getLogEntryExamplesSuccessResponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
-} from '../../../../../common/http_api/log_analysis';
+} from '../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
@@ -42,7 +42,8 @@ export const callGetLogEntryExamplesAPI = async (requestArgs: RequestArgs, fetch
         },
       })
     ),
+    version: '1',
   });
 
-  return decodeOrThrow(getLogEntryExamplesSuccessReponsePayloadRT)(response);
+  return decodeOrThrow(getLogEntryExamplesSuccessResponsePayloadRT)(response);
 };

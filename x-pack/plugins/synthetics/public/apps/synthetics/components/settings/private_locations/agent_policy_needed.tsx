@@ -6,45 +6,55 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiButton, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiEmptyPrompt, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useFleetPermissions } from '../../../hooks';
+import { FleetPermissionsCallout, NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LEARN_MORE, READ_DOCS } from './empty_locations';
 
-export const AgentPolicyNeeded = ({ disabled }: { disabled: boolean }) => {
-  const { basePath } = useSyntheticsSettingsContext();
+export const AgentPolicyNeeded = () => {
+  const { basePath, canSave } = useSyntheticsSettingsContext();
+
+  const { canCreateAgentPolicies } = useFleetPermissions();
 
   return (
-    <EuiEmptyPrompt
-      hasBorder
-      title={<h2>{AGENT_POLICY_NEEDED}</h2>}
-      body={<p>{ADD_AGENT_POLICY_DESCRIPTION}</p>}
-      actions={
-        <EuiButton
-          data-test-subj="syntheticsAgentPolicyNeededButton"
-          fill
-          href={`${basePath}/app/fleet/policies?create`}
-          color="primary"
-          isDisabled={disabled}
-        >
-          {CREATE_AGENT_POLICY}
-        </EuiButton>
-      }
-      footer={
-        <>
-          <EuiTitle size="xxs">
-            <h3>{LEARN_MORE}</h3>
-          </EuiTitle>
-          <EuiLink
-            data-test-subj="syntheticsAgentPolicyNeededLink"
-            target="_blank"
-            href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
-          >
-            {READ_DOCS}
-          </EuiLink>
-        </>
-      }
-    />
+    <>
+      {!canCreateAgentPolicies && <FleetPermissionsCallout />}
+      <EuiSpacer size="m" />
+      <EuiEmptyPrompt
+        hasBorder
+        title={<h2>{AGENT_POLICY_NEEDED}</h2>}
+        body={<p>{ADD_AGENT_POLICY_DESCRIPTION}</p>}
+        actions={
+          <NoPermissionsTooltip canEditSynthetics={canSave}>
+            <EuiButton
+              data-test-subj="syntheticsAgentPolicyNeededButton"
+              fill
+              href={`${basePath}/app/fleet/policies?create`}
+              color="primary"
+              isDisabled={!canSave || !canCreateAgentPolicies}
+            >
+              {CREATE_AGENT_POLICY}
+            </EuiButton>
+          </NoPermissionsTooltip>
+        }
+        footer={
+          <>
+            <EuiTitle size="xxs">
+              <h3>{LEARN_MORE}</h3>
+            </EuiTitle>
+            <EuiLink
+              data-test-subj="syntheticsAgentPolicyNeededLink"
+              target="_blank"
+              href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+            >
+              {READ_DOCS}
+            </EuiLink>
+          </>
+        }
+      />
+    </>
   );
 };
 

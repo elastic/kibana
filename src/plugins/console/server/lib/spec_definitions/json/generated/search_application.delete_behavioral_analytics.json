@@ -1,0 +1,11 @@
+{
+  "search_application.delete_behavioral_analytics": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_application/analytics/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-analytics-collection.html"
+  }
+}

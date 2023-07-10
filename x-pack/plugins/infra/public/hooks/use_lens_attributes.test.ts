@@ -49,7 +49,7 @@ describe('useHostTable hook', () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
         visualizationType: 'lineChart',
-        type: 'load',
+        type: 'normalizedLoad1m',
         options: {
           title: 'Injected Normalized Load',
         },
@@ -176,7 +176,7 @@ describe('useHostTable hook', () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
         visualizationType: 'lineChart',
-        type: 'load',
+        type: 'normalizedLoad1m',
         dataView: mockDataView,
       })
     );
@@ -209,6 +209,6 @@ describe('useHostTable hook', () => {
       ],
     });
 
-    expect(extraActions.openInLens).not.toBeNull();
+    expect(extraActions).toHaveLength(1);
   });
 });

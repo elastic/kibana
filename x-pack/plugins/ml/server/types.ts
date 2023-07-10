@@ -80,4 +80,7 @@ export interface RouteInitialization {
   router: IRouter;
   mlLicense: MlLicense;
   routeGuard: RouteGuard;
+  enabledFeatures: MlFeatures;
 }
+
+export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;

@@ -11,6 +11,10 @@ export function SvlObltOverviewPageProvider({ getService }: FtrProviderContext) 
   const testSubjects = getService('testSubjects');
 
   return {
+    async assertPageHeaderExists() {
+      await testSubjects.existOrFail('obltOverviewPageHeader');
+    },
+
     async assertAlertsSectionExists() {
       await testSubjects.existOrFail('obltOverviewAlerts');
     },

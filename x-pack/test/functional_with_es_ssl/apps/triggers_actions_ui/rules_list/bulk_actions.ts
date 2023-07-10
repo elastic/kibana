@@ -53,7 +53,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkSnooze');
@@ -62,13 +61,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
+      await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
     });
 
     it('should allow rules to be unsnoozed', async () => {
@@ -93,7 +92,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkUnsnooze');
@@ -102,13 +100,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
+      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
     });
 
     it('should allow rules to be scheduled', async () => {
@@ -125,7 +123,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkSnoozeSchedule');
@@ -134,13 +131,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
+      await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
     });
 
     it('should allow rules to be unscheduled', async () => {
@@ -165,7 +162,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await refreshAlertsList();
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
-      await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
       await testSubjects.click('bulkRemoveSnoozeSchedule');
@@ -174,13 +170,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Updated snooze settings for 1 rule.');
+        expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(rule1.name);
       await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
-      await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
+      await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
     });
 
     it('can bulk update API key', async () => {

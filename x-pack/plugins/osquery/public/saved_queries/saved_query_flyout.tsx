@@ -62,6 +62,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
   return (
     <EuiPortal>
       <EuiFlyout
+        data-test-subj={'osquery-save-query-flyout'}
         size="m"
         ownFocus
         onClose={onClose}
