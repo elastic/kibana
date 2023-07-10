@@ -73,11 +73,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should not hide the side navigation', async () => {
-      await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
-      // ensure center of button is visible and not hidden by sticky bottom bar
-      await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
-      // test cleanup: go back to policy details page
-      await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+        await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
+        // ensure center of button is visible and not hidden by sticky bottom bar
+        await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
+        // test cleanup: go back to policy details page
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
       });
 
       it('and the show advanced settings button is clicked', async () => {
