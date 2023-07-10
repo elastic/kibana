@@ -51,7 +51,7 @@ if is_pr_with_label "ci:build-serverless-image"; then
   --skip-archives \
   --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="git-$GIT_ABBREV_COMMIT" \
+  --docker-tag="pr-$BUILDKITE_PULL_REQUEST-$GIT_ABBREV_COMMIT" \
   --docker-push \
   --skip-docker-ubi \
   --skip-docker-ubuntu \
