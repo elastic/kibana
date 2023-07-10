@@ -7,4 +7,5 @@ schema:
     - type: array
       items:
         type: string
+      maxItems: 100
 example: tag-1

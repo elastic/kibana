@@ -61,6 +61,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       is_preconfigured: isPreconfigured,
       is_deprecated: isDeprecated,
       is_missing_secrets: isMissingSecrets,
+      is_system_action: isSystemAction,
       ...res
     }) => ({
       ...res,
@@ -69,6 +70,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       isDeprecated,
       isPreconfigured,
       isMissingSecrets,
+      isSystemAction,
     })
   );
 };
@@ -83,6 +85,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       enabled_in_license: enabledInLicense,
       minimum_license_required: minimumLicenseRequired,
       supported_feature_ids: supportedFeatureIds,
+      is_system_action_type: isSystemActionType,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
@@ -90,6 +93,7 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
       enabledInLicense,
       minimumLicenseRequired,
       supportedFeatureIds,
+      isSystemActionType,
     })
   );
 };

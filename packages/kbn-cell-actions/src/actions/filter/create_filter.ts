@@ -13,13 +13,10 @@ import {
   type PhraseFilter,
   type Filter,
 } from '@kbn/es-query';
-import { isArray } from 'lodash/fp';
-import { CellActionFieldValue } from '../../types';
+import { DefaultActionsSupportedValue } from '../types';
 
-export const isEmptyFilterValue = (
-  value: CellActionFieldValue
-): value is null | undefined | never[] =>
-  value == null || value === '' || (isArray(value) && value.length === 0);
+export const isEmptyFilterValue = (value: Array<string | number | boolean>) =>
+  value.length === 0 || value.every((v) => v === '');
 
 const createExistsFilter = ({ key, negate }: { key: string; negate: boolean }): ExistsFilter => ({
   meta: { key, negate, type: FILTERS.EXISTS, value: 'exists' },
@@ -49,7 +46,7 @@ const createCombinedFilter = ({
   key,
   negate,
 }: {
-  values: string[] | number[] | boolean[];
+  values: DefaultActionsSupportedValue;
   key: string;
   negate: boolean;
 }): CombinedFilter => ({
@@ -68,18 +65,16 @@ export const createFilter = ({
   negate,
 }: {
   key: string;
-  value: CellActionFieldValue;
+  value: DefaultActionsSupportedValue;
   negate: boolean;
 }): Filter => {
-  if (isEmptyFilterValue(value)) {
+  if (value.length === 0) {
     return createExistsFilter({ key, negate });
   }
-  if (Array.isArray(value)) {
-    if (value.length > 1) {
-      return createCombinedFilter({ key, negate, values: value });
-    } else {
-      return createPhraseFilter({ key, negate, value: value[0] });
-    }
+
+  if (value.length > 1) {
+    return createCombinedFilter({ key, negate, values: value });
+  } else {
+    return createPhraseFilter({ key, negate, value: value[0] });
   }
-  return createPhraseFilter({ key, negate, value });
 };

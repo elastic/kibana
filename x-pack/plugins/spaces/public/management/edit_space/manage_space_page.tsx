@@ -54,6 +54,7 @@ interface Props {
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
   history: ScopedHistory;
+  allowFeatureVisibility: boolean;
 }
 
 interface State {
@@ -161,13 +162,16 @@ export class ManageSpacePage extends Component<Props, State> {
           validator={this.validator}
         />
 
-        <EuiSpacer />
-
-        <EnabledFeatures
-          space={this.state.space}
-          features={this.state.features}
-          onChange={this.onSpaceChange}
-        />
+        {this.props.allowFeatureVisibility && (
+          <>
+            <EuiSpacer />
+            <EnabledFeatures
+              space={this.state.space}
+              features={this.state.features}
+              onChange={this.onSpaceChange}
+            />
+          </>
+        )}
 
         <EuiSpacer />
 

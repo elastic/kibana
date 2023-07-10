@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DatasetSelection, DatasetSelectionChange } from '../../../utils/dataset_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
@@ -12,10 +13,10 @@ import {
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { DatasetSelectionHandler, DatasetsSelectorSearchParams, PanelId } from '../types';
+import { DatasetsSelectorSearchParams, PanelId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
-  selected?: Dataset;
+  selection: DatasetSelection;
   panelId: PanelId;
   searchCache: IHashedCache<PanelId, DatasetsSelectorSearchParams>;
   search: DatasetsSelectorSearchParams;
@@ -23,27 +24,43 @@ export interface DefaultDatasetsSelectorContext {
 
 export type DatasetsSelectorTypestate =
   | {
-      value: 'closed';
+      value: 'popover';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: 'open';
+      value: 'popover.closed';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'hist' };
+      value: 'popover.open';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'listingIntegrations' };
+      value: 'popover.open.hist';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'listingIntegrationStreams' };
+      value: 'popover.open.listingIntegrations';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'listingUnmanagedStreams' };
+      value: 'popover.open.listingIntegrationStreams';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'popover.open.listingUnmanagedStreams';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection.single';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection.all';
       context: DefaultDatasetsSelectorContext;
     };
 
@@ -65,6 +82,9 @@ export type DatasetsSelectorEvent =
       dataset: Dataset;
     }
   | {
+      type: 'SELECT_ALL_LOGS_DATASET';
+    }
+  | {
       type: 'SCROLL_TO_INTEGRATIONS_BOTTOM';
     }
   | {
@@ -84,7 +104,7 @@ export interface DatasetsSelectorStateMachineDependencies {
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onDatasetSelected: DatasetSelectionHandler;
+  onSelectionChange: DatasetSelectionChange;
   onUnmanagedStreamsReload: ReloadDatasets;
   onUnmanagedStreamsSearch: SearchDatasets;
   onUnmanagedStreamsSort: SearchDatasets;

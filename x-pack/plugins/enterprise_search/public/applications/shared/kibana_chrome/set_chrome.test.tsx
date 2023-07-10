@@ -26,13 +26,13 @@ import {
 } from './generate_breadcrumbs';
 
 jest.mock('./generate_title', () => ({
-  enterpriseSearchTitle: jest.fn((title: any) => title),
+  searchTitle: jest.fn((title: any) => title),
   appSearchTitle: jest.fn((title: any) => title),
   workplaceSearchTitle: jest.fn((title: any) => title),
 }));
-import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
+import { searchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
-import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
+import { SetSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
 
 describe('Set Kibana Chrome helpers', () => {
   const mockCurrentPath = (pathname: string) =>
@@ -48,11 +48,11 @@ describe('Set Kibana Chrome helpers', () => {
     expect(mockKibanaValues.setDocTitle).toHaveBeenCalled();
   });
 
-  describe('SetEnterpriseSearchChrome', () => {
+  describe('SetSearchChrome', () => {
     it('sets breadcrumbs and document title', () => {
-      shallow(<SetEnterpriseSearchChrome trail={['Hello World']} />);
+      shallow(<SetSearchChrome trail={['Hello World']} />);
 
-      expect(enterpriseSearchTitle).toHaveBeenCalledWith(['Hello World']);
+      expect(searchTitle).toHaveBeenCalledWith(['Hello World']);
       expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([
         {
           text: 'Hello World',
@@ -62,9 +62,9 @@ describe('Set Kibana Chrome helpers', () => {
     });
 
     it('handles empty trails as a root-level page', () => {
-      shallow(<SetEnterpriseSearchChrome />);
+      shallow(<SetSearchChrome />);
 
-      expect(enterpriseSearchTitle).toHaveBeenCalledWith([]);
+      expect(searchTitle).toHaveBeenCalledWith([]);
       expect(useEnterpriseSearchBreadcrumbs).toHaveBeenCalledWith([]);
     });
   });

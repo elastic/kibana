@@ -17,29 +17,31 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
+import { useLensAttributes, Layer, LayerType } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
+import { FormulaConfig, XYLayerOptions } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { buildCombinedHostsFilter } from '../../../utils';
+import {
+  buildCombinedHostsFilter,
+  buildExistsHostsFilter,
+} from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
-import { LensWrapper } from '../../chart/lens_wrapper';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
-export interface MetricChartProps {
+export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
-  type: HostsLensLineChartFormulas;
-  breakdownSize: number;
-  render?: boolean;
+  layers: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
 }
 
 const lensStyle: CSSProperties = {
   height: METRIC_CHART_MIN_HEIGHT,
 };
 
-export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
+export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) => {
   const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
@@ -54,32 +56,32 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   });
 
   const { attributes, getExtraActions, error } = useLensAttributes({
-    type,
     dataView,
-    options: {
-      title,
-      breakdownSize,
-    },
-    visualizationType: 'lineChart',
+    layers,
+    title,
+    visualizationType: 'lnsXY',
   });
 
   const filters = useMemo(() => {
     return [
+      ...searchCriteria.filters,
       buildCombinedHostsFilter({
         field: 'host.name',
         values: currentPage.map((p) => p.name),
         dataView,
       }),
+      buildExistsHostsFilter({ field: 'host.name', dataView }),
     ];
-  }, [currentPage, dataView]);
+  }, [currentPage, dataView, searchCriteria.filters]);
 
   const extraActions: Action[] = useMemo(
     () =>
       getExtraActions({
         timeRange: afterLoadedState.dateRange,
+        query: afterLoadedState.query,
         filters,
       }),
-    [afterLoadedState.dateRange, filters, getExtraActions]
+    [afterLoadedState.dateRange, afterLoadedState.query, filters, getExtraActions]
   );
 
   const handleBrushEnd = useCallback(
@@ -106,7 +108,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
         min-height: calc(${METRIC_CHART_MIN_HEIGHT}px + ${euiTheme.size.l});
         position: relative;
       `}
-      data-test-subj={`hostsView-metricChart-${type}`}
+      data-test-subj={`hostsView-metricChart-${id}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -130,15 +132,17 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={`hostsViewsmetricsChart-${type}`}
+          id={`hostsViewsmetricsChart-${id}`}
           attributes={attributes}
           style={lensStyle}
           extraActions={extraActions}
           lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
           dateRange={afterLoadedState.dateRange}
           filters={filters}
+          query={afterLoadedState.query}
           onBrushEnd={handleBrushEnd}
           loading={loading}
+          overrides={overrides}
           hasTitle
         />
       )}

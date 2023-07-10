@@ -507,9 +507,13 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     controlled: true,
     props: ({ setValue, field }): EuiSwitchProps => ({
       id: 'syntheticsMonitorConfigIsAlertEnabled',
-      label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
-        defaultMessage: 'Enable status alerts',
-      }),
+      label: field?.value
+        ? i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
+            defaultMessage: 'Disable status alerts on this monitor',
+          })
+        : i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
+            defaultMessage: 'Enable status alerts on this monitor',
+          }),
       checked: field?.value || false,
       onChange: (event) => {
         setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
@@ -522,18 +526,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [AlertConfigKey.TLS_ENABLED]: {
     fieldKey: AlertConfigKey.TLS_ENABLED,
     component: Switch,
-    label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.tls.label', {
-      defaultMessage: 'Enable TLS alerts',
-    }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+    props: ({ setValue, field }): EuiSwitchProps => ({
       id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
-      label: isEdit
+      label: field?.value
         ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
-            defaultMessage: 'Disabling will stop tls alerting on this monitor.',
+            defaultMessage: 'Disable TLS alerts on this monitor.',
           })
         : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
-            defaultMessage: 'Enable tls alerts on this monitor.',
+            defaultMessage: 'Enable TLS alerts on this monitor.',
           }),
       checked: field?.value || false,
       onChange: (event) => {
