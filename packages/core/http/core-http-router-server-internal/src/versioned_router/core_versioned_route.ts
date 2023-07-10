@@ -23,7 +23,7 @@ import type {
   RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { HandlerResolutionStrategy, Method } from './types';
+import type { Method } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
@@ -72,17 +72,12 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   private isPublic: boolean;
   private enableQueryVersion: boolean;
-  private resolutionStrategy?: Exclude<HandlerResolutionStrategy, 'none'>;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
-    this.resolutionStrategy =
-      this.router.defaultHandlerResolutionStrategy === 'none'
-        ? undefined
-        : this.router.defaultHandlerResolutionStrategy;
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
     this.router.router[this.method](
@@ -103,8 +98,8 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   /** This method assumes that one or more versions handlers are registered  */
-  private getDefaultVersion(strategy: Exclude<HandlerResolutionStrategy, 'none'>): ApiVersion {
-    return resolvers[strategy]([...this.handlers.keys()]);
+  private getDefaultVersion(): undefined | ApiVersion {
+    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
   }
 
   private versionsToString(): string {
@@ -123,19 +118,18 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const req = originalReq as Mutable<KibanaRequest>;
-    let version: ApiVersion;
+    let version: undefined | ApiVersion;
 
     const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion) {
-      if (this.isPublic && this.resolutionStrategy) {
-        version = this.getDefaultVersion(this.resolutionStrategy);
-      } else {
-        return res.badRequest({
-          body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
-        });
-      }
+    if (!maybeVersion && this.isPublic) {
+      version = this.getDefaultVersion();
     } else {
       version = maybeVersion;
+    }
+    if (!version) {
+      return res.badRequest({
+        body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
+      });
     }
     if (hasQueryVersion(req)) {
       if (this.enableQueryVersion) {
