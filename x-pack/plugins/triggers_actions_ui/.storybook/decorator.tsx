@@ -63,6 +63,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
       ruleStatusFilter: true,
       rulesDetailLogs: true,
       ruleUseExecutionStatus: false,
+      ruleKqlBar: true,
     },
   });
   return (
