@@ -377,7 +377,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       share.url.locators.get(alertsLocatorID);
     const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-      scopedClusterClient.asCurrentUser
+      scopedClusterClient.asCurrentUser,
+      {
+        isLegacyAlert: true,
+      }
     );
 
     const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
