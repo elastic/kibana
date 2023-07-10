@@ -584,7 +584,9 @@ export const MLInferenceLogic = kea<
           mlInferencePipelinesData
         )
           .map(([pipelineName, pipeline]): MLInferencePipelineOption | undefined => {
-            if (!pipeline) return undefined;
+            if (!pipeline || indexProcessorNames.includes(pipelineName)) return undefined;
+
+            // Parse configuration from pipeline definition
             const pipelineParams = parseMlInferenceParametersFromPipeline(pipelineName, pipeline);
             if (!pipelineParams) return undefined;
             const { model_id: modelId, field_mappings: fieldMappings } = pipelineParams;
