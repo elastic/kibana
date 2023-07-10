@@ -82,7 +82,7 @@ import {
 } from './types';
 
 import {
-  getDisabledReason,
+  EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD,
   validateInferencePipelineConfiguration,
   validateInferencePipelineFields,
   validatePipelineNameIsAvailable,
@@ -595,11 +595,10 @@ export const MLInferenceLogic = kea<
             const missingSourceFields = sourceFields.filter((f) => !indexFields?.includes(f)) ?? [];
             const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
             const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
-            const disabledReason = getDisabledReason(
-              missingSourceFields,
-              indexProcessorNames,
-              pipelineName
-            );
+            const disabledReason =
+              missingSourceFields.length > 0
+                ? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD(missingSourceFields.join(', '))
+                : undefined;
 
             return {
               disabled: disabledReason !== undefined,
