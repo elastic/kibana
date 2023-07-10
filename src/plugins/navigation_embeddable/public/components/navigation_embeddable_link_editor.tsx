@@ -43,9 +43,9 @@ export const NavigationEmbeddableLinkEditor = ({
   onClose,
   parentDashboard,
 }: {
-  onSave: (newLink: NavigationEmbeddableLink) => void;
-  onClose: (closeBoth: boolean) => void;
+  onClose: () => void;
   parentDashboard?: DashboardContainer;
+  onSave: (newLink: NavigationEmbeddableLink) => void;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(DASHBOARD_LINK_TYPE);
   const [linkLabel, setLinkLabel] = useState<string>('');
@@ -80,7 +80,7 @@ export const NavigationEmbeddableLinkEditor = ({
           flush="left"
           color="text"
           iconType={'arrowLeft'}
-          onClick={() => onClose(false)}
+          onClick={() => onClose()}
         >
           <EuiTitle
             size="m"
@@ -161,7 +161,7 @@ export const NavigationEmbeddableLinkEditor = ({
                     label: linkLabel,
                     type: selectedLinkType,
                   });
-                  onClose(false);
+                  onClose();
                 }
               }}
             >

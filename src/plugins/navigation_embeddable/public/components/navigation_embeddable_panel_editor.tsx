@@ -178,12 +178,8 @@ export const NavigationEmbeddablePanelEditor = ({
 
       {showLinkEditorFlyout && (
         <NavigationEmbeddableLinkEditor
-          onClose={(closeBothFlyouts: boolean) => {
-            if (closeBothFlyouts) {
-              onClose();
-            } else {
-              setShowLinkEditorFlyout(false);
-            }
+          onClose={() => {
+            setShowLinkEditorFlyout(false);
           }}
           onSave={(newLink: NavigationEmbeddableLink) => {
             setLinks({ ...links, [uuidv4()]: newLink });
