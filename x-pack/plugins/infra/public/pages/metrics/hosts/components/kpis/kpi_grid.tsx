@@ -37,7 +37,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle' | 'style'>> =
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
       defaultMessage: 'Normalized Load',
     }),
-    toolTip: TOOLTIP.rx,
+    toolTip: TOOLTIP.normalizedLoad1m,
   },
   {
     type: 'memoryUsage',
@@ -46,9 +46,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle' | 'style'>> =
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.title', {
       defaultMessage: 'Memory Usage',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.tooltip', {
-      defaultMessage: 'Main memory usage excluding page cache.',
-    }),
+    toolTip: TOOLTIP.memoryUsage,
   },
   {
     type: 'diskSpaceUsage',
