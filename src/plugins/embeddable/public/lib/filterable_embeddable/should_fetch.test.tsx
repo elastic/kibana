@@ -11,7 +11,6 @@ import type { FilterableEmbeddableInput } from './types';
 import { shouldFetch$ } from './should_fetch';
 
 describe('shouldFetch$', () => {
-  
   let shouldFetchCount = 0;
   let subscription: Subscription;
   let updateInput: (inputFragment: Partial<FilterableEmbeddableInput>) => void;
@@ -30,7 +29,7 @@ describe('shouldFetch$', () => {
         ...inputFragment,
       };
       subject.next(input);
-    }
+    };
 
     subscription = shouldFetch$<FilterableEmbeddableInput>(subject, () => {
       return input;
@@ -59,7 +58,7 @@ describe('shouldFetch$', () => {
       timeRange: {
         to: 'now',
         from: 'now-25m',
-      }
+      },
     });
     expect(shouldFetchCount).toBe(initialCount + 1);
   });
