@@ -44,7 +44,10 @@ import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
+import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate/csv_searchsource_immediate';
 import { CsvV2ExportType } from './export_types/csv_v2';
+import { PngV1ExportType } from './export_types/png';
+import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -109,6 +112,9 @@ export class ReportingCore {
   private csvSearchSourceExport: CsvSearchSourceExportType;
   private csvV2ExportType: CsvV2ExportType;
   private pdfExport: PdfExportType;
+  private pdfV1Export: PdfV1ExportType;
+  private pngV1Export: PngV1ExportType;
+  private csvSearchSourceImmediateExport: CsvSearchSourceImmediateExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -138,6 +144,18 @@ export class ReportingCore {
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
 
+    // deprecated export types for tests
+    this.pdfV1Export = new PdfV1ExportType(this.core, this.config, this.logger, this.context);
+    this.pngV1Export = new PngV1ExportType(this.core, this.config, this.logger, this.context);
+    this.csvSearchSourceImmediateExport = new CsvSearchSourceImmediateExportType(
+      this.core,
+      this.config,
+      this.logger,
+      this.context
+    );
+    this.exportTypesRegistry.register(this.pdfV1Export);
+    this.exportTypesRegistry.register(this.pngV1Export);
+    this.exportTypesRegistry.register(this.csvSearchSourceImmediateExport);
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -167,6 +185,10 @@ export class ReportingCore {
     this.csvV2ExportType.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
 
+    this.csvSearchSourceImmediateExport.setup(setupDeps);
+    this.pdfV1Export.setup(setupDeps);
+    this.pngV1Export.setup(setupDeps);
+
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
@@ -184,6 +206,9 @@ export class ReportingCore {
     this.csvSearchSourceExport.start({ ...startDeps, reporting: reportingStart });
     this.csvV2ExportType.start({ ...startDeps, reporting: reportingStart });
     this.pdfExport.start({ ...startDeps, reporting: reportingStart });
+    this.csvSearchSourceImmediateExport.start({ ...startDeps, reporting: reportingStart });
+    this.pdfV1Export.start({ ...startDeps, reporting: reportingStart });
+    this.pngV1Export.start({ ...startDeps, reporting: reportingStart });
 
     await this.assertKibanaIsAvailable();
 

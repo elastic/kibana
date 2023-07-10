@@ -50,7 +50,7 @@ export type ImmediateExecuteFn = (
   req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
-export class CsvSearchImmediateSourceExportType extends ExportType<
+export class CsvSearchSourceImmediateExportType extends ExportType<
   CsvSearchSourceImmediateExportTypeSetupDeps,
   CsvSearchSourceImmediateExportTypeStartDeps
 > {
@@ -73,7 +73,7 @@ export class CsvSearchImmediateSourceExportType extends ExportType<
     this.logger = logger.get('csv-searchsource-export');
   }
 
-  public createJob = (immediateJobParams: {
+  public createJob = async (immediateJobParams: {
     layout?:
       | {
           id?: LayoutType | undefined;
