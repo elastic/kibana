@@ -1138,6 +1138,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/rules @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/public/entity_analytics @elastic/security-detection-engine
+
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
@@ -1164,6 +1166,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/cypress/e2e/data_sources @elastic/security-detection-engine
 /x-pack/plugins/security_solution/cypress/e2e/exceptions @elastic/security-detection-engine
 /x-pack/plugins/security_solution/cypress/e2e/value_lists @elastic/security-detection-engine
+/x-pack/plugins/security_solution/cypress/e2e/entity_analytics @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/common/detection_engine/rule_exceptions @elastic/security-detection-engine
 
