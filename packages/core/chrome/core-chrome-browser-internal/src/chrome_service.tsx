@@ -310,6 +310,7 @@ export class ChromeService {
               navControlsCenter$={navControls.getCenter$()}
               navControlsRight$={navControls.getRight$()}
               loadingCount$={http.getLoadingCount$()}
+              headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
               homeHref$={projectNavigation.getProjectHome$()}
               docLinks={docLinks}
               kibanaVersion={injectedMetadata.getKibanaVersion()}

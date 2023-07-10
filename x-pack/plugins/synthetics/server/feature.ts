@@ -11,7 +11,7 @@ import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import { UPTIME_RULE_TYPES } from '../common/constants/uptime_alerts';
-import { umDynamicSettings } from './saved_objects/uptime_settings';
+import { settingsObjectType } from './saved_objects/uptime_settings';
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const uptimeFeature = {
@@ -32,7 +32,7 @@ export const uptimeFeature = {
       api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
       savedObject: {
         all: [
-          umDynamicSettings.name,
+          settingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,
@@ -61,7 +61,7 @@ export const uptimeFeature = {
         all: [],
         read: [
           syntheticsParamType,
-          umDynamicSettings.name,
+          settingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,

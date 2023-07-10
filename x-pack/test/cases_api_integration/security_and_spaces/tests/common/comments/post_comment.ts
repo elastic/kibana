@@ -274,6 +274,49 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('400s when adding too long comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const longComment = Array(30001).fill('a').toString();
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: longComment,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding empty comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: '',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when adding a comment with only empty characters', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          // @ts-expect-error
+          params: {
+            comment: '    ',
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
       it('400s when adding excess attributes for type user', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
