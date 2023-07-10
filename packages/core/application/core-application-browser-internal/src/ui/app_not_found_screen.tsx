@@ -31,6 +31,6 @@ export const AppNotFound = () => (
           />
         </p>
       }
-    ></EuiPageTemplate.EmptyPrompt>
+    />
   </EuiPageTemplate>
 );
