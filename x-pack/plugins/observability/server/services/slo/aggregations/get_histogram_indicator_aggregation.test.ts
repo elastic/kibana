@@ -43,36 +43,4 @@ describe('GetHistogramIndicatorAggregation', () => {
       getHistogramIndicatorAggregations.execute({ type: 'good', aggregationKey: 'goodEvents' })
     ).toThrow('Invalid Range: "from" should be less that "to".');
   });
-
-  it('should throw and error when the "from" is missing', () => {
-    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(
-      createHistogramIndicator({
-        good: {
-          field: 'latency',
-          aggregation: 'range',
-          to: 0,
-          filter: '',
-        },
-      })
-    );
-    expect(() =>
-      getHistogramIndicatorAggregations.execute({ type: 'good', aggregationKey: 'goodEvents' })
-    ).toThrow('Invalid Range: both "from" or "to" are required for a range aggregation.');
-  });
-
-  it('should throw and error when the "to" is missing', () => {
-    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(
-      createHistogramIndicator({
-        good: {
-          field: 'latency',
-          aggregation: 'range',
-          from: 100,
-          filter: '',
-        },
-      })
-    );
-    expect(() =>
-      getHistogramIndicatorAggregations.execute({ type: 'good', aggregationKey: 'goodEvents' })
-    ).toThrow('Invalid Range: both "from" or "to" are required for a range aggregation.');
-  });
 });

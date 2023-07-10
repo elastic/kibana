@@ -26,11 +26,6 @@ import { MetricIndicator } from './metric_indicator';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
-interface Option {
-  label: string;
-  value: string;
-}
-
 export function CustomMetricIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
 
