@@ -11,6 +11,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
@@ -19,6 +20,23 @@ import { getAlertingHealthStatus } from './get_health';
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
 export const HEALTH_TASK_ID = `Alerting-${HEALTH_TASK_TYPE}`;
+
+const stateSchemaByVersion = {
+  1: {
+    up: (state: Record<string, unknown>) => ({
+      runs: state.runs || 0,
+      // OK unless proven otherwise
+      health_status: state.health_status || HealthStatus.OK,
+    }),
+    schema: schema.object({
+      runs: schema.number(),
+      health_status: schema.string(),
+    }),
+  },
+};
+
+const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export function initializeAlertingHealth(
   logger: Logger,
@@ -35,17 +53,22 @@ export async function scheduleAlertingHealthCheck(
 ) {
   try {
     const interval = config.healthCheck.interval;
+    const state: LatestTaskStateSchema = {
+      runs: 0,
+      // OK unless proven otherwise
+      health_status: HealthStatus.OK,
+    };
     await taskManager.ensureScheduled({
       id: HEALTH_TASK_ID,
       taskType: HEALTH_TASK_TYPE,
       schedule: {
         interval,
       },
-      state: {},
+      state,
       params: {},
     });
   } catch (e) {
-    logger.debug(`Error scheduling task, received ${e.message}`);
+    logger.error(`Error scheduling ${HEALTH_TASK_ID}, received ${e.message}`);
   }
 }
 
@@ -57,6 +80,7 @@ function registerAlertingHealthCheckTask(
   taskManager.registerTaskDefinitions({
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
+      stateSchemaByVersion,
       createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
     },
   });
@@ -67,23 +91,26 @@ export function healthCheckTaskRunner(
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
 ) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run() {
         try {
-          return await getAlertingHealthStatus(
+          const result = await getAlertingHealthStatus(
             (
               await coreStartServices
             )[0].savedObjects,
             state.runs
           );
+          const updatedState: LatestTaskStateSchema = result.state;
+          return { state: updatedState };
         } catch (errMsg) {
           logger.warn(`Error executing alerting health check task: ${errMsg}`);
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            health_status: HealthStatus.Error,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: HealthStatus.Error,
-            },
+            state: updatedState,
           };
         }
       },
