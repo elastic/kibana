@@ -71,8 +71,8 @@ export class GetHistogramIndicatorAggregation {
   }
 
   private buildRangeKey(from: number | undefined, to: number | undefined) {
-    const fromString = from ? this.formatNumberAsFloatString(from) : '*';
-    const toString = to ? this.formatNumberAsFloatString(to) : '*';
+    const fromString = from != null ? this.formatNumberAsFloatString(from) : '*';
+    const toString = to != null ? this.formatNumberAsFloatString(to) : '*';
     return `${fromString}-${toString}`;
   }
 

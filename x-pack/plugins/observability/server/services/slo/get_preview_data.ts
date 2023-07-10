@@ -215,7 +215,7 @@ export class GetPreviewData {
         );
         const filterQuery = getElastichsearchQueryOrThrow(params.indicator.params.filter);
         const timestampField = params.indicator.params.timestampField;
-        const result = await this.esClient.search({
+        const options = {
           index: params.indicator.params.index,
           query: {
             bool: {
@@ -240,7 +240,8 @@ export class GetPreviewData {
               },
             },
           },
-        });
+        };
+        const result = await this.esClient.search(options);
 
         // @ts-ignore buckets is not improperly typed
         return result.aggregations?.perMinute.buckets.map((bucket) => ({

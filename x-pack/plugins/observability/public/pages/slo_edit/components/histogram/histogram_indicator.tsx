@@ -69,8 +69,7 @@ export function HistogramIndicator({ type, indexFields, isLoadingIndex }: Histog
   const fromTooltip = (
     <EuiIconTip
       content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromTooltip', {
-        defaultMessage:
-          'The "from" value is inclusive. Leave this field blank if you would like to include everything below the "to" value.',
+        defaultMessage: 'The "from" value is inclusive.',
       })}
       position="top"
     />
@@ -79,8 +78,7 @@ export function HistogramIndicator({ type, indexFields, isLoadingIndex }: Histog
   const toTooltip = (
     <EuiIconTip
       content={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.toTooltip', {
-        defaultMessage:
-          'The "to" value is NOT inclusive. Leave this field blank if you would like to include everything above the "from" value.',
+        defaultMessage: 'The "to" value is NOT inclusive.',
       })}
       position="top"
     />

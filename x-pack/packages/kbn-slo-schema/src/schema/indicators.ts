@@ -85,21 +85,33 @@ const metricCustomIndicatorSchema = t.type({
   }),
 });
 
-const histogramAggregation = t.keyof({
-  value_count: null,
-  range: null,
-});
-
-const histogramMetricDef = t.intersection([
+const rangeHistogramMetricType = t.literal('range');
+const rangeBasedHistogramMetricDef = t.intersection([
   t.type({
     field: t.string,
-    aggregation: histogramAggregation,
-  }),
-  t.partial({
+    aggregation: rangeHistogramMetricType,
     from: t.number,
     to: t.number,
+  }),
+  t.partial({
     filter: t.string,
   }),
+]);
+
+const valueCountHistogramMetricType = t.literal('value_count');
+const valueCountBasedHistogramMetricDef = t.intersection([
+  t.type({
+    field: t.string,
+    aggregation: valueCountHistogramMetricType,
+  }),
+  t.partial({
+    filter: t.string,
+  }),
+]);
+
+const histogramMetricDef = t.union([
+  valueCountBasedHistogramMetricDef,
+  rangeBasedHistogramMetricDef,
 ]);
 
 const histogramIndicatorTypeSchema = t.literal('sli.histogram.custom');

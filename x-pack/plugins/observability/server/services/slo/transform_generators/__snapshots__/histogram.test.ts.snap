@@ -82,6 +82,7 @@ Object {
               "keyed": true,
               "ranges": Array [
                 Object {
+                  "from": 0,
                   "to": 100,
                 },
               ],
@@ -214,6 +215,7 @@ Object {
               "keyed": true,
               "ranges": Array [
                 Object {
+                  "from": 0,
                   "to": 100,
                 },
               ],
