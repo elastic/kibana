@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../../components';
 
-import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+import type { IntegrationCardItem } from '../../screens/home';
 
 import type { ExtendedIntegrationCategory } from '../../screens/home/category_facets';
 

@@ -79,7 +79,6 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../tasks/common/rule_actions';
 import {
-  continueWithNextSection,
   createAndEnableRule,
   expandAdvancedSettings,
   fillAboutRule,
@@ -111,8 +110,8 @@ import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/naviga
 describe('Custom query rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   describe('Custom detection rules creation', () => {
     const expectedNumberOfRules = 1;
 
@@ -123,6 +122,7 @@ describe('Custom query rules', () => {
           return response.body.data.persistTimeline.timeline.savedObjectId;
         })
         .as('timelineId');
+      login();
     });
 
     it('Creates and enables a new rule', function () {
@@ -130,7 +130,7 @@ describe('Custom query rules', () => {
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);
-      continueWithNextSection();
+      cy.get(DEFINE_CONTINUE_BUTTON).click();
 
       cy.log('Filling about section');
       fillRuleName();
@@ -145,7 +145,7 @@ describe('Custom query rules', () => {
       fillThreatTechnique();
       fillThreatSubtechnique();
       fillNote();
-      continueWithNextSection();
+      cy.get(ABOUT_CONTINUE_BTN).click();
 
       cy.log('Filling schedule section');
       fillFrom();
@@ -153,15 +153,13 @@ describe('Custom query rules', () => {
       // expect define step to repopulate
       cy.get(DEFINE_EDIT_BUTTON).click();
       cy.get(CUSTOM_QUERY_INPUT).should('have.value', ruleFields.ruleQuery);
-      cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-      cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
+      cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
 
       // expect about step to populate
       cy.get(ABOUT_EDIT_BUTTON).click();
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', ruleFields.ruleName);
-      cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
-      cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
-      cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
+      cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
+      cy.get(SCHEDULE_CONTINUE_BUTTON).click();
 
       createAndEnableRule();
 
@@ -209,7 +207,7 @@ describe('Custom query rules', () => {
         'contain',
         `${ruleFields.threatSubtechnique.name} (${ruleFields.threatSubtechnique.id})`
       );
-      cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click();
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
@@ -240,6 +238,7 @@ describe('Custom query rules', () => {
         createRule(getNewRule({ rule_id: 'rule1', enabled: true, max_signals: 500 }));
         createRule(getNewOverrideRule({ rule_id: 'rule2', enabled: true, max_signals: 500 }));
         createRule(getExistingRule({ rule_id: 'rule3', enabled: true }));
+        login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
@@ -351,7 +350,9 @@ describe('Custom query rules', () => {
         deleteConnectors();
         createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
       });
+
       beforeEach(() => {
+        login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
@@ -410,7 +411,7 @@ describe('Custom query rules', () => {
         cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
 
         goToAboutStepTab();
-        cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
+        cy.get(TAGS_CLEAR_BUTTON).click();
         fillAboutRule(getEditedRule());
 
         cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
@@ -430,7 +431,7 @@ describe('Custom query rules', () => {
           getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
           getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
         });
-        cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+        cy.get(INVESTIGATION_NOTES_TOGGLE).click();
         cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', getEditedRule().note);
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(INDEX_PATTERNS_DETAILS).should(

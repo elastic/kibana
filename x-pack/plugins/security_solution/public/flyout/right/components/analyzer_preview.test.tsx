@@ -59,7 +59,6 @@ describe('<AnalyzerPreview />', () => {
     );
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      processEntityId: '',
       isActiveTimeline: false,
       documentId: 'ancestors-id',
       indices: ['rule-parameters-index'],
@@ -84,7 +83,6 @@ describe('<AnalyzerPreview />', () => {
     );
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
-      processEntityId: '',
       isActiveTimeline: false,
       documentId: '',
       indices: [],

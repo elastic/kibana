@@ -9,15 +9,11 @@ import type { RuleSignatureId, RuleTagArray, RuleVersion } from '../../../rule_s
 import type { DiffableRule } from '../../model/diff/diffable_rule/diffable_rule';
 
 export interface ReviewRuleInstallationResponseBody {
-  status_code: number;
-  message: string;
-  attributes: {
-    /** Aggregated info about all rules available for installation */
-    stats: RuleInstallationStatsForReview;
+  /** Aggregated info about all rules available for installation */
+  stats: RuleInstallationStatsForReview;
 
-    /** Info about individual rules: one object per each rule available for installation */
-    rules: RuleInstallationInfoForReview[];
-  };
+  /** Info about individual rules: one object per each rule available for installation */
+  rules: RuleInstallationInfoForReview[];
 }
 
 export interface RuleInstallationStatsForReview {

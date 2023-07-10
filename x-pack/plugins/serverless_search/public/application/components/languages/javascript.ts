@@ -13,39 +13,19 @@ export const javascriptDefinition: LanguageDefinition = {
   advancedConfig: docLinks.jsAdvancedConfig,
   apiReference: docLinks.jsApiReference,
   basicConfig: docLinks.jsBasicConfig,
-  buildSearchQuery: `// Sample flight data
-const dataset = [
-{'flight': '9HY9SWR', 'price': 841.2656419677076, 'delayed': false},
-{'flight': 'X98CCZO', 'price': 882.9826615595518, 'delayed': false},
-{'flight': 'UFK2WIZ', 'price': 190.6369038508356, 'delayed': true},
-];
-
-// Index with the bulk helper
-const result = await client.helpers.bulk({
-datasource: dataset,
-onDocument (doc) {
-  return { index: { _index: 'my-index-name' }};
-}
+  buildSearchQuery: `// Let's search!
+const searchResult = await client.search({
+  index: 'my-index-name',
+  q: '9HY9SWR'
 });
 
-console.log(result);
-/**
-{
-total: 3,
-failed: 0,
-retry: 0,
-successful: 3,
-noop: 0,
-time: 421,
-bytes: 293,
-aborted: false
-}
-*/`,
-  configureClient: `const { Client } = require('@elastic/elasticsearch');
-const client = Client({
-node: 'https://my-deployment-url',
+console.log(searchResult.hits.hits)
+`,
+  configureClient: ({ url, apiKey }) => `const { Client } = require('@elastic/elasticsearch');
+const client = new Client({
+node: '${url}',
 auth: {
-    apiKey: 'your_api_key'
+    apiKey: '${apiKey}'
 }
 });`,
   docLink: docLinks.jsClient,
@@ -79,7 +59,31 @@ bytes: 293,
 aborted: false
 }
 */`,
-  installClient: `$ npm install @elastic/elasticsearch@8`,
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+  }) => `const { Client } = require('@elastic/elasticsearch');
+const client = new Client({
+  node: '${url}',
+  auth: {
+      apiKey: '${apiKey}'
+  }
+});
+const dataset = [
+  {'name': 'foo', 'title': 'bar'},
+];
+
+// Index with the bulk helper
+const result = await client.helpers.bulk({
+  datasource: dataset,
+  onDocument (doc) {
+    return { index: { _index: '${indexName ?? 'index_name'}' }};
+  }
+});
+console.log(result);
+`,
+  installClient: 'npm install @elastic/elasticsearch@8',
   name: i18n.translate('xpack.serverlessSearch.languages.javascript', {
     defaultMessage: 'JavaScript / Node.js',
   }),

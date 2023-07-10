@@ -44,6 +44,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
       try {
         const rulesClient = (await context.alerting).getRulesClient();
 
+        // TODO: https://github.com/elastic/kibana/issues/125642 Reuse fetchRuleById
         const rule = await readRules({
           id,
           rulesClient,

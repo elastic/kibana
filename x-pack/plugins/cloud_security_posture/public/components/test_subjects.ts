@@ -27,6 +27,9 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   NOT_DEPLOYED: 'agent-not-deployed-vuln-mgmt',
   UNPRIVILEGED: 'status-api-vuln-mgmt-unprivileged',
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
+  INDEX_TIMEOUT: 'vulnerabilities-timeout',
 };
 
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
+
+export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vuknerabilities_cvss_score_badge';

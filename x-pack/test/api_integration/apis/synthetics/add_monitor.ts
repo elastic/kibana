@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { ConfigKey, DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { format as formatUrl } from 'url';
@@ -19,7 +19,7 @@ import supertest from 'supertest';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddNewMonitors', function () {
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = httpMonitorJson;
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = { ...httpMonitorJson, 'check.request.headers': null };
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = { ...httpMonitorJson, type: 'invalid-data-steam' };
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
@@ -174,21 +174,21 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor)
         .expect(200);
 
       const response = await supertestAPI
-        .get(`${API_URLS.SYNTHETICS_MONITORS}/${apiResponse.body.id}`)
+        .get(SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', apiResponse.body.id))
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      expect(response.body.attributes).not.to.have.keys('unknownkey', 'url');
+      expect(response.body).not.to.have.keys('unknownkey', 'url');
     });
 
     it('can create monitor with API key with proper permissions', async () => {
-      await supertestAPI
+      const response: Record<string, any> = await supertestAPI
         .post('/internal/security/api_key')
         .set('kbn-xsrf', 'xxx')
         .send({
@@ -209,26 +209,25 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         })
-        .expect(200)
-        .then(async (response: Record<string, any>) => {
-          const { name, encoded: apiKey } = response.body;
-          expect(name).to.eql('test_api_key');
+        .expect(200);
 
-          const config = getService('config');
+      const { name, encoded: apiKey } = response.body;
+      expect(name).to.eql('test_api_key');
 
-          const { hostname, protocol, port } = config.get('servers.kibana');
-          const kibanaServerUrl = formatUrl({ hostname, protocol, port });
-          const supertestNoAuth = supertest(kibanaServerUrl);
+      const config = getService('config');
 
-          const apiResponse = await supertestNoAuth
-            .post(API_URLS.SYNTHETICS_MONITORS)
-            .auth(name, apiKey)
-            .set('kbn-xsrf', 'true')
-            .set('Authorization', `ApiKey ${apiKey}`)
-            .send(httpMonitorJson);
+      const { hostname, protocol, port } = config.get('servers.kibana');
+      const kibanaServerUrl = formatUrl({ hostname, protocol, port });
+      const supertestNoAuth = supertest(kibanaServerUrl);
 
-          expect(apiResponse.status).eql(200);
-        });
+      const apiResponse = await supertestNoAuth
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .auth(name, apiKey)
+        .set('kbn-xsrf', 'true')
+        .set('Authorization', `ApiKey ${apiKey}`)
+        .send(httpMonitorJson);
+
+      expect(apiResponse.status).eql(200);
     });
 
     it('can not create monitor with API key without proper permissions', async () => {
@@ -265,7 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
           const supertestNoAuth = supertest(kibanaServerUrl);
 
           const apiResponse = await supertestNoAuth
-            .post(API_URLS.SYNTHETICS_MONITORS)
+            .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
             .auth(name, apiKey)
             .set('kbn-xsrf', 'true')
             .set('Authorization', `ApiKey ${apiKey}`)
@@ -317,14 +316,14 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         await supertestWithoutAuth
-          .post(API_URLS.SYNTHETICS_MONITORS)
+          .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(newMonitor)
           .expect(500);
 
         const response = await supertestAPI
-          .get(API_URLS.SYNTHETICS_MONITORS)
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
           .query({
             filter: `${syntheticsMonitorType}.attributes.name: "${name}"`,
@@ -370,7 +369,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         const apiResponse = await supertestWithoutAuth
-          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(monitor)
@@ -381,7 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
         await security.user.delete(username);
         await security.role.delete(roleName);
         await supertestAPI
-          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
       }
@@ -417,7 +416,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         const apiResponse = await supertestWithoutAuth
-          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .query({ preserve_namespace: true })
           .set('kbn-xsrf', 'true')
@@ -429,7 +428,7 @@ export default function ({ getService }: FtrProviderContext) {
         await security.user.delete(username);
         await security.role.delete(roleName);
         await supertestAPI
-          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
       }
@@ -462,7 +461,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         const apiResponse = await supertestWithoutAuth
-          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(monitor)
@@ -473,7 +472,7 @@ export default function ({ getService }: FtrProviderContext) {
         await security.user.delete(username);
         await security.role.delete(roleName);
         await supertestAPI
-          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
       }

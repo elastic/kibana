@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
     );
   }
 
-  describe('/api/transform/transforms/_stats', function () {
+  describe('/internal/transform/transforms/_stats', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -74,12 +74,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return a list of transforms statistics for super-user', async () => {
       const { body, status } = await supertest
-        .get('/api/transform/transforms/_stats')
+        .get('/internal/transform/transforms/_stats')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(getCommonRequestHeader())
+        .set(getCommonRequestHeader('1'))
         .send();
       transform.api.assertResponseStatusCode(200, status, body);
 
@@ -88,12 +88,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return a list of transforms statistics view-only user', async () => {
       const { body, status } = await supertest
-        .get(`/api/transform/transforms/_stats`)
+        .get(`/internal/transform/transforms/_stats`)
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
-        .set(getCommonRequestHeader())
+        .set(getCommonRequestHeader('1'))
         .send();
       transform.api.assertResponseStatusCode(200, status, body);
 

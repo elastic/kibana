@@ -40,3 +40,22 @@ export const ACTION_TYPE_TITLE = i18n.translate(
     defaultMessage: 'Send to Slack',
   }
 );
+export const ALLOWED_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.allowedChannelsLabel',
+  {
+    defaultMessage: 'Channels',
+  }
+);
+export const SUCCESS_FETCH_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.successFetchChannelsText',
+  {
+    defaultMessage: 'Fetch all channels',
+  }
+);
+
+export const ERROR_FETCH_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.errorFetchChannelsText',
+  {
+    defaultMessage: 'Cannot fetch channels, please check the validity of your token',
+  }
+);

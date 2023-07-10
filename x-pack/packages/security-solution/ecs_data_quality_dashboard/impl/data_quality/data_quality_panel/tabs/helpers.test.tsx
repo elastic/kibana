@@ -77,13 +77,14 @@ describe('helpers', () => {
           getGroupByFieldsOnClick: jest.fn(),
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isAssistantEnabled: true,
           onAddToNewCase: jest.fn(),
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
           setSelectedTabId: jest.fn(),
           stats: mockStatsGreenIndex,
-          theme: DARK_THEME,
+          baseTheme: DARK_THEME,
         }).map((x) => omit(['append', 'content'], x))
       ).toEqual([
         {

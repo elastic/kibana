@@ -67,7 +67,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
-    describe('"kql" rule type', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160297
+    describe.skip('"kql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
         await createRule(supertest, log, rule);
@@ -290,7 +291,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/156088
-    describe('"eql" rule type', () => {
+    describe.skip('"eql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry'], 'rule-1', false);
         await createRule(supertest, log, rule);

@@ -644,6 +644,45 @@ export default async function ({ readConfigFile }) {
             ],
           },
         },
+
+        slo_all: {
+          kibana: [
+            {
+              feature: {
+                slo: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+        slo_read_only: {
+          kibana: [
+            {
+              feature: {
+                slo: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
       },
       defaultRoles: ['superuser'],
     },

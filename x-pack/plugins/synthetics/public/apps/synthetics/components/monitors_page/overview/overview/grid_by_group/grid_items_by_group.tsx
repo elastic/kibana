@@ -14,7 +14,7 @@ import { OverviewLoader } from '../overview_loader';
 import {
   getSyntheticsFilterDisplayValues,
   monitorTypeKeyLabelMap,
-} from '../../../common/monitor_filters/filter_fields';
+} from '../../../../../utils/filters/filter_fields';
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
 import { ConfigKey, MonitorOverviewItem } from '../../../../../../../../common/runtime_types';

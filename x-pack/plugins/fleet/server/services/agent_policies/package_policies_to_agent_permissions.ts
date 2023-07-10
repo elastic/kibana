@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE } from '../../../common/constants';
+import {
+  FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
+  FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
+} from '../../../common/constants';
 
 import { getNormalizedDataStreams } from '../../../common/services';
 
@@ -56,7 +59,10 @@ export async function storedPackagePoliciesToAgentPermissions(
 
       // Special handling for Universal Profiling packages, as it does not use data streams _only_,
       // but also indices that do not adhere to the convention.
-      if (pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE) {
+      if (
+        pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
+        pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
+      ) {
         return Promise.resolve(universalProfilingPermissions(packagePolicy.id));
       }
 

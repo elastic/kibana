@@ -140,11 +140,14 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         loading={findingsGroupByNone.isFetching}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false} style={{ width: 400 }}>
-          {!error && <FindingsGroupBySelector type="default" />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!error && (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false} style={{ width: 188 }}>
+            <FindingsGroupBySelector type="default" />
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>

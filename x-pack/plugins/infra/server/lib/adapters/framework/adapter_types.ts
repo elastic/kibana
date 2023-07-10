@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Lifecycle } from '@hapi/hapi';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteConfig, RouteMethod } from '@kbn/core/server';
@@ -23,6 +24,8 @@ import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plu
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
+import { VersionedRouteConfig } from '@kbn/core-http-server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -31,15 +34,18 @@ export interface InfraServerPluginSetupDeps {
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   observability: ObservabilityPluginSetup;
+  share: SharePluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   ml?: MlPluginSetup;
+  logsShared: LogsSharedPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
+  logsShared: LogsSharedPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {
@@ -171,3 +177,7 @@ export interface InfraFieldDef {
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
 } & RouteConfig<Params, Query, Body, Method>;
+
+export type InfraVersionedRouteConfig<Method extends RouteMethod> = {
+  method: RouteMethod;
+} & VersionedRouteConfig<Method>;

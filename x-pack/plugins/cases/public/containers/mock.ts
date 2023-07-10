@@ -74,6 +74,7 @@ export const elasticUser = {
 };
 
 export const tags: string[] = ['coke', 'pepsi'];
+export const categories: string[] = ['snickers', 'twix'];
 
 export const basicComment: CommentUI = {
   comment: 'Solve this fast!',
@@ -241,6 +242,7 @@ export const basicCase: CaseUI = {
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+  category: null,
 };
 
 export const basicFileMock: FileJSON = {
@@ -357,6 +359,7 @@ export const mockCase: CaseUI = {
     syncAlerts: true,
   },
   assignees: [],
+  category: null,
 };
 
 export const basicCasePost: CaseUI = {
@@ -414,7 +417,6 @@ export const pushedCase: CaseUI = {
 const basicAction = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
-  caseId: basicCaseId,
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
   payload: { title: 'a title' },
@@ -770,7 +772,16 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: externalReferenceAttachmentSnake },
+    payload: {
+      comment: {
+        type: CommentType.externalReference,
+        externalReferenceId: 'my-id',
+        externalReferenceMetadata: { test_foo: 'foo' },
+        externalReferenceAttachmentTypeId: '.test',
+        externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
   {
@@ -781,7 +792,14 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: persistableStateAttachmentSnake },
+    payload: {
+      comment: {
+        type: CommentType.persistableState,
+        persistableStateAttachmentState: { test_foo: 'foo' },
+        persistableStateAttachmentTypeId: '.test',
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
 ];
@@ -876,7 +894,16 @@ export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: externalReferenceAttachment },
+    payload: {
+      comment: {
+        type: CommentType.externalReference,
+        externalReferenceId: 'my-id',
+        externalReferenceMetadata: { test_foo: 'foo' },
+        externalReferenceAttachmentTypeId: '.test',
+        externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
   {
@@ -887,7 +914,14 @@ export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: persistableStateAttachment },
+    payload: {
+      comment: {
+        type: CommentType.persistableState,
+        persistableStateAttachmentState: { test_foo: 'foo' },
+        persistableStateAttachmentTypeId: '.test',
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
 ];

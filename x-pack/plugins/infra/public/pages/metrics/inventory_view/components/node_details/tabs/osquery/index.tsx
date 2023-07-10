@@ -13,7 +13,7 @@ import { TabContent, TabProps } from '../shared';
 import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
-import { useMetadata } from '../../../../../metric_detail/hooks/use_metadata';
+import { useMetadata } from '../../../../../../../components/asset_details/hooks/use_metadata';
 import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
 
 const TabComponent = (props: TabProps) => {
@@ -32,6 +32,7 @@ const TabComponent = (props: TabProps) => {
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
+
   // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
 
@@ -48,7 +49,7 @@ const TabComponent = (props: TabProps) => {
 
     return (
       <TabContent>
-        <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField />
+        <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />
       </TabContent>
     );
   }, [OsqueryAction, loading, metadata]);

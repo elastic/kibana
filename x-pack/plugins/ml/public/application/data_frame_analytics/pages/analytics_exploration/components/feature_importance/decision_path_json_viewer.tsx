@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import type { FeatureImportance } from '../../../../../../../common/types/feature_importance';
+import type { FeatureImportance } from '@kbn/ml-data-frame-analytics-utils';
 
 interface DecisionPathJSONViewerProps {
   featureImportance: FeatureImportance[];

@@ -7,9 +7,9 @@
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import type { SavedTimeline } from '../../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import type { SavedTimeline } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import type { Note } from '../../../../../common/types/timeline/note/api';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 
@@ -18,8 +18,8 @@ describe('pickSavedTimeline', () => {
   const getMockSavedTimeline = (): SavedTimeline & {
     savedObjectId?: string | null;
     version?: string;
-    eventNotes?: NoteSavedObject[];
-    globalNotes?: NoteSavedObject[];
+    eventNotes?: Note[];
+    globalNotes?: Note[];
     pinnedEventIds?: [];
   } => ({
     savedObjectId: '7af80430-03f4-11eb-9d9d-ffba20fabba8',

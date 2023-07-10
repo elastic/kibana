@@ -8,12 +8,14 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { groupBy } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-
-import type { EsAssetReference } from '../../../../../../../../common';
+import type {
+  EsAssetReference,
+  AssetSOObject,
+  SimpleSOAssetType,
+} from '../../../../../../../../common';
+import { allowedAssetTypes } from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
@@ -25,15 +27,14 @@ import {
   useLink,
   useStartServices,
   useUIExtension,
+  useAuthz,
 } from '../../../../../hooks';
+
+import { sendGetBulkAssets } from '../../../../../hooks';
 
 import { DeferredAssetsSection } from './deferred_assets_accordion';
 
-import type { AssetSavedObject } from './types';
-import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
-
-const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
@@ -42,11 +43,10 @@ interface AssetsPanelProps {
 export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
   const pkgkey = `${name}-${version}`;
-  const {
-    spaces,
-    savedObjects: { client: savedObjectsClient },
-  } = useStartServices();
+  const { spaces } = useStartServices();
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
+
+  const canReadPackageSettings = useAuthz().integrations.readPackageInfo;
 
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -54,19 +54,19 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
 
   // assume assets are installed in this space until we find otherwise
   const [assetsInstalledInCurrentSpace, setAssetsInstalledInCurrentSpace] = useState<boolean>(true);
-  const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | AssetSavedObject[]>();
+  const [assetSavedObjects, setAssetsSavedObjects] = useState<undefined | SimpleSOAssetType[]>();
   const [deferredInstallations, setDeferredInstallations] = useState<EsAssetReference[]>();
 
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
-      if ('savedObject' in packageInfo) {
+      if ('installationInfo' in packageInfo) {
         if (spaces) {
           const { id: spaceId } = await spaces.getActiveSpace();
-          const assetInstallSpaceId = packageInfo.savedObject.attributes.installed_kibana_space_id;
+          const assetInstallSpaceId = packageInfo.installationInfo?.installed_kibana_space_id;
+
           // if assets are installed in a different space no need to attempt to load them.
           if (assetInstallSpaceId && assetInstallSpaceId !== spaceId) {
             setAssetsInstalledInCurrentSpace(false);
@@ -75,71 +75,41 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           }
         }
 
-        const {
-          savedObject: { attributes: packageAttributes },
-        } = packageInfo;
+        const pkgInstallationInfo = packageInfo.installationInfo;
 
         if (
-          Array.isArray(packageAttributes.installed_es) &&
-          packageAttributes.installed_es?.length > 0
+          pkgInstallationInfo?.installed_es &&
+          Array.isArray(pkgInstallationInfo.installed_es) &&
+          pkgInstallationInfo.installed_es.length > 0
         ) {
-          const deferredAssets = packageAttributes.installed_es.filter(
+          const deferredAssets = pkgInstallationInfo.installed_es.filter(
             (asset) => asset.deferred === true
           );
           setDeferredInstallations(deferredAssets);
         }
-
-        const authorizedTransforms = packageAttributes.installed_es.filter(
+        const authorizedTransforms = (pkgInstallationInfo?.installed_es || []).filter(
           (asset) => asset.type === ElasticsearchAssetType.transform && !asset.deferred
         );
 
         if (
-          authorizedTransforms.length === 0 &&
-          (!packageAttributes.installed_kibana || packageAttributes.installed_kibana.length === 0)
+          authorizedTransforms?.length === 0 &&
+          (!pkgInstallationInfo?.installed_kibana ||
+            pkgInstallationInfo.installed_kibana.length === 0)
         ) {
           setIsLoading(false);
           return;
         }
         try {
-          const objectsToGet = [...authorizedTransforms, ...packageAttributes.installed_kibana].map(
-            ({ id, type }) => ({
-              id,
-              type,
-            })
-          );
-          // We don't have an API to know which SO types a user has access to, so instead we make a request for each
-          // SO type and ignore the 403 errors
-          const objectsByType = await Promise.all(
-            Object.entries(groupBy(objectsToGet, 'type')).map(([type, objects]) =>
-              savedObjectsClient
-                .bulkResolve(objects)
-                // Ignore privilege errors
-                .catch((e: any) => {
-                  if (e?.body?.statusCode === 403) {
-                    setHasPermissionError(true);
-                    return { resolved_objects: [] };
-                  } else {
-                    throw e;
-                  }
-                })
-                .then(
-                  ({
-                    resolved_objects: resolvedObjects,
-                  }: {
-                    resolved_objects: ResolvedSimpleSavedObject[];
-                  }) => {
-                    return resolvedObjects
-                      .map(({ saved_object: savedObject }) => savedObject)
-                      .filter(
-                        (savedObject) =>
-                          savedObject?.error?.statusCode !== 404 &&
-                          allowedAssetTypesLookup.has(savedObject.type)
-                      ) as AssetSavedObject[];
-                  }
-                )
-            )
-          );
-          setAssetsSavedObjects([...objectsByType.flat()]);
+          const assetIds: AssetSOObject[] = [
+            ...authorizedTransforms,
+            ...(pkgInstallationInfo?.installed_kibana || []),
+          ].map(({ id, type }) => ({
+            id,
+            type,
+          }));
+
+          const response = await sendGetBulkAssets({ assetIds });
+          setAssetsSavedObjects(response.data?.items);
         } catch (e) {
           setFetchError(e);
         } finally {
@@ -150,7 +120,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       }
     };
     fetchAssetSavedObjects();
-  }, [savedObjectsClient, packageInfo, spaces]);
+  }, [packageInfo, spaces]);
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
@@ -160,10 +130,26 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
 
   const showDeferredInstallations =
     Array.isArray(deferredInstallations) && deferredInstallations.length > 0;
-
   let content: JSX.Element | Array<JSX.Element | null> | null;
   if (isLoading) {
     content = <Loading />;
+  } else if (!canReadPackageSettings) {
+    content = (
+      <EuiCallOut
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.assets.assetsPermissionErrorTitle"
+            defaultMessage="Permission error"
+          />
+        }
+      >
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetails.assets.assetsPermissionError"
+          defaultMessage="You do not have permission to retrieve the Kibana saved object for that integration. Contact your administrator."
+        />
+      </EuiCallOut>
+    );
   } else if (fetchError) {
     content = (
       <Error
@@ -186,23 +172,6 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           />
         </h2>
       </EuiTitle>
-    );
-  } else if (hasPermissionError) {
-    content = (
-      <EuiCallOut
-        color="warning"
-        title={
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.assets.assetsPermissionErrorTitle"
-            defaultMessage="Permission errors"
-          />
-        }
-      >
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetails.assets.assetsPermissionError"
-          defaultMessage="You do not have permission to retrieve the Kibana saved object for that integration. Contact your administrator."
-        />
-      </EuiCallOut>
     );
   } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {

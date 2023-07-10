@@ -8,12 +8,12 @@
 import * as rt from 'io-ts';
 
 import type { SavedObject } from '@kbn/core/server';
-import type { ConfigurationAttributes } from '../../../common/api';
+import type { ConfigurationAttributes } from '../../../common/types/domain';
 import {
   ConfigurationActivityFieldsRt,
-  ConfigurationBasicWithoutOwnerRt,
   ConfigurationAttributesRt,
-} from '../../../common/api';
+  ConfigurationBasicWithoutOwnerRt,
+} from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { User } from './user';
 
@@ -31,8 +31,8 @@ export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;
 
 export const ConfigurationPartialAttributesRt = rt.intersection([
-  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.props)),
-  rt.exact(rt.partial(ConfigurationActivityFieldsRt.props)),
+  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.type.props)),
+  rt.exact(rt.partial(ConfigurationActivityFieldsRt.type.props)),
   rt.exact(
     rt.partial({
       owner: rt.string,

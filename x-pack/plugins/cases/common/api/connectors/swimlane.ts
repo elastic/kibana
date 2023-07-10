@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const SwimlaneFieldsRT = rt.type({
+export const SwimlaneFieldsRT = rt.strict({
   caseId: rt.union([rt.string, rt.null]),
 });
 

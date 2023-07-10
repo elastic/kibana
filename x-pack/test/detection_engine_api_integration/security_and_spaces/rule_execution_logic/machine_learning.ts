@@ -14,6 +14,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
@@ -66,16 +67,13 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/145776
-  describe('Machine learning type rules', () => {
+  describe.skip('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest, log });
-      console.log('HERE');
+      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
-      console.log('--------HERE 2');
-
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
     after(async () => {
@@ -121,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           'event.kind': 'signal',
           [ALERT_ANCESTORS]: expect.any(Array),
           [ALERT_WORKFLOW_STATUS]: 'open',
+          [ALERT_WORKFLOW_TAGS]: [],
           [ALERT_STATUS]: 'active',
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',

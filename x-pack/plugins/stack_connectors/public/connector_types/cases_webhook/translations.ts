@@ -119,6 +119,13 @@ export const USERNAME_REQUIRED = i18n.translate(
   }
 );
 
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredAuthPasswordText',
+  {
+    defaultMessage: 'Password is required.',
+  }
+);
+
 export const SUMMARY_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredWebhookSummaryText',
   {

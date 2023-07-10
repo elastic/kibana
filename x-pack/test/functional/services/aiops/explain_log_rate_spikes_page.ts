@@ -150,15 +150,11 @@ export function ExplainLogRateSpikesPageProvider({
       });
     },
 
-    async clickSpikeAnalysisGroupSwitch(checked: boolean) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry(
-        `aiopsExplainLogRateSpikesGroupSwitch${checked ? ' checked' : ''}`
-      );
+    async clickSpikeAnalysisGroupSwitchOn() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsExplainLogRateSpikesGroupSwitchOn');
 
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.existOrFail(
-          `aiopsExplainLogRateSpikesGroupSwitch${!checked ? ' checked' : ''}`
-        );
+        await testSubjects.existOrFail('aiopsExplainLogRateSpikesGroupSwitch checked');
       });
     },
 
@@ -243,6 +239,14 @@ export function ExplainLogRateSpikesPageProvider({
         await testSubjects.existOrFail('aiopProgressTitle');
         const currentProgressTitle = await testSubjects.getVisibleText('aiopProgressTitle');
         expect(currentProgressTitle).to.be(expectedProgressTitle);
+      });
+    },
+
+    async assertAnalysisComplete() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('aiopsAnalysisComplete');
+        const currentProgressTitle = await testSubjects.getVisibleText('aiopsAnalysisComplete');
+        expect(currentProgressTitle).to.be('Analysis complete');
       });
     },
 

@@ -68,7 +68,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
   const commonDataGrid = MachineLearningCommonDataGridProvider(context);
-  const commonFieldStatsFlyout = MachineLearningFieldStatsFlyoutProvider(context);
+  const commonFieldStatsFlyout = MachineLearningFieldStatsFlyoutProvider(context, commonUI);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyCharts = AnomalyChartsProvider(context);
@@ -90,7 +90,11 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     api,
     commonFieldStatsFlyout
   );
-  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
+  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(
+    context,
+    commonUI,
+    customUrls
+  );
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
     context,
     commonUI,

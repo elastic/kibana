@@ -10,15 +10,11 @@ import type { DiffableRule } from '../../model/diff/diffable_rule/diffable_rule'
 import type { PartialRuleDiff } from '../../model/diff/rule_diff/rule_diff';
 
 export interface ReviewRuleUpgradeResponseBody {
-  status_code: number;
-  message: string;
-  attributes: {
-    /** Aggregated info about all rules available for upgrade */
-    stats: RuleUpgradeStatsForReview;
+  /** Aggregated info about all rules available for upgrade */
+  stats: RuleUpgradeStatsForReview;
 
-    /** Info about individual rules: one object per each rule available for upgrade */
-    rules: RuleUpgradeInfoForReview[];
-  };
+  /** Info about individual rules: one object per each rule available for upgrade */
+  rules: RuleUpgradeInfoForReview[];
 }
 
 export interface RuleUpgradeStatsForReview {
@@ -34,4 +30,5 @@ export interface RuleUpgradeInfoForReview {
   rule_id: RuleSignatureId;
   rule: DiffableRule;
   diff: PartialRuleDiff;
+  revision: number;
 }

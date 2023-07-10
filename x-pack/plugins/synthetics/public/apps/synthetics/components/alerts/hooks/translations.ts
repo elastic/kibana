@@ -18,8 +18,14 @@ export const ToggleFlyoutTranslations = {
   toggleMonitorStatusAriaLabel: i18n.translate('xpack.synthetics.toggleAlertFlyout.ariaLabel', {
     defaultMessage: 'Open add rule flyout',
   }),
+  toggleTlsAriaLabel: i18n.translate('xpack.synthetics.toggleAlertFlyout.tls.ariaLabel', {
+    defaultMessage: 'Open add tls rule flyout',
+  }),
   toggleMonitorStatusContent: i18n.translate('xpack.synthetics.toggleAlertButton.content', {
     defaultMessage: 'Monitor status rule',
+  }),
+  toggleTlsContent: i18n.translate('xpack.synthetics.toggleTlsAlertButton.label.content', {
+    defaultMessage: 'TLS certificate rule',
   }),
   navigateToAlertingUIAriaLabel: i18n.translate('xpack.synthetics.app.navigateToAlertingUi', {
     defaultMessage: 'Leave Synthetics and go to Alerting Management page',

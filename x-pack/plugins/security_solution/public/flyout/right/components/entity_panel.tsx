@@ -14,14 +14,24 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
+  EuiIcon,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import {
-  ENTITY_PANEL_TEST_ID,
-  ENTITY_PANEL_ICON_TEST_ID,
   ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID,
   ENTITY_PANEL_HEADER_TEST_ID,
+  ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID,
+  ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
   ENTITY_PANEL_CONTENT_TEST_ID,
 } from './test_ids';
+
+const PanelHeaderRightSectionWrapper = styled(EuiFlexItem)`
+  margin-right: ${({ theme }) => theme.eui.euiSizeM};
+`;
+
+const IconWrapper = styled(EuiIcon)`
+  margin: ${({ theme }) => theme.eui.euiSizeS} 0;
+`;
 
 export interface EntityPanelProps {
   /**
@@ -33,10 +43,6 @@ export interface EntityPanelProps {
    */
   iconType: string;
   /**
-   * Content to show in the content section of the panel
-   */
-  content?: string | React.ReactNode;
-  /**
    * Boolean to determine the panel to be collapsable (with toggle)
    */
   expandable?: boolean;
@@ -44,6 +50,14 @@ export interface EntityPanelProps {
    * Boolean to allow the component to be expanded or collapsed on first render
    */
   expanded?: boolean;
+  /** 
+  Optional content and actions to be displayed on the right side of header
+  */
+  headerContent?: React.ReactNode;
+  /** 
+  Data test subject string for testing
+  */
+  ['data-test-subj']?: string;
 }
 
 /**
@@ -52,9 +66,11 @@ export interface EntityPanelProps {
 export const EntityPanel: React.FC<EntityPanelProps> = ({
   title,
   iconType,
-  content,
+  children,
   expandable = false,
   expanded = false,
+  headerContent,
+  'data-test-subj': dataTestSub,
 }) => {
   const [toggleStatus, setToggleStatus] = useState(expanded);
   const toggleQuery = useCallback(() => {
@@ -63,67 +79,78 @@ export const EntityPanel: React.FC<EntityPanelProps> = ({
 
   const toggleIcon = useMemo(
     () => (
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj={ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID}
-          aria-label={`entity-toggle`}
-          color="text"
-          display="empty"
-          iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
-          onClick={toggleQuery}
-          size="s"
-        />
-      </EuiFlexItem>
+      <EuiButtonIcon
+        data-test-subj={ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID}
+        aria-label={`entity-toggle`}
+        color="text"
+        display="empty"
+        iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
+        onClick={toggleQuery}
+        size="s"
+      />
     ),
     [toggleStatus, toggleQuery]
   );
 
-  const icon = useMemo(() => {
-    return (
-      <EuiButtonIcon
-        data-test-subj={ENTITY_PANEL_ICON_TEST_ID}
-        aria-label={'entity-icon'}
-        color="text"
-        display="empty"
-        iconType={iconType}
-        size="s"
-      />
-    );
-  }, [iconType]);
+  const headerLeftSection = useMemo(
+    () => (
+      <EuiFlexItem>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          data-test-subj={ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID}
+        >
+          <EuiFlexItem grow={false}>{expandable && children && toggleIcon}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <IconWrapper type={iconType} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxxs">
+              <EuiText>{title}</EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    ),
+    [title, children, toggleIcon, expandable, iconType]
+  );
+
+  const headerRightSection = useMemo(
+    () =>
+      headerContent && (
+        <PanelHeaderRightSectionWrapper
+          grow={false}
+          data-test-subj={ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID}
+        >
+          {headerContent}
+        </PanelHeaderRightSectionWrapper>
+      ),
+    [headerContent]
+  );
 
   const showContent = useMemo(() => {
-    if (!content) {
+    if (!children) {
       return false;
     }
     return !expandable || (expandable && toggleStatus);
-  }, [content, expandable, toggleStatus]);
-
-  const panelHeader = useMemo(() => {
-    return (
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-        data-test-subj={ENTITY_PANEL_HEADER_TEST_ID}
-      >
-        {expandable && content && toggleIcon}
-        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxxs">
-            <EuiText>{title}</EuiText>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }, [title, icon, content, toggleIcon, expandable]);
+  }, [children, expandable, toggleStatus]);
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder data-test-subj={ENTITY_PANEL_TEST_ID}>
-      <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="xs">
-        {panelHeader}
+    <EuiSplitPanel.Outer grow hasBorder data-test-subj={dataTestSub}>
+      <EuiSplitPanel.Inner
+        grow={false}
+        color="subdued"
+        paddingSize={'xs'}
+        data-test-subj={ENTITY_PANEL_HEADER_TEST_ID}
+      >
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          {headerLeftSection}
+          {headerRightSection}
+        </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       {showContent && (
         <EuiSplitPanel.Inner paddingSize="none">
-          <EuiPanel data-test-subj={ENTITY_PANEL_CONTENT_TEST_ID}>{content}</EuiPanel>
+          <EuiPanel data-test-subj={ENTITY_PANEL_CONTENT_TEST_ID}>{children}</EuiPanel>
         </EuiSplitPanel.Inner>
       )}
     </EuiSplitPanel.Outer>

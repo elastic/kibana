@@ -32,7 +32,6 @@ import {
 import {
   waitForRulesTableToBeLoaded,
   selectNumberOfRules,
-  loadPrebuiltDetectionRulesFromHeaderBtn,
   goToEditRuleActionsSettingsOf,
 } from '../../tasks/alerts_detection_rules';
 import {
@@ -58,6 +57,7 @@ import {
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../objects/rule';
+import { excessivelyInstallAllPrebuiltRules } from '../../tasks/api_calls/prebuilt_rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 const expectedNumberOfCustomRulesToBeEdited = 7;
@@ -69,7 +69,7 @@ const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
 // TODO: Fix flakiness and unskip https://github.com/elastic/kibana/issues/154721
-describe('Detection rules, bulk edit of rule actions', () => {
+describe.skip('Detection rules, bulk edit of rule actions', () => {
   before(() => {
     cleanKibana();
     login();
@@ -136,7 +136,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
         throttleUnit: 'd',
       };
 
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+      excessivelyInstallAllPrebuiltRules();
 
       // select both custom and prebuilt rules
       selectNumberOfRules(expectedNumberOfRulesToBeEdited);
@@ -164,7 +164,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
     });
 
     it('Overwrite rule actions in rules', () => {
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+      excessivelyInstallAllPrebuiltRules();
 
       // select both custom and prebuilt rules
       selectNumberOfRules(expectedNumberOfRulesToBeEdited);

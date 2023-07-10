@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLocalSearch, searchIdField } from '../../../../hooks';
 
-import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+import type { IntegrationCardItem } from '../../screens/home';
 
 import type {
   ExtendedIntegrationCategory,

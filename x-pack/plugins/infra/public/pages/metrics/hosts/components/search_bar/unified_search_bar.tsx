@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  type Query,
-  type TimeRange,
-  type Filter,
-} from '@kbn/es-query';
+import React, { useCallback } from 'react';
+import type { Query, TimeRange, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGrid,
-  useEuiTheme,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -42,11 +31,12 @@ export const UnifiedSearchBar = () => {
     onSubmit({ limit });
   };
 
-  const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
+  const onPanelFiltersChange = useCallback(
+    (panelFilters: Filter[]) => {
       onSubmit({ panelFilters });
-    }
-  };
+    },
+    [onSubmit]
+  );
 
   const handleRefresh = (payload: { query?: Query; dateRange: TimeRange }, isUpdate?: boolean) => {
     // This makes sure `onQueryChange` is only called when the submit button is clicked
@@ -57,7 +47,7 @@ export const UnifiedSearchBar = () => {
 
   return (
     <StickyContainer>
-      <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <SearchBar
             appName={'Infra Hosts'}
@@ -73,17 +63,17 @@ export const UnifiedSearchBar = () => {
             showQueryInput
             showQueryMenu
             useDefaultBehaviors
+            isAutoRefreshDisabled
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="xs">
+          <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="s">
             <EuiFlexItem>
               <ControlsContent
                 timeRange={searchCriteria.dateRange}
                 dataView={dataView}
                 query={searchCriteria.query}
                 filters={searchCriteria.filters}
-                selectedOptions={searchCriteria.panelFilters}
                 onFiltersChange={onPanelFiltersChange}
               />
             </EuiFlexItem>
@@ -96,35 +86,33 @@ export const UnifiedSearchBar = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="none" />
+      <EuiHorizontalRule
+        margin="xs"
+        css={css`
+          margin-bottom: 0;
+        `}
+      />
     </StickyContainer>
   );
 };
 
-const StickyContainer = (props: { children: React.ReactNode }) => {
+const StickyContainer = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
-
-  const top = useMemo(() => {
-    const wrapper = document.querySelector(`[data-test-subj="kibanaChrome"]`);
-    if (!wrapper) {
-      return `calc(${euiTheme.size.xxxl} * 2)`;
-    }
-
-    return `${wrapper.getBoundingClientRect().top}px`;
-  }, [euiTheme]);
+  const { headerHeight } = useKibanaHeader();
 
   return (
-    <EuiFlexGrid
-      gutterSize="none"
+    <div
       css={css`
         position: sticky;
-        top: ${top};
-        z-index: ${euiTheme.levels.header};
+        top: ${headerHeight}px;
+        z-index: ${euiTheme.levels.navigation};
         background: ${euiTheme.colors.emptyShade};
-        padding-top: ${euiTheme.size.m};
-        margin-top: -${euiTheme.size.l};
+        padding: ${euiTheme.size.m} ${euiTheme.size.l} 0px;
+        margin: -${euiTheme.size.l} -${euiTheme.size.l} 0px;
+        min-height: calc(${euiTheme.size.xxxl} * 2);
       `}
-      {...props}
-    />
+    >
+      {children}
+    </div>
   );
 };

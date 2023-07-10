@@ -28,7 +28,7 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import type { ActionTimeline, TimelineById } from './types';
 import { persistNote } from '../../containers/notes/api';
-import type { ResponseNote } from '../../../../common/types/timeline/note';
+import type { ResponseNote } from '../../../../common/types/timeline/note/api';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 

@@ -6,16 +6,55 @@
  */
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { createConfigRoute } from './config';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { RegistryAlertTypeWithAuth } from '@kbn/alerting-plugin/server/authorization';
+
+const ruleTypes = [
+  {
+    id: '1',
+    name: 'name',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    ruleTaskTimeout: '10m',
+    recoveryActionGroup: RecoveredActionGroup,
+    authorizedConsumers: {},
+    actionVariables: {
+      context: [],
+      state: [],
+    },
+    producer: 'test',
+    enabledInLicense: true,
+    minimumScheduleInterval: '1m',
+    defaultScheduleInterval: '10m',
+  } as unknown as RegistryAlertTypeWithAuth,
+];
 
 describe('createConfigRoute', () => {
-  it('registers the route', async () => {
+  it('registers the route and returns config if user is authorized', async () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.create().get();
-    createConfigRoute(logger, router, `/internal/triggers_actions_ui`, () => ({
-      isUsingSecurity: true,
-      minimumScheduleInterval: { value: '1m', enforce: false },
-    }));
+    const mockRulesClient = rulesClientMock.create();
+
+    mockRulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    createConfigRoute({
+      logger,
+      router,
+      baseRoute: `/internal/triggers_actions_ui`,
+      alertingConfig: () => ({
+        isUsingSecurity: true,
+        minimumScheduleInterval: { value: '1m', enforce: false },
+      }),
+      getRulesClientWithRequest: () => mockRulesClient,
+    });
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(`"/internal/triggers_actions_ui/_config"`);
@@ -26,6 +65,35 @@ describe('createConfigRoute', () => {
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } },
+    });
+  });
+
+  it('registers the route and returns forbidden error if user does not have access to any alerting rules ', async () => {
+    const router = httpServiceMock.createRouter();
+    const logger = loggingSystemMock.create().get();
+    const mockRulesClient = rulesClientMock.create();
+
+    mockRulesClient.listRuleTypes.mockResolvedValueOnce(new Set());
+    createConfigRoute({
+      logger,
+      router,
+      baseRoute: `/internal/triggers_actions_ui`,
+      alertingConfig: () => ({
+        isUsingSecurity: true,
+        minimumScheduleInterval: { value: '1m', enforce: false },
+      }),
+      getRulesClientWithRequest: () => mockRulesClient,
+    });
+
+    const [config, handler] = router.get.mock.calls[0];
+    expect(config.path).toMatchInlineSnapshot(`"/internal/triggers_actions_ui/_config"`);
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    await handler({}, httpServerMock.createKibanaRequest(), mockResponse);
+
+    expect(mockResponse.forbidden).toBeCalled();
+    expect(mockResponse.forbidden.mock.calls[0][0]).toEqual({
+      body: { message: 'Unauthorized to access config' },
     });
   });
 });

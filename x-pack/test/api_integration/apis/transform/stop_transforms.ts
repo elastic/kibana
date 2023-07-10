@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.createAndRunTransform(transformId, config);
   }
 
-  describe('/api/transform/stop_transforms', function () {
+  describe('/internal/transform/stop_transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -67,12 +67,12 @@ export default ({ getService }: FtrProviderContext) => {
           { id: transformId, state: TRANSFORM_STATE.STARTED },
         ];
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -88,12 +88,12 @@ export default ({ getService }: FtrProviderContext) => {
           { id: transformId, state: TRANSFORM_STATE.STARTED },
         ];
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_VIEWER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -112,12 +112,12 @@ export default ({ getService }: FtrProviderContext) => {
           { id: 'invalid_transform_id', state: TRANSFORM_STATE.STARTED },
         ];
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -149,12 +149,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should stop multiple transforms by transformIds', async () => {
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send(reqBody);
         transform.api.assertResponseStatusCode(200, status, body);
 
@@ -170,12 +170,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should stop multiple transforms by transformIds, even if one of the transformIds is invalid', async () => {
         const invalidTransformId = 'invalid_transform_id';
         const { body, status } = await supertest
-          .post(`/api/transform/stop_transforms`)
+          .post(`/internal/transform/stop_transforms`)
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(getCommonRequestHeader())
+          .set(getCommonRequestHeader('1'))
           .send([
             { id: reqBody[0].id, state: reqBody[0].state },
             { id: invalidTransformId, state: TRANSFORM_STATE.STOPPED },

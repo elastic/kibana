@@ -64,6 +64,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
       const attachments = getAttachments?.({ theCase }) ?? [];
+
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
@@ -106,13 +107,13 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       }
     },
     [
-      props,
-      closeModal,
-      createNewCaseFlyout,
-      startTransaction,
       appId,
-      createAttachments,
       casesToasts,
+      closeModal,
+      createAttachments,
+      createNewCaseFlyout,
+      props,
+      startTransaction,
     ]
   );
 
@@ -130,11 +131,11 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },
-          onClose: () => {
+          onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();
 
             if (props.onClose) {
-              return props.onClose();
+              return props.onClose(theCase, isCreateCase);
             }
           },
         },

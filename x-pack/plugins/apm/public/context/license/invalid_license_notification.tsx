@@ -9,11 +9,20 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibanaUrl } from '../../hooks/use_kibana_url';
+import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
 export function InvalidLicenseNotification() {
-  const manageLicenseURL = useKibanaUrl(
+  const {
+    plugins: { licenseManagement },
+  } = useApmPluginContext();
+  const licensePageUrl = useKibanaUrl(
     '/app/management/stack/license_management'
   );
+  const manageLicenseURL = licenseManagement?.locator
+    ? licenseManagement?.locator?.useUrl({
+        page: 'dashboard',
+      })
+    : licensePageUrl;
 
   return (
     <EuiEmptyPrompt

@@ -55,6 +55,7 @@ import {
   PackageOutdatedError,
   PackagePolicyValidationError,
   ConcurrentInstallOperationError,
+  FleetUnauthorizedError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
@@ -78,6 +79,8 @@ import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 
 import { auditLoggingService } from '../../audit_logging';
+
+import { getFilteredInstallPackages } from '../filtered_packages';
 
 import { formatVerificationResultForSO } from './package_verification';
 
@@ -471,6 +474,11 @@ async function installPackageCommon(options: {
       packageVersion: pkgVersion,
       installType,
     });
+
+    const filteredPackages = getFilteredInstallPackages();
+    if (filteredPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
 
     // if the requested version is the same as installed version, check if we allow it based on
     // current installed package status and force flag, if we don't allow it,

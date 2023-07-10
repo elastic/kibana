@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse, SavedObjectsRawDoc } from '@kbn/core/server';
+import type {
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsRawDoc,
+} from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/api';
-import { decodeOrThrow, ActionTypes } from '../../../common/api';
+import {
+  decodeOrThrow,
+  ActionTypes,
+  CaseUserActionDeprecatedResponseRt,
+} from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -515,10 +523,22 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
 
-      return legacyTransformFindResponseToExternalModel(
+      const transformedUserActions = legacyTransformFindResponseToExternalModel(
         userActions,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const validatedUserActions: Array<SavedObjectsFindResult<CaseUserActionDeprecatedResponse>> =
+        [];
+      for (const so of transformedUserActions.saved_objects) {
+        const validatedAttributes = decodeOrThrow(CaseUserActionDeprecatedResponseRt)(
+          so.attributes
+        );
+
+        validatedUserActions.push(Object.assign(so, { attributes: validatedAttributes }));
+      }
+
+      return Object.assign(transformedUserActions, { saved_objects: validatedUserActions });
     } catch (error) {
       this.context.log.error(`Error on GET case user action case id: ${caseId}: ${error}`);
       throw error;
@@ -636,7 +656,7 @@ export class CaseUserActionService {
 
   public async getCaseUserActionStats({ caseId }: { caseId: string }) {
     const response = await this.context.unsecuredSavedObjectsClient.find<
-      UserActionPersistedAttributes,
+      unknown,
       UserActionsStatsAggsResult
     >({
       type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -680,7 +700,7 @@ export class CaseUserActionService {
 
   public async getUsers({ caseId }: { caseId: string }): Promise<GetUsersResponse> {
     const response = await this.context.unsecuredSavedObjectsClient.find<
-      UserActionPersistedAttributes,
+      unknown,
       ParticipantsAggsResult
     >({
       type: CASE_USER_ACTION_SAVED_OBJECT,

@@ -33,6 +33,13 @@ export class MapsStorage extends SOContentStorage<MapCrudTypes> {
       cmServicesDefinition,
       searchArgsToSOFindOptions,
       enableMSearch: true,
+      allowedSavedObjectAttributes: [
+        'title',
+        'description',
+        'mapStateJSON',
+        'layerListJSON',
+        'uiStateJSON',
+      ],
     });
   }
 }

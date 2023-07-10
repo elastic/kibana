@@ -19,6 +19,7 @@ import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -40,15 +41,17 @@ const executeParams = {
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
+const securityMockStart = securityMock.createStart();
 
 actionExecutor.initialize({
   logger: loggerMock,
   spaces: spacesMock,
+  security: securityMockStart,
   getServices: () => services,
   actionTypeRegistry,
   encryptedSavedObjectsClient,
   eventLogger,
-  preconfiguredActions: [
+  inMemoryConnectors: [
     {
       id: 'preconfigured',
       name: 'Preconfigured',
@@ -61,6 +64,17 @@ actionExecutor.initialize({
       },
       isPreconfigured: true,
       isDeprecated: false,
+      isSystemAction: false,
+    },
+    {
+      actionTypeId: '.cases',
+      config: {},
+      id: 'system-connector-.cases',
+      name: 'System action: .cases',
+      secrets: {},
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: true,
     },
   ],
 });
@@ -69,6 +83,18 @@ beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   loggerMock.get.mockImplementation(() => loggerMock);
+  const mockRealm = { name: 'default_native', type: 'native' };
+  securityMockStart.authc.getCurrentUser.mockImplementation(() => ({
+    authentication_realm: mockRealm,
+    authentication_provider: mockRealm,
+    authentication_type: 'realm',
+    lookup_realm: mockRealm,
+    elastic_cloud_user: true,
+    enabled: true,
+    profile_uid: '123',
+    roles: ['superuser'],
+    username: 'coolguy',
+  }));
 });
 
 test('successfully executes', async () => {
@@ -203,6 +229,10 @@ test('successfully executes', async () => {
             ],
           },
           "message": "action executed: test:1: 1",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -266,6 +296,10 @@ test('successfully executes when http_request source is specified', async () => 
     },
     params: { foo: true },
     logger: loggerMock,
+    source: {
+      source: expect.anything(),
+      type: 'HTTP_REQUEST',
+    },
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -346,6 +380,10 @@ test('successfully executes when http_request source is specified', async () => 
             ],
           },
           "message": "action executed: test:1: 1",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -412,6 +450,13 @@ test('successfully executes when saved_object source is specified', async () => 
     },
     params: { foo: true },
     logger: loggerMock,
+    source: {
+      source: {
+        id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
+        type: 'alert',
+      },
+      type: 'SAVED_OBJECT',
+    },
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -492,6 +537,10 @@ test('successfully executes when saved_object source is specified', async () => 
             ],
           },
           "message": "action executed: test:1: 1",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -613,6 +662,137 @@ test('successfully executes with preconfigured connector', async () => {
             ],
           },
           "message": "action executed: test:preconfigured: Preconfigured",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
+        },
+      ],
+    ]
+  `);
+});
+
+test('successfully executes with system connector', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('.cases');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith(
+    'system-connector-.cases',
+    '.cases',
+    {
+      notifyUsage: true,
+    }
+  );
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: 'system-connector-.cases',
+    services: expect.anything(),
+    config: {},
+    secrets: {},
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith(
+    'executing action .cases:system-connector-.cases: System action: .cases'
+  );
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: .cases:system-connector-.cases: System action: .cases",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: .cases:system-connector-.cases: System action: .cases",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -906,6 +1086,51 @@ test('should not throws an error if actionType is preconfigured', async () => {
   });
 });
 
+test('should not throws an error if actionType is system action', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: '.cases',
+      config: {},
+      secrets: {},
+    },
+    references: [],
+  };
+
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+    throw new Error('not enabled for test');
+  });
+  actionTypeRegistry.isActionExecutable.mockImplementationOnce(() => true);
+  await actionExecutor.execute(executeParams);
+
+  expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledTimes(0);
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {},
+    secrets: {},
+    params: { foo: true },
+    logger: loggerMock,
+  });
+});
+
 test('throws an error when passing isESOCanEncrypt with value of false', async () => {
   const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
   customActionExecutor.initialize({
@@ -915,7 +1140,7 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
   });
   await expect(
     customActionExecutor.execute(executeParams)
@@ -933,7 +1158,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
-    preconfiguredActions: [
+    inMemoryConnectors: [
       {
         id: 'preconfigured',
         name: 'Preconfigured',
@@ -946,6 +1171,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
         },
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ],
   });
@@ -1063,6 +1289,159 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             ],
           },
           "message": "action executed: test:preconfigured: Preconfigured",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
+        },
+      ],
+    ]
+  `);
+});
+
+test('should not throw error if action is system action and isESOCanEncrypt is false', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+  customActionExecutor.initialize({
+    logger: loggingSystemMock.create().get(),
+    spaces: spacesMock,
+    getServices: () => services,
+    actionTypeRegistry,
+    encryptedSavedObjectsClient,
+    eventLogger: eventLoggerMock.create(),
+    inMemoryConnectors: [
+      {
+        actionTypeId: '.cases',
+        config: {},
+        id: 'system-connector-.cases',
+        name: 'System action: .cases',
+        secrets: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ],
+  });
+
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('.cases');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith(
+    'system-connector-.cases',
+    '.cases',
+    {
+      notifyUsage: true,
+    }
+  );
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: 'system-connector-.cases',
+    services: expect.anything(),
+    config: {},
+    secrets: {},
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith(
+    'executing action .cases:system-connector-.cases: System action: .cases'
+  );
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: .cases:system-connector-.cases: System action: .cases",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "system-connector-.cases",
+              "name": "System action: .cases",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "system-connector-.cases",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "space_agnostic": true,
+                "type": "action",
+                "type_id": ".cases",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: .cases:system-connector-.cases: System action: .cases",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -1279,7 +1658,78 @@ test('writes to event log for execute and execute start when consumer and relate
   });
 });
 
-function setupActionExecutorMock() {
+test('writes usage data to event log for gen ai events', async () => {
+  const executorMock = setupActionExecutorMock('.gen-ai');
+  const mockGenAi = {
+    id: 'chatcmpl-7LztF5xsJl2z5jcNpJKvaPm4uWt8x',
+    object: 'chat.completion',
+    created: 1685477149,
+    model: 'gpt-3.5-turbo-0301',
+    usage: {
+      prompt_tokens: 10,
+      completion_tokens: 9,
+      total_tokens: 19,
+    },
+    choices: [
+      {
+        message: {
+          role: 'assistant',
+          content: 'Hello! How can I assist you today?',
+        },
+        finish_reason: 'stop',
+        index: 0,
+      },
+    ],
+  };
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+    // @ts-ignore
+    data: mockGenAi,
+  });
+  await actionExecutor.execute(executeParams);
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    event: {
+      action: 'execute',
+      kind: 'action',
+      outcome: 'success',
+    },
+    kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+          gen_ai: {
+            usage: mockGenAi.usage,
+          },
+        },
+        name: 'action-1',
+        id: '1',
+      },
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          id: '1',
+          namespace: 'some-namespace',
+          rel: 'primary',
+          type: 'action',
+          type_id: '.gen-ai',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action executed: .gen-ai:1: action-1',
+    user: { name: 'coolguy', id: '123' },
+  });
+});
+
+function setupActionExecutorMock(actionTypeId = 'test') {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
@@ -1297,7 +1747,7 @@ function setupActionExecutorMock() {
     type: 'action',
     attributes: {
       name: 'action-1',
-      actionTypeId: 'test',
+      actionTypeId,
       config: {
         bar: true,
       },

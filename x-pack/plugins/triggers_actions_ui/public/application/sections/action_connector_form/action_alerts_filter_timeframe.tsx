@@ -146,7 +146,7 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeToggleLabel',
           {
-            defaultMessage: 'if alert is generated during timeframe',
+            defaultMessage: 'If alert is generated during timeframe',
           }
         )}
         checked={timeframeEnabled}

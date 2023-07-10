@@ -35,7 +35,6 @@ export const AnalyzerPreview: React.FC = () => {
   const indices = index?.values ?? [];
 
   const { loading, error, statsNodes } = useAlertPrevalenceFromProcessTree({
-    processEntityId: '',
     isActiveTimeline: isActiveTimeline(scopeId),
     documentId: processDocumentId,
     indices,

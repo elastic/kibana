@@ -15,9 +15,7 @@ import { ensurePreconfiguredPackagesAndPolicies } from '.';
 import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
-import { setupFleet, ensureFleetFileUploadIndices } from './setup';
-
-import { ensureFileUploadWriteIndices } from './epm/elasticsearch/template/install';
+import { setupFleet } from './setup';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
@@ -70,8 +68,6 @@ describe('setupFleet', () => {
 
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
     soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
-
-    (ensureFileUploadWriteIndices as jest.Mock).mockResolvedValue({});
   });
 
   afterEach(async () => {
@@ -137,13 +133,5 @@ describe('setupFleet', () => {
         },
       ],
     });
-  });
-
-  it('should create agent file upload write indices', async () => {
-    await ensureFleetFileUploadIndices(soClient, esClient);
-
-    expect((ensureFileUploadWriteIndices as jest.Mock).mock.calls[0][0].integrationNames).toEqual([
-      'elastic_agent',
-    ]);
   });
 });

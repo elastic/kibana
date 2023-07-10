@@ -31,7 +31,7 @@ export const getActionFileInfoRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileInfo');
 
   return async (context, req, res) => {
-    const fleetFiles = await endpointContext.service.getFleetFilesClient('from-host');
+    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const { action_id: requestActionId, file_id: fileId } = req.params;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
@@ -72,16 +72,23 @@ export const registerActionFileInfoRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ACTION_AGENT_FILE_INFO_ROUTE,
-      validate: EndpointActionFileInfoSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      endpointContext.logFactory.get('actionFileInfo'),
-      getActionFileInfoRouteHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionFileInfoSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        endpointContext.logFactory.get('actionFileInfo'),
+        getActionFileInfoRouteHandler(endpointContext)
+      )
+    );
 };

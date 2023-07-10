@@ -14,7 +14,7 @@ import { TakeActionDropdown } from '.';
 import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
 import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -22,7 +22,6 @@ import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
@@ -100,7 +99,6 @@ describe('take action dropdown', () => {
       detailsData: generateAlertDetailsDataMock() as TimelineEventsDetailsItem[],
       ecsData: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
-      indexName: 'index',
       isHostIsolationPanelOpen: false,
       loadingEventDetails: false,
       onAddEventFilterClick: jest.fn(),
@@ -452,27 +450,6 @@ describe('take action dropdown', () => {
       beforeEach(() => {
         setTypeOnEcsDataWithAgentType();
         apiMocks = endpointMetadataHttpMocks(mockStartServicesMock.http as jest.Mocked<HttpSetup>);
-      });
-
-      describe('when the `responseActionsConsoleEnabled` feature flag is false', () => {
-        beforeAll(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((featureKey) => {
-            if (featureKey === 'responseActionsConsoleEnabled') {
-              return false;
-            }
-            return true;
-          });
-        });
-
-        afterAll(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => true);
-        });
-
-        it('should hide the button if feature flag if off', async () => {
-          render();
-
-          expect(findLaunchResponderButton()).toHaveLength(0);
-        });
       });
 
       it('should not display the button if user is not allowed to write event filters', async () => {

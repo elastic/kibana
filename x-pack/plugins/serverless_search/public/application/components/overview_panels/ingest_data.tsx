@@ -11,16 +11,18 @@ import React, { useState } from 'react';
 import { docLinks } from '../../../../common/doc_links';
 import { CodeBox } from '../code_box';
 import { languageDefinitions } from '../languages/languages';
-import { LanguageDefinition } from '../languages/types';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from '../languages/types';
 import { OverviewPanel } from './overview_panel';
 import { IntegrationsPanel } from './integrations_panel';
 
 interface IngestDataProps {
+  codeArguments: LanguageDefinitionSnippetArguments;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
+  codeArguments,
   selectedLanguage,
   setSelectedLanguage,
 }) => {
@@ -37,6 +39,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
         selectedIngestMethod === 'ingestViaApi' ? (
           <CodeBox
             code="ingestData"
+            codeArgs={codeArguments}
             languages={languageDefinitions}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}

@@ -17,7 +17,7 @@ interface Props {
   helpText?: string;
 }
 
-export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors, helpText }: Props) {
+export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }: Props) {
   const [burnRate, setBurnRate] = useState<number>(initialBurnRate);
   const hasError = errors !== undefined && errors.length > 0;
 
@@ -45,8 +45,6 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors, h
       }
       fullWidth
       isInvalid={hasError}
-      error={hasError ? errors[0] : undefined}
-      helpText={helpText}
     >
       <EuiFieldNumber
         fullWidth

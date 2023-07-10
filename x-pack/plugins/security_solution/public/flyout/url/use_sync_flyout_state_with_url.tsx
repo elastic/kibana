@@ -9,8 +9,9 @@ import { useCallback, useRef } from 'react';
 import type { ExpandableFlyoutApi, ExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useSyncToUrl } from '@kbn/url-state';
 import last from 'lodash/last';
+import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 
-const URL_KEY = 'eventFlyout' as const;
+export const FLYOUT_URL_PARAM = URL_PARAM_KEY.eventFlyout;
 
 type FlyoutState = Parameters<ExpandableFlyoutApi['openFlyout']>[0];
 
@@ -21,7 +22,7 @@ type FlyoutState = Parameters<ExpandableFlyoutApi['openFlyout']>[0];
 export const useSyncFlyoutStateWithUrl = () => {
   const flyoutApi = useRef<ExpandableFlyoutApi>(null);
 
-  const syncStateToUrl = useSyncToUrl<FlyoutState>(URL_KEY, (data) => {
+  const syncStateToUrl = useSyncToUrl<FlyoutState>(FLYOUT_URL_PARAM, (data) => {
     flyoutApi.current?.openFlyout(data);
   });
 

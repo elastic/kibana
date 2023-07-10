@@ -44,6 +44,7 @@ export const casesQueriesKeys = {
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+  categories: () => [...casesQueriesKeys.all, 'categories'] as const,
   alertFeatureIds: (alertRegistrationContexts: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
 };

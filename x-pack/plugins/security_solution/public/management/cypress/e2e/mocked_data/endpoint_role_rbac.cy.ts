@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { closeAllToasts } from '../../tasks/close_all_toasts';
+import { closeAllToasts } from '../../tasks/toasts';
 import { login } from '../../tasks/login';
 
 describe('When defining a kibana role for Endpoint security access', () => {

@@ -10,9 +10,9 @@ import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 import { SettingsRt } from '../case';
 
-export const SettingsUserActionPayloadRt = rt.type({ settings: SettingsRt });
+export const SettingsUserActionPayloadRt = rt.strict({ settings: SettingsRt });
 
-export const SettingsUserActionRt = rt.type({
+export const SettingsUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.settings),
   payload: SettingsUserActionPayloadRt,
 });

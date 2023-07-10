@@ -9,7 +9,6 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { RouterProvider } from '@kbn/typed-react-router-config';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
@@ -26,17 +25,14 @@ import {
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
-import { apmRouter } from '../../routing/apm_route_config';
 
-function getMockAPMContext({ canSave }: { canSave: boolean }) {
-  return {
-    ...mockApmPluginContextValue,
-    core: {
-      ...mockApmPluginContextValue.core,
-      application: { capabilities: { apm: { save: canSave }, ml: {} } },
-    },
-  } as unknown as ApmPluginContextValue;
-}
+const apmContextMock = {
+  ...mockApmPluginContextValue,
+  core: {
+    ...mockApmPluginContextValue.core,
+    application: { capabilities: { apm: { save: true }, ml: {} } },
+  },
+} as unknown as ApmPluginContextValue;
 
 const history = createMemoryHistory();
 history.replace(
@@ -46,10 +42,8 @@ history.replace(
 function Wrapper({ children }: { children?: React.ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
-        <RouterProvider history={history} router={apmRouter as any}>
-          {children}
-        </RouterProvider>
+      <MockApmPluginContextWrapper value={apmContextMock} history={history}>
+        {children}
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -73,6 +67,13 @@ const renderTransaction = async (transaction: Record<string, any>) => {
   return rendered;
 };
 
+const expectInfraLocatorsToBeCalled = () => {
+  expect(
+    apmContextMock.infra.locators.nodeLogsLocator.getRedirectUrl
+  ).toBeCalled();
+  expect(apmContextMock.infra.locators.logsLocator.getRedirectUrl).toBeCalled();
+};
+
 describe('TransactionActionMenu component', () => {
   beforeAll(() => {
     jest.spyOn(hooks, 'useFetcher').mockReturnValue({
@@ -81,7 +82,7 @@ describe('TransactionActionMenu component', () => {
       refetch: jest.fn(),
     });
   });
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
   it('should always render the discover link', async () => {
@@ -92,16 +93,10 @@ describe('TransactionActionMenu component', () => {
     expect(queryByText('View transaction in Discover')).not.toBeNull();
   });
 
-  it('always renders the trace logs link', async () => {
-    const { getByText } = await renderTransaction(
-      Transactions.transactionWithMinimalData
-    );
+  it('should call infra locators getRedirectUrl function', async () => {
+    await renderTransaction(Transactions.transactionWithMinimalData);
 
-    expect(
-      (getByText('Trace logs').parentElement as HTMLAnchorElement).href
-    ).toEqual(
-      'http://localhost/basepath/app/logs/link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%20(not%20trace.id:*%20AND%20%228b60bd32ecc6e1506735a8b6cfcf175c%22)'
-    );
+    expectInfraLocatorsToBeCalled();
   });
 
   describe('when there is no pod id', () => {
@@ -123,16 +118,10 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('when there is a pod id', () => {
-    it('renders the pod logs link', async () => {
-      const { getByText } = await renderTransaction(
-        Transactions.transactionWithKubernetesData
-      );
+    it('should call infra locators getRedirectUrl function', async () => {
+      await renderTransaction(Transactions.transactionWithKubernetesData);
 
-      expect(
-        (getByText('Pod logs').parentElement as HTMLAnchorElement).href
-      ).toEqual(
-        'http://localhost/basepath/app/logs/link-to/pod-logs/pod123456abcdef?time=1545092070952'
-      );
+      expectInfraLocatorsToBeCalled();
     });
 
     it('renders the pod metrics link', async () => {
@@ -166,17 +155,11 @@ describe('TransactionActionMenu component', () => {
     });
   });
 
-  describe('when there is a container id', () => {
+  describe('should call infra locators getRedirectUrl function', () => {
     it('renders the Container logs link', async () => {
-      const { getByText } = await renderTransaction(
-        Transactions.transactionWithContainerData
-      );
+      await renderTransaction(Transactions.transactionWithContainerData);
 
-      expect(
-        (getByText('Container logs').parentElement as HTMLAnchorElement).href
-      ).toEqual(
-        'http://localhost/basepath/app/logs/link-to/container-logs/container123456abcdef?time=1545092070952'
-      );
+      expectInfraLocatorsToBeCalled();
     });
 
     it('renders the Container metrics link', async () => {
@@ -211,16 +194,10 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('when there is a hostname', () => {
-    it('renders the Host logs link', async () => {
-      const { getByText } = await renderTransaction(
-        Transactions.transactionWithHostData
-      );
+    it('should call infra locators getRedirectUrl function', async () => {
+      await renderTransaction(Transactions.transactionWithHostData);
 
-      expect(
-        (getByText('Host logs').parentElement as HTMLAnchorElement).href
-      ).toEqual(
-        'http://localhost/basepath/app/logs/link-to/host-logs/227453131a17?time=1545092070952'
-      );
+      expectInfraLocatorsToBeCalled();
     });
 
     it('renders the Host metrics link', async () => {

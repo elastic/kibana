@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
-import { timeWindowSchema } from '@kbn/slo-schema';
+import { rollingTimeWindowSchema, timeWindowSchema } from '@kbn/slo-schema';
 
 type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
+type RollingTimeWindow = t.TypeOf<typeof rollingTimeWindowSchema>;
 
-export type { TimeWindow };
+export type { RollingTimeWindow, TimeWindow };

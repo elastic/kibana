@@ -114,6 +114,7 @@ export function loadInitial(
   const loaderSharedArgs = {
     dataViews: lensServices.dataViews,
     storage: lensServices.storage,
+    eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
@@ -159,39 +160,48 @@ export function loadInitial(
           isFullEditor: true,
         }
       )
-        .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
-          const currentSessionId =
-            initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
-          store.dispatch(
-            setState({
-              isSaveable: true,
-              filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
-              query: initialStateFromLocator.query || emptyState.query,
-              searchSessionId: currentSessionId,
-              activeDatasourceId: emptyState.activeDatasourceId,
-              visualization: {
-                activeId: emptyState.visualization.activeId,
-                state: visualizationState,
-              },
-              dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-              datasourceStates: Object.entries(datasourceStates).reduce(
-                (state, [datasourceId, datasourceState]) => ({
-                  ...state,
-                  [datasourceId]: {
-                    ...datasourceState,
-                    isLoading: false,
-                  },
-                }),
-                {}
-              ),
-              isLoading: false,
-            })
-          );
+        .then(
+          ({
+            datasourceStates,
+            visualizationState,
+            indexPatterns,
+            indexPatternRefs,
+            annotationGroups,
+          }) => {
+            const currentSessionId =
+              initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
+            store.dispatch(
+              setState({
+                isSaveable: true,
+                filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
+                query: initialStateFromLocator.query || emptyState.query,
+                searchSessionId: currentSessionId,
+                activeDatasourceId: emptyState.activeDatasourceId,
+                visualization: {
+                  activeId: emptyState.visualization.activeId,
+                  state: visualizationState,
+                },
+                dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+                datasourceStates: Object.entries(datasourceStates).reduce(
+                  (state, [datasourceId, datasourceState]) => ({
+                    ...state,
+                    [datasourceId]: {
+                      ...datasourceState,
+                      isLoading: false,
+                    },
+                  }),
+                  {}
+                ),
+                isLoading: false,
+                annotationGroups,
+              })
+            );
 
-          if (autoApplyDisabled) {
-            store.dispatch(disableAutoApply());
+            if (autoApplyDisabled) {
+              store.dispatch(disableAutoApply());
+            }
           }
-        })
+        )
         .catch((e: { message: string }) => {
           notifications.toasts.addDanger({
             title: e.message,
@@ -304,52 +314,62 @@ export function loadInitial(
               references: [...doc.references, ...(doc.state.internalReferences || [])],
               initialContext,
               dataViews: lensServices.dataViews,
+              eventAnnotationService: lensServices.eventAnnotationService,
               storage: lensServices.storage,
               adHocDataViews: doc.state.adHocDataViews,
               defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
             },
             { isFullEditor: true }
           )
-            .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
-              const currentSessionId = data.search.session.getSessionId();
-              store.dispatch(
-                setState({
-                  isSaveable: true,
-                  sharingSavedObjectProps,
-                  filters: data.query.filterManager.getFilters(),
-                  query: doc.state.query,
-                  searchSessionId:
-                    dashboardFeatureFlag.allowByValueEmbeddables &&
-                    Boolean(embeddableEditorIncomingState?.originatingApp) &&
-                    !(initialInput as LensByReferenceInput)?.savedObjectId &&
-                    currentSessionId
-                      ? currentSessionId
-                      : data.search.session.start(),
-                  persistedDoc: doc,
-                  activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
-                  visualization: {
-                    activeId: doc.visualizationType,
-                    state: visualizationState,
-                  },
-                  dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-                  datasourceStates: Object.entries(datasourceStates).reduce(
-                    (state, [datasourceId, datasourceState]) => ({
-                      ...state,
-                      [datasourceId]: {
-                        ...datasourceState,
-                        isLoading: false,
-                      },
-                    }),
-                    {}
-                  ),
-                  isLoading: false,
-                })
-              );
+            .then(
+              ({
+                datasourceStates,
+                visualizationState,
+                indexPatterns,
+                indexPatternRefs,
+                annotationGroups,
+              }) => {
+                const currentSessionId = data.search.session.getSessionId();
+                store.dispatch(
+                  setState({
+                    isSaveable: true,
+                    sharingSavedObjectProps,
+                    filters: data.query.filterManager.getFilters(),
+                    query: doc.state.query,
+                    searchSessionId:
+                      dashboardFeatureFlag.allowByValueEmbeddables &&
+                      Boolean(embeddableEditorIncomingState?.originatingApp) &&
+                      !(initialInput as LensByReferenceInput)?.savedObjectId &&
+                      currentSessionId
+                        ? currentSessionId
+                        : data.search.session.start(),
+                    persistedDoc: doc,
+                    activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
+                    visualization: {
+                      activeId: doc.visualizationType,
+                      state: visualizationState,
+                    },
+                    dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+                    datasourceStates: Object.entries(datasourceStates).reduce(
+                      (state, [datasourceId, datasourceState]) => ({
+                        ...state,
+                        [datasourceId]: {
+                          ...datasourceState,
+                          isLoading: false,
+                        },
+                      }),
+                      {}
+                    ),
+                    isLoading: false,
+                    annotationGroups,
+                  })
+                );
 
-              if (autoApplyDisabled) {
-                store.dispatch(disableAutoApply());
+                if (autoApplyDisabled) {
+                  store.dispatch(disableAutoApply());
+                }
               }
-            })
+            )
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({
                 title: e.message,

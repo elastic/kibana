@@ -18,7 +18,11 @@ import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
-import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
+import type {
+  EndpointPrivileges,
+  ResponseActionUploadOutputContent,
+  ActionDetailsApiResponse,
+} from '../../../../../../common/endpoint/types';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { getEndpointConsoleCommands } from '../..';
 import React from 'react';
@@ -32,6 +36,7 @@ import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_ENDPOINT_FOR_RESPONDER,
 } from '../../../../../common/translations';
+import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 describe('When using `upload` response action', () => {
   let render: (
@@ -132,6 +137,7 @@ describe('When using `upload` response action', () => {
           'Content-Type': undefined,
         },
         path: UPLOAD_ROUTE,
+        version: '2023-10-31',
       });
     });
 
@@ -197,6 +203,47 @@ describe('When using `upload` response action', () => {
     await waitFor(() => {
       expect(getByTestId('test-validationError-message').textContent).toEqual(
         UPGRADE_ENDPOINT_FOR_RESPONDER
+      );
+    });
+  });
+
+  it.each([
+    'ra_upload_error_failure',
+    'ra_upload_already-exists',
+    'ra_upload_error_not-found',
+    'ra_upload_error_not-permitted',
+    'ra_upload_error_too-big',
+    'ra_upload_error_queue-timeout',
+    'ra_upload_error_download-failed',
+  ])('should show detailed error if upload failure returned code: %s', async (outputCode) => {
+    const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/a.b.c',
+    }) as ActionDetailsApiResponse<ResponseActionUploadOutputContent>;
+    pendingDetailResponse.data.agents = ['a.b.c'];
+    pendingDetailResponse.data.wasSuccessful = false;
+    pendingDetailResponse.data.errors = ['not found'];
+    pendingDetailResponse.data.outputs = {
+      'a.b.c': {
+        type: 'json',
+        content: {
+          code: outputCode,
+        } as unknown as ResponseActionUploadOutputContent,
+      },
+    };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+    await render();
+
+    console.enterCommand('upload --file', { inputOnly: true });
+    await waitFor(() => {
+      userEvent.upload(renderResult.getByTestId('console-arg-file-picker'), file);
+    });
+
+    console.submitCommand();
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('upload-actionFailure').textContent).toMatch(
+        // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
+        new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
     });
   });

@@ -26,10 +26,10 @@ describe('All rules - read only', () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: '1' }));
-    login(ROLES.reader);
   });
 
   beforeEach(() => {
+    login(ROLES.reader);
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.reader);
     waitForRulesTableToBeLoaded();
     cy.get(RULE_NAME).should('have.text', getNewRule().name);

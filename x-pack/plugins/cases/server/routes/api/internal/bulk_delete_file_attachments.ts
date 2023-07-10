@@ -11,7 +11,10 @@ import { INTERNAL_DELETE_FILE_ATTACHMENTS_URL } from '../../../../common/constan
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
 import { escapeHatch } from '../utils';
-import type { BulkDeleteFileAttachmentsRequest } from '../../../../common/api';
+import {
+  BulkDeleteFileAttachmentsRequestRt,
+  decodeWithExcessOrThrow,
+} from '../../../../common/api';
 
 export const bulkDeleteFileAttachments = createCasesRoute({
   method: 'post',
@@ -27,7 +30,7 @@ export const bulkDeleteFileAttachments = createCasesRoute({
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
 
-      const requestBody = request.body as BulkDeleteFileAttachmentsRequest;
+      const requestBody = decodeWithExcessOrThrow(BulkDeleteFileAttachmentsRequestRt)(request.body);
 
       await client.attachments.bulkDeleteFileAttachments({
         caseId: request.params.case_id,

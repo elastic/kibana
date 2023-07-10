@@ -8,6 +8,7 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 
 function findFeature(layer, callbackFn) {
@@ -71,8 +72,9 @@ export default function ({ getService }) {
 
     it('should return ES vector tile containing documents and metadata', async () => {
       const resp = await supertest
-        .get(`/api/maps/mvt/getTile/2/1/1.pbf?${getTileUrlParams(defaultParams)}`)
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${getTileUrlParams(defaultParams)}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -133,8 +135,9 @@ export default function ({ getService }) {
         hasLabels: true,
       });
       const resp = await supertest
-        .get(`/api/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -176,8 +179,9 @@ export default function ({ getService }) {
         index: 'notRealIndex',
       });
       await supertest
-        .get(`/api/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(404);
     });

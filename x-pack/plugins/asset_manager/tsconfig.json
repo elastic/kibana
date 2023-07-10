@@ -16,5 +16,6 @@
     "@kbn/config-schema",
     "@kbn/core-http-server",
     "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/io-ts-utils",
   ]
 }

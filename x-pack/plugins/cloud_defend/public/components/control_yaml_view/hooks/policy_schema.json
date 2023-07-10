@@ -118,7 +118,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^[a-z0-9]+$"
+            "pattern": "^([a-z0-9]+(?:[._-][a-z0-9]+)*)$"
           }
         },
         "containerImageTag": {
@@ -133,7 +133,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$"
           }
         },
         "kubernetesClusterId": {
@@ -261,7 +261,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^[a-z0-9]+$"
+            "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$"
           }
         },
         "containerImageTag": {
@@ -276,7 +276,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$"
           }
         },
         "kubernetesClusterId": {

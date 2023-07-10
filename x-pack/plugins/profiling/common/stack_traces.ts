@@ -7,11 +7,23 @@
 
 import { ProfilingESField } from './elasticsearch';
 
+export interface ProfilingStatusResponse {
+  profiling: {
+    enabled: boolean;
+  };
+  resource_management: {
+    enabled: boolean;
+  };
+  resources: {
+    created: boolean;
+  };
+}
+
 interface ProfilingEvents {
   [key: string]: number;
 }
 
-interface ProfilingStackTrace {
+export interface ProfilingStackTrace {
   ['file_ids']: string[];
   ['frame_ids']: string[];
   ['address_or_lines']: number[];
@@ -43,6 +55,7 @@ export interface StackTraceResponse {
   ['stack_frames']?: ProfilingStackFrames;
   ['executables']?: ProfilingExecutables;
   ['total_frames']: number;
+  ['sampling_rate']: number;
 }
 
 export enum StackTracesDisplayOption {

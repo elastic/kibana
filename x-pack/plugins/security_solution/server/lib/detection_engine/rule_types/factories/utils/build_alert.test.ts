@@ -20,6 +20,7 @@ import {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
   EVENT_KIND,
   EVENT_MODULE,
@@ -230,6 +231,7 @@ describe('buildAlert', () => {
       [ALERT_DEPTH]: 1,
       [ALERT_URL]: expectedAlertUrl,
       [ALERT_UUID]: alertUuid,
+      [ALERT_WORKFLOW_TAGS]: [],
     };
     expect(alert).toEqual(expected);
   });
@@ -421,6 +423,7 @@ describe('buildAlert', () => {
       [ALERT_DEPTH]: 1,
       [ALERT_URL]: expectedAlertUrl,
       [ALERT_UUID]: alertUuid,
+      [ALERT_WORKFLOW_TAGS]: [],
     };
     expect(alert).toEqual(expected);
   });

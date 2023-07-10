@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Subscription } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { combineLatestWith } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -34,18 +32,10 @@ import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
 
-import {
-  APP_ID,
-  APP_UI_ID,
-  APP_PATH,
-  APP_ICON_SOLUTION,
-  ENABLE_GROUPED_NAVIGATION,
-} from '../common/constants';
+import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import type { LinksPermissions } from './common/links';
-import { updateAppLinks } from './common/links';
-import { navLinks$ } from './common/links/nav_links';
+import { updateAppLinks, type LinksPermissions } from './common/links';
+import { registerDeepLinksUpdater } from './common/links/deep_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -61,6 +51,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
+import { PluginContract } from './plugin_contract';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -84,18 +75,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
+  private contract: PluginContract;
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
-  private isSidebarEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
-    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental || []
+    ).features;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.contract = new PluginContract();
     this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -160,6 +153,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
+        ...this.contract.getStartServices(),
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
@@ -170,7 +164,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
-        isSidebarEnabled$: this.isSidebarEnabled$,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -209,7 +202,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
-            coreStart.application.capabilities
+            coreStart.application.capabilities,
+            services
           ),
         });
       },
@@ -234,18 +228,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    return {
-      resolver: async () => {
-        /**
-         * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-         * See https://webpack.js.org/api/module-methods/#magic-comments
-         */
-        const { resolverPluginSetup } = await import(
-          /* webpackChunkName: "resolver" */ './resolver'
-        );
-        return resolverPluginSetup();
-      },
-    };
+    return this.contract.getSetupContract();
   }
 
   public start(core: CoreStart, plugins: StartPlugins): PluginStart {
@@ -268,18 +251,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
-      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-policy-response',
-          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
-        });
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-generic-errors-list',
-          Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
-        });
-      }
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-response',
+        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+      });
 
       registerExtension({
         package: 'endpoint',
@@ -309,16 +291,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {
-      getNavLinks$: () => navLinks$,
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
-    };
+    return this.contract.getStartContract();
   }
 
   public stop() {
     licenseService.stop();
-    return {};
+    return this.contract.getStopContract();
   }
 
   private lazyHelpersForRoutes() {
@@ -487,38 +465,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
-
     const { license$ } = plugins.licensing;
-    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);
+    const upselling = this.contract.upsellingService;
 
-    let appLinksSubscription: Subscription | null = null;
-    license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {
+    registerDeepLinksUpdater(this.appUpdater$);
+
+    license$.subscribe(async (license) => {
       const linksPermissions: LinksPermissions = {
         experimentalFeatures: this.experimentalFeatures,
+        upselling,
         capabilities: core.application.capabilities,
       };
 
       if (license.type !== undefined) {
         linksPermissions.license = license;
-      }
-
-      if (appLinksSubscription) {
-        appLinksSubscription.unsubscribe();
-        appLinksSubscription = null;
-      }
-
-      if (newNavEnabled) {
-        appLinksSubscription = registerDeepLinksUpdater(this.appUpdater$);
-      } else {
-        // old nav links update
-        this.appUpdater$.next(() => ({
-          navLinkStatus: AppNavLinkStatus.hidden,
-          deepLinks: getDeepLinks(
-            this.experimentalFeatures,
-            license.type,
-            core.application.capabilities
-          ),
-        }));
       }
 
       // set initial links to not block rendering

@@ -40,7 +40,10 @@ export function InstanceActionsMenu({
   kuery,
   onClose,
 }: Props) {
-  const { core } = useApmPluginContext();
+  const {
+    core,
+    infra: { locators },
+  } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
     serviceNodeName,
@@ -89,6 +92,7 @@ export function InstanceActionsMenu({
     basePath: core.http.basePath,
     onFilterByInstanceClick: handleFilterByInstanceClick,
     metricsHref,
+    infraLocators: locators,
   });
 
   return (

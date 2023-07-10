@@ -34,9 +34,17 @@ export const useFilteredDataView = (indexPattern: string) => {
       throw new Error('Error fetching fields for the index pattern');
     }
 
+    // Filter out fields that are not present in the index pattern passed as a parameter
     dataView.fields = dataView.fields.filter((field) =>
       indexPatternFields.some((indexPatternField) => indexPatternField.name === field.name)
     ) as DataView['fields'];
+
+    // Insert fields that are present in the index pattern but not in the data view
+    indexPatternFields.forEach((indexPatternField) => {
+      if (!dataView.fields.some((field) => field.name === indexPatternField.name)) {
+        dataView.fields.push(indexPatternField as DataView['fields'][0]);
+      }
+    });
 
     return dataView;
   };

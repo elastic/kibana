@@ -20,8 +20,9 @@ export default function ({ getService, getPageObjects }) {
   const esSupertest = getService('esSupertest');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/157723
-  describe.skip('watcher_test', function () {
+  describe('watcher_test', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/157723
+    // this.tags('includeFirefox');
     before('initialize tests', async () => {
       // There may be system watches if monitoring was previously enabled
       // These cannot be deleted via the UI, so we need to delete via the API
