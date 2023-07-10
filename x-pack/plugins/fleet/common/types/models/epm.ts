@@ -335,6 +335,7 @@ export enum RegistryDataStreamKeys {
   ingest_pipeline = 'ingest_pipeline',
   elasticsearch = 'elasticsearch',
   dataset_is_prefix = 'dataset_is_prefix',
+  routing_rules = 'routing_rules',
 }
 
 export interface RegistryDataStream {
@@ -351,6 +352,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
+  [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[]; // TODO do better
 }
 
 export interface RegistryElasticsearch {
@@ -372,6 +374,17 @@ export interface RegistryDataStreamProperties {
 export interface RegistryDataStreamPrivileges {
   cluster?: string[];
   indices?: string[];
+}
+
+export interface RegistryDataStreamRoutingRules {
+  source_dataset: string;
+  rules: RegistryRoutingRule[];
+}
+
+export interface RegistryRoutingRule {
+  target_dataset: string;
+  if: string;
+  namespace: string;
 }
 
 export type RegistryVarType =
