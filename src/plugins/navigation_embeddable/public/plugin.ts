@@ -19,43 +19,49 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { APP_NAME } from '../common/constants';
 import { setKibanaServices } from './navigation_embeddable_services';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
-export interface SetupDependencies {
+export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
   contentManagement: ContentManagementPublicSetup;
 }
 
-export interface StartDependencies {
+export interface NavigationEmbeddableStartDependencies {
   embeddable: EmbeddableStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
 }
 
 export class NavigationEmbeddablePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
+  implements
+    Plugin<
+      void,
+      void,
+      NavigationEmbeddableSetupDependencies,
+      NavigationEmbeddableStartDependencies
+    >
 {
   constructor() {}
 
-  public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
-    plugins.embeddable.registerEmbeddableFactory(
-      NAVIGATION_EMBEDDABLE_TYPE,
-      new NavigationEmbeddableFactoryDefinition()
-    );
+  public setup(
+    core: CoreSetup<NavigationEmbeddableStartDependencies>,
+    plugins: NavigationEmbeddableSetupDependencies
+  ) {
+    core.getStartServices().then(([_, deps]) => {
+      plugins.embeddable.registerEmbeddableFactory(
+        NAVIGATION_EMBEDDABLE_TYPE,
+        new NavigationEmbeddableFactoryDefinition()
+      );
 
-    plugins.contentManagement.registry.register({
-      id: CONTENT_ID,
-      version: {
-        latest: LATEST_VERSION,
-      },
-      name: APP_NAME,
+      plugins.contentManagement.registry.register({
+        id: CONTENT_ID,
+        version: {
+          latest: LATEST_VERSION,
+        },
+        name: APP_NAME,
+      });
     });
   }
 
-  public start(core: CoreStart, plugins: StartDependencies) {
+  public start(core: CoreStart, plugins: NavigationEmbeddableStartDependencies) {
     setKibanaServices(core, plugins);
     return {};
   }

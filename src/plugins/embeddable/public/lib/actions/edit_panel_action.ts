@@ -92,7 +92,7 @@ export class EditPanelAction implements Action<ActionContext> {
       }
 
       const oldExplicitInput = embeddable.getExplicitInput();
-      const newExplicitInput = await factory.getExplicitInput(oldExplicitInput);
+      const newExplicitInput = await factory.getExplicitInput(oldExplicitInput, embeddable.parent);
       embeddable.parent?.replaceEmbeddable(embeddable.id, newExplicitInput);
       return;
     }

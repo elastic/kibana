@@ -1,0 +1,23 @@
+@import '../mixins';
+
+.navEmbeddableLinkEditor {
+  @include euiFlyout;
+  animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+
+  .linkEditorBackButton {
+    height: auto;
+  }
+}
+
+.navEmbeddablePanelEditor {
+  .linkText {
+    flex: 1;
+    min-width: 0;
+
+    .wrapText {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}

@@ -14,8 +14,9 @@
       "kibanaReact",
       "presentationUtil"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["triggersActionsUi"],
     "requiredBundles": [
     ]
   }
 }
+

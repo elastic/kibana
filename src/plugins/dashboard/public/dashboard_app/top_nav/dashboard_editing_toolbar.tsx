@@ -101,7 +101,7 @@ export function DashboardEditingToolbar() {
 
       let explicitInput: Awaited<ReturnType<typeof embeddableFactory.getExplicitInput>>;
       try {
-        explicitInput = await embeddableFactory.getExplicitInput();
+        explicitInput = await embeddableFactory.getExplicitInput(undefined, dashboard);
       } catch (e) {
         // error likely means user canceled embeddable creation
         return;
