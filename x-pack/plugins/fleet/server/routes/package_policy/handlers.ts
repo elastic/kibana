@@ -51,10 +51,7 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type {
-  SimplifiedPackagePolicy,
-  FormattedPackagePolicy,
-} from '../../../common/services/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -79,25 +76,13 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       await populatePackagePolicyAssignedAgentsCount(esClient, items);
     }
 
-    if (request.query.format === inputsFormat.Simplified) {
-      const formattedItems: FormattedPackagePolicy[] = [];
-      items.forEach((item) => {
-        formattedItems.push(packagePolicyToSimplifiedPackagePolicy(item));
-      });
-      return response.ok({
-        body: {
-          items: formattedItems,
-          total,
-          page,
-          perPage,
-        },
-      });
-    }
-
     // agnostic to package-level RBAC
     return response.ok({
       body: {
-        items,
+        items:
+          request.query.format === inputsFormat.Simplified
+            ? items.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
+            : items,
         total,
         page,
         perPage,
