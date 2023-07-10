@@ -60,9 +60,10 @@ if is_pr_with_label "ci:build-serverless-image"; then
   docker logout docker.elastic.co
 
   SERVERLESS_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-serverless)
+  buildkite-agent meta-data set pr_comment:deploy_cloud:head "* Kibana Serverless Image: `$SERVERLESS_IMAGE`"
   cat << EOF | buildkite-agent annotate --style "info" --context kibana-serverless-image
 
-  Kibana serverless image: \`$SERVERLESS_IMAGE\`
+  Kibana Serverless Image: \`$SERVERLESS_IMAGE\`
 EOF
 fi
 
