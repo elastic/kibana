@@ -12,13 +12,22 @@ import {
   type DataView,
   getFieldSubtypeMulti,
 } from '@kbn/data-views-plugin/public';
+import type { SearchMode } from '../../types';
 
-export function shouldShowField(field: DataViewField | undefined, isPlainRecord: boolean): boolean {
+export function shouldShowField(
+  field: DataViewField | undefined,
+  searchMode: SearchMode | undefined,
+  disableMultiFieldsGroupingByParent: boolean | undefined
+): boolean {
   if (!field?.type || field.type === '_source') {
     return false;
   }
-  if (isPlainRecord) {
+  if (searchMode === 'text-based') {
     // exclude only `_source` for plain records
+    return true;
+  }
+  if (disableMultiFieldsGroupingByParent) {
+    // include subfields
     return true;
   }
   // exclude subfields
@@ -38,31 +47,36 @@ export interface SelectedFieldsResult {
 
 export function getSelectedFields({
   dataView,
-  columns,
+  workspaceSelectedFieldNames,
   allFields,
-  isPlainRecord,
+  searchMode,
 }: {
   dataView: DataView | undefined;
-  columns: string[];
+  workspaceSelectedFieldNames?: string[];
   allFields: DataViewField[] | null;
-  isPlainRecord: boolean;
+  searchMode: SearchMode | undefined;
 }): SelectedFieldsResult {
   const result: SelectedFieldsResult = {
     selectedFields: [],
     selectedFieldsMap: {},
   };
-  if (!Array.isArray(columns) || !columns.length || !allFields) {
+  if (
+    !workspaceSelectedFieldNames ||
+    !Array.isArray(workspaceSelectedFieldNames) ||
+    !workspaceSelectedFieldNames.length ||
+    !allFields
+  ) {
     return INITIAL_SELECTED_FIELDS_RESULT;
   }
 
-  // add selected columns, that are not part of the data view, to be removable
-  for (const column of columns) {
+  // add selected field names, that are not part of the data view, to be removable
+  for (const selectedFieldName of workspaceSelectedFieldNames) {
     const selectedField =
-      (!isPlainRecord && dataView?.getFieldByName?.(column)) ||
-      allFields.find((field) => field.name === column) || // for example to pick a `nested` root field or find a selected field in text-based response
+      (searchMode === 'documents' && dataView?.getFieldByName?.(selectedFieldName)) ||
+      allFields.find((field) => field.name === selectedFieldName) || // for example to pick a `nested` root field or find a selected field in text-based response
       ({
-        name: column,
-        displayName: column,
+        name: selectedFieldName,
+        displayName: selectedFieldName,
         type: 'unknown_selected',
       } as DataViewField);
     result.selectedFields.push(selectedField);
