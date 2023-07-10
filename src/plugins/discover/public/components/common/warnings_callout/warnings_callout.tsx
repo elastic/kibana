@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
 import {
   EuiCallOut,
   EuiEmptyPrompt,
@@ -21,6 +21,7 @@ import {
   EuiPopover,
   useEuiTheme,
   useEuiFontSize,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +41,12 @@ export const WarningsCallout = ({
 }: WarningsCalloutProps) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
+  const [isCalloutVisibleMap, setIsCalloutVisibleMap] = useState<Record<number, boolean>>({});
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsCalloutVisibleMap({});
+  }, [interceptedWarnings, setIsCalloutVisibleMap]);
 
   if (!interceptedWarnings?.length) {
     return null;
@@ -49,28 +55,39 @@ export const WarningsCallout = ({
   if (variant === 'inline') {
     return (
       <>
-        {interceptedWarnings.map((warning, index) => (
-          <EuiCallOut
-            key={`warning-${index}`}
-            title={
-              <WarningContent
-                warning={warning}
-                groupStyles={{ alignItems: 'center', direction: 'row' }}
-                data-test-subj={dataTestSubj}
-              />
-            }
-            color="warning"
-            iconType="warning"
-            size="s"
-            css={css`
-              .euiTitle {
-                display: flex;
-                align-items: center;
+        {interceptedWarnings.map((warning, index) => {
+          if (isCalloutVisibleMap[index] === false) {
+            return null;
+          }
+          return (
+            <EuiCallOut
+              key={`warning-${index}`}
+              title={
+                <CalloutTitleWrapper
+                  onCloseCallout={() =>
+                    setIsCalloutVisibleMap((prev) => ({ ...prev, [index]: false }))
+                  }
+                >
+                  <WarningContent
+                    warning={warning}
+                    groupStyles={{ alignItems: 'center', direction: 'row' }}
+                    data-test-subj={dataTestSubj}
+                  />
+                </CalloutTitleWrapper>
               }
-            `}
-            data-test-subj={dataTestSubj}
-          />
-        ))}
+              color="warning"
+              iconType="warning"
+              size="s"
+              css={css`
+                .euiTitle {
+                  display: flex;
+                  align-items: center;
+                }
+              `}
+              data-test-subj={dataTestSubj}
+            />
+          );
+        })}
       </>
     );
   }
@@ -229,6 +246,27 @@ function WarningContent({
         </EuiFlexItem>
       ) : null}
       {action ? <EuiFlexItem grow={false}>{action}</EuiFlexItem> : null}
+    </EuiFlexGroup>
+  );
+}
+
+function CalloutTitleWrapper({
+  children,
+  onCloseCallout,
+}: PropsWithChildren<{ onCloseCallout: () => void }>) {
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          aria-label={i18n.translate('discover.warningsCallout.closeButtonAriaLabel', {
+            defaultMessage: 'Close',
+          })}
+          onClick={onCloseCallout}
+          type="button"
+          iconType="cross"
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
