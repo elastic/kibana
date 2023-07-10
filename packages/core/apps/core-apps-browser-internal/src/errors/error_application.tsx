@@ -12,7 +12,7 @@ import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageSection } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
@@ -31,21 +31,14 @@ const ErrorPage: React.FC<Props> = ({ title, children }) => {
     });
 
   return (
-    <EuiPage
-      style={{ minHeight: '100%', alignItems: 'center' }}
-      data-test-subj="appRenderErrorPageContent"
-    >
-      <EuiPageBody>
-        <EuiPageSection alignment="center">
-          <EuiEmptyPrompt
-            iconType="warning"
-            iconColor="danger"
-            title={<h2>{title}</h2>}
-            body={children}
-          />
-        </EuiPageSection>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPageTemplate data-test-subj="appRenderErrorPageContent">
+      <EuiPageTemplate.EmptyPrompt
+        iconType="warning"
+        iconColor="danger"
+        title={<h2>{title}</h2>}
+        body={children}
+      />
+    </EuiPageTemplate>
   );
 };
 
