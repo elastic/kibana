@@ -20,6 +20,7 @@ import {
   createStubIndexRecord,
   createStubDataStreamRecord,
   createStubLogger,
+  createStubDocRecord,
 } from './__mocks__/stubs';
 
 const log = createStubLogger();
@@ -77,6 +78,51 @@ describe('esArchiver: createDeleteIndexStream()', () => {
     sinon.assert.calledOnce(client.indices.deleteIndexTemplate as sinon.SinonSpy);
     sinon.assert.calledWith(client.indices.deleteIndexTemplate as sinon.SinonSpy, {
       name: 'foo-template',
+    });
+  });
+
+  describe('saved object cleanup', () => {
+    describe('when saved object documents are found', () => {
+      it('cleans the corresponding saved object indices', async () => {
+        const client = createStubClient();
+        const stats = createStubStats();
+        await createPromiseFromStreams([
+          createListStream([
+            createStubDocRecord('.kibana_task_manager', 1),
+            createStubDocRecord('.kibana_alerting_cases', 2),
+            createStubDocRecord('.kibana', 3),
+          ]),
+          createDeleteIndexStream(client, stats, log),
+        ]);
+
+        expect(mockCleanSavedObjectIndices).toHaveBeenCalledTimes(2);
+
+        expect(mockCleanSavedObjectIndices).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ index: '.kibana_task_manager' })
+        );
+        expect(mockCleanSavedObjectIndices).toHaveBeenNthCalledWith(
+          2,
+          expect.not.objectContaining({ index: expect.any(String) })
+        );
+      });
+    });
+
+    describe('when saved object documents are not found', () => {
+      it('does not clean any indices', async () => {
+        const client = createStubClient();
+        const stats = createStubStats();
+        await createPromiseFromStreams([
+          createListStream([
+            createStubDocRecord('.foo', 1),
+            createStubDocRecord('.bar', 2),
+            createStubDocRecord('.baz', 3),
+          ]),
+          createDeleteIndexStream(client, stats, log),
+        ]);
+
+        expect(mockCleanSavedObjectIndices).not.toHaveBeenCalled();
+      });
     });
   });
 });
