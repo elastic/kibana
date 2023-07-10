@@ -1,10 +1,54 @@
 #!/bin/bash
 
+set -u
+
+fail() {
+  printf "%s\n" "$@" >&2
+  exit 1
+}
+
+# require bash
+if [ -z "${BASH_VERSION:-}" ]; then
+  fail "bash required"
+fi
+
+if [ $# -lt 4 ]; then
+  fail "usage: $0 api_key api_endpoint agent_version onboarding_id [autoDownloadConfig=1]"
+fi
+
 API_KEY_ENCODED=$1
 API_ENDPOINT=$2
 ELASTIC_AGENT_VERSION=$3
 ONBOARDING_ID=$4
-AUTO_DOWNLOAD_CONFIG=$5
+AUTO_DOWNLOAD_CONFIG=${5:-}
+
+# require curl
+[ $(builtin type -P curl) ] || fail "curl required"
+
+# check OS
+OS="$(uname)"
+ARCH="$(uname -m)"
+os=linux
+arch=x86_64
+if [ "${OS}" == "Linux" ]; then
+  if [ "${ARCH}" == "aarch64" ]; then
+    arch=arm64
+  fi
+elif [ "${OS}" == "Darwin" ]; then
+  os=darwin
+  if [ "${ARCH}" == "arm64" ]; then
+    arch=aarch64
+  fi
+else
+  fail "this script is only supported on linux and macOS"
+fi
+
+artifact=elastic-agent-${ELASTIC_AGENT_VERSION}-${os}-${arch}
+
+# https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.8.2-darwin-x86_64.tar.gz
+# https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.8.2-darwin-aarch64.tar.gz
+# https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.8.2-linux-x86_64.tar.gz
+# https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.8.2-linux-arm64.tar.gz
 
 updateStepProgress() {
   local STEPNAME="$1"
@@ -19,41 +63,40 @@ updateStepProgress() {
     --no-progress-meter
 }
 
-echo "Downloading Elastic Agent archive"
+ELASTIC_AGENT_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/beats/elastic-agent/${artifact}.tar.gz"
+echo "Downloading Elastic Agent archive from ${ELASTIC_AGENT_DOWNLOAD_URL}"
 updateStepProgress "ea-download" "loading"
-ELASTIC_AGENT_DOWNLOAD_URL="https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64.tar.gz"
-curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL --fail --continue-at -
+curl -L -O $ELASTIC_AGENT_DOWNLOAD_URL --fail
 if [ "$?" -eq 0 ]; then
   echo "Downloaded Elastic Agent"
   updateStepProgress "ea-download" "complete"
 else
   updateStepProgress "ea-download" "danger"
-  echo "Failed to download Elastic Agent"
-  exit 1
+  fail "Failed to download Elastic Agent"
 fi
 
 echo "Extracting Elastic Agent"
 updateStepProgress "ea-extract" "loading"
-tar -xzf elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64.tar.gz --checkpoint=.1000
+tar -xzf ${artifact}.tar.gz
 echo ""
 if [ "$?" -eq 0 ]; then
   echo "Elastic Agent extracted"
   updateStepProgress "ea-extract" "complete"
 else
   updateStepProgress "ea-extract" "danger"
-  exit 1
+  fail "Failed to extract Elastic Agent"
 fi
 
 echo "Installing Elastic Agent"
 updateStepProgress "ea-install" "loading"
-cd elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64
+cd ${artifact}
 ./elastic-agent install -f
 if [ "$?" -eq 0 ]; then
   echo "Elastic Agent installed"
   updateStepProgress "ea-install" "complete"
 else
   updateStepProgress "ea-install" "danger"
-  exit 1
+  fail "Failed to install Elastic Agent"
 fi
 
 waitForElasticAgentStatus() {
@@ -76,7 +119,7 @@ waitForElasticAgentStatus() {
 echo "Checking Elastic Agent status"
 updateStepProgress "ea-status" "loading"
 waitForElasticAgentStatus
-if [[ "$?" -ne 0 ]]; then
+if [ "$?" -ne 0 ]; then
   updateStepProgress "ea-status" "warning"
   exit 1
 fi
@@ -107,18 +150,13 @@ downloadElasticAgentConfig() {
     updateStepProgress "ea-config" "complete"
   else
     updateStepProgress "ea-config" "warning"
-    echo "Failed to download elastic-agent.yml"
-    exit 1
+    fail "Failed to download elastic-agent.yml"
   fi
-
 }
 
-if [[ "${AUTO_DOWNLOAD_CONFIG}" == *"autoDownloadConfig=1"* ]]; then
+if [ "${AUTO_DOWNLOAD_CONFIG}" == *"autoDownloadConfig=1"* ]; then
   downloadElasticAgentConfig
-  echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana."
+  echo "Done with standalone Elastic Agent setup for custom logs. Look for streaming logs to arrive in Kibana"
 else
-  echo "Done with standalone Elastic Agent setup for custom logs. Make sure to add your configuration to /opt/Elastic/Agent/elastic-agent.yml, then look for streaming logs to arrive in Kibana."
+  echo "Done with standalone Elastic Agent setup for custom logs. Make sure to add your configuration to /opt/Elastic/Agent/elastic-agent.yml, then look for streaming logs to arrive in Kibana"
 fi
-
-echo "Exit"
-exit 0

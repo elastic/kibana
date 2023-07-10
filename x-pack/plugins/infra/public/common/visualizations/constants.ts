@@ -36,3 +36,5 @@ export const hostLensFormulas = {
   rx,
   tx,
 };
+
+export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';

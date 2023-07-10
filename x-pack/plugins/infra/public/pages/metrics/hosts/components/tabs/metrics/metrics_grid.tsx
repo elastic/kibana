@@ -10,8 +10,8 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { hostLensFormulas, type XYLayerOptions } from '../../../../../../common/visualizations';
+import { HostMetricsDocsLink } from '../../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
 import { MetricChart, MetricChartProps } from './metric_chart';
-import { HostMetricsDocsLink } from '../../metric_explanation/host_metrics_docs_link';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
 const XY_LAYER_OPTIONS: XYLayerOptions = {
