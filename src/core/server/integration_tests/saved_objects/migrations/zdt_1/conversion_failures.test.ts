@@ -106,8 +106,8 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       '2': {
         changes: [
           {
-            type: 'data_backfill',
-            transform: (doc) => {
+            type: 'unsafe_transform',
+            transformFn: (doc) => {
               throw new Error(`error from ${doc.id}`);
             },
           },
@@ -121,8 +121,8 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       '2': {
         changes: [
           {
-            type: 'data_backfill',
-            transform: (doc) => {
+            type: 'unsafe_transform',
+            transformFn: (doc) => {
               if (doc.id === 'b-0') {
                 throw new Error(`error from ${doc.id}`);
               }
