@@ -58,10 +58,10 @@ if is_pr_with_label "ci:build-serverless-image"; then
   --skip-docker-contexts
   docker logout docker.elastic.co
 
-  CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-serverless)
+  SERVERLESS_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-serverless)
   cat << EOF | buildkite-agent annotate --style "info" --context kibana-serverless-image
 
-  Kibana serverless image: \`$CLOUD_IMAGE\`
+  Kibana serverless image: \`$SERVERLESS_IMAGE\`
 EOF
 fi
 
