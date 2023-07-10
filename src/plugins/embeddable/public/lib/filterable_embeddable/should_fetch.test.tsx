@@ -24,9 +24,8 @@ describe('shouldFetch$', () => {
   beforeAll(() => {
     subscription = shouldFetch$<FilterableEmbeddableInput>(subject, () => {
       return input;
-    }).subscribe((newInput) => {
+    }).subscribe(() => {
       shouldFetchCount++;
-      input = newInput;
     });
   });
 
