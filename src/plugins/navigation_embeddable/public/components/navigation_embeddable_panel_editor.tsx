@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -58,15 +58,19 @@ export const NavigationEmbeddablePanelEditor = ({
 
   const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
 
+  const addLink = useCallback(async () => {
+    const newLinks = await openLinkEditorFlyout({
+      links,
+      parentDashboard,
+      ref: editLinkFlyoutRef,
+    });
+    console.log('new links', newLinks);
+    setLinks(newLinks);
+  }, [editLinkFlyoutRef, links, parentDashboard]);
+
   const deleteLink = useCallback(
     (linkId: string) => {
-      const newLinks = Object.keys(links).reduce((prev, curr) => {
-        if (curr === linkId) {
-          return prev;
-        }
-        return { ...prev, [curr]: links[curr] };
-      }, {});
-      setLinks(newLinks);
+      setLinks(omit(links, [linkId]));
     },
     [links]
   );
@@ -124,18 +128,7 @@ export const NavigationEmbeddablePanelEditor = ({
                   <EuiSpacer size="s" />
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
-                      <EuiButton
-                        onClick={async () => {
-                          const newLinks = await openLinkEditorFlyout({
-                            links,
-                            parentDashboard,
-                            ref: editLinkFlyoutRef,
-                          });
-                          console.log('new links', newLinks);
-                          setLinks(newLinks);
-                        }}
-                        iconType="plusInCircle"
-                      >
+                      <EuiButton onClick={addLink} iconType="plusInCircle">
                         {NavEmbeddableStrings.editor.getAddButtonLabel()}
                       </EuiButton>
                     </EuiFlexItem>
@@ -191,19 +184,7 @@ export const NavigationEmbeddablePanelEditor = ({
                       </div>
                     );
                   })}
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="plusInCircle"
-                    onClick={async () => {
-                      const newLinks = await openLinkEditorFlyout({
-                        links,
-                        parentDashboard,
-                        ref: editLinkFlyoutRef,
-                      });
-                      console.log('new links', newLinks);
-                      setLinks(newLinks);
-                    }}
-                  >
+                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={addLink}>
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>
