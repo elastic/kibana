@@ -108,7 +108,7 @@ const stories: Meta<AssetDetailsProps> = {
     },
     overrides: {
       overview: {
-        dataView: {
+        metricsDataView: {
           id: 'default',
           getFieldByName: () => 'hostname' as unknown as DataViewField,
         } as unknown as DataView,

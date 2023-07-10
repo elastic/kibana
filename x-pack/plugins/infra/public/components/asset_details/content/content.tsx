@@ -40,8 +40,9 @@ export const Content = ({
           currentTimeRange={currentTimeRange}
           nodeName={node.name}
           nodeType={nodeType}
-          dataView={overrides?.overview?.dataView}
           dateRange={overrides?.overview?.dateRange}
+          metricsDataView={overrides?.overview?.metricsDataView}
+          logsDataView={overrides?.overview?.logsDataView}
         />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>

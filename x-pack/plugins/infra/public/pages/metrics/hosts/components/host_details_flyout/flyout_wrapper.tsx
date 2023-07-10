@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
@@ -26,9 +27,15 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { logViewReference, loading } = useLogViewReference({
+  const { logViewReference, loading, getLogsDataView } = useLogViewReference({
     id: 'hosts-flyout-logs-view',
   });
+
+  const { value: logsDataView } = useAsync(
+    () => getLogsDataView(logViewReference),
+    [logViewReference]
+  );
+
   const currentTimeRange = useMemo(
     () => ({
       ...getDateRangeAsTimestamp(),
@@ -48,7 +55,8 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
       overrides={{
         overview: {
           dateRange: searchCriteria.dateRange,
-          dataView,
+          logsDataView,
+          metricsDataView: dataView,
         },
         metadata: {
           query: hostFlyoutState?.metadataSearch,

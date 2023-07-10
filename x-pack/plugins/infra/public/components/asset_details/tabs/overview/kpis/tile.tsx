@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   EuiIcon,
@@ -18,14 +18,23 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import type { KPIChartProps } from '../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
-import { useLensAttributes } from '../../../../hooks/use_lens_attributes';
-import { LensWrapper } from '../../../../common/visualizations/lens/lens_wrapper';
-import { buildCombinedHostsFilter, buildExistsHostsFilter } from '../../../../utils/filters/build';
-import { TooltipContent } from '../../../../common/visualizations/metric_explanation/tooltip_content';
-import type { KPIGridProps } from './kpi_grid';
+import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
+import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
+import {
+  buildCombinedHostsFilter,
+  buildExistsHostsFilter,
+} from '../../../../../utils/filters/build';
+import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
+import type { StringDateRange } from '../../../types';
 
 const MIN_HEIGHT = 150;
+
+export interface TileProps {
+  dateRange: StringDateRange;
+  dataView?: DataView;
+  nodeName: string;
+}
 
 export const Tile = ({
   id,
@@ -35,7 +44,7 @@ export const Tile = ({
   dataView,
   nodeName,
   dateRange,
-}: KPIChartProps & KPIGridProps) => {
+}: KPIChartProps & TileProps) => {
   const getSubtitle = () =>
     i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average', {
       defaultMessage: 'Average',

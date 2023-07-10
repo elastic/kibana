@@ -16,22 +16,22 @@ import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/h
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummary } from './metadata_summary';
-import { KPIGrid } from './kpi_grid';
+import { KPIGrid } from './kpis/kpi_grid';
 import type { StringDateRange } from '../../types';
+import { MetricsGrid } from './metrics/metrics_grid';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
   setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
 }
 
-export interface KPIProps {
-  dateRange?: StringDateRange;
-  dataView?: DataView;
-}
-export interface OverviewProps extends KPIProps {
+export interface OverviewProps {
   currentTimeRange: MetricsTimeInput;
   nodeName: string;
   nodeType: InventoryItemType;
+  dateRange?: StringDateRange;
+  metricsDataView?: DataView;
+  logsDataView?: DataView;
 }
 
 const DEFAULT_DATE_RANGE = {
@@ -45,7 +45,8 @@ export const Overview = ({
   currentTimeRange,
   nodeType,
   dateRange,
-  dataView,
+  metricsDataView,
+  logsDataView,
 }: OverviewProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
@@ -61,7 +62,7 @@ export const Overview = ({
         <KPIGrid
           nodeName={nodeName}
           dateRange={dateRange ?? DEFAULT_DATE_RANGE}
-          dataView={dataView}
+          dataView={metricsDataView}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -94,6 +95,14 @@ export const Overview = ({
         ) : (
           <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
         )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MetricsGrid
+          dateRange={dateRange ?? DEFAULT_DATE_RANGE}
+          logsDataView={logsDataView}
+          metricsDataView={metricsDataView}
+          nodeName={nodeName}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

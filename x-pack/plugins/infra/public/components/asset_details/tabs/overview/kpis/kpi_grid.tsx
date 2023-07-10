@@ -5,22 +5,13 @@
  * 2.0.
  */
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Tile, type TileProps } from './tile';
+import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Tile } from './tile';
-import { KPI_CHARTS } from '../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
-import type { KPIProps } from './overview';
-import type { StringDateRange } from '../../types';
-
-export interface KPIGridProps extends KPIProps {
-  nodeName: string;
-  dateRange: StringDateRange;
-}
-
-export const KPIGrid = React.memo(({ nodeName, dataView, dateRange }: KPIGridProps) => {
+export const KPIGrid = React.memo(({ nodeName, dataView, dateRange }: TileProps) => {
   return (
     <>
-      <EuiSpacer size="s" />
       <EuiFlexGroup
         direction="row"
         gutterSize="s"

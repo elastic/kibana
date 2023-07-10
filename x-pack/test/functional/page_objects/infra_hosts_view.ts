@@ -203,6 +203,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return div.getAttribute('title');
     },
 
+    async getAssetDetailsMetricsCharts() {
+      const container = await testSubjects.find('assetDetailsMetricsChartGrid');
+      return container.findAllByCssSelector('[data-test-subj*="assetDetailsMetricsChart"]');
+    },
+
     getMetadataTab() {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
     },

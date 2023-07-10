@@ -103,7 +103,12 @@ export const MetadataSummary = ({ metadata, metadataLoading }: MetadataSummaryPr
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule
+        margin="m"
+        css={css`
+          margin-bottom: 0;
+        `}
+      />
     </>
   );
 };

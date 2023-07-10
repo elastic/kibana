@@ -287,6 +287,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
         });
+
+        it('should navigate to metadata tab', async () => {
+          await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.metadataTableExist();
+        });
+
+        it('should render 8 charts in the Metrics section', async () => {
+          const hosts = await pageObjects.infraHostsView.getAssetDetailsMetricsCharts();
+          expect(hosts.length).to.equal(8);
+        });
+
+        [
+          { metric: 'cpuUsage', value: '13.9%' },
+          { metric: 'normalizedLoad1m', value: '18.8%' },
+          { metric: 'memoryUsage', value: '94.9%' },
+          { metric: 'diskSpaceUsage', value: 'N/A' },
+        ].forEach(({ metric, value }) => {
+          it(`${metric} tile should show ${value}`, async () => {
+            await retry.try(async () => {
+              const tileValue = await pageObjects.infraHostsView.getAssetDetailsKPITileValue(
+                metric
+              );
+              expect(tileValue).to.eql(value);
+            });
+          });
+        });
         it('should navigate to metadata tab', async () => {
           await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
           await pageObjects.header.waitUntilLoadingHasFinished();

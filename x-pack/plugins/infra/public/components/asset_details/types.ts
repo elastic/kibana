@@ -48,7 +48,8 @@ export interface StringDateRange {
 export interface TabState {
   overview?: {
     dateRange: StringDateRange;
-    dataView?: DataView;
+    metricsDataView?: DataView;
+    logsDataView?: DataView;
   };
   metadata?: {
     query?: string;
