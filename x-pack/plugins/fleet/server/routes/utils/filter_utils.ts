@@ -7,6 +7,7 @@
 
 import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 type KueryNode = any;
@@ -204,7 +205,8 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
 export const validateKuery = (
   kuery: string | undefined,
   allowedTypes: string[],
-  indexMapping: IndexMapping
+  indexMapping: IndexMapping,
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>
 ) => {
   let isValid = true;
   let error: string | undefined;
@@ -221,7 +223,6 @@ export const validateKuery = (
         indexMapping,
         storeValue: true,
       });
-
       if (validationObject.some((obj) => obj.error != null)) {
         error = `KQLSyntaxError: ${validationObject
           .filter((obj) => obj.error != null)

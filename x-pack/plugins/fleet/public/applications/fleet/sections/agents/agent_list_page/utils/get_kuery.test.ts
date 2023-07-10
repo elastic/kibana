@@ -40,19 +40,19 @@ describe('getKuery', () => {
 
   it('should return a kuery with healthy selected status', () => {
     expect(getKuery({ selectedStatus: healthyStatuses })).toEqual(
-      'status:online or (status:updating or status:unenrolling or status:enrolling)'
+      'fleet-agents.status:online or (fleet-agents.status:updating or fleet-agents.status:unenrolling or fleet-agents.status:enrolling)'
     );
   });
 
   it('should return a kuery with unhealthy selected status', () => {
     expect(getKuery({ selectedStatus: inactiveStatuses })).toEqual(
-      '(status:error or status:degraded) or status:offline or status:inactive or status:unenrolled'
+      '(fleet-agents.status:error or fleet-agents.status:degraded) or fleet-agents.status:offline or fleet-agents.status:inactive or fleet-agents.status:unenrolled'
     );
   });
 
   it('should return a kuery with a combination of previous kueries', () => {
     expect(getKuery({ search, selectedTags, selectedStatus })).toEqual(
-      '((base search) and fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and (status:online or (status:error or status:degraded))'
+      '((base search) and fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")) and (fleet-agents.status:online or (fleet-agents.status:error or fleet-agents.status:degraded))'
     );
   });
 
