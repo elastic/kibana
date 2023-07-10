@@ -73,7 +73,7 @@ describe('Assistant', () => {
 
     jest
       .mocked(useLocalStorage)
-      .mockReturnValue(['', persistToLocalStorage] as unknown as ReturnType<
+      .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
       >);
   });
