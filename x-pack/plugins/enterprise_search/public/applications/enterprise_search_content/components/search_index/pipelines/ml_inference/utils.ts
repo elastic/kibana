@@ -7,8 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-
 import { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline';
 
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
@@ -86,13 +84,17 @@ export const validateInferencePipelineFields = (
   return errors;
 };
 
-export const EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD = i18n.translate(
-  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledSourceFieldDescription',
-  {
-    defaultMessage:
-      'This pipeline cannot be selected because the source field does not exist on this index.',
-  }
-);
+export const EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD = (
+  commaSeparatedMissingSourceFields: string
+) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledSourceFieldDescription',
+    {
+      defaultMessage:
+        "This pipeline cannot be selected because some source fields don't exist in this index: {commaSeparatedMissingSourceFields}.",
+      values: { commaSeparatedMissingSourceFields },
+    }
+  );
 
 export const EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledPipelineExistsDescription',
@@ -101,27 +103,15 @@ export const EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS = i18n.translate(
   }
 );
 
-export const EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION = i18n.translate(
-  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledElserNotSupportedDescription',
-  {
-    defaultMessage:
-      'This pipeline cannot be selected because attaching an ELSER pipeline is not supported yet.',
-  }
-);
-
 export const getDisabledReason = (
-  sourceFields: string[] | undefined,
-  sourceField: string,
+  missingSourceFields: string[],
   indexProcessorNames: string[],
-  pipelineName: string,
-  modelType: string
+  pipelineName: string
 ): string | undefined => {
-  if (!(sourceFields?.includes(sourceField) ?? false)) {
-    return EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD;
+  if (missingSourceFields.length > 0) {
+    return EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD(missingSourceFields.join(', '));
   } else if (indexProcessorNames.includes(pipelineName)) {
     return EXISTING_PIPELINE_DISABLED_PIPELINE_EXISTS;
-  } else if (modelType === SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION) {
-    return EXISTING_PIPELINE_DISABLED_TEXT_EXPANSION;
   }
 
   return undefined;
