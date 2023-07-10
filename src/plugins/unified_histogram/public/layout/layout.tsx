@@ -193,7 +193,7 @@ export const UnifiedHistogramLayout = ({
   onBrushEnd,
   children,
 }: UnifiedHistogramLayoutProps) => {
-  const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
+  const { allSuggestions, currentSuggestion } = useLensSuggestions({
     dataView,
     query,
     originalSuggestion,
@@ -203,7 +203,7 @@ export const UnifiedHistogramLayout = ({
     onSuggestionChange,
   });
 
-  const chart = suggestionUnsupported ? undefined : originalChart;
+  const chart = originalChart;
 
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
