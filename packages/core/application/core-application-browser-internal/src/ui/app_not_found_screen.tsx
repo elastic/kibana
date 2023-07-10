@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageSection } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const AppNotFound = () => (
-  <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
+  <EuiPage
+    style={{ minHeight: '100%', alignItems: 'center' }}
+    data-test-subj="appNotFoundPageContent"
+  >
     <EuiPageBody>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center">
+      <EuiPageSection alignment="center">
         <EuiEmptyPrompt
           iconType="warning"
           iconColor="danger"
@@ -39,7 +37,7 @@ export const AppNotFound = () => (
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     </EuiPageBody>
   </EuiPage>
 );
