@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs } from '../tabs';
+import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs, Overview } from '../tabs';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 
 type Props = Pick<
@@ -19,8 +19,8 @@ export const Content = ({
   overrides,
   currentTimeRange,
   node,
-  nodeType = 'host',
   onTabsStateChange,
+  nodeType = 'host',
 }: Props) => {
   const onChange = (state: TabState) => {
     if (!onTabsStateChange) {
@@ -34,6 +34,15 @@ export const Content = ({
     <>
       <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
         <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
+        <Overview
+          currentTimeRange={currentTimeRange}
+          nodeName={node.name}
+          nodeType={nodeType}
+          dataView={overrides?.overview?.dataView}
+          dateRange={overrides?.overview?.dateRange}
+        />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>
         <Logs
