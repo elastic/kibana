@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiText, EuiTitle } from '@elastic/eui';
 
-import { PipelineSelectOption, PipelineSelectOptionDisabled } from './pipeline_select_option';
-import { MLInferencePipelineOption } from './ml_inference_logic';
 import { MLModelTypeBadge } from '../ml_model_type_badge';
+
+import { MLInferencePipelineOption } from './ml_inference_logic';
+import { PipelineSelectOption, PipelineSelectOptionDisabled } from './pipeline_select_option';
+
 import { MODEL_REDACTED_VALUE } from './utils';
 
 describe('PipelineSelectOption', () => {
@@ -47,7 +48,7 @@ describe('PipelineSelectOption', () => {
     );
     expect(wrapper.find(MLModelTypeBadge)).toHaveLength(0);
   });
-  it('redacts model ID if it\'s unavailable', () => {
+  it("redacts model ID if it's unavailable", () => {
     const wrapper = shallow(
       <PipelineSelectOption
         pipeline={{
