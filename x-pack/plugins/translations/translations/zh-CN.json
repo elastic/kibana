@@ -998,7 +998,6 @@
     "core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle": "在 GitHub 中提出问题",
     "core.ui.chrome.headerGlobalNav.helpMenuTitle": "帮助",
     "core.ui.chrome.headerGlobalNav.logoAriaLabel": "Elastic 徽标",
-    "core.ui.enterpriseSearchNavList.label": "Enterprise Search",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText": "高级设置",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationTitle": "URL 过长，Kibana 可能无法工作",
     "core.ui.errorUrlOverflow.errorTitle": "此对象的 URL 过长，我们无法显示它",
