@@ -1,0 +1,25 @@
+@import '../../../core/public/mixins';
+
+@keyframes euiFlyoutAnimation {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}
+
+@mixin euiFlyout {
+  @include kibanaFullBodyHeight();
+  border-left: $euiBorderThin;
+  position: fixed;
+  width: 50%;
+  z-index: $euiZFlyout;
+  background: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}

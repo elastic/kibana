@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { NAVIGATION_EMBEDDABLE_TYPE, NavigationEmbeddable } from './navigation_embeddable';
+export {
+  NAVIGATION_EMBEDDABLE_TYPE,
+  NavigationEmbeddable as NavigationEmbeddable,
+} from './navigation_embeddable';
 export type { NavigationEmbeddableFactory } from './navigation_embeddable_factory';
 export { NavigationEmbeddableFactoryDefinition } from './navigation_embeddable_factory';
