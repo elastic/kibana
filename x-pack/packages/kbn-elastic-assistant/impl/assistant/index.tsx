@@ -28,6 +28,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UpgradeButtons } from '../upgrade/upgrade_buttons';
 import { getMessageFromRawResponse } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
@@ -47,15 +48,16 @@ import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { BASE_CONVERSATIONS } from './use_conversation/sample_conversations';
+import { BASE_CONVERSATIONS, enterpriseMessaging } from './use_conversation/sample_conversations';
 import { AssistantSettingsButton } from './settings/assistant_settings_button';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 
 export interface Props {
-  promptContextId?: string;
   conversationId?: string;
-  showTitle?: boolean;
+  isAssistantEnabled: boolean;
+  promptContextId?: string;
   shouldRefocusPrompt?: boolean;
+  showTitle?: boolean;
 }
 
 /**
@@ -63,10 +65,11 @@ export interface Props {
  * quick prompts for common actions, settings, and prompt context providers.
  */
 const AssistantComponent: React.FC<Props> = ({
-  promptContextId = '',
-  showTitle = true,
   conversationId = WELCOME_CONVERSATION_TITLE,
+  isAssistantEnabled,
+  promptContextId = '',
   shouldRefocusPrompt = false,
+  showTitle = true,
 }) => {
   const {
     actionTypeRegistry,
@@ -100,10 +103,37 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
-  const welcomeConversation = useMemo(
-    () => conversations[selectedConversationId] ?? BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE],
-    [conversations, selectedConversationId]
-  );
+  const welcomeConversation = useMemo(() => {
+    const conversation =
+      conversations[selectedConversationId] ?? BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
+    const doesConversationHaveMessages = conversation.messages.length > 0;
+    if (!isAssistantEnabled) {
+      if (
+        !doesConversationHaveMessages ||
+        conversation.messages[conversation.messages.length - 1].content !==
+          enterpriseMessaging[0].content
+      ) {
+        return {
+          ...conversation,
+          messages: [...conversation.messages, ...enterpriseMessaging],
+        };
+      }
+      return conversation;
+    }
+
+    return doesConversationHaveMessages
+      ? {
+          ...conversation,
+          messages: [
+            ...conversation.messages,
+            ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+          ],
+        }
+      : {
+          ...conversation,
+          messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+        };
+  }, [conversations, isAssistantEnabled, selectedConversationId]);
 
   const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
@@ -115,13 +145,19 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
+  const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
-  const { connectorDialog, connectorPrompt } = useConnectorSetup({
+  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     actionTypeRegistry,
     http,
     refetchConnectors,
+    onSetupComplete: () => {
+      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+    },
+    conversation: welcomeConversation,
     isConnectorConfigured: !!connectors?.length,
   });
+
   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
     isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
       ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
@@ -147,8 +183,8 @@ const AssistantComponent: React.FC<Props> = ({
   }, [augmentMessageCodeBlocks, currentConversation]);
 
   const isSendingDisabled = useMemo(() => {
-    return isWelcomeSetup || showMissingConnectorCallout;
-  }, [showMissingConnectorCallout, isWelcomeSetup]);
+    return isDisabled || showMissingConnectorCallout;
+  }, [showMissingConnectorCallout, isDisabled]);
 
   // Fixes initial render not showing buttons as code block controls are added to the DOM really late
   useEffect(() => {
@@ -271,16 +307,6 @@ const AssistantComponent: React.FC<Props> = ({
     [setShowAnonymizedValues]
   );
 
-  const comments = useMemo(
-    () =>
-      getComments({
-        currentConversation,
-        lastCommentRef,
-        showAnonymizedValues,
-      }),
-    [currentConversation, getComments, showAnonymizedValues]
-  );
-
   useEffect(() => {
     // Adding `conversationId !== selectedConversationId` to prevent auto-run still executing after changing selected conversation
     if (currentConversation.messages.length || conversationId !== selectedConversationId) {
@@ -354,7 +380,65 @@ const AssistantComponent: React.FC<Props> = ({
     [messageCodeBlocks]
   );
 
-  console.log('currentConversation', currentConversation);
+  const chatbotComments = useMemo(
+    () => (
+      <>
+        <EuiCommentList
+          comments={getComments({
+            currentConversation,
+            lastCommentRef,
+            showAnonymizedValues,
+          })}
+          css={css`
+            margin-right: 20px;
+          `}
+        />
+
+        <EuiSpacer size={'m'} />
+
+        {(currentConversation.messages.length === 0 ||
+          Object.keys(selectedPromptContexts).length > 0) && (
+          <PromptEditor
+            conversation={currentConversation}
+            isNewConversation={currentConversation.messages.length === 0}
+            promptContexts={promptContexts}
+            promptTextPreview={promptTextPreview}
+            selectedPromptContexts={selectedPromptContexts}
+            setSelectedPromptContexts={setSelectedPromptContexts}
+          />
+        )}
+
+        <div ref={bottomRef} />
+      </>
+    ),
+    [
+      currentConversation,
+      getComments,
+      promptContexts,
+      promptTextPreview,
+      selectedPromptContexts,
+      showAnonymizedValues,
+    ]
+  );
+
+  const comments = useMemo(() => {
+    if (isDisabled) {
+      return (
+        <>
+          <EuiCommentList
+            comments={connectorComments}
+            css={css`
+              margin-right: 20px;
+            `}
+          />
+          <span ref={bottomRef} />
+        </>
+      );
+    }
+
+    return chatbotComments;
+  }, [connectorComments, isDisabled, chatbotComments]);
+
   return (
     <>
       <EuiModalHeader
@@ -396,7 +480,7 @@ const AssistantComponent: React.FC<Props> = ({
                   defaultProvider={defaultProvider}
                   onSelectionChange={(id) => setSelectedConversationId(id)}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
-                  isDisabled={isWelcomeSetup}
+                  isDisabled={isDisabled}
                 />
 
                 <>
@@ -423,7 +507,10 @@ const AssistantComponent: React.FC<Props> = ({
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <AssistantSettingsButton selectedConversation={currentConversation} />
+                      <AssistantSettingsButton
+                        isDisabled={currentConversation.replacements == null}
+                        selectedConversation={currentConversation}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
@@ -436,7 +523,7 @@ const AssistantComponent: React.FC<Props> = ({
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
         {CodeBlockPortals}
 
-        {!isWelcomeSetup && (
+        {!isDisabled && (
           <>
             <ContextPills
               defaultAllow={defaultAllow}
@@ -450,34 +537,7 @@ const AssistantComponent: React.FC<Props> = ({
         )}
       </EuiModalHeader>
       <EuiModalBody>
-        {isWelcomeSetup ? (
-          connectorDialog
-        ) : (
-          <>
-            <EuiCommentList
-              comments={comments}
-              css={css`
-                margin-right: 20px;
-              `}
-            />
-
-            {(currentConversation.messages.length === 0 ||
-              Object.keys(selectedPromptContexts).length > 0) && (
-              <PromptEditor
-                conversation={currentConversation}
-                isNewConversation={currentConversation.messages.length === 0}
-                promptContexts={promptContexts}
-                promptTextPreview={promptTextPreview}
-                selectedPromptContexts={selectedPromptContexts}
-                setSelectedPromptContexts={setSelectedPromptContexts}
-              />
-            )}
-
-            <div ref={bottomRef} />
-          </>
-        )}
-
-        <EuiSpacer size={'l'} />
+        {comments}
 
         {!isWelcomeSetup && showMissingConnectorCallout && (
           <EuiFlexGroup justifyContent="spaceAround">
@@ -493,14 +553,28 @@ const AssistantComponent: React.FC<Props> = ({
           flex-direction: column;
         `}
       >
-        <EuiFlexGroup
-          gutterSize="none"
-          css={css`
-            width: 100%;
-          `}
-        >
-          {isWelcomeSetup && <EuiFlexItem>{connectorPrompt}</EuiFlexItem>}
-        </EuiFlexGroup>
+        {!isAssistantEnabled ? (
+          <EuiFlexGroup
+            justifyContent="spaceAround"
+            css={css`
+              width: 100%;
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              {<UpgradeButtons basePath={http.basePath.get()} />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          isWelcomeSetup && (
+            <EuiFlexGroup
+              css={css`
+                width: 100%;
+              `}
+            >
+              <EuiFlexItem>{connectorPrompt}</EuiFlexItem>
+            </EuiFlexGroup>
+          )
+        )}
         <EuiFlexGroup
           gutterSize="none"
           css={css`
@@ -512,8 +586,8 @@ const AssistantComponent: React.FC<Props> = ({
               onPromptSubmit={handleSendMessage}
               ref={promptTextAreaRef}
               handlePromptChange={setPromptTextPreview}
-              value={isWelcomeSetup ? '' : suggestedUserPrompt ?? ''}
-              isDisabled={isWelcomeSetup}
+              value={isDisabled ? '' : suggestedUserPrompt ?? ''}
+              isDisabled={isDisabled}
             />
           </EuiFlexItem>
 
@@ -537,7 +611,7 @@ const AssistantComponent: React.FC<Props> = ({
                   <EuiButtonIcon
                     display="base"
                     iconType="cross"
-                    isDisabled={isWelcomeSetup}
+                    isDisabled={isDisabled}
                     aria-label={i18n.CLEAR_CHAT}
                     color="danger"
                     onClick={() => {
@@ -565,7 +639,7 @@ const AssistantComponent: React.FC<Props> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {!isWelcomeSetup && <QuickPrompts setInput={setSuggestedUserPrompt} />}
+        {!isDisabled && <QuickPrompts setInput={setSuggestedUserPrompt} />}
       </EuiModalFooter>
     </>
   );
