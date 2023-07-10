@@ -22,7 +22,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('list containers render', async () => {
       await retry.try(async () => {
         const title = await testSubjects.getVisibleText('listContainerTitle');
-        expect(title).to.be('todo list');
+        expect(title).to.be('Todo list');
 
         const titles = await testSubjects.getVisibleTextAll('todoEmbeddableTitle');
         expect(titles).to.eql(['Take out the trash', 'Vaccum the floor']);
