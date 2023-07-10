@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import {
   EuiTextArea,
@@ -43,13 +43,15 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   messageVariables,
   paramsProperty,
 }) => {
-  const [matches, setMatches] = useState<string[]>([]);
   const textAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const selectableRef = React.useRef<EuiSelectable | null>(null);
-  const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
+
+  const [matches, setMatches] = useState<string[]>([]);
+  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
   const [selectableHasFocus, setSelectableHasFocus] = useState(false);
   const [searchWord, setSearchWord] = useState<string | null>(null);
+
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
       label: variable,
@@ -93,32 +95,39 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     [editAction, index, paramsProperty]
   );
 
+  const recalcMenuPosition = useCallback(() => {
+    if (!textAreaRef.current) return;
+    const newPosition = getCaretCoordinates(
+      textAreaRef.current,
+      textAreaRef.current.selectionStart
+    );
+    const textAreaClientRect = textAreaRef.current?.getBoundingClientRect();
+
+    const top =
+      textAreaClientRect.top - textAreaRef.current.scrollTop + newPosition.top + newPosition.height;
+    const left = textAreaClientRect.left + window.pageXOffset;
+    const height = newPosition.height;
+    const width = textAreaClientRect.width;
+    setPopupPosition((old) =>
+      old.top !== top || old.left !== left || old.width !== width || old.height !== height
+        ? { top, left, width, height }
+        : old
+    );
+  }, [setPopupPosition, textAreaRef]);
+
+  useEffect(() => {
+    if (!isListOpen) return;
+    const interval = setInterval(recalcMenuPosition, 300);
+    return () => clearInterval(interval);
+  }, [isListOpen, recalcMenuPosition]);
+
   const onChangeWithMessageVariable = useCallback(() => {
     if (!textAreaRef.current) return;
     const { value, selectionStart } = textAreaRef.current;
 
-    window.setTimeout(() => {
-      if (textAreaRef.current) {
-        const newCaretPosition = getCaretCoordinates(
-          textAreaRef.current,
-          textAreaRef.current.selectionStart
-        );
-
-        const textAreaClientRect = textAreaRef.current?.getBoundingClientRect();
-
-        setCaretPosition({
-          top:
-            textAreaClientRect.top -
-            textAreaRef.current.scrollTop +
-            newCaretPosition?.top +
-            newCaretPosition.height +
-            window.pageYOffset,
-          left: textAreaClientRect.left + window.pageXOffset,
-          height: newCaretPosition.height,
-          width: textAreaClientRect.width,
-        });
-      }
-    }, 0);
+    setTimeout(() => {
+      recalcMenuPosition();
+    }, 100);
 
     const lastSpaceIndex = value.slice(0, selectionStart).lastIndexOf(' ');
     const lastOpenDoubleCurlyBracketsIndex = value.slice(0, selectionStart).lastIndexOf('{{');
@@ -148,7 +157,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     }
 
     editAction(paramsProperty, value, index);
-  }, [editAction, index, messageVariables, paramsProperty]);
+  }, [editAction, index, messageVariables, paramsProperty, recalcMenuPosition]);
 
   const textareaOnKeyPress = useCallback(
     (event) => {
@@ -284,9 +293,9 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
               ref={selectableRef}
               style={{
                 position: 'absolute',
-                top: caretPosition.top,
-                width: caretPosition.width,
-                left: caretPosition.left,
+                top: popupPosition.top,
+                width: popupPosition.width,
+                left: popupPosition.left,
                 border: '1px solid rgb(211, 218, 230)',
                 background: '#fbfcfd',
                 zIndex: 3000,
