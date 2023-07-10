@@ -11,7 +11,7 @@ import type { FilterableEmbeddableInput } from './types';
 import { shouldFetch$ } from  './should_fetch';
 
 describe('shouldFetch$', () => {
-  let input = {
+  let input: FilterableEmbeddableInput = {
     timeRange: {
       to: 'now',
       from: 'now-15m',
