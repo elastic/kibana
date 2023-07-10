@@ -58,15 +58,19 @@ export const NavigationEmbeddablePanelEditor = ({
 
   const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
 
-  const addLink = useCallback(async () => {
-    const newLinks = await openLinkEditorFlyout({
-      links,
-      parentDashboard,
-      ref: editLinkFlyoutRef,
-    });
-    console.log('new links', newLinks);
-    setLinks(newLinks);
-  }, [editLinkFlyoutRef, links, parentDashboard]);
+  const addOrEditLink = useCallback(
+    async (linkToEditId?: string) => {
+      const newLinks = await openLinkEditorFlyout({
+        links,
+        parentDashboard,
+        idToEdit: linkToEditId,
+        ref: editLinkFlyoutRef,
+      });
+      console.log('new links', newLinks);
+      setLinks(newLinks);
+    },
+    [editLinkFlyoutRef, links, parentDashboard]
+  );
 
   const deleteLink = useCallback(
     (linkId: string) => {
@@ -128,7 +132,7 @@ export const NavigationEmbeddablePanelEditor = ({
                   <EuiSpacer size="s" />
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
-                      <EuiButton onClick={addLink} iconType="plusInCircle">
+                      <EuiButton onClick={() => addOrEditLink()} iconType="plusInCircle">
                         {NavEmbeddableStrings.editor.getAddButtonLabel()}
                       </EuiButton>
                     </EuiFlexItem>
@@ -163,7 +167,14 @@ export const NavigationEmbeddablePanelEditor = ({
                                 className="navEmbeddable_hoverActions"
                               >
                                 <EuiFlexItem>
-                                  <EuiButtonIcon size="xs" iconType="pencil" aria-label="Edit" />
+                                  <EuiButtonIcon
+                                    size="xs"
+                                    iconType="pencil"
+                                    aria-label="Edit"
+                                    onClick={() => {
+                                      addOrEditLink(link.id);
+                                    }}
+                                  />
                                 </EuiFlexItem>
                                 <EuiFlexItem>
                                   <EuiButtonIcon
@@ -184,7 +195,7 @@ export const NavigationEmbeddablePanelEditor = ({
                       </div>
                     );
                   })}
-                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={addLink}>
+                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={() => addOrEditLink()}>
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>

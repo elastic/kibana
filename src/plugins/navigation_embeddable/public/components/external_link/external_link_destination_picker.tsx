@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import useMount from 'react-use/lib/useMount';
+import React, { useEffect, useState } from 'react';
+
 import { EuiFieldText } from '@elastic/eui';
 import { ExternalLinkEmbeddableStrings } from './external_link_strings';
 
@@ -25,20 +27,32 @@ export const ExternalLinkDestinationPicker = ({
   currentDestination?: string;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
+  const [urlValue, setUrlValue] = useState(currentDestination);
+
+  useMount(() => {
+    if (urlValue && urlValue.length > 0) {
+      setPlaceholder(urlValue);
+      setValidUrl(isValidUrl.test(urlValue));
+    }
+  });
+
+  useEffect(() => {
+    if (urlValue) {
+      const isValid = isValidUrl.test(urlValue);
+      setValidUrl(isValid);
+      setDestination(isValid ? urlValue : undefined);
+      setPlaceholder(isValid ? urlValue : undefined);
+    }
+  }, [urlValue, setDestination, setPlaceholder]);
 
   /* {...other} is needed so all inner elements are treated as part of the form */
   return (
     <div {...other}>
       <EuiFieldText
+        value={urlValue || ''}
         placeholder={ExternalLinkEmbeddableStrings.getPlaceholder()}
         isInvalid={!validUrl}
-        onChange={(e) => {
-          const url = e.target.value;
-          const isValid = isValidUrl.test(url);
-          setValidUrl(isValid);
-          setDestination(isValid ? url : undefined);
-          setPlaceholder(isValid ? url : undefined);
-        }}
+        onChange={(e) => setUrlValue(e.target.value)}
       />
     </div>
   );

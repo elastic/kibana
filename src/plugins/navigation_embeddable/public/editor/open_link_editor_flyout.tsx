@@ -12,9 +12,9 @@ import ReactDOM from 'react-dom';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
+import { coreServices } from '../services/kibana_services';
 import { NavigationEmbeddableLinkList } from '../embeddable/types';
 import { NavigationEmbeddableLinkEditor } from '../components/navigation_embeddable_link_editor';
-import { coreServices } from '../services/kibana_services';
 
 export interface LinkEditorProps {
   idToEdit?: string;
@@ -41,7 +41,6 @@ export async function openLinkEditorFlyout({
 
     const onCancel = () => {
       if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
-
       reject();
     };
 
