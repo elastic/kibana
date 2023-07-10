@@ -113,8 +113,6 @@ export const DataComparisonPage: FC = () => {
     [dataService.query.filterManager]
   );
 
-  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
-
   useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({
@@ -140,16 +138,17 @@ export const DataComparisonPage: FC = () => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
-    number | WindowParameters | undefined
-  >();
-  const [isBrushCleared, setIsBrushCleared] = useState(true);
-
   const euiTheme = useEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
     productionColor: euiTheme.euiColorVis1,
   };
+
+  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
+    number | WindowParameters | undefined
+  >();
+  const [isBrushCleared, setIsBrushCleared] = useState(true);
 
   function brushSelectionUpdate(d: WindowParameters, force: boolean) {
     if (!isBrushCleared || force) {
@@ -165,6 +164,28 @@ export const DataComparisonPage: FC = () => {
     setIsBrushCleared(true);
     setInitialAnalysisStart(undefined);
   }
+
+  const barStyleAccessor = useCallback(
+    (datum: DataSeriesDatum) => {
+      if (!windowParameters) return null;
+
+      const start = datum.x;
+      const end =
+        (typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x) +
+        (documentCountStats?.interval ?? 0);
+
+      if (start >= windowParameters.baselineMin && end <= windowParameters.baselineMax) {
+        return colors.referenceColor;
+      }
+      if (start >= windowParameters.deviationMin && end <= windowParameters.deviationMax) {
+        return colors.productionColor;
+      }
+
+      return null;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(windowParameters, colors)]
+  );
 
   return (
     <EuiPageBody data-test-subj="aiopsDataComparisonPage" paddingSize="none" panelled={false}>
@@ -194,29 +215,7 @@ export const DataComparisonPage: FC = () => {
                   initialAnalysisStart={initialAnalysisStart}
                   baselineLabel={REFERENCE_LABEL}
                   deviationLabel={PRODUCTION_LABEL}
-                  barStyleAccessor={(datum: DataSeriesDatum) => {
-                    if (!windowParameters) return null;
-
-                    const start = datum.x;
-                    const end =
-                      (typeof datum.x === 'string' ? parseInt(datum.x, 10) : datum.x) +
-                      (documentCountStats?.interval ?? 0);
-
-                    if (
-                      start >= windowParameters.baselineMin &&
-                      end <= windowParameters.baselineMax
-                    ) {
-                      return colors.referenceColor;
-                    }
-                    if (
-                      start >= windowParameters.deviationMin &&
-                      end <= windowParameters.deviationMax
-                    ) {
-                      return colors.productionColor;
-                    }
-
-                    return null;
-                  }}
+                  barStyleAccessor={barStyleAccessor}
                   baselineAnnotationStyle={{
                     strokeWidth: 0,
                     stroke: colors.referenceColor,

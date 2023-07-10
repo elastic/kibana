@@ -9,7 +9,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DATA_COMPARISON_TYPE } from './constants';
 
 export interface Histogram {
-  doc_count: 0;
+  doc_count: number;
   key: string | number;
   percentage?: number;
 }

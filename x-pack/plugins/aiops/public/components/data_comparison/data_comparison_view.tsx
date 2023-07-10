@@ -42,7 +42,12 @@ import { DataComparisonChartTooltipBody } from './data_comparison_chart_tooltip_
 import { UseTableState, useTableState } from '../log_categorization/category_table/use_table_state';
 import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { DATA_COMPARISON_TYPE, DATA_COMPARISON_TYPE_LABEL, PRODUCTION_LABEL } from './constants';
+import {
+  DATA_COMPARISON_TYPE,
+  DATA_COMPARISON_TYPE_LABEL,
+  PRODUCTION_LABEL,
+  REFERENCE_LABEL,
+} from './constants';
 import type {
   Histogram,
   ComparisionHistogram,
@@ -62,13 +67,14 @@ const formatSignificanceLevel = (significanceLevel: number) => {
   }
 };
 
-// Reference data numeric distribution
-export const ReferenceDistribution = ({
+export const DataComparisonDisbutrionChart = ({
   data,
   color,
   fieldType,
+  name,
 }: {
   data: Histogram[];
+  name: string;
   color?: SeriesColorAccessor;
   fieldType?: DataComparisonField['type'];
 }) => {
@@ -76,37 +82,8 @@ export const ReferenceDistribution = ({
     <Chart>
       <Settings />
       <BarSeries
-        id="reference-distr-viz"
-        name="Reference distribution"
-        xScaleType={
-          fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
-        }
-        yScaleType={ScaleType.Linear}
-        xAccessor="key"
-        yAccessors={['percentage']}
-        data={data}
-        color={color}
-      />
-    </Chart>
-  );
-};
-
-// Production data numeric distribution
-export const ProductionDistribution = ({
-  data,
-  color,
-  fieldType,
-}: {
-  data: Histogram[];
-  color?: SeriesColorAccessor;
-  fieldType?: DataComparisonField['type'];
-}) => {
-  return (
-    <Chart>
-      <Settings />
-      <BarSeries
-        id="production-distr-viz"
-        name="Production distribution"
+        id={`${name}-distr-viz`}
+        name={name}
         xScaleType={
           fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
         }
@@ -510,10 +487,14 @@ export const DataComparisonOverviewTable = ({
       render: (referenceHistogram: Feature['referenceHistogram'], item) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <ReferenceDistribution
+            <DataComparisonDisbutrionChart
               fieldType={item.fieldType}
               data={referenceHistogram}
               color={colors.referenceColor}
+              name={i18n.translate('xpack.aiops.dataComparison.dataComparisonDistributionLabel', {
+                defaultMessage: '{label} distribution',
+                values: { label: REFERENCE_LABEL },
+              })}
             />
           </div>
         );
@@ -522,15 +503,19 @@ export const DataComparisonOverviewTable = ({
     {
       field: 'productionHistogram',
       name: 'Production distribution',
-      'data-test-subj': 'mlDataComparisonOverviewTableProductionDistribution',
+      'data-test-subj': 'mlDataComparisonOverviewTableDataComparisonDisbutrionChart',
       sortable: false,
       render: (productionDistribution: Feature['productionHistogram'], item) => {
         return (
           <div css={{ width: 100, height: 40 }}>
-            <ProductionDistribution
+            <DataComparisonDisbutrionChart
               fieldType={item.fieldType}
               data={productionDistribution}
               color={colors.productionColor}
+              name={i18n.translate('xpack.aiops.dataComparison.dataComparisonDistributionLabel', {
+                defaultMessage: '{label} distribution',
+                values: { label: PRODUCTION_LABEL },
+              })}
             />
           </div>
         );
@@ -539,7 +524,7 @@ export const DataComparisonOverviewTable = ({
     {
       field: 'comparisonDistribution',
       name: 'Comparison',
-      'data-test-subj': 'mlDataComparisonOverviewTableProductionDistribution',
+      'data-test-subj': 'mlDataComparisonOverviewTableDataComparisonDisbutrionChart',
       sortable: false,
       render: (comparisonDistribution: Feature['comparisonDistribution'], item) => {
         return (
