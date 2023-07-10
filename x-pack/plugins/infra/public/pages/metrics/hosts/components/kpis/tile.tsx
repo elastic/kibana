@@ -111,7 +111,7 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
     <EuiPanelStyled
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
-      data-test-subj={`hostsView-metricChart-${id}`}
+      data-test-subj={`hostsViewKPI-${id}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -141,7 +141,7 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
         >
           <div>
             <LensWrapper
-              id={`hostsViewsmetricsChart-${id}`}
+              id={`hostsViewKPIGrid${id}Tile`}
               attributes={afterLoadedState.attributes}
               style={style}
               extraActions={extraActions}
