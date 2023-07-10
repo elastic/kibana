@@ -29,6 +29,8 @@ image::management/connectors/images/slack-api-connector.png[Slack API connector]
 
 If you use the latter method, you choose your channel when you create a rule action.
 Thus a connector can be used in multiple rules and actions to communicate with different channels.
+By default, the connector can access all channels within the scope of the Slack app.
+To reduce its access, list the allowed channels in *Channels*.
 
 For Slack setup details, go to <<configuring-slack>>.
 
@@ -60,8 +62,11 @@ xpack.actions.preconfigured:
     actionTypeId: .slack_api
     secrets:
       token: 'xoxb-xxxx-xxxx-xxxx' <1>
+    config:
+      allowedChannels: ['channel1', 'channel2'] <2>
 --
 <1> To obtain this value, go to <<configuring-slack-web-api>>.
+<2> Optionally limit the channels that the connector can access.
 
 [float]
 [[slack-action-configuration]]
