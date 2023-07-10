@@ -235,7 +235,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const takeActionItems = useGroupTakeActionsItems({
-    indexName: indexPattern.title,
     currentStatus: currentAlertStatusFilterValue,
     showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
   });

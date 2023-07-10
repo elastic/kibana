@@ -81,9 +81,10 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   config?: Config;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  isSystemAction: boolean;
 }
 
-export interface PreConfiguredAction<
+export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
 > extends ActionResult<Config> {
@@ -139,9 +140,8 @@ export interface ActionType<
     secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
-
+  isSystemActionType?: boolean;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 

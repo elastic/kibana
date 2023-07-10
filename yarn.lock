@@ -1552,10 +1552,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@82.1.0":
-  version "82.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-82.1.0.tgz#39816294a573c68b16eb729d80adebdd86614420"
-  integrity sha512-Y5zuPm4/n3dKKc0yxJxoq8m4UfjumKPixW5CCtKwFgjaZFw4RICDuNCkS11oSMQD7aYX2a1ie1EvD4OA4pa7ug==
+"@elastic/eui@83.0.0":
+  version "83.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-83.0.0.tgz#32d6a4516ff4bbc058cf604cf323536ce57748e7"
+  integrity sha512-xoGa/+WmqNV4+GwM7k9u610nAzL4MiWLns55qZdkftuN0zOwFjlnQS2bd+NJlNNXVB9PfeOIKfpvdB4iMIRsFA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.194"
@@ -4182,10 +4182,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ess-security@link:x-pack/plugins/ess_security":
-  version "0.0.0"
-  uid ""
-
 "@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
   version "0.0.0"
   uid ""
@@ -4618,6 +4614,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/logs-shared-plugin@link:x-pack/plugins/logs_shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logstash-plugin@link:x-pack/plugins/logstash":
   version "0.0.0"
   uid ""
@@ -4954,6 +4954,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rrule@link:packages/kbn-rrule":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rule-data-utils@link:packages/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
@@ -5058,11 +5062,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-ess@link:x-pack/plugins/security_solution_ess":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/security_solution":
   version "0.0.0"
   uid ""
 
 "@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
   version "0.0.0"
   uid ""
 
@@ -5167,10 +5179,6 @@
   uid ""
 
 "@kbn/serverless-search@link:x-pack/plugins/serverless_search":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-security@link:x-pack/plugins/serverless_security":
   version "0.0.0"
   uid ""
 
@@ -5711,6 +5719,10 @@
   uid ""
 
 "@kbn/ux-plugin@link:x-pack/plugins/ux":
+  version "0.0.0"
+  uid ""
+
+"@kbn/v8-profiler-examples-plugin@link:examples/v8_profiler_examples":
   version "0.0.0"
   uid ""
 
@@ -20699,7 +20711,7 @@ lru-queue@0.1:
   dependencies:
     es5-ext "~0.10.2"
 
-luxon@^1.21.3, luxon@^1.25.0:
+luxon@^1.25.0:
   version "1.28.1"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.28.1.tgz#528cdf3624a54506d710290a2341aa8e6e6c61b0"
   integrity sha512-gYHAa180mKrNIUJCbwpmD0aTu9kV0dREDrwNnuyFAsO1Wt0EVYSZelPnJlbj9HplzXX/YWXHFTL45kvZ53M0pw==
@@ -25669,15 +25681,6 @@ robust-predicates@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/robust-predicates/-/robust-predicates-3.0.1.tgz#ecde075044f7f30118682bd9fb3f123109577f9a"
   integrity sha512-ndEIpszUHiG4HtDsQLeIuMvRsDnn8c8rYStabochtUeCvfuvNptb5TUbVD68LRAILPX7p9nqQGh4xJgn3EHS/g==
-
-rrule@2.6.4:
-  version "2.6.4"
-  resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.6.4.tgz#7f4f31fda12bc7249bb176c891109a9bc448e035"
-  integrity sha512-sLdnh4lmjUqq8liFiOUXD5kWp/FcnbDLPwq5YAc/RrN6120XOPb86Ae5zxF7ttBVq8O3LxjjORMEit1baluahA==
-  dependencies:
-    tslib "^1.10.0"
-  optionalDependencies:
-    luxon "^1.21.3"
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"

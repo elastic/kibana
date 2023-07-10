@@ -791,6 +791,7 @@ describe('useCasesColumns ', () => {
                   name: 'None',
                   config: {},
                   isPreconfigured: false,
+                  isSystemAction: false,
                   isDeprecated: false,
                 },
               ]}
