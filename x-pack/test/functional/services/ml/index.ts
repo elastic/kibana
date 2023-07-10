@@ -90,7 +90,11 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     api,
     commonFieldStatsFlyout
   );
-  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
+  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(
+    context,
+    commonUI,
+    customUrls
+  );
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
     context,
     commonUI,

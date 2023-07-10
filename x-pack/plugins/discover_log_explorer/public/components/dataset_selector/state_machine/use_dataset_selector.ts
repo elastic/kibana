@@ -24,9 +24,9 @@ export const useDatasetSelector = ({
   onIntegrationsSort,
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
+  onSelectionChange,
   onUnmanagedStreamsSearch,
   onUnmanagedStreamsSort,
-  onDatasetSelected,
   onUnmanagedStreamsReload,
 }: DatasetsSelectorStateMachineDependencies) => {
   const datasetsSelectorStateService = useInterpret(() =>
@@ -38,18 +38,19 @@ export const useDatasetSelector = ({
       onIntegrationsSort,
       onIntegrationsStreamsSearch,
       onIntegrationsStreamsSort,
+      onSelectionChange,
       onUnmanagedStreamsSearch,
       onUnmanagedStreamsSort,
-      onDatasetSelected,
       onUnmanagedStreamsReload,
     })
   );
 
-  const isOpen = useSelector(datasetsSelectorStateService, (state) => state.matches('open'));
+  const isOpen = useSelector(datasetsSelectorStateService, (state) =>
+    state.matches('popover.open')
+  );
 
   const panelId = useSelector(datasetsSelectorStateService, (state) => state.context.panelId);
   const search = useSelector(datasetsSelectorStateService, (state) => state.context.search);
-  const selected = useSelector(datasetsSelectorStateService, (state) => state.context.selected);
 
   const changePanel = useCallback<ChangePanelHandler>(
     (panelDetails) =>
@@ -67,6 +68,11 @@ export const useDatasetSelector = ({
 
   const searchByName = useCallback<DatasetsSelectorSearchHandler>(
     (params) => datasetsSelectorStateService.send({ type: 'SEARCH_BY_NAME', search: params }),
+    [datasetsSelectorStateService]
+  );
+
+  const selectAllLogDataset = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SELECT_ALL_LOGS_DATASET' }),
     [datasetsSelectorStateService]
   );
 
@@ -95,12 +101,12 @@ export const useDatasetSelector = ({
     isOpen,
     panelId,
     search,
-    selected,
     // Actions
     closePopover,
     changePanel,
     scrollToIntegrationsBottom,
     searchByName,
+    selectAllLogDataset,
     selectDataset,
     sortByOrder,
     togglePopover,
