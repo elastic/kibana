@@ -55,7 +55,7 @@ export class XYChart implements Chart<XYState> {
   }
 
   getTitle(): string {
-    return this.chartConfig.title ?? this.chartConfig.layers[0].getName();
+    return this.chartConfig.title ?? this.chartConfig.layers[0].getName() ?? '';
   }
 }
 
