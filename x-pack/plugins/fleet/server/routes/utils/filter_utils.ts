@@ -207,26 +207,36 @@ export const validateKuery = (
   kuery: string | undefined,
   allowedTypes: string[],
   indexMapping: IndexMapping
-): boolean => {
-  if (!kuery) return true;
+) => {
+  let isValid = true;
+  let error: string | undefined;
 
-  if (kuery && indexMapping) {
-    const astFilter = esKuery.fromKueryExpression(kuery);
-    const validationObject = validateFilterKueryNode({
-      astFilter,
-      types: allowedTypes,
-      indexMapping,
-      storeValue: true,
-    });
+  if (!kuery) {
+    isValid = true;
+  }
+  try {
+    if (kuery && indexMapping) {
+      const astFilter = esKuery.fromKueryExpression(kuery);
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: allowedTypes,
+        indexMapping,
+        storeValue: true,
+      });
 
-    if (validationObject.some((obj) => obj.error != null)) {
-      throw new KQLSyntaxError(
-        `KQLSyntaxError: ${validationObject
+      if (validationObject.some((obj) => obj.error != null)) {
+        error = `KQLSyntaxError: ${validationObject
           .filter((obj) => obj.error != null)
           .map((obj) => obj.error)
-          .join('\n')}`
-      );
+          .join('\n')}`;
+        isValid = false;
+      }
+    } else {
+      isValid = true;
     }
+    return { isValid, error };
+  } catch (e) {
+    isValid = false;
+    error = e.message;
   }
-  return true;
 };

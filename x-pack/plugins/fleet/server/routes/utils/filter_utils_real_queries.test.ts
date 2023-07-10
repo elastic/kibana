@@ -406,18 +406,22 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 describe('validateKuery validates real kueries', () => {
   describe('Agent policies', () => {
     it('Test 1 - search by data_output_id', async () => {
-      const isValid = validateKuery(
+      const validationObj = validateKuery(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
         [AGENT_POLICY_SAVED_OBJECT_TYPE],
         AGENT_POLICY_MAPPINGS
       );
-      expect(isValid).toEqual(true);
+      expect(validationObj?.isValid).toEqual(true);
     });
 
     it('Invalid kuery', async () => {
-      expect(() =>
-        validateKuery('test%3A', [AGENT_POLICY_SAVED_OBJECT_TYPE], AGENT_POLICY_MAPPINGS)
-      ).toThrowError(
+      const validationObj = validateKuery(
+        'test%3A',
+        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        AGENT_POLICY_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toContain(
         `KQLSyntaxError: The key is empty and needs to be wrapped by a saved object type like ingest-agent-policies`
       );
     });
@@ -425,53 +429,54 @@ describe('validateKuery validates real kueries', () => {
 
   describe('Agents', () => {
     it('Test 1 - search policy id', async () => {
-      const isValid = validateKuery(
+      const validationObj = validateKuery(
         `${AGENTS_PREFIX}.policy_id: "policy_id"`,
         [AGENTS_PREFIX],
         AGENT_MAPPINGS
       );
-      expect(isValid).toEqual(true);
+      expect(validationObj?.isValid).toEqual(true);
     });
 
     it('Test 2 - invalid kuery', async () => {
-      expect(() =>
-        validateKuery(
-          `status:online or (status:updating or status:unenrolling or status:enrolling)`,
-          [AGENTS_PREFIX],
-          AGENT_MAPPINGS
-        )
-      ).toThrowError();
+      const validationObj = validateKuery(
+        `status:online or (status:updating or status:unenrolling or status:enrolling)`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toContain(
+        "KQLSyntaxError: This key 'status' need to be wrapped by a saved object type like fleet-agents"
+      );
     });
 
     it('Test 3 - valid kuery', async () => {
-      expect(
-        validateKuery(
-          `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`,
-          [AGENTS_PREFIX],
-          AGENT_MAPPINGS
-        )
-      ).toEqual(true);
+      const validationObj = validateKuery(
+        `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(true);
     });
   });
 
   describe('Package policies', () => {
     it('Test 1 - search by package name', async () => {
-      const isValid = validateKuery(
+      const validationObj = validateKuery(
         `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
         PACKAGE_POLICIES_MAPPINGS
       );
-      expect(isValid).toEqual(true);
+      expect(validationObj?.isValid).toEqual(true);
     });
 
     it('Test 2 - invalid search by package name', async () => {
-      expect(() =>
-        validateKuery(
-          `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
-          [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-          PACKAGE_POLICIES_MAPPINGS
-        )
-      ).toThrowError(
+      const validationObj = validateKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toEqual(
         `KQLSyntaxError: This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`
       );
     });
