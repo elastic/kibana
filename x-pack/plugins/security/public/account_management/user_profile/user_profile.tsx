@@ -88,7 +88,7 @@ export interface UserProfileFormValues {
   avatarType: 'initials' | 'image';
 }
 
-function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
+const UserDetailsEditor = ({ user }: { user: AuthenticatedUser }) => {
   const { services } = useKibana<CoreStart>();
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
@@ -145,7 +145,7 @@ function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
       </FormRow>
     </EuiDescribedFormGroup>
   );
-}
+};
 
 function UserSettingsEditor({
   formik,

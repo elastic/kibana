@@ -454,7 +454,7 @@ describe('useUserProfileForm', () => {
       );
 
       expect(userRolesExpandButton).toBeTruthy();
-      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length} Roles.`);
+      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length} more`);
     });
   });
 });
