@@ -21,7 +21,6 @@ import { Layout } from '../layouts';
 import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
-import { getNumberOfItems } from './get_number_of_items';
 import { getPdf } from './get_pdf';
 import { getRenderErrors } from './get_render_errors';
 import { getScreenshots } from './get_screenshots';
@@ -30,7 +29,6 @@ import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import type { PhaseInstance, PhaseTimeouts, Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
-import { waitForVisualizations } from './wait_for_visualizations';
 
 type Url = string;
 type UrlWithContext = [url: Url, context: Context];
@@ -185,17 +183,17 @@ export class ScreenshotObservableHandler {
     }).pipe(this.waitUntil(this.timeouts.openUrl));
   }
 
-  private waitForElements() {
-    const driver = this.driver;
-    const waitTimeout = this.timeouts.waitForElements.timeoutValue * 1.8; // the waitUntil is needed to catch actually timing out
+  // private waitForElements() {
+  //   const driver = this.driver;
+  //   const waitTimeout = this.timeouts.waitForElements.timeoutValue * 1.8; // the waitUntil is needed to catch actually timing out
 
-    return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
-      mergeMap((itemsCount) =>
-        waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
-      ),
-      this.waitUntil(this.timeouts.waitForElements)
-    );
-  }
+  //   return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
+  //     mergeMap((itemsCount) =>
+  //       waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
+  //     ),
+  //     this.waitUntil(this.timeouts.waitForElements)
+  //   );
+  // }
 
   private completeRender() {
     const driver = this.driver;
@@ -240,7 +238,7 @@ export class ScreenshotObservableHandler {
 
   public setupPage(index: number, url: UrlOrUrlWithContext) {
     return this.openUrl(index, url).pipe(
-      switchMapTo(this.waitForElements()),
+      // switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender())
     );
   }

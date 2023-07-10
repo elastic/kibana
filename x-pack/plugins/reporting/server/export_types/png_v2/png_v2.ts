@@ -54,7 +54,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
    * @params JobParamsPNGV2
    * @returns jobParams
    */
-  public createJob = ({ locatorParams, ...jobParams }: JobParamsPNGV2) => {
+  public createJob = async ({ locatorParams, ...jobParams }: JobParamsPNGV2) => {
     return {
       ...jobParams,
       locatorParams: [locatorParams] as unknown as LocatorParams<SerializableRecord>,
