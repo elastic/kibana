@@ -740,6 +740,43 @@ describe('getLensAttributes', () => {
     `);
   });
 
+  it('should return correct attributes for text based languages with adhoc dataview', () => {
+    const adHocDataview = {
+      ...dataView,
+      isPersisted: () => false,
+    } as DataView;
+    const lensAttrs = getLensAttributes({
+      title: 'test',
+      filters,
+      query,
+      dataView: adHocDataview,
+      timeInterval,
+      breakdownField: undefined,
+      suggestion: currentSuggestionMock,
+    });
+    expect(lensAttrs.attributes).toEqual({
+      state: expect.objectContaining({
+        adHocDataViews: {
+          'index-pattern-with-timefield-id': {},
+        },
+      }),
+      references: [
+        {
+          id: 'index-pattern-with-timefield-id',
+          name: 'indexpattern-datasource-current-indexpattern',
+          type: 'index-pattern',
+        },
+        {
+          id: 'index-pattern-with-timefield-id',
+          name: 'indexpattern-datasource-layer-unifiedHistogram',
+          type: 'index-pattern',
+        },
+      ],
+      title: 'test',
+      visualizationType: 'lnsHeatmap',
+    });
+  });
+
   it('should return suggestion title if no title is given', () => {
     expect(
       getLensAttributes({

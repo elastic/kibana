@@ -561,109 +561,133 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s if the title is too long', async () => {
-        const longTitle = 'a'.repeat(161);
-
-        const postedCase = await createCase(supertest, postCaseReq);
+      it('400s when trying to update too many cases', async () => {
         await updateCase({
           supertest,
           params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                title: longTitle,
-              },
-            ],
+            cases: Array(101).fill({ id: 'foo', version: 'bar', title: 'coolTitle' }),
           },
           expectedHttpCode: 400,
         });
       });
 
-      it('400s if the title an empty string', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
+      it('400s when trying to update zero cases', async () => {
         await updateCase({
           supertest,
           params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                title: '',
-              },
-            ],
+            cases: [],
           },
           expectedHttpCode: 400,
         });
       });
 
-      it('400s if the title is a string with empty characters', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                title: '  ',
-              },
-            ],
-          },
-          expectedHttpCode: 400,
+      describe('title', async () => {
+        it('400s if the title is too long', async () => {
+          const longTitle = 'a'.repeat(161);
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: longTitle,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the title an empty string', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the title is a string with empty characters', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
         });
       });
 
-      it('400s if the description is too long', async () => {
-        const longDescription = 'a'.repeat(30001);
+      describe('description', async () => {
+        it('400s if the description is too long', async () => {
+          const longDescription = 'a'.repeat(30001);
 
-        const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                description: longDescription,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: longDescription,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
         });
-      });
 
-      it('400s if the description an empty string', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                description: '',
-              },
-            ],
-          },
-          expectedHttpCode: 400,
+        it('400s if the description an empty string', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
         });
-      });
 
-      it('400s if the description is a string with empty characters', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                description: '  ',
-              },
-            ],
-          },
-          expectedHttpCode: 400,
+        it('400s if the description is a string with empty characters', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
         });
       });
 

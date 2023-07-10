@@ -6,10 +6,10 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { PreConfiguredAction, RawAction } from '../types';
+import { InMemoryConnector, RawAction } from '../types';
 
-export type ConnectorWithOptionalDeprecation = Omit<PreConfiguredAction, 'isDeprecated'> &
-  Pick<Partial<PreConfiguredAction>, 'isDeprecated'>;
+export type ConnectorWithOptionalDeprecation = Omit<InMemoryConnector, 'isDeprecated'> &
+  Pick<Partial<InMemoryConnector>, 'isDeprecated'>;
 
 const isObject = (obj: unknown): obj is Record<string, unknown> => isPlainObject(obj);
 
