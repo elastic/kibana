@@ -64,17 +64,13 @@ export default function (providerContext: FtrProviderContext) {
           },
           type: 'keyword',
         },
-        my_date: {
-          format: 'yyyy-MM-dd',
-          type: 'date',
-        },
         'responses.runtime_group_boolean': {
           type: 'boolean',
         },
         'runtime.date': {
-          format: 'date_optional_time',
+          format: 'yyyy-MM-dd',
           script: {
-            source: "emit(doc['@timestamp'].value.toLocalDate().toEpochDay())",
+            source: "emit(doc['@timestamp'].value.toEpochMilli())",
           },
           type: 'date',
         },
@@ -85,11 +81,23 @@ export default function (providerContext: FtrProviderContext) {
           },
           type: 'keyword',
         },
+        'runtime.epoch_milli': {
+          type: 'long',
+          script: {
+            source: "emit(doc['@timestamp'].value.toEpochMilli())",
+          },
+        },
         runtime_boolean: {
           type: 'boolean',
         },
         to_be_long: {
           type: 'long',
+        },
+        lowercase: {
+          type: 'keyword',
+          script: {
+            source: "emit(doc['uppercase'].value.toLowerCase())",
+          },
         },
       });
 
@@ -100,7 +108,7 @@ export default function (providerContext: FtrProviderContext) {
             path_match: 'labels.*',
             match_mapping_type: 'double',
             runtime: {
-              type: 'keyword',
+              type: 'long',
             },
           },
         },
