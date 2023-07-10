@@ -59,6 +59,5 @@ server.versioned.strictClientVersionCheck: false
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
 
-# Temporarily allow unauthenticated access to task manager utilization & status/stats APIs for autoscaling
-status.allowAnonymous: true
-xpack.task_manager.unsafe.authenticate_background_task_utilization: false
+# Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
+elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
