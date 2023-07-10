@@ -46,8 +46,9 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
             '--dev',
             '--no-dev-config',
             '--no-dev-credentials',
-            // Simulate versioned API behavior of onprem Kibana for FTR tests
-            '--server.versioned.versionResolution=oldest',
+            config.get('serverless')
+              ? '--server.versioned.versionResolution=newest'
+              : '--server.versioned.versionResolution=oldest',
           ],
     });
 
