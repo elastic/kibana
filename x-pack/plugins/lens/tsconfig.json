@@ -80,8 +80,6 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/unified-field-list",
-    "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-theme-browser-mocks"
   ],
   "exclude": [
     "target/**/*",
