@@ -7,19 +7,30 @@
 
 import {
   getSpecificSelectorId,
+  SETTINGS_CONFIRM_MODAL_BTN,
   SETTINGS_OUTPUTS,
   SETTINGS_OUTPUTS_KAFKA,
   SETTINGS_SAVE_BTN,
 } from '../screens/fleet';
 import {
-  cleanupKafkaOutput,
+  cleanupOutput,
+  fillInKafkaOutputForm,
   interceptOutputId,
+  kafkaOutputBody,
   kafkaOutputFormValues,
+  loadESOutput,
+  loadKafkaOutput,
+  loadLogstashOutput,
+  resetKafkaOutputForm,
   selectKafkaOutput,
   shouldDisplayError,
+  validateOutputTypeChangeToKafka,
+  validateSavedKafkaOutputForm,
 } from '../screens/fleet_outputs';
 
 import { login } from '../tasks/login';
+
+import { visit } from '../tasks/common';
 
 describe('Outputs', () => {
   beforeEach(() => {
@@ -164,101 +175,57 @@ describe('Outputs', () => {
       });
     });
 
-    describe('Form submission', () => {
-      let outputId: string;
+    // Test buttons presence before accessing output directly via url and delete via api
+    describe('Output operations', () => {
+      let kafkaOutputId: string;
+
+      before(() => {
+        loadKafkaOutput().then((data) => {
+          kafkaOutputId = data.item.id;
+        });
+      });
+
+      it('opens edit modal', () => {
+        visit('/app/fleet/settings');
+        cy.get(`a[href="/app/fleet/settings/outputs/${kafkaOutputId}"]`)
+          .parents('tr')
+          .within(() => {
+            cy.contains(kafkaOutputBody.name);
+            cy.contains(kafkaOutputBody.type);
+            cy.contains(kafkaOutputBody.hosts[0]);
+            cy.getBySel('editOutputBtn').click();
+            cy.url().should('include', `/app/fleet/settings/outputs/${kafkaOutputId}`);
+          });
+      });
+      it('delete output', () => {
+        visit('/app/fleet/settings');
+        cy.get(`a[href="/app/fleet/settings/outputs/${kafkaOutputId}"]`)
+          .parents('tr')
+          .within(() => {
+            cy.get('[title="Delete"]').click();
+          });
+        cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
+        cy.get(`a[href="app/fleet/settings/outputs/${kafkaOutputId}"]`).should('not.exist');
+      });
+    });
+
+    describe('Form submit', () => {
+      let kafkaOutputId: string;
 
       before(() => {
         interceptOutputId((id) => {
-          outputId = id;
+          kafkaOutputId = id;
         });
       });
 
       after(() => {
-        cleanupKafkaOutput(outputId);
+        cleanupOutput(kafkaOutputId);
       });
 
       it('saves the output', () => {
         selectKafkaOutput();
 
-        cy.getBySel(kafkaOutputFormValues.name.selector).type(kafkaOutputFormValues.name.value);
-        cy.get('[placeholder="Specify host"').clear().type('http://localhost:5000');
-        cy.getBySel(kafkaOutputFormValues.username.selector).type(
-          kafkaOutputFormValues.username.value
-        );
-        cy.getBySel(kafkaOutputFormValues.password.selector).type(
-          kafkaOutputFormValues.password.value
-        );
-
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SCRAM_256_OPTION).click();
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).click();
-
-        cy.getBySel(kafkaOutputFormValues.hash.selector).type(kafkaOutputFormValues.hash.value);
-        cy.getBySel(kafkaOutputFormValues.defaultTopic.selector).type(
-          kafkaOutputFormValues.defaultTopic.value
-        );
-
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-
-        cy.getBySel(kafkaOutputFormValues.firstTopic.selector).type(
-          kafkaOutputFormValues.firstTopic.value
-        );
-        cy.getBySel(kafkaOutputFormValues.firstTopicCondition.selector).type(
-          kafkaOutputFormValues.firstTopicCondition.value
-        );
-        cy.getBySel(kafkaOutputFormValues.firstTopicWhen.selector).select(
-          kafkaOutputFormValues.firstTopicWhen.value
-        );
-
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.TOPICS_ADD_ROW_BUTTON).click();
-
-        cy.getBySel(kafkaOutputFormValues.secondTopic.selector).type(
-          kafkaOutputFormValues.secondTopic.value
-        );
-        cy.getBySel(kafkaOutputFormValues.secondTopicCondition.selector).type(
-          kafkaOutputFormValues.secondTopicCondition.value
-        );
-        cy.getBySel(kafkaOutputFormValues.secondTopicWhen.selector).select(
-          kafkaOutputFormValues.secondTopicWhen.value
-        );
-
-        cy.getBySel(kafkaOutputFormValues.firstHeaderKey.selector).type(
-          kafkaOutputFormValues.firstHeaderKey.value
-        );
-        cy.getBySel(kafkaOutputFormValues.firstHeaderValue.selector).type(
-          kafkaOutputFormValues.firstHeaderValue.value
-        );
-
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.HEADERS_ADD_ROW_BUTTON).click();
-
-        cy.getBySel(kafkaOutputFormValues.secondHeaderKey.selector).type(
-          kafkaOutputFormValues.secondHeaderKey.value
-        );
-        cy.getBySel(kafkaOutputFormValues.secondHeaderValue.selector).type(
-          kafkaOutputFormValues.secondHeaderValue.value
-        );
-
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.COMPRESSION_SWITCH).click();
-
-        cy.getBySel(kafkaOutputFormValues.compressionCoded.selector).select(
-          kafkaOutputFormValues.compressionCoded.value
-        );
-        cy.getBySel(kafkaOutputFormValues.compressionLevel.selector).select(
-          kafkaOutputFormValues.compressionLevel.value
-        );
-
-        cy.getBySel(kafkaOutputFormValues.brokerAckReliability.selector).select(
-          kafkaOutputFormValues.brokerAckReliability.value
-        );
-        cy.getBySel(kafkaOutputFormValues.brokerChannelBufferSize.selector).select(
-          kafkaOutputFormValues.brokerChannelBufferSize.value
-        );
-        cy.getBySel(kafkaOutputFormValues.brokerTimeout.selector).select(
-          kafkaOutputFormValues.brokerTimeout.value
-        );
-        cy.getBySel(kafkaOutputFormValues.brokerReachabilityTimeout.selector).select(
-          kafkaOutputFormValues.brokerReachabilityTimeout.value
-        );
-        cy.getBySel(kafkaOutputFormValues.key.selector).type(kafkaOutputFormValues.key.value);
+        fillInKafkaOutputForm();
 
         cy.intercept('POST', '**/api/fleet/outputs').as('saveOutput');
 
@@ -269,24 +236,110 @@ describe('Outputs', () => {
           cy.visit(`/app/fleet/settings/outputs/${responseBody?.item?.id}`);
         });
 
-        Object.keys(kafkaOutputFormValues).forEach((key: string) => {
-          const { selector, value } =
-            kafkaOutputFormValues[key as keyof typeof kafkaOutputFormValues];
-          cy.getBySel(selector).should('have.value', value);
+        validateSavedKafkaOutputForm();
+      });
+    });
+
+    describe('Form edit', () => {
+      let kafkaOutputId: string;
+
+      before(() => {
+        loadKafkaOutput().then((data) => {
+          kafkaOutputId = data.item.id;
+        });
+      });
+      after(() => {
+        cleanupOutput(kafkaOutputId);
+      });
+
+      it('edits the output', () => {
+        visit(`/app/fleet/settings/outputs/${kafkaOutputId}`);
+
+        resetKafkaOutputForm();
+
+        fillInKafkaOutputForm();
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+        cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
+        visit(`/app/fleet/settings/outputs/${kafkaOutputId}`);
+
+        validateSavedKafkaOutputForm();
+      });
+    });
+
+    describe('Form output type change', () => {
+      let kafkaOutputToESId: string;
+      let kafkaOutputToLogstashId: string;
+      let logstashOutputToKafkaId: string;
+      let esOutputToKafkaId: string;
+
+      before(() => {
+        loadKafkaOutput().then((data) => {
+          kafkaOutputToESId = data.item.id;
+        });
+        loadKafkaOutput().then((data) => {
+          kafkaOutputToLogstashId = data.item.id;
+        });
+        loadESOutput().then((data) => {
+          esOutputToKafkaId = data.item.id;
+        });
+        loadLogstashOutput().then((data) => {
+          logstashOutputToKafkaId = data.item.id;
+        });
+      });
+      after(() => {
+        cleanupOutput(kafkaOutputToESId);
+        cleanupOutput(kafkaOutputToLogstashId);
+        cleanupOutput(logstashOutputToKafkaId);
+        cleanupOutput(esOutputToKafkaId);
+      });
+      it('changes output type from es to kafka', () => {
+        validateOutputTypeChangeToKafka(esOutputToKafkaId);
+      });
+
+      it('changes output type from logstash to kafka', () => {
+        validateOutputTypeChangeToKafka(logstashOutputToKafkaId);
+      });
+
+      it('changes output type from kafka to es', () => {
+        visit(`/app/fleet/settings/outputs/${kafkaOutputToESId}`);
+        cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('elasticsearch');
+        cy.getBySel(kafkaOutputFormValues.name.selector).clear().type('kafka_to_es');
+
+        cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+        cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
+
+        // wait for the save request to finish to avoid race condition
+        cy.wait('@saveOutput').then(() => {
+          visit(`/app/fleet/settings/outputs/${kafkaOutputToESId}`);
         });
 
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SCRAM_256_OPTION)
-          .find('input')
-          .should('be.checked');
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION)
-          .find('input')
-          .should('be.checked');
+        cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).should('have.value', 'elasticsearch');
+        cy.getBySel(kafkaOutputFormValues.name.selector).should('have.value', 'kafka_to_es');
+      });
 
-        cy.getBySel(SETTINGS_OUTPUTS_KAFKA.COMPRESSION_SWITCH).should(
-          'have.attr',
-          'aria-checked',
-          'true'
-        );
+      it('changes output type from kafka to logstash', () => {
+        visit(`/app/fleet/settings/outputs/${kafkaOutputToLogstashId}`);
+        cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('logstash');
+        cy.getBySel(kafkaOutputFormValues.name.selector).clear().type('kafka_to_logstash');
+        cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
+        cy.get('[placeholder="Specify ssl certificate"]').clear().type('SSL CERTIFICATE');
+        cy.get('[placeholder="Specify certificate key"]').clear().type('SSL KEY');
+
+        cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
+
+        cy.getBySel(SETTINGS_SAVE_BTN).click();
+        cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
+
+        // wait for the save request to finish to avoid race condition
+        cy.wait('@saveOutput').then(() => {
+          visit(`/app/fleet/settings/outputs/${kafkaOutputToLogstashId}`);
+        });
+
+        cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).should('have.value', 'logstash');
+        cy.getBySel(kafkaOutputFormValues.name.selector).should('have.value', 'kafka_to_logstash');
       });
     });
   });

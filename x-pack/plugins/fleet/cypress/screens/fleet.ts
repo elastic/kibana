@@ -53,6 +53,7 @@ export const ENROLLMENT_TOKENS = {
 };
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
 export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
+export const SETTINGS_CONFIRM_MODAL_BTN = 'confirmModalConfirmButton';
 
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
