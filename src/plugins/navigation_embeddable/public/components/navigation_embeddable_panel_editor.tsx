@@ -7,9 +7,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiText,
@@ -27,21 +26,22 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  DASHBOARD_LINK_TYPE,
-  EXTERNAL_LINK_TYPE,
-  NavigationEmbeddableInput,
-  NavigationEmbeddableLink,
   NavigationLinkInfo,
+  EXTERNAL_LINK_TYPE,
+  DASHBOARD_LINK_TYPE,
+  NavigationEmbeddableInput,
+  NavigationEmbeddableLinkList,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
-import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 
 import './navigation_embeddable.scss';
+import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
 
 export const NavigationEmbeddablePanelEditor = ({
   onSave,
@@ -54,8 +54,9 @@ export const NavigationEmbeddablePanelEditor = ({
   onSave: (input: Partial<NavigationEmbeddableInput>) => void;
   parentDashboard?: DashboardContainer;
 }) => {
-  const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
-  const [links, setLinks] = useState(initialInput.links);
+  const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
+
+  const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
 
   /**
    * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
@@ -88,6 +89,7 @@ export const NavigationEmbeddablePanelEditor = ({
 
   return (
     <>
+      <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}</h2>
@@ -110,7 +112,15 @@ export const NavigationEmbeddablePanelEditor = ({
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
                       <EuiButton
-                        onClick={() => setShowLinkEditorFlyout(true)}
+                        onClick={async () => {
+                          const newLinks = await openLinkEditorFlyout({
+                            links,
+                            parentDashboard,
+                            ref: editLinkFlyoutRef,
+                          });
+                          console.log('new links', newLinks);
+                          setLinks(newLinks);
+                        }}
                         iconType="plusInCircle"
                       >
                         {NavEmbeddableStrings.editor.getAddButtonLabel()}
@@ -129,12 +139,35 @@ export const NavigationEmbeddablePanelEditor = ({
                           hasShadow={false}
                           paddingSize="s"
                         >
-                          <EuiFlexGroup gutterSize="s" responsive={false} wrap={false}>
+                          <EuiFlexGroup
+                            gutterSize="s"
+                            responsive={false}
+                            wrap={false}
+                            alignItems="center"
+                          >
                             <EuiFlexItem grow={false}>
                               <EuiIcon type={link.icon} color="text" />
                             </EuiFlexItem>
                             <EuiFlexItem className="linkText">
                               <div className="wrapText">{link.label}</div>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiFlexGroup
+                                gutterSize="none"
+                                className="navEmbeddable_hoverActions"
+                              >
+                                <EuiFlexItem>
+                                  <EuiButtonIcon size="xs" iconType="pencil" aria-label="Edit" />
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <EuiButtonIcon
+                                    size="xs"
+                                    iconType="trash"
+                                    aria-label="Delete"
+                                    color="danger"
+                                  />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiPanel>
@@ -145,7 +178,15 @@ export const NavigationEmbeddablePanelEditor = ({
                   <EuiButtonEmpty
                     size="s"
                     iconType="plusInCircle"
-                    onClick={() => setShowLinkEditorFlyout(true)}
+                    onClick={async () => {
+                      const newLinks = await openLinkEditorFlyout({
+                        links,
+                        parentDashboard,
+                        ref: editLinkFlyoutRef,
+                      });
+                      console.log('new links', newLinks);
+                      setLinks(newLinks);
+                    }}
                   >
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
@@ -175,18 +216,6 @@ export const NavigationEmbeddablePanelEditor = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-
-      {showLinkEditorFlyout && (
-        <NavigationEmbeddableLinkEditor
-          onClose={() => {
-            setShowLinkEditorFlyout(false);
-          }}
-          onSave={(newLink: NavigationEmbeddableLink) => {
-            setLinks({ ...links, [uuidv4()]: newLink });
-          }}
-          parentDashboard={parentDashboard}
-        />
-      )}
     </>
   );
 };

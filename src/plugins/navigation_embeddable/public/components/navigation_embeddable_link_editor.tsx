@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import React, { useMemo, useState } from 'react';
 
 import {
@@ -32,20 +33,24 @@ import {
   NavigationLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  NavigationEmbeddableLink,
+  NavigationEmbeddableLinkList,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';
 
 export const NavigationEmbeddableLinkEditor = ({
+  links,
   onSave,
   onClose,
+  idToEdit,
   parentDashboard,
 }: {
+  idToEdit?: string;
+  links: NavigationEmbeddableLinkList;
   onClose: () => void;
+  onSave: (newLinks: NavigationEmbeddableLinkList) => void;
   parentDashboard?: DashboardContainer;
-  onSave: (newLink: NavigationEmbeddableLink) => void;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(DASHBOARD_LINK_TYPE);
   const [linkLabel, setLinkLabel] = useState<string>('');
@@ -157,9 +162,13 @@ export const NavigationEmbeddableLinkEditor = ({
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety
                 if (linkDestination) {
                   onSave({
-                    destination: linkDestination,
-                    label: linkLabel,
-                    type: selectedLinkType,
+                    ...links,
+                    [uuidv4()]: {
+                      destination: linkDestination,
+                      label: linkLabel,
+                      order: 0,
+                      type: selectedLinkType,
+                    },
                   });
                   onClose();
                 }

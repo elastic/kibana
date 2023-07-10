@@ -19,6 +19,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+
 import { DashboardItem } from '../../embeddable/types';
 import { memoizedFetchDashboards } from './dashboard_link_tools';
 import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';

@@ -79,6 +79,8 @@ export class NavigationEmbeddableFactoryDefinition
       '../editor/open_editor_flyout'
     );
 
+    console.log('input - before', initialInput);
+
     const input = await createNavigationEmbeddable(
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
       parent
@@ -86,6 +88,8 @@ export class NavigationEmbeddableFactoryDefinition
       // swallow the promise rejection that happens when the flyout is closed
       return {};
     });
+
+    console.log('input - after', input);
 
     return input;
   }
