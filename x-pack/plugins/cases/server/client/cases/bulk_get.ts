@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { partition } from 'lodash';
 
-import { MAX_BULK_GET_CASES } from '../../../common/constants';
 import type {
   CasesBulkGetResponse,
   CasesBulkGetRequest,
@@ -44,8 +42,6 @@ export const bulkGet = async (
 
   try {
     const request = decodeWithExcessOrThrow(CasesBulkGetRequestRt)(params);
-
-    throwErrorIfCaseIdsReachTheLimit(request.ids);
 
     const cases = await caseService.getCases({ caseIds: request.ids });
 
@@ -88,12 +84,6 @@ export const bulkGet = async (
       error,
       logger,
     });
-  }
-};
-
-const throwErrorIfCaseIdsReachTheLimit = (ids: string[]) => {
-  if (ids.length > MAX_BULK_GET_CASES) {
-    throw Boom.badRequest(`Maximum request limit of ${MAX_BULK_GET_CASES} cases reached`);
   }
 };
 

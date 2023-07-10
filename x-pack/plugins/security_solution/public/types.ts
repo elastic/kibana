@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -71,6 +71,7 @@ import type { NavigationLink } from './common/links';
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { UpsellingService } from './common/lib/upsellings';
+import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -129,8 +130,15 @@ export interface StartPluginsDependencies extends StartPlugins {
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
+export interface ContractStartServices {
+  isSidebarEnabled$: Observable<boolean>;
+  getStartedComponent$: Observable<React.ComponentType | null>;
+  upselling: UpsellingService;
+}
+
 export type StartServices = CoreStart &
-  StartPlugins & {
+  StartPlugins &
+  ContractStartServices & {
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
@@ -145,9 +153,6 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
-    isSidebarEnabled$: BehaviorSubject<boolean>;
-    getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
-    upselling: UpsellingService;
     telemetry: TelemetryClientStart;
   };
 
@@ -160,6 +165,7 @@ export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
+  getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
 }
 
 export interface AppObservableLibs {

@@ -28,6 +28,7 @@ const preconfiguredActions = [
     secrets: {},
     isPreconfigured: true,
     isDeprecated: false,
+    isSystemAction: false,
   },
 ];
 

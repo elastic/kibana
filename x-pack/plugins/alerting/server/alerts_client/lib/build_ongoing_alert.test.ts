@@ -34,6 +34,10 @@ const alertRule: AlertRule = {
 };
 const existingAlert = {
   '@timestamp': '2023-03-28T12:27:28.159Z',
+  event: {
+    action: 'open',
+    kind: 'signal',
+  },
   kibana: {
     alert: {
       action_group: 'error',
@@ -48,10 +52,16 @@ const existingAlert = {
       start: '2023-03-28T12:27:28.159Z',
       rule,
       status: 'active',
+      time_range: {
+        gte: '2023-03-28T12:27:28.159Z',
+      },
       uuid: 'abcdefg',
+      workflow_status: 'open',
     },
     space_ids: ['default'],
+    version: '8.8.1',
   },
+  tags: ['rule-', '-tags'],
 };
 
 describe('buildOngoingAlert', () => {
@@ -67,9 +77,14 @@ describe('buildOngoingAlert', () => {
         legacyAlert,
         rule: alertRule,
         timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
+      event: {
+        action: 'active',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'warning',
@@ -85,10 +100,16 @@ describe('buildOngoingAlert', () => {
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'active',
+          time_range: {
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
     });
   });
 
@@ -117,9 +138,14 @@ describe('buildOngoingAlert', () => {
           },
         },
         timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
+      event: {
+        action: 'active',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'warning',
@@ -141,10 +167,16 @@ describe('buildOngoingAlert', () => {
             },
           },
           status: 'active',
+          time_range: {
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
     });
   });
 
@@ -170,9 +202,14 @@ describe('buildOngoingAlert', () => {
         legacyAlert,
         rule: alertRule,
         timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
+      event: {
+        action: 'active',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'error',
@@ -188,10 +225,16 @@ describe('buildOngoingAlert', () => {
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'active',
+          time_range: {
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
     });
   });
 
@@ -222,10 +265,15 @@ describe('buildOngoingAlert', () => {
           url: `https://url2`,
           kibana: { alert: { nested_field: 2 } },
         },
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
       count: 2,
+      event: {
+        action: 'active',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'warning',
@@ -242,11 +290,17 @@ describe('buildOngoingAlert', () => {
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'active',
+          time_range: {
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
       url: `https://url2`,
+      tags: ['rule-', '-tags'],
     });
   });
 
@@ -281,10 +335,15 @@ describe('buildOngoingAlert', () => {
           url: `https://url2`,
           kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
         },
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
       count: 2,
+      event: {
+        action: 'active',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'warning',
@@ -301,11 +360,90 @@ describe('buildOngoingAlert', () => {
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'active',
+          time_range: {
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
       url: `https://url2`,
+      tags: ['rule-', '-tags'],
+    });
+  });
+
+  test('should merge and de-dupe tags from existing alert, reported payload and rule tags', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'error' | 'warning'>('alert-A');
+    legacyAlert
+      .scheduleActions('warning')
+      .replaceState({ start: '0000-00-00T00:00:00.000Z', duration: '36000000' });
+
+    expect(
+      buildOngoingAlert<
+        {
+          count: number;
+          url: string;
+          kibana?: { alert?: { action_group: string; nested_field?: number } };
+          tags?: string[];
+        },
+        {},
+        {},
+        'error' | 'warning',
+        'recovered'
+      >({
+        alert: {
+          ...existingAlert,
+          count: 1,
+          tags: ['old-tag1', '-tags'],
+          url: `https://url1`,
+        },
+        legacyAlert,
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+        payload: {
+          count: 2,
+          url: `https://url2`,
+          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+          tags: ['-tags', 'custom-tag2'],
+        },
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-29T12:27:28.159Z',
+      count: 2,
+      event: {
+        action: 'active',
+        kind: 'signal',
+      },
+      kibana: {
+        alert: {
+          action_group: 'warning',
+          duration: {
+            us: '36000000',
+          },
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: [],
+          nested_field: 2,
+          start: '2023-03-28T12:27:28.159Z',
+          rule,
+          status: 'active',
+          time_range: {
+            gte: '2023-03-28T12:27:28.159Z',
+          },
+          uuid: 'abcdefg',
+          workflow_status: 'open',
+        },
+        space_ids: ['default'],
+        version: '8.9.0',
+      },
+      url: `https://url2`,
+      tags: ['-tags', 'custom-tag2', 'old-tag1', 'rule-'],
     });
   });
 
@@ -325,10 +463,15 @@ describe('buildOngoingAlert', () => {
         legacyAlert,
         rule: alertRule,
         timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
       count: 1,
+      event: {
+        action: 'active',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'warning',
@@ -344,11 +487,17 @@ describe('buildOngoingAlert', () => {
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'active',
+          time_range: {
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
       url: `https://url1`,
+      tags: ['rule-', '-tags'],
     });
   });
 });

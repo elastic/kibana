@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
 
 const setupMock = () => ({
@@ -15,6 +16,10 @@ const setupMock = () => ({
 const startMock = () => ({
   getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
   setIsSidebarEnabled: jest.fn(),
+  setGetStartedPage: jest.fn(),
+  getBreadcrumbsNav$: jest.fn(
+    () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
+  ),
 });
 
 export const securitySolutionMock = {

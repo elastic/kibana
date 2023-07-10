@@ -6,6 +6,7 @@
  */
 
 import type {
+  DiffableAllFields,
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
@@ -19,6 +20,7 @@ import type {
 
 import type { FieldsDiff } from './fields_diff';
 
+export type AllFieldsDiff = FieldsDiff<DiffableAllFields>;
 export type CommonFieldsDiff = FieldsDiff<DiffableCommonFields>;
 export type CustomQueryFieldsDiff = FieldsDiff<DiffableCustomQueryFields>;
 export type SavedQueryFieldsDiff = FieldsDiff<DiffableSavedQueryFields>;

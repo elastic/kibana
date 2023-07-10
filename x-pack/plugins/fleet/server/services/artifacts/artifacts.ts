@@ -95,20 +95,13 @@ export const BULK_CREATE_MAX_ARTIFACTS_BYTES = 4_000_000;
 const generateArtifactBatches = (
   artifacts: NewArtifact[],
   maxArtifactsBatchSizeInBytes: number = BULK_CREATE_MAX_ARTIFACTS_BYTES
-): {
-  batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>>;
-  artifactsEsResponse: Artifact[];
-} => {
+): Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>> => {
   const batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>> = [];
-  const artifactsEsResponse: Artifact[] = [];
+
   let artifactsBatchLengthInBytes = 0;
   const sortedArtifacts = sortBy(artifacts, 'encodedSize');
 
-  sortedArtifacts.forEach((artifact, index) => {
-    const esArtifactResponse = esSearchHitToArtifact({
-      _id: uniqueIdFromArtifact(artifact),
-      _source: newArtifactToElasticsearchProperties(artifacts[index]),
-    });
+  sortedArtifacts.forEach((artifact) => {
     const esArtifact = newArtifactToElasticsearchProperties(artifact);
     const bulkOperation = {
       create: {
@@ -120,9 +113,6 @@ const generateArtifactBatches = (
     // If there is no artifact yet added to the current batch, we add it anyway ignoring the batch limit as the batch size has to be > 0.
     if (artifact.encodedSize + artifactsBatchLengthInBytes >= maxArtifactsBatchSizeInBytes) {
       artifactsBatchLengthInBytes = artifact.encodedSize;
-      // Use non sorted artifacts array to preserve the artifacts order in the response
-      artifactsEsResponse.push(esArtifactResponse);
-
       batches.push([bulkOperation, esArtifact]);
     } else {
       // Case it's the first one
@@ -131,14 +121,11 @@ const generateArtifactBatches = (
       }
       // Adds the next artifact to the current batch and increases the batch size count with the artifact size.
       artifactsBatchLengthInBytes += artifact.encodedSize;
-      // Use non sorted artifacts array to preserve the artifacts order in the response
-      artifactsEsResponse.push(esArtifactResponse);
-
       batches[batches.length - 1].push(bulkOperation, esArtifact);
     }
   });
 
-  return { batches, artifactsEsResponse };
+  return batches;
 };
 
 export const bulkCreateArtifacts = async (
@@ -146,7 +133,7 @@ export const bulkCreateArtifacts = async (
   artifacts: NewArtifact[],
   refresh = false
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
-  const { batches, artifactsEsResponse } = generateArtifactBatches(
+  const batches = generateArtifactBatches(
     artifacts,
     appContextService.getConfig()?.createArtifactsBulkBatchSize
   );
@@ -185,8 +172,16 @@ export const bulkCreateArtifacts = async (
     return { errors: nonConflictErrors };
   }
 
+  // Use non sorted artifacts array to preserve the artifacts order in the response
+  const nonSortedEsArtifactsResponse: Artifact[] = artifacts.map((artifact) => {
+    return esSearchHitToArtifact({
+      _id: uniqueIdFromArtifact(artifact),
+      _source: newArtifactToElasticsearchProperties(artifact),
+    });
+  });
+
   return {
-    artifacts: artifactsEsResponse,
+    artifacts: nonSortedEsArtifactsResponse,
   };
 };
 
@@ -197,6 +192,37 @@ export const deleteArtifact = async (esClient: ElasticsearchClient, id: string):
       id,
       refresh: 'wait_for',
     });
+  } catch (e) {
+    throw new ArtifactsElasticsearchError(e);
+  }
+};
+
+export const bulkDeleteArtifacts = async (
+  esClient: ElasticsearchClient,
+  ids: string[]
+): Promise<Error[]> => {
+  try {
+    const body = ids.map((id) => ({
+      delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: id },
+    }));
+
+    const res = await withPackageSpan(`Bulk delete fleet artifacts`, () =>
+      esClient.bulk({
+        body,
+        refresh: 'wait_for',
+      })
+    );
+    let errors: Error[] = [];
+    // Track errors of the bulk delete action
+    if (res.errors) {
+      errors = res.items.reduce<Error[]>((acc, item) => {
+        if (item.delete?.error) {
+          acc.push(new Error(item.delete.error.reason));
+        }
+        return acc;
+      }, []);
+    }
+    return errors;
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);
   }

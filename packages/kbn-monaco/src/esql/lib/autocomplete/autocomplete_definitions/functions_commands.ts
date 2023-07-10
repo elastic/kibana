@@ -74,6 +74,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'pow',
+    insertText: 'pow',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.powDoc', {
+      defaultMessage:
+        'Returns the the value of a base (first argument) raised to a power (second argument).',
+    }),
+    documentation: {
+      value: buildDocumentation('pow(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval s = POW(field, exponent)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'concat',
     insertText: 'concat',
     kind: 1,
@@ -218,6 +233,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
       value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
         `from index where field="value""
         | EVAL long = to_long(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'to_unsigned_long',
+    insertText: 'to_unsigned_long',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toUnsignedLongDoc', {
+      defaultMessage: 'Converts to unsigned long.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL long = to_unsigned_long(field)`,
       ]),
     },
     sortText: 'C',

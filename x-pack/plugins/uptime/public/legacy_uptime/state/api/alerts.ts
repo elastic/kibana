@@ -38,6 +38,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       is_preconfigured: isPreconfigured,
       is_deprecated: isDeprecated,
       is_missing_secrets: isMissingSecrets,
+      is_system_action: isSystemAction,
       ...res
     }) => ({
       ...res,
@@ -46,6 +47,7 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       isDeprecated,
       isPreconfigured,
       isMissingSecrets,
+      isSystemAction,
     })
   );
 };

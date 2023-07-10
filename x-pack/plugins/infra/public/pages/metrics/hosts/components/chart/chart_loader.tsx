@@ -33,12 +33,17 @@ export const ChartLoader = ({
           position="absolute"
           css={css`
             top: ${loadedOnce && hasTitle ? euiTheme.size.l : 0};
+            z-index: ${Number(euiTheme.levels.header) - 1};
           `}
-          style={{ zIndex: Number(euiTheme.levels.header) - 1 }}
         />
       )}
       {loading && !loadedOnce ? (
-        <EuiFlexGroup style={style} justifyContent="center" alignItems="center">
+        <EuiFlexGroup
+          style={{ ...style, marginTop: hasTitle ? euiTheme.size.l : 0 }}
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <EuiLoadingChart mono size="l" />
           </EuiFlexItem>

@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { buildExistsFilter } from '@kbn/es-query';
+import {
+  BooleanRelation,
+  buildCombinedFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+} from '@kbn/es-query';
 import { AggConfig } from '../../agg_config';
 import { IMetricAggConfig } from '../metric_agg_type';
 
@@ -18,4 +23,22 @@ export const createMetricFilter = <TMetricAggConfig extends AggConfig = IMetricA
   if (aggConfig.getField()) {
     return buildExistsFilter(aggConfig.getField(), indexPattern);
   }
+};
+
+export const createTopHitFilter = <TMetricAggConfig extends AggConfig = IMetricAggConfig>(
+  aggConfig: TMetricAggConfig,
+  key: string
+) => {
+  const indexPattern = aggConfig.getIndexPattern();
+  const field = aggConfig.getField();
+  if (!field) {
+    return;
+  }
+  return Array.isArray(key)
+    ? buildCombinedFilter(
+        BooleanRelation.OR,
+        key.map((k) => buildPhraseFilter(field, k, indexPattern)),
+        indexPattern
+      )
+    : buildPhraseFilter(field, key, indexPattern);
 };

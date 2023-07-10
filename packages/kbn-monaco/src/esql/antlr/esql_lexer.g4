@@ -145,6 +145,7 @@ NULLS_ORDERING_DIRECTION
 MATH_FUNCTION
     : R O U N D
     | A B S
+    | P O W
     | S U B S T R I N G
     | C O N C A T
     | S T A R T S UNDERSCORE W I T H
@@ -158,11 +159,13 @@ MATH_FUNCTION
     | L E N G T H
     | M V UNDERSCORE M A X
     | M V UNDERSCORE M I N
-    | M V UNDERSCORE M A X
+    | M V UNDERSCORE A V G
     | M V UNDERSCORE S U M
     | M V UNDERSCORE C O U N T
+    | M V UNDERSCORE C O N C A T
     | M V UNDERSCORE J O I N
     | M V UNDERSCORE M E D I A N
+    | M E T A D A T A
     | S P L I T
     | T O UNDERSCORE S T R I N G
     | T O UNDERSCORE S T R
@@ -177,6 +180,7 @@ MATH_FUNCTION
     | T O UNDERSCORE L O N G
     | T O UNDERSCORE I P
     | T O UNDERSCORE V E R S I O N
+    | T O UNDERSCORE U N S I G N E D UNDERSCORE L O N G
     ;
 
 UNARY_FUNCTION
@@ -195,7 +199,10 @@ WHERE_FUNCTIONS
     ;
 
 UNQUOTED_IDENTIFIER
-    : (LETTER | '_') (LETTER | DIGIT | '_' | ASTERISK)*
+    : LETTER (LETTER | DIGIT | '_' | ASTERISK)*
+    // only allow @ at beginning of identifier to keep the option to allow @ as infix operator in the future
+    // also, single `_` and `@` characters are not valid identifiers
+    | ('_' | '@') (LETTER | DIGIT | '_' | ASTERISK)+
     ;
 
 QUOTED_IDENTIFIER

@@ -83,7 +83,6 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/core-chrome-browser",
     "@kbn/ecs-data-quality-dashboard",
     "@kbn/elastic-assistant",
     "@kbn/data-views-plugin",
@@ -161,9 +160,9 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/dev-proc-runner",
     "@kbn/expressions-plugin",
-    "@kbn/text-based-editor",
-    "@kbn/cloud-chat-plugin"
+    "@kbn/dev-proc-runner",
+    "@kbn/cloud-chat-plugin",
+    "@kbn/alerts-ui-shared"
   ]
 }

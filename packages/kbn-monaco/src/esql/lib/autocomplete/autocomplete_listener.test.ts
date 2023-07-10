@@ -141,6 +141,7 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | eval a=', [
       'round',
       'abs',
+      'pow',
       'concat',
       'substring',
       'starts_with',
@@ -151,6 +152,7 @@ describe('autocomplete_listener', () => {
       'to_double',
       'to_integer',
       'to_long',
+      'to_unsigned_long',
       'to_ip',
       'to_version',
       'date_format',

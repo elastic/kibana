@@ -462,6 +462,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger,
         experimentalFeatures: config.experimentalFeatures,
+        packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
+        esClient: core.elasticsearch.client.asInternalUser,
       });
 
       // Migrate artifacts to fleet and then start the minifest task after that is done

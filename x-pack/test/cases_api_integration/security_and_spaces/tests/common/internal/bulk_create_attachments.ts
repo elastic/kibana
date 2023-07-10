@@ -441,6 +441,23 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('400s when comment is too long', async () => {
+        const longComment = 'x'.repeat(30001);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: 'case-id',
+          params: [
+            {
+              type: CommentType.user,
+              comment: longComment,
+              owner: 'securitySolutionFixture',
+            },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
       it('400s when adding excess attributes for type user', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 

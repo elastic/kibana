@@ -63,6 +63,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: createdAction.id,
                 is_preconfigured: false,
+                is_system_action: false,
                 connector_type_id: 'test.index-record',
                 is_deprecated: false,
                 is_missing_secrets: false,
@@ -151,6 +152,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 connector_type_id: '.slack',
                 name: 'Slack#xyz',
                 is_preconfigured: true,
+                is_system_action: false,
                 is_deprecated: false,
               });
               break;
