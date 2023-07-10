@@ -17,6 +17,7 @@ import url from 'url';
 
 import type { Duration } from 'moment';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
 import {
@@ -267,7 +268,7 @@ export class HttpConfig implements IHttpConfig {
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {
-    versionResolution: 'newest' | 'oldest' | 'none';
+    versionResolution: HandlerResolutionStrategy;
     strictClientVersionCheck: boolean;
   };
   public shutdownTimeout: Duration;
