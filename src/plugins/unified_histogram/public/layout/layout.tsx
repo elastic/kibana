@@ -193,7 +193,7 @@ export const UnifiedHistogramLayout = ({
   onBrushEnd,
   children,
 }: UnifiedHistogramLayoutProps) => {
-  const { allSuggestions, currentSuggestion } = useLensSuggestions({
+  const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
     dataView,
     query,
     originalSuggestion,
@@ -202,6 +202,8 @@ export const UnifiedHistogramLayout = ({
     lensSuggestionsApi,
     onSuggestionChange,
   });
+
+  const chart = suggestionUnsupported ? undefined : originalChart;
 
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
@@ -214,20 +216,20 @@ export const UnifiedHistogramLayout = ({
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const showFixedPanels = isMobile || !originalChart || originalChart.hidden;
+  const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
-    isMobile && originalChart && !originalChart.hidden
+    isMobile && chart && !chart.hidden
       ? css`
           height: ${defaultTopPanelHeight}px;
         `
       : 'eui-fullHeight';
 
   const panelsMode =
-    originalChart || hits
+    chart || hits
       ? showFixedPanels
         ? PANELS_MODE.FIXED
         : PANELS_MODE.RESIZABLE
@@ -257,7 +259,7 @@ export const UnifiedHistogramLayout = ({
           currentSuggestion={currentSuggestion}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
-          chart={originalChart}
+          chart={chart}
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
