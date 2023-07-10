@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import type { FilterableEmbeddableInput } from './types';
 import { shouldFetch$ } from './should_fetch';
 
 describe('shouldFetch$', () => {
   let input: FilterableEmbeddableInput = {
+    id: '1',
     timeRange: {
       to: 'now',
       from: 'now-15m',
@@ -19,7 +20,7 @@ describe('shouldFetch$', () => {
   };
   const subject = new BehaviorSubject(input);
   let shouldFetchCount = 0;
-  let subscription;
+  let subscription: Subscription | undefined;
   beforeAll(() => {
     subscription = shouldFetch$<FilterableEmbeddableInput>(subject, () => {
       return input;
@@ -35,26 +36,32 @@ describe('shouldFetch$', () => {
     }
   });
 
+  function updateInput(inputFragment: Partial<FilterableEmbeddableInput>) {
+    input = {
+      ...input,
+      ...inputFragment,
+    };
+    subject.next(input);
+  }
+
   test('should not fire on initial subscription', () => {
     expect(shouldFetchCount).toBe(0);
   });
 
   test('should not fire when there are no changes', () => {
     const initialCount = shouldFetchCount;
-    subject.next();
+    updateInput({});
     expect(shouldFetchCount).toBe(initialCount);
   });
 
   test('should fire when timeRange changes', () => {
     const initialCount = shouldFetchCount;
-    input = {
-      ...input,
+    updateInput({
       timeRange: {
         to: 'now',
         from: 'now-25m',
-      },
-    };
-    subject.next();
+      }
+    });
     expect(shouldFetchCount).toBe(initialCount + 1);
   });
 });
