@@ -160,6 +160,43 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should handle get system action request appropriately', async () => {
+          const response = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test.system-action`
+            )
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                id: 'system-connector-test.system-action',
+                connector_type_id: 'test.system-action',
+                name: 'System action: test.system-action',
+                is_preconfigured: false,
+                is_system_action: true,
+                is_deprecated: false,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });
