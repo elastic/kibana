@@ -46,8 +46,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    const logger = args[2];
-    this.logger = logger.get('png-export-v2');
+    this.logger = this.logger.get('png-export-v2');
   }
 
   /**

@@ -58,7 +58,6 @@ beforeEach(async () => {
   const mockCoreStart = coreMock.createStart();
 
   mockPngExportType = new PngExportType(mockCoreSetup, configType, mockLogger, context);
-
   mockPngExportType.setup({
     basePath: { set: jest.fn() },
   });
