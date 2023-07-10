@@ -189,10 +189,11 @@ export class ReportingCore {
     this.pluginStartDeps = startDeps; // cache
     const reportingStart = this.getContract();
 
-    this.csvSearchSourceExport.start({ ...startDeps, reporting: reportingStart });
-    this.csvV2ExportType.start({ ...startDeps, reporting: reportingStart });
-    this.pdfExport.start({ ...startDeps, reporting: reportingStart });
-    this.pngExport.start({ ...startDeps, reporting: reportingStart });
+    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
+    this.csvSearchSourceExport.start(exportTypeStartDeps);
+    this.csvV2ExportType.start(exportTypeStartDeps);
+    this.pdfExport.start(exportTypeStartDeps);
+    this.pngExport.start(exportTypeStartDeps);
 
     await this.assertKibanaIsAvailable();
 
@@ -213,9 +214,12 @@ export class ReportingCore {
   private async assertKibanaIsAvailable(): Promise<void> {
     const { status } = this.getPluginSetupDeps();
 
-    await Rx.firstValueFrom(
-      status.overall$.pipe(filter((current) => current.level === ServiceStatusLevels.available))
-    );
+    await status.overall$
+      .pipe(
+        filter((current) => current.level === ServiceStatusLevels.available),
+        first()
+      )
+      .toPromise();
   }
   /*
    * Blocks the caller until setup is done
