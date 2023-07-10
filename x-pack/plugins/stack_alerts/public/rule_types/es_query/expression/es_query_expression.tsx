@@ -6,7 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { get } from 'lodash';
+import { get, sortBy } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -111,7 +111,7 @@ export const EsQueryExpression: React.FC<
   const refreshEsFields = async (indices: string[]) => {
     const currentEsFields = await getFields(http, indices);
     setEsFields(currentEsFields);
-    setCombinedFields(currentEsFields.concat(runtimeFields));
+    setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
   };
 
   const getRuntimeFields = () => {
@@ -124,7 +124,7 @@ export const EsQueryExpression: React.FC<
     if (runtimeMappings) {
       const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
       setRuntimeFields(currentRuntimeFields);
-      setCombinedFields(esFields.concat(currentRuntimeFields));
+      setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
     }
   };
 

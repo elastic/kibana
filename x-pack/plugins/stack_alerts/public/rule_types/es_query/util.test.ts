@@ -158,6 +158,28 @@ describe('Es Query utils', () => {
               "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
           },
         },
+        http: {
+          type: 'composite',
+          script: 'emit(grok("%{COMMONAPACHELOG}").extract(doc["message"].value))',
+          fields: {
+            clientip: {
+              type: 'ip',
+            },
+            verb: {
+              type: 'keyword',
+            },
+            response: {
+              type: 'long',
+            },
+          },
+        },
+        location: {
+          type: 'lookup',
+          target_index: 'ip_location',
+          input_field: 'host',
+          target_field: 'ip',
+          fetch_fields: ['country', 'city'],
+        },
       })
     ).toEqual([
       {
@@ -166,6 +188,20 @@ describe('Es Query utils', () => {
         normalizedType: 'keyword',
         aggregatable: true,
         searchable: true,
+      },
+      {
+        name: 'http',
+        type: 'composite',
+        normalizedType: 'composite',
+        aggregatable: false,
+        searchable: false,
+      },
+      {
+        name: 'location',
+        type: 'lookup',
+        normalizedType: 'lookup',
+        aggregatable: false,
+        searchable: false,
       },
     ]);
   });
