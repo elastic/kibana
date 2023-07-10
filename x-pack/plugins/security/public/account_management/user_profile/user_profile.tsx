@@ -67,6 +67,7 @@ import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR }
 export interface UserProfileData {
   avatar?: UserProfileAvatarData;
   userSettings?: UserSettingsData;
+  [key: string]: unknown;
 }
 
 export interface UserProfileProps {

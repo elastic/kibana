@@ -65,7 +65,7 @@ export interface UserProfileUserInfo {
 /**
  * Placeholder for data stored in user profile.
  */
-export type UserProfileData = Record<any, any>;
+export type UserProfileData = Record<string, unknown>;
 
 /**
  * Type of the user profile labels structure (currently
