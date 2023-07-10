@@ -162,7 +162,7 @@ export class TLSRuleExecutor {
       latestPingsMap.set(ping.config_id!, ping);
     });
     return certs.filter((cert) => {
-      const lPing = latestPingsMap.get(cert.configId);
+      const lPing = latestPingsMap.get(cert.configId!);
       if (!lPing) {
         return true;
       }
