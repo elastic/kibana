@@ -55,7 +55,7 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardReturn) => boolean;
+  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
 
   isEmbeddedExternally?: boolean;
 }
@@ -95,7 +95,7 @@ export class DashboardContainerFactoryDefinition
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
     savedObjectId?: string
-  ): Promise<DashboardContainer | ErrorEmbeddable> => {
+  ): Promise<DashboardContainer | ErrorEmbeddable | undefined> => {
     const dashboardCreationStartTime = performance.now();
     const { createDashboard } = await import('./create/create_dashboard');
     try {

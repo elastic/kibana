@@ -74,6 +74,7 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+  actions.registerType(getSystemActionType());
 
   /** Sub action framework */
 
@@ -397,5 +398,31 @@ function getExcludedActionType() {
       return { status: 'ok', actionId };
     },
   };
+  return result;
+}
+
+function getSystemActionType() {
+  const result: ActionType<{}, {}, {}> = {
+    id: 'test.system-action',
+    name: 'Test system action',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: {
+        schema: schema.any(),
+      },
+      config: {
+        schema: schema.any(),
+      },
+      secrets: {
+        schema: schema.any(),
+      },
+    },
+    isSystemActionType: true,
+    async executor({ config, secrets, params, services, actionId }) {
+      return { status: 'ok', actionId };
+    },
+  };
+
   return result;
 }
