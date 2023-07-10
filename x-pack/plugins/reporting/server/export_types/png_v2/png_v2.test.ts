@@ -8,15 +8,15 @@
 import * as Rx from 'rxjs';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../..';
 import { CancellationToken } from '@kbn/reporting-common';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import { ReportingCore } from '../..';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { generatePngObservable } from '../common';
 import { TaskPayloadPNGV2 } from './types';
 import { PngExportType } from './png_v2';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 
 jest.mock('../common/generate_png');
 
