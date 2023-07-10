@@ -187,7 +187,14 @@ export const getAgentsHandler: RequestHandler<
 
   try {
     // validate kuery
-    validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
+    const validationObj = validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
+    if (validationObj?.error) {
+      return response.badRequest({
+        body: {
+          message: validationObj.error,
+        },
+      });
+    }
 
     const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
       page: request.query.page,
@@ -218,13 +225,13 @@ export const getAgentsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    }
+    // if (error instanceof KQLSyntaxError) {
+    //   return response.badRequest({
+    //     body: {
+    //       message: error.message,
+    //     },
+    //   });
+    // }
     return defaultFleetErrorHandler({ error, response });
   }
 };

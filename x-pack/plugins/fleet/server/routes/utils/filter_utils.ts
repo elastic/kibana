@@ -9,8 +9,6 @@ import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
-import { KQLSyntaxError } from '../../errors';
-
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];

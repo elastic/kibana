@@ -52,7 +52,7 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { validateKuery } from '../utils/filter_utils';
 
@@ -95,7 +95,18 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     // validate kuery parameters
     if (kuery && kuery !== '') {
       newKuery = normalizeKuery(AGENT_POLICY_SAVED_OBJECT_TYPE, kuery);
-      validateKuery(newKuery, [AGENT_POLICY_SAVED_OBJECT_TYPE], AGENT_POLICY_MAPPINGS);
+      const validationObj = validateKuery(
+        newKuery,
+        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        AGENT_POLICY_MAPPINGS
+      );
+      if (validationObj?.error) {
+        return response.badRequest({
+          body: {
+            message: validationObj.error,
+          },
+        });
+      }
     }
 
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
@@ -114,15 +125,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    } else {
-      return defaultFleetErrorHandler({ error, response });
-    }
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 

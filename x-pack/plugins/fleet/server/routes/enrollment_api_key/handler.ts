@@ -37,7 +37,18 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
   const { kuery } = request.query;
 
   try {
-    validateKuery(kuery, [FLEET_ENROLLMENT_API_PREFIX], ENROLLMENT_API_KEY_MAPPINGS);
+    const validationObj = validateKuery(
+      kuery,
+      [FLEET_ENROLLMENT_API_PREFIX],
+      ENROLLMENT_API_KEY_MAPPINGS
+    );
+    if (validationObj?.error) {
+      return response.badRequest({
+        body: {
+          message: validationObj.error,
+        },
+      });
+    }
 
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,

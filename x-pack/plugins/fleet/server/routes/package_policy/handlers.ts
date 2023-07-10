@@ -45,7 +45,7 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses } from '../../../common/constants';
-import { defaultFleetErrorHandler, PackagePolicyNotFoundError, KQLSyntaxError } from '../../errors';
+import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -77,7 +77,18 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
     // normalize kuery and validate it
     if (kuery && kuery !== '') {
       newKuery = normalizeKuery(PACKAGE_POLICY_SAVED_OBJECT_TYPE, kuery);
-      validateKuery(newKuery, [PACKAGE_POLICY_SAVED_OBJECT_TYPE], PACKAGE_POLICIES_MAPPINGS);
+      const validationObj = validateKuery(
+        newKuery,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS
+      );
+      if (validationObj?.error) {
+        return response.badRequest({
+          body: {
+            message: validationObj.error,
+          },
+        });
+      }
     }
 
     const { items, total, page, perPage } = await packagePolicyService.list(soClient, {
@@ -101,15 +112,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    } else {
-      return defaultFleetErrorHandler({ error, response });
-    }
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
