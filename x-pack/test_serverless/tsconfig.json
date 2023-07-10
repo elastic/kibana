@@ -26,5 +26,8 @@
     "@kbn/telemetry-plugin",
     "@kbn/telemetry-collection-xpack-plugin",
     "@kbn/telemetry-tools",
+    "@kbn/infra-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/infra-forge",
   ]
 }
