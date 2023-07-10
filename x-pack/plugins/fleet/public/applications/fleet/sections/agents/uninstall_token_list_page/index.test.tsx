@@ -165,9 +165,6 @@ describe('UninstallTokenList page', () => {
           })
         ).toBeInTheDocument();
       });
-      expect(useGetUninstallTokensMock).toHaveBeenLastCalledWith({
-        policyId: uninstallTokenFixture.policy_id,
-      });
       expect(useGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenFixture.id);
     });
   });

@@ -36,18 +36,18 @@ export const UninstallTokenListPage = () => {
     page: pagination.currentPage,
   });
 
-  const [policyIdForFlyout, setPolicyIdForFlyout] = useState<string | null>(null);
+  const [tokenIdForFlyout, setTokenIdForFlyout] = useState<string | null>(null);
 
   const tokens = data?.items ?? [];
   const total = data?.total ?? 0;
 
   return (
     <DefaultLayout section="uninstall_tokens">
-      {policyIdForFlyout && (
+      {tokenIdForFlyout && (
         <UninstallCommandFlyout
-          onClose={() => setPolicyIdForFlyout(null)}
+          onClose={() => setTokenIdForFlyout(null)}
           target="agent"
-          policyId={policyIdForFlyout}
+          uninstallTokenId={tokenIdForFlyout}
         />
       )}
 
@@ -105,7 +105,7 @@ export const UninstallTokenListPage = () => {
                       'xpack.fleet.uninstallTokenList.getUninstallCommandLabel',
                       { defaultMessage: 'Get uninstall command' }
                     )}
-                    onClick={() => setPolicyIdForFlyout(uninstallTokenMetadata.policy_id)}
+                    onClick={() => setTokenIdForFlyout(uninstallTokenMetadata.id)}
                     iconType="minusInCircle"
                     color="danger"
                   />
