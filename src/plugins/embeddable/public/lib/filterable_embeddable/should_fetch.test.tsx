@@ -11,17 +11,27 @@ import type { FilterableEmbeddableInput } from './types';
 import { shouldFetch$ } from './should_fetch';
 
 describe('shouldFetch$', () => {
-  let input: FilterableEmbeddableInput = {
-    id: '1',
-    timeRange: {
-      to: 'now',
-      from: 'now-15m',
-    },
-  };
-  const subject = new BehaviorSubject(input);
+  
   let shouldFetchCount = 0;
-  let subscription: Subscription | undefined;
+  let subscription: Subscription;
+  let updateInput: (inputFragment: Partial<FilterableEmbeddableInput>) => void;
   beforeAll(() => {
+    let input: FilterableEmbeddableInput = {
+      id: '1',
+      timeRange: {
+        to: 'now',
+        from: 'now-15m',
+      },
+    };
+    const subject = new BehaviorSubject(input);
+    updateInput = (inputFragment: Partial<FilterableEmbeddableInput>) => {
+      input = {
+        ...input,
+        ...inputFragment,
+      };
+      subject.next(input);
+    }
+
     subscription = shouldFetch$<FilterableEmbeddableInput>(subject, () => {
       return input;
     }).subscribe(() => {
@@ -30,18 +40,8 @@ describe('shouldFetch$', () => {
   });
 
   afterAll(() => {
-    if (subscription) {
-      subscription.unsubscribe();
-    }
+    subscription.unsubscribe();
   });
-
-  function updateInput(inputFragment: Partial<FilterableEmbeddableInput>) {
-    input = {
-      ...input,
-      ...inputFragment,
-    };
-    subject.next(input);
-  }
 
   test('should not fire on initial subscription', () => {
     expect(shouldFetchCount).toBe(0);
