@@ -9,7 +9,7 @@ import { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/ser
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ActionTypeRegistryContract as ConnectorTypeRegistryContract,
-  PreConfiguredAction as PreconfiguredConnector,
+  InMemoryConnector,
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
@@ -21,7 +21,7 @@ const ALLOWED_CONNECTOR_TYPE_IDS = ['.email'];
 interface CreateBulkUnsecuredExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   connectorTypeRegistry: ConnectorTypeRegistryContract;
-  preconfiguredConnectors: PreconfiguredConnector[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export interface ExecuteOptions
@@ -42,7 +42,7 @@ export type BulkUnsecuredExecutionEnqueuer<T> = (
 export function createBulkUnsecuredExecutionEnqueuerFunction({
   taskManager,
   connectorTypeRegistry,
-  preconfiguredConnectors,
+  inMemoryConnectors,
 }: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<void> {
   return async function execute(
     internalSavedObjectsRepository: ISavedObjectsRepository,
@@ -51,24 +51,23 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
     const connectorTypeIds: Record<string, string> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
 
-    const notPreconfiguredConnectors = connectorIds.filter(
-      (connectorId) =>
-        preconfiguredConnectors.find((connector) => connector.id === connectorId) == null
+    const notInMemoryConnectors = connectorIds.filter(
+      (connectorId) => inMemoryConnectors.find((connector) => connector.id === connectorId) == null
     );
 
-    if (notPreconfiguredConnectors.length > 0) {
+    if (notInMemoryConnectors.length > 0) {
       throw new Error(
-        `${notPreconfiguredConnectors.join(
+        `${notInMemoryConnectors.join(
           ','
-        )} are not preconfigured connectors and can't be scheduled for unsecured actions execution`
+        )} are not in-memory connectors and can't be scheduled for unsecured actions execution`
       );
     }
 
-    const connectors: PreconfiguredConnector[] = connectorIds
+    const connectors: InMemoryConnector[] = connectorIds
       .map((connectorId) =>
-        preconfiguredConnectors.find((pConnector) => pConnector.id === connectorId)
+        inMemoryConnectors.find((inMemoryConnector) => inMemoryConnector.id === connectorId)
       )
-      .filter(Boolean) as PreconfiguredConnector[];
+      .filter(Boolean) as InMemoryConnector[];
 
     connectors.forEach((connector) => {
       const { id, actionTypeId } = connector;
