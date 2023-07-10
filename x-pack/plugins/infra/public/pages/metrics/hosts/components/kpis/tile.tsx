@@ -19,26 +19,22 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useLensAttributes, type Layer } from '../../../../../hooks/use_lens_attributes';
+import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+import {
+  buildCombinedHostsFilter,
+  buildExistsHostsFilter,
+} from '../../../../../utils/filters/build';
+import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { FormulaConfig, MetricLayerOptions } from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
-import { buildCombinedHostsFilter, buildExistsHostsFilter } from '../../utils';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
-export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides' | 'style'> {
-  layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
-  toolTip: string;
-  'data-test-subj'?: string;
-}
-
-export const Tile = ({ id, layers, style, toolTip, ...props }: KPIChartProps) => {
+export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
@@ -59,6 +55,7 @@ export const Tile = ({ id, layers, style, toolTip, ...props }: KPIChartProps) =>
 
   const { formula, attributes, getExtraActions, error } = useLensAttributes({
     dataView,
+    title,
     layers: { ...layers, options: { ...layers.options, subtitle: getSubtitle() } },
     visualizationType: 'lnsMetric',
   });
@@ -114,7 +111,7 @@ export const Tile = ({ id, layers, style, toolTip, ...props }: KPIChartProps) =>
     <EuiPanelStyled
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
-      data-test-subj={props['data-test-subj']}
+      data-test-subj={`hostsView-metricChart-${id}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -144,7 +141,7 @@ export const Tile = ({ id, layers, style, toolTip, ...props }: KPIChartProps) =>
         >
           <div>
             <LensWrapper
-              id={id}
+              id={`hostsViewsmetricsChart-${id}`}
               attributes={afterLoadedState.attributes}
               style={style}
               extraActions={extraActions}

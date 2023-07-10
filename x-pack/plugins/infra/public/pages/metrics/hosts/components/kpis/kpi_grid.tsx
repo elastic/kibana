@@ -13,7 +13,7 @@ import { Tile } from './tile';
 import { HostCountProvider } from '../../hooks/use_host_count';
 import { HostsTile } from './hosts_tile';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
-import { KPI_CHARTS } from '../../../../../common/visualizations/lens/kpi_grid_config';
+import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 
 const lensStyle: CSSProperties = {
   height: KPI_CHART_MIN_HEIGHT,

@@ -9,7 +9,7 @@ import React from 'react';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { TOOLTIP } from '../../../../../common/visualizations/lens/translations';
+import { TOOLTIP } from '../../../../../common/visualizations/lens/dashboards/host/translations';
 
 import { type Props, MetricChartWrapper } from '../chart/metric_chart_wrapper';
 import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';

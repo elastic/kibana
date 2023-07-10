@@ -6,21 +6,25 @@
  */
 
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { Layer } from '../../../hooks/use_lens_attributes';
-import { hostLensFormulas } from '../constants';
-import { FormulaConfig } from '../types';
+import { i18n } from '@kbn/i18n';
+import { Layer } from '../../../../../hooks/use_lens_attributes';
+import { hostLensFormulas } from '../../../constants';
+import { FormulaConfig } from '../../../types';
 import { TOOLTIP } from './translations';
-import { MetricLayerOptions } from './visualization_types/layers';
+import { MetricLayerOptions } from '../../visualization_types/layers';
 
-export interface KPIChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides' | 'style'> {
+export interface KPIChartProps
+  extends Pick<TypedLensByValueInput, 'id' | 'title' | 'overrides' | 'style'> {
   layers: Layer<MetricLayerOptions, FormulaConfig, 'data'>;
   toolTip: string;
-  'data-test-subj'?: string;
 }
 
 export const KPI_CHARTS: KPIChartProps[] = [
   {
-    id: 'hostsViewKPIGridCpuUsageTile',
+    id: 'cpuUsage',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpuUsage.title', {
+      defaultMessage: 'CPU Usage',
+    }),
     layers: {
       data: {
         ...hostLensFormulas.cpuUsage,
@@ -38,10 +42,12 @@ export const KPI_CHARTS: KPIChartProps[] = [
       },
     },
     toolTip: TOOLTIP.cpuUsage,
-    'data-test-subj': 'hostsViewKPI-cpuUsage',
   },
   {
-    id: 'hostsViewKPIGridNormalizedLoad1mTile',
+    id: 'normalizedLoad1m',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
+      defaultMessage: 'CPU Usage',
+    }),
     layers: {
       data: {
         ...hostLensFormulas.normalizedLoad1m,
@@ -59,10 +65,12 @@ export const KPI_CHARTS: KPIChartProps[] = [
       },
     },
     toolTip: TOOLTIP.normalizedLoad1m,
-    'data-test-subj': 'hostsViewKPI-normalizedLoad1m',
   },
   {
-    id: 'hostsViewKPIGridMemoryUsageTile',
+    id: 'memoryUsage',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.title', {
+      defaultMessage: 'CPU Usage',
+    }),
     layers: {
       data: {
         ...hostLensFormulas.memoryUsage,
@@ -80,10 +88,12 @@ export const KPI_CHARTS: KPIChartProps[] = [
       },
     },
     toolTip: TOOLTIP.memoryUsage,
-    'data-test-subj': 'hostsViewKPI-memoryUsage',
   },
   {
-    id: 'hostsViewKPIGridDiskSpaceUsageTile',
+    id: 'diskSpaceUsage',
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.title', {
+      defaultMessage: 'CPU Usage',
+    }),
     layers: {
       data: {
         ...hostLensFormulas.diskSpaceUsage,
@@ -101,6 +111,5 @@ export const KPI_CHARTS: KPIChartProps[] = [
       },
     },
     toolTip: TOOLTIP.diskSpaceUsage,
-    'data-test-subj': 'hostsViewKPI-diskSpaceUsage',
   },
 ];
