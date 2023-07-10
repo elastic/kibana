@@ -275,7 +275,7 @@ export function Chart({
     [isFlyoutVisible]
   );
 
-  const canEditVisualizationOnTheFly = isPlainRecord && chartVisible;
+  const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
 
   return (
     <EuiFlexGroup
