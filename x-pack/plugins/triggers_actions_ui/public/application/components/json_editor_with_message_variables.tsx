@@ -173,7 +173,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     >
       <>
         {renderErrorMessage()}
-        <CodeEditor // TODO theme provided in context by x-pack/plugins/triggers_actions_ui/public/application/app.tsx
+        <CodeEditor
           languageId={XJsonLang.ID}
           options={{
             renderValidationDecorations: xJson ? 'on' : 'off', // Disable error underline when empty

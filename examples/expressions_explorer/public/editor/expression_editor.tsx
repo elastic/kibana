@@ -16,7 +16,7 @@ interface Props {
 
 export function ExpressionEditor({ value, onChange }: Props) {
   return (
-    <CodeEditor // TODO theme needs to be provided from examples/expressions_explorer/public/app.tsx, need CodeOwners help
+    <CodeEditor
       languageId="javascript"
       width="100%"
       height="250px"
