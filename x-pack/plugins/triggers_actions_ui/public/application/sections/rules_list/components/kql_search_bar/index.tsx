@@ -5,17 +5,4 @@
  * 2.0.
  */
 
-import { DataViewBase } from '@kbn/es-query';
-
-export const getFilters = ({ id }: Pick<DataViewBase, 'id'>) => [
-  {
-    meta: {
-      index: id,
-    },
-    query: {
-      exists: {
-        field: 'host.name',
-      },
-    },
-  },
-];
+export { KqlSearchBar } from './kql_search_bar';
