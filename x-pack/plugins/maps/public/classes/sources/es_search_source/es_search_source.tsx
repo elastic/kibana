@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
+import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -28,7 +29,6 @@ import {
   getField,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
-  PreIndexedShape,
   TotalHits,
 } from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -800,7 +800,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async _getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
+  async _getPreIndexedShape(properties: GeoJsonProperties): Promise<QueryDslFieldLookup | null> {
     if (properties === null) {
       return null;
     }
