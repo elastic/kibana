@@ -218,17 +218,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should bulk create 100 file attachments when there is another attachment type in the request', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [postExternalReferenceSOReq, ...fileRequests],
-          });
-        });
-
         it('should bulk create 99 file attachments when the case has a file associated to it', async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
@@ -373,6 +362,23 @@ export default ({ getService }: FtrProviderContext): void => {
             params: fileRequests,
             expectedHttpCode: 400,
           });
+        });
+      });
+
+      it('400s when attempting to add more than 100 attachments', async () => {
+        const comment = {
+          type: CommentType.user,
+          comment: 'test',
+          owner: 'securitySolutionFixture',
+        };
+
+        const attachments = Array(101).fill(comment);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: 'test-case-id',
+          params: attachments,
+          expectedHttpCode: 400,
         });
       });
 
