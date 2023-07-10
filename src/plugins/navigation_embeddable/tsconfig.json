@@ -11,6 +11,10 @@
     "@kbn/embeddable-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/presentation-util-plugin",
+    "@kbn/object-versioning",
+    "@kbn/config-schema",
+    "@kbn/content-management-utils",
+    "@kbn/content-management-plugin",
   ],
   "exclude": ["target/**/*"]
 }
