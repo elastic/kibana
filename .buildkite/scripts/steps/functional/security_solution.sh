@@ -6,6 +6,7 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
+export BUILDKITE_ANALYTICS_TOKEN="$(retry 5 5 vault read -field=security_solution secret/siem-team/kibana/buildkite_test_analytics_cypress)"
 
 Xvfb :99 -screen 0 1600x1200x24 &
 

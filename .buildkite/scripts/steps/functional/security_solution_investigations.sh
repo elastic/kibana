@@ -6,7 +6,7 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
-
+# export BUILDKITE_ANALYTICS_TOKEN=
 
 Xvfb :99 -screen 0 1600x1200x24 &
 
