@@ -109,6 +109,7 @@ export function Home() {
             <EuiCard
               icon={<EuiIcon type={systemIcon} size="l" />}
               betaBadgeProps={{
+                'data-test-subj': 'obltOnboardingHomeQuickstartBadge',
                 color: 'accent',
                 label: i18n.translate(
                   'xpack.observability_onboarding.card.systemLogs.quickstartBadge',
@@ -157,7 +158,12 @@ export function Home() {
                 { defaultMessage: 'Stream log files' }
               )}
               footer={
-                <EuiButton onClick={handleClickCustomLogs} color="primary" fill>
+                <EuiButton
+                  onClick={handleClickCustomLogs}
+                  color="primary"
+                  fill
+                  data-test-subj="obltOnboardingHomeStartLogFileStream"
+                >
                   {getStartedLabel}
                 </EuiButton>
               }
