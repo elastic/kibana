@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import moment from 'moment';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
-import { ENABLE_SQL, LENS_APP_NAME } from '../../common/constants';
+import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
@@ -986,13 +986,6 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  // setting that enables/disables SQL
-  const isSQLModeEnabled = uiSettings.get(ENABLE_SQL);
-  const supportedTextBasedLanguages = [];
-  if (isSQLModeEnabled) {
-    supportedTextBasedLanguages.push('SQL');
-  }
-
   const dataViewPickerProps: DataViewPickerProps = {
     trigger: {
       label: currentIndexPattern?.getName?.() || '',
@@ -1052,7 +1045,6 @@ export const LensTopNavMenu = ({
         indexPatternService.replaceDataViewId(updatedDataViewStub);
       }
     },
-    textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
   const textBasedLanguageModeErrors = getUserMessages('textBasedLanguagesQueryInput', {
