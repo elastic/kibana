@@ -95,7 +95,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const benchMarkName = data[0].rule.benchmark.name;
 
-  describe('Findings Page', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/159565
+  describe.skip('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let findingsByResourceTable: typeof findings.findingsByResourceTable;

@@ -1143,7 +1143,7 @@
             "text": "Space"
           }
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1167,7 +1167,7 @@
               },
               ", boolean> | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1655,7 +1655,7 @@
         "description": [
           "\nA Space."
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1668,7 +1668,7 @@
             "description": [
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1681,7 +1681,7 @@
             "description": [
               "\nDisplay name for this space."
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1697,7 +1697,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1713,7 +1713,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1729,7 +1729,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1745,7 +1745,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1761,7 +1761,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1779,7 +1779,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2781,7 +2781,7 @@
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3021,7 +3021,7 @@
         "description": [
           "\nControls how spaces are retrieved."
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3046,7 +3046,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3064,7 +3064,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3097,7 +3097,7 @@
             "text": "Space"
           }
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3121,7 +3121,7 @@
               },
               ", boolean> | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3520,7 +3520,7 @@
         "description": [
           "\nA Space."
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3533,7 +3533,7 @@
             "description": [
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3546,7 +3546,7 @@
             "description": [
               "\nDisplay name for this space."
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3562,7 +3562,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3578,7 +3578,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3594,7 +3594,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3610,7 +3610,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3626,7 +3626,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3644,7 +3644,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4112,7 +4112,7 @@
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4604,7 +4604,7 @@
         "description": [
           "\nControls how spaces are retrieved."
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4629,7 +4629,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4647,7 +4647,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4680,7 +4680,7 @@
             "text": "Space"
           }
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4704,7 +4704,7 @@
               },
               ", boolean> | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4720,7 +4720,7 @@
         "description": [
           "\nA Space."
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4733,7 +4733,7 @@
             "description": [
               "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4746,7 +4746,7 @@
             "description": [
               "\nDisplay name for this space."
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4762,7 +4762,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4778,7 +4778,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4794,7 +4794,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4810,7 +4810,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4826,7 +4826,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4844,7 +4844,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
+            "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4898,7 +4898,7 @@
         "signature": [
           "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\""
         ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
+        "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

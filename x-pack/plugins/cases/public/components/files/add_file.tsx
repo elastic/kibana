@@ -98,8 +98,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         // error toast is handled inside  createAttachments
 
         // we need to delete the file if attachment creation failed
-        const abortCtrlRef = new AbortController();
-        return deleteFileAttachments({ caseId, fileIds: [file.id], signal: abortCtrlRef.signal });
+        return deleteFileAttachments({ caseId, fileIds: [file.id] });
       }
 
       closeModal();

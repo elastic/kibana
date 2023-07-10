@@ -12,6 +12,7 @@ import {
   historicalSummarySchema,
   indicatorSchema,
   indicatorTypesArraySchema,
+  indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
   objectiveSchema,
@@ -189,17 +190,15 @@ type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryRe
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
-type GetPreviewDataResponse = t.TypeOf<typeof getPreviewDataResponseSchema>;
+type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
 
-type APMTransactionErrorRateIndicatorSchema = t.TypeOf<
-  typeof apmTransactionErrorRateIndicatorSchema
->;
-type APMTransactionDurationIndicatorSchema = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
 type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
-type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
-type TimeWindow = t.TypeOf<typeof timeWindowTypeSchema>;
-
+type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
+type TimeWindow = t.OutputOf<typeof timeWindowTypeSchema>;
+type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;
 type Indicator = t.OutputOf<typeof indicatorSchema>;
+type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
+type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
@@ -242,9 +241,10 @@ export type {
   UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
-  APMTransactionDurationIndicatorSchema,
-  APMTransactionErrorRateIndicatorSchema,
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
   GetSLOBurnRatesResponse,
+  IndicatorType,
   Indicator,
   MetricCustomIndicator,
   KQLCustomIndicator,

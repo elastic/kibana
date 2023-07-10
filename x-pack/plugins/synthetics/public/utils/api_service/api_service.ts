@@ -41,20 +41,7 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get<T>(
-    apiUrl: string,
-    params?: HttpFetchQuery,
-    decodeType?: any,
-    asResponse = false
-  ) {
-    const response = await this._http!.fetch<T>({
-      path: apiUrl,
-      query: params,
-      asResponse,
-    });
-
-    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
-
+  private parseResponse<T>(response: Awaited<T>, apiUrl: string, decodeType?: any): T {
     if (decodeType) {
       const decoded = decodeType.decode(response);
       if (isRight(decoded)) {
@@ -69,8 +56,24 @@ class ApiService {
         );
       }
     }
-
     return response;
+  }
+
+  public async get<T>(
+    apiUrl: string,
+    params?: HttpFetchQuery,
+    decodeType?: any,
+    asResponse = false
+  ) {
+    const response = await this._http!.fetch<T>({
+      path: apiUrl,
+      query: params,
+      asResponse,
+    });
+
+    this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
+
+    return this.parseResponse(response, apiUrl, decodeType);
   }
 
   public async post<T>(apiUrl: string, data?: any, decodeType?: any, params?: HttpFetchQuery) {
@@ -82,18 +85,7 @@ class ApiService {
 
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
 
-    if (decodeType) {
-      const decoded = decodeType.decode(response);
-      if (isRight(decoded)) {
-        return decoded.right as T;
-      } else {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `API ${apiUrl} is not returning expected response, ${formatErrors(decoded.left)}`
-        );
-      }
-    }
-    return response;
+    return this.parseResponse(response, apiUrl, decodeType);
   }
 
   public async put<T>(apiUrl: string, data?: any, decodeType?: any) {
@@ -102,18 +94,7 @@ class ApiService {
       body: JSON.stringify(data),
     });
 
-    if (decodeType) {
-      const decoded = decodeType.decode(response);
-      if (isRight(decoded)) {
-        return decoded.right as T;
-      } else {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `API ${apiUrl} is not returning expected response, ${formatErrors(decoded.left)}`
-        );
-      }
-    }
-    return response;
+    return this.parseResponse(response, apiUrl, decodeType);
   }
 
   public async delete<T>(apiUrl: string, params?: HttpFetchQuery) {

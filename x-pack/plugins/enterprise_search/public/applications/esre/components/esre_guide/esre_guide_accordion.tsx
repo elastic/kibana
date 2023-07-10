@@ -24,6 +24,8 @@ export interface EsreGuideAccordionProps {
   title: string;
   description: string;
   initialIsOpen?: boolean;
+  onToggle: (id: string | undefined) => void;
+  currentExpandedId: string | undefined;
 }
 
 export const EsreGuideAccordion: React.FC<EsreGuideAccordionProps> = ({
@@ -32,6 +34,8 @@ export const EsreGuideAccordion: React.FC<EsreGuideAccordionProps> = ({
   title,
   description,
   initialIsOpen = false,
+  onToggle,
+  currentExpandedId,
   children,
 }) => {
   return (
@@ -39,6 +43,8 @@ export const EsreGuideAccordion: React.FC<EsreGuideAccordionProps> = ({
       <EuiAccordion
         id={id}
         initialIsOpen={initialIsOpen}
+        onToggle={(isOpen: boolean) => onToggle(isOpen ? id : undefined)}
+        forceState={id === currentExpandedId ? 'open' : 'closed'}
         buttonContent={
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>

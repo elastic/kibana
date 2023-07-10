@@ -17,17 +17,10 @@ export const useGetCategories = () => {
   const { showErrorToast } = useCasesToast();
   const { owner } = useCasesContext();
 
-  return useQuery(
-    casesQueriesKeys.categories(),
-    () => {
-      const abortCtrl = new AbortController();
-      return getCategories(abortCtrl.signal, owner);
+  return useQuery(casesQueriesKeys.categories(), ({ signal }) => getCategories({ owner, signal }), {
+    onError: (error: ServerError) => {
+      showErrorToast(error, { title: i18n.CATEGORIES_ERROR_TITLE });
     },
-    {
-      onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.CATEGORIES_ERROR_TITLE });
-      },
-      staleTime: 60 * 1000, // one minute
-    }
-  );
+    staleTime: 60 * 1000, // one minute
+  });
 };

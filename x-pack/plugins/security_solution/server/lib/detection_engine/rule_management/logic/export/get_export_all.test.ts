@@ -39,6 +39,7 @@ const connectors = [
     config: {},
     isPreconfigured: false,
     isDeprecated: false,
+    isSystemAction: false,
     referencedByCount: 1,
   },
   {
@@ -47,6 +48,7 @@ const connectors = [
     name: 'Email (preconfigured)',
     config: {},
     isPreconfigured: true,
+    isSystemAction: false,
     isDeprecated: false,
     referencedByCount: 1,
   },

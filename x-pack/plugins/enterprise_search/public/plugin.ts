@@ -33,8 +33,10 @@ import {
   ESRE_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  SEARCH_PRODUCT_NAME,
+  VECTOR_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { ClientConfigType, InitialAppData } from '../common/types';
 
@@ -161,6 +163,27 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchEsre, kibanaDeps, pluginData);
       },
       title: ESRE_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
+      appRoute: VECTOR_SEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: VECTOR_SEARCH_PLUGIN.LOGO,
+      id: VECTOR_SEARCH_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(VECTOR_SEARCH_PLUGIN.NAME);
+
+        this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchVectorSearch } = await import('./applications/vector_search');
+
+        return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
+      },
+      title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({
@@ -328,7 +351,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
         order: 100,
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+        title: SEARCH_PRODUCT_NAME,
       });
 
       plugins.home.featureCatalogue.register({

@@ -1305,18 +1305,6 @@
             "path": "x-pack/plugins/observability/public/application/index.tsx"
           },
           {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/agent_logs.tsx"
           },
@@ -1351,6 +1339,18 @@
           {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
           {
             "plugin": "apm",
@@ -1394,30 +1394,6 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
           },
           {
@@ -1443,6 +1419,30 @@
           {
             "plugin": "upgradeAssistant",
             "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
             "plugin": "ux",
@@ -1493,44 +1493,6 @@
               "React.PropsWithChildren<RedirectCrossAppLinksProps>"
             ],
             "path": "src/plugins/kibana_react/public/app_links/redirect_app_link.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.Route",
-        "type": "Function",
-        "tags": [],
-        "label": "Route",
-        "description": [
-          "\nIt's a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
-        ],
-        "signature": [
-          "({ children, component: Component, render, ...rest }: ",
-          "RouteProps",
-          "<string, { [x: string]: string | undefined; }>) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/router/router.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Route.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children, component: Component, render, ...rest }",
-            "description": [],
-            "signature": [
-              "RouteProps",
-              "<string, { [x: string]: string | undefined; }>"
-            ],
-            "path": "src/plugins/kibana_react/public/router/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

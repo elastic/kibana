@@ -61,5 +61,5 @@ curl -XGET elasticsearch_ip_or_hostname:9200/_cat/indices/.kibana,.kibana_task_m
 +
 For example:
 
-* When {kib} is unable to connect to a healthy {es} cluster, the `master_not_discovered_exception` or `Unable to revive connection` errors appear.
+* When {kib} is unable to connect to a healthy {es} cluster, errors like `master_not_discovered_exception` or `unable to revive connection` or `license is not available` errors appear.
 * When one or more {kib}-backing indices are unhealthy, the `index_not_green_timeout` error appears.

@@ -206,6 +206,7 @@ function _generateMappings(
           case 'boolean':
             dynProperties = {
               type: field.object_type,
+              time_series_metric: field.metric_type,
             };
             matchingType = field.object_type_mapping_type ?? field.object_type;
           default:

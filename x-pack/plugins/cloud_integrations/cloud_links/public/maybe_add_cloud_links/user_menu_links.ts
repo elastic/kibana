@@ -10,13 +10,14 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { UserMenuLink } from '@kbn/security-plugin/public';
 
 export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
-  const { profileUrl, organizationUrl } = cloud;
+  const { profileUrl, billingUrl, organizationUrl } = cloud;
+
   const userMenuLinks = [] as UserMenuLink[];
 
   if (profileUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.profileLinkText', {
-        defaultMessage: 'Edit profile',
+        defaultMessage: 'Profile',
       }),
       iconType: 'user',
       href: profileUrl,
@@ -25,14 +26,25 @@ export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
     });
   }
 
+  if (billingUrl) {
+    userMenuLinks.push({
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.billingLinkText', {
+        defaultMessage: 'Billing',
+      }),
+      iconType: 'visGauge',
+      href: billingUrl,
+      order: 200,
+    });
+  }
+
   if (organizationUrl) {
     userMenuLinks.push({
-      label: i18n.translate('xpack.cloudLinks.userMenuLinks.accountLinkText', {
-        defaultMessage: 'Account & Billing',
+      label: i18n.translate('xpack.cloudLinks.userMenuLinks.organizationLinkText', {
+        defaultMessage: 'Organization',
       }),
       iconType: 'gear',
       href: organizationUrl,
-      order: 200,
+      order: 300,
     });
   }
 

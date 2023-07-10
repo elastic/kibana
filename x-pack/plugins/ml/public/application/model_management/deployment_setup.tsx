@@ -55,7 +55,7 @@ export interface ThreadingParams {
   deploymentId?: string;
 }
 
-const THREADS_MAX_EXPONENT = 4;
+const THREADS_MAX_EXPONENT = 5;
 
 /**
  * Form for setting threading params.

@@ -57,6 +57,7 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
     const result: string[] = await this.getHttp().post(
       resolvePathVariables(SUGGESTIONS_ROUTE, { suggestion_type: 'eventFilters' }),
       {
+        version: '2023-10-31',
         body: JSON.stringify(body),
       }
     );

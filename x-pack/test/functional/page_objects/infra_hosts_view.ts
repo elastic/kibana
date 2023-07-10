@@ -24,12 +24,32 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-button');
     },
 
+    async clickHostCheckbox(id: string, os: string) {
+      return testSubjects.click(`checkboxSelectRow-${id}-${os}`);
+    },
+
+    async clickSelectedHostsButton() {
+      return testSubjects.click('hostsViewTableSelectHostsFilterButton');
+    },
+
+    async clickSelectedHostsAddFilterButton() {
+      return testSubjects.click('hostsViewTableAddFilterButton');
+    },
+
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async clickMetadataFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-metadata');
+    },
+
     async clickProcessesFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-processes');
+    },
+
+    async clickShowAllMetadataOverviewTab() {
+      return testSubjects.click('infraMetadataSummaryShowAllMetadataButton');
     },
 
     async clickLogsFlyoutTab() {
@@ -46,6 +66,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async clickFlyoutApmServicesLink() {
       return testSubjects.click('hostsView-flyout-apm-services-link');
+    },
+
+    async clickAddMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableAddPin');
+    },
+
+    async clickRemoveMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableRemovePin');
     },
 
     async clickAddMetadataFilter() {
@@ -80,6 +108,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-enable-feature-button');
     },
 
+    // Table
+
     async getHostsTable() {
       return testSubjects.find('hostsView-table');
     },
@@ -107,6 +137,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async getHostsCellContent(cell: WebElementWrapper) {
       const cellContent = await cell.findByClassName('euiTableCellContent');
       return cellContent.getVisibleText();
+    },
+
+    async selectedHostsButtonExist() {
+      return testSubjects.exists('hostsViewTableSelectHostsFilterButton');
     },
 
     async getMetricsTrendContainer() {
@@ -162,14 +196,29 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Flyout Tabs
+    async getAssetDetailsKPITileValue(type: string) {
+      const container = await testSubjects.find('assetDetailsKPIGrid');
+      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const div = await element.findByClassName('echMetricText__value');
+      return div.getAttribute('title');
+    },
+
     getMetadataTab() {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
+    },
+
+    metadataTableExist() {
+      return testSubjects.exists('infraMetadataTable');
     },
 
     async getMetadataTabName() {
       const tabElement = await this.getMetadataTab();
       const tabTitle = await tabElement.findByClassName('euiTab__content');
       return tabTitle.getVisibleText();
+    },
+
+    async getRemovePinExist() {
+      return testSubjects.exists('infraMetadataEmbeddableRemovePin');
     },
 
     async getAppliedFilter() {

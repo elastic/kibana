@@ -206,6 +206,32 @@ describe('engines routes', () => {
         },
       });
     });
+    it('returns 400, create search application with invalid characters', async () => {
+      (mockClient.asCurrentUser.searchApplication.put as jest.Mock).mockRejectedValueOnce({
+        meta: {
+          body: {
+            error: {
+              reason: `Invalid alias name [engine name]: must not contain the following characters ['\',' ','"','<','*','?','>','|',',','/']`,
+              type: 'invalid_alias_name_exception',
+            },
+          },
+          statusCode: 400,
+        },
+      });
+      await mockRouter.callRoute({
+        params: { engine_name: 'engine name' },
+      });
+      const exceptionReason = `Search application name must not contain: [ '' , ' ' , '\"' , '<' , '*' , '?' , '>' , '|' , ',' , '/' ]`;
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        body: {
+          attributes: {
+            error_code: 'search_application_name_invalid',
+          },
+          message: `Invalid Search application name. ${exceptionReason}`,
+        },
+        statusCode: 400,
+      });
+    });
     it('PUT - Upsert API creates request - update', async () => {
       mockClient.asCurrentUser.searchApplication.put.mockImplementation(() => ({
         acknowledged: true,
