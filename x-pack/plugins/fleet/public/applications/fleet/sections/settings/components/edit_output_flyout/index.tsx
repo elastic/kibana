@@ -27,8 +27,12 @@ import {
   EuiSpacer,
   EuiLink,
   EuiComboBox,
+  EuiBetaBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { css } from '@emotion/react/dist/emotion-react.cjs';
 
 import { outputType } from '../../../../../../../common/constants';
 
@@ -66,6 +70,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const form = useOutputForm(onClose, output);
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
+  const { euiTheme } = useEuiTheme();
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
@@ -220,6 +225,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
       </>
     );
   };
+
   const renderKafkaSection = () => {
     return <OutputFormKafkaSection inputs={inputs} />;
   };
@@ -302,10 +308,26 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           <EuiFormRow
             fullWidth
             label={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.typeInputLabel"
-                defaultMessage="Type"
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.typeInputLabel"
+                  defaultMessage="Type"
+                />
+                {inputs.typeInput.value === outputType.Kafka && (
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.fleet.settings.betaBadgeLabel', {
+                      defaultMessage: 'Beta',
+                    })}
+                    size="s"
+                    css={css`
+                      margin-left: ${euiTheme.size.s};
+                      color: ${euiTheme.colors.text};
+                      vertical-align: middle;
+                      margin-bottom: ${euiTheme.size.xxs};
+                    `}
+                  />
+                )}
+              </>
             }
           >
             <>
