@@ -12,18 +12,22 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
+import { HistogramIndicator } from './histogram_indicator';
 
-export function CustomKqlIndicatorTypeForm() {
+export function HistogramIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
 
   const index = watch('indicator.params.index');
@@ -39,7 +43,7 @@ export function CustomKqlIndicatorTypeForm() {
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.label',
+              'xpack.observability.slo.sloEdit.sliType.histogram.timestampField.label',
               { defaultMessage: 'Timestamp field' }
             )}
             isInvalid={getFieldState('indicator.params.timestampField').invalid}
@@ -54,14 +58,14 @@ export function CustomKqlIndicatorTypeForm() {
                   {...field}
                   async
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
+                    'xpack.observability.slo.sloEdit.sliType.histogram.timestampField.placeholder',
                     { defaultMessage: 'Select a timestamp field' }
                   )}
                   aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customKql.timestampField.placeholder',
+                    'xpack.observability.slo.sloEdit.sliType.histogram.timestampField.placeholder',
                     { defaultMessage: 'Select a timestamp field' }
                   )}
-                  data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
+                  data-test-subj="histogramIndicatorFormTimestampFieldSelect"
                   isClearable
                   isDisabled={!index}
                   isInvalid={fieldState.invalid}
@@ -91,20 +95,20 @@ export function CustomKqlIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          dataTestSubj="customKqlIndicatorFormQueryFilterInput"
+          dataTestSubj="histogramIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.queryFilter', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.queryFilter', {
             defaultMessage: 'Query filter',
           })}
           name="indicator.params.filter"
           placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.customFilter',
+            'xpack.observability.slo.sloEdit.sliType.histogram.customFilter',
             { defaultMessage: 'Custom filter to apply on the index' }
           )}
           tooltip={
             <EuiIconTip
               content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.customFilter.tooltip',
+                'xpack.observability.slo.sloEdit.sliType.histogram.customFilter.tooltip',
                 {
                   defaultMessage:
                     'This KQL query can be used to filter the documents with some relevant criteria.',
@@ -117,62 +121,29 @@ export function CustomKqlIndicatorTypeForm() {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <QueryBuilder
-          dataTestSubj="customKqlIndicatorFormGoodQueryInput"
-          indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.goodQuery', {
-            defaultMessage: 'Good query',
-          })}
-          name="indicator.params.good"
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.goodQueryPlaceholder',
-            {
-              defaultMessage: 'Define the good events',
-            }
-          )}
-          required
-          tooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.goodQuery.tooltip',
-                {
-                  defaultMessage:
-                    'This KQL query should return a subset of events that are considered "good" or "successful" for the purpose of calculating the SLO. The query should filter events based on some relevant criteria, such as status codes, error messages, or other relevant fields.',
-                }
-              )}
-              position="top"
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpac.observability.slo.sloEdit.sliType.histogram.goodTitle"
+              defaultMessage="Good events"
             />
-          }
-        />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <HistogramIndicator type="good" indexFields={indexFields} isLoadingIndex={isLoading} />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <QueryBuilder
-          dataTestSubj="customKqlIndicatorFormTotalQueryInput"
-          indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.totalQuery', {
-            defaultMessage: 'Total query',
-          })}
-          name="indicator.params.total"
-          placeholder={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customKql.totalQueryPlaceholder',
-            {
-              defaultMessage: 'Define the total events',
-            }
-          )}
-          tooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customKql.totalQuery.tooltip',
-                {
-                  defaultMessage:
-                    'This KQL query should return all events that are relevant to the SLO calculation, including both good and bad events.',
-                }
-              )}
-              position="top"
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpac.observability.slo.sloEdit.sliType.histogram.totalTitle"
+              defaultMessage="Total events"
             />
-          }
-        />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <HistogramIndicator type="total" indexFields={indexFields} isLoadingIndex={isLoading} />
       </EuiFlexItem>
 
       <DataPreviewChart />

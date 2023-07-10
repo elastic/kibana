@@ -85,6 +85,35 @@ const metricCustomIndicatorSchema = t.type({
   }),
 });
 
+const histogramAggregation = t.keyof({
+  value_count: null,
+  range: null,
+});
+
+const histogramMetricDef = t.intersection([
+  t.type({
+    field: t.string,
+    aggregation: histogramAggregation,
+  }),
+  t.partial({
+    from: t.number,
+    to: t.number,
+    filter: t.string,
+  }),
+]);
+
+const histogramIndicatorTypeSchema = t.literal('sli.histogram.custom');
+const histogramIndicatorSchema = t.type({
+  type: histogramIndicatorTypeSchema,
+  params: t.type({
+    index: t.string,
+    timestampField: t.string,
+    filter: t.string,
+    good: histogramMetricDef,
+    total: histogramMetricDef,
+  }),
+});
+
 const indicatorDataSchema = t.type({
   dateRange: dateRangeSchema,
   good: t.number,
@@ -96,6 +125,7 @@ const indicatorTypesSchema = t.union([
   apmTransactionErrorRateIndicatorTypeSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
+  histogramIndicatorTypeSchema,
 ]);
 
 // Validate that a string is a comma separated list of indicator types,
@@ -122,6 +152,7 @@ const indicatorSchema = t.union([
   apmTransactionErrorRateIndicatorSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  histogramIndicatorSchema,
 ]);
 
 export {
@@ -133,6 +164,8 @@ export {
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
   metricCustomIndicatorSchema,
+  histogramIndicatorTypeSchema,
+  histogramIndicatorSchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   indicatorTypesSchema,
