@@ -146,7 +146,7 @@ export const NavigationEmbeddableLinkEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose(true)} iconType="cross">
+            <EuiButtonEmpty onClick={() => onClose()} iconType="cross">
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
