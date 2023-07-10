@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs, Overview } from '../tabs';
+import { Anomalies, Metadata, Processes, Osquery, Logs, Overview } from '../tabs';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 
 type Props = Pick<
@@ -64,16 +64,6 @@ export const Content = ({
           showActionsColumn={overrides?.metadata?.showActionsColumn}
           search={overrides?.metadata?.query}
           onSearchChange={(query) => onChange({ metadata: { query } })}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.METRICS}>
-        <Metrics
-          currentTime={currentTimeRange.to}
-          accountId={overrides?.metrics?.accountId}
-          customMetrics={overrides?.metrics?.customMetrics}
-          region={overrides?.metrics?.region}
-          nodeId={node.id}
-          nodeType={nodeType}
         />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>

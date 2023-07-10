@@ -26,13 +26,6 @@ const tabs: Tab[] = [
     'data-test-subj': 'hostsView-flyout-tabs-overview',
   },
   {
-    id: FlyoutTabIds.METRICS,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.metrics', {
-      defaultMessage: 'Metrics',
-    }),
-    'data-test-subj': 'hostsView-flyout-tabs-metrics',
-  },
-  {
     id: FlyoutTabIds.LOGS,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
       defaultMessage: 'Logs',
@@ -109,6 +102,10 @@ const stories: Meta<AssetDetailsProps> = {
     overrides: {
       overview: {
         metricsDataView: {
+          id: 'default',
+          getFieldByName: () => 'hostname' as unknown as DataViewField,
+        } as unknown as DataView,
+        logsDataView: {
           id: 'default',
           getFieldByName: () => 'hostname' as unknown as DataViewField,
         } as unknown as DataView,

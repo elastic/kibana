@@ -27,7 +27,6 @@ export type HostNodeRow = HostMetadata &
 
 export enum FlyoutTabIds {
   OVERVIEW = 'overview',
-  METRICS = 'metrics',
   METADATA = 'metadata',
   PROCESSES = 'processes',
   ANOMALIES = 'anomalies',
