@@ -24,7 +24,7 @@ Object {
   "goodEvents": Object {
     "bucket_script": Object {
       "buckets_path": Object {
-        "value": "_good>total['*-100.0']>_count",
+        "value": "_good>total['0.0-100.0']>_count",
       },
       "script": "params.value",
     },
