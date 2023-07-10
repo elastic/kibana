@@ -30,7 +30,7 @@ describe('Policy Details', () => {
 
   beforeEach(() => {
     login();
-    visitPolicyDetailsPage();
+    visitPolicyDetailsPage(indexedHostsData.data.integrationPolicies[0].id);
   });
 
   afterEach(() => {
@@ -116,7 +116,7 @@ describe('Policy Details', () => {
 
       cy.getByTestSubj('endpointPolicyForm-malware-osValues').should(
         'contain.text',
-        'Linux, Windows, Mac'
+        'Windows, Mac, Linux'
       );
 
       cy.getByTestSubj('endpointPolicyForm-malware-enableDisableSwitch').click();
@@ -152,7 +152,7 @@ describe('Policy Details', () => {
       cy.getByTestSubj('endpointPolicyForm-ransomware-notifyUser-checkbox').should('be.checked');
 
       // Changing to Detect -> Notify user disabled
-      cy.getByTestSubj('`endpointPolicyForm-ransomware-protectionLevel-detectRadio')
+      cy.getByTestSubj('endpointPolicyForm-ransomware-protectionLevel-detectRadio')
         .find('label')
         .click();
       cy.getByTestSubj('endpointPolicyForm-ransomware-notifyUser-checkbox').should(
