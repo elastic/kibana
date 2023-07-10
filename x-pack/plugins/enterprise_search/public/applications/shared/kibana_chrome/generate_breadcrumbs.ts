@@ -14,6 +14,7 @@ import {
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_PRODUCT_NAME,
   ESRE_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
@@ -102,7 +103,7 @@ export const useEuiBreadcrumbs = (breadcrumbs: Breadcrumbs): EuiBreadcrumb[] => 
 export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
-      text: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+      text: ENTERPRISE_SEARCH_PRODUCT_NAME,
       path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       shouldNotCreateHref: true,
     },
