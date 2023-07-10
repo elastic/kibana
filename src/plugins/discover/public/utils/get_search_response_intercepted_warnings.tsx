@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { uniqBy } from 'lodash';
 import { ShardFailureOpenModalButton, ShardFailureRequest } from '@kbn/data-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DiscoverServices } from '../build_services';
@@ -52,5 +53,19 @@ export const getSearchResponseInterceptedWarnings = ({
     return true; // suppress the default behaviour
   });
 
-  return interceptedWarnings.length ? interceptedWarnings : undefined;
+  return removeInterceptedWarningDuplicates(interceptedWarnings);
+};
+
+export const removeInterceptedWarningDuplicates = (
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined
+): SearchResponseInterceptedWarning[] | undefined => {
+  if (!interceptedWarnings?.length) {
+    return undefined;
+  }
+
+  const uniqInterceptedWarnings = uniqBy(interceptedWarnings, (interceptedWarning) =>
+    JSON.stringify(interceptedWarning.originalWarning)
+  );
+
+  return uniqInterceptedWarnings?.length ? uniqInterceptedWarnings : undefined;
 };

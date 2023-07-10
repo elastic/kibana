@@ -9,18 +9,40 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord, EsHitRecord } from '../../../types';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type {
+  DataTableRecord,
+  EsHitRecord,
+  SearchResponseInterceptedWarning,
+} from '../../../types';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
+import type { DiscoverServices } from '../../../build_services';
+import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
+import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
 
 export async function fetchAnchor(
   anchorId: string,
   dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
-  useNewFieldsApi: boolean = false
-): Promise<DataTableRecord> {
+  useNewFieldsApi: boolean = false,
+  services: DiscoverServices
+): Promise<{
+  anchorRow: DataTableRecord;
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+}> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
-  const { rawResponse } = await lastValueFrom(searchSource.fetch$());
+
+  const inspectorAdapters = { requests: new RequestAdapter() };
+  const { rawResponse } = await lastValueFrom(
+    searchSource.fetch$({
+      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      inspector: {
+        adapter: inspectorAdapters.requests,
+        title: 'anchor',
+      },
+    })
+  );
   const doc = rawResponse.hits?.hits?.[0] as EsHitRecord;
 
   if (!doc) {
@@ -30,7 +52,16 @@ export async function fetchAnchor(
       })
     );
   }
-  return buildDataTableRecord(doc, dataView, true);
+  return {
+    anchorRow: buildDataTableRecord(doc, dataView, true),
+    interceptedWarnings: getSearchResponseInterceptedWarnings({
+      services,
+      adapter: inspectorAdapters.requests,
+      options: {
+        disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      },
+    }),
+  };
 }
 
 export function updateSearchSource(

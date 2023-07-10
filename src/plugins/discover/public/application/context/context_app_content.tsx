@@ -8,7 +8,7 @@
 
 import React, { useState, Fragment, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -23,9 +23,10 @@ import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../types';
+import type { DataTableRecord, SearchResponseInterceptedWarning } from '../../types';
 import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer';
+import { WarningsCallout } from '../../components/common/warnings_callout/warnings_callout';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -41,6 +42,7 @@ export interface ContextAppContentProps {
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
   useNewFieldsApi: boolean;
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
@@ -71,6 +73,7 @@ export function ContextAppContent({
   anchorStatus,
   predecessorsStatus,
   successorsStatus,
+  interceptedWarnings,
   useNewFieldsApi,
   isLegacy,
   setAppState,
@@ -118,6 +121,16 @@ export function ContextAppContent({
 
   return (
     <Fragment>
+      {!!interceptedWarnings?.length && (
+        <>
+          <WarningsCallout
+            variant="inline"
+            interceptedWarnings={interceptedWarnings}
+            data-test-subj="dscContextInterceptedWarnings"
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <ActionBarMemoized
         type={SurrDocType.PREDECESSORS}
         defaultStepSize={defaultStepSize}

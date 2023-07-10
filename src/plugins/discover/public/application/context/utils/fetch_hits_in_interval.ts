@@ -8,10 +8,15 @@
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
-import type { DataTableRecord } from '../../../types';
+import type { DataTableRecord, SearchResponseInterceptedWarning } from '../../../types';
+import type { SurrDocType } from '../services/context';
+import type { DiscoverServices } from '../../../build_services';
+import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
 
 interface RangeQuery {
   format: string;
@@ -35,8 +40,13 @@ export async function fetchHitsInInterval(
   searchAfter: EsQuerySearchAfter,
   maxCount: number,
   nanosValue: string,
-  anchorId: string
-): Promise<DataTableRecord[]> {
+  anchorId: string,
+  type: SurrDocType,
+  services: DiscoverServices
+): Promise<{
+  rows: DataTableRecord[];
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+}> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
   };
@@ -49,6 +59,8 @@ export async function fetchHitsInInterval(
   if (stop) {
     range[sortDir === SortDirection.asc ? 'lte' : 'gte'] = convertTimeValueToIso(stop, nanosValue);
   }
+
+  const inspectorAdapters = { requests: new RequestAdapter() };
   const fetch$ = searchSource
     .setField('size', maxCount)
     .setField('query', {
@@ -75,11 +87,26 @@ export async function fetchHitsInInterval(
     .setField('searchAfter', searchAfter)
     .setField('sort', sort)
     .setField('version', true)
-    .fetch$();
+    .fetch$({
+      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      inspector: {
+        adapter: inspectorAdapters.requests,
+        title: type,
+      },
+    });
 
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
-  const records = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
+  const rows = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
 
-  return records ?? [];
+  return {
+    rows: rows ?? [],
+    interceptedWarnings: getSearchResponseInterceptedWarnings({
+      services,
+      adapter: inspectorAdapters.requests,
+      options: {
+        disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+      },
+    }),
+  };
 }

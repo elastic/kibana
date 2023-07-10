@@ -14,7 +14,9 @@ import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
 import { getEsQuerySort } from '../utils/get_es_query_sort';
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord, SearchResponseInterceptedWarning } from '../../../types';
+import type { DiscoverServices } from '../../../build_services';
+import { removeInterceptedWarningDuplicates } from '../../../utils/get_search_response_intercepted_warnings';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
@@ -48,10 +50,17 @@ export async function fetchSurroundingDocs(
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
-  useNewFieldsApi?: boolean
-): Promise<DataTableRecord[]> {
+  useNewFieldsApi: boolean | undefined,
+  services: DiscoverServices
+): Promise<{
+  rows: DataTableRecord[];
+  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+}> {
   if (typeof anchor !== 'object' || anchor === null || !size) {
-    return [];
+    return {
+      rows: [],
+      interceptedWarnings: undefined,
+    };
   }
   const timeField = dataView.timeFieldName!;
   const searchSource = data.search.searchSource.createEmpty();
@@ -64,10 +73,11 @@ export async function fetchSurroundingDocs(
     nanos !== '' ? convertIsoToMillis(anchorRaw.fields?.[timeField][0]) : anchorRaw.sort?.[0];
 
   const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
-  let documents: DataTableRecord[] = [];
+  let rows: DataTableRecord[] = [];
+  let interceptedWarnings: SearchResponseInterceptedWarning[] = [];
 
   for (const interval of intervals) {
-    const remainingSize = size - documents.length;
+    const remainingSize = size - rows.length;
 
     if (remainingSize <= 0) {
       break;
@@ -75,7 +85,7 @@ export async function fetchSurroundingDocs(
 
     const searchAfter = getEsQuerySearchAfter(
       type,
-      documents,
+      rows,
       timeField,
       anchor,
       nanos,
@@ -84,7 +94,7 @@ export async function fetchSurroundingDocs(
 
     const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply, nanos);
 
-    const hits = await fetchHitsInInterval(
+    const result = await fetchHitsInInterval(
       searchSource,
       timeField,
       sort,
@@ -93,16 +103,28 @@ export async function fetchSurroundingDocs(
       searchAfter,
       remainingSize,
       nanos,
-      anchor.raw._id
+      anchor.raw._id,
+      type,
+      services
     );
 
-    documents =
+    rows =
       type === SurrDocType.SUCCESSORS
-        ? [...documents, ...hits]
-        : [...hits.slice().reverse(), ...documents];
+        ? [...rows, ...result.rows]
+        : [...result.rows.slice().reverse(), ...rows];
+
+    if (result.interceptedWarnings) {
+      interceptedWarnings =
+        type === SurrDocType.SUCCESSORS
+          ? [...interceptedWarnings, ...result.interceptedWarnings]
+          : [...result.interceptedWarnings.slice().reverse(), ...interceptedWarnings];
+    }
   }
 
-  return documents;
+  return {
+    rows,
+    interceptedWarnings: removeInterceptedWarningDuplicates(interceptedWarnings),
+  };
 }
 
 export function updateSearchSource(

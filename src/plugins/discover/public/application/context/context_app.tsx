@@ -30,6 +30,7 @@ import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
+import { removeInterceptedWarningDuplicates } from '../../utils/get_search_response_intercepted_warnings';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -172,6 +173,20 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
   );
 
+  const interceptedWarnings = useMemo(
+    () =>
+      removeInterceptedWarningDuplicates([
+        ...(fetchedState.predecessorsInterceptedWarnings || []),
+        ...(fetchedState.anchorInterceptedWarnings || []),
+        ...(fetchedState.successorsInterceptedWarnings || []),
+      ]),
+    [
+      fetchedState.predecessorsInterceptedWarnings,
+      fetchedState.anchorInterceptedWarnings,
+      fetchedState.successorsInterceptedWarnings,
+    ]
+  );
+
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
@@ -251,6 +266,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
+                interceptedWarnings={interceptedWarnings}
               />
             </EuiPageBody>
           </EuiPage>
