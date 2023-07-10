@@ -14,12 +14,12 @@ describe('Serverless', () => {
     cy.loginAsElasticUser();
     cy.contains('Discover');
     cy.contains('Dashboards');
+    cy.contains('Alerts');
+    cy.contains('AIOps');
+    cy.contains('Applications');
+    cy.contains('Cases');
     cy.contains('Visualizations');
-    cy.contains('Services');
-    cy.contains('Traces');
-    cy.contains('Dependencies');
-    cy.contains('Get started');
-    cy.contains('Management');
+    cy.contains('Add data');
   });
 
   it('navigates to discover-dashboard-viz links', () => {
@@ -28,7 +28,7 @@ describe('Serverless', () => {
     cy.contains('Discover').click();
     cy.url().should('include', '/app/discover');
 
-    cy.contains('Dashboard').click();
+    cy.contains('Dashboards').click();
     cy.url().should('include', '/app/dashboards');
 
     cy.contains('Visualizations').click();
@@ -51,6 +51,7 @@ describe('Serverless', () => {
   it('navigates to apm links', () => {
     cy.loginAsElasticUser();
 
+    cy.contains('Applications').click();
     cy.contains('Services').click();
     cy.url().should('include', '/apm/services');
 
@@ -64,25 +65,39 @@ describe('Serverless', () => {
   it('navigates to get started links', () => {
     cy.loginAsElasticUser();
 
-    cy.contains('Get started').click();
+    cy.contains('Add data').click();
     cy.url().should('include', '/app/observabilityOnboarding');
   });
 
-  it('navigates to management links', () => {
+  it('navigates to AIOps links', () => {
     cy.loginAsElasticUser();
 
+    cy.contains('AIOps').click();
+    cy.contains('Anomaly detection').click();
+    cy.url().should('include', '/app/ml/jobs');
+
+    cy.contains('Spike analysis').click();
+    cy.url().should('include', 'app/ml/aiops/explain_log_rate_spikes_index_select');
+
+    cy.contains('Change Point Detection').click();
+    cy.url().should('include', 'app/ml/aiops/change_point_detection_index_select');
+
+    cy.contains('Job notifications').click();
+    cy.url().should('include', 'app/ml/notifications');
+  });
+
+  it('navigates to project settings', () => {
+    cy.loginAsElasticUser();
+
+    cy.contains('Project settings').click();
     cy.contains('Management').click();
-    cy.contains('Stack Monitoring').click();
-    cy.url().should('include', '/app/monitoring');
+    cy.url().should('include', '/app/management');
 
     cy.contains('Integrations').click();
     cy.url().should('include', '/app/integrations/browse');
 
     cy.contains('Fleet').click();
     cy.url().should('include', '/app/fleet/agents');
-
-    cy.contains('Osquery').click();
-    cy.url().should('include', 'app/osquery');
   });
 });
 
