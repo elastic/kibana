@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { i18n } from '@kbn/i18n';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
@@ -16,6 +18,13 @@ import { DecorateWithKibanaContext } from './__stories__/decorator';
 
 const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices', 'uptime'];
 const tabs: Tab[] = [
+  {
+    id: FlyoutTabIds.OVERVIEW,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
+      defaultMessage: 'Overview',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-overview',
+  },
   {
     id: FlyoutTabIds.METRICS,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.metrics', {
@@ -98,6 +107,16 @@ const stories: Meta<AssetDetailsProps> = {
       memoryFree: 34359738368,
     },
     overrides: {
+      overview: {
+        dataView: {
+          id: 'default',
+          getFieldByName: () => 'hostname' as unknown as DataViewField,
+        } as unknown as DataView,
+        dateRange: {
+          from: '168363046800',
+          to: '168363046900',
+        },
+      },
       metadata: {
         showActionsColumn: true,
       },

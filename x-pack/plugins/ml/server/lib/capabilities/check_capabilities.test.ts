@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(39);
+      expect(count).toBe(42);
     });
   });
 
@@ -105,6 +105,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('full capabilities', async () => {
@@ -160,6 +164,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('upgrade in progress with full capabilities', async () => {
@@ -215,6 +223,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('upgrade in progress with partial capabilities', async () => {
@@ -270,6 +282,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
 
     test('full capabilities, ml disabled in space', async () => {
@@ -325,6 +341,10 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+      expect(capabilities.isADEnabled).toBe(true);
+      expect(capabilities.isDFAEnabled).toBe(true);
+      expect(capabilities.isNLPEnabled).toBe(true);
     });
   });
 
@@ -381,5 +401,9 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateTrainedModels).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);
+
+    expect(capabilities.isADEnabled).toBe(true);
+    expect(capabilities.isDFAEnabled).toBe(true);
+    expect(capabilities.isNLPEnabled).toBe(true);
   });
 });

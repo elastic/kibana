@@ -80,6 +80,7 @@ const mockConfig: ConfigSchema = {
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
   },
+  serverless: { enabled: false },
 };
 
 const urlService = new UrlService({

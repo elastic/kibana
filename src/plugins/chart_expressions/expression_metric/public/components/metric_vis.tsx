@@ -38,7 +38,7 @@ import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
-import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
@@ -118,7 +118,7 @@ export interface MetricVisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderMode: RenderMode;
   filterable: boolean;
-  overrides?: AllowedSettingsOverrides;
+  overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
 export const MetricVis = ({
@@ -301,7 +301,7 @@ export const MetricVis = ({
           height: ${scrollChildHeight};
         `}
       >
-        <Chart>
+        <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             theme={[
               {

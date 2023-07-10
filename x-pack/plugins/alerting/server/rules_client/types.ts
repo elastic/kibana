@@ -35,7 +35,6 @@ export type {
   BulkEditOptionsFilter,
   BulkEditOptionsIds,
 } from './methods/bulk_edit';
-export type { CreateOptions } from './methods/create';
 export type { FindOptions, FindResult } from './methods/find';
 export type { UpdateOptions } from './methods/update';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';

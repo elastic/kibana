@@ -45,7 +45,7 @@ import {
   ActionResult,
   FindActionResult,
   RawAction,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
 } from './types';
@@ -115,7 +115,7 @@ interface ConstructorOptions {
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
@@ -139,7 +139,7 @@ export class ActionsClient {
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
-  private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
@@ -157,7 +157,7 @@ export class ActionsClient {
     kibanaIndices,
     scopedClusterClient,
     unsecuredSavedObjectsClient,
-    preconfiguredActions,
+    inMemoryConnectors,
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
@@ -174,7 +174,7 @@ export class ActionsClient {
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
     this.kibanaIndices = kibanaIndices;
-    this.preconfiguredActions = preconfiguredActions;
+    this.inMemoryConnectors = inMemoryConnectors;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
     this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
@@ -196,17 +196,6 @@ export class ActionsClient {
   }: CreateOptions): Promise<ActionResult> {
     const id = options?.id || SavedObjectsUtils.generateId();
 
-    if (this.preconfiguredActions.some((preconfiguredAction) => preconfiguredAction.id === id)) {
-      throw Boom.badRequest(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
-          defaultMessage: 'This {id} already exist in preconfigured action.',
-          values: {
-            id,
-          },
-        })
-      );
-    }
-
     try {
       await this.authorization.ensureAuthorized('create', actionTypeId);
     } catch (error) {
@@ -218,6 +207,33 @@ export class ActionsClient {
         })
       );
       throw error;
+    }
+
+    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+
+    if (
+      this.actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      foundInMemoryConnector?.isSystemAction
+    ) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
+          defaultMessage: 'System action creation is forbidden. Action type: {actionTypeId}.',
+          values: {
+            actionTypeId,
+          },
+        })
+      );
+    }
+
+    if (foundInMemoryConnector?.isPreconfigured) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
+          defaultMessage: 'This {id} already exists in a preconfigured action.',
+          values: {
+            id,
+          },
+        })
+      );
     }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -260,6 +276,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
@@ -271,13 +288,25 @@ export class ActionsClient {
     try {
       await this.authorization.ensureAuthorized('update');
 
-      if (
-        this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
-        undefined
-      ) {
+      const foundInMemoryConnector = this.inMemoryConnectors.find(
+        (connector) => connector.id === id
+      );
+
+      if (foundInMemoryConnector?.isSystemAction) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.actions.serverSideErrors.systemActionUpdateForbidden', {
+            defaultMessage: 'System action {id} can not be updated.',
+            values: {
+              id,
+            },
+          })
+        );
+      }
+
+      if (foundInMemoryConnector?.isPreconfigured) {
         throw new PreconfiguredActionDisabledModificationError(
           i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
-            defaultMessage: 'Preconfigured action {id} is not allowed to update.',
+            defaultMessage: 'Preconfigured action {id} can not be updated.',
             values: {
               id,
             },
@@ -357,6 +386,7 @@ export class ActionsClient {
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
@@ -378,10 +408,9 @@ export class ActionsClient {
       throw error;
     }
 
-    const preconfiguredActionsList = this.preconfiguredActions.find(
-      (preconfiguredAction) => preconfiguredAction.id === id
-    );
-    if (preconfiguredActionsList !== undefined) {
+    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+
+    if (foundInMemoryConnector !== undefined) {
       this.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET,
@@ -391,10 +420,11 @@ export class ActionsClient {
 
       return {
         id,
-        actionTypeId: preconfiguredActionsList.actionTypeId,
-        name: preconfiguredActionsList.name,
-        isPreconfigured: true,
-        isDeprecated: isConnectorDeprecated(preconfiguredActionsList),
+        actionTypeId: foundInMemoryConnector.actionTypeId,
+        name: foundInMemoryConnector.name,
+        isPreconfigured: foundInMemoryConnector.isPreconfigured,
+        isSystemAction: foundInMemoryConnector.isSystemAction,
+        isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
       };
     }
 
@@ -414,12 +444,13 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
   /**
-   * Get all actions with preconfigured list
+   * Get all actions with in-memory connectors
    */
   public async getAll(): Promise<FindActionResult[]> {
     try {
@@ -454,19 +485,20 @@ export class ActionsClient {
 
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.preconfiguredActions.map((preconfiguredAction) => ({
-        id: preconfiguredAction.id,
-        actionTypeId: preconfiguredAction.actionTypeId,
-        name: preconfiguredAction.name,
-        isPreconfigured: true,
-        isDeprecated: isConnectorDeprecated(preconfiguredAction),
+      ...this.inMemoryConnectors.map((inMemoryConnector) => ({
+        id: inMemoryConnector.id,
+        actionTypeId: inMemoryConnector.actionTypeId,
+        name: inMemoryConnector.name,
+        isPreconfigured: inMemoryConnector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(inMemoryConnector),
+        isSystemAction: inMemoryConnector.isSystemAction,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
     return await injectExtraFindData(this.kibanaIndices, this.scopedClusterClient, mergedResult);
   }
 
   /**
-   * Get bulk actions with preconfigured list
+   * Get bulk actions with in-memory list
    */
   public async getBulk(ids: string[]): Promise<ActionResult[]> {
     try {
@@ -485,17 +517,19 @@ export class ActionsClient {
     }
 
     const actionResults = new Array<ActionResult>();
+
     for (const actionId of ids) {
-      const action = this.preconfiguredActions.find(
-        (preconfiguredAction) => preconfiguredAction.id === actionId
+      const action = this.inMemoryConnectors.find(
+        (inMemoryConnector) => inMemoryConnector.id === actionId
       );
+
       if (action !== undefined) {
         actionResults.push(action);
       }
     }
 
     // Fetch action objects in bulk
-    // Excluding preconfigured actions to avoid an not found error, which is already added
+    // Excluding in-memory actions to avoid an not found error, which is already added
     const actionSavedObjectsIds = [
       ...new Set(
         ids.filter(
@@ -526,6 +560,7 @@ export class ActionsClient {
       }
       actionResults.push(actionFromSavedObject(action, isConnectorDeprecated(action.attributes)));
     }
+
     return actionResults;
   }
 
@@ -627,10 +662,22 @@ export class ActionsClient {
     try {
       await this.authorization.ensureAuthorized('delete');
 
-      if (
-        this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
-        undefined
-      ) {
+      const foundInMemoryConnector = this.inMemoryConnectors.find(
+        (connector) => connector.id === id
+      );
+
+      if (foundInMemoryConnector?.isSystemAction) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.actions.serverSideErrors.systemActionDeletionForbidden', {
+            defaultMessage: 'System action {id} is not allowed to delete.',
+            values: {
+              id,
+            },
+          })
+        );
+      }
+
+      if (foundInMemoryConnector?.isPreconfigured) {
         throw new PreconfiguredActionDisabledModificationError(
           i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
             defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
@@ -760,7 +807,15 @@ export class ActionsClient {
   }
 
   public isPreconfigured(connectorId: string): boolean {
-    return !!this.preconfiguredActions.find((preconfigured) => preconfigured.id === connectorId);
+    return !!this.inMemoryConnectors.find(
+      (connector) => connector.isPreconfigured && connector.id === connectorId
+    );
+  }
+
+  public isSystemAction(connectorId: string): boolean {
+    return !!this.inMemoryConnectors.find(
+      (connector) => connector.isSystemAction && connector.id === connectorId
+    );
   }
 
   public async getGlobalExecutionLogWithAuth({
@@ -893,6 +948,7 @@ function actionFromSavedObject(
     ...savedObject.attributes,
     isPreconfigured: false,
     isDeprecated,
+    isSystemAction: false,
   };
 }
 

@@ -30,7 +30,7 @@ import {
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
-import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
