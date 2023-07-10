@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { isNil } from 'lodash';
 import classNames from 'classnames';
+import { distinct, map } from 'rxjs';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 
@@ -20,18 +22,42 @@ import {
   CustomizePanelAction,
 } from './panel_actions';
 import {
+  EmbeddablePhase,
+  EmbeddablePhaseEvent,
+  PanelUniversalActions,
+  UnwrappedEmbeddablePanelProps,
+} from './types';
+import {
   useSelectFromEmbeddableInput,
   useSelectFromEmbeddableOutput,
 } from './use_select_from_embeddable';
-import { ViewMode, EmbeddableErrorHandler } from '../lib';
 import { EmbeddablePanelError } from './embeddable_panel_error';
 import { core, embeddableStart, inspector } from '../kibana_services';
-import { UnwrappedEmbeddablePanelProps, PanelUniversalActions } from './types';
+import { ViewMode, EmbeddableErrorHandler, EmbeddableOutput } from '../lib';
 import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 
+const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
+  if (!isNil(output.error)) {
+    return 'error';
+  } else if (output.rendered === true) {
+    return 'rendered';
+  } else if (output.loading === false) {
+    return 'loaded';
+  } else {
+    return 'loading';
+  }
+};
+
 export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
+  const {
+    hideHeader,
+    showShadow,
+    embeddable,
+    hideInspector,
+    containerContext,
+    onPanelStatusChange,
+  } = panelProps;
   const [node, setNode] = useState<ReactNode | undefined>();
-  const { hideHeader, showShadow, embeddable, containerContext, hideInspector } = panelProps;
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -64,6 +90,46 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
     if (!hideInspector) actions.inspectPanel = new InspectPanelAction(inspector);
     return actions;
   }, [containerContext?.getCurrentPath, hideInspector]);
+
+  /**
+   * Track panel status changes
+   */
+  useEffect(() => {
+    if (!onPanelStatusChange) return;
+    let loadingStartTime = 0;
+
+    const subscription = embeddable
+      .getOutput$()
+      .pipe(
+        // Map loaded event properties
+        map((output) => {
+          if (output.loading === true) {
+            loadingStartTime = performance.now();
+          }
+          return {
+            id: embeddable.id,
+            status: getEventStatus(output),
+            error: output.error,
+          };
+        }),
+        // Dedupe
+        distinct((output) => loadingStartTime + output.id + output.status + !!output.error),
+        // Map loaded event properties
+        map((output): EmbeddablePhaseEvent => {
+          return {
+            ...output,
+            timeToEvent: performance.now() - loadingStartTime,
+          };
+        })
+      )
+      .subscribe((statusOutput) => {
+        onPanelStatusChange(statusOutput);
+      });
+    return () => subscription?.unsubscribe();
+
+    // Panel status change subscription should only be run on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Select state from the embeddable

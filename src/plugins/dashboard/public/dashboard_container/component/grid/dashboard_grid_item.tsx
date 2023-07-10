@@ -84,11 +84,11 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
         {isRenderable ? (
           <>
             <EmbeddablePanel
-              // TODO onPanelStatusChange
               key={type}
               index={index}
               showBadges={true}
               showNotifications={true}
+              onPanelStatusChange={onPanelStatusChange}
               embeddable={() => container.untilEmbeddableLoaded(id)}
             />
             {children}

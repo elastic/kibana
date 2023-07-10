@@ -55,6 +55,7 @@ export interface EmbeddablePanelProps {
   showNotifications?: boolean;
   containerContext?: EmbeddableContainerContext;
   actionPredicate?: (actionId: string) => boolean;
+  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
   getActions?: UiActionsService['getTriggerCompatibleActions'];
   embeddable: PanelEmbeddable | (() => Promise<PanelEmbeddable>);
 
