@@ -110,7 +110,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           )}
           <ExpandableFlyout
             registeredPanels={expandableFlyoutDocumentsPanels}
-            onClose={() => {}}
             handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
           />
         </StyledKibanaPageTemplate>
