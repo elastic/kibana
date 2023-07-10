@@ -13,6 +13,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useConversationStore } from '../../../../assistant/use_conversation_store';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
@@ -199,6 +200,13 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
+    const { conversations } = useConversationStore();
+
+    const hasTimelineConversationStarted = useMemo(
+      () => conversations[TIMELINE_CONVERSATION_TITLE].messages.length > 0,
+      [conversations]
+    );
+
     /* Future developer -> why are we doing that
      * It is really expansive to re-render the QueryTab because the drag/drop
      * Therefore, we are only hiding its dom when switching to another tab
@@ -254,15 +262,18 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
               overflow: hidden !important;
             `}
           >
-            <AssistantTab
-              isAssistantEnabled={isAssistantEnabled}
-              renderCellValue={renderCellValue}
-              rowRenderers={rowRenderers}
-              timelineId={timelineId}
-              shouldRefocusPrompt={
-                showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
-              }
-            />
+            {(activeTimelineTab === TimelineTabs.securityAssistant ||
+              hasTimelineConversationStarted) && (
+              <AssistantTab
+                isAssistantEnabled={isAssistantEnabled}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
+                timelineId={timelineId}
+                shouldRefocusPrompt={
+                  showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
+                }
+              />
+            )}
           </HideShowContainer>
         )}
       </>

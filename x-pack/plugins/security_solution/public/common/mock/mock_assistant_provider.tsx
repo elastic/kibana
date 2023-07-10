@@ -33,7 +33,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) =>
       defaultAllowReplacement={[]}
       getComments={jest.fn(() => [])}
       getInitialConversations={jest.fn(() => ({}))}
-      setConversations={jest.fn((e) => e)}
+      setConversations={jest.fn()}
       setDefaultAllow={jest.fn()}
       setDefaultAllowReplacement={jest.fn()}
       http={mockHttp}

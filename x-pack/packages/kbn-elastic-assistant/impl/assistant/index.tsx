@@ -107,9 +107,10 @@ const AssistantComponent: React.FC<Props> = ({
   const welcomeConversation = useMemo(() => {
     const conversation =
       conversations[selectedConversationId] ?? BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
+    const doesConversationHaveMessages = conversation.messages.length > 0;
     if (!isAssistantEnabled) {
       if (
-        conversation.messages.length === 0 ||
+        !doesConversationHaveMessages ||
         conversation.messages[conversation.messages.length - 1].content !==
           enterpriseMessaging[0].content
       ) {
@@ -118,8 +119,21 @@ const AssistantComponent: React.FC<Props> = ({
           messages: [...conversation.messages, ...enterpriseMessaging],
         };
       }
+      return conversation;
     }
-    return conversation;
+
+    return doesConversationHaveMessages
+      ? {
+          ...conversation,
+          messages: [
+            ...conversation.messages,
+            ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+          ],
+        }
+      : {
+          ...conversation,
+          messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+        };
   }, [conversations, isAssistantEnabled, selectedConversationId]);
 
   const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });

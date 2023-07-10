@@ -126,7 +126,10 @@ export const useConnectorSetup = ({
   const commentBody = useCallback(
     (message: Message, index: number, length: number) => {
       // If timestamp is not set, set it to current time (will update conversation at end of setup)
-      if (conversation.messages[index].timestamp.length === 0) {
+      if (
+        conversation.messages[index].timestamp == null ||
+        conversation.messages[index].timestamp.length === 0
+      ) {
         conversation.messages[index].timestamp = new Date().toLocaleString();
       }
       const isLastMessage = index === length - 1;

@@ -61,10 +61,7 @@ interface UseConversation {
     replacements,
   }: AppendReplacementsProps) => Record<string, string>;
   clearConversation: (conversationId: string) => void;
-  createConversation: ({
-    conversationId,
-    messages,
-  }: CreateConversationProps) => Conversation | undefined;
+  createConversation: ({ conversationId, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
   setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
   setConversation: ({ conversation }: SetConversationProps) => void;
@@ -162,7 +159,7 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversationId, and optionally add messages
    */
   const createConversation = useCallback(
-    ({ conversationId, messages }: CreateConversationProps): Conversation | undefined => {
+    ({ conversationId, messages }: CreateConversationProps): Conversation => {
       const newConversation: Conversation = {
         ...DEFAULT_CONVERSATION_STATE,
         id: conversationId,
