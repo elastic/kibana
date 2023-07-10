@@ -11,11 +11,11 @@ import type {
   MetadataTransformStatsChanged,
 } from './action';
 import {
-  isOnEndpointPage,
-  hasSelectedEndpoint,
-  uiQueryParams,
-  getIsOnEndpointDetailsActivityLog,
   getCurrentIsolationRequestState,
+  getIsOnEndpointDetailsActivityLog,
+  hasSelectedEndpoint,
+  isOnEndpointPage,
+  uiQueryParams,
 } from './selectors';
 import type { EndpointState } from '../types';
 import { initialEndpointPageState } from './builders';
@@ -97,7 +97,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       },
     };
   } else if (action.type === 'serverReturnedMetadataPatterns') {
-    // handle error case
+    // handle an error case
     return {
       ...state,
       patterns: action.payload,
@@ -114,12 +114,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       endpointDetails: {
         ...state.endpointDetails,
         hostInfo: action.payload,
-        hostDetails: {
-          ...state.endpointDetails.hostDetails,
-          details: action.payload.metadata,
-          detailsLoading: false,
-          detailsError: undefined,
-        },
+        hostInfoError: undefined,
+        isHostInfoLoading: false,
       },
       policyVersionInfo: action.payload.policy_info,
       hostStatus: action.payload.host_status,
@@ -129,11 +125,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...state,
       endpointDetails: {
         ...state.endpointDetails,
-        hostDetails: {
-          ...state.endpointDetails.hostDetails,
-          detailsError: action.payload,
-          detailsLoading: false,
-        },
+        hostInfoError: action.payload,
+        isHostInfoLoading: false,
       },
     };
   } else if (action.type === 'endpointPendingActionsStateChanged') {
@@ -262,44 +255,35 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
-            hostDetails: {
-              ...state.endpointDetails.hostDetails,
-              detailsError: undefined,
-            },
+            hostInfoError: undefined,
           },
           loading: true,
           policyItemsLoading: true,
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
-      // if previous page was the list or another endpoint details page, load endpoint details only
+      // if the previous page was the list or another endpoint details page, load endpoint details only
       if (wasPreviouslyOnDetailsPage || wasPreviouslyOnListPage) {
         return {
           ...state,
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
-            hostDetails: {
-              ...state.endpointDetails.hostDetails,
-              detailsLoading: !isNotLoadingDetails,
-              detailsError: undefined,
-            },
+            hostInfoError: undefined,
+            isHostInfoLoading: !isNotLoadingDetails,
           },
           detailsLoading: true,
           policyResponseLoading: true,
         };
       } else {
-        // if previous page was not endpoint list or endpoint details, load both list and details
+        // if the previous page was not endpoint list or endpoint details, load both list and details
         return {
           ...state,
           ...stateUpdates,
           endpointDetails: {
             ...state.endpointDetails,
-            hostDetails: {
-              ...state.endpointDetails.hostDetails,
-              detailsLoading: true,
-              detailsError: undefined,
-            },
+            hostInfoError: undefined,
+            isHostInfoLoading: true,
           },
           loading: true,
           policyResponseLoading: true,
@@ -307,16 +291,13 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         };
       }
     }
-    // otherwise we are not on a endpoint list or details page
+    // otherwise, we are not on an endpoint list or details page
     return {
       ...state,
       ...stateUpdates,
       endpointDetails: {
         ...state.endpointDetails,
-        hostDetails: {
-          ...state.endpointDetails.hostDetails,
-          detailsError: undefined,
-        },
+        hostInfoError: undefined,
       },
       endpointsExist: true,
     };

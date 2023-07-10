@@ -1218,3 +1218,10 @@ export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
     defaultMessage: 'Go back to installed Elastic rules',
   }
 );
+
+export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.securitySolution.ruleUpdates.documentationLink',
+  {
+    defaultMessage: "See what's new in Prebuilt Security Detection Rules",
+  }
+);

@@ -13,13 +13,13 @@ import {
   parseActionRunOutcomeByConnectorTypesBucket,
 } from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
-import { ActionResult, PreConfiguredAction } from '../types';
+import { ActionResult, InMemoryConnector } from '../types';
 
 export async function getTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
   logger: Logger,
-  preconfiguredActions?: PreConfiguredAction[]
+  inMemoryConnectors?: InMemoryConnector[]
 ) {
   const scriptedMetric = {
     scripted_metric: {
@@ -74,9 +74,9 @@ export async function getTotalCount(
       },
       {}
     );
-    if (preconfiguredActions && preconfiguredActions.length) {
-      for (const preconfiguredAction of preconfiguredActions) {
-        const actionTypeId = replaceFirstAndLastDotSymbols(preconfiguredAction.actionTypeId);
+    if (inMemoryConnectors && inMemoryConnectors.length) {
+      for (const inMemoryConnector of inMemoryConnectors) {
+        const actionTypeId = replaceFirstAndLastDotSymbols(inMemoryConnector.actionTypeId);
         countByType[actionTypeId] = countByType[actionTypeId] || 0;
         countByType[actionTypeId]++;
       }
@@ -87,7 +87,7 @@ export async function getTotalCount(
         Object.keys(aggs).reduce(
           (total: number, key: string) => parseInt(aggs[key], 10) + total,
           0
-        ) + (preconfiguredActions?.length ?? 0),
+        ) + (inMemoryConnectors?.length ?? 0),
       countByType,
     };
   } catch (err) {
@@ -109,7 +109,7 @@ export async function getInUseTotalCount(
   kibanaIndex: string,
   logger: Logger,
   referenceType?: string,
-  preconfiguredActions?: PreConfiguredAction[]
+  inMemoryConnectors?: InMemoryConnector[]
 ): Promise<{
   hasErrors: boolean;
   errorMessage?: string;
@@ -363,9 +363,9 @@ export async function getInUseTotalCount(
       if (actionRef === `preconfigured:${AlertHistoryEsIndexConnectorId}`) {
         preconfiguredAlertHistoryConnectors++;
       }
-      if (preconfiguredActions && actionTypeId === '__email') {
+      if (inMemoryConnectors && actionTypeId === '__email') {
         const preconfiguredConnectorId = actionRef.split(':')[1];
-        const service = (preconfiguredActions.find(
+        const service = (inMemoryConnectors.find(
           (preconfConnector) => preconfConnector.id === preconfiguredConnectorId
         )?.config?.service ?? 'other') as string;
         const currentCount =

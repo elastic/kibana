@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
+import type { LensChartConfig, LensLineChartConfig } from '../../../types';
 import { getFilters } from './utils';
+
+export const diskSpaceUsageLineChart: LensLineChartConfig = {
+  extraVisualizationState: {
+    yLeftExtent: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
+    },
+  },
+};
 
 export const diskSpaceUsage: LensChartConfig = {
   title: 'Disk Space Usage',
@@ -20,4 +30,5 @@ export const diskSpaceUsage: LensChartConfig = {
     },
   },
   getFilters,
+  lineChartConfig: diskSpaceUsageLineChart,
 };

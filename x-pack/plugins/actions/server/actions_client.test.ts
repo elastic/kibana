@@ -133,7 +133,7 @@ beforeEach(() => {
     ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
@@ -142,7 +142,7 @@ beforeEach(() => {
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
@@ -385,6 +385,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
@@ -532,6 +533,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
@@ -592,7 +594,7 @@ describe('create()', () => {
       ),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     };
 
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
@@ -602,7 +604,7 @@ describe('create()', () => {
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
@@ -713,7 +715,7 @@ describe('create()', () => {
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: preDefinedId,
           actionTypeId: 'my-action-type',
@@ -722,6 +724,7 @@ describe('create()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -752,8 +755,78 @@ describe('create()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"This mySuperRadTestPreconfiguredId already exist in preconfigured action."`
+      `"This mySuperRadTestPreconfiguredId already exists in a preconfigured action."`
     );
+  });
+
+  it('throws when creating a system connector', async () => {
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
+
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: '.cases',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"System action creation is forbidden. Action type: .cases."`
+    );
+  });
+
+  it('throws when creating a system connector where the action type is not registered but a system connector exists in the in-memory list', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          actionTypeId: '.cases',
+          config: {},
+          id: 'system-connector-.cases',
+          name: 'System action: .cases',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: '.cases',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Action type \\".cases\\" is not registered."`);
   });
 });
 
@@ -790,7 +863,7 @@ describe('get()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
@@ -799,6 +872,7 @@ describe('get()', () => {
             },
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -810,6 +884,40 @@ describe('get()', () => {
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('ensures user is authorised to get a system action', async () => {
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          {
+            actionTypeId: '.cases',
+            config: {},
+            id: 'system-connector-.cases',
+            name: 'System action: .cases',
+            secrets: {},
+            isPreconfigured: false,
+            isDeprecated: false,
+            isSystemAction: true,
+          },
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      await actionsClient.get({ id: 'system-connector-.cases' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
@@ -851,7 +959,7 @@ describe('get()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
@@ -860,6 +968,7 @@ describe('get()', () => {
             },
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -876,6 +985,48 @@ describe('get()', () => {
 
       await expect(actionsClient.get({ id: 'testPreconfigured' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to get a "my-action-type" action]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to get a system action', async () => {
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          {
+            actionTypeId: '.cases',
+            config: {},
+            id: 'system-connector-.cases',
+            name: 'System action: .cases',
+            secrets: {},
+            isPreconfigured: false,
+            isDeprecated: false,
+            isSystemAction: true,
+          },
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to get a "system-connector-.cases" action`)
+      );
+
+      await expect(
+        actionsClient.get({ id: 'system-connector-.cases' })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get a "system-connector-.cases" action]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
@@ -950,6 +1101,7 @@ describe('get()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -974,7 +1126,7 @@ describe('get()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
@@ -983,6 +1135,7 @@ describe('get()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -999,8 +1152,53 @@ describe('get()', () => {
       actionTypeId: '.slack',
       isPreconfigured: true,
       isDeprecated: false,
+      isSystemAction: false,
       name: 'test',
     });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+  });
+
+  it('return system action with id', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    const result = await actionsClient.get({ id: 'system-connector-.cases' });
+
+    expect(result).toEqual({
+      id: 'system-connector-.cases',
+      actionTypeId: '.cases',
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: true,
+      name: 'System action: .cases',
+    });
+
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 });
@@ -1050,13 +1248,14 @@ describe('getAll()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1149,7 +1348,7 @@ describe('getAll()', () => {
     });
   });
 
-  test('calls unsecuredSavedObjectsClient with parameters', async () => {
+  test('calls unsecuredSavedObjectsClient with parameters and returns inMemoryConnectors correctly', async () => {
     const expectedResult = {
       total: 1,
       per_page: 10,
@@ -1177,6 +1376,7 @@ describe('getAll()', () => {
         aggregations: {
           '1': { doc_count: 6 },
           testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
         },
       }
     );
@@ -1193,41 +1393,64 @@ describe('getAll()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
         },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
     });
+
     const result = await actionsClient.getAll();
+
     expect(result).toEqual([
       {
+        id: 'system-connector-.cases',
+        actionTypeId: '.cases',
+        name: 'System action: .cases',
+        isPreconfigured: false,
+        isSystemAction: true,
+        isDeprecated: false,
+        referencedByCount: 2,
+      },
+      {
         id: '1',
+        name: 'test',
+        isMissingSecrets: false,
+        config: { foo: 'bar' },
         isPreconfigured: false,
         isDeprecated: false,
-        name: 'test',
-        config: {
-          foo: 'bar',
-        },
-        isMissingSecrets: false,
+        isSystemAction: false,
         referencedByCount: 6,
       },
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
-        isPreconfigured: true,
-        isDeprecated: false,
         name: 'test',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
         referencedByCount: 2,
       },
     ]);
@@ -1276,13 +1499,14 @@ describe('getBulk()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1373,7 +1597,7 @@ describe('getBulk()', () => {
     });
   });
 
-  test('calls getBulk unsecuredSavedObjectsClient with parameters', async () => {
+  test('calls getBulk unsecuredSavedObjectsClient with parameters and return inMemoryConnectors correctly', async () => {
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -1397,6 +1621,7 @@ describe('getBulk()', () => {
         aggregations: {
           '1': { doc_count: 6 },
           testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
         },
       }
     );
@@ -1413,45 +1638,72 @@ describe('getBulk()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
         },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
     });
-    const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
+
+    const result = await actionsClient.getBulk([
+      '1',
+      'testPreconfigured',
+      'system-connector-.cases',
+    ]);
+
     expect(result).toEqual([
       {
-        actionTypeId: '.slack',
-        config: {
-          foo: 'bar',
-        },
         id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        secrets: {},
         isPreconfigured: true,
+        isSystemAction: false,
         isDeprecated: false,
         name: 'test',
-        secrets: {},
+        config: { foo: 'bar' },
       },
       {
-        actionTypeId: 'test',
-        config: {
-          foo: 'bar',
-        },
-        id: '1',
+        id: 'system-connector-.cases',
+        actionTypeId: '.cases',
+        name: 'System action: .cases',
+        config: {},
+        secrets: {},
+        isDeprecated: false,
         isMissingSecrets: false,
         isPreconfigured: false,
-        isDeprecated: false,
+        isSystemAction: true,
+      },
+      {
+        id: '1',
+        actionTypeId: 'test',
         name: 'test',
+        config: { foo: 'bar' },
+        isMissingSecrets: false,
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
       },
     ]);
   });
@@ -1473,12 +1725,13 @@ describe('getOAuthAccessToken()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
           name: 'test',
           config: {
@@ -1825,6 +2078,83 @@ describe('delete()', () => {
       ]
     `);
   });
+
+  it('throws when trying to delete a preconfigured connector', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.delete({ id: 'testPreconfigured' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Preconfigured action testPreconfigured is not allowed to delete."`
+    );
+  });
+
+  it('throws when trying to delete a system connector', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.delete({ id: 'system-connector-.cases' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"System action system-connector-.cases is not allowed to delete."`
+    );
+  });
 });
 
 describe('update()', () => {
@@ -1982,6 +2312,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -2060,6 +2391,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
@@ -2217,6 +2549,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
@@ -2297,6 +2630,97 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+
+  it('throws when trying to update a preconfigured connector', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.update({
+        id: 'testPreconfigured',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Preconfigured action testPreconfigured can not be updated."`
+    );
+  });
+
+  it('throws when trying to update a system connector', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.update({
+        id: 'system-connector-.cases',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"System action system-connector-.cases can not be updated."`
+    );
   });
 });
 
@@ -2681,7 +3105,7 @@ describe('isActionTypeEnabled()', () => {
 });
 
 describe('isPreconfigured()', () => {
-  test('should return true if connector id is in list of preconfigured connectors', () => {
+  test('should return true if the connector is a preconfigured connector', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -2694,7 +3118,7 @@ describe('isPreconfigured()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
@@ -2703,10 +3127,22 @@ describe('isPreconfigured()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
         },
       ],
       connectorTokenClient: new ConnectorTokenClient({
@@ -2720,7 +3156,7 @@ describe('isPreconfigured()', () => {
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
   });
 
-  test('should return false if connector id is not in list of preconfigured connectors', () => {
+  test('should return false if the connector is not preconfigured connector', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -2733,7 +3169,7 @@ describe('isPreconfigured()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
@@ -2742,10 +3178,22 @@ describe('isPreconfigured()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
         },
       ],
       connectorTokenClient: new ConnectorTokenClient({
@@ -2757,6 +3205,110 @@ describe('isPreconfigured()', () => {
     });
 
     expect(actionsClient.isPreconfigured(uuidv4())).toEqual(false);
+  });
+});
+
+describe('isSystemAction()', () => {
+  test('should return true if the connector is a system connectors', () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
+      getEventLogClient,
+    });
+
+    expect(actionsClient.isSystemAction('system-connector-.cases')).toEqual(true);
+  });
+
+  test('should return false if connector id is not a system action', () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
+      getEventLogClient,
+    });
+
+    expect(actionsClient.isSystemAction(uuidv4())).toEqual(false);
   });
 });
 

@@ -17,7 +17,7 @@ import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -100,7 +100,7 @@ import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import { FormBasedLayer } from '../..';
+import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
@@ -112,24 +112,31 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
+function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPattern | DataView) {
+  if (column.dataType === 'string') {
+    const fieldTypes =
+      'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
+    return fieldTypes?.[0] || undefined;
+  }
+  if (isColumnOfType<LastValueIndexPatternColumn>('last_value', column)) {
+    return column.dataType;
+  }
+}
+
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
   const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
-  const fieldTypes =
-    'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
+
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
-    sortingHint:
-      column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
-        ? 'version'
-        : undefined,
+    sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)

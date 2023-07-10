@@ -1027,6 +1027,11 @@ export interface VisualizationLayerDescription {
     autoTimeField?: boolean;
   }>;
 }
+
+export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
+  id: string;
+  group: EventAnnotationGroupConfig;
+}) => void;
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -1115,8 +1120,18 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     layerId: string,
     state: T,
     setState: StateSetter<T>,
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction,
     isSaveable?: boolean
   ) => LayerAction[];
+
+  /**
+   * This method is a clunky solution to the problem, but I'm banking on the confirm modal being removed
+   * with undo/redo anyways
+   */
+  getCustomRemoveLayerText?: (
+    layerId: string,
+    state: T
+  ) => { title?: string; description?: string } | undefined;
 
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -1242,10 +1257,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     supportedLayers: VisualizationLayerDescription[];
     addLayer: AddLayerFunction;
     ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
-    registerLibraryAnnotationGroup: (groupInfo: {
-      id: string;
-      group: EventAnnotationGroupConfig;
-    }) => void;
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers

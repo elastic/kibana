@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase, Filter } from '@kbn/es-query';
 import {
   FormBasedPersistedState,
@@ -53,7 +53,11 @@ export interface VisualizationAttributes<T extends TVisualization> {
   getVisualizationState(): T;
   getReferences(): SavedObjectReference[];
   getFilters(): Filter[];
-  getAdhocDataView(): Record<string, DataViewSpec>;
+  getDataView(): DataView;
+}
+
+export interface VisualizationAttributesBuilder {
+  build(): LensAttributes;
 }
 
 export type Formula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
