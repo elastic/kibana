@@ -107,7 +107,7 @@ describe('kuery functions', () => {
           'response'
         ) as KqlExistsFunctionNode;
         const result = exists.toKqlExpression(existsNode);
-        expect(result).toBe(`"response: *"`);
+        expect(result).toBe('response: *');
       });
     });
   });
