@@ -41,6 +41,30 @@ if is_pr_with_label "ci:build-cloud-image"; then
 EOF
 fi
 
+if is_pr_with_label "ci:build-serverless-image"; then
+  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+  node scripts/build \
+  --skip-initialize \
+  --skip-generic-folders \
+  --skip-platform-folders \
+  --skip-archives \
+  --docker-images \
+  --docker-namespace="kibana-ci" \
+  --docker-tag="git-$GIT_ABBREV_COMMIT" \
+  --docker-push \
+  --skip-docker-ubi \
+  --skip-docker-ubuntu \
+  --skip-docker-cloud \
+  --skip-docker-contexts
+  docker logout docker.elastic.co
+
+  CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-serverless)
+  cat << EOF | buildkite-agent annotate --style "info" --context kibana-serverless-image
+
+  Kibana serverless image: \`$CLOUD_IMAGE\`
+EOF
+fi
+
 echo "--- Archive Kibana Distribution"
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$KIBANA_DIR/install/kibana"
