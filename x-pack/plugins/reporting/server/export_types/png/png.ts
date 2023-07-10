@@ -73,7 +73,7 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders(this.config.encryptionKey, job.headers, jobLogger)),
       mergeMap((headers) => {
-        const [url] = getFullUrls(this.getServerInfo(), this.config, { ...job, objects: [relateiveUrl: ''] });
+        const [url] = getFullUrls(this.getServerInfo(), this.config, job);
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
