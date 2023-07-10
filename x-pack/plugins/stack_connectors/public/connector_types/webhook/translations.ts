@@ -111,3 +111,65 @@ export const PASSWORD_REQUIRED = i18n.translate(
     defaultMessage: 'Password is required.',
   }
 );
+
+export const AUTHENTICATION_METHOD = i18n.translate(
+  'xpack.stackConnectors.components.webhook.authenticationMethodLabel',
+  {
+    defaultMessage: 'Authentication method',
+  }
+);
+
+export const AUTHENTICATION_BASIC = i18n.translate(
+  'xpack.stackConnectors.components.webhook.authenticationMethodBasicLabel',
+  {
+    defaultMessage: 'Basic',
+  }
+);
+
+export const AUTHENTICATION_SSL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.authenticationMethodSSLLabel',
+  {
+    defaultMessage: 'SSL certificate',
+  }
+);
+
+export const CERT_FILE_TYPE = i18n.translate(
+  'xpack.stackConnectors.components.webhook.certTypeLabel',
+  {
+    defaultMessage: 'Certificate file type',
+  }
+);
+
+export const CERT_TYPE_CRT_KEY = i18n.translate(
+  'xpack.stackConnectors.components.webhook.certTypeCrtKeyLabel',
+  {
+    defaultMessage: 'CRT and KEY file',
+  }
+);
+export const CERT_TYPE_PFX = i18n.translate(
+  'xpack.stackConnectors.components.webhook.certTypePfxLabel',
+  {
+    defaultMessage: 'PFX file',
+  }
+);
+
+export const CRT_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookCRTText',
+  {
+    defaultMessage: 'CRT file is required.',
+  }
+);
+
+export const KEY_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookKEYText',
+  {
+    defaultMessage: 'KEY file is required.',
+  }
+);
+
+export const PFX_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookPFXText',
+  {
+    defaultMessage: 'PFX file is required.',
+  }
+);

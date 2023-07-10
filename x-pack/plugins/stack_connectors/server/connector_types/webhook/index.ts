@@ -54,6 +54,8 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
+  authType: schema.string({ defaultValue: 'webhook-authentication-basic' }),
+  certType: schema.nullable(schema.string()),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -63,14 +65,20 @@ export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
+  crt: schema.nullable(schema.string()),
+  key: schema.nullable(schema.string()),
+  pfx: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
     // user and password must be set together (or not at all)
-    if (!secrets.password && !secrets.user) return;
-    if (secrets.password && secrets.user) return;
+    if (!secrets.password && !secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
+    if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
+    if (secrets.password && secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
+    if (secrets.password && !secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
     return i18n.translate('xpack.stackConnectors.webhook.invalidUsernamePassword', {
-      defaultMessage: 'both user and password must be specified',
+      defaultMessage:
+        'must specify one of the following schemas: user and password; crt, key, and password; or pfx and password',
     });
   },
 });

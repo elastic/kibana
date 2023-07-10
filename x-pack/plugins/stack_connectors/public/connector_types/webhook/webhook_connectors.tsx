@@ -28,6 +28,8 @@ import {
   TextField,
   ToggleField,
   PasswordField,
+  ButtonGroupField,
+  FilePickerField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -41,13 +43,17 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 }) => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
-    watch: ['config.hasAuth', '__internal__.hasHeaders'],
+    watch: ['config.hasAuth', 'config.authType', 'config.certType', '__internal__.hasHeaders'],
   });
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
+  const authTypeDefaultValue = getFieldDefaultValue('config.authType');
+  const certTypeDefaultValue = getFieldDefaultValue('config.certType');
 
   const hasAuth = config == null ? true : config.hasAuth;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
+  const authType = config == null ? 'webhook-authentication-basic' : config.authType;
+  const certType = config == null ? 'ssl-crt-key' : config.certType;
 
   return (
     <>
@@ -119,45 +125,190 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         </EuiFlexItem>
       </EuiFlexGroup>
       {hasAuth ? (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <UseField
-              path="secrets.user"
-              config={{
-                label: i18n.USERNAME_LABEL,
-                validations: [
+        <>
+          <EuiSpacer size="s" />
+          <UseField
+            path="config.authType"
+            defaultValue={authTypeDefaultValue}
+            component={ButtonGroupField}
+            componentProps={{
+              euiFieldProps: {
+                options: [
                   {
-                    validator: emptyField(i18n.USERNAME_REQUIRED),
+                    id: 'webhook-authentication-basic',
+                    label: i18n.AUTHENTICATION_BASIC,
+                  },
+                  {
+                    id: 'webhook-authentication-ssl',
+                    label: i18n.AUTHENTICATION_SSL,
                   },
                 ],
-              }}
-              component={Field}
-              componentProps={{
-                euiFieldProps: { readOnly, 'data-test-subj': 'webhookUserInput', fullWidth: true },
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField
-              path="secrets.password"
-              config={{
-                label: i18n.PASSWORD_LABEL,
-                validations: [
-                  {
-                    validator: emptyField(i18n.PASSWORD_REQUIRED),
-                  },
-                ],
-              }}
-              component={PasswordField}
-              componentProps={{
-                euiFieldProps: {
-                  'data-test-subj': 'webhookPasswordInput',
-                  readOnly,
-                },
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              },
+            }}
+            config={{
+              label: i18n.AUTHENTICATION_METHOD,
+            }}
+          />
+          <EuiSpacer size="s" />
+          {authType === 'webhook-authentication-basic' && (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <UseField
+                  path="secrets.user"
+                  config={{
+                    label: i18n.USERNAME_LABEL,
+                    validations: [
+                      {
+                        validator: emptyField(i18n.USERNAME_REQUIRED),
+                      },
+                    ],
+                  }}
+                  component={Field}
+                  componentProps={{
+                    euiFieldProps: {
+                      readOnly,
+                      'data-test-subj': 'webhookUserInput',
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <UseField
+                  path="secrets.password"
+                  config={{
+                    label: i18n.PASSWORD_LABEL,
+                    validations: [
+                      {
+                        validator: emptyField(i18n.PASSWORD_REQUIRED),
+                      },
+                    ],
+                  }}
+                  component={PasswordField}
+                  componentProps={{
+                    euiFieldProps: {
+                      'data-test-subj': 'webhookPasswordInput',
+                      readOnly,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+
+          {authType === 'webhook-authentication-ssl' && (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <UseField
+                  path="secrets.password"
+                  config={{
+                    label: i18n.PASSWORD_LABEL,
+                    validations: [
+                      {
+                        validator: emptyField(i18n.PASSWORD_REQUIRED),
+                      },
+                    ],
+                  }}
+                  component={PasswordField}
+                  componentProps={{
+                    euiFieldProps: {
+                      'data-test-subj': 'webhookSSLPassphraseInput',
+                      readOnly,
+                    },
+                  }}
+                />
+                <EuiSpacer size="s" />
+                <UseField
+                  path="config.certType"
+                  defaultValue={certTypeDefaultValue}
+                  component={ButtonGroupField}
+                  componentProps={{
+                    euiFieldProps: {
+                      options: [
+                        {
+                          id: 'ssl-crt-key',
+                          label: i18n.CERT_TYPE_CRT_KEY,
+                        },
+                        {
+                          id: 'ssl-pfx',
+                          label: i18n.CERT_TYPE_PFX,
+                        },
+                      ],
+                    },
+                  }}
+                  config={{
+                    label: i18n.CERT_FILE_TYPE,
+                  }}
+                />
+                <EuiSpacer size="s" />
+                {certType === 'ssl-crt-key' && (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <UseField
+                        path="secrets.crt"
+                        config={{
+                          label: 'CRT file',
+                          validations: [
+                            {
+                              validator: emptyField(i18n.CRT_REQUIRED),
+                            },
+                          ],
+                        }}
+                        component={FilePickerField}
+                        componentProps={{
+                          euiFieldProps: {
+                            'data-test-subj': 'webhookSSLCRTInput',
+                            readOnly,
+                          },
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <UseField
+                        path="secrets.key"
+                        config={{
+                          label: 'KEY file',
+                          validations: [
+                            {
+                              validator: emptyField(i18n.KEY_REQUIRED),
+                            },
+                          ],
+                        }}
+                        component={FilePickerField}
+                        componentProps={{
+                          euiFieldProps: {
+                            'data-test-subj': 'webhookSSLKEYInput',
+                            readOnly,
+                          },
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+                {certType === 'ssl-pfx' && (
+                  <UseField
+                    path="secrets.pfx"
+                    config={{
+                      label: 'PFX file',
+                      validations: [
+                        {
+                          validator: emptyField(i18n.PFX_REQUIRED),
+                        },
+                      ],
+                    }}
+                    component={FilePickerField}
+                    componentProps={{
+                      euiFieldProps: {
+                        'data-test-subj': 'webhookSSLPFXInput',
+                        readOnly,
+                      },
+                    }}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </>
       ) : null}
       <EuiSpacer size="m" />
       <UseField
