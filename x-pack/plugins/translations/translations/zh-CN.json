@@ -32180,7 +32180,7 @@
     "xpack.securitySolution.flyout.documentDetails.analyzerPreviewTitle": "分析器预览",
     "xpack.securitySolution.flyout.documentDetails.collapseDetailButton": "折叠告警详情",
     "xpack.securitySolution.flyout.documentDetails.correlationsButton": "相关性",
-    "xpack.securitySolution.flyout.documentDetails.descriptionTitle": "描述",
+    "xpack.securitySolution.flyout.documentDetails.aboutTitle": "描述",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton": "折叠",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton": "展开",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionTitle": "文档描述",
