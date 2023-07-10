@@ -70,6 +70,20 @@ export interface UserProfileProps {
   };
 }
 
+export interface UserDetailsEditorProps {
+  user: AuthenticatedUser;
+}
+
+export interface UserSettingsEditorProps {
+  formik: ReturnType<typeof useUserProfileForm>;
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
+}
+
+export interface UserRoleProps {
+  user: AuthenticatedUser;
+}
+
 export interface UserProfileFormValues {
   user: {
     full_name: string;
@@ -88,7 +102,7 @@ export interface UserProfileFormValues {
   avatarType: 'initials' | 'image';
 }
 
-const UserDetailsEditor = ({ user }: { user: AuthenticatedUser }) => {
+const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) => {
   const { services } = useKibana<CoreStart>();
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
@@ -147,15 +161,11 @@ const UserDetailsEditor = ({ user }: { user: AuthenticatedUser }) => {
   );
 };
 
-function UserSettingsEditor({
+const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
   formik,
   isThemeOverridden,
   isOverriddenThemeDarkMode,
-}: {
-  formik: ReturnType<typeof useUserProfileForm>;
-  isThemeOverridden: boolean;
-  isOverriddenThemeDarkMode: boolean;
-}) {
+}) => {
   if (!formik.values.data) {
     return null;
   }
@@ -265,7 +275,7 @@ function UserSettingsEditor({
       </FormRow>
     </EuiDescribedFormGroup>
   );
-}
+};
 
 function UserAvatarEditor({
   user,
@@ -560,7 +570,7 @@ function UserPasswordEditor({
   );
 }
 
-const UserRoles = ({ user }: { user: AuthenticatedUser }) => {
+const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
