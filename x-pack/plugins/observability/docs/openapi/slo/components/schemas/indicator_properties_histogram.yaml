@@ -89,4 +89,4 @@ properties:
   type:
     description: The type of indicator.
     type: string
-    example: sli.metric.custom
+    example: sli.histogram.custom
