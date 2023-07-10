@@ -21,7 +21,7 @@ export const NavEmbeddableStrings = {
     panelEditor: {
       getEmptyLinksMessage: () =>
         i18n.translate('navigationEmbeddable.panelEditor.emptyLinksMessage', {
-          defaultMessage: "You haven't added any links yet.",
+          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
         }),
       getCreateFlyoutTitle: () =>
         i18n.translate('navigationEmbeddable.panelEditor.createFlyoutTitle', {
