@@ -43,6 +43,7 @@ fi
 
 if is_pr_with_label "ci:build-serverless-image"; then
   echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+  GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
   node scripts/build \
   --skip-initialize \
   --skip-generic-folders \
