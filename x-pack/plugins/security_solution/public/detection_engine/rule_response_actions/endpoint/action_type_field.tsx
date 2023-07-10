@@ -45,17 +45,17 @@ const ActionTypeFieldComponent = ({
   const fieldOptions = useMemo(
     () =>
       ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
-        const isDisabled =
-          map(data.responseActions, 'params.command').includes(name) ||
-          !getRbacControl({
-            commandName: getUiCommand(name),
-            privileges: endpointPrivileges,
-          });
+        const missingRbac = !getRbacControl({
+          commandName: getUiCommand(name),
+          privileges: endpointPrivileges,
+        });
+        const commandAlreadyExists = map(data.responseActions, 'params.command').includes(name);
+        const isDisabled = commandAlreadyExists || missingRbac;
 
         return {
           value: name,
           inputDisplay: name,
-          dropdownDisplay: <EndpointActionText name={name} isDisabled={isDisabled} />,
+          dropdownDisplay: <EndpointActionText name={name} isDisabled={missingRbac} />,
           disabled: isDisabled,
           'data-test-subj': `command-type-${name}`,
         };
