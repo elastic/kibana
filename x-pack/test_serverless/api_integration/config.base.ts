@@ -22,6 +22,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          '--xpack.observability.unsafe.thresholdRule.enabled=true',
         ],
       },
       testFiles: options.testFiles,
