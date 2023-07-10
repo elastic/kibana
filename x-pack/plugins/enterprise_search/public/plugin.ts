@@ -34,6 +34,7 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
@@ -350,7 +351,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
         order: 100,
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+        title: SEARCH_PRODUCT_NAME,
       });
 
       plugins.home.featureCatalogue.register({

@@ -28,7 +28,7 @@ import {
   useVectorSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
-  enterpriseSearchTitle,
+  searchTitle,
   analyticsTitle,
   elasticsearchTitle,
   appSearchTitle,
@@ -57,11 +57,11 @@ interface SetChromeProps {
   trail?: BreadcrumbTrail;
 }
 
-export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
-  const docTitle = enterpriseSearchTitle(title);
+  const docTitle = searchTitle(title);
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchBreadcrumbs(crumbs);
@@ -69,7 +69,7 @@ export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = []
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);
     setDocTitle(docTitle);
-  }, [trail]);
+  }, [trail.join('|')]);
 
   return null;
 };
