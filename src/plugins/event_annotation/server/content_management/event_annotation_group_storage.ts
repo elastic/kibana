@@ -15,7 +15,7 @@ import type {
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-components';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
   EventAnnotationGroupSavedObjectAttributes,

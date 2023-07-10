@@ -8,7 +8,7 @@
 
 import { EuiButton, EuiFlyout } from '@elastic/eui';
 import { getDefaultManualAnnotation } from '../util';
-import { type EventAnnotationGroupConfig } from '../types';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/api.mock';
 import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';

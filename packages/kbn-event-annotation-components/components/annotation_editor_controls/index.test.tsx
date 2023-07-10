@@ -11,7 +11,10 @@ import AnnotationEditorControls from './annotation_editor_controls';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import type { EventAnnotationConfig, RangeEventAnnotationConfig } from '../../types';
+import type {
+  EventAnnotationConfig,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
 import moment from 'moment';
 import { act } from 'react-dom/test-utils';

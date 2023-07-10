@@ -23,8 +23,11 @@ import type { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-taggi
 import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type {
+  EventAnnotationConfig,
+  EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
 import { EVENT_ANNOTATION_APP_NAME } from '../../constants';
-import type { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../types';
 import { AnnotationEditorControls } from '../annotation_editor_controls';
 import { AnnotationList } from './annotation_list';
 

@@ -10,7 +10,7 @@ import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
 import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { EventAnnotationConfig } from '@kbn/event-annotation-components';
+import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getEventAnnotationService } from './service';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import { EventAnnotationGroupSavedObjectAttributes } from '../../common';

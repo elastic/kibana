@@ -7,7 +7,7 @@
  */
 
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { PointStyleProps } from '@kbn/event-annotation-components';
+import type { PointStyleProps } from '@kbn/event-annotation-common';
 
 export type QueryPointEventAnnotationArgs = {
   id: string;

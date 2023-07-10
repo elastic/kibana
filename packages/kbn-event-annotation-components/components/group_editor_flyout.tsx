@@ -23,7 +23,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
-import type { EventAnnotationConfig, EventAnnotationGroupConfig } from '../types';
+import type {
+  EventAnnotationConfig,
+  EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
 import { GroupEditorControls, isGroupValid } from './group_editor_controls';
 
 export const GroupEditorFlyout = ({

@@ -32,7 +32,7 @@ import type {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
-} from '../../types';
+} from '@kbn/event-annotation-common';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   defaultAnnotationColor,

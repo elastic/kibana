@@ -19,8 +19,10 @@ import {
 import type { EventAnnotationServiceType } from '../types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '../constants';
-import { EventAnnotationGroupConfig } from '../types';
+import {
+  EventAnnotationGroupConfig,
+  EVENT_ANNOTATION_GROUP_TYPE,
+} from '@kbn/event-annotation-common';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 
 import { act } from 'react-dom/test-utils';

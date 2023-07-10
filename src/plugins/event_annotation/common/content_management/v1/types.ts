@@ -20,7 +20,7 @@ import {
 } from '@kbn/content-management-plugin/common';
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { EventAnnotationConfig } from '@kbn/event-annotation-components';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { EventAnnotationGroupContentType } from '../types';
 
 export interface Reference {

@@ -21,8 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
-  EventAnnotationServiceType,
-} from '../types';
+} from '@kbn/event-annotation-common';
+import type { EventAnnotationServiceType } from '../types';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';

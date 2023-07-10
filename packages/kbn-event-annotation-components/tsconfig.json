@@ -29,5 +29,6 @@
     "@kbn/dom-drag-drop",
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-tabbed-table-list-view",
+    "@kbn/event-annotation-common",
   ]
 }

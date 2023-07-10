@@ -7,7 +7,7 @@
  */
 
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import type { EventAnnotationConfig } from '../types';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,

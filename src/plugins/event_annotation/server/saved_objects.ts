@@ -15,7 +15,7 @@ import {
 
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-components';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
 import { EventAnnotationGroupSavedObjectAttributes } from '../common';
 

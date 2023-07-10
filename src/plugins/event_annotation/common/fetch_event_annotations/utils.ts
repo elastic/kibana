@@ -13,7 +13,7 @@ import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { LineStyle } from '@kbn/visualization-ui-components';
-import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-components';
+import type { AvailableAnnotationIcon, PointStyleProps } from '@kbn/event-annotation-common';
 import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,

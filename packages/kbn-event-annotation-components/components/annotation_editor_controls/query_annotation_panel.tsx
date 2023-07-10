@@ -21,7 +21,7 @@ import {
 } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import type { QueryPointEventAnnotationConfig } from '../../types';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 
 export const defaultQuery: Query = {
   query: '',

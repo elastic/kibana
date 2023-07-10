@@ -25,12 +25,14 @@ import {
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
   defaultAnnotationLabel,
+  type EventAnnotationServiceType,
+} from '@kbn/event-annotation-components';
+import {
   type EventAnnotationGroupContent,
   type EventAnnotationConfig,
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
-  type EventAnnotationServiceType,
-} from '@kbn/event-annotation-components';
+} from '@kbn/event-annotation-common';
 import { EventAnnotationGroupSavedObjectFinder } from '../components/event_annotation_group_saved_object_finder';
 import { CONTENT_ID } from '../../common/content_management';
 import type {

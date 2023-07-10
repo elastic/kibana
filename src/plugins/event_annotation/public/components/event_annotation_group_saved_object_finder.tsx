@@ -23,7 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-components';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
   uiSettings,

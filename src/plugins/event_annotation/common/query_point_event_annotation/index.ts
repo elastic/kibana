@@ -8,8 +8,8 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { AvailableAnnotationIcons } from '@kbn/event-annotation-components';
-import type { EventAnnotationConfig } from '@kbn/event-annotation-components';
+import { AvailableAnnotationIcons } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 
 import type { QueryPointEventAnnotationArgs, QueryPointEventAnnotationOutput } from './types';
 

@@ -4198,6 +4198,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-components@link:packages/kbn-event-annotation-components":
   version "0.0.0"
   uid ""

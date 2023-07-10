@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PointStyleProps, RangeStyleProps } from '@kbn/event-annotation-components';
+import type { PointStyleProps, RangeStyleProps } from '@kbn/event-annotation-common';
 
 export type ManualPointEventAnnotationArgs = {
   id: string;

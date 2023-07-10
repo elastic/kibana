@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { IconTriangle, IconCircle } from '@kbn/chart-icons';
 import type { IconSet } from '@kbn/visualization-ui-components';
-import type { AvailableAnnotationIcon } from '../../types';
+import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 
 export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
   {

@@ -17,7 +17,10 @@ import {
   EuiDatePicker,
 } from '@elastic/eui';
 import moment from 'moment';
-import type { PointInTimeEventAnnotationConfig, RangeEventAnnotationConfig } from '../../types';
+import type {
+  PointInTimeEventAnnotationConfig,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { isRangeAnnotationConfig } from '../..';
 import { defaultRangeAnnotationLabel, defaultAnnotationLabel } from './helpers';
 import { toLineAnnotationColor, toRangeAnnotationColor } from './helpers';

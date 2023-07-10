@@ -21,17 +21,5 @@ export {
   isManualPointAnnotationConfig,
   isQueryAnnotationConfig,
 } from './util';
-export {
-  EVENT_ANNOTATION_APP_NAME,
-  EVENT_ANNOTATION_GROUP_TYPE,
-  AvailableAnnotationIcons,
-} from './constants';
-export type {
-  EventAnnotationGroupContent,
-  AvailableAnnotationIcon,
-  PointStyleProps,
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  RangeStyleProps,
-  EventAnnotationServiceType,
-} from './types';
+export { EVENT_ANNOTATION_APP_NAME } from './constants';
+export type { EventAnnotationServiceType } from './types';

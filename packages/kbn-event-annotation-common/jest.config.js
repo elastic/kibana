@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type {
-  PointInTimeEventAnnotationConfig,
-  RangeEventAnnotationConfig,
-} from '@kbn/event-annotation-common';
-
-export type ManualEventAnnotationType =
-  | PointInTimeEventAnnotationConfig
-  | RangeEventAnnotationConfig;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-event-annotation-common'],
+};

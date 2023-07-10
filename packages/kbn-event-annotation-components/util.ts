@@ -12,7 +12,7 @@ import {
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
-} from './types';
+} from '@kbn/event-annotation-common';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
 // Do not compute it live as dependencies will add tens of Kbs to the plugin
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
