@@ -10,12 +10,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters } from '@kbn/core/public';
 import {
-  EuiPage,
-  EuiPageBody,
+  EuiPageTemplate,
   EuiPageSection,
   EuiText,
   EuiHorizontalRule,
-  EuiPageHeader,
   EuiListGroup,
 } from '@elastic/eui';
 import { RandomNumberRouteExample } from './random_number_example';
@@ -34,14 +32,14 @@ function RoutingExplorer({
   getMessageById,
 }: Props) {
   return (
-    <EuiPage>
-      <EuiPageBody>
+    <EuiPageTemplate>
+      <EuiPageTemplate.Header>
+        <EuiText>
+          <h1>Routing examples</h1>
+        </EuiText>
+      </EuiPageTemplate.Header>
+      <EuiPageTemplate.Section>
         <EuiPageSection>
-          <EuiPageHeader>
-            <EuiText>
-              <h1>Routing examples</h1>
-            </EuiText>
-          </EuiPageHeader>
           <EuiText>
             <EuiListGroup
               listItems={[
@@ -80,8 +78,8 @@ function RoutingExplorer({
           <EuiHorizontalRule />
           <GetMessageRouteExample getMessageById={getMessageById} />
         </EuiPageSection>
-      </EuiPageBody>
-    </EuiPage>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 }
 
