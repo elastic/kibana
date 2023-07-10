@@ -7,13 +7,11 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageSidebar,
   EuiTitle,
   EuiEmptyPrompt,
   EuiLoadingLogo,
@@ -38,7 +36,7 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
   const [dataView, setDataView] = useState<DataView | null>();
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
 
-  const onAddFieldToWorkplace = useCallback(
+  const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
       setSelectedFieldNames((names) => [...names, field.name]);
     },
@@ -124,20 +122,13 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
                 <RootDragDropProvider>
                   <EuiFlexGroup direction="row" alignItems="stretch">
                     <EuiFlexItem grow={false}>
-                      <EuiPageSidebar
-                        css={css`
-                          flex: 1;
-                          width: 320px;
-                        `}
-                      >
-                        <FieldListSidebar
-                          services={services}
-                          dataView={dataView}
-                          selectedFieldNames={selectedFieldNames}
-                          onAddFieldToWorkplace={onAddFieldToWorkplace}
-                          onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-                        />
-                      </EuiPageSidebar>
+                      <FieldListSidebar
+                        services={services}
+                        dataView={dataView}
+                        selectedFieldNames={selectedFieldNames}
+                        onAddFieldToWorkspace={onAddFieldToWorkspace}
+                        onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+                      />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <ExampleDropZone onDropField={onDropFieldToWorkplace} />
