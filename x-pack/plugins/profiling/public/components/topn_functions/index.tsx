@@ -14,7 +14,6 @@ import {
   EuiDataGridRefProps,
   EuiDataGridSorting,
   EuiScreenReaderOnly,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
@@ -24,7 +23,6 @@ import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions'
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FunctionRow } from './function_row';
-import { TotalSamplesStat } from './total_samples_stat';
 import { getFunctionsRows, IFunctionRow } from './utils';
 
 interface Props {
@@ -219,13 +217,6 @@ export const TopNFunctionsGrid = forwardRef(
 
     return (
       <>
-        <TotalSamplesStat
-          baselineTotalSamples={totalCount}
-          baselineScaleFactor={baselineScaleFactor}
-          comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
-          comparisonScaleFactor={comparisonScaleFactor}
-        />
-        <EuiSpacer size="s" />
         <EuiDataGrid
           ref={ref}
           aria-label="TopN functions"
