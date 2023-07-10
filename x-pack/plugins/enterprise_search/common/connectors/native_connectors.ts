@@ -1652,6 +1652,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      fetch_users_by_site: {
+        default_value: false,
+        depends_on: [{ field: 'use_document_level_security', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteLabel',
+          {
+            defaultMessage: 'Fetch ACLs for users based on site membership',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteTooltip',
+          {
+            defaultMessage:
+              'When only syncing a small subset of sites, it may be more efficient to fetch only the users who have access to those sites. However, this becomes inefficent the more sites (and the more users) that are intended to be synced, as there can be a lot of redundancy in membership between sites. This should not be used if all sites are being synced.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
