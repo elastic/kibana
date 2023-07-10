@@ -8,7 +8,7 @@
 
 import { isEmpty } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiText,
@@ -57,6 +57,19 @@ export const NavigationEmbeddablePanelEditor = ({
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
+
+  const deleteLink = useCallback(
+    (linkId: string) => {
+      const newLinks = Object.keys(links).reduce((prev, curr) => {
+        if (curr === linkId) {
+          return prev;
+        }
+        return { ...prev, [curr]: links[curr] };
+      }, {});
+      setLinks(newLinks);
+    },
+    [links]
+  );
 
   /**
    * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
@@ -165,6 +178,9 @@ export const NavigationEmbeddablePanelEditor = ({
                                     iconType="trash"
                                     aria-label="Delete"
                                     color="danger"
+                                    onClick={() => {
+                                      deleteLink(link.id);
+                                    }}
                                   />
                                 </EuiFlexItem>
                               </EuiFlexGroup>
