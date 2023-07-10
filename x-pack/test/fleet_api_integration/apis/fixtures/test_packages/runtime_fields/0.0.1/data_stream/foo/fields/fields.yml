@@ -20,7 +20,7 @@
   runtime: >-
     emit(doc['@timestamp'].value.toLocalDate().toEpochDay())
 - name: labels.*
-  type: keyword
+  type: long
   object_type_mapping_type: double
   runtime: true
 - name: responses
