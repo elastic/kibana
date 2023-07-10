@@ -101,7 +101,7 @@ export function HistogramIndicator({ type, indexFields, isLoadingIndex }: Histog
   });
 
   const fromLabel = i18n.translate('xpack.observability.slo.sloEdit.sliType.histogram.fromLabel', {
-    defaultMessage: 'Good from',
+    defaultMessage: 'From',
   });
 
   return (
