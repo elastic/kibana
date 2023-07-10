@@ -54,22 +54,19 @@ export class ManagementPlugin
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
     const config = this.initializerContext.config.get();
+    const navLinkStatus = AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus]
 
     const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        navLinkStatus: config.deeplinks.visible
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.default,
+        navLinkStatus,
         deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
           id: mgmtApp.id,
           title: mgmtApp.title,
           path: mgmtApp.basePath,
           keywords: mgmtApp.keywords,
-          navLinkStatus: config.deeplinks.visible
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.default,
+          navLinkStatus,
         })),
       })
     );

@@ -115,6 +115,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
       const config = this.initializerContext.config.get();
+      const navLinkStatus = AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus]
 
       this.appStateUpdater.next(() => {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]
@@ -127,9 +128,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
-              navLinkStatus: config.deeplinks.visible
-                ? AppNavLinkStatus.visible
-                : AppNavLinkStatus.default,
+              navLinkStatus,
             };
             if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');
@@ -139,9 +138,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
         return {
           deepLinks,
-          navLinkStatus: config.deeplinks.visible
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.default,
+          navLinkStatus,
         };
       });
     }

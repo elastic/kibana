@@ -11,7 +11,7 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   deeplinks: schema.object({
-    visible: schema.boolean({ defaultValue: false }),
+    navLinkStatus: schema.string({ defaultValue: 'default' }),
   }),
 });
 

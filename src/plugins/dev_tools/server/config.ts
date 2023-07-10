@@ -9,9 +9,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
+
 const configSchema = schema.object({
   deeplinks: schema.object({
-    visible: schema.boolean({ defaultValue: false }),
+    navLinkStatus: schema.string({ defaultValue: 'default' }),
   }),
 });
 

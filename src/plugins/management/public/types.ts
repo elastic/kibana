@@ -13,6 +13,7 @@ import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type { AppId } from '@kbn/management-cards-navigation';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
+import { AppNavLinkStatus } from '@kbn/core/public';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -96,6 +97,6 @@ export interface AppDependencies {
 
 export interface ConfigSchema {
   deeplinks: {
-    visible: boolean;
+    navLinkStatus: keyof typeof AppNavLinkStatus;
   };
 }

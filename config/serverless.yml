@@ -29,8 +29,8 @@ xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
-dev_tools.deeplinks.visible: true
-management.deeplinks.visible: true
+dev_tools.deeplinks.navLinkStatus: visible
+management.deeplinks.navLinkStatus: visible
 
 # Other disabled plugins
 #xpack.canvas.enabled: false #only disabable in dev-mode
