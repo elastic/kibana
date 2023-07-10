@@ -464,6 +464,7 @@ export const getMockGetResponse = (
       ...mockTimestampFields,
     } as SavedObjectsRawDocSource,
   } as estypes.GetResponse<SavedObjectsRawDocSource>;
+  console.log(`result`, JSON.stringify(result));
   return result;
 };
 
@@ -533,20 +534,18 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
   options?: SavedObjectsUpdateOptions,
   internalOptions: {
     originId?: string;
-    mockGetResponseValue?: estypes.GetResponse;
+    mockGetResponseAsNotFound?: estypes.GetResponse;
   } = {},
   objNamespaces?: string[]
 ) => {
-  console.log('what is the type?', type);
-  console.log('what are the options?', options);
-  console.log('internalOptions', internalOptions);
-  const { mockGetResponseValue, originId } = internalOptions;
+  const { mockGetResponseAsNotFound, originId } = internalOptions;
+  console.log('options.namespace?', options?.namespace);
   const mockGetResponse =
-    mockGetResponseValue ??
+    mockGetResponseAsNotFound ?? // ATM, only using this as { found: 'false' } nock out a not found response from getting the doc
     getMockGetResponse(registry, { type, id, originId }, objNamespaces ?? options?.namespace);
   client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
   // mockUpdateResponse(client, type, id, options, objNamespaces, originId); // mocks client.update response
-  if (!mockGetResponseValue) {
+  if (!mockGetResponseAsNotFound) {
     // index doc from existing doc
     client.index.mockResponseImplementation((params) => {
       return {
@@ -557,7 +556,7 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
       };
     });
   }
-  if (mockGetResponseValue) {
+  if (mockGetResponseAsNotFound) {
     // upsert case: create the doc. (be careful here, we're also sending mockGetResponseValue as { found: false })
     client.create.mockResponseImplementation((params) => {
       return {

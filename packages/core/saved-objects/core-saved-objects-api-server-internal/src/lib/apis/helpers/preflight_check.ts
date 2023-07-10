@@ -168,10 +168,9 @@ rawDocSource
     namespace,
     migrationVersionCompatibility,
   }: PreflightGetDocForUpdateParams): Promise<PreflightGetDocForUpdateResult> {
-    const getDocWithNamespace = this.registry.isMultiNamespace(type) ? undefined : namespace;
     const response = await this.client.get<SavedObjectsRawDocSource>(
       {
-        id: this.serializer.generateRawId(getDocWithNamespace, type, id),
+        id: this.serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
       },
       { ignore: [404], meta: true }
@@ -187,9 +186,6 @@ rawDocSource
       return {
         checkDocFound: 'found',
         rawDocSource: response.body,
-        savedObjectFromRawDoc: getSavedObjectFromSource(this.registry, type, id, response.body, {
-          migrationVersionCompatibility,
-        }) as SavedObject, // unused, remove later
       };
     }
 
@@ -223,7 +219,8 @@ rawDocSource
       }
       return {
         checkResult: 'found_in_namespace',
-        savedObjectNamespaces: getSavedObjectNamespaces(namespace, rawDocSource),
+        savedObjectNamespaces:
+          initialNamespaces ?? getSavedObjectNamespaces(namespace, rawDocSource),
         rawDocSource,
         checkSkipped: false,
       };
@@ -231,7 +228,7 @@ rawDocSource
 
     return {
       checkResult: 'not_found',
-      savedObjectNamespaces: getSavedObjectNamespaces(namespace),
+      savedObjectNamespaces: initialNamespaces ?? getSavedObjectNamespaces(namespace),
       checkSkipped: false,
     };
   }
@@ -346,5 +343,4 @@ export interface PreflightGetDocForUpdateResult {
   checkDocFound: 'not_found' | 'found' | 'unknown';
   /** The source of the raw document, if the object already exists in the server's version (unsafe to use) */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
-  savedObjectFromRawDoc?: SavedObject<unknown>;
 }

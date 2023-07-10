@@ -150,6 +150,7 @@ export const performUpdate = async <T>(
       preflightGetDocForUpdateResult.rawDocSource!,
       { migrationVersionCompatibility }
     );
+    console.log('document from source pre migrating it:', document);
     try {
       migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
     } catch (migrateStorageDocError) {
@@ -267,19 +268,14 @@ export const performUpdate = async <T>(
       preflightCheckNamespacesForUpdateResult.checkResult === 'found_in_namespace') ||
     (!registry.isMultiNamespace(type) && preflightGetDocForUpdateResult.checkDocFound === 'found')
   ) {
-    const updatedAttributes = {
-      attributes: { ...migrated!.attributes, ...attributes },
-    };
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
       id,
       type,
-      attributes: await encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        namespace,
-        updatedAttributes!
-      ),
+      attributes: await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, {
+        ...migrated!.attributes,
+        ...attributes,
+      }),
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });

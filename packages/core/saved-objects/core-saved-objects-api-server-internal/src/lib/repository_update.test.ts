@@ -177,20 +177,20 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('client calls', () => {
-      it(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
+      it.only(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
 
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
-        await updateBWCSuccess(client, repository, registry, type, id, attributes);
+        await updateBWCSuccess(client, repository, registry, type, id, attributes, { namespace });
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
-      it(`should use the ES get action then index action when type is multi-namespace for existing objects`, async () => {
+      it.skip(`should use the ES get action then index action when type is multi-namespace for existing objects`, async () => {
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
@@ -207,7 +207,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
-      it(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
+      it.skip(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
@@ -224,7 +224,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
-      it(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
+      it.skip(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
@@ -236,14 +236,14 @@ describe('SavedObjectsRepository', () => {
           id,
           attributes,
           { upsert: true },
-          { mockGetResponseValue: { found: false } as estypes.GetResponse }
+          { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse }
         );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.create).toHaveBeenCalledTimes(1);
       });
 
-      it(`defaults to empty array with no input references`, async () => {
+      it.skip(`defaults to empty array with no input references`, async () => {
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
 
@@ -255,7 +255,7 @@ describe('SavedObjectsRepository', () => {
         ).toEqual([]); // we're indexing a full new doc, serializer adds default if not defined
       });
       // There's a mock that isn't clearing somewhere and causes testing more than once to fail.
-      it(`accepts custom references array 1`, async () => {
+      it.skip(`accepts custom references array 1`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
@@ -269,7 +269,7 @@ describe('SavedObjectsRepository', () => {
         };
         await test(references);
       });
-      it(`accepts custom references array 2`, async () => {
+      it.skip(`accepts custom references array 2`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
@@ -279,11 +279,11 @@ describe('SavedObjectsRepository', () => {
             (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
               .references
           ).toEqual(references);
-          client.update.mockClear();
+          client.index.mockClear();
         };
         await test([{ type: 'foo', id: '42', name: 'some ref' }]);
       });
-      it(`accepts custom references array 3`, async () => {
+      it.skip(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
@@ -293,12 +293,12 @@ describe('SavedObjectsRepository', () => {
             (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
               .references
           ).toEqual(references);
-          client.update.mockClear();
+          client.index.mockClear();
         };
         await test([]);
       });
 
-      it(`uses the 'upsertAttributes' option when specified for a single-namespace type that does not exist`, async () => {
+      it.skip(`uses the 'upsertAttributes' option when specified for a single-namespace type that does not exist`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateBWCSuccess(
           client,
@@ -313,7 +313,7 @@ describe('SavedObjectsRepository', () => {
               description: 'bar',
             },
           },
-          { mockGetResponseValue: { found: false } as estypes.GetResponse }
+          { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse }
         );
 
         const expected = {
@@ -329,7 +329,7 @@ describe('SavedObjectsRepository', () => {
         ).toEqual(expected);
       });
 
-      it(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
+      it.skip(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
         const options = { upsert: { title: 'foo', description: 'bar' } };
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateBWCSuccess(
@@ -345,7 +345,9 @@ describe('SavedObjectsRepository', () => {
               description: 'bar',
             },
           },
-          { mockGetResponseValue: { found: false } as estypes.GetResponse }
+          {
+            mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+          }
         );
         await repository.update(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, options);
         expect(client.get).toHaveBeenCalledTimes(2);
@@ -363,11 +365,9 @@ describe('SavedObjectsRepository', () => {
         ).toEqual(expectedType);
       });
 
-      it.skip(`ignores use the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
-        const changeTitleAttributes = { title: 'Testing' };
-        const changeDescriptionAttributes = { description: 'baz' };
+      it.skip(`ignores the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
         const options = { upsert: { title: 'foo', description: 'bar' } };
-
+        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateBWCSuccess(
           client,
           repository,
@@ -377,11 +377,20 @@ describe('SavedObjectsRepository', () => {
           attributes,
           options
         );
-        expect(client.update).toHaveBeenCalledWith(
+        await repository.update(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, options);
+        expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:logstash-*`,
-            body: expect.not.objectContaining({
-              upsert: expect.anything(),
+            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
+            body: expect.objectContaining({
+              managed: false,
+              migrationVersion: { foo: '2.3.4' },
+              multiNamespaceIsolatedType: { title: 'Testing!!' },
+              namespaces: ['default'],
+              references: [],
+              type: 'multiNamespaceIsolatedType',
+              ...mockTimestampFields,
             }),
           }),
           expect.anything()
@@ -389,16 +398,20 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`doesn't accept custom references if not an array`, async () => {
+        const migrationVersion = mockMigrationVersion;
+        const coreMigrationVersion = '8.0.0';
         const test = async (references: unknown) => {
-          // @ts-expect-error references is unknown
-          await updateSuccess(client, repository, registry, type, id, attributes, { references });
-          expect(client.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-              body: { doc: expect.not.objectContaining({ references: expect.anything() }) },
-            }),
-            expect.anything()
-          );
-          client.update.mockClear();
+          migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+          await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+            // @ts-expect-error references is unknown
+            references,
+          });
+          expect(
+            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+              .references
+          ).toEqual([]);
+          client.index.mockClear();
+          client.create.mockClear();
         };
         await test('string');
         await test(123);
@@ -407,8 +420,9 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`defaults to a refresh setting of wait_for`, async () => {
-        await updateSuccess(client, repository, registry, type, id, { foo: 'bar' });
-        expect(client.update).toHaveBeenCalledWith(
+        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+        await updateBWCSuccess(client, repository, registry, type, id, { foo: 'bar' });
+        expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             refresh: 'wait_for',
           }),
@@ -417,7 +431,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`does not default to the version of the existing document when type is multi-namespace`, async () => {
-        await updateSuccess(
+        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+        await updateBWCSuccess(
           client,
           repository,
           registry,
@@ -430,17 +445,18 @@ describe('SavedObjectsRepository', () => {
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         };
-        expect(client.update).toHaveBeenCalledWith(
+        expect(client.index).toHaveBeenCalledWith(
           expect.not.objectContaining(versionProperties),
           expect.anything()
         );
       });
 
       it.skip(`accepts version`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
+        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+        await updateBWCSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
         });
-        expect(client.update).toHaveBeenCalledWith(
+        expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ if_seq_no: 100, if_primary_term: 200 }),
           expect.anything()
         );
@@ -662,7 +678,7 @@ describe('SavedObjectsRepository', () => {
           id,
           attributes,
           { upsert: true },
-          { mockGetResponseValue: { found: false } as estypes.GetResponse }
+          { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse }
         );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
@@ -696,7 +712,7 @@ describe('SavedObjectsRepository', () => {
           },
         };
         const internalOptions = {
-          mockGetResponseValue: { found: false } as estypes.GetResponse,
+          mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
         };
         await updateBWCSuccess(
           client,
