@@ -1078,6 +1078,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
+    async getCurrentChartDebugStateForVizType(visType: string) {
+      await this.waitForVisualization(visType);
+      return await elasticChart.getChartDebugData(visType);
+    },
+
     /**
      * Gets text of the specified datatable cell
      *
@@ -1454,7 +1459,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (!opts.keepOpen) {
-        await this.closeDimensionEditor();
+        await testSubjects.click('collapseFlyoutButton');
       }
     },
 
