@@ -7,7 +7,7 @@
 import { keyBy } from 'lodash';
 import { TopNFunctions } from '../../../common/functions';
 import { StackFrameMetadata } from '../../../common/profiling';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
+import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
 
 export function getColorLabel(percent: number) {
   const color = percent < 0 ? 'success' : 'danger';
