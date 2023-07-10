@@ -11,6 +11,7 @@ import type {
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
 export interface CellActionsProviderProps {
@@ -24,14 +25,14 @@ export interface CellActionsProviderProps {
 type Metadata = Record<string, unknown>;
 
 export type CellActionFieldValue =
-  | string
-  | number
-  | boolean
+  | Serializable
+  // Add primitive array types to allow type guards to work.
+  // Because SerializableArray is a cyclic self referenced Array.
   | string[]
   | number[]
   | boolean[]
-  | null
-  | undefined;
+  | null[]
+  | undefined[];
 
 export interface CellActionsData {
   /**

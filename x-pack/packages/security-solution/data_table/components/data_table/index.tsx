@@ -338,7 +338,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
           ? // TODO use FieldSpec object instead of column
             columnHeaders.map((column) => ({
               name: column.id,
-              type: column.type ?? 'keyword',
+              type: column.type ?? '', // When type is an empty string all cell actions are incompatible
               aggregatable: column.aggregatable ?? false,
               searchable: column.searchable ?? false,
               esTypes: column.esTypes ?? [],

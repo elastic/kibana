@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { CSSProperties, useMemo, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
@@ -18,16 +18,18 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { HostsLensMetricChartFormulas } from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
-import { LensWrapper } from '../chart/lens_wrapper';
-import { buildCombinedHostsFilter } from '../../utils';
+import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { TooltipContent } from '../metric_explanation/tooltip_content';
+import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
+import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
 export interface KPIChartProps {
   title: string;
@@ -37,15 +39,15 @@ export interface KPIChartProps {
   type: HostsLensMetricChartFormulas;
   decimals?: number;
   toolTip: string;
+  style?: CSSProperties;
 }
-
-const MIN_HEIGHT = 150;
 
 export const Tile = ({
   title,
   type,
   backgroundColor,
   toolTip,
+  style,
   decimals = 1,
   trendLine = false,
 }: KPIChartProps) => {
@@ -83,31 +85,33 @@ export const Tile = ({
 
   const filters = useMemo(() => {
     return [
+      ...searchCriteria.filters,
       buildCombinedHostsFilter({
         field: 'host.name',
         values: hostNodes.map((p) => p.name),
         dataView,
       }),
     ];
-  }, [hostNodes, dataView]);
+  }, [searchCriteria.filters, hostNodes, dataView]);
 
-  const extraActionOptions = getExtraActions({
-    timeRange: searchCriteria.dateRange,
-    filters,
-  });
-
-  const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
-    const [min, max] = range;
-    onSubmit({
-      dateRange: {
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-        mode: 'absolute',
-      },
-    });
-  };
+  const handleBrushEnd = useCallback(
+    ({ range }: BrushTriggerEvent['data']) => {
+      const [min, max] = range;
+      onSubmit({
+        dateRange: {
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+          mode: 'absolute',
+        },
+      });
+    },
+    [onSubmit]
+  );
 
   const loading = hostsLoading || !attributes || hostCountLoading;
+
+  // prevents requestTs and serchCriteria states from reloading the chart
+  // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
     attributes,
     lastReloadRequestTime: requestTs,
@@ -115,16 +119,25 @@ export const Tile = ({
     filters,
   });
 
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: afterLoadedState.dateRange,
+        query: searchCriteria.query,
+        filters,
+      }),
+    [afterLoadedState.dateRange, filters, getExtraActions, searchCriteria.query]
+  );
+
   return (
     <EuiPanelStyled
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
-      style={{ minHeight: MIN_HEIGHT }}
       data-test-subj={`hostsViewKPI-${type}`}
     >
       {error ? (
         <EuiFlexGroup
-          style={{ height: MIN_HEIGHT, alignContent: 'center' }}
+          style={{ minHeight: '100%', alignContent: 'center' }}
           gutterSize="xs"
           justifyContent="center"
           alignItems="center"
@@ -148,17 +161,20 @@ export const Tile = ({
           content={<TooltipContent formula={formula} description={toolTip} />}
           anchorClassName="eui-fullWidth"
         >
-          <LensWrapper
-            id={`hostsViewKPIGrid${type}Tile`}
-            attributes={afterLoadedState.attributes}
-            style={{ height: MIN_HEIGHT }}
-            extraActions={[extraActionOptions.openInLens]}
-            lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
-            dateRange={afterLoadedState.dateRange}
-            filters={afterLoadedState.filters}
-            onBrushEnd={handleBrushEnd}
-            loading={loading}
-          />
+          <div>
+            <LensWrapper
+              id={`hostsViewKPIGrid${type}Tile`}
+              attributes={afterLoadedState.attributes}
+              style={style}
+              extraActions={extraActions}
+              lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
+              dateRange={afterLoadedState.dateRange}
+              filters={afterLoadedState.filters}
+              query={afterLoadedState.query}
+              onBrushEnd={handleBrushEnd}
+              loading={loading}
+            />
+          </div>
         </EuiToolTip>
       )}
     </EuiPanelStyled>
@@ -166,6 +182,7 @@ export const Tile = ({
 };
 
 const EuiPanelStyled = styled(EuiPanel)`
+  min-height: ${KPI_CHART_MIN_HEIGHT};
   .echMetric {
     border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
     pointer-events: none;

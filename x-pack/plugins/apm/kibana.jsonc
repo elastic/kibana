@@ -15,6 +15,7 @@
       "embeddable",
       "features",
       "infra",
+      "logsShared",
       "inspector",
       "licensing",
       "observability",
@@ -35,6 +36,7 @@
       "cases",
       "charts",
       "cloud",
+      "discover",
       "fleet",
       "fieldFormats",
       "home",
@@ -44,7 +46,8 @@
       "taskManager",
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
-      "licenseManagement"
+      "licenseManagement",
+      "profiling"
     ],
     "requiredBundles": [
       "advancedSettings",

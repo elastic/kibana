@@ -186,10 +186,8 @@ export function createMessageSigningServiceMock(): MessageSigningServiceInterfac
 
 export function createUninstallTokenServiceMock(): UninstallTokenServiceInterface {
   return {
-    getTokenForPolicyId: jest.fn(),
-    getTokensForPolicyIds: jest.fn(),
-    getAllTokens: jest.fn(),
-    findTokensForPartialPolicyId: jest.fn(),
+    getToken: jest.fn(),
+    getTokenMetadata: jest.fn(),
     getHashedTokenForPolicyId: jest.fn(),
     getHashedTokensForPolicyIds: jest.fn(),
     getAllHashedTokens: jest.fn(),

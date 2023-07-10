@@ -170,13 +170,19 @@ describe('ConfigPanel', () => {
 
   it('allow datasources and visualizations to use setters', async () => {
     const props = getDefaultProps();
-    const { instance, lensStore } = await prepareAndMountComponent(props);
+    const onUpdateCbSpy = jest.fn();
+    const newProps = {
+      ...props,
+      onUpdateStateCb: onUpdateCbSpy,
+    };
+    const { instance, lensStore } = await prepareAndMountComponent(newProps);
     const { updateDatasource, updateAll } = instance.find(LayerPanel).props();
 
     const updater = () => 'updated';
     updateDatasource('testDatasource', updater);
     await waitMs(0);
     expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+    expect(onUpdateCbSpy).toHaveBeenCalled();
     expect(
       (lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.updater(
         props.datasourceStates.testDatasource.state
@@ -184,6 +190,7 @@ describe('ConfigPanel', () => {
     ).toEqual('updated');
 
     updateAll('testDatasource', updater, props.visualizationState);
+    expect(onUpdateCbSpy).toHaveBeenCalled();
     // wait for one tick so async updater has a chance to trigger
     await waitMs(0);
     expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
