@@ -7,16 +7,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  EuiPanel,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiPageTemplate } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { IEmbeddable, EmbeddablePanel } from '@kbn/embeddable-plugin/public';
 import {
@@ -115,16 +106,10 @@ export function EmbeddablePanelExample({ searchListContainerFactory }: Props) {
   });
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>The embeddable panel component</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
+    <>
+      <EuiPageTemplate.Header pageTitle="Context menu" />
+      <EuiPageTemplate.Section grow={false}>
+        <>
           <EuiText>
             You can render your embeddable inside the EmbeddablePanel component. This adds some
             extra rendering and offers a context menu with pluggable actions. Using EmbeddablePanel
@@ -141,8 +126,8 @@ export function EmbeddablePanelExample({ searchListContainerFactory }: Props) {
           </EuiPanel>
 
           <EuiSpacer />
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+        </>
+      </EuiPageTemplate.Section>
+    </>
   );
 }

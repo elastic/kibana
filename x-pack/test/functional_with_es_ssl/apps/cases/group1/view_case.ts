@@ -82,7 +82,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const error = await find.byCssSelector('.euiFormErrorText');
         expect(await error.getVisibleText()).equal(
-          'The length of the title is too long. The maximum length is 160.'
+          'The length of the title is too long. The maximum length is 160 characters.'
         );
 
         await testSubjects.click('editable-title-cancel-btn');
@@ -135,7 +135,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const error = await find.byCssSelector('.euiFormErrorText');
         expect(await error.getVisibleText()).equal(
-          'The length of the category is too long. The maximum length is 50.'
+          'The length of the category is too long. The maximum length is 50 characters.'
         );
 
         await testSubjects.click('edit-category-cancel');
@@ -167,7 +167,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const error = await find.byCssSelector('.euiFormErrorText');
         expect(await error.getVisibleText()).equal(
-          'The length of the tag is too long. The maximum length is 256.'
+          'The length of the tag is too long. The maximum length is 256 characters.'
         );
 
         await testSubjects.click('edit-tags-cancel');

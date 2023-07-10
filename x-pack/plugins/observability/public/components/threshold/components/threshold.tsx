@@ -48,7 +48,7 @@ export function Threshold({
         minWidth: '100%',
       }}
       hasShadow={false}
-      data-test-subj={`threshold-${threshold}-${value}`}
+      data-test-subj={`thresholdRule-${threshold}-${value}`}
     >
       <Chart>
         <Settings theme={theme} baseTheme={baseTheme} />
