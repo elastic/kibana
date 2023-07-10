@@ -90,16 +90,16 @@ describe('SecurityNavControlService', () => {
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Account menu"
-                class="euiButtonEmpty euiHeaderSectionItemButton css-wvaqcf-empty-text"
+                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
                 data-test-subj="userMenuButton"
                 style="line-height: normal;"
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     <span
                       class="euiHeaderSectionItemButton__content"
