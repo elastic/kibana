@@ -32,7 +32,7 @@ const PERECENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
 
 const CHARTS_IN_ORDER: MetricChartProps[] = [
   {
-    id: 'hostsViewsMetricsChartCpuUsage',
+    id: 'cpuUsage',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
@@ -44,10 +44,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
       },
     ],
     overrides: PERECENT_LEFT_AXIS,
-    'data-test-subj': 'hostsView-metricChart-cpuUsage',
   },
   {
-    id: 'hostsViewsMetricsChartNormalizedLoad1m',
+    id: 'normalizedLoad1m',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.normalizedLoad1m', {
       defaultMessage: 'Normalized Load',
     }),
@@ -73,10 +72,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         layerType: 'referenceLine',
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-normalizedLoad1m',
   },
   {
-    id: 'hostsViewsMetricsChartMemoryUsage',
+    id: 'memoryUsage',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',
     }),
@@ -88,10 +86,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
       },
     ],
     overrides: PERECENT_LEFT_AXIS,
-    'data-test-subj': 'hostsView-metricChart-memoryUsage',
   },
   {
-    id: 'hostsViewsMetricsChartMemoryFree',
+    id: 'memoryFree',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryFree', {
       defaultMessage: 'Memory Free',
     }),
@@ -102,10 +99,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-memoryFree',
   },
   {
-    id: 'hostsViewsMetricsChartDiskSpaceUsed',
+    id: 'diskSpaceUsed',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceUsed', {
       defaultMessage: 'Disk Space Usage',
     }),
@@ -117,10 +113,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
       },
     ],
     overrides: PERECENT_LEFT_AXIS,
-    'data-test-subj': 'hostsView-metricChart-diskSpaceUsed',
   },
   {
-    id: 'hostsViewsMetricsChartDiskSpaceAvailable',
+    id: 'diskSpaceAvailable',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceAvailable', {
       defaultMessage: 'Disk Space Available',
     }),
@@ -131,10 +126,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-diskSpaceAvailable',
   },
   {
-    id: 'hostsViewsMetricsChartDiskIORead',
+    id: 'diskIORead',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIORead', {
       defaultMessage: 'Disk Read IOPS',
     }),
@@ -145,10 +139,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-diskIORead',
   },
   {
-    id: 'hostsViewsMetricsChartDiskIOWrite',
+    id: 'diskIOWrite',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIOWrite', {
       defaultMessage: 'Disk Write IOPS',
     }),
@@ -159,10 +152,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-diskIOWrite',
   },
   {
-    id: 'hostsViewsMetricsChartDiskReadThroughput',
+    id: 'diskReadThroughput',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskReadThroughput', {
       defaultMessage: 'Disk Read Throughput',
     }),
@@ -173,10 +165,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-diskReadThroughput',
   },
   {
-    id: 'hostsViewsMetricsChartDiskWriteThroughput',
+    id: 'diskWriteThroughput',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskWriteThroughput', {
       defaultMessage: 'Disk Write Throughput',
     }),
@@ -187,10 +178,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-diskWriteThroughput',
   },
   {
-    id: 'hostsViewsMetricsChartRX',
+    id: 'rx',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.rx', {
       defaultMessage: 'Network Inbound (RX)',
     }),
@@ -201,10 +191,9 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-rx',
   },
   {
-    id: 'hostsViewsMetricsChartTX',
+    id: 'tx',
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.tx', {
       defaultMessage: 'Network Outbound (TX)',
     }),
@@ -215,7 +204,6 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    'data-test-subj': 'hostsView-metricChart-tx',
   },
 ];
 

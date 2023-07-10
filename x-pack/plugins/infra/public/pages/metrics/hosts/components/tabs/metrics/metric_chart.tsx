@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
 import { useLensAttributes, Layer, LayerType } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -28,21 +29,19 @@ import {
   buildExistsHostsFilter,
 } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
-import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
   layers: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
-  'data-test-subj'?: string;
 }
 
 const lensStyle: CSSProperties = {
   height: METRIC_CHART_MIN_HEIGHT,
 };
 
-export const MetricChart = ({ id, title, layers, overrides, ...props }: MetricChartProps) => {
+export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) => {
   const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
@@ -109,7 +108,7 @@ export const MetricChart = ({ id, title, layers, overrides, ...props }: MetricCh
         min-height: calc(${METRIC_CHART_MIN_HEIGHT}px + ${euiTheme.size.l});
         position: relative;
       `}
-      data-test-subj={props['data-test-subj']}
+      data-test-subj={`hostsView-metricChart-${id}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -133,7 +132,7 @@ export const MetricChart = ({ id, title, layers, overrides, ...props }: MetricCh
         </EuiFlexGroup>
       ) : (
         <LensWrapper
-          id={id}
+          id={`hostsViewsmetricsChart-${id}`}
           attributes={attributes}
           style={lensStyle}
           extraActions={extraActions}
