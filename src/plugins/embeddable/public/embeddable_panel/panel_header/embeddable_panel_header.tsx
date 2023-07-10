@@ -16,7 +16,7 @@ import {
 } from '../use_select_from_embeddable';
 import { isSelfStyledEmbeddable, ViewMode } from '../../lib';
 import { getAriaLabelForTitle } from '../embeddable_panel_strings';
-import { EmbeddablePanelProps, PanelUniversalActions } from '../types';
+import { UnwrappedEmbeddablePanelProps, PanelUniversalActions } from '../types';
 import { useEmbeddablePanelTitle } from './use_embeddable_panel_title';
 import { useEmbeddablePanelBadges } from './use_embeddable_panel_badges';
 import { useEmbeddablePanelContextMenu } from './use_embeddable_panel_context_menu';
@@ -30,7 +30,10 @@ export const EmbeddablePanelHeader = ({
   universalActions,
   showBadges = true,
   showNotifications = true,
-}: EmbeddablePanelProps & { headerId: string; universalActions: PanelUniversalActions }) => {
+}: UnwrappedEmbeddablePanelProps & {
+  headerId: string;
+  universalActions: PanelUniversalActions;
+}) => {
   const selfStyledEmbeddableOptions = useMemo(
     () => (isSelfStyledEmbeddable(embeddable) ? embeddable.getSelfStyledOptions() : undefined),
     [embeddable]
