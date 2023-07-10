@@ -39,8 +39,8 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     this.column = layerConfig.data.map((p) => new FormulaColumn(p, layerConfig.formulaAPI));
   }
 
-  getName(): string {
-    return this.column[0].getName();
+  getName(): string | undefined {
+    return this.column[0].getFormulaConfig().label;
   }
 
   getBaseColumnColumn(dataView: DataView, options?: XYLayerOptions) {
@@ -51,7 +51,6 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
           sourceField: dataView.timeFieldName,
         },
       }),
-
       ...(options?.breakdown
         ? {
             ...getTopValuesColumn({
@@ -82,7 +81,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
       [layerId]: this.column.reduce(
         (acc, curr, index) => ({
           ...acc,
-          ...curr.getData(`${accessorId}_${index}`, dataView, acc),
+          ...curr.getData(`${accessorId}_${index}`, acc, dataView),
         }),
         baseLayer
       ),

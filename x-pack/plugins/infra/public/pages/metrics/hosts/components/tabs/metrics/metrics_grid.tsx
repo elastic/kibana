@@ -21,7 +21,7 @@ const XY_LAYER_OPTIONS: XYLayerOptions = {
   },
 };
 
-const PERECENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
+const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
   axisLeft: {
     domain: {
       min: 0,
@@ -43,7 +43,7 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    overrides: PERECENT_LEFT_AXIS,
+    overrides: PERCENT_LEFT_AXIS,
   },
   {
     id: 'normalizedLoad1m',
@@ -85,7 +85,7 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    overrides: PERECENT_LEFT_AXIS,
+    overrides: PERCENT_LEFT_AXIS,
   },
   {
     id: 'memoryFree',
@@ -112,7 +112,7 @@ const CHARTS_IN_ORDER: MetricChartProps[] = [
         options: XY_LAYER_OPTIONS,
       },
     ],
-    overrides: PERECENT_LEFT_AXIS,
+    overrides: PERCENT_LEFT_AXIS,
   },
   {
     id: 'diskSpaceAvailable',

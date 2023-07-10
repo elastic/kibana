@@ -60,16 +60,20 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
 
     return {
       [layerId]: {
-        ...this.column.getData(accessorId, dataView, {
-          columnOrder: [],
-          columns: {},
-        }),
+        ...this.column.getData(
+          accessorId,
+          {
+            columnOrder: [],
+            columns: {},
+          },
+          dataView
+        ),
       },
       ...(this.layerConfig.options?.showTrendLine
         ? {
             [`${layerId}_trendline`]: {
               linkToLayers: [layerId],
-              ...this.column.getData(`${accessorId}_trendline`, dataView, baseLayer),
+              ...this.column.getData(`${accessorId}_trendline`, baseLayer, dataView),
             },
           }
         : {}),
@@ -102,7 +106,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
         : {}),
     };
   }
-  getName(): string {
-    return this.column.getName();
+  getName(): string | undefined {
+    return this.column.getFormulaConfig().label;
   }
 }

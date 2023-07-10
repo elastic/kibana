@@ -53,7 +53,7 @@ const xyChart = new XYChart({
 
 ### Adding Multiple Layers to an XY Chart
 
-An XY chart can have multiple layers. Here's an example of containg a Reference Line Layer:
+An XY chart can have multiple layers. Here's an example of containing a Reference Line Layer:
 
 ```ts
 const xyChart = new XYChart({

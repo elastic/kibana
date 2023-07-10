@@ -30,18 +30,17 @@ export interface VisualizationAttributesBuilder {
 export interface ChartColumn {
   getData(
     id: string,
-    dataView: DataView,
-    baseLayer: PersistedIndexPatternLayer
+    baseLayer: PersistedIndexPatternLayer,
+    dataView: DataView
   ): PersistedIndexPatternLayer;
   getFormulaConfig(): FormulaConfig;
-  getName(): string;
 }
 
 // Layer
 export type LensLayerConfig = XYDataLayerConfig | MetricVisualizationState;
 
 export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
-  getName(): string;
+  getName(): string | undefined;
   getLayer(
     layerId: string,
     accessorId: string,

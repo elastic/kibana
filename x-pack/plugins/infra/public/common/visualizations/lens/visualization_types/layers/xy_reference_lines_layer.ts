@@ -26,8 +26,8 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
     this.column = layerConfig.data.map((p) => new ReferenceLineColumn(p));
   }
 
-  getName(): string {
-    return this.column[0].getName();
+  getName(): string | undefined {
+    return this.column[0].getFormulaConfig().label;
   }
 
   getLayer(
@@ -40,7 +40,7 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
       [`${layerId}_reference`]: this.column.reduce((acc, curr, index) => {
         return {
           ...acc,
-          ...curr.getData(`${accessorId}_${index}_reference_column`, dataView, acc),
+          ...curr.getData(`${accessorId}_${index}_reference_column`, acc, dataView),
         };
       }, baseLayer),
     };

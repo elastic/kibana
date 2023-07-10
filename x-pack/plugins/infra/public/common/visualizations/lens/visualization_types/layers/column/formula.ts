@@ -12,18 +12,14 @@ import type { FormulaConfig, ChartColumn } from '../../../../types';
 export class FormulaColumn implements ChartColumn {
   constructor(private formulaConfig: FormulaConfig, private formulaAPI: FormulaPublicApi) {}
 
-  getName() {
-    return this.formulaConfig.label ?? '';
-  }
-
   getFormulaConfig(): FormulaConfig {
     return this.formulaConfig;
   }
 
   getData(
     id: string,
-    dataView: DataView,
-    baseLayer: PersistedIndexPatternLayer
+    baseLayer: PersistedIndexPatternLayer,
+    dataView: DataView
   ): PersistedIndexPatternLayer {
     const { value, ...rest } = this.getFormulaConfig();
     const formulaLayer = this.formulaAPI.insertOrReplaceFormulaColumn(

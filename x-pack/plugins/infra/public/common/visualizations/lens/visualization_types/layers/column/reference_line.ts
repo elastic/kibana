@@ -6,26 +6,17 @@
  */
 
 import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import type { FormulaConfig, ChartColumn } from '../../../../types';
 
 export class ReferenceLineColumn implements ChartColumn {
   constructor(private formulaConfig: FormulaConfig) {}
 
-  getName() {
-    return this.formulaConfig.label ?? '';
-  }
-
   getFormulaConfig(): FormulaConfig {
     return this.formulaConfig;
   }
 
-  getData(
-    id: string,
-    _dataView: DataView,
-    baseLayer: PersistedIndexPatternLayer
-  ): PersistedIndexPatternLayer {
+  getData(id: string, baseLayer: PersistedIndexPatternLayer): PersistedIndexPatternLayer {
     const { label, ...params } = this.getFormulaConfig();
     return {
       linkToLayers: [],
