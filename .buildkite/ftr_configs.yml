@@ -413,3 +413,5 @@ enabled:
   - x-pack/performance/journeys/cloud_security_dashboard.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
+  - x-pack/test/api_integration/apis/all_deployments/config.ts
+  - x-pack/test/functional/apps/all_deployments/config.ts
