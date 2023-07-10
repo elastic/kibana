@@ -31,6 +31,7 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import type { CoverageOverviewFilter } from '../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import type { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
@@ -268,6 +269,11 @@ export interface FetchRuleProps {
 
 export interface FetchRuleSnoozingProps {
   ids: string[];
+  signal?: AbortSignal;
+}
+
+export interface FetchCoverageOverviewProps {
+  filter: CoverageOverviewFilter;
   signal?: AbortSignal;
 }
 
