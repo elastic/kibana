@@ -124,7 +124,9 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
 export const MAX_LENGTH_PER_TAG = 256 as const;
 export const MAX_TAGS_PER_CASE = 200 as const;
 export const MAX_DELETE_IDS_LENGTH = 100 as const;
+export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;
+export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 
 /**
  * Cases features
