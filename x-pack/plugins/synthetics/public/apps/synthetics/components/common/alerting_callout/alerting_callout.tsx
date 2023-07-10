@@ -13,13 +13,14 @@ import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useSessionStorage } from 'react-use';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import { selectDynamicSettings } from '../../../state/settings';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoading,
 } from '../../../state/alert_rules/selectors';
 import { selectMonitorListState } from '../../../state';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
-import { useAlertingDefaults } from '../../settings/alerting_defaults/hooks/use_alerting_defaults';
 import { useSyntheticsSettingsContext, useSyntheticsStartPlugins } from '../../../contexts';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
@@ -27,11 +28,12 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const dispatch = useDispatch();
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
-  const loading = useSelector(selectSyntheticsAlertsLoading);
+  const rulesLoading = useSelector(selectSyntheticsAlertsLoading);
+  const { loading, settings } = useSelector(selectDynamicSettings);
+
+  const hasDefaultConnector = !isEmpty(settings?.defaultConnectors) && !loading;
 
   const { canSave } = useSyntheticsSettingsContext();
-
-  const { defaultConnectors, settingsLoading } = useAlertingDefaults();
 
   const {
     data: { monitors },
@@ -45,15 +47,13 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     return locator?.getUrl({});
   }, [locator]);
 
-  const hasDefaultConnector =
-    Boolean(defaultConnectors?.length) || (!settingsLoading && Boolean(defaultConnectors?.length));
   const hasAlertingConfigured =
     isAlertingEnabled ??
     (monitorsLoaded &&
       monitors.some((monitor) => monitor[ConfigKey.ALERT_CONFIG]?.status?.enabled));
 
   const showCallout = url && !hasDefaultConnector && hasAlertingConfigured;
-  const missingRules = !loading && Object.keys(defaultRules ?? {}).length !== 2 && !canSave;
+  const missingRules = !rulesLoading && Object.keys(defaultRules ?? {}).length !== 2 && !canSave;
 
   useEffect(() => {
     dispatch(getDynamicSettingsAction.get());
@@ -91,16 +91,9 @@ const MissingRulesCallout = ({
     <EuiMarkdownFormat>{`${point}${MISSING_CONFIG_LABEL}`}</EuiMarkdownFormat>
   ) : null;
 
-  let rulesCallout =
-    missingConfig && missingRules ? (
-      <EuiMarkdownFormat>{`${point}${MISSING_RULES_LABEL}`}</EuiMarkdownFormat>
-    ) : null;
-
-  if (missingRules && !missingConfig) {
-    rulesCallout = (
-      <EuiMarkdownFormat>{`${point}${MISSING_RULES_PRIVILIGES_LABEL}`}</EuiMarkdownFormat>
-    );
-  }
+  const rulesCallout = missingRules ? (
+    <EuiMarkdownFormat>{`${point}${MISSING_RULES_PRIVILEGES_LABEL}`}</EuiMarkdownFormat>
+  ) : null;
 
   return (
     <EuiCallOut
@@ -152,12 +145,7 @@ const MISSING_CONFIG_LABEL = i18n.translate(
   }
 );
 
-const MISSING_RULES_LABEL = i18n.translate('xpack.synthetics.alerting.createRules.content', {
-  defaultMessage:
-    'You have monitors with alerting enabled, but there are rules configured to send those alerts. Default rules are automatically created when you configure a default connector.',
-});
-
-const MISSING_RULES_PRIVILIGES_LABEL = i18n.translate(
+export const MISSING_RULES_PRIVILEGES_LABEL = i18n.translate(
   'xpack.synthetics.alerting.missingRules.content',
   {
     defaultMessage:
