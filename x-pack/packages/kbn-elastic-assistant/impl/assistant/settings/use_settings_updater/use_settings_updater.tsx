@@ -7,10 +7,14 @@
 
 import React, { useCallback, useState } from 'react';
 import { Prompt, QuickPrompt } from '../../../..';
-import { useAssistantContext } from '../../../assistant_context';
+import { UseAssistantContext, useAssistantContext } from '../../../assistant_context';
 
 interface UseSettingsUpdater {
+  conversationSettings: UseAssistantContext['conversations'];
   quickPromptSettings: QuickPrompt[];
+  setUpdatedConversationSettings: React.Dispatch<
+    React.SetStateAction<UseAssistantContext['conversations']>
+  >;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   saveSettings: () => void;
 }
@@ -19,13 +23,31 @@ interface UseSettingsUpdater {
 
 export const useSettingsUpdater = (): UseSettingsUpdater => {
   // Initial state from assistant context
-  const { setAllQuickPrompts, setAllSystemPrompts, setIsSettingsModalVisible } =
-    useAssistantContext();
-  const { allQuickPrompts } = useAssistantContext();
+  const {
+    conversations,
+    allQuickPrompts,
+    allSystemPrompts,
+    setAllQuickPrompts,
+    setAllSystemPrompts,
+    setConversations,
+    setIsSettingsModalVisible,
+    setDefaultAllow,
+    setDefaultAllowReplacement,
+  } = useAssistantContext();
 
-  // Pending updated state
+  /**
+   * Pending updating state
+   */
+  // Conversations
+  const [updatedConversationSettings, setUpdatedConversationSettings] =
+    useState<UseAssistantContext['conversations']>(conversations);
+  // Quick Prompts
   const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
     useState<QuickPrompt[]>(allQuickPrompts);
+  // System Prompts
+  const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] =
+    useState<Prompt[]>(allSystemPrompts);
+  // Anonymization
 
   // Callback for modal onSave, saves to local storage on change
   const onSystemPromptsChange = useCallback(
@@ -41,9 +63,20 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
    */
   const saveSettings = useCallback((): void => {
     setAllQuickPrompts(updatedQuickPromptSettings);
-  }, [setAllQuickPrompts, updatedQuickPromptSettings]);
+    setAllSystemPrompts(updatedSystemPromptSettings);
+    setConversations(updatedConversationSettings);
+  }, [
+    setAllQuickPrompts,
+    setAllSystemPrompts,
+    setConversations,
+    updatedConversationSettings,
+    updatedQuickPromptSettings,
+    updatedSystemPromptSettings,
+  ]);
 
   return {
+    conversationSettings: updatedConversationSettings,
+    setUpdatedConversationSettings,
     quickPromptSettings: updatedQuickPromptSettings,
     setUpdatedQuickPromptSettings,
     saveSettings,

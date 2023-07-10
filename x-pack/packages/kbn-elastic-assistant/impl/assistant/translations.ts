@@ -18,20 +18,6 @@ export const DEFAULT_ASSISTANT_TITLE = i18n.translate(
   }
 );
 
-export const MISSING_CONNECTOR_CALLOUT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.missingConnectorCalloutTitle',
-  {
-    defaultMessage: 'The current conversation is missing a connector configuration',
-  }
-);
-
-export const MISSING_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.missingConnectorCalloutDescription',
-  {
-    defaultMessage: 'Select a connector from the conversation settings to continue',
-  }
-);
-
 export const SHOW_ANONYMIZED = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleLabel',
   {

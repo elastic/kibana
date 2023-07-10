@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,6 +31,8 @@ import { QuickPromptSettings } from '../quick_prompts/quick_prompt_settings/quic
 import { SystemPromptSettings } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_settings';
 import { AdvancedSettings } from './advanced_settings/advanced_settings';
 import { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
+import { TEST_IDS } from '../constants';
+import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -67,12 +69,24 @@ interface Props {
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({ onClose, onSave, selectedConversation, selectedTab: defaultSelectedTab }) => {
     const { actionTypeRegistry, allSystemPrompts, http } = useAssistantContext();
+    const {
+      conversationSettings,
+      setUpdatedConversationSettings,
+      quickPromptSettings,
+      setUpdatedQuickPromptSettings,
+      saveSettings,
+    } = useSettingsUpdater();
     const [selectedTab, setSelectedTab] = useState<SettingsTabs>(
       defaultSelectedTab ?? CONVERSATIONS_TAB
     );
 
+    const handleSave = useCallback(() => {
+      saveSettings();
+      onSave();
+    }, [onSave, saveSettings]);
+
     return (
-      <StyledEuiModal onClose={onClose}>
+      <StyledEuiModal data-test-subj={TEST_IDS.SETTINGS_MODAL} onClose={onClose}>
         <EuiPage paddingSize="none">
           <EuiPageSidebar
             paddingSize="xs"
@@ -186,13 +200,20 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 {selectedTab === CONVERSATIONS_TAB && (
                   <ConversationSettings
+                    conversationSettings={conversationSettings}
+                    setUpdatedConversationSettings={setUpdatedConversationSettings}
                     allSystemPrompts={allSystemPrompts}
                     actionTypeRegistry={actionTypeRegistry}
                     conversation={selectedConversation}
                     http={http}
                   />
                 )}
-                {selectedTab === QUICK_PROMPTS_TAB && <QuickPromptSettings />}
+                {selectedTab === QUICK_PROMPTS_TAB && (
+                  <QuickPromptSettings
+                    quickPromptSettings={quickPromptSettings}
+                    setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+                  />
+                )}
                 {selectedTab === SYSTEM_PROMPTS_TAB && (
                   <SystemPromptSettings onSystemPromptsChange={() => {}} />
                 )}
@@ -216,7 +237,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     {i18n.CANCEL}
                   </EuiButtonEmpty>
 
-                  <EuiButton size="s" type="submit" onClick={onSave} fill>
+                  <EuiButton size="s" type="submit" onClick={handleSave} fill>
                     {i18n.SAVE}
                   </EuiButton>
                 </EuiModalFooter>

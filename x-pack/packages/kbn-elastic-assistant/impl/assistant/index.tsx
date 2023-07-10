@@ -16,7 +16,6 @@ import {
   EuiToolTip,
   EuiSwitchEvent,
   EuiSwitch,
-  EuiCallOut,
   EuiIcon,
   EuiModalFooter,
   EuiModalHeader,
@@ -50,6 +49,7 @@ import { useConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { BASE_CONVERSATIONS } from './use_conversation/sample_conversations';
 import { AssistantSettingsButton } from './settings/assistant_settings_button';
+import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 
 export interface Props {
   promptContextId?: string;
@@ -353,12 +353,15 @@ const AssistantComponent: React.FC<Props> = ({
       }),
     [messageCodeBlocks]
   );
+
+  console.log('currentConversation', currentConversation);
   return (
     <>
       <EuiModalHeader
         css={css`
           align-items: flex-start;
           flex-direction: column;
+          padding-bottom: 0;
         `}
       >
         {showTitle && (
@@ -427,19 +430,6 @@ const AssistantComponent: React.FC<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin={'m'} />
-            {!isWelcomeSetup && showMissingConnectorCallout && (
-              <>
-                <EuiCallOut
-                  color="danger"
-                  iconType="controlsVertical"
-                  size="m"
-                  title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
-                >
-                  <p>{i18n.MISSING_CONNECTOR_CALLOUT_DESCRIPTION}</p>
-                </EuiCallOut>
-                <EuiSpacer size={'s'} />
-              </>
-            )}
           </>
         )}
 
@@ -471,8 +461,6 @@ const AssistantComponent: React.FC<Props> = ({
               `}
             />
 
-            <EuiSpacer size={'m'} />
-
             {(currentConversation.messages.length === 0 ||
               Object.keys(selectedPromptContexts).length > 0) && (
               <PromptEditor
@@ -489,7 +477,15 @@ const AssistantComponent: React.FC<Props> = ({
           </>
         )}
 
-        <EuiSpacer />
+        <EuiSpacer size={'l'} />
+
+        {!isWelcomeSetup && showMissingConnectorCallout && (
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <ConnectorMissingCallout />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiModalBody>
       <EuiModalFooter
         css={css`

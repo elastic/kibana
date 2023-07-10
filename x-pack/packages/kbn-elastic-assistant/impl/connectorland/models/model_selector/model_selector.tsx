@@ -10,7 +10,10 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-const DEFAULT_MODELS = ['gpt-3.5-turbo', 'gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k'];
+export const MODEL_GPT_3_5_TURBO = 'gpt-3.5-turbo';
+export const MODEL_GPT_4 = 'gpt-4';
+export const MODEL_GPT_4_32K = 'gpt-4-32k';
+const DEFAULT_MODELS = [MODEL_GPT_3_5_TURBO, MODEL_GPT_4, MODEL_GPT_4_32K];
 
 interface Props {
   onModelDeleted?: (model: string) => void;

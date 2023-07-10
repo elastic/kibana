@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow, EuiLink, EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -20,17 +20,30 @@ import { ConversationSelector } from '../conversation_selector';
 import { ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
+import { UseAssistantContext } from '../../../assistant_context';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   conversation: Conversation;
   http: HttpSetup;
+  conversationSettings: UseAssistantContext['conversations'];
+  setUpdatedConversationSettings: React.Dispatch<
+    React.SetStateAction<UseAssistantContext['conversations']>
+  >;
   isDisabled?: boolean;
 }
 
 export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
-  ({ actionTypeRegistry, allSystemPrompts, conversation, http, isDisabled = false }) => {
+  ({
+    actionTypeRegistry,
+    allSystemPrompts,
+    conversation,
+    conversationSettings,
+    http,
+    setUpdatedConversationSettings,
+    isDisabled = false,
+  }) => {
     const provider = useMemo(() => {
       return conversation.apiConfig?.provider;
     }, [conversation.apiConfig]);
@@ -43,6 +56,16 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
     }, [conversation, allSystemPrompts]);
 
+    const selectedModel = useMemo(() => conversationSettings[conversation.id].apiConfig.model, []);
+
+    const handleOnModelSelectionChange = useCallback(
+      (model?: string) => {
+        conversationSettings[conversation.id].apiConfig.model = model;
+        setUpdatedConversationSettings(conversationSettings);
+      },
+      [conversation.id, conversationSettings, setUpdatedConversationSettings]
+    );
+
     return (
       <>
         <EuiTitle size={'s'}>
@@ -52,7 +75,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
         <EuiHorizontalRule margin={'s'} />
 
-        <ConversationSelector />
+        <ConversationSelector conversationId={conversation.id} />
 
         <EuiFormRow
           data-test-subj="prompt-field"
@@ -102,7 +125,10 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             label={i18nModel.MODEL_TITLE}
             helpText={i18nModel.HELP_LABEL}
           >
-            <ModelSelector />
+            <ModelSelector
+              onModelSelectionChange={handleOnModelSelectionChange}
+              selectedModel={selectedModel}
+            />
           </EuiFormRow>
         )}
       </>

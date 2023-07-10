@@ -72,7 +72,7 @@ interface AssistantProviderProps {
   title?: string;
 }
 
-interface UseAssistantContext {
+export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];

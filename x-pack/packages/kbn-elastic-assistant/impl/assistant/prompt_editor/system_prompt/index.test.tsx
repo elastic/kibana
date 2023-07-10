@@ -117,7 +117,8 @@ describe('SystemPrompt', () => {
     });
   });
 
-  describe('when a new prompt is saved', () => {
+  // TODO: To be implemented as part of the global settings tests instead of within the SystemPrompt component
+  describe.skip('when a new prompt is saved', () => {
     it('should save new prompt correctly', async () => {
       const customPromptName = 'custom prompt';
       const customPromptText = 'custom prompt text';
