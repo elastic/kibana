@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { PolicySettingsForm } from './policy_settings_form';
-export { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from './protection_notice_supported_endpoint_version';
+export const PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION = Object.freeze({
+  malware: '7.11+',
+  ransomware: '7.12+',
+  memory_protection: '7.15+',
+  behavior_protection: '7.15+',
+});

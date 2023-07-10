@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '../protection_notice_supported_endpoint_version';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
@@ -264,12 +265,9 @@ export const SupportedVersionForProtectionNotice = React.memo(
     'data-test-subj'?: string;
   }) => {
     const version = useMemo(() => {
-      return {
-        malware: '7.11+',
-        ransomware: '7.12+',
-        memory_protection: '7.15+',
-        behavior_protection: '7.15+',
-      }[protection];
+      return PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION[
+        protection as keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION
+      ];
     }, [protection]);
 
     if (!version) {

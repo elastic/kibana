@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { popupVersionsMap } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
+import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
@@ -108,7 +108,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
 
           expect(await supportedVersionElement.getVisibleText()).to.equal(
-            'Agent version ' + popupVersionsMap.get(protection)
+            'Agent version ' +
+              PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION[
+                protection as keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION
+              ]
           );
         });
 
