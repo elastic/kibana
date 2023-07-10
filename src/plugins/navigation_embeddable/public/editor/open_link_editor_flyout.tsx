@@ -31,10 +31,10 @@ export async function openLinkEditorFlyout({
   links,
   idToEdit,
   parentDashboard,
-}: LinkEditorProps): Promise<NavigationEmbeddableLinkList> {
-  return new Promise((resolve, reject) => {
+}: LinkEditorProps): Promise<NavigationEmbeddableLinkList | undefined> {
+  return new Promise<NavigationEmbeddableLinkList | undefined>((resolve, reject) => {
     const onSave = (newLinks: NavigationEmbeddableLinkList) => {
-      console.log('on save', newLinks);
+      // console.log('on save', newLinks);
       resolve(newLinks);
       if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
     };
@@ -56,5 +56,8 @@ export async function openLinkEditorFlyout({
       </KibanaThemeProvider>,
       ref.current
     );
+  }).catch(() => {
+    // on reject (i.e. on cancel), just return the original list of links
+    return undefined;
   });
 }

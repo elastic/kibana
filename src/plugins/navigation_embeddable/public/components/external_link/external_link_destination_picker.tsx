@@ -19,15 +19,15 @@ const isValidUrl =
 export const ExternalLinkDestinationPicker = ({
   setDestination,
   setPlaceholder,
-  currentDestination,
+  initialSelection,
   ...other
 }: {
   setDestination: (destination?: string) => void;
   setPlaceholder: (placeholder?: string) => void;
-  currentDestination?: string;
+  initialSelection?: string;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
-  const [urlValue, setUrlValue] = useState(currentDestination);
+  const [urlValue, setUrlValue] = useState(initialSelection);
 
   useMount(() => {
     if (urlValue && urlValue.length > 0) {

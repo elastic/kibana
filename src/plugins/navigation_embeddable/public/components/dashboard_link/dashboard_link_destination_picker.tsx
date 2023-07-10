@@ -27,14 +27,14 @@ import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
 export const DashboardLinkDestinationPicker = ({
   setDestination,
   setPlaceholder,
-  currentDestination,
   parentDashboard,
+  initialSelection,
   ...other
 }: {
   setDestination: (destination?: string) => void;
   setPlaceholder: (placeholder?: string) => void;
-  currentDestination?: string;
   parentDashboard?: DashboardContainer;
+  initialSelection?: string;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
@@ -43,7 +43,11 @@ export const DashboardLinkDestinationPicker = ({
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    return await memoizedFetchDashboards(searchString, undefined, parentDashboardId);
+    return await memoizedFetchDashboards({
+      search: searchString,
+      currentDashboardId: parentDashboardId,
+      selectedDashboardId: initialSelection,
+    });
   }, [searchString, parentDashboardId]);
 
   useEffect(() => {
@@ -52,6 +56,7 @@ export const DashboardLinkDestinationPicker = ({
         return {
           data: dashboard,
           label: dashboard.attributes.title,
+          checked: initialSelection && dashboard.id === initialSelection ? 'on' : undefined,
           ...(dashboard.id === parentDashboardId
             ? {
                 prepend: (
@@ -63,7 +68,7 @@ export const DashboardLinkDestinationPicker = ({
       }) ?? [];
 
     setDashboardListOptions(dashboardOptions);
-  }, [dashboardList, parentDashboardId, searchString]);
+  }, [dashboardList, parentDashboardId, initialSelection, searchString]);
 
   const debouncedSetSearch = useMemo(
     () =>

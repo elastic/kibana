@@ -57,15 +57,9 @@ export const NavigationEmbeddableLinkEditor = ({
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(
     linkToEdit.current ? linkToEdit.current.type : DASHBOARD_LINK_TYPE
   );
-  const [linkLabel, setLinkLabel] = useState<string>(
-    linkToEdit.current ? linkToEdit.current.label || '' : ''
-  );
-  const [linkDestination, setLinkDestination] = useState<string | undefined>(
-    linkToEdit.current?.destination
-  );
+  const [linkLabel, setLinkLabel] = useState<string>();
+  const [linkDestination, setLinkDestination] = useState<string | undefined>();
   const [linkLabelPlaceholder, setLinkLabelPlaceholder] = useState<string | undefined>();
-
-  console.log(linkToEdit.current);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
@@ -114,8 +108,12 @@ export const NavigationEmbeddableLinkEditor = ({
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
-                setLinkDestination(undefined);
-                setLinkLabelPlaceholder(undefined);
+                if (linkToEdit.current?.type === id) {
+                  setLinkDestination(linkToEdit.current.destination);
+                } else {
+                  setLinkDestination(undefined);
+                  setLinkLabelPlaceholder(undefined);
+                }
                 setSelectedLinkType(id as NavigationLinkType);
               }}
             />
@@ -126,13 +124,13 @@ export const NavigationEmbeddableLinkEditor = ({
               <DashboardLinkDestinationPicker
                 parentDashboard={parentDashboard}
                 setDestination={setLinkDestination}
-                currentDestination={linkDestination}
+                initialSelection={linkToEdit.current?.destination}
                 setPlaceholder={setLinkLabelPlaceholder}
               />
             ) : (
               <ExternalLinkDestinationPicker
                 setDestination={setLinkDestination}
-                currentDestination={linkDestination}
+                initialSelection={linkToEdit.current?.destination}
                 setPlaceholder={setLinkLabelPlaceholder}
               />
             )}
@@ -144,7 +142,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 linkLabelPlaceholder ||
                 NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
-              value={linkLabel}
+              value={linkLabel || linkToEdit.current?.label}
               onChange={(e) => {
                 setLinkLabel(e.target.value);
               }}

@@ -23,10 +23,10 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlyoutBody,
+  EuiButtonIcon,
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -63,11 +63,10 @@ export const NavigationEmbeddablePanelEditor = ({
       const newLinks = await openLinkEditorFlyout({
         links,
         parentDashboard,
-        idToEdit: linkToEditId,
+        idToEdit: linkToEditId, // if this is defined, then we are editing; otherwise, we are adding
         ref: editLinkFlyoutRef,
       });
-      console.log('new links', newLinks);
-      setLinks(newLinks);
+      if (newLinks) setLinks(newLinks);
     },
     [editLinkFlyoutRef, links, parentDashboard]
   );
