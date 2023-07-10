@@ -6,41 +6,47 @@
  * Side Public License, v 1.
  */
 
-import './discover_field.scss';
-
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
+import { DragDrop } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SearchMode } from '../../types';
+import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
-  FieldItemButton,
-  type FieldItemButtonProps,
   FieldPopover,
   FieldPopoverHeader,
-  FieldPopoverHeaderProps,
+  type FieldPopoverHeaderProps,
   FieldPopoverFooter,
-} from '@kbn/unified-field-list';
-import { DragDrop } from '@kbn/dom-drag-drop';
-import { DiscoverFieldStats } from './discover_field_stats';
-import { PLUGIN_ID } from '../../../../../common';
-import { getUiActions } from '../../../../kibana_services';
+  type FieldPopoverFooterProps,
+} from '../../components/field_popover';
+import {
+  UnifiedFieldListItemStats,
+  type UnifiedFieldListItemStatsProps,
+} from './field_list_item_stats';
+import type {
+  UnifiedFieldListSidebarContainerStateService,
+  AddFieldFilterHandler,
+} from '../../types';
 
 interface GetCommonFieldItemButtonPropsParams {
+  stateService: UnifiedFieldListSidebarContainerStateService;
   field: DataViewField;
   isSelected: boolean;
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
 }
 
 function getCommonFieldItemButtonProps({
+  stateService,
   field,
   isSelected,
   toggleDisplay,
 }: GetCommonFieldItemButtonPropsParams): {
   field: FieldItemButtonProps<DataViewField>['field'];
   isSelected: FieldItemButtonProps<DataViewField>['isSelected'];
-  buttonAddFieldToWorkspaceProps: FieldItemButtonProps<DataViewField>['buttonAddFieldToWorkspaceProps'];
-  buttonRemoveFieldFromWorkspaceProps: FieldItemButtonProps<DataViewField>['buttonRemoveFieldFromWorkspaceProps'];
+  buttonAddFieldToWorkspaceProps?: FieldItemButtonProps<DataViewField>['buttonAddFieldToWorkspaceProps'];
+  buttonRemoveFieldFromWorkspaceProps?: FieldItemButtonProps<DataViewField>['buttonRemoveFieldFromWorkspaceProps'];
   onAddFieldToWorkspace: FieldItemButtonProps<DataViewField>['onAddFieldToWorkspace'];
   onRemoveFieldFromWorkspace: FieldItemButtonProps<DataViewField>['onRemoveFieldFromWorkspace'];
 } {
@@ -49,33 +55,27 @@ function getCommonFieldItemButtonProps({
   return {
     field,
     isSelected,
-    buttonAddFieldToWorkspaceProps: {
-      'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-        defaultMessage: 'Add field as column',
-      }),
-    },
-    buttonRemoveFieldFromWorkspaceProps: {
-      'aria-label': i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-        defaultMessage: 'Remove field from table',
-      }),
-    },
+    buttonAddFieldToWorkspaceProps: stateService.creationOptions.buttonAddFieldToWorkspaceProps,
+    buttonRemoveFieldFromWorkspaceProps:
+      stateService.creationOptions.buttonRemoveFieldFromWorkspaceProps,
     onAddFieldToWorkspace: handler,
     onRemoveFieldFromWorkspace: handler,
   };
 }
 
 interface MultiFieldsProps {
-  multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
+  stateService: UnifiedFieldListSidebarContainerStateService;
+  multiFields: NonNullable<UnifiedFieldListItemProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
+  ({ stateService, multiFields, toggleDisplay, alwaysShowActionButton }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
-          {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
+          {i18n.translate('unifiedFieldList.fieldListItem.multiFields', {
             defaultMessage: 'Multi fields',
           })}
         </h5>
@@ -85,13 +85,13 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
         <FieldItemButton
           key={entry.field.name}
           size="xs"
-          className="dscSidebarItem dscSidebarItem--multi"
           flush="both"
           isEmpty={false}
           isActive={false}
           shouldAlwaysShowAction={alwaysShowActionButton}
           onClick={undefined}
           {...getCommonFieldItemButtonProps({
+            stateService,
             field: entry.field,
             isSelected: entry.isSelected,
             toggleDisplay,
@@ -102,7 +102,22 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
   )
 );
 
-export interface DiscoverFieldProps {
+export interface UnifiedFieldListItemProps {
+  /**
+   * Service for managing the state
+   */
+  stateService: UnifiedFieldListSidebarContainerStateService;
+
+  /**
+   * Required services
+   */
+  services: UnifiedFieldListItemStatsProps['services'] & {
+    uiActions?: FieldPopoverFooterProps['uiActions'];
+  };
+  /**
+   * Current search mode
+   */
+  searchMode: SearchMode | undefined;
   /**
    * Determines whether add/remove button is displayed not only when focused
    */
@@ -118,16 +133,16 @@ export interface DiscoverFieldProps {
   /**
    * Callback to add/select the field
    */
-  onAddField: (fieldName: string) => void;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
+  onAddFieldToWorkspace: (field: DataViewField) => void;
   /**
    * Callback to remove a field column from the table
    * @param fieldName
    */
-  onRemoveField: (fieldName: string) => void;
+  onRemoveFieldFromWorkspace: (field: DataViewField) => void;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: AddFieldFilterHandler;
   /**
    * Determines whether the field is empty
    */
@@ -142,49 +157,48 @@ export interface DiscoverFieldProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-
+  /**
+   * Multi fields for the current field
+   */
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
-
   /**
    * Callback to edit a field from data view
    * @param fieldName name of the field to edit
    */
-  onEditField?: (fieldName: string) => void;
-
+  onEditField?: (fieldName?: string) => void;
   /**
    * Callback to delete a runtime field from data view
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;
-
   /**
-   * Columns
+   * Currently selected fields like table columns
    */
-  contextualFields: string[];
-
+  workspaceSelectedFieldNames?: string[];
   /**
    * Search by field name
    */
   highlight?: string;
-
   /**
    * Group index in the field list
    */
   groupIndex: number;
-
   /**
    * Item index in the field list
    */
   itemIndex: number;
 }
 
-function DiscoverFieldComponent({
+function UnifiedFieldListItemComponent({
+  stateService,
+  services,
+  searchMode,
   alwaysShowActionButton = false,
   field,
   highlight,
   dataView,
-  onAddField,
-  onRemoveField,
+  onAddFieldToWorkspace,
+  onRemoveFieldFromWorkspace,
   onAddFilter,
   isEmpty,
   isSelected,
@@ -192,12 +206,11 @@ function DiscoverFieldComponent({
   multiFields,
   onEditField,
   onDeleteField,
-  contextualFields,
+  workspaceSelectedFieldNames,
   groupIndex,
   itemIndex,
-}: DiscoverFieldProps) {
+}: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
-  const isDocumentRecord = !!onAddFilter;
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
@@ -222,40 +235,41 @@ function DiscoverFieldComponent({
     (f, isCurrentlySelected) => {
       closePopover();
       if (isCurrentlySelected) {
-        onRemoveField(f.name);
+        onRemoveFieldFromWorkspace(f);
       } else {
-        onAddField(f.name);
+        onAddFieldToWorkspace(f);
       }
     },
-    [onAddField, onRemoveField, closePopover]
+    [onAddFieldToWorkspace, onRemoveFieldFromWorkspace, closePopover]
   );
 
   const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
 
-  const customPopoverHeaderProps: Partial<FieldPopoverHeaderProps> = useMemo(
-    () => ({
-      buttonAddFieldToWorkspaceProps: {
-        'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-          defaultMessage: 'Add field as column',
-        }),
-      },
-      buttonAddFilterProps: {
-        'data-test-subj': `discoverFieldListPanelAddExistFilter-${field.name}`,
-      },
-      buttonEditFieldProps: {
-        'data-test-subj': `discoverFieldListPanelEdit-${field.name}`,
-      },
-      buttonDeleteFieldProps: {
-        'data-test-subj': `discoverFieldListPanelDelete-${field.name}`,
-      },
-    }),
-    [field.name]
-  );
+  const customPopoverHeaderProps: Partial<FieldPopoverHeaderProps> = useMemo(() => {
+    const dataTestSubjPrefix =
+      stateService.creationOptions.dataTestSubj?.fieldListItemPopoverHeaderDataTestSubjPrefix;
+    return {
+      buttonAddFieldToWorkspaceProps: stateService.creationOptions.buttonAddFieldToWorkspaceProps,
+      ...(dataTestSubjPrefix && {
+        buttonAddFilterProps: {
+          'data-test-subj': `${dataTestSubjPrefix}AddExistFilter-${field.name}`,
+        },
+        buttonEditFieldProps: {
+          'data-test-subj': `${dataTestSubjPrefix}Edit-${field.name}`,
+        },
+        buttonDeleteFieldProps: {
+          'data-test-subj': `${dataTestSubjPrefix}Delete-${field.name}`,
+        },
+      }),
+    };
+  }, [field.name, stateService.creationOptions]);
 
   const renderPopover = () => {
     return (
       <>
-        <DiscoverFieldStats
+        <UnifiedFieldListItemStats
+          stateService={stateService}
+          services={services}
           field={field}
           multiFields={multiFields}
           dataView={dataView}
@@ -266,6 +280,7 @@ function DiscoverFieldComponent({
           <>
             <EuiSpacer size="m" />
             <MultiFields
+              stateService={stateService}
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
@@ -273,16 +288,18 @@ function DiscoverFieldComponent({
           </>
         )}
 
-        <FieldPopoverFooter
-          field={field}
-          dataView={dataView}
-          multiFields={rawMultiFields}
-          trackUiMetric={trackUiMetric}
-          contextualFields={contextualFields}
-          originatingApp={PLUGIN_ID}
-          uiActions={getUiActions()}
-          closePopover={() => closePopover()}
-        />
+        {!!services.uiActions && (
+          <FieldPopoverFooter
+            field={field}
+            dataView={dataView}
+            multiFields={rawMultiFields}
+            trackUiMetric={trackUiMetric}
+            contextualFields={workspaceSelectedFieldNames}
+            originatingApp={stateService.creationOptions.originatingApp}
+            uiActions={services.uiActions}
+            closePopover={() => closePopover()}
+          />
+        )}
       </>
     );
   };
@@ -308,24 +325,28 @@ function DiscoverFieldComponent({
           order={order}
           value={value}
           onDragStart={closePopover}
-          isDisabled={alwaysShowActionButton}
-          dataTestSubj={`dscFieldListPanelField-${field.name}`}
+          isDisabled={
+            alwaysShowActionButton || stateService.creationOptions.disableFieldListItemDragAndDrop
+          }
+          dataTestSubj={`${
+            stateService.creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
+            'unifiedFieldListItemDnD'
+          }-${field.name}`}
         >
           <FieldItemButton
             size="xs"
             fieldSearchHighlight={highlight}
-            className="dscSidebarItem"
             isEmpty={isEmpty}
             isActive={infoIsOpen}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
             onClick={field.type !== '_source' ? togglePopover : undefined}
-            {...getCommonFieldItemButtonProps({ field, isSelected, toggleDisplay })}
+            {...getCommonFieldItemButtonProps({ stateService, field, isSelected, toggleDisplay })}
           />
         </DragDrop>
       }
       closePopover={closePopover}
-      data-test-subj="discoverFieldListPanelPopover"
+      data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
         <FieldPopoverHeader
           field={field}
@@ -337,9 +358,9 @@ function DiscoverFieldComponent({
           {...customPopoverHeaderProps}
         />
       )}
-      renderContent={isDocumentRecord ? renderPopover : undefined}
+      renderContent={searchMode === 'documents' ? renderPopover : undefined}
     />
   );
 }
 
-export const DiscoverField = memo(DiscoverFieldComponent);
+export const UnifiedFieldListItem = memo(UnifiedFieldListItemComponent);
