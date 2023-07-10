@@ -13,6 +13,8 @@ import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
+import { ApiKeyField } from '../../../../../components/api_key_field';
+
 import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
 
 import {
@@ -22,7 +24,6 @@ import {
 
 import { useBreadcrumbs, usePagination } from '../../../hooks';
 import { DefaultLayout } from '../../../layouts';
-import { ApiKeyField } from '../enrollment_token_list_page';
 import type { GetUninstallTokenResponse } from '../../../../../../common/types/rest_spec/uninstall_token';
 
 export const UninstallTokenListPage = () => {

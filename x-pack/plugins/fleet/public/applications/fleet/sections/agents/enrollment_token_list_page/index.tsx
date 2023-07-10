@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import {
   EuiSpacer,
@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/request/send_request';
+
+import { ApiKeyField } from '../../../../../components/api_key_field';
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../../../common/types';
 import { ENROLLMENT_API_KEYS_INDEX, SO_SEARCH_LIMIT } from '../../../constants';
@@ -39,79 +41,6 @@ import { SearchBar } from '../../../components/search_bar';
 import { DefaultLayout } from '../../../layouts';
 
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
-
-export const ApiKeyField: React.FunctionComponent<{
-  apiKeyId: string;
-  length: number;
-  sendGetAPIKey: (id: string) => Promise<SendRequestResponse>;
-  tokenGetter: (response: SendRequestResponse) => string | undefined;
-}> = ({ apiKeyId, length, sendGetAPIKey, tokenGetter }) => {
-  const { notifications } = useStartServices();
-  const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
-  const [key, setKey] = useState<string | undefined>();
-
-  const tokenMask = useMemo(() => '•'.repeat(length), [length]);
-
-  const toggleKey = async () => {
-    if (state === 'VISIBLE') {
-      setState('HIDDEN');
-    } else if (state === 'HIDDEN') {
-      try {
-        setState('LOADING');
-        const res = await sendGetAPIKey(apiKeyId);
-        if (res.error) {
-          throw res.error;
-        }
-        setKey(tokenGetter(res));
-        setState('VISIBLE');
-      } catch (err) {
-        notifications.toasts.addError(err as Error, {
-          title: 'Error',
-        });
-        setState('HIDDEN');
-      }
-    }
-  };
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiText color="subdued" size="xs">
-          {state === 'VISIBLE' ? key : tokenMask}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            state === 'VISIBLE'
-              ? i18n.translate('xpack.fleet.enrollmentTokensList.hideTokenButtonLabel', {
-                  defaultMessage: 'Hide token',
-                })
-              : i18n.translate('xpack.fleet.enrollmentTokensList.showTokenButtonLabel', {
-                  defaultMessage: 'Show token',
-                })
-          }
-        >
-          <EuiButtonIcon
-            aria-label={
-              state === 'VISIBLE'
-                ? i18n.translate('xpack.fleet.enrollmentTokensList.hideTokenButtonLabel', {
-                    defaultMessage: 'Hide token',
-                  })
-                : i18n.translate('xpack.fleet.enrollmentTokensList.showTokenButtonLabel', {
-                    defaultMessage: 'Show token',
-                  })
-            }
-            color="text"
-            onClick={toggleKey}
-            iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
-            data-test-subj="showHideTokenButton"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh: () => void }> = ({
   apiKey,
