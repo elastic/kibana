@@ -31,7 +31,6 @@ export const Tile = ({
   id,
   layers,
   title,
-  style,
   toolTip,
   dataView,
   nodeName,
