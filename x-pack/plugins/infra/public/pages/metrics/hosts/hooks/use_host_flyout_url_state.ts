@@ -49,6 +49,8 @@ const FlyoutTabIdRT = rt.union([
   rt.literal(FlyoutTabIds.METADATA),
   rt.literal(FlyoutTabIds.PROCESSES),
   rt.literal(FlyoutTabIds.LOGS),
+  rt.literal(FlyoutTabIds.ANOMALIES),
+  rt.literal(FlyoutTabIds.OSQUERY),
 ]);
 
 const HostFlyoutStateRT = rt.intersection([
