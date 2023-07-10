@@ -12,6 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { getRawData } from '../../../../assistant/helpers';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
@@ -21,7 +22,6 @@ import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
@@ -72,9 +72,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   scopeId,
   isReadOnly,
 }) => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
-  const useAssistant = isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
+  const useAssistant = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const currentSpaceId = useSpaceId();
   const { indexName } = expandedEvent;
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
