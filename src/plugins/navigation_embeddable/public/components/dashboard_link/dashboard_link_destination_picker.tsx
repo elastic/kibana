@@ -53,10 +53,11 @@ export const DashboardLinkDestinationPicker = ({
   useEffect(() => {
     const dashboardOptions =
       (dashboardList ?? []).map((dashboard: DashboardItem) => {
+        if (dashboard.id === initialSelection) setSelectedDashboard(dashboard);
         return {
           data: dashboard,
           label: dashboard.attributes.title,
-          checked: initialSelection && dashboard.id === initialSelection ? 'on' : undefined,
+          checked: dashboard.id === initialSelection ? 'on' : undefined,
           ...(dashboard.id === parentDashboardId
             ? {
                 prepend: (

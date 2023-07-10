@@ -55,10 +55,12 @@ export const NavigationEmbeddableLinkEditor = ({
   const linkToEdit = useRef(idToEdit ? links[idToEdit] : undefined);
 
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(
-    linkToEdit.current ? linkToEdit.current.type : DASHBOARD_LINK_TYPE
+    linkToEdit.current?.type ?? DASHBOARD_LINK_TYPE
   );
   const [linkLabel, setLinkLabel] = useState<string>();
-  const [linkDestination, setLinkDestination] = useState<string | undefined>();
+  const [linkDestination, setLinkDestination] = useState<string | undefined>(
+    linkToEdit.current?.destination
+  );
   const [linkLabelPlaceholder, setLinkLabelPlaceholder] = useState<string | undefined>();
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {

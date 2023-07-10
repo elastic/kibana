@@ -11,21 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import {
-  EuiText,
-  EuiIcon,
-  EuiForm,
-  EuiTitle,
-  EuiPanel,
-  IconType,
-  EuiSpacer,
-  EuiButton,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFlyoutBody,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiIcon, EuiPanel, IconType, EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
