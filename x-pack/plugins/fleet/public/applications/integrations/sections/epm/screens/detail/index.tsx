@@ -732,7 +732,7 @@ export function Detail() {
       ) : isLoading || !packageInfo ? (
         <Loading />
       ) : (
-        <Routes>
+        <Routes compat={false}>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
             <OverviewPage
               packageInfo={packageInfo}
@@ -755,7 +755,9 @@ export function Detail() {
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_api_reference}>
             <DocumentationPage packageInfo={packageInfo} integration={integrationInfo?.name} />
           </Route>
-          <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
+          <Route path="*">
+            <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
+          </Route>
         </Routes>
       )}
     </WithHeaderLayout>

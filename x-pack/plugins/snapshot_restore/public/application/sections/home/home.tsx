@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
@@ -25,12 +25,9 @@ interface MatchParams {
   section: Section;
 }
 
-export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const SnapshotRestoreHome: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { section } = useParams<MatchParams>();
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
 
@@ -134,7 +131,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       <Routes>
         <Route
           exact
-          path={`${BASE_PATH}/repositories/:repositoryName*`}
+          path={`${BASE_PATH}/repositories/:repositoryName?`}
           component={RepositoryList}
         />
         {/* We have two separate SnapshotList routes because repository names could have slashes in
@@ -142,12 +139,12 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
          */}
         <Route exact path={`${BASE_PATH}/snapshots`} component={SnapshotList} />
         <Route
-          exact
-          path={`${BASE_PATH}/snapshots/:repositoryName*/:snapshotId`}
+          // exact
+          path={`${BASE_PATH}/snapshots/:repositoryName?/:snapshotId?`}
           component={SnapshotList}
         />
         <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
-        <Route exact path={`${BASE_PATH}/policies/:policyName*`} component={PolicyList} />
+        <Route exact path={`${BASE_PATH}/policies/:policyName?`} component={PolicyList} />
       </Routes>
     </>
   );

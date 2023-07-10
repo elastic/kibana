@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
@@ -24,10 +24,9 @@ import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy, useLoadIndices } from '../../services/http';
 
-export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
-  history,
-  location: { pathname },
-}) => {
+export const PolicyAdd: React.FunctionComponent = () => {
+  const { pathname } = useLocation();
+  const history = useHistory();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 

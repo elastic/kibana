@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useRouteMatch, useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
@@ -37,9 +37,7 @@ import {
 } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
-  const {
-    params: { agentId, tabId = '' },
-  } = useRouteMatch<{ agentId: string; tabId?: string }>();
+  const { agentId, tabId = '' } = useParams<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
   const {
@@ -231,7 +229,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         : '-',
   });
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {

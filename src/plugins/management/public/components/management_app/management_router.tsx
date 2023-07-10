@@ -47,7 +47,7 @@ export const ManagementRouter = memo(
 
     return (
       <Router history={history}>
-        <Routes>
+        <Routes compat={false}>
           {sections.map((section) =>
             section
               .getAppsEnabled()
@@ -70,7 +70,12 @@ export const ManagementRouter = memo(
             section
               .getAppsEnabled()
               .filter((app) => app.redirectFrom)
-              .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+              .map((app) => (
+                <Route
+                  path={`/${app.redirectFrom}*`}
+                  component={() => <Redirect to={`${app.basePath}*`} />}
+                />
+              ))
           )}
 
           <Route

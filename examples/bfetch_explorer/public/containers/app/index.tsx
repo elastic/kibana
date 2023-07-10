@@ -30,7 +30,9 @@ export const App: React.FC = () => {
         <Sidebar />
         <Routes>
           {routeElements}
-          <Redirect to="/count-until" />
+          <Route path="*">
+            <Redirect to="/count-until" />
+          </Route>
         </Routes>
       </EuiPage>
     </Router>

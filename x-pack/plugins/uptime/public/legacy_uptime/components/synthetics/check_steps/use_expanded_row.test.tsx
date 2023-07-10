@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactRouterDom from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { fireEvent, screen } from '@testing-library/dom';
 import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
@@ -97,18 +97,20 @@ describe('useExpandedROw', () => {
     expandedRowsObj = expandedRows;
 
     return (
-      <Route path={SYNTHETIC_CHECK_STEPS_ROUTE}>
-        Step list
-        {defaultSteps.map((journeyStep, index) => (
-          <EuiButtonIcon
-            key={index}
-            data-test-subj={TEST_ID + index}
-            onClick={() => toggleExpand({ journeyStep })}
-            aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[journeyStep._id] ? 'arrowUp' : 'arrowDown'}
-          />
-        ))}
-      </Route>
+      <Routes>
+        <Route path={SYNTHETIC_CHECK_STEPS_ROUTE}>
+          Step list
+          {defaultSteps.map((journeyStep, index) => (
+            <EuiButtonIcon
+              key={index}
+              data-test-subj={TEST_ID + index}
+              onClick={() => toggleExpand({ journeyStep })}
+              aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
+              iconType={expandedRows[journeyStep._id] ? 'arrowUp' : 'arrowDown'}
+            />
+          ))}
+        </Route>
+      </Routes>
     );
   };
 

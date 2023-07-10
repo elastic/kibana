@@ -40,7 +40,7 @@ export const HostsTabs = React.memo<HostsTabsProps>(
     const hostNameExistsFilter = useMemo(() => fieldNameExistsFilter(SecurityPageName.hosts), []);
 
     return (
-      <Routes>
+      <Routes compat={false}>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />
         </Route>

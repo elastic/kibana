@@ -32,7 +32,7 @@ const App = React.memo(() => {
   const hasLicense = isAtLeastPlatinum();
 
   return (
-    <Routes>
+    <Routes compat={false}>
       {hasLicense ? (
         <Route
           key={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate}
@@ -55,7 +55,7 @@ const App = React.memo(() => {
           </Suspense>
         </Route>
       ) : null}
-      <Route>
+      <Route path="*">
         <Suspense fallback={<EuiLoadingSpinner />}>
           <MaintenanceWindowsLazy />
         </Suspense>

@@ -8,7 +8,7 @@
 import { parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
@@ -24,10 +24,9 @@ import { BASE_PATH, Section } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
-export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
-  history,
-  location: { search },
-}) => {
+export const RepositoryAdd: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { search } = useLocation();
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);

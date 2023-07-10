@@ -45,8 +45,36 @@ export const renderApp = async (
       <KibanaThemeProvider theme$={theme$}>
         <Router history={history}>
           <Routes>
+            <Route path="/pipeline/new-pipeline" exact>
+              <PipelineEditView
+                history={history}
+                setBreadcrumbs={setBreadcrumbs}
+                logstashLicenseService={logstashLicenseService}
+                pipelineService={pipelineService}
+                toasts={core.notifications.toasts}
+              />
+            </Route>
             <Route
-              path={['/', '']}
+              path="/pipeline/:id"
+              exact
+              render={({ match }) => <Redirect to={`/pipeline/${match.params.id}/edit`} />}
+            />
+            <Route
+              path="/pipeline/:id/edit"
+              exact
+              render={({ match }) => (
+                <PipelineEditView
+                  history={history}
+                  setBreadcrumbs={setBreadcrumbs}
+                  logstashLicenseService={logstashLicenseService}
+                  pipelineService={pipelineService}
+                  toasts={core.notifications.toasts}
+                  id={match.params.id}
+                />
+              )}
+            />
+            <Route
+              path={'*'}
               exact
               render={() => {
                 setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());
@@ -66,38 +94,6 @@ export const renderApp = async (
                   />
                 );
               }}
-            />
-            <Route
-              path="/pipeline/new-pipeline"
-              exact
-              render={() => (
-                <PipelineEditView
-                  history={history}
-                  setBreadcrumbs={setBreadcrumbs}
-                  logstashLicenseService={logstashLicenseService}
-                  pipelineService={pipelineService}
-                  toasts={core.notifications.toasts}
-                />
-              )}
-            />
-            <Route
-              path="/pipeline/:id"
-              exact
-              render={({ match }) => <Redirect to={`/pipeline/${match.params.id}/edit`} />}
-            />
-            <Route
-              path="/pipeline/:id/edit"
-              exact
-              render={({ match }) => (
-                <PipelineEditView
-                  history={history}
-                  setBreadcrumbs={setBreadcrumbs}
-                  logstashLicenseService={logstashLicenseService}
-                  pipelineService={pipelineService}
-                  toasts={core.notifications.toasts}
-                  id={match.params.id}
-                />
-              )}
             />
           </Routes>
         </Router>

@@ -8,8 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from '@kbn/shared-ux-router';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -51,7 +50,9 @@ export const mountManagementSection = (
               getAllFindKindDefinitions={getAllFindKindDefinitions}
             >
               <Router history={history}>
-                <Route path="/" component={App} />
+                <Routes>
+                  <Route path="/" component={App} />
+                </Routes>
               </Router>
             </FilesManagementAppContextProvider>
           </TableListViewKibanaProvider>

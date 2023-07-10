@@ -6,24 +6,19 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, useParams, useLocation } from 'react-router-dom';
 
 import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 
-type RedirectToNodeDetailProps = RouteComponentProps<{
-  nodeId: string;
-  nodeType: InventoryItemType;
-}>;
-
-export const RedirectToNodeDetail = ({
-  match: {
-    params: { nodeId, nodeType },
-  },
-  location,
-}: RedirectToNodeDetailProps) => {
+export const RedirectToNodeDetail = () => {
+  const { nodeId, nodeType } = useParams<{
+    nodeId: string;
+    nodeType: InventoryItemType;
+  }>();
+  const location = useLocation();
   const searchString = replaceMetricTimeInQueryString(
     getFromFromLocation(location),
     getToFromLocation(location)

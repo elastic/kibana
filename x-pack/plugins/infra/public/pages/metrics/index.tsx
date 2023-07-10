@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useContext } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
@@ -41,7 +40,7 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
   defaultMessage: 'Add data',
 });
 
-export const InfrastructurePage = ({ match }: RouteComponentProps) => {
+export const InfrastructurePage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
@@ -80,7 +79,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
-                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                        <Routes>
+                          <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                        </Routes>
                         <MetricsAlertDropdown />
                         <EuiHeaderLink
                           href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
@@ -110,7 +111,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     <Route path="/detail/:type/:node" component={MetricDetail} />
                     <Route path={'/hosts'} component={HostsLandingPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
-                    <Route render={() => <NotFoundPage title="Infrastructure" />} />
+                    <Route path="*">
+                      <NotFoundPage title="Infrastructure" />
+                    </Route>
                   </Routes>
                 </InfraMLCapabilitiesProvider>
               </ReactQueryProvider>

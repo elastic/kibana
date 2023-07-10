@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { RouteComponentProps, Redirect } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { History } from 'history';
+import React, { FC, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { parse, stringify } from 'query-string';
-import { HomeRoute } from './home';
-import { WorkpadRoute, ExportWorkpadRoute } from './workpad';
+import { HomeApp } from './home';
+import { ExportWorkpadRouteComponent, WorkpadRouteComponent } from './workpad';
 
 const isHashPath = (hash: string) => {
   return hash.indexOf('#/') === 0;
@@ -24,39 +24,41 @@ const mergeQueryStrings = (query: string, queryFromHash: string) => {
   return stringify({ ...queryObject, ...hashObject });
 };
 
-export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
-  <Router history={history}>
-    <Route
-      path="/"
-      children={(route: RouteComponentProps) => {
-        // If it looks like the hash is a route then we will do a redirect
-        if (isHashPath(route.location.hash) && !route.location.pathname) {
-          const [hashPath, hashQuery] = route.location.hash.split('?');
-          let search = route.location.search || '?';
+export const CanvasRouter: FC = () => {
+  const history = useHistory();
+  const location = useLocation();
 
-          if (hashQuery !== undefined) {
-            search = mergeQueryStrings(search, `?${hashQuery}`);
-          }
+  useEffect(() => {
+    // If it looks like the hash is a route then we will do a redirect
+    if (isHashPath(location.hash) && !location.pathname?.length) {
+      const [hashPath, hashQuery] = location.hash.split('?');
+      let search = location.search || '?';
+      if (hashQuery !== undefined) {
+        search = mergeQueryStrings(search, `?${hashQuery}`);
+      }
 
-          return (
-            <Redirect
-              push
-              to={{
-                pathname: `${hashPath.substring(1)}`,
-                search,
-              }}
-            />
-          );
-        }
+      history.push({
+        pathname: `${hashPath.substring(1)}`,
+        search,
+      });
+    }
+  }, [history, location]);
 
-        return (
-          <Routes>
-            {ExportWorkpadRoute()}
-            {WorkpadRoute()}
-            {HomeRoute()}
-          </Routes>
-        );
-      }}
-    />
-  </Router>
-);
+  return (
+    <Routes>
+      <Route
+        path={'/export/workpad/pdf/:id/page/:pageNumber?'}
+        component={ExportWorkpadRouteComponent}
+      />
+      <Route
+        path={'/workpad/:id/page/:pageNumber?'}
+        exact={true}
+        component={WorkpadRouteComponent}
+      />
+      <Route path={'/workpad/:id'} exact={true} component={WorkpadRouteComponent} />
+      <Route path="/">
+        <HomeApp />
+      </Route>
+    </Routes>
+  );
+};

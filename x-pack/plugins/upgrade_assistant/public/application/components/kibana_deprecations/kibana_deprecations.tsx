@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
@@ -92,7 +92,8 @@ const getDeprecationCountByLevel = (deprecations: KibanaDeprecationDetails[]) =>
   };
 };
 
-export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) => {
+export const KibanaDeprecations = () => {
+  const history = useHistory();
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     KibanaDeprecationDetails[] | undefined
   >(undefined);
@@ -290,4 +291,4 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
       />
     </div>
   );
-});
+};

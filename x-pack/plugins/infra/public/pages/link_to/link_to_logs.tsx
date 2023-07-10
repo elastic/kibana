@@ -29,14 +29,16 @@ const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
  */
 export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         path={`${props.match.url}/:logViewId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
         component={RedirectToNodeLogs}
       />
       <Route path={`${props.match.url}/:logViewId?/logs`} component={RedirectToLogs} />
       <Route path={`${props.match.url}/:logViewId?`} component={RedirectToLogs} />
-      <Redirect to="/" />
+      <Route path="*">
+        <Redirect to="/" />
+      </Route>
     </Routes>
   );
 };

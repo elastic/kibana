@@ -68,22 +68,25 @@ export const App: React.FunctionComponent = () => {
           <div data-test-subj="snapshotRestoreApp" className={APP_WRAPPER_CLASS}>
             <Routes>
               <Route exact path="/add_repository" component={RepositoryAdd} />
-              <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
+              <Route exact path="/edit_repository/:name?" component={RepositoryEdit} />
               <Route
                 exact
                 path={`/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
                 component={SnapshotRestoreHome}
               />
-              <Redirect exact from="/restore/:repositoryName" to="/snapshots" />
+              <Route exact path="/restore/:repositoryName">
+                <Redirect to="/snapshots" />
+              </Route>
               <Route
                 exact
-                path="/restore/:repositoryName/:snapshotId*"
+                path="/restore/:repositoryName?/:snapshotId?"
                 component={RestoreSnapshot}
               />
               {slmUi.enabled && <Route exact path="/add_policy" component={PolicyAdd} />}
-              {slmUi.enabled && <Route exact path="/edit_policy/:name*" component={PolicyEdit} />}
-              <Redirect from="/" to={`/${DEFAULT_SECTION}`} />
-              <Redirect from="" to={`/${DEFAULT_SECTION}`} />
+              {slmUi.enabled && <Route exact path="/edit_policy/:name?" component={PolicyEdit} />}
+              <Route path="*">
+                <Redirect to={`/${DEFAULT_SECTION}`} />
+              </Route>
             </Routes>
           </div>
         ) : (

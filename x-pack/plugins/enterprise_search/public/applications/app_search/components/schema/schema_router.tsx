@@ -25,7 +25,7 @@ export const SchemaRouter: React.FC = () => {
       <Route path={ENGINE_REINDEX_JOB_PATH}>
         <ReindexJob />
       </Route>
-      <Route>{isMetaEngine ? <MetaEngineSchema /> : <Schema />}</Route>
+      <Route path="*">{isMetaEngine ? <MetaEngineSchema /> : <Schema />}</Route>
     </Routes>
   );
 };

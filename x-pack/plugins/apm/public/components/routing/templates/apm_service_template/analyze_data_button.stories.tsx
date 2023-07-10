@@ -7,7 +7,6 @@
 
 import type { Story, DecoratorFn } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
@@ -38,30 +37,28 @@ export default {
       } as unknown as Partial<CoreStart>);
 
       return (
-        <MemoryRouter
+        <MockApmPluginContextWrapper
           initialEntries={[
             `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
               environment ?? ENVIRONMENT_ALL.value
             }&kuery=`,
           ]}
         >
-          <MockApmPluginContextWrapper>
-            <APMServiceContext.Provider
-              value={{
-                agentName,
-                transactionTypeStatus: FETCH_STATUS.SUCCESS,
-                transactionTypes: [],
-                serviceName,
-                fallbackToTransactions: false,
-                serviceAgentStatus: FETCH_STATUS.SUCCESS,
-              }}
-            >
-              <KibanaContext.Provider>
-                <StoryComponent />
-              </KibanaContext.Provider>
-            </APMServiceContext.Provider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <APMServiceContext.Provider
+            value={{
+              agentName,
+              transactionTypeStatus: FETCH_STATUS.SUCCESS,
+              transactionTypes: [],
+              serviceName,
+              fallbackToTransactions: false,
+              serviceAgentStatus: FETCH_STATUS.SUCCESS,
+            }}
+          >
+            <KibanaContext.Provider>
+              <StoryComponent />
+            </KibanaContext.Provider>
+          </APMServiceContext.Provider>
+        </MockApmPluginContextWrapper>
       );
     },
   ] as DecoratorFn[],

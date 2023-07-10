@@ -8,7 +8,6 @@
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { LatencyChart } from '.';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
@@ -67,40 +66,39 @@ const stories: Meta<Args> = {
       const transactionType = `${Math.random()}`; // So we don't memoize
 
       return (
-        <MemoryRouter
+        <MockApmPluginContextWrapper
+          value={apmPluginContextMock}
           initialEntries={[
             `/services/${serviceName}/overview?environment=ENVIRONMENT_ALL&kuery=&rangeFrom=now-15m&rangeTo=now&transactionType=request&comparisonEnabled=true&offset=1d`,
           ]}
         >
-          <MockApmPluginContextWrapper value={apmPluginContextMock}>
-            <KibanaContextProvider services={{ ...apmPluginContextMock.core }}>
-              <MockUrlParamsContextProvider
-                params={{
-                  latencyAggregationType: LatencyAggregationType.avg,
-                }}
-              >
-                <MockTimeRangeContextProvider>
-                  <ApmTimeRangeMetadataContextProvider>
-                    <APMServiceContext.Provider
-                      value={{
-                        serviceName,
-                        transactionType,
-                        transactionTypeStatus: FETCH_STATUS.SUCCESS,
-                        transactionTypes: [],
-                        fallbackToTransactions: false,
-                        serviceAgentStatus: FETCH_STATUS.SUCCESS,
-                      }}
-                    >
-                      <ChartPointerEventContextProvider>
-                        <StoryComponent />
-                      </ChartPointerEventContextProvider>
-                    </APMServiceContext.Provider>
-                  </ApmTimeRangeMetadataContextProvider>
-                </MockTimeRangeContextProvider>
-              </MockUrlParamsContextProvider>
-            </KibanaContextProvider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
+          <KibanaContextProvider services={{ ...apmPluginContextMock.core }}>
+            <MockUrlParamsContextProvider
+              params={{
+                latencyAggregationType: LatencyAggregationType.avg,
+              }}
+            >
+              <MockTimeRangeContextProvider>
+                <ApmTimeRangeMetadataContextProvider>
+                  <APMServiceContext.Provider
+                    value={{
+                      serviceName,
+                      transactionType,
+                      transactionTypeStatus: FETCH_STATUS.SUCCESS,
+                      transactionTypes: [],
+                      fallbackToTransactions: false,
+                      serviceAgentStatus: FETCH_STATUS.SUCCESS,
+                    }}
+                  >
+                    <ChartPointerEventContextProvider>
+                      <StoryComponent />
+                    </ChartPointerEventContextProvider>
+                  </APMServiceContext.Provider>
+                </ApmTimeRangeMetadataContextProvider>
+              </MockTimeRangeContextProvider>
+            </MockUrlParamsContextProvider>
+          </KibanaContextProvider>
+        </MockApmPluginContextWrapper>
       );
     },
   ],

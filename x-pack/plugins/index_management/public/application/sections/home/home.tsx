@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
@@ -35,12 +35,9 @@ interface MatchParams {
   section: Section;
 }
 
-export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const IndexManagementHome: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { section } = useParams<MatchParams>();
   const tabs = [
     {
       id: Section.Indices,
@@ -118,25 +115,17 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
       <EuiSpacer size="l" />
 
       <Routes>
-        <Route
-          exact
-          path={[`/${Section.DataStreams}`, `/${Section.DataStreams}/:dataStreamName?`]}
-          component={DataStreamList}
-        />
+        <Route exact path={`/${Section.DataStreams}/:dataStreamName`} component={DataStreamList} />
+        <Route exact path={`/${Section.DataStreams}`} component={DataStreamList} />
         <Route exact path={`/${Section.Indices}`} component={IndexList} />
+        <Route exact path={`/${Section.IndexTemplates}/:templateName`} component={TemplateList} />
+        <Route exact path={`/${Section.IndexTemplates}`} component={TemplateList} />
         <Route
           exact
-          path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
-          component={TemplateList}
-        />
-        <Route
-          exact
-          path={[
-            `/${Section.ComponentTemplates}`,
-            `/${Section.ComponentTemplates}/:componentTemplateName?`,
-          ]}
+          path={`/${Section.ComponentTemplates}/:componentTemplateName`}
           component={ComponentTemplateList}
         />
+        <Route exact path={`/${Section.ComponentTemplates}`} component={ComponentTemplateList} />
       </Routes>
     </>
   );

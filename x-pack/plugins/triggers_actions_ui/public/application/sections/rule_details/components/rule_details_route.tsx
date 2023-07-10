@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ToastsApi } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
 import { RuleType, ActionType, ResolvedRule } from '../../../../types';
@@ -24,20 +24,17 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
-type RuleDetailsRouteProps = RouteComponentProps<{
-  ruleId: string;
-}> &
-  Pick<ActionApis, 'loadActionTypes'> &
+type RuleDetailsRouteProps = Pick<ActionApis, 'loadActionTypes'> &
   Pick<RuleApis, 'loadRuleTypes' | 'resolveRule'>;
 
 export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = ({
-  match: {
-    params: { ruleId },
-  },
   loadRuleTypes,
   loadActionTypes,
   resolveRule,
 }) => {
+  const { ruleId } = useParams<{
+    ruleId: string;
+  }>();
   const {
     http,
     notifications: { toasts },

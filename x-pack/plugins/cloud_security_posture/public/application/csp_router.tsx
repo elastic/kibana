@@ -42,7 +42,7 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
           </Routes>
         </CspRoute>
 
-        <Route>
+        <Route path="*">
           <Redirect to={cloudPosturePages.dashboard.path} />
         </Route>
       </Routes>

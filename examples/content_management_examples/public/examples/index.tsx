@@ -53,7 +53,6 @@ export const renderApp = (
 
           <EuiPageTemplate.Section>
             <Routes>
-              <Redirect from="/" to="/todos" exact />
               <Route path="/todos">
                 <TodoApp contentClient={contentManagement.client} />
               </Route>
@@ -63,6 +62,9 @@ export const renderApp = (
                   core={core}
                   savedObjectsTagging={savedObjectsTaggingOss}
                 />
+              </Route>
+              <Route path="*">
+                <Redirect to="/todos" />
               </Route>
             </Routes>
           </EuiPageTemplate.Section>

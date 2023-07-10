@@ -8,8 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { BrowserRouter as Router, Route } from '@kbn/shared-ux-router';
 import {
   EuiPage,
   EuiPageBody,

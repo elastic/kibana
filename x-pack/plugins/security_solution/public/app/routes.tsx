@@ -52,13 +52,13 @@ const PageRouterComponent: FC<RouterProps> = ({
     <ManageRoutesSpy>
       <Router history={history}>
         <RouteCapture>
-          <Routes>
+          <Routes compat={false}>
             <Route path="/">
               <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
                 <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
               </CasesContext>
             </Route>
-            <Route>
+            <Route path="*">
               <NotFoundPage />
             </Route>
           </Routes>

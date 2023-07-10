@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiStat,
 } from '@elastic/eui';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import {
@@ -30,15 +29,15 @@ import {
 import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
 import { Rule, RuleTaskState } from '../../common/types';
 
-type Props = RouteComponentProps & {
+interface Props {
   http: CoreStart['http'];
   id: string;
-};
+}
 
 function hasCraft(state: any): state is { craft: string } {
   return state && state.craft;
 }
-export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
+export const ViewPeopleInSpaceAlertPage = ({ http, id }: Props) => {
   const [alert, setAlert] = useState<Rule<AlwaysFiringParams> | null>(null);
   const [alertState, setAlertState] = useState<RuleTaskState | null>(null);
 
@@ -114,4 +113,4 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
   ) : (
     <EuiLoadingLogo logo="logoKibana" size="xl" />
   );
-});
+};

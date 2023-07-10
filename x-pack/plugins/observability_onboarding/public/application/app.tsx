@@ -24,7 +24,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -34,11 +33,11 @@ import { routes } from '../routes';
 
 export type BreadcrumbTitle<
   T extends { [K in keyof T]?: string | undefined } = {}
-> = string | ((props: RouteComponentProps<T>) => string) | null;
+> = string | (() => string) | null;
 
 export interface RouteDefinition<
   T extends { [K in keyof T]?: string | undefined } = any
-> extends RouteProps {
+> {
   breadcrumb: BreadcrumbTitle<T>;
 }
 

@@ -217,6 +217,7 @@ export const PageRouter: FC = () => {
         )
       )}
       <Route
+        path="*"
         component={() => (
           <SyntheticsPageTemplateComponent>
             <NotFoundPrompt

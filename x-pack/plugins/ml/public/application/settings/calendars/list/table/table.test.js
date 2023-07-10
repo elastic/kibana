@@ -9,7 +9,7 @@ import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { CalendarsListTable } from './table';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToMlLink: jest.fn(),

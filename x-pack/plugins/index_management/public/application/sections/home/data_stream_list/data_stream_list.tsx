@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams, useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,7 +20,6 @@ import {
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
 
 import {
   PageLoading,
@@ -46,13 +45,10 @@ interface MatchParams {
   dataStreamName?: string;
 }
 
-export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { dataStreamName },
-  },
-  location: { search },
-  history,
-}) => {
+export const DataStreamList: React.FunctionComponent = () => {
+  const { dataStreamName } = useParams<MatchParams>();
+  const { search } = useLocation();
+  const history = useHistory();
   const { isDeepLink, includeHidden } = extractQueryParams(search);
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
@@ -282,7 +278,6 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           }
           dataStreams={filteredDataStreams}
           reload={reload}
-          history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
       </EuiPageContent>

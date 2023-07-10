@@ -6,16 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 
 import { EditPackagePolicyForm } from '../edit_package_policy_page';
 
 export const UpgradePackagePolicyPage = memo(() => {
-  const {
-    params: { packagePolicyId },
-  } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
+  const { packagePolicyId } = useParams<{ policyId: string; packagePolicyId: string }>();
   const { search } = useLocation();
 
   const qs = new URLSearchParams(search);

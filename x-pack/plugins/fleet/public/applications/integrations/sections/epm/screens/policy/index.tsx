@@ -6,16 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 // TODO: Needs to be moved
 import { EditPackagePolicyForm } from '../../../../../fleet/sections/agent_policy/edit_package_policy_page';
 import { useGetOnePackagePolicyQuery, useUIExtension } from '../../../../hooks';
 
 export const Policy = memo(() => {
-  const {
-    params: { packagePolicyId },
-  } = useRouteMatch<{ packagePolicyId: string }>();
+  const { packagePolicyId } = useParams<{ packagePolicyId: string }>();
 
   const { data: packagePolicyData } = useGetOnePackagePolicyQuery(packagePolicyId);
 

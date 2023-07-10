@@ -10,13 +10,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { createMemoryHistory, createLocation } from 'history';
+import { useParams } from 'react-router-dom';
 import { ToastsApi } from '@kbn/core/public';
 import { RuleDetailsRoute, getRuleData } from './rule_details_route';
 import { Rule } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+}));
+
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../../common/lib/config_api', () => ({
@@ -39,10 +45,12 @@ describe('rule_details_route', () => {
   it('render a loader while fetching data', () => {
     const rule = mockRule();
 
+    useParams.mockReturnValue({ ruleId: rule.id });
+
     expect(
-      shallow(
-        <RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />
-      ).containsMatchingElement(<CenterJustifiedSpinner />)
+      shallow(<RuleDetailsRoute {...mockApis()} />).containsMatchingElement(
+        <CenterJustifiedSpinner />
+      )
     ).toBeTruthy();
   });
 
@@ -58,9 +66,8 @@ describe('rule_details_route', () => {
       alias_target_id: rule.id,
       alias_purpose: 'savedObjectConversion',
     }));
-    const wrapper = mountWithIntl(
-      <RuleDetailsRoute {...mockRouterProps(rule)} {...{ ...mockApis(), resolveRule }} />
-    );
+    useParams.mockReturnValue({ ruleId: rule.id });
+    const wrapper = mountWithIntl(<RuleDetailsRoute {...{ ...mockApis(), resolveRule }} />);
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -91,11 +98,9 @@ describe('rule_details_route', () => {
       outcome: 'conflict',
       alias_target_id: rule.id,
     }));
+    useParams.mockReturnValue({ ruleId: rule.id });
     const wrapper = mountWithIntl(
-      <RuleDetailsRoute
-        {...mockRouterProps(rule)}
-        {...{ ...mockApis(), loadRuleTypes, loadActionTypes, resolveRule }}
-      />
+      <RuleDetailsRoute {...{ ...mockApis(), loadRuleTypes, loadActionTypes, resolveRule }} />
     );
     await act(async () => {
       await nextTick();
@@ -458,18 +463,6 @@ function mockStateSetter() {
   };
 }
 
-function mockRouterProps(rule: Rule) {
-  return {
-    match: {
-      isExact: false,
-      path: `/rule/${rule.id}`,
-      url: '',
-      params: { ruleId: rule.id },
-    },
-    history: createMemoryHistory(),
-    location: createLocation(`/rule/${rule.id}`),
-  };
-}
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuidv4(),

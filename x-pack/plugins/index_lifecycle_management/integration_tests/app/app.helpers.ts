@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test-jest-helpers';
-import { App } from '../../public/application/app';
+import { AppRoutes } from '../../public/application/app';
 import { WithAppDependencies } from '../helpers';
 
 const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
@@ -32,7 +32,7 @@ export const setup = async (
   initialEntries: string[]
 ): Promise<AppTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(App, httpSetup),
+    WithAppDependencies(AppRoutes, httpSetup),
     getTestBedConfig(initialEntries)
   );
   const testBed = await initTestBed();

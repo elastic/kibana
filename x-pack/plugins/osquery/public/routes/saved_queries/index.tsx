@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { QueriesPage } from './list';
@@ -19,7 +18,6 @@ import { useKibana } from '../../common/lib/kibana';
 const SavedQueriesComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('saved_queries');
-  const match = useRouteMatch();
 
   if (!permissions.readSavedQueries) {
     return <MissingPrivileges />;
@@ -27,13 +25,13 @@ const SavedQueriesComponent = () => {
 
   return (
     <Routes>
-      <Route path={`${match.url}/new`}>
+      <Route path={`/saved_queries/new`}>
         {permissions.writeSavedQueries ? <NewSavedQueryPage /> : <MissingPrivileges />}
       </Route>
-      <Route path={`${match.url}/:savedQueryId`}>
+      <Route path={`/saved_queries/:savedQueryId`}>
         <EditSavedQueryPage />
       </Route>
-      <Route path={`${match.url}`}>
+      <Route path={`/saved_queries*`}>
         <QueriesPage />
       </Route>
     </Routes>

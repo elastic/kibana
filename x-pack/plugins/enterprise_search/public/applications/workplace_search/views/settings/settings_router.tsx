@@ -46,7 +46,7 @@ export const SettingsRouter: React.FC = () => {
       <Route exact path={getEditPath(':serviceType')}>
         <SourceConfig />
       </Route>
-      <Route>
+      <Route path="*">
         <Redirect to={ORG_SETTINGS_CUSTOMIZE_PATH} />
       </Route>
     </Routes>

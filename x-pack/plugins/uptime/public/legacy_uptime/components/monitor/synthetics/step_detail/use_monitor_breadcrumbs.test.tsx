@@ -7,7 +7,7 @@
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import React from 'react';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { of } from 'rxjs';
 import { render } from '../../../../lib/helper/rtl_helpers';
@@ -56,9 +56,11 @@ describe('useMonitorBreadcrumbs', () => {
     };
 
     render(
-      <Route path={OVERVIEW_ROUTE}>
-        <Component />
-      </Route>,
+      <Routes>
+        <Route path={OVERVIEW_ROUTE}>
+          <Component />
+        </Route>
+      </Routes>,
       { core }
     );
 

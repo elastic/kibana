@@ -7,18 +7,13 @@
 
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { MetadataTable } from '.';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { expectTextsInDocument } from '../../../utils/test_helpers';
 import type { SectionDescriptor } from './types';
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-    </MemoryRouter>
-  );
+  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
 }
 
 const renderOptions = {

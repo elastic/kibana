@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useEffect, useCallback } from 'react';
-import { Redirect, useParams } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { useDispatch } from 'react-redux';
 import { WorkpadApp } from '../../components/workpad_app';
 import { ExportApp } from '../../components/export_app';
@@ -15,103 +15,59 @@ import { CanvasLoading } from '../../components/canvas_loading';
 // @ts-expect-error
 import { fetchAllRenderables } from '../../state/actions/elements';
 import { useNotifyService } from '../../services';
-import { CanvasWorkpad } from '../../../types';
 import { ErrorStrings } from '../../../i18n';
 import { useWorkpad } from './hooks/use_workpad';
 import { useRestoreHistory } from './hooks/use_restore_history';
 import { useWorkpadHistory } from './hooks/use_workpad_history';
 import { usePageSync } from './hooks/use_page_sync';
 import { useWorkpadPersist } from './hooks/use_workpad_persist';
-import { WorkpadRouteProps, WorkpadPageRouteParams } from '.';
+import { WorkpadRouteParams } from '.';
 import { WorkpadRoutingContextComponent } from './workpad_routing_context';
 import { WorkpadPresentationHelper } from './workpad_presentation_helper';
 
 const { workpadRoutes: strings } = ErrorStrings;
 
-export const WorkpadRoute = () => {
-  return (
-    <Route
-      path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
-      exact={false}
-      children={(route: WorkpadRouteProps) => {
-        return <WorkpadRouteComponent route={route} />;
-      }}
-    />
-  );
-};
+export const WorkpadRouteComponent = React.memo(() => {
+  const params = useParams<WorkpadRouteParams>();
 
-const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
   const getRedirectPath = useCallback(
     (workpadId: string) =>
-      `/workpad/${workpadId}${
-        route.match.params.pageNumber ? `/page/${route.match.params.pageNumber}` : ''
-      }`,
-    [route.match.params.pageNumber]
+      `/workpad/${workpadId}${params.pageNumber ? `/page/${params.pageNumber}` : ''}`,
+    [params.pageNumber]
   );
 
   return (
-    <WorkpadLoaderComponent
-      params={route.match.params}
-      key="workpad-loader"
-      getRedirectPath={getRedirectPath}
-    >
-      {(workpad: CanvasWorkpad) => (
-        <Routes>
-          <Route
-            path="/workpad/:id/page/:pageNumber"
-            children={(pageRoute) => (
-              <WorkpadHistoryManager>
-                <WorkpadRoutingContextComponent>
-                  <WorkpadPresentationHelper>
-                    <WorkpadApp />
-                  </WorkpadPresentationHelper>
-                </WorkpadRoutingContextComponent>
-              </WorkpadHistoryManager>
-            )}
-          />
-          <Route path="/workpad/:id" strict={false} exact={true}>
-            <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
-          </Route>
-        </Routes>
-      )}
+    <WorkpadLoaderComponent params={params} key="workpad-loader" getRedirectPath={getRedirectPath}>
+      <WorkpadHistoryManager>
+        <WorkpadRoutingContextComponent>
+          <WorkpadPresentationHelper>
+            <WorkpadApp />
+          </WorkpadPresentationHelper>
+        </WorkpadRoutingContextComponent>
+      </WorkpadHistoryManager>
     </WorkpadLoaderComponent>
   );
-};
+});
 
-export const ExportWorkpadRoute = () => {
-  return (
-    <Route
-      path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      children={(route: WorkpadRouteProps) => {
-        return <ExportWorkpadRouteComponent route={route} />;
-      }}
-    />
-  );
-};
-
-const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: { match } }) => {
+// eslint-disable-next-line react/no-multi-comp
+export const ExportWorkpadRouteComponent = React.memo(() => {
+  const params = useParams<WorkpadRouteParams>();
   const getRedirectPath = useCallback(
-    (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${match.params.pageNumber}`,
-    [match.params.pageNumber]
+    (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${params.pageNumber}`,
+    [params.pageNumber]
   );
 
   return (
-    <WorkpadLoaderComponent
-      loadPages={false}
-      params={match.params}
-      getRedirectPath={getRedirectPath}
-    >
-      {() => (
-        <ExportRouteManager>
-          <ExportApp />
-        </ExportRouteManager>
-      )}
+    <WorkpadLoaderComponent loadPages={false} params={params} getRedirectPath={getRedirectPath}>
+      <ExportRouteManager>
+        <ExportApp />
+      </ExportRouteManager>
     </WorkpadLoaderComponent>
   );
-};
+});
 
 export const ExportRouteManager: FC = ({ children }) => {
-  const params = useParams<WorkpadPageRouteParams>();
+  const params = useParams<WorkpadRouteParams>();
   usePageSync();
 
   const dispatch = useDispatch();
@@ -133,27 +89,29 @@ export const WorkpadHistoryManager: FC = ({ children }) => {
 };
 
 const WorkpadLoaderComponent: FC<{
-  params: WorkpadRouteProps['match']['params'];
+  params: Readonly<Partial<WorkpadRouteParams>>;
   loadPages?: boolean;
   getRedirectPath: (workpadId: string) => string;
-  children: (workpad: CanvasWorkpad) => JSX.Element;
+  children: React.ReactElement;
 }> = ({ params, children, loadPages, getRedirectPath }) => {
-  const [workpad, error] = useWorkpad(params.id, loadPages, getRedirectPath);
+  const history = useHistory();
+  const [workpad, error] = useWorkpad(params.id as string, loadPages, getRedirectPath);
   const notifyService = useNotifyService();
 
   useEffect(() => {
     if (error) {
       notifyService.error(error, { title: strings.getLoadFailureErrorMessage() });
+      history.push('/');
+    } else if (workpad && !params.pageNumber) {
+      history.replace({
+        pathname: `/workpad/${params.id}/page/${workpad.page + 1}`,
+      });
     }
-  }, [error, notifyService]);
-
-  if (error) {
-    return <Redirect to="/" />;
-  }
+  }, [error, history, notifyService, params, workpad]);
 
   if (!workpad) {
     return <CanvasLoading />;
   }
 
-  return children(workpad);
+  return children;
 };

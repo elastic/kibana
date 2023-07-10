@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import type { EditTagsProps } from './edit_tags';
 import { EditTags } from './edit_tags';
-import { readCasesPermissions, TestProviders, createAppMockRenderer } from '../../../common/mock';
+import { readCasesPermissions, createAppMockRenderer } from '../../../common/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { MAX_LENGTH_PER_TAG } from '../../../../common/constants';
@@ -139,11 +139,10 @@ describe('EditTags ', () => {
   });
 
   it('does not render when the user does not have update permissions', () => {
-    appMockRender.render(
-      <TestProviders permissions={readCasesPermissions()}>
-        <EditTags {...defaultProps} />
-      </TestProviders>
-    );
+    appMockRender = createAppMockRenderer({
+      permissions: readCasesPermissions(),
+    });
+    appMockRender.render(<EditTags {...defaultProps} />);
 
     expect(screen.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
   });

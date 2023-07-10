@@ -18,7 +18,7 @@ import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../types';

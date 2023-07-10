@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,
@@ -104,23 +103,18 @@ export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, clos
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <Route
-              key="menu"
-              render={() => (
-                <IndexActionsContextMenu
-                  iconSide="left"
-                  indexNames={[indexName]}
-                  anchorPosition="upRight"
-                  detailPanel={true}
-                  iconType="arrowUp"
-                  label={
-                    <FormattedMessage
-                      id="xpack.idxMgmt.detailPanel.manageContextMenuLabel"
-                      defaultMessage="Manage"
-                    />
-                  }
+            <IndexActionsContextMenu
+              iconSide="left"
+              indexNames={[indexName]}
+              anchorPosition="upRight"
+              detailPanel={true}
+              iconType="arrowUp"
+              label={
+                <FormattedMessage
+                  id="xpack.idxMgmt.detailPanel.manageContextMenuLabel"
+                  defaultMessage="Manage"
                 />
-              )}
+              }
             />
           </EuiFlexItem>
         </EuiFlexGroup>

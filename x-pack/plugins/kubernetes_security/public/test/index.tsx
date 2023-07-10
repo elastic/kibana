@@ -9,7 +9,7 @@ import React, { memo, ReactNode, useMemo } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Router } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -75,7 +75,11 @@ const AppRootProvider = memo<{
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <EuiThemeProvider darkMode={isDarkMode}>
-          <Router history={history}>{children}</Router>
+          <Router history={history}>
+            <Routes>
+              <Route path="*">{children}</Route>
+            </Routes>
+          </Router>
         </EuiThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
@@ -91,8 +95,14 @@ AppRootProvider.displayName = 'AppRootProvider';
  * for further customization.
  */
 
-export const createAppRootMockRenderer = (): AppContextTestRender => {
-  const history = createMemoryHistory<never>();
+export const createAppRootMockRenderer = (
+  {
+    initialEntries,
+  }: {
+    initialEntries: string[];
+  } = { initialEntries: ['/'] }
+): AppContextTestRender => {
+  const history = createMemoryHistory<never>({ initialEntries });
   const coreStart = createCoreStartMock(history);
 
   const queryClient = new QueryClient({

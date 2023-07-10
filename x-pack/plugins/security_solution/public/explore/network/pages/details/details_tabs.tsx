@@ -53,7 +53,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
     const commonPropsWithFlowTarget = { ...commonProps, flowTarget };
 
     return (
-      <Routes>
+      <Routes compat={false}>
         <Route
           path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.flows})`}
         >

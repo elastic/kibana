@@ -49,14 +49,14 @@ const PortableDashboardsDemos = ({
   return (
     <Router history={history}>
       <Routes>
-        <Route exact path="/">
-          <Redirect to={DASHBOARD_DEMO_PATH} />
-        </Route>
         <Route path={DASHBOARD_LIST_PATH}>
           <PortableDashboardListingDemo history={history} />
         </Route>
         <Route path={DASHBOARD_DEMO_PATH}>
           <DashboardsDemo data={data} dashboard={dashboard} history={history} />
+        </Route>
+        <Route path="*">
+          <Redirect to={DASHBOARD_DEMO_PATH} />
         </Route>
       </Routes>
     </Router>

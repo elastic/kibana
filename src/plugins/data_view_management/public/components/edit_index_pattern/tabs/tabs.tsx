@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -51,7 +51,7 @@ import { RelationshipsTable } from '../relationships_table';
 import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
 
-interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
+interface TabsProps {
   indexPattern: DataView;
   fields: DataViewField[];
   saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
@@ -142,12 +142,12 @@ export function Tabs({
   indexPattern,
   saveIndexPattern,
   fields,
-  history,
   refreshFields,
   relationships,
   allowedTypes,
   compositeRuntimeFields,
 }: TabsProps) {
+  const history = useHistory();
   const {
     uiSettings,
     docLinks,

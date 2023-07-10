@@ -13,8 +13,7 @@ import {
   MatcherFunction,
   RenderOptions,
 } from '@testing-library/react';
-import { Router } from '@kbn/shared-ux-router';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
@@ -205,7 +204,9 @@ export function MockRouter<ExtraCore>({
   return (
     <Router history={history}>
       <MockKibanaProvider core={core} kibanaProps={kibanaProps}>
-        <Route path={path}>{children}</Route>
+        <Routes compat={false}>
+          <Route path={path}>{children}</Route>
+        </Routes>
       </MockKibanaProvider>
     </Router>
   );

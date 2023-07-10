@@ -7,7 +7,6 @@
 
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   expectTextsInDocument,
@@ -75,15 +74,14 @@ function getWrapper({
 }) {
   return ({ children }: { children?: ReactNode }) => {
     return (
-      <MemoryRouter
+      <MockApmPluginContextWrapper
+        value={mockPluginContext}
         initialEntries={[
           `${url}?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&environment=${environment}&offset=${offset}&comparisonEnabled=${comparisonEnabled}${params}`,
         ]}
       >
-        <MockApmPluginContextWrapper value={mockPluginContext}>
-          <EuiThemeProvider>{children}</EuiThemeProvider>
-        </MockApmPluginContextWrapper>
-      </MemoryRouter>
+        <EuiThemeProvider>{children}</EuiThemeProvider>
+      </MockApmPluginContextWrapper>
     );
   };
 }

@@ -96,7 +96,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
-        <Route render={() => <NotFoundPage title="Logs" />} />
+        <Route path="*">
+          <NotFoundPage title="Logs" />
+        </Route>
       </Routes>
     </>
   );

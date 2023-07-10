@@ -78,7 +78,20 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           )}
         </Route>
 
-        <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
+        <Route exact path={getCaseViewWithCommentPath(basePath)}>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <CaseViewLazy
+              onComponentInitialized={onComponentInitialized}
+              actionsNavigation={actionsNavigation}
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              showAlertDetails={showAlertDetails}
+              useFetchAlertData={useFetchAlertData}
+              refreshRef={refreshRef}
+              timelineIntegration={timelineIntegration}
+            />
+          </Suspense>
+        </Route>
+        <Route exact path={getCaseViewPath(basePath)}>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <CaseViewLazy
               onComponentInitialized={onComponentInitialized}
@@ -92,7 +105,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           </Suspense>
         </Route>
 
-        <Route path={basePath}>
+        <Route path="*">
           <Redirect to={basePath} />
         </Route>
       </Routes>

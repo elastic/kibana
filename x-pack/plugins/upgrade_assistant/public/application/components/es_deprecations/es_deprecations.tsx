@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiPageHeader,
@@ -117,7 +117,9 @@ const RemoteClustersAppLink: React.FunctionComponent = () => {
   );
 };
 
-export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
+export const EsDeprecations = () => {
+  const history = useHistory();
+
   const {
     services: {
       api,
@@ -213,4 +215,4 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
       <EsDeprecationsTable deprecations={esDeprecations?.deprecations} reload={resendRequest} />
     </div>
   );
-});
+};

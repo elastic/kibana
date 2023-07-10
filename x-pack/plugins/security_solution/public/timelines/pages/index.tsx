@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TimelineType } from '../../../common/types/timeline/api';
@@ -20,17 +20,20 @@ import { TIMELINES_PATH } from '../../../common/constants';
 const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineType.default}|${TimelineType.template})`;
 const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineType.default}`;
 
+const RedirectRoute = () => {
+  const { search = '' } = useLocation();
+
+  return <Redirect to={`${timelinesDefaultPath}${appendSearch(search)}`} />;
+};
+
 export const Timelines = React.memo(() => (
-  <Routes>
+  <Routes compat={false}>
     <Route exact path={timelinesPagePath}>
       <TimelinesPage />
     </Route>
-    <Route
-      path={TIMELINES_PATH}
-      render={({ location: { search = '' } }) => (
-        <Redirect to={`${timelinesDefaultPath}${appendSearch(search)}`} />
-      )}
-    />
+    <Route path={TIMELINES_PATH}>
+      <RedirectRoute />
+    </Route>
   </Routes>
 ));
 

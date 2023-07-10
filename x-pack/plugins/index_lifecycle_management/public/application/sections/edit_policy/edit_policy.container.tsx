@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -29,11 +29,8 @@ interface RouterProps {
   policyName: string;
 }
 
-export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps>> = ({
-  match: {
-    params: { policyName },
-  },
-}) => {
+export const EditPolicy: React.FunctionComponent = () => {
+  const { policyName } = useParams<RouterProps>();
   const {
     services: { breadcrumbService, license },
   } = useKibana();

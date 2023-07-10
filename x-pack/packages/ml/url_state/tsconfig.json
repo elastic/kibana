@@ -19,5 +19,6 @@
     "@kbn/ml-nested-property",
     "@kbn/rison",
     "@kbn/ml-is-populated-object",
+    "@kbn/shared-ux-router",
   ]
 }

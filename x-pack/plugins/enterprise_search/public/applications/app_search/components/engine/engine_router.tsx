@@ -160,7 +160,7 @@ export const EngineRouter: React.FC = () => {
           <ApiLogs />
         </Route>
       )}
-      <Route>
+      <Route path="*">
         <NotFound pageChrome={getEngineBreadcrumbs()} />
       </Route>
     </Routes>

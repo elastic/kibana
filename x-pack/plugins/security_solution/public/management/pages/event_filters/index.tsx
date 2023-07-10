@@ -13,7 +13,7 @@ import { EventFiltersList } from './view/event_filters_list';
 
 export const EventFiltersContainer = () => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} exact component={EventFiltersList} />
       <Route path="*" component={NotFoundPage} />
     </Routes>

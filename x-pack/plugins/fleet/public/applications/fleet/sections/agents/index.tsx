@@ -85,7 +85,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) : undefined;
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={FLEET_ROUTING_PATHS.agent_details}>
         <AgentDetailsPage />
       </Route>

@@ -37,9 +37,8 @@ export const SynchronizationRouter: React.FC = () => (
     <Route exact path={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}>
       <AssetsAndObjects />
     </Route>
-    <Redirect
-      from={getSourcesPath(OLD_OBJECTS_AND_ASSETS_PATH, true)}
-      to={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}
-    />
+    <Route path={getSourcesPath(OLD_OBJECTS_AND_ASSETS_PATH, true)}>
+      <Redirect to={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)} />
+    </Route>
   </Routes>
 );

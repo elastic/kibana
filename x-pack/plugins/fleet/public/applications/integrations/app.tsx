@@ -130,11 +130,12 @@ export const AppRoutes = memo(() => {
 
   return (
     <>
-      <Routes>
+      <Routes compat={false}>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />
         </Route>
         <Route
+          path="*"
           render={({ location }) => {
             // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
             const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;

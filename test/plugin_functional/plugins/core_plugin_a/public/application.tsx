@@ -9,7 +9,7 @@
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -72,39 +72,42 @@ const PageA = () => (
   </EuiPageBody>
 );
 
-type NavProps = RouteComponentProps & {
+interface NavProps {
   navigateToApp: CoreStart['application']['navigateToApp'];
+}
+const Nav = ({ navigateToApp }: NavProps) => {
+  const history = useHistory();
+  return (
+    <EuiSideNav
+      items={[
+        {
+          name: 'Foo',
+          id: 'foo',
+          items: [
+            {
+              id: 'home',
+              name: 'Home',
+              onClick: () => history.push('/home'),
+              'data-test-subj': 'fooNavHome',
+            },
+            {
+              id: 'page-a',
+              name: 'Page A',
+              onClick: () => history.push('/page-a'),
+              'data-test-subj': 'fooNavPageA',
+            },
+            {
+              id: 'linktobar',
+              name: 'Open Bar / Page B',
+              onClick: () => navigateToApp('bar', { path: 'page-b?query=here', state: 'foo!!' }),
+              'data-test-subj': 'fooNavBarPageB',
+            },
+          ],
+        },
+      ]}
+    />
+  );
 };
-const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
-  <EuiSideNav
-    items={[
-      {
-        name: 'Foo',
-        id: 'foo',
-        items: [
-          {
-            id: 'home',
-            name: 'Home',
-            onClick: () => history.push('/home'),
-            'data-test-subj': 'fooNavHome',
-          },
-          {
-            id: 'page-a',
-            name: 'Page A',
-            onClick: () => history.push('/page-a'),
-            'data-test-subj': 'fooNavPageA',
-          },
-          {
-            id: 'linktobar',
-            name: 'Open Bar / Page B',
-            onClick: () => navigateToApp('bar', { path: 'page-b?query=here', state: 'foo!!' }),
-            'data-test-subj': 'fooNavBarPageB',
-          },
-        ],
-      },
-    ]}
-  />
-));
 
 const FooApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
@@ -112,7 +115,9 @@ const FooApp = ({ history, coreStart }: { history: History; coreStart: CoreStart
       <EuiPageSideBar>
         <Nav navigateToApp={coreStart.application.navigateToApp} />
       </EuiPageSideBar>
-      <Route path="/" exact render={() => <Redirect to="/home" />} />
+      <Route path="/" exact>
+        <Redirect to="/home" />
+      </Route>
       <Route path="/home" exact component={Home} />
       <Route path="/page-a" component={PageA} />
     </EuiPage>

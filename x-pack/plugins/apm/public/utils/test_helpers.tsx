@@ -17,7 +17,6 @@ import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
@@ -62,13 +61,11 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MemoryRouter initialEntries={[location]}>
-      <MockApmPluginContextWrapper>
-        <UrlParamsProvider>
-          <Component />
-        </UrlParamsProvider>
-      </MockApmPluginContextWrapper>
-    </MemoryRouter>
+    <MockApmPluginContextWrapper initialEntries={[location]}>
+      <UrlParamsProvider>
+        <Component />
+      </UrlParamsProvider>
+    </MockApmPluginContextWrapper>
   );
   const a = el.container.querySelector('a');
 

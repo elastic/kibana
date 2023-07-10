@@ -134,20 +134,24 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       <Route exact path={`${VisualizeConstants.EDIT_BY_VALUE_PATH}`}>
         <VisualizeByValueEditor onAppLeave={onAppLeave} />
       </Route>
-      <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
+      <Route path={`${VisualizeConstants.EDIT_PATH}/:id`}>
         <VisualizeEditor onAppLeave={onAppLeave} />
       </Route>
-      <Route
-        exact
-        path={[
-          VisualizeConstants.LANDING_PAGE_PATH,
-          VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
-          VisualizeConstants.LANDING_PAGE_PATH_WITH_TAB,
-        ]}
-      >
+      <Route path={VisualizeConstants.CREATE_PATH}>
+        <VisualizeEditor onAppLeave={onAppLeave} />
+      </Route>
+      <Route exact path={VisualizeConstants.LANDING_PAGE_PATH}>
         <VisualizeListing />
       </Route>
-      <VisualizeNoMatch />
+      <Route exact path={VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}>
+        <VisualizeListing />
+      </Route>
+      <Route exact path={VisualizeConstants.LANDING_PAGE_PATH_WITH_TAB}>
+        <VisualizeListing />
+      </Route>
+      <Route path="*">
+        <VisualizeNoMatch />
+      </Route>
     </Routes>
   );
 };

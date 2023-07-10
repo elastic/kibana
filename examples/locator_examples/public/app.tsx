@@ -47,7 +47,9 @@ export const Routes: React.FC<{}> = () => {
                 lastName={query.get('lastName') || ''}
               />
             </Route>
-            <Redirect from="/" to="/hello" />
+            <Route path="*">
+              <Redirect to="/hello" />
+            </Route>
           </RouterRoutes>
         </EuiPageContentBody>
       </EuiPageContent>

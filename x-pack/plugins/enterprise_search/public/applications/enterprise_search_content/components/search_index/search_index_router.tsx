@@ -52,10 +52,9 @@ export const SearchIndexRouter: React.FC = () => {
       <Route path={SEARCH_INDEX_TAB_PATH}>
         <SearchIndex />
       </Route>
-      <Redirect
-        from={OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH}
-        to={`${SEARCH_INDEX_PATH}/domain_management/:domainId}`}
-      />
+      <Route path={OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH}>
+        <Redirect to={`${SEARCH_INDEX_PATH}/domain_management/:domainId`} />
+      </Route>
     </Routes>
   );
 };

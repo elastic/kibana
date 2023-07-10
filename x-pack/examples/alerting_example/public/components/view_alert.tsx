@@ -18,7 +18,6 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import {
@@ -28,12 +27,12 @@ import {
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import { Rule, RuleTaskState } from '../../common/types';
 
-type Props = RouteComponentProps & {
+interface Props {
   http: CoreStart['http'];
   id: string;
-};
+}
 
-export const ViewAlertPage = withRouter(({ http, id }: Props) => {
+export const ViewAlertPage = ({ http, id }: Props) => {
   const [alert, setAlert] = useState<Rule | null>(null);
   const [alertState, setAlertState] = useState<RuleTaskState | null>(null);
 
@@ -109,4 +108,4 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
   ) : (
     <EuiLoadingLogo logo="logoKibana" size="xl" />
   );
-});
+};

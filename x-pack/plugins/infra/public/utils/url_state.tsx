@@ -123,7 +123,7 @@ class UrlStateContainerLifecycle<UrlState> extends React.Component<
 export const UrlStateContainer = <UrlState extends any>(
   props: UrlStateContainerProps<UrlState>
 ) => (
-  <Route>
+  <Route path="*">
     {({ history, location }) => (
       <UrlStateContainerLifecycle<UrlState> history={history} location={location} {...props} />
     )}

@@ -9,7 +9,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -40,7 +40,6 @@ interface DevToolsWrapperProps {
   updateRoute: (newRoute: string) => void;
   theme$: Observable<CoreTheme>;
   appServices: AppServices;
-  location: RouteComponentProps['location'];
 }
 
 interface MountedDevToolDescriptor {
@@ -55,8 +54,8 @@ function DevToolsWrapper({
   updateRoute,
   theme$,
   appServices,
-  location,
 }: DevToolsWrapperProps) {
+  const location = useLocation();
   const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
@@ -195,7 +194,6 @@ export function renderApp(
                   render={(props) => (
                     <DevToolsWrapper
                       updateRoute={props.history.push}
-                      location={props.location}
                       activeDevTool={devTool}
                       devTools={devTools}
                       theme$={theme$}
@@ -204,7 +202,7 @@ export function renderApp(
                   )}
                 />
               ))}
-            <Route path="/">
+            <Route path="*">
               <Redirect to={`/${devTools[0].id}`} />
             </Route>
           </Routes>

@@ -36,11 +36,11 @@ export const renderApp = ({
       theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
-        <Routes>
+        <Routes compat={false}>
           {subPluginRoutes.map((route, index) => {
             return <Route key={`route-${index}`} {...route} />;
           })}
-          <Route>
+          <Route path="*">
             <NotFoundPage />
           </Route>
         </Routes>

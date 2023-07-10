@@ -7,8 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { BrowserRouter as Router, Route } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
@@ -34,15 +33,11 @@ const AlertingExampleApp = ({
   return (
     <Router basename={basename}>
       <EuiPage>
-        <Route
-          path={`/`}
-          exact={true}
-          render={() => (
-            <Page title={`Home`} isHome={true}>
-              <DocumentationPage triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
+        <Route path={`/`} exact={true}>
+          <Page title={`Home`} isHome={true}>
+            <DocumentationPage triggersActionsUi={triggersActionsUi} />
+          </Page>
+        </Route>
         <Route
           path={`/rule/:id`}
           render={(props) => {

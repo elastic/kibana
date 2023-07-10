@@ -17,7 +17,7 @@ import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './const
 
 export const UsersContainer = React.memo(() => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={usersTabPath}>
         <Users />
       </Route>
@@ -79,7 +79,7 @@ export const UsersContainer = React.memo(() => {
         )}
       />
       <Route // Redirect to the first tab when tabName is not present.
-        path={USERS_PATH}
+        path="*"
         render={({ location: { search = '' } }) => (
           <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
         )}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
+import { generatePath, Link, useParams } from 'react-router-dom';
 import {
   EuiButtonEmpty,
   type EuiDescriptionListProps,
@@ -65,7 +65,8 @@ const getRulesSharedValues = (
   return values;
 };
 
-export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
+export const Rules = () => {
+  const params = useParams<PageUrlParams>();
   const { http } = useKibana().services;
   const integrationInfo = useCspIntegrationInfo(params);
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, lazy, useEffect, useCallback } from 'react';
-import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { useHistory, useParams, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,12 +30,9 @@ export interface MatchParams {
   section: Section;
 }
 
-export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const TriggersActionsUIHome: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { section } = useParams<MatchParams>();
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const { chrome, setBreadcrumbs } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
@@ -134,17 +131,15 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             <Route exact path={routeToLogs} component={renderLogsList} />
             <Route exact path={routeToRules} component={renderRulesList} />
             {isInternalAlertsTableEnabled ? (
-              <Route
-                exact
-                path={routeToInternalAlerts}
-                component={() => (
-                  <EuiPageTemplate.Section grow={false} paddingSize="none">
-                    {suspendedComponentWithProps(AlertsPage, 'xl')({})}
-                  </EuiPageTemplate.Section>
-                )}
-              />
+              <Route exact path={routeToInternalAlerts}>
+                <EuiPageTemplate.Section grow={false} paddingSize="none">
+                  {suspendedComponentWithProps(AlertsPage, 'xl')({})}
+                </EuiPageTemplate.Section>
+              </Route>
             ) : (
-              <Redirect to={routeToRules} />
+              <Route path="*">
+                <Redirect to={routeToRules} />
+              </Route>
             )}
           </Routes>
         </HealthCheck>

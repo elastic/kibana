@@ -17,7 +17,7 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
@@ -86,11 +86,14 @@ export function ApmAppRoot({
                                           <ApmThemeProvider>
                                             <MountApmHeaderActionMenu />
 
-                                            <Route
-                                              component={
-                                                ScrollToTopOnPathChange
-                                              }
-                                            />
+                                            <Routes>
+                                              <Route
+                                                path="*"
+                                                component={
+                                                  ScrollToTopOnPathChange
+                                                }
+                                              />
+                                            </Routes>
                                             <RouteRenderer />
                                           </ApmThemeProvider>
                                         </InspectorContextProvider>

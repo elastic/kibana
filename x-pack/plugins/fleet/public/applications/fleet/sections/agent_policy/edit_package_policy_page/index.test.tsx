@@ -137,10 +137,8 @@ jest.mock('../../../../integrations/hooks', () => {
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useRouteMatch: jest.fn().mockReturnValue({
-    params: {
-      packagePolicyId: 'nginx-1',
-    },
+  useParams: jest.fn().mockReturnValue({
+    packagePolicyId: 'nginx-1',
   }),
 }));
 

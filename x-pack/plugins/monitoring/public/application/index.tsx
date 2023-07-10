@@ -339,12 +339,14 @@ const MonitoringApp: React.FC<{
                           fetchAllClusters={false}
                         />
 
-                        <Redirect
-                          to={{
-                            pathname: '/loading',
-                            search: history.location.search,
-                          }}
-                        />
+                        <Route path="*">
+                          <Redirect
+                            to={{
+                              pathname: '/loading',
+                              search: history.location.search,
+                            }}
+                          />
+                        </Route>
                       </Routes>
                     </Router>
                   </BreadcrumbContainer>

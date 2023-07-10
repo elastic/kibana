@@ -9,7 +9,7 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -280,121 +280,109 @@ export async function mountApp(
     lens: getPreloadedState(storeDeps) as LensAppState,
   } as unknown as PreloadedState<LensState>);
 
-  const EditorRenderer = React.memo(
-    (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
-      const [editorState, setEditorState] = useState<'loading' | 'no_data' | 'data'>('loading');
+  const EditorRenderer = React.memo(({ editByValue }: { editByValue?: boolean }) => {
+    const history = useHistory();
+    const { id: propsId } = useParams<{ id?: string }>();
+    const [editorState, setEditorState] = useState<'loading' | 'no_data' | 'data'>('loading');
 
-      useEffect(() => {
-        const kbnUrlStateStorage = createKbnUrlStateStorage({
-          history: props.history,
-          useHash: lensServices.uiSettings.get('state:storeInSessionStorage'),
-          ...withNotifyOnErrors(lensServices.notifications.toasts),
-        });
-        const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-          data.query,
-          kbnUrlStateStorage
-        );
-
-        return () => {
-          stopSyncingQueryServiceStateWithUrl();
-        };
-      }, [props.history]);
-      const redirectCallback = useCallback(
-        (id?: string) => {
-          redirectTo(props.history, id);
-        },
-        [props.history]
+    useEffect(() => {
+      const kbnUrlStateStorage = createKbnUrlStateStorage({
+        history,
+        useHash: lensServices.uiSettings.get('state:storeInSessionStorage'),
+        ...withNotifyOnErrors(lensServices.notifications.toasts),
+      });
+      const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+        data.query,
+        kbnUrlStateStorage
       );
-      const initialInput = useMemo(() => {
-        return getInitialInput(props.id, props.editByValue);
-      }, [props.editByValue, props.id]);
 
-      const initCallback = useCallback(() => {
-        // Clear app-specific filters when navigating to Lens. Necessary because Lens
-        // can be loaded without a full page refresh.
-        // If the user navigates to Lens from Discover, or comes from a Lens share link we keep the filters
-        if (!initialContext) {
-          data.query.filterManager.setAppFilters([]);
-        }
-        // if user comes from a dashboard to convert a legacy viz to a Lens chart
-        // we clear up the dashboard filters and query
-        if (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable) {
-          data.query.filterManager.setAppFilters([]);
-          data.query.queryString.clearQuery();
-        }
-        lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
-        lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
-      }, [initialInput, props.history, redirectCallback]);
-      useEffect(() => {
-        (async () => {
-          const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-          if (!hasUserDataView) {
-            setEditorState('no_data');
-            return;
-          }
-          setEditorState('data');
-          initCallback();
-        })();
-      }, [initCallback, initialInput, props.history, redirectCallback]);
+      return () => {
+        stopSyncingQueryServiceStateWithUrl();
+      };
+    }, [history]);
+    const redirectCallback = useCallback(
+      (id?: string) => {
+        redirectTo(history, id);
+      },
+      [history]
+    );
+    const initialInput = useMemo(() => {
+      return getInitialInput(propsId, editByValue);
+    }, [editByValue, propsId]);
 
-      if (editorState === 'loading') {
-        return <EuiLoadingSpinner />;
+    const initCallback = useCallback(() => {
+      // Clear app-specific filters when navigating to Lens. Necessary because Lens
+      // can be loaded without a full page refresh.
+      // If the user navigates to Lens from Discover, or comes from a Lens share link we keep the filters
+      if (!initialContext) {
+        data.query.filterManager.setAppFilters([]);
       }
-
-      if (editorState === 'no_data') {
-        const analyticsServices = {
-          coreStart,
-          dataViews: data.dataViews,
-          dataViewEditor: startDependencies.dataViewEditor,
-        };
-        return (
-          <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-            <AnalyticsNoDataPage
-              onDataViewCreated={() => {
-                setEditorState('data');
-                initCallback();
-              }}
-            />
-          </AnalyticsNoDataPageKibanaProvider>
-        );
+      // if user comes from a dashboard to convert a legacy viz to a Lens chart
+      // we clear up the dashboard filters and query
+      if (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable) {
+        data.query.filterManager.setAppFilters([]);
+        data.query.queryString.clearQuery();
       }
+      lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
+      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history }));
+    }, [initialInput, history, redirectCallback]);
+    useEffect(() => {
+      (async () => {
+        const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
+        if (!hasUserDataView) {
+          setEditorState('no_data');
+          return;
+        }
+        setEditorState('data');
+        initCallback();
+      })();
+    }, [initCallback, initialInput, history, redirectCallback]);
 
+    if (editorState === 'loading') {
+      return <EuiLoadingSpinner />;
+    }
+
+    if (editorState === 'no_data') {
+      const analyticsServices = {
+        coreStart,
+        dataViews: data.dataViews,
+        dataViewEditor: startDependencies.dataViewEditor,
+      };
       return (
-        <Provider store={lensStore}>
-          <App
-            incomingState={embeddableEditorIncomingState}
-            editorFrame={instance}
-            initialInput={initialInput}
-            redirectTo={redirectCallback}
-            redirectToOrigin={redirectToOrigin}
-            onAppLeave={params.onAppLeave}
-            setHeaderActionMenu={params.setHeaderActionMenu}
-            history={props.history}
-            datasourceMap={datasourceMap}
-            visualizationMap={visualizationMap}
-            initialContext={initialContext}
-            contextOriginatingApp={originatingApp}
-            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
-            theme$={core.theme.theme$}
-            coreStart={coreStart}
-            savedObjectStore={savedObjectStore}
+        <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
+          <AnalyticsNoDataPage
+            onDataViewCreated={() => {
+              setEditorState('data');
+              initCallback();
+            }}
           />
-        </Provider>
+        </AnalyticsNoDataPageKibanaProvider>
       );
     }
-  );
 
-  const EditorRoute = (
-    routeProps: RouteComponentProps<{ id?: string }> & { editByValue?: boolean }
-  ) => {
     return (
-      <EditorRenderer
-        id={routeProps.match.params.id}
-        history={routeProps.history}
-        editByValue={routeProps.editByValue}
-      />
+      <Provider store={lensStore}>
+        <App
+          incomingState={embeddableEditorIncomingState}
+          editorFrame={instance}
+          initialInput={initialInput}
+          redirectTo={redirectCallback}
+          redirectToOrigin={redirectToOrigin}
+          onAppLeave={params.onAppLeave}
+          setHeaderActionMenu={params.setHeaderActionMenu}
+          history={history}
+          datasourceMap={datasourceMap}
+          visualizationMap={visualizationMap}
+          initialContext={initialContext}
+          contextOriginatingApp={originatingApp}
+          topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+          theme$={core.theme.theme$}
+          coreStart={coreStart}
+          savedObjectStore={savedObjectStore}
+        />
+      </Provider>
     );
-  };
+  });
 
   function NotFound() {
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
@@ -416,14 +404,16 @@ export async function mountApp(
           <PresentationUtilContext>
             <HashRouter>
               <Routes>
-                <Route exact path="/edit/:id" component={EditorRoute} />
-                <Route
-                  exact
-                  path={`/${LENS_EDIT_BY_VALUE}`}
-                  render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-                />
-                <Route exact path="/" component={EditorRoute} />
-                <Route path="/" component={NotFound} />
+                <Route exact path="/edit/:id">
+                  <EditorRenderer />
+                </Route>
+                <Route exact path={`/${LENS_EDIT_BY_VALUE}`}>
+                  <EditorRenderer editByValue />
+                </Route>
+                <Route exact path="/">
+                  <EditorRenderer />
+                </Route>
+                <Route path="*" component={NotFound} />
               </Routes>
             </HashRouter>
           </PresentationUtilContext>

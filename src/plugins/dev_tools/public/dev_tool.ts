@@ -7,7 +7,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { RouteComponentProps } from 'react-router-dom';
 
 import { AppUnmount, CoreTheme } from '@kbn/core/public';
 
@@ -21,7 +20,6 @@ export type CreateDevToolArgs = Omit<DevToolApp, 'enable' | 'disable' | 'isDisab
 
 interface DevToolMountParams {
   element: HTMLDivElement;
-  location: RouteComponentProps['location'];
   theme$: Observable<CoreTheme>;
 }
 

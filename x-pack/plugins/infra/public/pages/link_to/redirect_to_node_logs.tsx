@@ -6,25 +6,24 @@
  */
 
 import { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
-type RedirectToNodeLogsType = RouteComponentProps<{
-  nodeId: string;
-  nodeType: InventoryItemType;
-  logViewId?: string;
-}>;
-
-export const RedirectToNodeLogs = ({
-  match: {
-    params: { nodeId, nodeType, logViewId = DEFAULT_LOG_VIEW.logViewId },
-  },
-  location,
-}: RedirectToNodeLogsType) => {
+export const RedirectToNodeLogs = () => {
+  const location = useLocation();
+  const {
+    nodeId,
+    nodeType,
+    logViewId = DEFAULT_LOG_VIEW.logViewId,
+  } = useParams<{
+    nodeId: string;
+    nodeType: InventoryItemType;
+    logViewId?: string;
+  }>();
   const {
     services: { locators },
   } = useKibanaContextForPlugin();

@@ -6,11 +6,6 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
-import type { RouteProps } from 'react-router-dom';
-
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
@@ -18,19 +13,6 @@ import { licenseService } from '../../hooks';
 import type { UIExtensionsStorage } from '../../types';
 
 import { AppRoutes, IntegrationsAppContext } from './app';
-
-export interface ProtectedRouteProps extends RouteProps {
-  isAllowed?: boolean;
-  restrictedPath?: string;
-}
-
-export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
-  isAllowed = false,
-  restrictedPath = '/',
-  ...routeProps
-}: ProtectedRouteProps) => {
-  return isAllowed ? <Route {...routeProps} /> : <Redirect to={{ pathname: restrictedPath }} />;
-};
 
 interface IntegrationsAppProps {
   basepath: string;

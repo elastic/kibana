@@ -30,7 +30,7 @@ describe('SynchronizationRouter', () => {
     expect(wrapper.find(AssetsAndObjects)).toHaveLength(1);
     expect(wrapper.find(Frequency)).toHaveLength(2);
     expect(wrapper.find(Routes)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(4);
+    expect(wrapper.find(Route)).toHaveLength(5);
     expect(wrapper.find(Redirect)).toHaveLength(1);
   });
 });

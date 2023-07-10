@@ -58,7 +58,7 @@ export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
         <Router history={params.history}>
           <I18nProvider>
             <Routes>
-              <Route path="*" render={() => <>{children}</>} />
+              <Route path="*">{children}</Route>
             </Routes>
           </I18nProvider>
         </Router>

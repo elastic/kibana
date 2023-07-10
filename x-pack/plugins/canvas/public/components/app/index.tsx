@@ -8,6 +8,7 @@
 import React, { FC, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { ScopedHistory } from '@kbn/core/public';
+import { Router } from '@kbn/shared-ux-router';
 import { useNavLinkService } from '../../services';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
@@ -40,7 +41,9 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   return (
     <ShortcutManagerContextWrapper>
       <div className="canvas canvasContainer">
-        <CanvasRouter history={history} />
+        <Router history={history}>
+          <CanvasRouter />
+        </Router>
         <Flyouts />
       </div>
     </ShortcutManagerContextWrapper>

@@ -69,17 +69,17 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
 
   return (
     <Routes>
-      <Route exact path={SETUP_GUIDE_PATH}>
+      <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
-      <Route>{showView()}</Route>
+      <Route path="/">{showView()}</Route>
     </Routes>
   );
 };
 
 export const AppSearchUnconfigured: React.FC = () => (
   <Routes>
-    <Route>
+    <Route path="*">
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
   </Routes>
@@ -142,7 +142,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <RoleMappings />
         </Route>
       )}
-      <Route>
+      <Route path="*">
         <NotFound />
       </Route>
     </Routes>

@@ -7,13 +7,12 @@
 
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createMemoryHistory, createLocation } from 'history';
+import { createMemoryHistory } from 'history';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import TriggersActionsUIHome, { MatchParams } from './home';
+import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 
@@ -39,25 +38,16 @@ describe('home', () => {
   });
 
   it('renders rule list components', async () => {
-    const props: RouteComponentProps<MatchParams> = {
+    const props = {
       history: createMemoryHistory({
         initialEntries: ['/rules'],
       }),
-      location: createLocation('/rules'),
-      match: {
-        isExact: true,
-        path: `/rules`,
-        url: '',
-        params: {
-          section: 'rules',
-        },
-      },
     };
 
     render(
       <IntlProvider locale="en">
         <Router history={props.history}>
-          <TriggersActionsUIHome {...props} />
+          <TriggersActionsUIHome />
         </Router>
       </IntlProvider>
     );
@@ -71,22 +61,13 @@ describe('home', () => {
     (hasShowActionsCapability as jest.Mock).mockImplementation(() => {
       return true;
     });
-    const props: RouteComponentProps<MatchParams> = {
+    const props = {
       history: createMemoryHistory(),
-      location: createLocation('/'),
-      match: {
-        isExact: true,
-        path: `/connectorss`,
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
     };
 
     let home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <TriggersActionsUIHome />
       </Router>
     );
 
@@ -102,7 +83,7 @@ describe('home', () => {
 
     home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <TriggersActionsUIHome />
       </Router>
     );
     // alerts now too!

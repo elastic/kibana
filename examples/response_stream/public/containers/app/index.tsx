@@ -30,7 +30,9 @@ export const App: React.FC = () => {
         <Sidebar />
         <Routes>
           {routeElements}
-          <Redirect to="/simple-string-stream" />
+          <Route path="*">
+            <Redirect to="/simple-string-stream" />
+          </Route>
         </Routes>
       </EuiPage>
     </Router>

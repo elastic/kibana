@@ -50,10 +50,13 @@ class AppComponent extends Component {
     return (
       <Router history={this.props.history}>
         <Routes>
-          <Route exact path={[`/list`, '/', '']} component={RemoteClusterList} />
-          <Route path={[`/add`]} component={RemoteClusterAdd} />
+          <Route exact path={`/list`} component={RemoteClusterList} />
+          <Route exact path={'/'} component={RemoteClusterList} />
+          <Route path={`/add`} component={RemoteClusterAdd} />
           <Route path={`/edit/:name`} component={RemoteClusterEdit} />
-          <Redirect from={`/:anything`} to="/list" />
+          <Route path="*">
+            <Redirect to="/list" />
+          </Route>
         </Routes>
       </Router>
     );

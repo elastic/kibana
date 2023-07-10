@@ -29,7 +29,7 @@ export const CloudDefendRouter = ({ securitySolutionContext }: CloudDefendRouter
       <Routes>
         <CloudDefendRoute {...cloudDefendPages.policies} component={Policies} />
 
-        <Route>
+        <Route path="*">
           <Redirect to={cloudDefendPages.policies.path} />
         </Route>
       </Routes>

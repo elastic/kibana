@@ -8,8 +8,8 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory } from 'react-router-dom';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
 
 import { DataStream } from '../../../../../../common/types';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
@@ -22,7 +22,6 @@ import { DataStreamsBadges } from '../data_stream_badges';
 interface Props {
   dataStreams?: DataStream[];
   reload: UseRequestResponse['resendRequest'];
-  history: ScopedHistory;
   includeStats: boolean;
   filters?: string;
 }
@@ -30,10 +29,10 @@ interface Props {
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
   reload,
-  history,
   filters,
   includeStats,
 }) => {
+  const history = useHistory();
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
 

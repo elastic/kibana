@@ -7,8 +7,8 @@
  */
 
 import React, { Component, ComponentType } from 'react';
-import { MemoryRouter, withRouter } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { withRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History, LocationDescriptor } from 'history';
 
 const stringifyPath = (path: LocationDescriptor): string => {
@@ -63,10 +63,12 @@ export function WithRoute<T extends object = Record<string, any>>(
     );
 
     return (props: any) => (
-      <Route
-        path={locationDescriptorToRoutePath(componentRoutePath)}
-        render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
-      />
+      <Routes compat={false}>
+        <Route
+          path={locationDescriptorToRoutePath(componentRoutePath)}
+          render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
+        />
+      </Routes>
     );
   };
 }

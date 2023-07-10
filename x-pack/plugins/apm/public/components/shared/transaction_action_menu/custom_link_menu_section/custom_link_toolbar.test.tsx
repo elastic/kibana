@@ -7,7 +7,6 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
@@ -31,11 +30,9 @@ function getMockAPMContext({ canSave }: { canSave: boolean }) {
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
-        {children}
-      </MockApmPluginContextWrapper>
-    </MemoryRouter>
+    <MockApmPluginContextWrapper value={getMockAPMContext({ canSave: true })}>
+      {children}
+    </MockApmPluginContextWrapper>
   );
 }
 

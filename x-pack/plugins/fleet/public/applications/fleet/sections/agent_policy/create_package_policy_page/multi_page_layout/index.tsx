@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
@@ -57,7 +57,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   queryParamsPolicyId,
   prerelease,
 }) => {
-  const { params } = useRouteMatch<AddToPolicyParams>();
+  const params = useParams<AddToPolicyParams>();
   const { pkgkey, policyId, integration } = params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const [onSplash, setOnSplash] = useState(true);

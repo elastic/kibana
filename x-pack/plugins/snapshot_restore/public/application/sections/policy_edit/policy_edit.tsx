@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
@@ -29,10 +29,9 @@ interface MatchParams {
   name: string;
 }
 
-export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  history,
-  location: { pathname },
-}) => {
+export const PolicyEdit: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { pathname } = useLocation();
   const { name } = useDecodedParams<MatchParams>();
   const { i18n } = useServices();
 

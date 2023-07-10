@@ -13,7 +13,7 @@ import { NotFoundPage } from '../../../app/404';
 
 export const TrustedAppsContainer = memo(() => {
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} exact component={TrustedAppsList} />
       <Route path="*" component={NotFoundPage} />
     </Routes>

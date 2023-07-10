@@ -104,18 +104,14 @@ export const Findings = () => {
         </>
       )}
       <Routes>
-        <Route
-          exact
-          path={cloudPosturePages.findings.path}
-          render={() => (
-            <Redirect
-              to={{
-                pathname: findingsNavigation.findings_default.path,
-                search: location.search,
-              }}
-            />
-          )}
-        />
+        <Route exact path={cloudPosturePages.findings.path}>
+          <Redirect
+            to={{
+              pathname: findingsNavigation.findings_default.path,
+              search: location.search,
+            }}
+          />
+        </Route>
         <Route path={findingsNavigation.findings_default.path} component={Configurations} />
         <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
         <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
@@ -124,7 +120,9 @@ export const Findings = () => {
           component={Vulnerabilities}
         />
         {/* Redirect to default findings page if no match */}
-        <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
+        <Route path="*">
+          <Redirect to={findingsNavigation.findings_default.path} />
+        </Route>
       </Routes>
     </>
   );

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Redirect, useRouteMatch, useLocation } from 'react-router-dom';
+import { Redirect, useParams, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
@@ -37,9 +37,7 @@ import {
 } from './components';
 
 export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
-  const {
-    params: { policyId, tabId = '' },
-  } = useRouteMatch<{ policyId: string; tabId?: string }>();
+  const { policyId, tabId = '' } = useParams<{ policyId: string; tabId?: string }>();
   const { getHref } = useLink();
   const agentPolicyRequest = useGetOneAgentPolicy(policyId);
   const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
@@ -200,7 +198,7 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
 }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         path={FLEET_ROUTING_PATHS.policy_details_settings}
         render={() => {

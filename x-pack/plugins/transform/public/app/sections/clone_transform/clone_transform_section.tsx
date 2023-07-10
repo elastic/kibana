@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, FC } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { parse } from 'query-string';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,9 +33,9 @@ import { PrivilegesWrapper } from '../../lib/authorization';
 import { Wizard } from '../create_transform/components/wizard';
 import { overrideTransformForCloning } from '../../common/transform';
 
-type Props = RouteComponentProps<{ transformId: string }>;
-
-export const CloneTransformSection: FC<Props> = ({ match, location }) => {
+export const CloneTransformSection: FC = () => {
+  const location = useLocation();
+  const params = useParams<{ transformId: string }>();
   const { dataViewId }: Record<string, any> = parse(location.search, {
     sort: false,
   });
@@ -49,7 +49,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
 
   const { esTransform } = useDocumentationLinks();
 
-  const transformId = match.params.transformId;
+  const transformId = params.transformId;
 
   const [transformConfig, setTransformConfig] = useState<TransformConfigUnion>();
   const [errorMessage, setErrorMessage] = useState<string>();

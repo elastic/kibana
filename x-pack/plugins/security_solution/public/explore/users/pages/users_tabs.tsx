@@ -34,7 +34,7 @@ export const UsersTabs = memo<UsersTabsProps>(
     };
 
     return (
-      <Routes>
+      <Routes compat={false}>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.allUsers})`}>
           <AllUsersQueryTabBody {...tabProps} />
         </Route>

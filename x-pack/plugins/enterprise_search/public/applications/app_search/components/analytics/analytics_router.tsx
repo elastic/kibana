@@ -61,7 +61,7 @@ export const AnalyticsRouter: React.FC = () => {
       <Route exact path={ENGINE_ANALYTICS_QUERY_DETAILS_PATH}>
         <Redirect to={generateEnginePath(ENGINE_ANALYTICS_PATH)} />
       </Route>
-      <Route>
+      <Route path="*">
         <NotFound pageChrome={getEngineBreadcrumbs([ANALYTICS_TITLE])} />
       </Route>
     </Routes>

@@ -48,15 +48,17 @@ exports[`MostRecentError component validates props with shallow render 1`] = `
     }
   }
 >
-  <MostRecentError
-    error={
-      Object {
-        "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
-        "type": "io",
+  <CompatRouter>
+    <MostRecentError
+      error={
+        Object {
+          "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+          "type": "io",
+        }
       }
-    }
-    monitorId="bad-ssl"
-    timestamp="2019-11-30T01:57:37.792Z"
-  />
+      monitorId="bad-ssl"
+      timestamp="2019-11-30T01:57:37.792Z"
+    />
+  </CompatRouter>
 </Router>
 `;

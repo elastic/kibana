@@ -42,14 +42,14 @@ export const SearchApplicationRouter: React.FC = () => {
 
   return (
     <Routes>
-      <Redirect
-        from={SEARCH_APPLICATION_PATH}
-        to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
-          searchApplicationName,
-          tabId: SearchApplicationViewTabs.PREVIEW,
-        })}
-        exact
-      />
+      <Route path={SEARCH_APPLICATION_PATH} exact>
+        <Redirect
+          to={generateEncodedPath(SEARCH_APPLICATION_TAB_PATH, {
+            searchApplicationName,
+            tabId: SearchApplicationViewTabs.PREVIEW,
+          })}
+        />
+      </Route>
       <Route path={SEARCH_APPLICATION_TAB_PATH}>
         <SearchApplicationView />
       </Route>

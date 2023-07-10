@@ -19,15 +19,15 @@ export const graphRouter = (deps: GraphServices) => {
 
   return (
     <Router history={history}>
-      <Routes>
+      <Routes compat={false}>
         <Route exact path="/home">
           <ListingRoute deps={deps} />
         </Route>
         <Route path="/workspace/:id?">
           <WorkspaceRoute deps={deps} />
         </Route>
-        <Route>
-          <Redirect exact to="/home" />
+        <Route path="*">
+          <Redirect to="/home" />
         </Route>
       </Routes>
     </Router>

@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs } from './use_breadcrumbs';

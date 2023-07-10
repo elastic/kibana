@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, useCallback, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,12 +27,9 @@ export interface MatchParams {
   section: Section;
 }
 
-export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const ActionsConnectorsHome: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { section } = useParams<MatchParams>();
   const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
 
   const tabs: Array<{

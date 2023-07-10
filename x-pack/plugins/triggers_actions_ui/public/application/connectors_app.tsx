@@ -102,13 +102,15 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
-      <Routes>
+      <Routes compat={false}>
         <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(ActionsConnectorsHome, 'xl')}
         />
 
-        <Redirect from={'/'} to="connectors" />
+        <Route path="*">
+          <Redirect to="connectors" />
+        </Route>
       </Routes>
     </ConnectorProvider>
   );

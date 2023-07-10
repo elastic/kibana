@@ -22,7 +22,7 @@ export const AgentPolicyApp: React.FunctionComponent = () => {
   useBreadcrumbs('policies');
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={FLEET_ROUTING_PATHS.edit_integration}>
         <EditPackagePolicyPage />
       </Route>

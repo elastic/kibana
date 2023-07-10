@@ -8,7 +8,7 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import moment from 'moment';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -28,8 +28,10 @@ import { PipelineVersions } from './pipeline_versions_dropdown';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => {
-  const match = useRouteMatch<{ id: string | undefined; hash: string | undefined }>();
-  const { hash: pipelineHash, id: pipelineId } = match.params;
+  const { hash: pipelineHash, id: pipelineId } = useParams<{
+    id: string | undefined;
+    hash: string | undefined;
+  }>();
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;

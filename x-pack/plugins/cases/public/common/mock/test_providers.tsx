@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ThemeProvider } from 'styled-components';
 
 import type { RenderOptions, RenderResult } from '@testing-library/react';
@@ -25,6 +25,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { MemoryRouterProps } from 'react-router-dom';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { StartServices } from '../../types';
 import type { ReleasePhase } from '../../components/types';
@@ -45,6 +46,7 @@ interface TestProviderProps {
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
   license?: ILicense;
+  initialEntries?: MemoryRouterProps['initialEntries'];
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -76,6 +78,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
   license,
+  initialEntries,
 }) => {
   const services = createStartServicesMock({ license });
 
@@ -98,7 +101,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <MemoryRouter>
+          <MemoryRouter initialEntries={initialEntries}>
             <CasesProvider
               value={{
                 externalReferenceAttachmentTypeRegistry,

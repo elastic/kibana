@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,8 +18,8 @@ export interface Params {
   sourceComponentTemplateName: string;
 }
 
-export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
-  const { sourceComponentTemplateName } = props.match.params;
+export const ComponentTemplateClone: FunctionComponent = () => {
+  const { sourceComponentTemplateName } = useParams<Params>();
   const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName)!;
 
   const { toasts, api } = useComponentTemplatesContext();
@@ -59,6 +59,6 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
       ? { ...componentTemplateToClone, name: `${componentTemplateToClone.name}-copy` }
       : undefined;
 
-    return <ComponentTemplateCreate {...props} sourceComponentTemplate={sourceComponentTemplate} />;
+    return <ComponentTemplateCreate sourceComponentTemplate={sourceComponentTemplate} />;
   }
 };

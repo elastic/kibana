@@ -32,7 +32,7 @@ export const SearchApplicationsRouter: React.FC = () => {
       <Route path={SEARCH_APPLICATION_PATH}>
         <SearchApplicationRouter />
       </Route>
-      <Route>
+      <Route path="*">
         <NotFound />
       </Route>
     </Routes>

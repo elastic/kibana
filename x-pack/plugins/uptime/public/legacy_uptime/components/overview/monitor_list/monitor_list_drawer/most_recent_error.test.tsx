@@ -8,7 +8,7 @@
 import { shallowWithIntl, renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import moment from 'moment';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { MostRecentError } from './most_recent_error';
 import { MonitorDetails, PingError } from '../../../../../../common/runtime_types';
 
@@ -42,7 +42,7 @@ describe('MostRecentError component', () => {
         />
       </Router>
     );
-    expect(component).toMatchSnapshot();
+    expect(component.dive()).toMatchSnapshot();
   });
 
   it('renders properly with mock data', () => {

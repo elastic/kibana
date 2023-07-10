@@ -43,7 +43,7 @@ const NetworkContainerComponent = () => {
   );
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route
         exact
         strict
@@ -80,7 +80,7 @@ const NetworkContainerComponent = () => {
           />
         )}
       />
-      <Route>
+      <Route path="*">
         <Redirect
           to={{
             pathname: NETWORK_PATH,

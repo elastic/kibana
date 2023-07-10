@@ -145,7 +145,9 @@ export const SourcesRouter: React.FC = () => {
           <AddSourceList />
         </Route>
       ) : (
-        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PRIVATE_SOURCES_PATH} />
+        <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
+          <Redirect to={PRIVATE_SOURCES_PATH} />
+        </Route>
       )}
       <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
         <AddSourceList />

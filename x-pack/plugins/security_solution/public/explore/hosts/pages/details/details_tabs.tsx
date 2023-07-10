@@ -49,7 +49,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     };
 
     return (
-      <Routes>
+      <Routes compat={false}>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
           <AuthenticationsQueryTabBody {...tabProps} />
         </Route>

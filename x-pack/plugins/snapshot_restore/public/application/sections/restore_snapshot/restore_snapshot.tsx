@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
@@ -28,9 +28,8 @@ interface MatchParams {
   snapshotId: string;
 }
 
-export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  history,
-}) => {
+export const RestoreSnapshot: React.FunctionComponent = () => {
+  const history = useHistory();
   const { i18n } = useServices();
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
 

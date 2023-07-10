@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
@@ -48,12 +48,9 @@ const ManagedPipelineCallout = () => (
   </EuiCallOut>
 );
 
-export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  history,
-}) => {
+export const PipelinesEdit: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { name } = useParams<MatchParams>();
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

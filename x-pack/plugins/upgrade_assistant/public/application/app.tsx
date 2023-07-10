@@ -34,7 +34,7 @@ import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from 
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
+export const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   const {
     services: { api, core },
   } = useAppContext();
@@ -149,7 +149,9 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
       <Route exact path="/es_deprecations" component={EsDeprecations} />
       <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
-      <Redirect from="/" to="/overview" />
+      <Route path="*">
+        <Redirect to="/overview" />
+      </Route>
     </Routes>
   );
 };

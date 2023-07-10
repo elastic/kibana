@@ -112,7 +112,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
-      <Routes>
+      <Routes compat={false}>
         <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
@@ -135,8 +135,9 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           }}
         />
 
-        <Redirect from={'/'} to="rules" />
-        <Redirect from={'/alerts'} to="rules" />
+        <Route path="*">
+          <Redirect to="rules" />
+        </Route>
       </Routes>
     </ConnectorProvider>
   );

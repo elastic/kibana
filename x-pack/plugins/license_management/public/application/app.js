@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LicenseDashboard, UploadLicense } from './sections';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -17,15 +18,21 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { UPLOAD_LICENSE_ROUTE } from '../locator';
+import {
+  getPermission,
+  isPermissionsLoading,
+  getPermissionsError,
+} from './store/reducers/license_management';
+import { loadPermissions as loadPermissionsAction } from './store/actions/permissions';
 
-export const App = ({
-  hasPermission,
-  permissionsLoading,
-  permissionsError,
-  telemetry,
-  loadPermissions,
-  executionContext,
-}) => {
+export const App = ({ telemetry, executionContext }) => {
+  const hasPermission = useSelector(getPermission);
+  const permissionsLoading = useSelector(isPermissionsLoading);
+  const permissionsError = useSelector(getPermissionsError);
+
+  const dispatch = useDispatch();
+  const loadPermissions = useCallback(() => dispatch(loadPermissionsAction()), [dispatch]);
+
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'licenseManagement',
@@ -103,7 +110,7 @@ export const App = ({
     <EuiPageBody>
       <Routes>
         <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
-        <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
+        <Route path="*" component={withTelemetry(LicenseDashboard)} />
       </Routes>
     </EuiPageBody>
   );

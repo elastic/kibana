@@ -9,7 +9,7 @@
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -50,7 +50,8 @@ const Home = () => (
   </EuiPageBody>
 );
 
-const PageB = ({ location }: RouteComponentProps) => {
+const PageB = () => {
+  const location = useLocation();
   const searchParams: any[] = [];
   new URLSearchParams(location.search).forEach((value, key) => searchParams.push([key, value]));
 
@@ -79,39 +80,43 @@ const PageB = ({ location }: RouteComponentProps) => {
   );
 };
 
-type NavProps = RouteComponentProps & {
+interface NavProps {
   navigateToApp: CoreStart['application']['navigateToApp'];
+}
+const Nav = ({ navigateToApp }: NavProps) => {
+  const history = useHistory();
+
+  return (
+    <EuiSideNav
+      items={[
+        {
+          name: 'Bar',
+          id: 'bar',
+          items: [
+            {
+              id: 'home',
+              name: 'Home',
+              onClick: () => navigateToApp('bar', { path: '' }),
+              'data-test-subj': 'barNavHome',
+            },
+            {
+              id: 'page-b',
+              name: 'Page B',
+              onClick: () => history.push('/page-b', { bar: 'page-b' }),
+              'data-test-subj': 'barNavPageB',
+            },
+            {
+              id: 'linktofoo',
+              name: 'Open Foo',
+              onClick: () => navigateToApp('foo'),
+              'data-test-subj': 'barNavFooHome',
+            },
+          ],
+        },
+      ]}
+    />
+  );
 };
-const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
-  <EuiSideNav
-    items={[
-      {
-        name: 'Bar',
-        id: 'bar',
-        items: [
-          {
-            id: 'home',
-            name: 'Home',
-            onClick: () => navigateToApp('bar', { path: '' }),
-            'data-test-subj': 'barNavHome',
-          },
-          {
-            id: 'page-b',
-            name: 'Page B',
-            onClick: () => history.push('/page-b', { bar: 'page-b' }),
-            'data-test-subj': 'barNavPageB',
-          },
-          {
-            id: 'linktofoo',
-            name: 'Open Foo',
-            onClick: () => navigateToApp('foo'),
-            'data-test-subj': 'barNavFooHome',
-          },
-        ],
-      },
-    ]}
-  />
-));
 
 const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>

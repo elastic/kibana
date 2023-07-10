@@ -96,7 +96,7 @@ export const SourceRouter: React.FC = () => {
       <Route exact path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}>
         <SourceSettings />
       </Route>
-      <Route>
+      <Route path="*">
         <NotFound isOrganization={isOrganization} pageChrome={[NAV.SOURCES]} />
       </Route>
     </Routes>

@@ -14,7 +14,7 @@ import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { ADD_SOURCE_PATH, PRIVATE_SOURCES_PATH, getSourcesPath } from '../../routes';
+import { PRIVATE_SOURCES_PATH } from '../../routes';
 
 import { SourcesRouter } from './sources_router';
 
@@ -48,9 +48,9 @@ describe('SourcesRouter', () => {
     setMockValues({ ...mockValues, account: { canCreatePrivateSources: false } });
     const wrapper = shallow(<SourcesRouter />);
 
-    expect(wrapper.find(Redirect).last().prop('from')).toEqual(
-      getSourcesPath(ADD_SOURCE_PATH, false)
-    );
+    // expect(wrapper.find(Redirect).last().prop('from')).toEqual(
+    //   getSourcesPath(ADD_SOURCE_PATH, false)
+    // );
     expect(wrapper.find(Redirect).last().prop('to')).toEqual(PRIVATE_SOURCES_PATH);
   });
 

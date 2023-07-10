@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import fileSaver from 'file-saver';
@@ -19,9 +19,8 @@ import { PipelinesPreview } from './pipelines_preview';
 import { Error } from './error_display';
 import { Instructions } from './instructions';
 
-export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps> = ({
-  history,
-}) => {
+export const PipelinesCreateFromCsv: React.FunctionComponent = () => {
+  const history = useHistory();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [pipelineProcessors, setPipelineProcessors] = useState<Processor[]>([]);

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,15 +34,14 @@ import { useRedirectPath } from '../../../hooks/redirect_path';
 
 interface Props {
   componentTemplateName?: string;
-  history: RouteComponentProps['history'];
 }
 
 const { useGlobalFlyout } = GlobalFlyout;
 
 export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
-  history,
 }) => {
+  const history = useHistory();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
@@ -187,7 +186,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       </>
     );
   } else if (data && data.length === 0) {
-    content = <EmptyPrompt history={history} />;
+    content = <EmptyPrompt />;
   } else if (error) {
     content = (
       <PageError

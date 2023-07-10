@@ -7,7 +7,7 @@
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import React from 'react';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { mountWithRouter } from '../lib';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -31,9 +31,11 @@ describe('useBreadcrumbs', () => {
     mountWithRouter(
       <MountWithReduxProvider>
         <KibanaContextProvider services={{ ...core }}>
-          <Route path={OVERVIEW_ROUTE}>
-            <Component />
-          </Route>
+          <Routes>
+            <Route path={OVERVIEW_ROUTE}>
+              <Component />
+            </Route>
+          </Routes>
         </KibanaContextProvider>
       </MountWithReduxProvider>
     );

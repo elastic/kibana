@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, Fragment } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useLocation, useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -28,13 +28,10 @@ interface MatchParams {
   name: string;
 }
 
-export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  location,
-  history,
-}) => {
+export const TemplateEdit: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { name } = useParams<MatchParams>();
+  const location = useLocation();
   const decodedTemplateName = attemptToURIDecode(name)!;
   const isLegacy = getIsLegacyFromQueryParams(location);
 

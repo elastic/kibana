@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 
 export const routerContextDecorator = (story: Function) => (
   <MemoryRouter initialEntries={['/']}>{story()}</MemoryRouter>

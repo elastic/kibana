@@ -12,7 +12,7 @@ import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_servi
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute } from './discover_main_route';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';

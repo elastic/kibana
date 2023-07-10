@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject, registerTestBed, TestBed, mountWithIntl } from '@kbn/test-jest-helpers';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { chromeServiceMock, applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api.service';

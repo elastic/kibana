@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
@@ -19,7 +19,8 @@ import { breadcrumbService } from '../../services/breadcrumbs';
 import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 
-export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const TemplateCreate: React.FunctionComponent = () => {
+  const history = useHistory();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
   const search = parse(useLocation().search.substring(1));

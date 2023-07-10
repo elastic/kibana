@@ -93,7 +93,7 @@ export const ManagementContainer = memo(() => {
   }
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
         component={EndpointTelemetry}

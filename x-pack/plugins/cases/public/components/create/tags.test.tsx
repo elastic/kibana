@@ -15,7 +15,7 @@ import { Tags } from './tags';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
 
@@ -38,11 +38,7 @@ describe('Tags', () => {
 
     globalForm = form;
 
-    return (
-      <TestProviders>
-        <Form form={form}>{children}</Form>
-      </TestProviders>
-    );
+    return <Form form={form}>{children}</Form>;
   };
 
   beforeEach(() => {
