@@ -626,7 +626,7 @@
             "label": "getBrowserFields",
             "description": [],
             "signature": [
-              "({ indices, metaFields, allowNoIndex, }: { indices: string[]; metaFields: string[]; allowNoIndex: boolean; }) => Promise<",
+              "({ indices, metaFields, allowNoIndex, }: { indices: string[]; metaFields: string[]; allowNoIndex: boolean; }) => Promise<{ browserFields: ",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "common",
@@ -634,7 +634,15 @@
                 "section": "def-common.BrowserFields",
                 "text": "BrowserFields"
               },
-              ">"
+              "; fields: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.FieldDescriptor",
+                "text": "FieldDescriptor"
+              },
+              "[]; }>"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
