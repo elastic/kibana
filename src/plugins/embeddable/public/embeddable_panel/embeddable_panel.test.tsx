@@ -30,7 +30,7 @@ import { embeddablePluginMock } from '../mocks';
 import { EmbeddablePanel } from './embeddable_panel';
 import { core, inspector } from '../kibana_services';
 import { CONTEXT_MENU_TRIGGER, ViewMode } from '..';
-import { EmbeddablePanelProps } from './types';
+import { UnwrappedEmbeddablePanelProps } from './types';
 
 const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
@@ -55,7 +55,9 @@ setup.registerEmbeddableFactory(embeddableReactFactory.type, embeddableReactFact
 const start = doStart();
 const getEmbeddableFactory = start.getEmbeddableFactory;
 
-const renderEmbeddableInPanel = async (props: EmbeddablePanelProps): Promise<ReactWrapper> => {
+const renderEmbeddableInPanel = async (
+  props: UnwrappedEmbeddablePanelProps
+): Promise<ReactWrapper> => {
   let wrapper: ReactWrapper;
   await act(async () => {
     wrapper = mount(

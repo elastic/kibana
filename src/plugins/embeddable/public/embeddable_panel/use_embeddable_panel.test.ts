@@ -19,7 +19,7 @@ describe('useEmbeddablePanel', () => {
     jest.resetAllMocks();
   });
 
-  it('returns the correct values when embeddable is provided', async () => {
+  it('returns the correct values when an unwrapped embeddable is provided', async () => {
     const embeddable: IEmbeddable = { id: 'supertest' } as unknown as IEmbeddable;
 
     const { result, waitForNextUpdate } = renderHook(() => useEmbeddablePanel({ embeddable }));
@@ -31,28 +31,20 @@ describe('useEmbeddablePanel', () => {
     expect(result.current!.Panel).toBeDefined();
   });
 
-  it('returns the correct values when getEmbeddable is provided', async () => {
-    const embeddable: IEmbeddable = { id: 'supertest' } as unknown as IEmbeddable;
-    const getEmbeddable = jest
+  it('returns the correct values when embeddable is provided as an async function', async () => {
+    const unwrappedEmbeddable: IEmbeddable = { id: 'supertest' } as unknown as IEmbeddable;
+    const embeddable = jest
       .fn<Promise<IEmbeddable | ErrorEmbeddable>, []>()
-      .mockResolvedValue(embeddable); // Replace with your desired resolved embeddable
+      .mockResolvedValue(unwrappedEmbeddable);
 
-    const { result, waitForNextUpdate } = renderHook(() => useEmbeddablePanel({ getEmbeddable }));
+    const { result, waitForNextUpdate } = renderHook(() => useEmbeddablePanel({ embeddable }));
 
     await waitForNextUpdate();
 
     expect(result.current).toBeDefined();
-    expect(getEmbeddable).toHaveBeenCalled();
+    expect(embeddable).toHaveBeenCalled();
     expect(result.current!.Panel).toBeDefined();
-    expect(result.current!.unwrappedEmbeddable).toEqual(embeddable);
-  });
-
-  it('throws an error when neither embeddable nor getEmbeddable is provided', async () => {
-    expect(() => {
-      useEmbeddablePanel({});
-    }).toThrow(
-      Error('useEmbeddable must be run with either an embeddable or a getEmbeddable function')
-    );
+    expect(result.current!.unwrappedEmbeddable).toEqual(unwrappedEmbeddable);
   });
 
   it('calls untilPluginStartServicesReady', async () => {
