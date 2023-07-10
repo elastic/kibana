@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { IContainer, PanelState } from '../..';
-import { EmbeddablePanelAsync } from '../../../embeddable_panel';
+import { EmbeddablePanel } from '../../../embeddable_panel';
 
 interface Props {
   container: IContainer;
@@ -85,8 +85,8 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
     const list = Object.values(this.state.panels).map((panelState) => {
       const item = (
         <EuiFlexItem key={panelState.explicitInput.id}>
-          <EmbeddablePanelAsync
-            getEmbeddable={() =>
+          <EmbeddablePanel
+            embeddable={() =>
               this.props.container.untilEmbeddableLoaded(panelState.explicitInput.id)
             }
           />

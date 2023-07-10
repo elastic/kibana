@@ -82,7 +82,7 @@ export {
   panelHoverTrigger,
 } from './lib';
 
-export { EmbeddablePanelAsync, EmbeddablePanel } from './embeddable_panel';
+export { EmbeddablePanel } from './embeddable_panel';
 export {
   InspectPanelAction,
   ACTION_INSPECT_PANEL,

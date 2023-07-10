@@ -14,7 +14,7 @@ import {
   withEmbeddableSubscription,
   ContainerInput,
   ContainerOutput,
-  EmbeddablePanelAsync,
+  EmbeddablePanel,
 } from '@kbn/embeddable-plugin/public';
 
 interface Props {
@@ -36,8 +36,8 @@ function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EmbeddablePanelAsync
-              getEmbeddable={() => embeddable.untilEmbeddableLoaded(panel.explicitInput.id)}
+            <EmbeddablePanel
+              embeddable={() => embeddable.untilEmbeddableLoaded(panel.explicitInput.id)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

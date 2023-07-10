@@ -10,11 +10,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import {
-  EmbeddablePanelAsync,
-  EmbeddablePhaseEvent,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddablePhaseEvent, EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
@@ -87,13 +83,13 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       >
         {isRenderable ? (
           <>
-            <EmbeddablePanelAsync
+            <EmbeddablePanel
               // TODO onPanelStatusChange
+              key={type}
+              index={index}
               showBadges={true}
               showNotifications={true}
-              key={type}
-              getEmbeddable={() => container.untilEmbeddableLoaded(id)}
-              index={index}
+              embeddable={() => container.untilEmbeddableLoaded(id)}
             />
             {children}
           </>

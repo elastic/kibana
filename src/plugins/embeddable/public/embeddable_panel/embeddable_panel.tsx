@@ -26,10 +26,10 @@ import {
 import { ViewMode, EmbeddableErrorHandler } from '../lib';
 import { EmbeddablePanelError } from './embeddable_panel_error';
 import { core, embeddableStart, inspector } from '../kibana_services';
-import { EmbeddablePanelProps, PanelUniversalActions } from './types';
+import { UnwrappedEmbeddablePanelProps, PanelUniversalActions } from './types';
 import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 
-export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
+export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
   const [node, setNode] = useState<ReactNode | undefined>();
   const { hideHeader, showShadow, embeddable, containerContext, hideInspector } = panelProps;
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);

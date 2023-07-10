@@ -8,34 +8,27 @@
 
 import useAsync from 'react-use/lib/useAsync';
 
-import { ErrorEmbeddable, IEmbeddable } from '../lib';
+import { IEmbeddable } from '../lib';
+import { EmbeddablePanelProps, UnwrappedEmbeddablePanelProps } from './types';
 import { untilPluginStartServicesReady } from '../kibana_services';
-import { EmbeddablePanelProps } from './types';
 
 export type UseEmbeddablePanelResult =
   | {
       unwrappedEmbeddable: IEmbeddable;
-      Panel: (props: EmbeddablePanelProps) => JSX.Element;
+      Panel: (props: UnwrappedEmbeddablePanelProps) => JSX.Element;
     }
   | undefined;
 
 export const useEmbeddablePanel = ({
   embeddable,
-  getEmbeddable,
 }: {
-  embeddable?: IEmbeddable;
-  getEmbeddable?: () => Promise<IEmbeddable | ErrorEmbeddable>;
+  embeddable: EmbeddablePanelProps['embeddable'];
 }): UseEmbeddablePanelResult => {
-  if (!embeddable && !getEmbeddable) {
-    throw new Error(
-      'useEmbeddable must be run with either an embeddable or a getEmbeddable function'
-    );
-  }
-
   const { loading, value } = useAsync(async () => {
     const startServicesPromise = untilPluginStartServicesReady();
     const modulePromise = import('./embeddable_panel');
-    const embeddablePromise = embeddable ? Promise.resolve(embeddable) : getEmbeddable?.();
+    const embeddablePromise =
+      typeof embeddable === 'function' ? embeddable() : Promise.resolve(embeddable);
     const [, unwrappedEmbeddable, panelModule] = await Promise.all([
       startServicesPromise,
       embeddablePromise,

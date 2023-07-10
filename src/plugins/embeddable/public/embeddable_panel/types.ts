@@ -45,16 +45,18 @@ export type EmbeddableNotificationAction = Action<
   EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput>>
 >;
 
+type PanelEmbeddable = IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
+
 export interface EmbeddablePanelProps {
   showBadges?: boolean;
   showShadow?: boolean;
   hideHeader?: boolean;
   hideInspector?: boolean;
-  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
   showNotifications?: boolean;
   containerContext?: EmbeddableContainerContext;
   actionPredicate?: (actionId: string) => boolean;
   getActions?: UiActionsService['getTriggerCompatibleActions'];
+  embeddable: PanelEmbeddable | (() => Promise<PanelEmbeddable>);
 
   /**
    * Ordinal number of the embeddable in the container, used as a
@@ -62,6 +64,10 @@ export interface EmbeddablePanelProps {
    */
   index?: number;
 }
+
+export type UnwrappedEmbeddablePanelProps = Omit<EmbeddablePanelProps, 'embeddable'> & {
+  embeddable: PanelEmbeddable;
+};
 
 export interface InspectorPanelAction {
   inspectPanel: InspectPanelAction;
