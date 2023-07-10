@@ -8,7 +8,7 @@
 import { isIndexNotFoundException } from '@kbn/core-saved-objects-migration-server-internal';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../..';
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../common/constants';
 
 export const deleteAccessControlIndex = async (client: IScopedClusterClient, index: string) => {
   try {

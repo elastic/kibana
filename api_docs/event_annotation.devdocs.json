@@ -350,23 +350,7 @@
             "label": "findAnnotationGroupContent",
             "description": [],
             "signature": [
-              "(searchTerm: string, pageSize: number, references?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
-              "[] | undefined, referencesToExclude?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
-              "[] | undefined) => Promise<{ total: number; hits: ",
+              "(searchTerm: string, pageSize: number, tagsToInclude?: string[] | undefined, tagsToExclude?: string[] | undefined) => Promise<{ total: number; hits: ",
               "EventAnnotationGroupContent",
               "[]; }>"
             ],
@@ -409,17 +393,10 @@
                 "id": "def-public.EventAnnotationServiceType.findAnnotationGroupContent.$3",
                 "type": "Array",
                 "tags": [],
-                "label": "references",
+                "label": "tagsToInclude",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
-                  "[] | undefined"
+                  "string[] | undefined"
                 ],
                 "path": "src/plugins/event_annotation/public/event_annotation_service/types.ts",
                 "deprecated": false,
@@ -431,17 +408,10 @@
                 "id": "def-public.EventAnnotationServiceType.findAnnotationGroupContent.$4",
                 "type": "Array",
                 "tags": [],
-                "label": "referencesToExclude",
+                "label": "tagsToExclude",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
-                  "[] | undefined"
+                  "string[] | undefined"
                 ],
                 "path": "src/plugins/event_annotation/public/event_annotation_service/types.ts",
                 "deprecated": false,
