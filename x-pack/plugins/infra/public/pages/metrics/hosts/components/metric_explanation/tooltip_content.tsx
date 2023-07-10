@@ -19,8 +19,12 @@ interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'style'> {
 
 export const TooltipContent = React.memo(
   ({ description, formula, showDocumentationLink = false, style }: Props) => {
+    const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      e.stopPropagation();
+    };
+
     return (
-      <EuiText size="xs" style={style}>
+      <EuiText size="xs" style={style} onClick={onClick}>
         <p>{description}</p>
         {formula && (
           <p>
