@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { DocumentCountChart } from './document_count_chart';
-export type { DocumentCountChartPoint } from './document_count_chart';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/in_memory_table'],
+};

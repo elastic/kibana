@@ -67,6 +67,7 @@ export const CategoryTable: FC<Props> = ({
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  // @TODO: replace with package useTableState
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
 
   const labels = useMemo(

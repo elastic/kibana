@@ -8,9 +8,11 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-import type { BasicAppState } from '@kbn/data-visualizer-plugin/public/application/data_comparison/types';
-import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
-import { useAiopsAppContext } from './use_aiops_app_context';
+import { useEffect } from 'react';
+import { FilterStateStore } from '@kbn/es-query';
+import { getEsQueryFromSavedSearch } from '../../index_data_visualizer/utils/saved_search_utils';
+import { useDataVisualizerKibana } from '../../kibana_context';
+import type { BasicAppState } from '../../data_comparison/types';
 
 export const useSearch = (
   { dataView, savedSearch }: { dataView: DataView; savedSearch: SavedSearch | null },
@@ -22,7 +24,21 @@ export const useSearch = (
     data: {
       query: { filterManager },
     },
-  } = useAiopsAppContext();
+  } = useDataVisualizerKibana().services;
+
+  useEffect(
+    function clearFiltersOnLeave() {
+      return () => {
+        // We want to clear all filters that have not been pinned globally
+        // when navigating to other pages
+        filterManager
+          .getFilters()
+          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .forEach((f) => filterManager.removeFilter(f));
+      };
+    },
+    [filterManager]
+  );
 
   const searchData = getEsQueryFromSavedSearch({
     dataView,

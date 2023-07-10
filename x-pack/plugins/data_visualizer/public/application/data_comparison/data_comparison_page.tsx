@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, FC } from 'react';
+import React, { useCallback, useEffect, useState, FC, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
@@ -15,38 +15,119 @@ import {
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
+  EuiPageHeader,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
-
-import { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
-import { PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
-import { useSearch } from '../../hooks/use_search';
-import { DataComparisonView } from './data_comparison_view';
-import { useDataSource } from '../../hooks/use_data_source';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
-import { useData } from '../../hooks/use_data';
+import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
+import { useStorage } from '@kbn/ml-local-storage';
 import {
-  getDefaultAiOpsListState,
-  type AiOpsPageUrlState,
-} from '../../application/utils/url_state';
+  DatePickerWrapper,
+  FROZEN_TIER_PREFERENCE,
+  FullTimeRangeSelector,
+  FullTimeRangeSelectorProps,
+  useTimefilter,
+} from '@kbn/ml-date-picker';
+import moment from 'moment';
+import { css } from '@emotion/react';
+import { useData } from '../common/hooks/use_data';
+import {
+  DV_FROZEN_TIER_PREFERENCE,
+  DVKey,
+  DVStorageMapped,
+} from '../index_data_visualizer/types/storage';
+import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
+import { DataComparisonFullAppState, getDefaultDataComparisonState } from './types';
+import { useDataSource } from '../common/hooks/data_source_context';
+import { useDataVisualizerKibana } from '../kibana_context';
+import { DataComparisonView } from './data_comparison_view';
+import { PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
+import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
+import { useSearch } from '../common/hooks/use_search';
+import type { SearchQueryLanguage } from '../index_data_visualizer/types/combined_query';
+import { DocumentCountWithDualBrush } from './document_count_with_dual_brush';
 
-import { DocumentCountContent } from '../document_count_content/document_count_content';
-import { SearchPanel } from '../search_panel';
-import { PageHeader } from '../page_header';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
+const dataViewTitleHeader = css({
+  minWidth: '300px',
+});
+
+export const PageHeader: FC = () => {
+  const [, setGlobalState] = useUrlState('_g');
+  const { dataView } = useDataSource();
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
+  >(
+    DV_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
+
+  const timefilter = useTimefilter({
+    timeRangeSelector: dataView.timeFieldName !== undefined,
+    autoRefreshSelector: true,
+  });
+
+  const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
+    (update) => {
+      setGlobalState({
+        time: {
+          from: moment(update.start.epoch).toISOString(),
+          to: moment(update.end.epoch).toISOString(),
+        },
+      });
+    },
+    [setGlobalState]
+  );
+
+  const hasValidTimeField = useMemo(
+    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView.timeFieldName]
+  );
+
+  return (
+    <EuiPageHeader
+      pageTitle={<div css={dataViewTitleHeader}>{dataView.getName()}</div>}
+      rightSideItems={[
+        <EuiFlexGroup gutterSize="s" data-test-subj="dataComparisonTimeRangeSelectorSection">
+          {hasValidTimeField ? (
+            <EuiFlexItem grow={false}>
+              <FullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
+                dataView={dataView}
+                query={undefined}
+                disabled={false}
+                timefilter={timefilter}
+                callback={updateTimeState}
+              />
+            </EuiFlexItem>
+          ) : null}
+          <DatePickerWrapper
+            isAutoRefreshOnly={!hasValidTimeField}
+            showRefresh={!hasValidTimeField}
+            width="full"
+            flexGroup={false}
+          />
+        </EuiFlexGroup>,
+      ]}
+    />
+  );
+};
 
 export const DataComparisonPage: FC = () => {
-  const { data: dataService } = useAiopsAppContext();
+  const {
+    services: { data: dataService },
+  } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
-  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
-    'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState()
-  );
+  const [dataComparisonListState, setAiopsListState] = usePageUrlState<{
+    pageKey: 'DV_DATA_COMP';
+    pageUrlState: DataComparisonFullAppState;
+  }>('DV_DATA_COMP', getDefaultDataComparisonState());
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
@@ -71,19 +152,19 @@ export const DataComparisonPage: FC = () => {
       }
 
       setAiopsListState({
-        ...aiopsListState,
+        ...dataComparisonListState,
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
         filters: searchParams.filters,
       });
     },
-    [selectedSavedSearch, aiopsListState, setAiopsListState]
+    [selectedSavedSearch, dataComparisonListState, setAiopsListState]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
     { dataView, savedSearch },
-    aiopsListState
+    dataComparisonListState
   );
 
   const { documentStats, timefilter } = useData(
@@ -97,21 +178,6 @@ export const DataComparisonPage: FC = () => {
 
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
-
-  useEffect(
-    // TODO: Consolidate this hook/function with with Data visualizer's
-    function clearFiltersOnLeave() {
-      return () => {
-        // We want to clear all filters that have not been pinned globally
-        // when navigating to other pages
-        dataService.query.filterManager
-          .getFilters()
-          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
-          .forEach((f) => dataService.query.filterManager.removeFilter(f));
-      };
-    },
-    [dataService.query.filterManager]
-  );
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -138,7 +204,7 @@ export const DataComparisonPage: FC = () => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const euiTheme = useEuiTheme();
+  const euiTheme = useCurrentEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
     productionColor: euiTheme.euiColorVis1,
@@ -188,15 +254,19 @@ export const DataComparisonPage: FC = () => {
   );
 
   return (
-    <EuiPageBody data-test-subj="aiopsDataComparisonPage" paddingSize="none" panelled={false}>
+    <EuiPageBody
+      data-test-subj="dataComparisonDataComparisonPage"
+      paddingSize="none"
+      panelled={false}
+    >
       <PageHeader />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexItem>
-            <SearchPanel
+            <SearchPanelContent
               dataView={dataView}
-              searchString={searchString ?? ''}
+              searchString={searchString}
               searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
               setSearchParams={setSearchParams}
@@ -205,7 +275,7 @@ export const DataComparisonPage: FC = () => {
           {documentCountStats !== undefined && (
             <EuiFlexItem>
               <EuiPanel paddingSize="m">
-                <DocumentCountContent
+                <DocumentCountWithDualBrush
                   brushSelectionUpdateHandler={brushSelectionUpdate}
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={documentCountStatsCompare}

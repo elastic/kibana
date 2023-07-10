@@ -8,12 +8,16 @@
 import { useState } from 'react';
 import { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
 
-// @TODO: replace with package useTableState
-export function useTableState<T>(items: T[], initialSortField: string) {
+export type UseTableState = ReturnType<typeof useTableState>;
+export function useTableState<T>(
+  items: T[],
+  initialSortField: string,
+  initialSortDirection: 'asc' | 'desc' = 'asc'
+) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<string>(initialSortField);
-  const [sortDirection, setSortDirection] = useState<Direction>('asc');
+  const [sortDirection, setSortDirection] = useState<Direction>(initialSortDirection);
 
   const onTableChange: EuiInMemoryTable<T>['onTableChange'] = ({
     page = { index: 0, size: 10 },

@@ -8,7 +8,6 @@
 import React, { FC, Suspense } from 'react';
 
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
-import { DataComparisonDetectionAppStateProps } from './components/data_comparison/data_comparison_app_state';
 import type { ExplainLogRateSpikesAppStateProps } from './components/explain_log_rate_spikes';
 import type { ExplainLogRateSpikesContentWrapperProps } from './components/explain_log_rate_spikes/explain_log_rate_spikes_content/explain_log_rate_spikes_content_wrapper';
 import type { LogCategorizationAppStateProps } from './components/log_categorization';
@@ -68,16 +67,5 @@ const ChangePointDetectionLazy = React.lazy(() => import('./components/change_po
 export const ChangePointDetection: FC<ChangePointDetectionAppStateProps> = (props) => (
   <LazyWrapper>
     <ChangePointDetectionLazy {...props} />
-  </LazyWrapper>
-);
-
-const DataComparisonLazy = React.lazy(() => import('./components/data_comparison'));
-/**
- * Lazy-wrapped DataComparison React component
- * @param {DataComparisonDetectionAppStateProps}  props - properties specifying the data on which to run the analysis.
- */
-export const DataComparison: FC<DataComparisonDetectionAppStateProps> = (props) => (
-  <LazyWrapper>
-    <DataComparisonLazy {...props} />
   </LazyWrapper>
 );

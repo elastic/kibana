@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { DataComparisonDetectionAppState } from './data_comparison_app_state';
-
-// required for dynamic import using React.lazy()
-// eslint-disable-next-line import/no-default-export
-export default DataComparisonDetectionAppState;
+export type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../../application';
+export { FileDataVisualizer, IndexDataVisualizer, DataComparison } from '../../application';

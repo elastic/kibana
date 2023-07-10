@@ -6,13 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { TimeBuckets } from '../../common/time_buckets';
-import { useAiopsAppContext } from './use_aiops_app_context';
+import { UI_SETTINGS } from '@kbn/data-service';
+import { TimeBuckets } from '../../../../common/services/time_buckets';
+import { useDataVisualizerKibana } from '../../kibana_context';
 
-// @TODO: refactor
 export const useTimeBuckets = () => {
-  const { uiSettings } = useAiopsAppContext();
+  const { uiSettings } = useDataVisualizerKibana().services;
 
   return useMemo(() => {
     return new TimeBuckets({

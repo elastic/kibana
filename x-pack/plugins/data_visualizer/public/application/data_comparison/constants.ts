@@ -13,24 +13,39 @@ export const DATA_COMPARISON_TYPE = {
   UNSUPPORTED: 'unsupported',
 } as const;
 
-export const NUMERIC_TYPE_LABEL = i18n.translate('xpack.aiops.driftData.numericLabel', {
-  defaultMessage: 'Numeric',
-});
-export const CATEGORICAL_TYPE_LABEL = i18n.translate('xpack.aiops.driftData.categoricalLabel', {
-  defaultMessage: 'Categorical',
-});
+export const NUMERIC_TYPE_LABEL = i18n.translate(
+  'xpack.dataVisualizer.dataComparison.numericLabel',
+  {
+    defaultMessage: 'Numeric',
+  }
+);
+export const CATEGORICAL_TYPE_LABEL = i18n.translate(
+  'xpack.dataVisualizer.dataComparison.categoricalLabel',
+  {
+    defaultMessage: 'Categorical',
+  }
+);
 
-export const UNSUPPORTED_LABEL = i18n.translate('xpack.aiops.driftData.UnsupportedLabel', {
-  defaultMessage: 'Unsupported',
-});
+export const UNSUPPORTED_LABEL = i18n.translate(
+  'xpack.dataVisualizer.dataComparison.UnsupportedLabel',
+  {
+    defaultMessage: 'Unsupported',
+  }
+);
 
-export const REFERENCE_LABEL = i18n.translate('xpack.aiops.driftData.referenceLabel', {
-  defaultMessage: 'Reference',
-});
+export const REFERENCE_LABEL = i18n.translate(
+  'xpack.dataVisualizer.dataComparison.referenceLabel',
+  {
+    defaultMessage: 'Reference',
+  }
+);
 
-export const PRODUCTION_LABEL = i18n.translate('xpack.aiops.driftData.productionLabel', {
-  defaultMessage: 'Production',
-});
+export const PRODUCTION_LABEL = i18n.translate(
+  'xpack.dataVisualizer.dataComparison.productionLabel',
+  {
+    defaultMessage: 'Production',
+  }
+);
 
 export const DATA_COMPARISON_TYPE_LABEL = {
   [DATA_COMPARISON_TYPE.NUMERIC]: NUMERIC_TYPE_LABEL,

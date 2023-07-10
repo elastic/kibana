@@ -12,3 +12,6 @@ export type {
   IndexDataVisualizerViewProps,
 } from './index_data_visualizer';
 export { IndexDataVisualizer } from './index_data_visualizer';
+
+export { DataComparison } from './data_comparison';
+export type { DataComparisonSpec } from './data_comparison/data_comparison_app_state';

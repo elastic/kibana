@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataSourceContextProvider } from '../../../contexts/ml';
-import { DataComparisonWithDocCountPage } from '../../../aiops/data_drift';
+import { DataComparisonWithDocCountPage } from '../../../datavisualizer/data_comparison/data_drift';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';

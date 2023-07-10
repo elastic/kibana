@@ -44,6 +44,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
+  // @TODO: replace with package useTableState
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<ManagementItems>(
     items ?? [],
     'id'

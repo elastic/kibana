@@ -6,7 +6,37 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { Filter, Query } from '@kbn/es-query';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  SEARCH_QUERY_LANGUAGE,
+  SearchQueryLanguage,
+} from '../index_data_visualizer/types/combined_query';
 import { DATA_COMPARISON_TYPE } from './constants';
+
+export interface DataComparisonAppState {
+  searchString?: Query['query'];
+  searchQuery?: estypes.QueryDslQueryContainer;
+  searchQueryLanguage: SearchQueryLanguage;
+  filters?: Filter[];
+}
+
+export type DataComparisonFullAppState = Required<DataComparisonAppState>;
+export type BasicAppState = DataComparisonFullAppState;
+
+const defaultSearchQuery = {
+  match_all: {},
+};
+
+export const getDefaultDataComparisonState = (
+  overrides?: Partial<DataComparisonAppState>
+): DataComparisonFullAppState => ({
+  searchString: '',
+  searchQuery: defaultSearchQuery,
+  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
+  filters: [],
+  ...overrides,
+});
 
 export interface Histogram {
   doc_count: number;

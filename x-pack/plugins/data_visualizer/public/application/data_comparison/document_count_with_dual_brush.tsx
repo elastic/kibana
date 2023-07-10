@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
-
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import type { WindowParameters } from '@kbn/aiops-utils';
-
+import { WindowParameters } from '@kbn/aiops-utils';
 import {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import React, { FC } from 'react';
 import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
-import { DocumentCountStats } from '../../../get_document_stats';
-
-import { TotalCountHeader } from '../total_count_header';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useDataVisualizerKibana } from '../kibana_context';
+import { DocumentCountStats } from '../../../common/types/field_stats';
+import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 
 export interface DocumentCountContentProps {
   brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
@@ -43,7 +39,7 @@ export interface DocumentCountContentProps {
   deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
-export const DocumentCountContent: FC<DocumentCountContentProps> = ({
+export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   brushSelectionUpdateHandler,
   documentCountStats,
   documentCountStatsSplit,
@@ -58,7 +54,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   incomingInitialAnalysisStart,
   ...docCountChartProps
 }) => {
-  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+  const {
+    services: { data, uiSettings, fieldFormats, charts },
+  } = useDataVisualizerKibana();
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -73,9 +71,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     timeRangeEarliest === undefined ||
     timeRangeLatest === undefined
   ) {
-    return totalCount !== undefined ? (
-      <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
-    ) : null;
+    return totalCount !== undefined ? <TotalCountHeader totalCount={totalCount} /> : null;
   }
 
   const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
@@ -96,7 +92,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexItem>
-        <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+        <TotalCountHeader totalCount={totalCount} />
       </EuiFlexItem>
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>

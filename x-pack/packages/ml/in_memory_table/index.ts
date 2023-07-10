@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../../application';
-export { FileDataVisualizer, IndexDataVisualizer } from '../../application';
+export { useTableState } from './hooks/use_table_state';
+export type { UseTableState } from './hooks/use_table_state';

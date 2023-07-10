@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { DualBrush, DualBrushAnnotation } from './src/dual_brush';
-export { ProgressControls } from './src/progress_controls';
-export { DocumentCountChart, type DocumentCountChartPoint } from './src/document_count_chart';
+export const SEARCH_QUERY_LANGUAGE = {
+  KUERY: 'kuery',
+  LUCENE: 'lucene',
+} as const;
+
+export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];

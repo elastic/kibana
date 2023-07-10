@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { DocumentCountChart as DocumentCountChartRoot } from '../document_count_content/document_count_chart';
+import { DocumentCountChart as DocumentCountChartRoot } from '@kbn/aiops-components/src/document_count_chart';
 import { TotalCountHeader } from '../document_count_content/total_count_header';
 import type { Category, SparkLinesPerCategory } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';

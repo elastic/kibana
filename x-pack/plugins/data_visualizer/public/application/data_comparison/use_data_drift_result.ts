@@ -8,16 +8,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
-import { merge } from 'lodash';
 import { cloneDeep } from 'lodash';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getDefaultQuery, SearchQueryLanguage } from '../../application/utils/search_utils';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { type SearchQueryLanguage, getDefaultQuery } from '@kbn/ml-query-utils';
+
+import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
   PRODUCTION_LABEL,
@@ -52,7 +51,7 @@ export const getDataComparisonType = (kibanaType: string): DataComparisonField['
 };
 
 export const useDataSearch = () => {
-  const { data } = useAiopsAppContext();
+  const { data } = useDataVisualizerKibana().services;
 
   return useCallback(
     async (esSearchRequestParams: IKibanaSearchRequest['params'], abortSignal?: AbortSignal) => {
@@ -228,18 +227,27 @@ const getDataComparisonQuery = ({
         [datetimeField]: {
           gte: timeRange.start,
           lte: timeRange.end,
+          format: 'epoch_millis',
         },
       },
     };
   }
-  const query = cloneDeep(searchQuery ?? getDefaultQuery());
 
-  if (isPopulatedObject(query, ['match_all'])) {
-    delete query.match_all;
+  const query: Query['query'] = cloneDeep(
+    !searchQuery || isPopulatedObject(searchQuery, ['match_all']) ? getDefaultQuery() : searchQuery
+  );
+
+  if (rangeFilter && isPopulatedObject<string, unknown>(query, ['bool'])) {
+    if (Array.isArray(query.bool.filter)) {
+      query.bool.filter.push(rangeFilter);
+    } else {
+      query.bool.filter = [rangeFilter];
+    }
   }
-  const refDataQuery: { query: Query['query']; runtime_mappings?: MappingRuntimeFields } =
-    rangeFilter ? { query: merge({}, query, { bool: { filter: [rangeFilter] } }) } : { query };
 
+  const refDataQuery: { query: Query['query']; runtime_mappings?: MappingRuntimeFields } = {
+    query,
+  };
   if (runtimeFields) {
     refDataQuery.runtime_mappings = runtimeFields;
   }
@@ -534,7 +542,7 @@ export const useFetchDataComparisonResult = ({
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
-            error: extractErrorMessage(e),
+            error: e,
           });
         }
       };

@@ -23,22 +23,9 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, isQuery, SearchSource } from '@kbn/data-plugin/common';
 import { FilterManager, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { getDefaultQuery } from '@kbn/ml-query-utils';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
-
-const DEFAULT_QUERY = {
-  bool: {
-    must: [
-      {
-        match_all: {},
-      },
-    ],
-  },
-};
-
-export function getDefaultQuery() {
-  return cloneDeep(DEFAULT_QUERY);
-}
 
 /**
  * Parse the stringified searchSourceJSON
@@ -124,7 +111,7 @@ function getSavedSearchSource(savedSearch: SavedSearch) {
     : undefined;
 }
 
-/**
+/** @TODO: refactor this to kbn/ml/query_utils
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
  */

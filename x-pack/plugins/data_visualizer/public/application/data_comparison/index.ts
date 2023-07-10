@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { DualBrush, DualBrushAnnotation } from './src/dual_brush';
-export { ProgressControls } from './src/progress_controls';
-export { DocumentCountChart, type DocumentCountChartPoint } from './src/document_count_chart';
+import { DataComparisonDetectionAppState as DataComparison } from './data_comparison_app_state';
+export { DataComparison };

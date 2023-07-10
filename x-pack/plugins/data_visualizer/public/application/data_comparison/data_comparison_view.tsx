@@ -19,7 +19,6 @@ import {
 import {
   Comparators,
   EuiButtonIcon,
-  EuiBasicTable,
   EuiBasicTableColumn,
   EuiTableFieldDataColumnType,
   EuiEmptyPrompt,
@@ -27,6 +26,7 @@ import {
   EuiFormRow,
   EuiScreenReaderOnly,
   EuiSwitch,
+  EuiInMemoryTable,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -37,11 +37,11 @@ import { ProgressControls } from '@kbn/aiops-components';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
-import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
+import type { SearchQueryLanguage } from '@kbn/aiops-plugin/public/application/utils/search_utils';
+import { useTableState, UseTableState } from '@kbn/ml-in-memory-table';
+import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { DataComparisonChartTooltipBody } from './data_comparison_chart_tooltip_body';
-import { UseTableState, useTableState } from '../log_categorization/category_table/use_table_state';
-import type { SearchQueryLanguage } from '../../application/utils/search_utils';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
+import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
 import {
   DATA_COMPARISON_TYPE,
   DATA_COMPARISON_TYPE_LABEL,
@@ -114,12 +114,15 @@ const OverlapDistributionComparison = ({
 
       <Settings showLegend={false} />
       <AreaSeries
-        id="aiops.overlapDistributionComparisonChart"
-        name={i18n.translate('xpack.aiops.dataComparison.distributionComparisonChartName', {
-          defaultMessage:
-            'Distribution comparison of reference and production data for {fieldName}',
-          values: { fieldName },
-        })}
+        id="dataVisualizer.overlapDistributionComparisonChart"
+        name={i18n.translate(
+          'xpack.dataVisualizer.dataComparison.distributionComparisonChartName',
+          {
+            defaultMessage:
+              'Distribution comparison of reference and production data for {fieldName}',
+            values: { fieldName },
+          }
+        )}
         xScaleType={
           fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
         }
@@ -180,15 +183,21 @@ const DataComparisonChart = ({
   );
 };
 
-const dataComparisonedYesLabel = i18n.translate('xpack.aiops.dataComparison.fieldTypeYesLabel', {
-  defaultMessage: 'Yes',
-});
-const dataComparisonedNoLabel = i18n.translate('xpack.aiops.dataComparison.driftDetectedNoLabel', {
-  defaultMessage: 'No',
-});
+const dataComparisonedYesLabel = i18n.translate(
+  'xpack.dataVisualizer.dataComparison.fieldTypeYesLabel',
+  {
+    defaultMessage: 'Yes',
+  }
+);
+const dataComparisonedNoLabel = i18n.translate(
+  'xpack.dataVisualizer.dataComparison.driftDetectedNoLabel',
+  {
+    defaultMessage: 'No',
+  }
+);
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
-  'xpack.aiops.dataComparison.showOnlyDriftedFieldsOptionLabel',
+  'xpack.dataVisualizer.dataComparison.showOnlyDriftedFieldsOptionLabel',
   { defaultMessage: 'Show only fields with data drifted' }
 );
 
@@ -312,7 +321,7 @@ export const DataComparisonView = ({
       title={
         <h2>
           <FormattedMessage
-            id="xpack.aiops.dataComparison.emptyPromptTitle"
+            id="xpack.dataVisualizer.dataComparison.emptyPromptTitle"
             defaultMessage="Select a time range for reference and production data in the histogram chart to compare data distribution."
           />
         </h2>
@@ -321,13 +330,13 @@ export const DataComparisonView = ({
       body={
         <p>
           <FormattedMessage
-            id="xpack.aiops.dataComparison.emptyPromptBody"
+            id="xpack.dataVisualizer.dataComparison.emptyPromptBody"
             defaultMessage="The Data Comparison Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues.
 "
           />
         </p>
       }
-      data-test-subj="aiopsNoWindowParametersEmptyPrompt"
+      data-test-subj="dataVisualizerNoWindowParametersEmptyPrompt"
     />
   ) : (
     <div>
@@ -354,7 +363,7 @@ export const DataComparisonView = ({
           </EuiFormRow>
         </EuiFlexItem>
       </ProgressControls>
-      {result.error ? <EuiEmptyPrompt color="danger">{result.error}</EuiEmptyPrompt> : null}
+      {result.error ? <EuiEmptyPrompt color="danger" body={<p>{result.error}</p>} /> : null}
 
       {filteredData ? (
         <DataComparisonOverviewTable
@@ -377,7 +386,7 @@ export const DataComparisonOverviewTable = ({
 }: {
   data: Feature[];
 } & UseTableState) => {
-  const euiTheme = useEuiTheme();
+  const euiTheme = useCurrentEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
     productionColor: euiTheme.euiColorVis1,
@@ -438,7 +447,7 @@ export const DataComparisonOverviewTable = ({
 
     {
       field: 'featureName',
-      name: i18n.translate('xpack.aiops.dataComparison.fieldNameLabel', {
+      name: i18n.translate('xpack.dataVisualizer.dataComparison.fieldNameLabel', {
         defaultMessage: 'Field name',
       }),
       'data-test-subj': 'mlDataComparisonOverviewTableFeatureName',
@@ -447,7 +456,7 @@ export const DataComparisonOverviewTable = ({
     },
     {
       field: 'fieldType',
-      name: i18n.translate('xpack.aiops.dataComparison.fieldTypeLabel', {
+      name: i18n.translate('xpack.dataVisualizer.dataComparison.fieldTypeLabel', {
         defaultMessage: 'Field type',
       }),
       'data-test-subj': 'mlDataComparisonOverviewTableFeatureType',
@@ -459,7 +468,7 @@ export const DataComparisonOverviewTable = ({
     },
     {
       field: 'driftDetected',
-      name: i18n.translate('xpack.aiops.dataComparison.driftDetectedLabel', {
+      name: i18n.translate('xpack.dataVisualizer.dataComparison.driftDetectedLabel', {
         defaultMessage: 'Drift detected',
       }),
       'data-test-subj': 'mlDataComparisonOverviewTableDriftDetected',
@@ -491,10 +500,13 @@ export const DataComparisonOverviewTable = ({
               fieldType={item.fieldType}
               data={referenceHistogram}
               color={colors.referenceColor}
-              name={i18n.translate('xpack.aiops.dataComparison.dataComparisonDistributionLabel', {
-                defaultMessage: '{label} distribution',
-                values: { label: REFERENCE_LABEL },
-              })}
+              name={i18n.translate(
+                'xpack.dataVisualizer.dataComparison.dataComparisonDistributionLabel',
+                {
+                  defaultMessage: '{label} distribution',
+                  values: { label: REFERENCE_LABEL },
+                }
+              )}
             />
           </div>
         );
@@ -512,10 +524,13 @@ export const DataComparisonOverviewTable = ({
               fieldType={item.fieldType}
               data={productionDistribution}
               color={colors.productionColor}
-              name={i18n.translate('xpack.aiops.dataComparison.dataComparisonDistributionLabel', {
-                defaultMessage: '{label} distribution',
-                values: { label: PRODUCTION_LABEL },
-              })}
+              name={i18n.translate(
+                'xpack.dataVisualizer.dataComparison.dataComparisonDistributionLabel',
+                {
+                  defaultMessage: '{label} distribution',
+                  values: { label: PRODUCTION_LABEL },
+                }
+              )}
             />
           </div>
         );
@@ -582,10 +597,13 @@ export const DataComparisonOverviewTable = ({
   };
 
   return (
-    <EuiBasicTable
-      tableCaption={i18n.translate('xpack.aiops.dataComparison.dataComparisonTableCaption', {
-        defaultMessage: 'Data comparison overview',
-      })}
+    <EuiInMemoryTable<Feature>
+      tableCaption={i18n.translate(
+        'xpack.dataVisualizer.dataComparison.dataComparisonTableCaption',
+        {
+          defaultMessage: 'Data comparison overview',
+        }
+      )}
       items={features}
       rowHeader="featureName"
       columns={columns}

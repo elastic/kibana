@@ -24,5 +24,4 @@ export {
   ExplainLogRateSpikesContent,
   LogCategorization,
   ChangePointDetection,
-  DataComparison,
 } from './shared_lazy_components';
