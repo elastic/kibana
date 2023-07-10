@@ -57,7 +57,7 @@ export class IndexMgmtUIPlugin {
             this.extensionsService,
             Boolean(fleet),
             kibanaVersion,
-            enableIndexActions,
+            enableIndexActions
           );
         },
       });

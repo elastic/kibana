@@ -53,7 +53,7 @@ export async function mountManagementSection(
   extensionsService: ExtensionsService,
   isFleetEnabled: boolean,
   kibanaVersion: SemVer,
-  enableIndexActions: boolean,
+  enableIndexActions: boolean
 ) {
   const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
