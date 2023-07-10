@@ -28,5 +28,5 @@ export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
 export type NavigationEmbeddableAttributes = {
   title: string;
   description?: string;
-  linkListJSON?: string;
+  linksJSON?: string;
 };

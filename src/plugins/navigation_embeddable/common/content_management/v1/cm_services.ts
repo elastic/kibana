@@ -20,7 +20,7 @@ const navigationEmbeddableAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.string()),
-    linkListJSON: schema.maybe(schema.string()),
+    linksJSON: schema.maybe(schema.string()),
   },
   { unknowns: 'forbid' }
 );

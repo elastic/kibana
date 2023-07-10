@@ -10,11 +10,13 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { NavigationEmbeddableStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
+export let contentManagement: ContentManagementPublicStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -36,6 +38,7 @@ export const setKibanaServices = (
 ) => {
   coreServices = kibanaCore;
   dashboardServices = deps.dashboard;
+  contentManagement = deps.contentManagement;
 
   servicesReady$.next(true);
 };

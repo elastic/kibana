@@ -9,7 +9,7 @@
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { NavigationEmbeddableCrudTypes } from '../../common/content_management';
 import { CONTENT_ID as contentTypeId } from '../../common';
-import { contentManagement } from '../navigation_embeddable_services';
+import { contentManagement } from '../services/kibana_services';
 
 const get = async (id: string) => {
   return contentManagement.client.get({ contentTypeId, id });

@@ -36,7 +36,7 @@ export class NavigationEmbeddableServerPlugin implements Plugin<object, object> 
         properties: {
           title: { type: 'text' },
           description: { type: 'text' },
-          linkListJSON: { type: 'text' },
+          linksJSON: { type: 'text' },
         },
       },
     });

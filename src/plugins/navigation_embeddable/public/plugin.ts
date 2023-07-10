@@ -17,7 +17,7 @@ import { NAVIGATION_EMBEDDABLE_TYPE } from './embeddable';
 import { NavigationEmbeddableFactoryDefinition } from './embeddable';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { APP_NAME } from '../common/constants';
-import { setKibanaServices } from './navigation_embeddable_services';
+import { setKibanaServices } from './services/kibana_services';
 
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
