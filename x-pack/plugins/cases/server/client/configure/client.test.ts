@@ -10,6 +10,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { CasesClientArgs } from '../types';
 import { getConnectors, get, update } from './client';
 import { createCasesClientInternalMock, createCasesClientMockArgs } from '../mocks';
+import { MAX_SUPPORTED_CONNECTORS_RETURNED } from '../../../common/constants';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -34,6 +35,7 @@ describe('client', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
+        isSystemActionType: false,
       },
       {
         id: '.servicenow',
@@ -43,6 +45,7 @@ describe('client', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
+        isSystemActionType: false,
       },
       {
         id: '.unsupported',
@@ -52,6 +55,7 @@ describe('client', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
       },
       {
         id: '.swimlane',
@@ -61,6 +65,7 @@ describe('client', () => {
         enabledInLicense: false,
         minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
+        isSystemActionType: false,
       },
     ];
 
@@ -218,6 +223,15 @@ describe('client', () => {
           referencedByCount: 1,
         },
       ]);
+    });
+
+    it('limits connectors returned to 1000', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes.slice(0, 1));
+      actionsClient.getAll.mockImplementation(async () =>
+        Array(MAX_SUPPORTED_CONNECTORS_RETURNED + 1).fill(connectors[0])
+      );
+
+      expect((await getConnectors(args)).length).toEqual(MAX_SUPPORTED_CONNECTORS_RETURNED);
     });
   });
 

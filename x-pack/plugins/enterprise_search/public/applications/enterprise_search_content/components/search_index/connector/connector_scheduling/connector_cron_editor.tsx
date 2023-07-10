@@ -135,7 +135,7 @@ function cronToFrequency(cron: string): Frequency {
   if (fields.length < 4) {
     return 'YEAR';
   }
-  if (fields[1] === '*' || fields[1].startsWith('*/')) {
+  if (fields[1] === '*' || fields[1].includes(',')) {
     return 'MINUTE';
   }
   if (fields[2] === '*') {
