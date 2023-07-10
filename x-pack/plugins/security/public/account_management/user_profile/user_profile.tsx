@@ -560,7 +560,7 @@ function UserPasswordEditor({
   );
 }
 
-function UserRoles({ user }: { user: AuthenticatedUser }) {
+const UserRoles = ({ user }: { user: AuthenticatedUser }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -574,10 +574,7 @@ function UserRoles({ user }: { user: AuthenticatedUser }) {
       <EuiButtonEmpty size="xs" onClick={onButtonClick} data-test-subj="userRolesExpand">
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.rolesCountLabel"
-          defaultMessage="+{count, plural,
-              one {# Role}
-              other {# Roles}
-            }."
+          defaultMessage="+{count} more"
           values={{ count: remainingRoles.length }}
         />
       </EuiButtonEmpty>
@@ -615,7 +612,7 @@ function UserRoles({ user }: { user: AuthenticatedUser }) {
       {remainingRoles.length ? renderMoreRoles() : null}
     </>
   );
-}
+};
 
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
   const { euiTheme } = useEuiTheme();
@@ -691,15 +688,19 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   rightSideItems.push({
     title: (
       <FormattedMessage
-        id="xpack.security.accountManagement.userProfile.rolesLable"
-        defaultMessage="Roles"
+        id="xpack.security.accountManagement.userProfile.rolesLabel"
+        defaultMessage="{roles, plural,
+            one {Role}
+            other {Roles}
+          }"
+        values={{ roles: user.roles.length }}
       />
     ),
     description: <UserRoles user={user} />,
     helpText: (
       <FormattedMessage
         id="xpack.security.accountManagement.userProfile.rolesHelpText"
-        defaultMessage="Your access and permissions."
+        defaultMessage="Roles control access and permissions across the Elastic Stack."
       />
     ),
     testSubj: 'userRoles',
