@@ -17,7 +17,7 @@ import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_que
 
 const NewSavedQueryPageComponent = () => {
   useBreadcrumbs('saved_query_new');
-  const savedQueryListProps = useRouterNavigate('saved_queries');
+  const savedQueryListProps = useRouterNavigate('/saved_queries');
 
   const { mutateAsync } = useCreateSavedQuery({ withRedirect: true });
 

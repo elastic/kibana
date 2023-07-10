@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
@@ -30,11 +30,11 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const EditPackPageComponent = () => {
   const { packId } = useParams<{ packId: string }>();
-  const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
+  const queryDetailsLinkProps = useRouterNavigate(`/packs/${packId}`);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { isLoading, data } = usePack({ packId });
-  const deletePackMutation = useDeletePack({ packId, withRedirect: true });
+  const deletePackMutation = useDeletePack({ packId: packId as string, withRedirect: true });
   const isReadOnly = useMemo(() => !!data?.read_only, [data]);
 
   useBreadcrumbs('pack_edit', {

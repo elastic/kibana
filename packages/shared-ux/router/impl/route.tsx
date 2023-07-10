@@ -11,9 +11,10 @@ import {
   // eslint-disable-next-line no-restricted-imports
   Route as ReactRouterRoute,
   RouteComponentProps,
-  RouteProps,
+  RouteProps as LegacyRouteProps,
   useRouteMatch,
 } from 'react-router-dom';
+import { CompatRoute, RouteProps, useLocation, useParams } from 'react-router-dom-v5-compat';
 import { useKibanaSharedUX } from './services';
 import { useSharedUXExecutionContext } from './use_execution_context';
 
@@ -27,8 +28,12 @@ export const Route = <T extends {}>({
   children,
   component: Component,
   render,
+  element: Element,
+  compat,
   ...rest
-}: RouteProps<string, { [K: string]: string } & T>) => {
+}: LegacyRouteProps<string, { [K: string]: string } & T> &
+  Pick<RouteProps, 'index' | 'element'> & { compat?: boolean }) => {
+  const ReactRouterRouteComponent = compat ? CompatRoute : ReactRouterRoute;
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
@@ -42,14 +47,14 @@ export const Route = <T extends {}>({
   }, [Component]);
 
   if (component) {
-    return <ReactRouterRoute {...rest} component={component} />;
+    return <ReactRouterRouteComponent {...rest} component={component} />;
   }
   if (render || typeof children === 'function') {
     const renderFunction = typeof children === 'function' ? children : render;
     return (
-      <ReactRouterRoute
+      <ReactRouterRouteComponent
         {...rest}
-        render={(props) => (
+        render={(props: RouteComponentProps) => (
           <>
             <MatchPropagator />
             {/* @ts-ignore  else condition exists if renderFunction is undefined*/}
@@ -60,10 +65,10 @@ export const Route = <T extends {}>({
     );
   }
   return (
-    <ReactRouterRoute {...rest}>
+    <ReactRouterRouteComponent {...rest}>
       <MatchPropagator />
       {children}
-    </ReactRouterRoute>
+    </ReactRouterRouteComponent>
   );
 };
 
@@ -78,6 +83,23 @@ export const MatchPropagator = () => {
     type: 'application',
     page: match.path,
     id: Object.keys(match.params).length > 0 ? JSON.stringify(match.params) : undefined,
+  });
+
+  return null;
+};
+
+/**
+ * The match propagator that is part of the Route
+ */
+export const MatchPropagatorV6 = () => {
+  const { executionContext } = useKibanaSharedUX().services;
+  const location = useLocation();
+  const params = useParams();
+
+  useSharedUXExecutionContext(executionContext, {
+    type: 'application',
+    page: location.pathname,
+    id: Object.keys(params).length > 0 ? JSON.stringify(params) : undefined,
   });
 
   return null;

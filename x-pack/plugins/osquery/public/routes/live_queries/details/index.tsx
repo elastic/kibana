@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import styled from 'styled-components';
 import { useRouterNavigate } from '../../../common/lib/kibana';
@@ -23,8 +23,8 @@ const StyledTableWrapper = styled(EuiFlexItem)`
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
-  useBreadcrumbs('live_query_details', { liveQueryId: actionId });
-  const liveQueryListProps = useRouterNavigate('live_queries');
+  useBreadcrumbs('live_query_details', { liveQueryId: actionId as string });
+  const liveQueryListProps = useRouterNavigate('/live_queries');
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
 

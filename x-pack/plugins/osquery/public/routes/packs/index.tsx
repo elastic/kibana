@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { PacksPage } from './list';
@@ -20,26 +19,23 @@ import { MissingPrivileges } from '../components';
 const PacksComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('packs');
-  const match = useRouteMatch();
 
   if (!permissions.readPacks) {
     return <MissingPrivileges />;
   }
 
   return (
-    <Routes>
-      <Route path={`${match.url}/add`}>
-        {permissions.writePacks ? <AddPackPage /> : <MissingPrivileges />}
-      </Route>
-      <Route path={`${match.url}/:packId/edit`}>
-        {permissions.writePacks ? <EditPackPage /> : <MissingPrivileges />}
-      </Route>
-      <Route path={`${match.url}/:packId`}>
-        <PackDetailsPage />
-      </Route>
-      <Route path={`${match.url}`}>
-        <PacksPage />
-      </Route>
+    <Routes legacySwitch={false}>
+      <Route
+        path="add"
+        element={permissions.writePacks ? <AddPackPage /> : <MissingPrivileges />}
+      />
+      <Route
+        path=":packId/edit"
+        element={permissions.writePacks ? <EditPackPage /> : <MissingPrivileges />}
+      />
+      <Route path=":packId" element={<PackDetailsPage />} />
+      <Route index element={<PacksPage />} />
     </Routes>
   );
 };

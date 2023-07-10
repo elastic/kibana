@@ -97,7 +97,7 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
   savedQueryId,
   savedQueryName,
 }) => {
-  const buttonProps = useRouterNavigate(`saved_queries/${savedQueryId}`);
+  const buttonProps = useRouterNavigate(`/saved_queries/${savedQueryId}`);
 
   const editText = useMemo(
     () =>
@@ -129,7 +129,7 @@ const SavedQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
   useBreadcrumbs('saved_queries');
-  const newQueryLinkProps = useRouterNavigate('saved_queries/new');
+  const newQueryLinkProps = useRouterNavigate('/saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [sortField, setSortField] = useState('updated_at');

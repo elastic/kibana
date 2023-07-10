@@ -50,7 +50,7 @@ export const LiveQueriesPage = React.memo(LiveQueriesPageComponent);
 
 const NewLiveQueryButton = React.memo(() => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const newQueryLinkProps = useRouterNavigate('live_queries/new');
+  const newQueryLinkProps = useRouterNavigate('/live_queries/new');
 
   return (
     <EuiButton

@@ -6,16 +6,18 @@
  */
 
 import type React from 'react';
+import type { Path } from 'react-router-dom-v5-compat';
 import { useHistory } from 'react-router-dom';
+import { useHref, parsePath } from 'react-router-dom-v5-compat';
 import { FieldIcon } from '@kbn/react-field';
-import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue, reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaContextProvider,
   useKibana,
   useUiSetting,
   useUiSetting$,
   withKibana,
-  reactRouterNavigate,
+  reactRouterOnClickHandler,
 } from '@kbn/kibana-react-plugin/public';
 import type { StartServices } from '../../../types';
 
@@ -31,13 +33,18 @@ const isModifiedEvent = (event: React.MouseEvent) =>
 
 const isLeftClickEvent = (event: React.MouseEvent) => event.button === 0;
 
+const toLocationObject = (to: string | Path) => (typeof to === 'string' ? parsePath(to) : to);
+
 const useRouterNavigate = (
-  to: Parameters<typeof reactRouterNavigate>[1],
+  to: Path | string,
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
 ) => {
   const history = useHistory();
 
-  return reactRouterNavigate(history, to, onClickCallback);
+  return {
+    href: useHref(toLocationObject(to)),
+    onClick: reactRouterOnClickHandler(history.push, toLocationObject(to), onClickCallback),
+  };
 };
 
 export {

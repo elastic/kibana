@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
@@ -18,17 +18,11 @@ const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
 
   return (
-    <Routes>
-      <Route path={`/packs`}>
-        <Packs />
-      </Route>
-      <Route path={`/saved_queries`}>
-        <SavedQueries />
-      </Route>
-      <Route path="/live_queries">
-        <LiveQueries />
-      </Route>
-      <Redirect to="/live_queries" />
+    <Routes legacySwitch={false}>
+      <Route path="packs/*" element={<Packs />} />
+      <Route path="saved_queries/*" element={<SavedQueries />} />
+      <Route path="live_queries/*" element={<LiveQueries />} />
+      <Route index element={<Navigate to="live_queries" replace />} />
     </Routes>
   );
 };
