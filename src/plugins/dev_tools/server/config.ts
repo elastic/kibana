@@ -17,9 +17,7 @@ const configSchema = schema.object({
 
 export type DevToolsConfig = TypeOf<typeof configSchema>;
 
-export type DevToolsPublicConfig = TypeOf<typeof configSchema>;
-
-export const config: PluginConfigDescriptor<DevToolsPublicConfig> = {
+export const config: PluginConfigDescriptor<DevToolsConfig> = {
   exposeToBrowser: {
     deeplinks: true,
   },
