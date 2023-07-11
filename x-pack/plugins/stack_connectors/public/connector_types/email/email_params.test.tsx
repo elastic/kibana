@@ -8,8 +8,16 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import EmailParamsFields from './email_params';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+import { render, fireEvent, screen } from '@testing-library/react';
+
+jest.mock('../../common/get_experimental_features');
 
 describe('EmailParamsFields renders', () => {
+  beforeEach(() => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+  });
+
   test('all params fields is rendered', () => {
     const actionParams = {
       cc: [],
@@ -95,7 +103,7 @@ describe('EmailParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = render(
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
@@ -109,22 +117,37 @@ describe('EmailParamsFields renders', () => {
 
     // simulate value being updated
     const valueToSimulate = 'some new value';
-    wrapper
-      .find('[data-test-subj="messageTextArea"]')
-      .last()
-      .simulate('change', { target: { value: valueToSimulate } });
-    expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
-    wrapper.setProps({
-      actionParams: {
-        ...actionParams,
-        message: valueToSimulate,
-      },
+    fireEvent.change(screen.getByTestId('messageTextArea'), {
+      target: { value: valueToSimulate },
     });
 
-    // simulate default changing
-    wrapper.setProps({
-      defaultMessage: 'Some different default message',
-    });
+    expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
+
+    rerender(
+      <EmailParamsFields
+        actionParams={{
+          ...actionParams,
+          message: valueToSimulate,
+        }}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
+    );
+
+    rerender(
+      <EmailParamsFields
+        actionParams={{
+          ...actionParams,
+          message: valueToSimulate,
+        }}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        editAction={editAction}
+        defaultMessage={'Some different default message'}
+        index={0}
+      />
+    );
 
     expect(editAction).not.toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
