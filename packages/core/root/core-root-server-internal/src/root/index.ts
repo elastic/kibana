@@ -161,7 +161,7 @@ export class Root {
 }
 
 const formatShutdownReason = (reason: any): string => {
-  let message = `${reason}`;
+  let message = `Reason: ${reason.message ?? reason}`;
   if (reason.stack) {
     message = `${message}\n${reason.stack}`;
   }
