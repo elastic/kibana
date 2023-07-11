@@ -42,9 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           END_DATE.format(timepickerFormat)
         );
       });
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      });
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
       it('should render the correct page title', async () => {
         const documentTitle = await browser.getTitle();
