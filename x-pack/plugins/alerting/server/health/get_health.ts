@@ -7,7 +7,7 @@
 
 import { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
 import { AlertsHealth, HealthStatus, RawRule, RuleExecutionStatusErrorReasons } from '../types';
-import type { LatestTaskStateSchema } from './task';
+import type { LatestTaskStateSchema } from './task_state';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository
