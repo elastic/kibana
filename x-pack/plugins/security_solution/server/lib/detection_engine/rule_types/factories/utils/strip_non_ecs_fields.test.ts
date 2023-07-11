@@ -120,7 +120,6 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(result).toEqual({
-        agent: [],
         message: 'test message',
       });
       expect(removed).toEqual([
@@ -142,7 +141,7 @@ describe('stripNonEcsFields', () => {
       });
 
       expect(result).toEqual({
-        agent: { type: 'filebeat', name: [] },
+        agent: { type: 'filebeat' },
         message: 'test message',
       });
       expect(removed).toEqual([
@@ -173,6 +172,42 @@ describe('stripNonEcsFields', () => {
         {
           key: 'agent.name.conflict',
           value: 'some-value',
+        },
+      ]);
+    });
+
+    it('should strip conflicting fields that use dot notation and is an array', () => {
+      const { result, removed } = stripNonEcsFields({
+        'agent.name.text': ['1'],
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([
+        {
+          key: 'agent.name.text',
+          value: '1',
+        },
+      ]);
+    });
+
+    it('should strip conflicting fields that use dot notation and is an empty array', () => {
+      const { result, removed } = stripNonEcsFields({
+        'agent.name.text': [],
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([
+        {
+          key: 'agent.name.text',
+          value: [],
         },
       ]);
     });
@@ -289,7 +324,6 @@ describe('stripNonEcsFields', () => {
 
       expect(result).toEqual({
         threat: {
-          enrichments: [],
           'indicator.port': 443,
         },
       });

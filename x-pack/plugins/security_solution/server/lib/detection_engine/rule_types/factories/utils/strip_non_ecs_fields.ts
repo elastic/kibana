@@ -174,7 +174,7 @@ export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsRetu
   ) => {
     const fullPath = [parentPath, documentKey].filter(Boolean).join('.');
     // if document array, traverse through each item w/o changing documentKey, parent, parentPath
-    if (isArray(document)) {
+    if (isArray(document) && document.length > 0) {
       document.slice().forEach((value) => {
         traverseAndDeleteInObj(value, documentKey, parent, parentPath);
       });
@@ -188,6 +188,9 @@ export const stripNonEcsFields = (doc: SourceFieldRecord): StripNonEcsFieldsRetu
       if (isArray(documentReference)) {
         const indexToDelete = documentReference.findIndex((item) => item === document);
         documentReference.splice(indexToDelete, 1);
+        if (documentReference.length === 0) {
+          delete parent[documentKey];
+        }
       } else {
         delete parent[documentKey];
       }
