@@ -70,7 +70,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
             protection={protection}
             protectionLabel={protectionLabel}
             osList={BEHAVIOUR_OS_VALUES}
-            data-test-subj={getTestId()}
+            data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
       >
