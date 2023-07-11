@@ -39,7 +39,7 @@ export async function createOrUpdateIndex({
     await pRetry(
       async () => {
         const indexExists = await client.indices.exists({ index });
-        const results = indexExists
+        const result = indexExists
           ? await updateExistingIndex({
               index,
               client,
@@ -52,13 +52,11 @@ export async function createOrUpdateIndex({
               settings,
             });
 
-        results.forEach((result) => {
-          if (!result.acknowledged) {
-            const bodyWithError: { body?: { error: any } } = result as any;
-            const resultError = JSON.stringify(bodyWithError?.body?.error);
-            throw new Error(resultError);
-          }
-        });
+        if (!result.acknowledged) {
+          const bodyWithError: { body?: { error: any } } = result as any;
+          const resultError = JSON.stringify(bodyWithError?.body?.error);
+          throw new Error(resultError);
+        }
       },
       {
         onFailedAttempt: (e) => {
@@ -83,7 +81,7 @@ async function createNewIndex({
   mappings: Required<estypes.IndicesCreateRequest>['body']['mappings'];
   settings: Required<estypes.IndicesPutSettingsRequest>['body']['settings'];
 }) {
-  const res = await client.indices.create({
+  return await client.indices.create({
     index,
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
@@ -91,8 +89,6 @@ async function createNewIndex({
       mappings,
     },
   });
-
-  return [res];
 }
 
 async function updateExistingIndex({
@@ -104,9 +100,8 @@ async function updateExistingIndex({
   client: ElasticsearchClient;
   mappings: estypes.IndicesPutMappingRequest['body'];
 }) {
-  const res = await client.indices.putMapping({
+  return await client.indices.putMapping({
     index,
     body: mappings,
   });
-  return [res];
 }
