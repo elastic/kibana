@@ -24,6 +24,7 @@ import { SecurityPageName } from '../../../../../../app/types';
 /** The Behavior Protections form for policy details
  *  which will configure for all relevant OSes.
  */
+
 export const BehaviorProtection = React.memo(() => {
   const OSes: Immutable<BehaviorProtectionOSes[]> = [
     PolicyOperatingSystem.windows,
