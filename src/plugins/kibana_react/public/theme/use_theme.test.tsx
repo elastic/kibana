@@ -12,6 +12,7 @@ import type { CoreTheme } from '@kbn/core/public';
 import { KibanaContextProvider } from '../context';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { useKibanaTheme } from './use_theme';
+import { of } from 'rxjs';
 
 describe('useKibanaTheme', () => {
   let resultTheme: CoreTheme | undefined;
@@ -29,9 +30,10 @@ describe('useKibanaTheme', () => {
   };
 
   it('retrieve CoreTheme when theme service is provided in context', async () => {
-    const expectedCoreTheme: CoreTheme = { darkMode: false };
+    const expectedCoreTheme: CoreTheme = { darkMode: true };
 
     const themeServiceStart = themeServiceMock.createStartContract();
+    themeServiceStart.theme$ = of({ darkMode: true });
 
     mountWithIntl(
       <KibanaContextProvider services={{ theme: themeServiceStart }}>
@@ -42,15 +44,15 @@ describe('useKibanaTheme', () => {
     expect(resultTheme).toEqual(expectedCoreTheme);
   });
 
-  it('throws type error when theme is not provided', async () => {
-    const mount = () => {
-      return mountWithIntl(
-        <KibanaContextProvider>
-          <InnerComponent />
-        </KibanaContextProvider>
-      );
-    };
+  it('does not throw error when theme service is not provided, default theme applied', async () => {
+    const expectedCoreTheme: CoreTheme = { darkMode: false };
 
-    expect(mount).toThrow(new TypeError('theme service not available in kibana-react context.'));
+    mountWithIntl(
+      <KibanaContextProvider>
+        <InnerComponent />
+      </KibanaContextProvider>
+    );
+
+    expect(resultTheme).toEqual(expectedCoreTheme);
   });
 });

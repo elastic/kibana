@@ -8,6 +8,7 @@
 
 import { CoreTheme } from '@kbn/core-theme-browser';
 import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { useKibana } from '../context/context';
 
 export const useKibanaTheme = (): CoreTheme => {
@@ -17,9 +18,13 @@ export const useKibanaTheme = (): CoreTheme => {
     services: { theme },
   } = useKibana();
 
+  let themeObservable;
+
   if (!theme) {
-    throw new TypeError('theme service not available in kibana-react context.');
+    themeObservable = of(defaultTheme);
+  } else {
+    themeObservable = theme.theme$;
   }
 
-  return useObservable(theme.theme$, defaultTheme);
+  return useObservable(themeObservable, defaultTheme);
 };
