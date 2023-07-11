@@ -17,6 +17,9 @@ interface Deps {
 
 export const useThemeDarkmodeToggle = ({ uiSettingsClient, security }: Deps) => {
   const [isDarkModeOn, setIsDarkModeOn] = useState(false);
+  // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
+  // we don't allow the user to change the theme color.
+  const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
 
   const { userProfileData, isLoading, update } = security.hooks.useUpdateUserProfile({
     notificationSuccess: {
@@ -66,7 +69,7 @@ export const useThemeDarkmodeToggle = ({ uiSettingsClient, security }: Deps) => 
   }, [colorScheme, uiSettingsClient]);
 
   return {
-    isVisible: Boolean(userProfileData),
+    isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
     toggle,
     isDarkModeOn,
     colorScheme,
