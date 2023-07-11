@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PreConfiguredAction } from '../../types';
+import { InMemoryConnector } from '../../types';
 import { AlertHistoryEsIndexConnectorId, AlertHistoryDefaultIndexName } from '../../../common';
 
 const EsIndexActionTypeId = '.index';
-export function getAlertHistoryEsIndex(): Readonly<PreConfiguredAction> {
+export function getAlertHistoryEsIndex(): Readonly<InMemoryConnector> {
   return Object.freeze({
     name: i18n.translate('xpack.actions.alertHistoryEsIndexConnector.name', {
       defaultMessage: 'Alert history Elasticsearch index',
