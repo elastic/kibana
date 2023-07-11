@@ -67,10 +67,10 @@ export const rowToDocument = (columns: DatatableColumn[], row: DatatableRow): Es
   }, {});
 };
 
-export const toEsResult = (results: Datatable, alertId?: string[]) => {
+export const toEsResult = (results: Datatable) => {
   const documentsGrouping = results.rows.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(results.columns, row);
-    const id = alertId ? alertId.map((a) => document[a] ?? 'undefined').join(':') : 'test';
+    const id = 'test';
     const hit = {
       _id: id,
       _index: '',

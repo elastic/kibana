@@ -13,7 +13,6 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { PublicLastRunSetters } from '@kbn/alerting-plugin/server/types';
 import { OnlyEsqlQueryRuleParams } from '../types';
 import { getSmallerDataViewSpec } from './fetch_search_source_query';
 
@@ -41,14 +40,12 @@ export interface FetchEsqlQueryOpts {
   ruleId: string;
   alertLimit: number | undefined;
   params: OnlyEsqlQueryRuleParams;
-  latestTimestamp: string | undefined;
   spacePrefix: string;
   services: {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
     dataViews: DataViewsContract;
-    ruleResultService?: PublicLastRunSetters;
   };
 }
 
@@ -56,7 +53,6 @@ export async function fetchEsqlQuery({
   ruleId,
   alertLimit,
   params,
-  latestTimestamp,
   services,
   spacePrefix,
 }: FetchEsqlQueryOpts) {
@@ -68,7 +64,7 @@ export async function fetchEsqlQuery({
   const dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   const dataView = await dataViews.get(dataViewId);
 
-  const { query, dateStart, dateEnd } = getEsqlQuery(dataView, params, latestTimestamp, alertLimit);
+  const { query, dateStart, dateEnd } = getEsqlQuery(dataView, params, alertLimit);
 
   logger.debug(`ESQL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
@@ -100,7 +96,7 @@ export async function fetchEsqlQuery({
         timed_out: false,
         _shards: { failed: 0, successful: 0, total: 0 },
         hits: { hits: [] },
-        aggregations: toEsResult(response, services.ruleResultService, params.alertId),
+        aggregations: toEsResult(response),
       },
       resultLimit: alertLimit,
     }),
@@ -109,12 +105,7 @@ export async function fetchEsqlQuery({
   };
 }
 
-const getEsqlQuery = (
-  index: DataView,
-  params: OnlyEsqlQueryRuleParams,
-  latestTimestamp: string | undefined,
-  alertLimit?: number
-) => {
+const getEsqlQuery = (index: DataView, params: OnlyEsqlQueryRuleParams, alertLimit?: number) => {
   const timeFieldName = index.timeFieldName;
 
   if (!timeFieldName) {
@@ -155,30 +146,18 @@ const getEsqlQuery = (
   };
 };
 
-const toEsResult = (
-  results: EsqlTable,
-  ruleResultService?: PublicLastRunSetters,
-  alertId?: string[]
-) => {
+const toEsResult = (results: EsqlTable) => {
   const documentsGrouping = results.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(results.columns, row);
-    const id = alertId
-      ? alertId.map((a) => document[a] ?? 'undefined').join(':')
-      : UngroupedGroupId;
     const hit = {
-      _id: id,
+      _id: UngroupedGroupId,
       _index: '',
       _source: document,
     };
-    if (acc[id]) {
-      if (alertId && ruleResultService) {
-        ruleResultService.addLastRunWarning(
-          'There are duplicate alerts. Changing rule status to warning.'
-        );
-      }
-      acc[id].push(hit);
+    if (acc[UngroupedGroupId]) {
+      acc[UngroupedGroupId].push(hit);
     } else {
-      acc[id] = [hit];
+      acc[UngroupedGroupId] = [hit];
     }
 
     return acc;
