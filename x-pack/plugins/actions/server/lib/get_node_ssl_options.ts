@@ -5,20 +5,30 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { PeerCertificate } from 'tls';
 import { Logger } from '@kbn/core/server';
 import { SSLSettings } from '../types';
 
 export function getNodeSSLOptions(
   logger: Logger,
-  verificationMode?: string
+  verificationMode?: string,
+  sslSettings?: SSLSettings
 ): {
   rejectUnauthorized?: boolean;
   checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
+  cert?: Buffer;
+  key?: Buffer;
+  pfx?: Buffer;
+  passphrase?: string;
 } {
   const agentOptions: {
     rejectUnauthorized?: boolean;
     checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
+    cert?: Buffer;
+    key?: Buffer;
+    pfx?: Buffer;
+    passphrase?: string;
   } = {};
   if (!!verificationMode) {
     switch (verificationMode) {
@@ -40,6 +50,9 @@ export function getNodeSSLOptions(
     }
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
+  }
+  if (sslSettings) {
+    Object.assign(agentOptions, omit(sslSettings, 'verificationMode'));
   }
   return agentOptions;
 }

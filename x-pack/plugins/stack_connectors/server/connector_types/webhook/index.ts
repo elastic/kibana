@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isString } from 'lodash';
+import { isString, isEmpty } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -176,6 +176,28 @@ export async function executor(
     hasAuth && isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
+  const sslCertificate =
+    hasAuth &&
+    isString(secrets.password) &&
+    ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
+      ? isString(secrets.pfx)
+        ? {
+            pfx: Buffer.from(secrets.pfx, 'base64'),
+            passphrase: secrets.password,
+          }
+        : {
+            cert: Buffer.from(secrets.crt!, 'base64'),
+            key: Buffer.from(secrets.key!, 'base64'),
+            passphrase: secrets.password,
+          }
+      : {};
+
+  if (!isEmpty(sslCertificate)) {
+    configurationUtilities.getSSLSettings = () => ({
+      verificationMode: 'certificate',
+      ...sslCertificate,
+    });
+  }
 
   const axiosInstance = axios.create();
 

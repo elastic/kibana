@@ -24,7 +24,11 @@ export function getCustomAgents(
   url: string
 ): GetCustomAgentsResponse {
   const generalSSLSettings = configurationUtilities.getSSLSettings();
-  const agentSSLOptions = getNodeSSLOptions(logger, generalSSLSettings.verificationMode);
+  const agentSSLOptions = getNodeSSLOptions(
+    logger,
+    generalSSLSettings.verificationMode,
+    generalSSLSettings
+  );
   // the default for rejectUnauthorized is the global setting, which can
   // be overridden (below) with a custom host setting
   const defaultAgents = {

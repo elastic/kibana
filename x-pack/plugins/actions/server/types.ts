@@ -200,6 +200,10 @@ export interface ResponseSettings {
 
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
+  pfx?: Buffer;
+  cert?: Buffer;
+  key?: Buffer;
+  passphrase?: string;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

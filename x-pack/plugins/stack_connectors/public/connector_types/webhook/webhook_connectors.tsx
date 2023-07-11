@@ -47,8 +47,9 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   });
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const authTypeDefaultValue = getFieldDefaultValue('config.authType');
-  const certTypeDefaultValue = getFieldDefaultValue('config.certType');
+  const authTypeDefaultValue =
+    getFieldDefaultValue('config.authType') ?? 'webhook-authentication-basic';
+  const certTypeDefaultValue = getFieldDefaultValue('config.certType') ?? 'ssl-crt-key';
 
   const hasAuth = config == null ? true : config.hasAuth;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
