@@ -99,7 +99,7 @@ export function TextBasedDataPanel({
 
   const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DatatableColumn>({
     dataViewId: null,
-    allFields: dataHasLoaded ? fieldList : null,
+    allFields: dataHasLoaded ? fieldList ?? [] : null,
     services: {
       dataViews,
       core,
