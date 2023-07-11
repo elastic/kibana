@@ -47,10 +47,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     const { basePromptContexts } = useAssistantContext();
 
     // Prompt
-    const selectedPrompt = useMemo(
-      () => selectedQuickPrompt?.prompt ?? '',
-      [selectedQuickPrompt?.prompt]
-    );
+    const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
 
     const handlePromptChange = useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -201,7 +198,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
             disabled={selectedQuickPrompt == null}
             fullWidth
             onChange={handlePromptChange}
-            value={selectedPrompt}
+            value={prompt}
             css={css`
               min-height: 150px;
             `}

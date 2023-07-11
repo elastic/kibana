@@ -86,7 +86,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     } = useSettingsUpdater();
 
     // Local state for saving previously selected items so tab switching is friendlier
-    // Conversation Selected State
+    // Conversation Selection State
     const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
       () => {
         return conversationSettings[defaultSelectedConversation.id];
@@ -119,6 +119,11 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
       setSelectedSystemPrompt(systemPrompt);
     }, []);
+    useEffect(() => {
+      if (selectedSystemPrompt != null) {
+        setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
+      }
+    }, [selectedSystemPrompt, systemPromptSettings]);
 
     const handleSave = useCallback(() => {
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
@@ -254,9 +259,11 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 )}
                 {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
                   <SystemPromptSettings
+                    conversationSettings={conversationSettings}
                     systemPromptSettings={systemPromptSettings}
                     onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
                     selectedSystemPrompt={selectedSystemPrompt}
+                    setUpdatedConversationSettings={setUpdatedConversationSettings}
                     setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
                   />
                 )}

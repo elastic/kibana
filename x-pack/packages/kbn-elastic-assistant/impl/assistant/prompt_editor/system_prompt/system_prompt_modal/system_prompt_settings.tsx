@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiTextArea,
@@ -19,19 +19,25 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { keyBy } from 'lodash/fp';
+
 import { css } from '@emotion/react';
 import { Conversation, Prompt } from '../../../../..';
 import * as i18n from './translations';
-import { useAssistantContext } from '../../../../assistant_context';
+import { UseAssistantContext } from '../../../../assistant_context';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
 import { TEST_IDS } from '../../../constants';
 
 interface Props {
-  systemPromptSettings: Prompt[];
-  onSelectedSystemPromptChange?: (systemPrompt?: Prompt) => void;
-  selectedSystemPrompt?: Prompt;
+  conversationSettings: UseAssistantContext['conversations'];
+  onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;
+  selectedSystemPrompt: Prompt | undefined;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  setUpdatedConversationSettings: React.Dispatch<
+    React.SetStateAction<UseAssistantContext['conversations']>
+  >;
+  systemPromptSettings: Prompt[];
 }
 
 /**
@@ -39,64 +45,104 @@ interface Props {
  */
 export const SystemPromptSettings: React.FC<Props> = React.memo(
   ({
-    systemPromptSettings,
+    conversationSettings,
     onSelectedSystemPromptChange,
     selectedSystemPrompt,
     setUpdatedSystemPromptSettings,
+    setUpdatedConversationSettings,
+    systemPromptSettings,
   }) => {
-    const { conversations } = useAssistantContext();
-
-    // Form options
     // Prompt
-    const [prompt, setPrompt] = useState(selectedSystemPrompt?.content ?? '');
-    const handlePromptTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setPrompt(e.target.value);
-    }, []);
-    // Conversations this system prompt should be a default for // TODO: Calculate defaults from selectedSystemPrompt
-    const [selectedConversations, setSelectedConversations] = useState<Conversation[]>([]);
+    const promptContent = useMemo(
+      () => selectedSystemPrompt?.content ?? '',
+      [selectedSystemPrompt?.content]
+    );
 
-    const onConversationSelectionChange = useCallback(
-      (currentPromptConversations: Conversation[]) => {
-        setSelectedConversations(currentPromptConversations);
+    const handlePromptContentChange = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (selectedSystemPrompt != null) {
+          setUpdatedSystemPromptSettings((prev): Prompt[] => {
+            const alreadyExists = prev.some((sp) => sp.id === selectedSystemPrompt.id);
+
+            if (alreadyExists) {
+              return prev.map((sp): Prompt => {
+                if (sp.id === selectedSystemPrompt.id) {
+                  return {
+                    ...sp,
+                    content: e.target.value,
+                  };
+                }
+                return sp;
+              });
+            }
+
+            return prev;
+          });
+        }
       },
-      []
+      [selectedSystemPrompt, setUpdatedSystemPromptSettings]
     );
 
-    /*
-     * updatedConversationWithPrompts calculates the present of prompt for
-     * each conversation. Based on the values of selected conversation, it goes
-     * through each conversation adds/removed the selected prompt on each conversation.
-     *
-     * */
-    const getUpdatedConversationWithPrompts = useCallback(() => {
-      const currentPromptConversationIds = selectedConversations.map((convo) => convo.id);
+    // Conversations this system prompt should be a default for // TODO: Calculate defaults from selectedSystemPrompt
+    const conversationOptions = useMemo(
+      () => Object.values(conversationSettings),
+      [conversationSettings]
+    );
+    const selectedConversations = useMemo(() => {
+      return selectedSystemPrompt != null
+        ? Object.values(conversationSettings).filter(
+            (conversation) =>
+              conversation.apiConfig.defaultSystemPromptId === selectedSystemPrompt.id
+          )
+        : [];
+    }, [conversationSettings, selectedSystemPrompt]);
 
-      const allConversations = Object.values(conversations).map((convo) => ({
-        ...convo,
-        apiConfig: {
-          ...convo.apiConfig,
-          defaultSystemPromptId: currentPromptConversationIds.includes(convo.id)
-            ? selectedSystemPrompt?.id
-            : convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
-            ? // remove the default System Prompt if it is assigned to a conversation
-              // but that conversation is not in the currentPromptConversationList
-              // This means conversation was removed in the current transaction
-              undefined
-            : //  leave it as it is .. if that conversation was neither added nor removed.
-              convo.apiConfig.defaultSystemPromptId,
-        },
-      }));
+    const handleConversationSelectionChange = useCallback(
+      (currentPromptConversations: Conversation[]) => {
+        const currentPromptConversationIds = currentPromptConversations.map((convo) => convo.id);
 
-      return allConversations;
-    }, [selectedSystemPrompt, conversations, selectedConversations]);
+        if (selectedSystemPrompt != null) {
+          setUpdatedConversationSettings((prev) =>
+            keyBy(
+              'id',
+              /*
+               * updatedConversationWithPrompts calculates the present of prompt for
+               * each conversation. Based on the values of selected conversation, it goes
+               * through each conversation adds/removed the selected prompt on each conversation.
+               *
+               * */
+              Object.values(prev).map((convo) => ({
+                ...convo,
+                apiConfig: {
+                  ...convo.apiConfig,
+                  defaultSystemPromptId: currentPromptConversationIds.includes(convo.id)
+                    ? selectedSystemPrompt?.id
+                    : convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
+                    ? // remove the default System Prompt if it is assigned to a conversation
+                      // but that conversation is not in the currentPromptConversationList
+                      // This means conversation was removed in the current transaction
+                      undefined
+                    : //  leave it as it is .. if that conversation was neither added nor removed.
+                      convo.apiConfig.defaultSystemPromptId,
+                },
+              }))
+            )
+          );
+        }
+      },
+      [selectedSystemPrompt, setUpdatedConversationSettings]
+    );
+
     // Whether this system prompt should be the default for new conversations
-    const [isNewConversationDefault, setIsNewConversationDefault] = useState(
-      selectedSystemPrompt?.isNewConversationDefault ?? false
+    const isNewConversationDefault = useMemo(
+      () => selectedSystemPrompt?.isNewConversationDefault ?? false,
+      [selectedSystemPrompt?.isNewConversationDefault]
     );
+
     const handleNewConversationDefaultChange = useCallback(
       (e) => {
         const isChecked = e.target.checked;
-        setIsNewConversationDefault(isChecked);
+
         if (selectedSystemPrompt != null) {
           setUpdatedSystemPromptSettings((prev) => {
             return prev.map((pp) => {
@@ -106,41 +152,39 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
               };
             });
           });
-          onSelectedSystemPromptChange?.({
-            ...selectedSystemPrompt,
-            isNewConversationDefault: isChecked,
-          });
         }
       },
-      [onSelectedSystemPromptChange, selectedSystemPrompt, setUpdatedSystemPromptSettings]
+      [selectedSystemPrompt, setUpdatedSystemPromptSettings]
     );
 
     // When top level system prompt selection changes
     const onSystemPromptSelectionChange = useCallback(
       (systemPrompt?: Prompt | string) => {
-        const newPrompt: Prompt | undefined =
-          typeof systemPrompt === 'string'
-            ? {
-                id: systemPrompt ?? '',
-                content: '',
-                name: systemPrompt ?? '',
-                promptType: 'system',
-              }
-            : systemPrompt;
+        const isNew = typeof systemPrompt === 'string';
+        const newSelectedSystemPrompt: Prompt | undefined = isNew
+          ? {
+              id: systemPrompt ?? '',
+              content: '',
+              name: systemPrompt ?? '',
+              promptType: 'system',
+            }
+          : systemPrompt;
 
-        setPrompt(newPrompt?.content ?? '');
-        setIsNewConversationDefault(newPrompt?.isNewConversationDefault ?? false);
-        // Find all conversations that have this system prompt as a default
-        const currenlySelectedConversations =
-          newPrompt != null
-            ? Object.values(conversations).filter(
-                (conversation) => conversation?.apiConfig.defaultSystemPromptId === newPrompt?.id
-              )
-            : [];
-        setSelectedConversations(currenlySelectedConversations);
-        onSelectedSystemPromptChange?.(newPrompt);
+        if (newSelectedSystemPrompt != null) {
+          setUpdatedSystemPromptSettings((prev) => {
+            const alreadyExists = prev.some((sp) => sp.id === newSelectedSystemPrompt.id);
+
+            if (!alreadyExists) {
+              return [...prev, newSelectedSystemPrompt];
+            }
+
+            return prev;
+          });
+        }
+
+        onSelectedSystemPromptChange(newSelectedSystemPrompt);
       },
-      [conversations, onSelectedSystemPromptChange]
+      [onSelectedSystemPromptChange, setUpdatedSystemPromptSettings]
     );
 
     const onSystemPromptDeleted = useCallback(
@@ -149,43 +193,6 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
       },
       [setUpdatedSystemPromptSettings]
     );
-
-    // TODO: New update logic
-    // const handleSave = useCallback(() => {
-    //   const updatedConversations = getUpdatedConversationWithPrompts();
-    //   onSystemPromptsChange(updatedSystemPrompts, updatedConversations);
-    // }, [onSystemPromptsChange, updatedSystemPrompts, getUpdatedConversationWithPrompts]);
-
-    // useEffects
-    // Update system prompts on any field change since editing is in place
-    useEffect(() => {
-      if (selectedSystemPrompt != null) {
-        setUpdatedSystemPromptSettings((prev) => {
-          const alreadyExists = prev.some((sp) => sp.id === selectedSystemPrompt.id);
-          if (alreadyExists) {
-            return prev.map((sp) => {
-              if (sp.id === selectedSystemPrompt.id) {
-                return {
-                  ...sp,
-                  content: prompt,
-                  promptType: 'system',
-                };
-              }
-              return sp;
-            });
-          } else {
-            return [
-              ...prev,
-              {
-                ...selectedSystemPrompt,
-                content: prompt,
-                promptType: 'system',
-              },
-            ];
-          }
-        });
-      }
-    }, [prompt, selectedSystemPrompt, setUpdatedSystemPromptSettings]);
 
     return (
       <>
@@ -207,8 +214,9 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
         <EuiFormRow display="rowCompressed" label={i18n.SYSTEM_PROMPT_PROMPT} fullWidth>
           <EuiTextArea
             data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT}
-            onChange={handlePromptTextChange}
-            value={prompt}
+            disabled={selectedSystemPrompt == null}
+            onChange={handlePromptContentChange}
+            value={promptContent}
             compressed
             fullWidth
             css={css`
@@ -223,8 +231,9 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
           label={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS}
         >
           <ConversationMultiSelector
-            onConversationSelectionChange={onConversationSelectionChange}
-            conversations={Object.values(conversations)}
+            conversations={conversationOptions}
+            isDisabled={selectedSystemPrompt == null}
+            onConversationSelectionChange={handleConversationSelectionChange}
             selectedConversations={selectedConversations}
           />
         </EuiFormRow>
@@ -232,6 +241,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
         <EuiFormRow display="rowCompressed">
           <EuiCheckbox
             data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS}
+            disabled={selectedSystemPrompt == null}
             id={'defaultNewConversation'}
             label={
               <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
