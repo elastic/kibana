@@ -10,8 +10,6 @@ import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import { LayoutType } from '@kbn/screenshotting-plugin/common';
-import { LayoutSelectorDictionary } from '@kbn/screenshotting-plugin/common/layout';
 import { Writable } from 'stream';
 import {
   CSV_JOB_TYPE,
@@ -24,17 +22,13 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
-import { BasePayload, ReportingRequestHandlerContext } from '../../types';
-import {
-  ExportType,
-  BaseExportTypeSetupDeps,
-  BaseExportTypeStartDeps,
-  decryptJobHeaders,
-} from '../common';
+import { ReportingRequestHandlerContext } from '../../types';
+import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
 import { JobParamsDownloadCSV } from './types';
 
 /*
  * @TODO move to be within @kbn/reporitng-export-types
+ * PR in place to try and remove this endpoint
  */
 
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
@@ -80,40 +74,27 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     this.logger = logger.get('csv-searchsource-export');
   }
 
-  public createJob = async (immediateJobParams: {
-    layout?:
-      | {
-          id?: LayoutType | undefined;
-          dimensions?: { width: number; height: number } | undefined;
-          selectors?: Partial<LayoutSelectorDictionary> | undefined;
-          zoom?: number | undefined;
-        }
-      | undefined;
-    objectType: string;
-    title: string;
-    browserTimezone: string;
-    version: string;
-  }) => {
+  // @ts-ignore expected to have a type failure due to deprecated export type
+  public createJob = async (immediateJobParams: any): Promise<JobParamsDownloadCSV> => {
     return {
       ...immediateJobParams,
       objectType: 'immediate-search',
     };
   };
 
+  // @ts-ignore expected type failure from deprecated export type
   public runTask = async (
-    _jobId: string,
-    immediateJobParams: BasePayload,
+    _jobId: string | null,
+    immediateJobParams: JobParamsDownloadCSV,
     context: ReportingRequestHandlerContext,
     stream: Writable,
     req: KibanaRequest
   ) => {
-    const job = this.createJob(immediateJobParams);
-    const { encryptionKey } = this.config;
+    const job = await this.createJob(immediateJobParams);
 
     const dataPluginStart = await this.startDeps.data;
-    const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-    const fakeRequest = this.getFakeRequest(headers, job.spaceId, this.logger);
-    const uiSettings = await this.getUiSettingsClient(fakeRequest, this.logger);
+    const savedObjectsClient = (await context.core).savedObjects.client;
+    const uiSettings = this.getUiSettingsServiceFactory(savedObjectsClient);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
     const [es, searchSourceStart] = await Promise.all([

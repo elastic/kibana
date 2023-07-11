@@ -87,7 +87,7 @@ export abstract class ExportType<
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
-  private getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+  protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
