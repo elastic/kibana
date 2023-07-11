@@ -128,7 +128,7 @@ describe('Slack API service', () => {
         logger,
         configurationUtilities,
         method: 'get',
-        url: 'conversations.list?types=public_channel,private_channel',
+        url: 'conversations.list?exclude_archived=true&types=public_channel,private_channel&limit=1000',
       });
     });
 
@@ -175,6 +175,51 @@ describe('Slack API service', () => {
         message: 'error posting slack message',
         serviceMessage: 'request fail',
         status: 'error',
+      });
+    });
+
+    test('should NOT by pass allowed channels when present', async () => {
+      service = createExternalService(
+        {
+          secrets: { token: 'token' },
+          config: { allowedChannels: ['foo', 'bar'] },
+        },
+        logger,
+        configurationUtilities
+      );
+
+      expect(
+        await service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
+      ).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        serviceMessage:
+          'The channel "general,privat" is not included in the allowed channels list "foo,bar"',
+        message: 'error posting slack message',
+        status: 'error',
+      });
+    });
+
+    test('should allowed channels to be persisted', async () => {
+      service = createExternalService(
+        {
+          secrets: { token: 'token' },
+          config: { allowedChannels: ['foo', 'bar', 'general', 'privat'] },
+        },
+        logger,
+        configurationUtilities
+      );
+      requestMock.mockImplementation(() => postMessageResponse);
+
+      await service.postMessage({ channels: ['general', 'privat'], text: 'a message' });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'chat.postMessage',
+        data: { channel: 'general', text: 'a message' },
       });
     });
   });

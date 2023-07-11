@@ -250,6 +250,80 @@ For example, the date format `"YYYY-MM-DD hh:mma"` will render in the following 
 The date value itself should usually be referenced with triple braces since some characters in date strings may contain values that are escaped, which would prevent them from being parsed as dates.
 
 [discrete]
+===== FormatNumber
+
+The FormatNumber lambda provides number formatting capabilities using the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat[`Intl.NumberFormat` object].
+
+Numbers can be formatted with the following `Intl.NumberFormat` options:
+
+- `compactDisplay`
+- `currencyDisplay`
+- `currencySign`
+- `notation`
+- `signDisplay`
+- `unitDisplay`
+- `unit`
+- `useGrouping` - but only values true and false
+- `minimumIntegerDigits`
+- `minimumFractionDigits`
+- `maximumFractionDigits`
+- `minimumSignificantDigits`
+- `maximumSignificantDigits`
+
+To use the lambda, surround the number and formatting options with `{{#FormatNumber}}...{{/FormatNumber}}`.
+
+The format of the text passed to the lambda is: `<number>; <locales>; <options>`, where semicolons (`;`) separate each parameter.
+The `<number>` parameter is required.  It is the value to be formatted.  The `<locales>` and `<options>` parameters are optional, but the semicolons must be provided - the values may be empty strings.
+The `<locales>` parameter is a list of locales, separated by commas (`,`).
+The `<options>` parameter is a list of key value pairs, separated by commas (`,`).  The key value pairs are strings separated by colons (`:`) where the key is the name of the option and the value is the value of the option.
+The default locale is `en-US` and no options are set by default.
+
+For more information on locale strings, see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument[the `locales` argument documentation from the `Intl` reference].
+
+The options and values that can be used with them are listed under `options` in the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat[Intl.NumberFormat() constructor documentation].
+
+For example, the following template, given the value of context variable
+`context.value.condition0` is 628.4, will render as shown below.
+
+[source]
+----
+    original value: {{{context.value.condition0}}}
+    formatted value: {{#FormatNumber}}
+        {{{context.value.condition0}}} ; de-DE ; style: currency, currency: EUR
+    {{/FormatNumber}}
+----
+
+Rendered text:
+
+[source]
+----
+    original value: 628.4
+    formatted value: 628,40 €
+----
+
+The `{{FormatNumber}}` and `{{EvalMath}}` lambdas can be used together to perform calculations on numbers and then format them.
+
+For example, the following template, given the value of context variable
+`context.value.condition0` is 628.4 will render as shown below.
+
+[source]
+----
+    original value: {{{context.value.condition0}}}
+    formatted value: {{#FormatNumber}}
+      {{#EvalMath}} {{context.value.condition0}} * 0.1 {{/EvalMath}}
+      ; de-DE ; style: currency, currency: EUR
+    {{/FormatNumber}}
+----
+
+Rendered text:
+
+[source]
+----
+    original value: 628.4
+    formatted value: 62,84 €
+----
+
+[discrete]
 [[mustache-examples]]
 === Mustache examples
 

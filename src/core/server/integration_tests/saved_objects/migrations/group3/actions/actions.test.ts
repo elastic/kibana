@@ -68,6 +68,7 @@ describe('migration actions', () => {
     await createIndex({
       client,
       indexName: 'existing_index_with_docs',
+      aliases: ['existing_index_with_docs_alias'],
       mappings: {
         dynamic: true,
         properties: {
@@ -151,7 +152,9 @@ describe('migration actions', () => {
       expect(res.right).toEqual(
         expect.objectContaining({
           existing_index_with_docs: {
-            aliases: {},
+            aliases: {
+              existing_index_with_docs_alias: {},
+            },
             mappings: expect.anything(),
             settings: expect.anything(),
           },
@@ -168,7 +171,9 @@ describe('migration actions', () => {
       expect(res.right).toEqual(
         expect.objectContaining({
           existing_index_with_docs: {
-            aliases: {},
+            aliases: {
+              existing_index_with_docs_alias: {},
+            },
             mappings: {
               // FIXME https://github.com/elastic/elasticsearch-js/issues/1796
               dynamic: 'true',
@@ -1112,7 +1117,8 @@ describe('migration actions', () => {
     });
   });
 
-  describe('readWithPit', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/160994
+  describe.skip('readWithPit', () => {
     it('requests documents from an index using given PIT', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
@@ -1871,7 +1877,7 @@ describe('migration actions', () => {
         expect(res).toMatchInlineSnapshot(`
           Object {
             "_tag": "Right",
-            "right": "create_index_succeeded",
+            "right": "index_already_exists",
           }
         `);
       });
@@ -1941,6 +1947,30 @@ describe('migration actions', () => {
           "_tag": "Right",
           "right": "bulk_index_succeeded",
         }
+      `);
+    });
+    it('resolves left index_not_found_exception if the index does not exist and useAliasToPreventAutoCreate=true', async () => {
+      const newDocs = [
+        { _source: { title: 'doc 5' } },
+        { _source: { title: 'doc 6' } },
+        { _source: { title: 'doc 7' } },
+      ] as unknown as SavedObjectsRawDoc[];
+      await expect(
+        bulkOverwriteTransformedDocuments({
+          client,
+          index: 'existing_index_with_docs_alias_that_does_not_exist',
+          useAliasToPreventAutoCreate: true,
+          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
+          refresh: 'wait_for',
+        })()
+      ).resolves.toMatchInlineSnapshot(`
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "index": "existing_index_with_docs_alias_that_does_not_exist",
+              "type": "index_not_found_exception",
+            },
+          }
       `);
     });
     it('resolves left target_index_had_write_block if there are write_block errors', async () => {

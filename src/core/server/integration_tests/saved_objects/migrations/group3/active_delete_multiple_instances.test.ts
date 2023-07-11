@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
 import {
   defaultLogFilePath,
   getEsClient,
@@ -113,6 +114,7 @@ describe('multiple migrator instances running in parallel', () => {
             getKibanaMigratorTestKit({
               ...config,
               logFilePath: Path.join(__dirname, `active_delete_instance_${index}.log`),
+              defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
             })
           )
       );

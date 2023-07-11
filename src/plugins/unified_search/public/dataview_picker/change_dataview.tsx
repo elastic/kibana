@@ -111,8 +111,9 @@ export function ChangeDataView({
       const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
+      // not propagate the adHoc dataviews on the list for text based languages
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
-        adHocDataViews?.map(mapAdHocDataView) || [];
+        (!isTextBasedLangSelected && adHocDataViews?.map(mapAdHocDataView)) || [];
 
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };

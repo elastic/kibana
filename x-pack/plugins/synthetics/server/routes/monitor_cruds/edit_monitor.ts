@@ -9,8 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
+import { getSyntheticsPrivateLocations } from '../../saved_objects/private_locations';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,
@@ -18,8 +19,7 @@ import {
   SyntheticsMonitor,
   ConfigKey,
 } from '../../../common/runtime_types';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
@@ -31,7 +31,7 @@ import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {
     params: schema.object({
       monitorId: schema.string(),
@@ -95,7 +95,6 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         normalizedMonitor: monitorWithRevision,
         spaceId,
       });
-
       if (failedPolicyUpdates && failedPolicyUpdates.length > 0) {
         const hasError = failedPolicyUpdates.find((update) => update.error);
         await rollbackUpdate({

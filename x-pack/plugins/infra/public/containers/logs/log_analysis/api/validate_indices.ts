@@ -31,6 +31,7 @@ export const callValidateIndicesAPI = async (requestArgs: RequestArgs, fetch: Ht
       // @ts-expect-error TODO: fix after elasticsearch-js bump
       validationIndicesRequestPayloadRT.encode({ data: { indices, fields, runtimeMappings } })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(validationIndicesResponsePayloadRT)(response);

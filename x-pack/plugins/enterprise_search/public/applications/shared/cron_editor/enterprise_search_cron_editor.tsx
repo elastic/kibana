@@ -9,14 +9,14 @@ import React, { useState } from 'react';
 
 import { Frequency } from '@kbn/es-ui-shared-plugin/public/components/cron_editor/types';
 
-import { Connector } from '../../../../common/types/connectors';
+import { ConnectorScheduling } from '../../../../common/types/connectors';
 
 import { CronEditor } from './cron_editor';
 
 interface Props {
   disabled?: boolean;
-  onChange(scheduling: Connector['scheduling']): void;
-  scheduling: Connector['scheduling'];
+  onChange(scheduling: ConnectorScheduling): void;
+  scheduling: ConnectorScheduling;
 }
 
 export const EnterpriseSearchCronEditor: React.FC<Props> = ({ disabled, onChange, scheduling }) => {

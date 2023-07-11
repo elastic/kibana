@@ -57,11 +57,10 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export interface DiscoverLayoutProps {
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
 }
 
-export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutProps) {
+export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -174,6 +173,13 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
+  const documentState = useDataState(stateContainer.dataState.data$.documents$);
+
+  const textBasedLanguageModeWarning = useMemo(() => {
+    if (isPlainRecord) {
+      return documentState.warning;
+    }
+  }, [documentState.warning, isPlainRecord]);
 
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
@@ -265,12 +271,12 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
       <TopNavMemoized
         onOpenInspector={onOpenInspector}
         query={query}
-        navigateTo={navigateTo}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+        textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
@@ -291,9 +297,7 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
               selectedDataView={dataView}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
-              useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
               onDataViewCreated={stateContainer.actions.onDataViewCreated}
               availableFields$={stateContainer.dataState.data$.availableFields$}
             />

@@ -13,7 +13,7 @@ import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { FieldSelectionItem } from '@kbn/ml-data-frame-analytics-utils';
+import type { FieldSelectionItem } from '@kbn/ml-data-frame-analytics-utils';
 import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import {
   FieldForStats,

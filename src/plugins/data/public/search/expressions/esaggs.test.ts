@@ -153,4 +153,28 @@ describe('esaggs expression function - public', () => {
       })
     );
   });
+
+  test('does not forward filters and query if ignoreGlobalFilters is enabled', async () => {
+    const input = {
+      type: 'kibana_context' as 'kibana_context',
+      filters: [{ $state: {}, meta: {}, query: {} }],
+      query: {
+        query: 'hiya',
+        language: 'painless',
+      },
+      timeRange: { from: 'a', to: 'b' },
+    } as KibanaContext;
+
+    await definition()
+      .fn(input, { ...args, ignoreGlobalFilters: true }, mockHandlers)
+      .toPromise();
+
+    expect(handleEsaggsRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: undefined,
+        query: undefined,
+        timeRange: input.timeRange,
+      })
+    );
+  });
 });

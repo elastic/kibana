@@ -5,37 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
+
 import { pick } from 'lodash';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedSearchAttributes } from '../../../common';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../../../common';
 import type { SavedSearch } from './types';
 
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '../../../common';
 
-export const getSavedSearchUrlConflictMessage = async (savedSearch: SavedSearch) =>
-  i18n.translate('savedSearch.legacyURLConflict.errorMessage', {
-    defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
-    values: {
-      json: savedSearch.sharingSavedObjectProps?.errorJSON,
-    },
-  });
-
-export const throwErrorOnSavedSearchUrlConflict = async (savedSearch: SavedSearch) => {
-  if (savedSearch.sharingSavedObjectProps?.errorJSON) {
-    throw new Error(await getSavedSearchUrlConflictMessage(savedSearch));
-  }
-};
-
 export const fromSavedSearchAttributes = (
   id: string,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
+  references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'],
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps']
 ): SavedSearch => ({
   ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource),
   sharingSavedObjectProps,
+  references,
 });
 
 export const toSavedSearchAttributes = (

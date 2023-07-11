@@ -25,7 +25,7 @@ import { getTimelinesQuerySchema } from '../../../schemas/timelines';
 
 export const getTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  _config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(

@@ -7,10 +7,10 @@
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 
+import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { Aggregation, Field } from '../../../../../../../../../common/types/fields';
 import { MetricSelector } from './metric_selector';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { DetectorList } from './detector_list';

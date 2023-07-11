@@ -22,13 +22,10 @@ import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { isActiveState } from '../hooks/use_monitor_errors';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
-import {
-  formatTestDuration,
-  formatTestRunAt,
-  useDateFormatForTest,
-} from '../../../utils/monitor_test_result/test_time_formats';
 
 export function isErrorActive(item: PingState, lastErrorId?: string, latestPingStatus?: string) {
   // if the error is the most recent, `isActiveState`, and the monitor
@@ -57,13 +54,11 @@ export const ErrorsList = ({
 
   const history = useHistory();
 
-  const format = useDateFormatForTest();
-
-  const selectedLocation = location;
+  const formatter = useDateFormat();
 
   const { latestPing } = useMonitorLatestPing({
     monitorId: configId,
-    locationLabel: selectedLocation?.label,
+    locationLabel: location?.label,
   });
 
   const lastErrorTestRun = errorStates?.sort((a, b) => {
@@ -84,8 +79,8 @@ export const ErrorsList = ({
           <ErrorDetailsLink
             configId={configId}
             stateId={item.state?.id!}
-            label={formatTestRunAt(item.state!.started_at, format)}
-            locationId={selectedLocation?.id}
+            label={formatter(item.state!.started_at)}
+            locationId={location?.id}
           />
         );
         if (isErrorActive(item, lastErrorTestRun?.state.id, latestPing?.monitor.status)) {
@@ -175,9 +170,7 @@ export const ErrorsList = ({
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(
-            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
-          );
+          history.push(`/monitor/${configId}/errors/${state.id}?locationId=${location?.id}`);
         },
       };
     }

@@ -8,15 +8,15 @@
 import { CoreSetup } from '@kbn/core/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
+import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
+import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { SavedSearchQuery } from '../../../contexts/ml';
-import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
 
 import { ml } from '../../../services/ml_api_service';
 import { FieldHistogramRequestConfig } from '../common/request';
-import { RuntimeMappings } from '../../../../../common/types/fields';
 
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;
@@ -35,7 +35,7 @@ export class DataLoader {
 
   async loadFieldHistograms(
     fields: FieldHistogramRequestConfig[],
-    query: string | SavedSearchQuery,
+    query: string | estypes.QueryDslQueryContainer,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
     editorRuntimeMappings?: RuntimeMappings
   ): Promise<any[]> {

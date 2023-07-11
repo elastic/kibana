@@ -22,6 +22,8 @@
       "dataViewEditor",
       "alerting",
       "actions",
+      "dashboard",
+      "licensing",
       "expressions"
     ],
     "optionalPlugins": [

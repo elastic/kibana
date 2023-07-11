@@ -8,8 +8,7 @@
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
@@ -53,7 +52,7 @@ const PageRouterComponent: FC<RouterProps> = ({
     <ManageRoutesSpy>
       <Router history={history}>
         <RouteCapture>
-          <Switch>
+          <Routes>
             <Route path="/">
               <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
                 <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
@@ -62,7 +61,7 @@ const PageRouterComponent: FC<RouterProps> = ({
             <Route>
               <NotFoundPage />
             </Route>
-          </Switch>
+          </Routes>
         </RouteCapture>
       </Router>
     </ManageRoutesSpy>

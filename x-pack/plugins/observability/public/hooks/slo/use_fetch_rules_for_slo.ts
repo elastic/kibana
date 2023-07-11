@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-query';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 type SloId = string;
 
@@ -42,20 +43,17 @@ export interface UseFetchRulesForSloResponse {
   ) => Promise<QueryObserverResult<Record<string, Array<Rule<SloRule>>> | undefined, unknown>>;
 }
 
-export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResponse {
+export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSloResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchRulesForSlo', sloIds],
+      queryKey: sloKeys.rule(sloIds),
       queryFn: async () => {
         try {
           const body = JSON.stringify({
-            filter: `${sloIds?.reduce((acc, sloId, index, array) => {
-              return `${acc}alert.attributes.params.sloId:${sloId}${
-                index < array.length - 1 ? ' or ' : ''
-              }`;
-            }, '')}`,
+            filter:
+              sloIds?.map((sloId) => `alert.attributes.params.sloId:${sloId}`).join(' or ') ?? '',
             fields: ['params.sloId', 'name'],
             per_page: 1000,
           });

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
+import { RESPONSE_TAB_ID, ResponseDetails } from '../components/response_details';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
+  INSIGHTS_TAB_RESPONSE_BUTTON_TEST_ID,
 } from './test_ids';
 
 import {
@@ -23,6 +25,7 @@ import {
   THREAT_INTELLIGENCE_BUTTON,
   PREVALENCE_BUTTON,
   CORRELATIONS_BUTTON,
+  RESPONSE_BUTTON,
 } from './translations';
 import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
 import {
@@ -53,6 +56,11 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
     label: CORRELATIONS_BUTTON,
     'data-test-subj': INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
   },
+  {
+    id: RESPONSE_TAB_ID,
+    label: RESPONSE_BUTTON,
+    'data-test-subj': INSIGHTS_TAB_RESPONSE_BUTTON_TEST_ID,
+  },
 ];
 
 /**
@@ -60,9 +68,10 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  */
 export const InsightsTab: React.FC = memo(() => {
   const [activeInsightsId, setActiveInsightsId] = useState(ENTITIES_TAB_ID);
-  const onChangeCompressed = (optionId: string) => {
+
+  const onChangeCompressed = useCallback((optionId: string) => {
     setActiveInsightsId(optionId);
-  };
+  }, []);
 
   return (
     <>
@@ -72,7 +81,7 @@ export const InsightsTab: React.FC = memo(() => {
         legend={INSIGHTS_BUTTONGROUP_OPTIONS}
         options={insightsButtons}
         idSelected={activeInsightsId}
-        onChange={(id) => onChangeCompressed(id)}
+        onChange={onChangeCompressed}
         buttonSize="compressed"
         isFullWidth
         data-test-subj={INSIGHTS_TAB_BUTTON_GROUP_TEST_ID}
@@ -82,6 +91,7 @@ export const InsightsTab: React.FC = memo(() => {
       {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && <ThreatIntelligenceDetails />}
       {activeInsightsId === PREVALENCE_TAB_ID && <PrevalenceDetails />}
       {activeInsightsId === CORRELATIONS_TAB_ID && <CorrelationsDetails />}
+      {activeInsightsId === RESPONSE_TAB_ID && <ResponseDetails />}
     </>
   );
 });

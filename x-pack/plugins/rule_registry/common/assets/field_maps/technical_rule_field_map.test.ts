@@ -296,6 +296,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.workflow_tags": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.workflow_user": Object {
         "array": false,
         "required": false,

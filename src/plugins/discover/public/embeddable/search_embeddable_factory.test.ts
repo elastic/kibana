@@ -8,17 +8,9 @@
 
 import { discoverServiceMock } from '../__mocks__/services';
 import { SearchEmbeddableFactory, type StartServices } from './search_embeddable_factory';
-import { getSavedSearch } from '@kbn/saved-search-plugin/public';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '../__mocks__/data_view';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-
-jest.mock('@kbn/saved-search-plugin/public', () => {
-  return {
-    ...jest.requireActual('@kbn/saved-search-plugin/public'),
-    getSavedSearch: jest.fn(),
-  };
-});
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
@@ -35,7 +27,6 @@ const input = {
   rowsPerPage: 50,
 };
 
-const getSavedSearchMock = getSavedSearch as unknown as jest.Mock;
 const ErrorEmbeddableMock = ErrorEmbeddable as unknown as jest.Mock;
 
 describe('SearchEmbeddableFactory', () => {
@@ -45,7 +36,9 @@ describe('SearchEmbeddableFactory', () => {
       sort: [['message', 'asc']] as Array<[string, string]>,
       searchSource: createSearchSourceMock({ index: dataViewMock }, undefined),
     };
-    getSavedSearchMock.mockResolvedValue(savedSearchMock);
+
+    const mockGet = jest.fn().mockResolvedValue(savedSearchMock);
+    discoverServiceMock.savedSearch.get = mockGet;
 
     const factory = new SearchEmbeddableFactory(
       () => Promise.resolve({ executeTriggerActions: jest.fn() } as unknown as StartServices),
@@ -53,12 +46,13 @@ describe('SearchEmbeddableFactory', () => {
     );
     const embeddable = await factory.createFromSavedObject('saved-object-id', input);
 
-    expect(getSavedSearchMock.mock.calls[0][0]).toEqual('saved-object-id');
+    expect(mockGet.mock.calls[0][0]).toEqual('saved-object-id');
     expect(embeddable).toBeDefined();
   });
 
   it('should throw an error when saved search could not be found', async () => {
-    getSavedSearchMock.mockRejectedValue('Could not find saved search');
+    const mockGet = jest.fn().mockRejectedValue('Could not find saved search');
+    discoverServiceMock.savedSearch.get = mockGet;
 
     const factory = new SearchEmbeddableFactory(
       () => Promise.resolve({ executeTriggerActions: jest.fn() } as unknown as StartServices),

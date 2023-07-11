@@ -7,10 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import {
-  RuleAggregationFormattedResult,
-  RuleTagsAggregationFormattedResult,
-} from '@kbn/alerting-plugin/common';
+import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common';
 import { RuleStatus } from '../../../types';
 
 export const rewriteBodyRes: RewriteRequestCase<RuleAggregationFormattedResult> = ({
@@ -31,10 +28,19 @@ export const rewriteBodyRes: RewriteRequestCase<RuleAggregationFormattedResult> 
   ruleTags,
 });
 
-export const rewriteTagsBodyRes: RewriteRequestCase<RuleTagsAggregationFormattedResult> = ({
-  rule_tags: ruleTags,
-}: any) => ({
-  ruleTags,
+export interface GetRuleTagsResponse {
+  total: number;
+  page: number;
+  perPage: number;
+  data: string[];
+}
+
+export const rewriteTagsBodyRes: RewriteRequestCase<GetRuleTagsResponse> = ({
+  per_page: perPage,
+  ...rest
+}) => ({
+  perPage,
+  ...rest,
 });
 
 export interface LoadRuleAggregationsProps {
@@ -46,4 +52,11 @@ export interface LoadRuleAggregationsProps {
   ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
+}
+
+export interface LoadRuleTagsProps {
+  http: HttpSetup;
+  search?: string;
+  perPage?: number;
+  page: number;
 }

@@ -60,7 +60,8 @@ export const THREAT_ITEM_ENTRY_DELETE_BUTTON = '[data-test-subj="itemEntryDelete
 
 export const THREAT_MATCH_OR_BUTTON = '[data-test-subj="orButton"]';
 
-export const THREAT_COMBO_BOX_INPUT = '[data-test-subj="fieldAutocompleteComboBox"]';
+export const THREAT_COMBO_BOX_INPUT =
+  '[data-test-subj="stepDefineRule"] [data-test-subj="fieldAutocompleteComboBox"]';
 
 export const INVALID_MATCH_CONTENT = 'All matches require both a field and threat index field.';
 
@@ -74,8 +75,6 @@ export const DATA_VIEW_COMBO_BOX =
   '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
 
 export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
-
-export const CONTINUE_BUTTON = '[data-test-subj$=-continue]';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 

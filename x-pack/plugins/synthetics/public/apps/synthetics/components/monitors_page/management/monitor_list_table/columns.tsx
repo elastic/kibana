@@ -32,7 +32,6 @@ import {
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
-import { canUpdatePrivateMonitor, useFleetPermissions } from '../../../../hooks';
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
@@ -51,7 +50,6 @@ export function useMonitorListColumns({
   const canEditSynthetics = useCanEditSynthetics();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
-  const { canSaveIntegrations } = useFleetPermissions();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
@@ -168,20 +166,14 @@ export function useMonitorListColumns({
           'data-test-subj': 'syntheticsMonitorEditAction',
           isPrimary: true,
           name: (fields) => (
-            <NoPermissionsTooltip
-              canEditSynthetics={canEditSynthetics}
-              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
-            >
+            <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
               {labels.EDIT_LABEL}
             </NoPermissionsTooltip>
           ),
           description: labels.EDIT_LABEL,
           icon: 'pencil' as const,
           type: 'icon' as const,
-          enabled: (fields) =>
-            canEditSynthetics &&
-            !isActionLoading(fields) &&
-            canUpdatePrivateMonitor(fields, canSaveIntegrations),
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
             history.push({
               pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
@@ -192,10 +184,7 @@ export function useMonitorListColumns({
           'data-test-subj': 'syntheticsMonitorDeleteAction',
           isPrimary: true,
           name: (fields) => (
-            <NoPermissionsTooltip
-              canEditSynthetics={canEditSynthetics}
-              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
-            >
+            <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
               {labels.DELETE_LABEL}
             </NoPermissionsTooltip>
           ),
@@ -203,10 +192,7 @@ export function useMonitorListColumns({
           icon: 'trash' as const,
           type: 'icon' as const,
           color: 'danger' as const,
-          enabled: (fields) =>
-            canEditSynthetics &&
-            !isActionLoading(fields) &&
-            canUpdatePrivateMonitor(fields, canSaveIntegrations),
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
           onClick: (fields) => {
             setMonitorPendingDeletion(fields);
           },
@@ -252,7 +238,7 @@ export function useMonitorListColumns({
         defaultMessage: 'Actions',
       }),
       render: () => (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics} canUpdatePrivateMonitor={true}>
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           <EuiButtonIcon
             iconType="boxesHorizontal"
             isDisabled={true}

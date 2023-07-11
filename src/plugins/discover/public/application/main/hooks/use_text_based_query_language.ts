@@ -21,7 +21,7 @@ import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'project'];
+const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
 /**
  * Hook to take care of text based query language state transformations when a new result is returned
@@ -53,6 +53,13 @@ export function useTextBasedQueryLanguage({
         query: undefined,
       };
     }
+    if (queryString.current) {
+      queryString.current = '';
+    }
+
+    if (isPrevTransformationalMode.current) {
+      isPrevTransformationalMode.current = true;
+    }
   }, []);
 
   useEffect(() => {
@@ -61,14 +68,19 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
+      const sendComplete = () => {
+        stateContainer.dataState.data$.documents$.next({
+          ...next,
+          fetchStatus: FetchStatus.COMPLETE,
+        });
+      };
       const { index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' &&
-        query &&
         isOfAggregateQueryType(query) &&
         ('sql' in query || 'esql' in query);
-      const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+      const hasResults = Boolean(next.result?.length);
       const initialFetch = !prev.current.columns.length;
       let queryHasTransformationalCommands = 'sql' in query;
       if ('esql' in query) {
@@ -81,6 +93,9 @@ export function useTextBasedQueryLanguage({
       }
       if (isTextBasedQueryLang) {
         const language = getAggregateQueryMode(query);
+        if (next.fetchStatus !== FetchStatus.PARTIAL) {
+          return;
+        }
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
@@ -113,7 +128,8 @@ export function useTextBasedQueryLanguage({
         const queryChanged = query[language] !== queryString.current;
         // no need to reset index to state if it hasn't changed
         const addDataViewToState = Boolean(dataViewObj?.id !== index);
-        if (!queryChanged && !addColumnsToState) {
+        if (!queryChanged && !addColumnsToState && !addDataViewToState) {
+          sendComplete();
           return;
         }
 
@@ -121,7 +137,6 @@ export function useTextBasedQueryLanguage({
           queryString.current = query[language];
           isPrevTransformationalMode.current = queryHasTransformationalCommands;
         }
-
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
@@ -129,9 +144,9 @@ export function useTextBasedQueryLanguage({
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
           }),
         };
-        if (Object.keys(nextState).length !== 0) {
-          stateContainer.appState.replaceUrlState(nextState);
-        }
+        await stateContainer.appState.replaceUrlState(nextState);
+        sendComplete();
+        // }
       } else {
         // cleanup for a "regular" query
         cleanup();

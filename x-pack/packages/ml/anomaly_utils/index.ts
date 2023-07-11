@@ -10,6 +10,16 @@ export { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 export { ML_SEVERITY_COLORS } from './severity_colors';
 
 export {
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
+  type SparseDataAggregation,
+  ES_AGGREGATION,
+  KIBANA_AGGREGATION,
+  ML_JOB_AGGREGATION,
+  SPARSE_DATA_AGGREGATIONS,
+} from './aggregation_types';
+
+export {
   aggregationTypeTransform,
   getAnomalyScoreExplanationImpactValue,
   getEntityFieldList,
@@ -49,6 +59,33 @@ export {
   ML_DETECTOR_RULE_FILTER_TYPE,
   ML_DETECTOR_RULE_OPERATOR,
 } from './detector_rule';
+
+export type { InfluencersFilterQuery } from './es_client';
+
+export {
+  type MlJobFieldType,
+  DOC_COUNT,
+  MLCATEGORY,
+  ML_JOB_FIELD_TYPES,
+  OMIT_FIELDS,
+  _DOC_COUNT,
+} from './field_types';
+
+export {
+  mlCategory,
+  type AggFieldNamePair,
+  type AggFieldPair,
+  type AggId,
+  type Aggregation,
+  type Field,
+  type FieldId,
+  type NewJobCaps,
+  type NewJobCapsResponse,
+  type RollupFields,
+  type SplitField,
+  EVENT_RATE_FIELD_ID,
+  METRIC_AGG_TYPE,
+} from './fields';
 
 export { getFormattedSeverityScore } from './get_formatted_severity_score';
 export { getSeverity } from './get_severity';

@@ -178,7 +178,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
               }
             };
 
-            describe(condition.archives.join(',') || 'no data', () => {
+            describe(condition.archives.join(',') || 'no archive', () => {
               before(runBefore);
 
               runs.forEach((run) => {

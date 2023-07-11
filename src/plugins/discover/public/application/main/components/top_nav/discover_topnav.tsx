@@ -13,13 +13,13 @@ import { ENABLE_TEXT_BASED } from '../../../../../common';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverLayoutProps } from '../layout/discover_layout';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
+import { useDiscoverCustomization } from '../../../../customizations';
 
-export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
+export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
@@ -30,8 +30,9 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   stateContainer: DiscoverStateContainer;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
+  textBasedLanguageModeWarning?: string;
   onFieldEdited: () => Promise<void>;
-};
+}
 
 export const DiscoverTopNav = ({
   onOpenInspector,
@@ -39,9 +40,9 @@ export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
   updateQuery,
-  navigateTo,
   isPlainRecord,
   textBasedLanguageModeErrors,
+  textBasedLanguageModeWarning,
   onFieldEdited,
 }: DiscoverTopNavProps) => {
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
@@ -111,18 +112,27 @@ export const DiscoverTopNav = ({
     });
   }, [dataViewEditor, stateContainer]);
 
+  const topNavCustomization = useDiscoverCustomization('top_nav');
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
         dataView,
-        navigateTo,
         services,
         state: stateContainer,
         onOpenInspector,
         isPlainRecord,
         adHocDataViews,
+        topNavCustomization,
       }),
-    [dataView, navigateTo, services, stateContainer, onOpenInspector, isPlainRecord, adHocDataViews]
+    [
+      adHocDataViews,
+      dataView,
+      isPlainRecord,
+      onOpenInspector,
+      services,
+      stateContainer,
+      topNavCustomization,
+    ]
   );
 
   const onEditDataView = async (editedDataView: DataView) => {
@@ -182,14 +192,15 @@ export const DiscoverTopNav = ({
       onSaveSearch({
         savedSearch: stateContainer.savedSearchState.getState(),
         services,
-        navigateTo,
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
       });
     },
-    [navigateTo, services, stateContainer]
+    [services, stateContainer]
   );
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   return (
     <AggregateQueryTopNavMenu
@@ -206,11 +217,19 @@ export const DiscoverTopNav = ({
       showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
-      dataViewPickerComponentProps={dataViewPickerProps}
+      dataViewPickerOverride={
+        searchBarCustomization?.CustomDataViewPicker ? (
+          <searchBarCustomization.CustomDataViewPicker />
+        ) : undefined
+      }
+      dataViewPickerComponentProps={
+        searchBarCustomization?.CustomDataViewPicker ? undefined : dataViewPickerProps
+      }
       displayStyle="detached"
       textBasedLanguageModeErrors={
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
       }
+      textBasedLanguageModeWarning={textBasedLanguageModeWarning}
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
     />
   );

@@ -215,6 +215,28 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-query-utils",
+        "id": "def-common.ES_CLIENT_TOTAL_HITS_RELATION",
+        "type": "Object",
+        "tags": [],
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
+        "description": [
+          "\nCustom enum for total hits relation values"
+        ],
+        "signature": [
+          "{ GTE: ",
+          "SearchTotalHitsRelation",
+          "; EQ: ",
+          "SearchTotalHitsRelation",
+          "; }"
+        ],
+        "path": "x-pack/packages/ml/query_utils/src/es_client_total_hits_relation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -227,7 +227,11 @@ export function createSearchBar({
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query, props.onRefreshChange)}
+            onRefreshChange={
+              !props.isAutoRefreshDisabled
+                ? defaultOnRefreshChange(data.query, props.onRefreshChange)
+                : undefined
+            }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
             onRefresh={props.onRefresh}
@@ -237,11 +241,13 @@ export function createSearchBar({
             iconType={props.iconType}
             nonKqlMode={props.nonKqlMode}
             customSubmitButton={props.customSubmitButton}
+            dataViewPickerOverride={props.dataViewPickerOverride}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
             {...overrideDefaultBehaviors(props)}
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
+            textBasedLanguageModeWarning={props.textBasedLanguageModeWarning}
             onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}

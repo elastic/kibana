@@ -49,6 +49,7 @@ import {
 import {
   useDebounceWithOptions,
   parseErrors,
+  parseWarning,
   getInlineEditorText,
   getDocumentationSections,
   MonacoError,
@@ -67,6 +68,7 @@ export interface TextBasedLanguagesEditorProps {
   isCodeEditorExpanded: boolean;
   detectTimestamp?: boolean;
   errors?: Error[];
+  warning?: string;
   isDisabled?: boolean;
   isDarkMode?: boolean;
   dataTestSubj?: string;
@@ -110,6 +112,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   isCodeEditorExpanded,
   detectTimestamp = false,
   errors,
+  warning,
   isDisabled,
   isDarkMode,
   dataTestSubj,
@@ -130,6 +133,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
   const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
+  const [editorWarning, setEditorWarning] = useState<MonacoError[]>([]);
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
@@ -139,6 +143,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     editorHeight,
     isCodeEditorExpanded,
     Boolean(errors?.length),
+    Boolean(warning),
     isCodeEditorExpandedFocused,
     Boolean(documentationSections)
   );
@@ -262,6 +267,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (!isCodeEditorExpanded) {
         editor1.current?.onDidContentSizeChange(updateHeight);
       }
+      if (warning && (!errors || !errors.length)) {
+        const parsedWarning = parseWarning(warning);
+        setEditorWarning(parsedWarning);
+      } else {
+        setEditorWarning([]);
+      }
       if (errors && errors.length) {
         const parsedErrors = parseErrors(errors, code);
         setEditorErrors(parsedErrors);
@@ -273,7 +284,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     { skipFirstRender: false },
     256,
-    [errors]
+    [errors, warning]
   );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoError) => {
@@ -310,7 +321,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         const text = getInlineEditorText(queryString, Boolean(hasLines));
         const queryLength = text.length;
         const unusedSpace =
-          errors && errors.length
+          (errors && errors.length) || warning
             ? EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS
             : EDITOR_ONE_LINER_UNUSED_SPACE;
         const charactersAlowed = Math.floor((width - unusedSpace) / FONT_WIDTH);
@@ -323,7 +334,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
       }
     },
-    [queryString, errors, isCompactFocused]
+    [isCompactFocused, queryString, errors, warning]
   );
 
   useEffect(() => {
@@ -365,8 +376,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [language, documentationSections]);
 
   const getSourceIdentifiers: ESQLCustomAutocompleteCallbacks['getSourceIdentifiers'] =
-    useCallback(() => {
-      return dataViews.getTitles();
+    useCallback(async () => {
+      const indices = await dataViews.getIndices({
+        showAllIndices: false,
+        pattern: '*',
+        isRollupIndex: () => false,
+      });
+      return indices.map((i) => i.name);
     }, [dataViews]);
 
   const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
@@ -584,6 +600,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         {errors.length}
                       </EuiBadge>
                     )}
+                    {!isCompactFocused && warning && (!errors || errors.length === 0) && (
+                      <EuiBadge
+                        color={euiTheme.colors.warning}
+                        css={styles.errorsBadge}
+                        iconType="warning"
+                        iconSide="left"
+                        data-test-subj="TextBasedLangEditor-inline-warning-badge"
+                      >
+                        {editorWarning.length}
+                      </EuiBadge>
+                    )}
                     <CodeEditor
                       languageId={languageId(language)}
                       value={codeOneLiner || code}
@@ -614,6 +641,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         lines={lines}
                         containerCSS={styles.bottomContainer}
                         errors={editorErrors}
+                        warning={editorWarning}
                         onErrorClick={onErrorClick}
                         refreshErrors={onTextLangQuerySubmit}
                         detectTimestamp={detectTimestamp}
@@ -697,6 +725,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           lines={lines}
           containerCSS={styles.bottomContainer}
           errors={editorErrors}
+          warning={editorWarning}
           onErrorClick={onErrorClick}
           refreshErrors={onTextLangQuerySubmit}
           detectTimestamp={detectTimestamp}

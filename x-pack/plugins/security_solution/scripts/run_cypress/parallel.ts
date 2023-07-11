@@ -41,19 +41,35 @@ import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
+/**
+ * Retrieve test files using a glob pattern.
+ * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
+ */
 const retrieveIntegrations = (
-  specPattern: string[],
-  chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
-    : 1,
-  chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
-    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
-    : 0
+  /** Pattern passed to globby to find spec files. */ specPattern: string[]
 ) => {
   const integrationsPaths = globby.sync(specPattern);
-  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-  return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
+  if (process.env.RUN_ALL_TESTS === 'true') {
+    return integrationsPaths;
+  } else {
+    // The number of instances of this job were created
+    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+      : 1;
+    // An index which uniquely identifies this instance of the job
+    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+      : 0;
+
+    const integrationsPathsForChunk: string[] = [];
+
+    for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
+      integrationsPathsForChunk.push(integrationsPaths[i]);
+    }
+
+    return integrationsPathsForChunk;
+  }
 };
 
 export const cli = () => {
@@ -63,11 +79,9 @@ export const cli = () => {
 
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-      const files = retrieveIntegrations(
-        spec ? (spec.includes(',') ? spec.split(',') : [spec]) : cypressConfigFile?.e2e?.specPattern
-      );
+      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
-      if (!files.length) {
+      if (!files?.length) {
         throw new Error('No files found');
       }
 
@@ -165,9 +179,10 @@ export const cli = () => {
                   }
                   return element.value as string;
                 });
+              } else if (property.value.type === 'StringLiteral') {
+                value = property.value.value;
               }
               if (key && value) {
-                // @ts-expect-error
                 acc[key] = value;
               }
               return acc;
@@ -219,9 +234,9 @@ export const cli = () => {
                   kibana: {
                     port: kibanaPort,
                   },
-                  // fleetserver: {
-                  //   port: fleetServerPort,
-                  // },
+                  fleetserver: {
+                    port: fleetServerPort,
+                  },
                 },
                 kbnTestServer: {
                   serverArgs: [
@@ -266,9 +281,12 @@ export const cli = () => {
                   );
                 }
 
+                if (configFromTestFile?.license) {
+                  vars.esTestCluster.license = configFromTestFile.license;
+                }
+
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
-                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`,
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                   );
                 }
@@ -290,6 +308,7 @@ export const cli = () => {
 
             const options = {
               installDir: process.env.KIBANA_INSTALL_DIR,
+              ci: process.env.CI,
             };
 
             const shutdownEs = await pRetry(
@@ -308,9 +327,10 @@ export const cli = () => {
               procs,
               config,
               installDir: options?.installDir,
-              extraKbnOpts: options?.installDir
-                ? []
-                : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+              extraKbnOpts:
+                options?.installDir || options?.ci || !isOpen
+                  ? []
+                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
             });
 
@@ -322,7 +342,9 @@ export const cli = () => {
               EsVersion.getDefault()
             );
 
-            const customEnv = await functionalTestRunner.run(abortCtrl.signal);
+            const customEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
+              retries: 1,
+            });
 
             if (isOpen) {
               await cypress.open({
@@ -363,7 +385,13 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: !isOpen ? 3 : 1 }
+        {
+          concurrency: (argv.concurrency as number | undefined)
+            ? (argv.concurrency as number)
+            : !isOpen
+            ? 3
+            : 1,
+        }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(

@@ -24,7 +24,12 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
+<<<<<<< HEAD
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+=======
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+>>>>>>> b41b8372c7d2464e9acad3841e98c57327b9220a
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -149,6 +154,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -156,6 +162,7 @@ interface PluginsStart {
   features: FeaturesPluginStart;
   expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  licensing: LicensingPluginStart;
 }
 
 export class Plugin
@@ -261,6 +268,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
+          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -278,7 +286,11 @@ export class Plugin
           ruleTypeRegistry,
           alertsTableConfigurationRegistry,
           kibanaFeatures,
+<<<<<<< HEAD
           expressions: pluginsStart.expressions,
+=======
+          licensing: pluginsStart.licensing,
+>>>>>>> b41b8372c7d2464e9acad3841e98c57327b9220a
         });
       },
     });
@@ -309,6 +321,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
+          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,

@@ -26,6 +26,13 @@ Cypress.Commands.add('loginAsMonitorUser', () => {
   });
 });
 
+Cypress.Commands.add('loginAsApmManageOwnAndCreateAgentKeys', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmManageOwnAndCreateAgentKeys,
+    password: 'changeme',
+  });
+});
+
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {

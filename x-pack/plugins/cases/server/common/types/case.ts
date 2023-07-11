@@ -47,6 +47,7 @@ export interface CasePersistedAttributes {
   total_comments: number;
   updated_at: string | null;
   updated_by: User | null;
+  category?: string | null;
 }
 
 export type CaseTransformedAttributes = CaseAttributes;

@@ -88,7 +88,6 @@ import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_qu
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
-import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 
 import {
@@ -127,6 +126,7 @@ export interface RulesListProps {
   onSearchFilterChange?: (search: string) => void;
   onStatusFilterChange?: (status: RuleStatus[]) => void;
   onTypeFilterChange?: (type: string[]) => void;
+  onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
 }
 
@@ -165,6 +165,7 @@ export const RulesList = ({
   onSearchFilterChange,
   onStatusFilterChange,
   onTypeFilterChange,
+  onRefresh,
   setHeaderActions,
 }: RulesListProps) => {
   const history = useHistory();
@@ -190,6 +191,7 @@ export const RulesList = ({
     searchText: searchFilter || '',
     tags: [],
     types: typeFilter || [],
+    kueryNode: undefined,
   });
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -227,6 +229,8 @@ export const RulesList = ({
 
   const [isCloningRule, setIsCloningRule] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [localRefresh, setLocalRefresh] = useState<Date>(new Date());
 
   // Fetch config
   const { config } = useLoadConfigQuery();
@@ -274,12 +278,6 @@ export const RulesList = ({
       refresh,
     });
 
-  // Fetch tags
-  const { tags, loadTags } = useLoadTagsQuery({
-    enabled: isRuleStatusFilterEnabled && canLoadRules,
-    refresh,
-  });
-
   const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
     authorizedToCreateAnyRules,
     filters,
@@ -307,15 +305,16 @@ export const RulesList = ({
     if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
       return;
     }
+    const now = new Date();
+    setLocalRefresh(now);
+    onRefresh?.(now);
     await loadRules();
     await loadRuleAggregations();
-    if (isRuleStatusFilterEnabled) {
-      await loadTags();
-    }
   }, [
     loadRules,
-    loadTags,
     loadRuleAggregations,
+    setLocalRefresh,
+    onRefresh,
     isRuleStatusFilterEnabled,
     hasAnyAuthorizedRuleType,
     ruleTypesState,
@@ -822,7 +821,8 @@ export const RulesList = ({
                   setInputText={setInputText}
                   showActionFilter={showActionFilter}
                   showErrors={showErrors}
-                  tags={tags}
+                  canLoadRules={canLoadRules}
+                  refresh={refresh || localRefresh}
                   updateFilters={updateFilters}
                   onClearSelection={onClearSelection}
                   onRefreshRules={refreshRules}

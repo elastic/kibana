@@ -16,6 +16,8 @@ import {
   isDeprecatedConnector,
   isEmptyValue,
   removeItemFromSessionStorage,
+  parseURL,
+  stringifyToURL,
 } from './utils';
 
 describe('Utils', () => {
@@ -26,6 +28,7 @@ describe('Utils', () => {
     config: { usesTableApi: false },
     secrets: {},
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   };
 
@@ -210,6 +213,46 @@ describe('Utils', () => {
       [null, 'test', 1, true, false, {}, '', undefined],
     ])('returns false for value: %s', (value) => {
       expect(isEmptyValue(value)).toBe(false);
+    });
+  });
+
+  describe('parseUrl', () => {
+    it('parses URL correctly into object', () => {
+      expect(
+        parseURL(
+          'severity=critical&status=open&page=1&perPage=10&sortField=createdAt&sortOrder=desc'
+        )
+      ).toEqual({
+        page: '1',
+        severity: 'critical',
+        perPage: '10',
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        status: 'open',
+      });
+    });
+
+    it('parses empty URL correctly into object', () => {
+      expect(parseURL('')).toEqual({});
+    });
+  });
+
+  describe('stringifyToURL', () => {
+    it('stringifies object correctly into URL', () => {
+      expect(
+        stringifyToURL({
+          page: '1',
+          severity: 'critical',
+          perPage: '10',
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+          status: 'open',
+        })
+      ).toBe('page=1&severity=critical&perPage=10&sortField=createdAt&sortOrder=desc&status=open');
+    });
+
+    it('stringifies empty object correctly into URL', () => {
+      expect(stringifyToURL({})).toBe('');
     });
   });
 });

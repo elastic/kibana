@@ -14,6 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { MockAssistantProvider } from './mock_assistant_provider';
 import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
@@ -52,13 +53,14 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  */
 export const StorybookProviders: React.FC = ({ children }) => {
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
   return (
     <I18nProvider>
       <KibanaReactContext.Provider>
         <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-              {children}
+              <MockAssistantProvider>{children}</MockAssistantProvider>
             </ThemeProvider>
           </ReduxStoreProvider>
         </CellActionsProvider>

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { RRule } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { generateMaintenanceWindowEvents } from './generate_maintenance_window_events';
 
 describe('generateMaintenanceWindowEvents', () => {
@@ -24,7 +24,7 @@ describe('generateMaintenanceWindowEvents', () => {
         .toISOString(),
       rRule: {
         tzid: 'UTC',
-        freq: RRule.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         dtstart: '2023-02-27T00:00:00.000Z',
       },
@@ -55,7 +55,7 @@ describe('generateMaintenanceWindowEvents', () => {
         .toISOString(),
       rRule: {
         tzid: 'UTC',
-        freq: RRule.WEEKLY,
+        freq: Frequency.WEEKLY,
         interval: 1,
         dtstart: '2023-02-27T00:00:00.000Z',
       },
@@ -86,7 +86,7 @@ describe('generateMaintenanceWindowEvents', () => {
         .toISOString(),
       rRule: {
         tzid: 'UTC',
-        freq: RRule.MONTHLY,
+        freq: Frequency.MONTHLY,
         interval: 1,
         dtstart: '2023-02-27T00:00:00.000Z',
       },
@@ -116,7 +116,7 @@ describe('generateMaintenanceWindowEvents', () => {
         .toISOString(),
       rRule: {
         tzid: 'UTC',
-        freq: RRule.WEEKLY,
+        freq: Frequency.WEEKLY,
         interval: 1,
         byweekday: ['TU', 'TH'],
         dtstart: '2023-02-27T00:00:00.000Z',

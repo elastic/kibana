@@ -11,10 +11,23 @@
       "expressions",
       "savedObjectsManagement",
       "data",
+      "presentationUtil",
+      "visualizations",
+      "dataViews",
+      "unifiedSearch",
+      "kibanaUtils",
+      "visualizationUiComponents",
+      "contentManagement"
+    ],
+    "optionalPlugins": [
+      "savedObjectsTagging",
     ],
     "requiredBundles": [
+      "data",
       "savedObjectsFinder",
-      "dataViews"
+      "dataViews",
+      "kibanaReact",
+      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common"

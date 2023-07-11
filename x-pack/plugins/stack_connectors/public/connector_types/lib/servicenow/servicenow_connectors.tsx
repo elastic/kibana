@@ -131,6 +131,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           ...connectorToUpdate,
           isDeprecated,
           isPreconfigured: false,
+          isSystemAction: false,
           actionTypeId,
         });
 

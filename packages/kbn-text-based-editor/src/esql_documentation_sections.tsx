@@ -212,7 +212,7 @@ FROM employees
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 \`\`\`
 
@@ -220,7 +220,7 @@ If the specified column already exists, the existing column will be dropped, and
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL height = height * 3.281
 \`\`\`
 
@@ -311,39 +311,36 @@ ROW a=[1,2,3], b="b", j=["a","b"]
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.project',
-        {
-          defaultMessage: 'PROJECT',
-        }
-      ),
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.keep', {
+        defaultMessage: 'KEEP',
+      }),
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.project.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.keep.markdown',
             {
-              defaultMessage: `### PROJECT
-The \`PROJECT\` command enables you to specify what columns are returned and the order in which they are returned.
+              defaultMessage: `### KEEP
+The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
 
 To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
               
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 \`\`\`
 
 Rather than specify each column by name, you can use wildcards to return all columns with a name that matches a pattern:
 
 \`\`\`
 FROM employees
-| PROJECT h*
+| KEEP h*
 \`\`\`
 
 The asterisk wildcard (\`*\`) by itself translates to all columns that do not match the other arguments. This query will first return all columns with a name that starts with an h, followed by all other columns:
 
 \`\`\`
 FROM employees
-| PROJECT h*, *
+| KEEP h*, *
 \`\`\`
             `,
               description:
@@ -367,7 +364,7 @@ Use \`RENAME\` to rename a column. If a column with the new name already exists,
               
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, still_hired
+| KEEP first_name, last_name, still_hired
 | RENAME employed = still_hired
 \`\`\`
 
@@ -375,7 +372,7 @@ Multiple columns can be renamed with a single \`RENAME\` command:
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name
+| KEEP first_name, last_name
 | RENAME fn = first_name, ln = last_name
 \`\`\`
             `,
@@ -400,7 +397,7 @@ Use the \`SORT\` command to sort rows on one or more fields:
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT height
 \`\`\`
 
@@ -408,7 +405,7 @@ The default sort order is ascending. Set an explicit sort order using \`ASC\` or
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT height DESC
 \`\`\`
 
@@ -416,7 +413,7 @@ If two rows have the same sort key, the original order will be preserved. You ca
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT height DESC, first_name ASC
 \`\`\`
 
@@ -425,7 +422,7 @@ By default, \`null\` values are treated as being larger than any other value. Wi
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | SORT first_name ASC NULLS FIRST
 \`\`\`
             `,
@@ -512,20 +509,26 @@ Use \`WHERE\` to produce a table that contains all the rows from the input table
               
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, still_hired
+| KEEP first_name, last_name, still_hired
 | WHERE still_hired == true
 \`\`\`
 
 #### Operators
-These comparison operators are supported:
+These binary comparison operators are supported:
 
 * equality: \`==\`
 * inequality: \`!=\`
-* comparison:
-  * less than: \`<\`
-  * less than or equal: \`<=\`
-  * larger than: \`>\`
-  * larger than or equal: \`>=\`
+* less than: \`<\`
+* less than or equal: \`<=\`
+* larger than: \`>\`
+* larger than or equal: \`>=\`
+
+The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
+
+\`\`\`
+ROW a = 1, b = 4, c = 3
+| WHERE c-a IN (3, b / 2, a)
+\`\`\`
 
 For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
 
@@ -536,7 +539,7 @@ For string comparison using wildcards or regular expressions, use \`LIKE\` or \`
   \`\`\`
   FROM employees 
   | WHERE first_name LIKE "?b*" 
-  | PROJECT first_name, last_name
+  | KEEP first_name, last_name
   \`\`\`
 
 * Use \`RLIKE\` to match strings using [regular expressions](https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html):
@@ -544,7 +547,7 @@ For string comparison using wildcards or regular expressions, use \`LIKE\` or \`
   \`\`\`
   FROM employees 
   | WHERE first_name RLIKE ".leja.*" 
-  | PROJECT first_name, last_name
+  | KEEP first_name, last_name
   \`\`\`
 
 You can use the following boolean operators:
@@ -555,7 +558,7 @@ You can use the following boolean operators:
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height, still_hired
+| KEEP first_name, last_name, height, still_hired
 | WHERE height > 2 AND NOT still_hired
 \`\`\`
 
@@ -600,9 +603,84 @@ Returns the absolute value.
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL abs_height = ABS(0.0 - height)
 \`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
+        {
+          defaultMessage: 'AUTO_BUCKET',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
+            {
+              defaultMessage: `### AUTO_BUCKET
+Creates human-friendly buckets and returns a \`datetime\` value for each row that corresponds to the resulting bucket the row falls into. Combine \`AUTO_BUCKET\`with \`STATS ... BY\` to create a date histogram.
+
+You provide a target number of buckets, a start date, and an end date, and it picks an appropriate bucket size to generate the target number of buckets or fewer. For example, this asks for at most 20 buckets over a whole year, which picks monthly buckets:
+
+\`\`\`
+ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
+| EVAL bucket=AUTO_BUCKET(date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+\`\`\`
+
+Returning:
+\`\`\`
+1985-07-09T00:00:00.000Z | 1985-07-01T00:00:00.000Z
+\`\`\`
+
+The goal isn't to provide *exactly* the target number of buckets, it's to pick a
+range that people are comfortable with that provides at most the target number of
+buckets.
+
+If you ask for more buckets then \`AUTO_BUCKET\` can pick a smaller range. For example,
+asking for at most 100 buckets in a year will get you week long buckets:
+
+\`\`\`
+ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
+| EVAL bucket=AUTO_BUCKET(date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+\`\`\`
+
+Returning:
+\`\`\`
+1985-07-09T00:00:00.000Z | 1985-07-08T00:00:00.000Z
+\`\`\`
+
+\`AUTO_BUCKET\` does not filter any rows. It only uses the provided time range to pick a good bucket size. For rows with a date outside of the range, it returns a datetime that corresponds to a bucket outside the range. Combine \`AUTO_BUCKET\` with \`WHERE\` to filter rows.
+
+A more complete example might look like:
+
+\`\`\`
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| EVAL bucket = AUTO_BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| STATS AVG(salary) BY bucket
+| SORT bucket
+\`\`\`
+
+Returning:
+\`\`\`
+46305.0 | 1985-02-01T00:00:00.000Z
+44817.0 | 1985-05-01T00:00:00.000Z
+62405.0 | 1985-07-01T00:00:00.000Z
+49095.0 | 1985-09-01T00:00:00.000Z
+51532.0 | 1985-10-01T00:00:00.000Z
+54539.75 | 1985-11-01T00:00:00.000
+\`\`\`
+
+NOTE: \`AUTO_BUCKET\` does not create buckets that don’t match any documents. That’s why the example above is missing 1985-03-01 and other dates.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -632,7 +710,7 @@ FROM employees
     languages <= 1, "monolingual",
     languages <= 2, "bilingual",
      "polyglot")
-| PROJECT first_name, last_name, type
+| KEEP first_name, last_name, type
 \`\`\`
               `,
               description:
@@ -688,7 +766,7 @@ Concatenates two or more strings.
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL fullname = CONCAT(first_name, " ", last_name)
 \`\`\`
               `,
@@ -716,7 +794,7 @@ Returns a string representation of a date in the provided format. If no format i
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, hire_date
+| KEEP first_name, last_name, hire_date
 | EVAL hired = DATE_FORMAT(hire_date, "YYYY-MM-dd")
 \`\`\`
               `,
@@ -905,7 +983,7 @@ Returns the character length of a string.
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL fn_length = LENGTH(first_name)
 \`\`\`
               `,
@@ -953,6 +1031,52 @@ NOTE: The output type is always a double and the input type can be any number.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvConcatFunction',
+        {
+          defaultMessage: 'MV_CONCAT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvConcatFunction.markdown',
+            {
+              defaultMessage: `### MV_CONCAT
+Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter:
+
+\`\`\`
+ROW a=["foo", "zoo", "bar"]
+| EVAL j = MV_CONCAT(a, ", ")
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "zoo", "bar"] | "foo, zoo, bar"
+\`\`\`
+
+If you want to join non-string fields call \`TO_STRING\` on them first:
+
+\`\`\`
+ROW a=[10, 9, 8]
+| EVAL j = MV_CONCAT(TO_STRING(a), ", ")
+\`\`\`
+
+Returning:
+
+\`\`\`
+[10, 9, 8] | "10, 9, 8"
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvCountFunction',
         {
           defaultMessage: 'MV_COUNT',
@@ -978,52 +1102,6 @@ Returning:
 \`\`\`
 
 NOTE: This function accepts all types and always returns an integer.
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction',
-        {
-          defaultMessage: 'MV_JOIN',
-        }
-      ),
-      description: (
-        <Markdown
-          markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction.markdown',
-            {
-              defaultMessage: `### MV_JOIN
-Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter:
-
-\`\`\`
-ROW a=["foo", "zoo", "bar"]
-| EVAL j = MV_JOIN(a, ", ")
-\`\`\`
-
-Returning:
-
-\`\`\`
-["foo", "zoo", "bar"] | "foo, zoo, bar"
-\`\`\`
-
-If you want to join non-string fields call \`TO_STRING\` on them first:
-
-\`\`\`
-ROW a=[10, 9, 8]
-| EVAL j = MV_JOIN(TO_STRING(a), ", ")
-\`\`\`
-
-Returning:
-
-\`\`\`
-[10, 9, 8] | "10, 9, 8"
-\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1248,7 +1326,7 @@ Rounds a number to the closest number with the specified number of digits. Defau
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL height = ROUND(height * 3.281, 1)
 \`\`\`
               `,
@@ -1311,7 +1389,7 @@ Returns a boolean that indicates whether a keyword string starts with another st
 
 \`\`\`
 FROM employees
-| PROJECT first_name, last_name, height
+| KEEP first_name, last_name, height
 | EVAL ln_S = STARTS_WITH(last_name, "S")
 \`\`\`
               `,
@@ -1339,7 +1417,7 @@ Returns a substring of a string, specified by a start position and an optional l
 
 \`\`\`
 FROM employees
-| PROJECT last_name
+| KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, 1, 3)
 \`\`\`
 
@@ -1347,7 +1425,7 @@ A negative start position is interpreted as being relative to the end of the str
 
 \`\`\`
 FROM employees
-| PROJECT last_name
+| KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, -3, 3)
 \`\`\`
 
@@ -1355,9 +1433,277 @@ If length is omitted, substring returns the remainder of the string. This exampl
 
 \`\`\`
 FROM employees
-| PROJECT last_name
+| KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, 2)
 \`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toBooleanFunction',
+        {
+          defaultMessage: 'TO_BOOLEAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toBooleanFunction.markdown',
+            {
+              defaultMessage: `### TO_BOOLEAN
+Converts an input value to a boolean value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a string or numeric type.
+
+A string value of **"true"** will be case-insensitive converted to the Boolean **true**. For anything else, including the empty string, the function will return **false**. For example:
+
+\`\`\`
+ROW str = ["true", "TRuE", "false", "", "yes", "1"]
+| EVAL bool = TO_BOOLEAN(str)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["true", "TRuE", "false", "", "yes", "1"] | [true, true, false, false, false, false]
+\`\`\`
+
+The numerical value of **0** will be converted to **false**, anything else will be converted to **true**.
+
+Alias: TO_BOOL
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDatetimeFunction',
+        {
+          defaultMessage: 'TO_DATETIME',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDatetimeFunction.markdown',
+            {
+              defaultMessage: `### TO_DATETIME
+Converts an input value to a date value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a string or numeric type.
+
+A string will only be successfully converted if it’s respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`. For example:
+
+\`\`\`
+ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
+| EVAL datetime = TO_DATETIME(string)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"] | [1953-09-02T00:00:00.000Z, 1964-06-02T00:00:00.000Z]
+\`\`\`
+
+Note that in this example, the last value in the source multi-valued field has not been converted. The reason being that if the date format is not respected, the conversion will result in a **null** value.
+
+If the input parameter is of a numeric type, its value will be interpreted as milliseconds since the Unix epoch. For example:
+
+\`\`\`
+ROW int = [0, 1]
+| EVAL dt = TO_DATETIME(int)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[0, 1] | [1970-01-01T00:00:00.000Z, 1970-01-01T00:00:00.001Z]
+\`\`\`
+
+Alias: TO_DT
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDoubleFunction',
+        {
+          defaultMessage: 'TO_DOUBLE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toDoubleFunction.markdown',
+            {
+              defaultMessage: `### TO_DOUBLE
+Converts an input value to a double value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+
+Example:
+
+\`\`\`
+ROW str1 = "5.20128E11", str2 = "foo"
+| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
+\`\`\`
+
+Returning:
+
+\`\`\`
+5.20128E11 | foo | 5.20128E11 | 5.20128E11 | null
+\`\`\`
+
+Note that in this example, the last conversion of the string isn’t possible. When this happens, the result is a **null** value.
+
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to double.
+
+Boolean **true** will be converted to double **1.0**, **false** to **0.0**.
+
+Alias: TO_DBL
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIntegerFunction',
+        {
+          defaultMessage: 'TO_INTEGER',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIntegerFunction.markdown',
+            {
+              defaultMessage: `### TO_INTEGER
+Converts an input value to an integer value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+
+Example:
+
+\`\`\`
+ROW long = [5013792, 2147483647, 501379200000]
+| EVAL int = TO_INTEGER(long)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[5013792, 2147483647, 501379200000] | [5013792, 2147483647]
+\`\`\`
+
+Note that in this example, the last value of the multi-valued field cannot be converted as an integer. When this happens, the result is a **null** value.
+
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer.
+
+Boolean **true** will be converted to integer **1**, **false** to **0**.
+
+Alias: TO_INT
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIpFunction',
+        {
+          defaultMessage: 'TO_IP',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toIpFunction.markdown',
+            {
+              defaultMessage: `### TO_IP
+Converts an input string to an IP value.
+
+The input can be a single- or multi-valued field or an expression.
+
+Example:
+
+\`\`\`
+ROW str1 = "1.1.1.1", str2 = "foo"
+| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
+| WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
+\`\`\`
+
+Returning:
+
+\`\`\`
+1.1.1.1 | foo | 1.1.1.1 | null
+\`\`\`
+
+Note that in the example above the last conversion of the string isn’t possible. When this happens, the result is a **null** value.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toLongFunction',
+        {
+          defaultMessage: 'TO_LONG',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toLongFunction.markdown',
+            {
+              defaultMessage: `### TO_LONG
+Converts an input value to an long value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be of a boolean, date, string or numeric type.
+
+Example:
+
+\`\`\`
+ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
+| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
+\`\`\`
+
+Returning:
+
+\`\`\`
+2147483648 | 2147483648.2 | foo | 2147483648 | 2147483648 | null
+\`\`\`
+
+Note that in this example, the last conversion of the string isn’t possible. When this happens, the result is a **null** value. 
+
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to integer.
+
+Boolean **true** will be converted to long **1**, **false** to **0**.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1392,6 +1738,40 @@ It also works fine on multivalued fields:
 ROW a=[10, 9, 8]
 | EVAL j = TO_STRING(a)
 \`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toVersionFunction',
+        {
+          defaultMessage: 'TO_VERSION',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toVersionFunction.markdown',
+            {
+              defaultMessage: `### TO_VERSION
+Converts an input string to a version value. For example:
+
+\`\`\`
+ROW v = TO_VERSION("1.2.3")
+\`\`\`
+
+Returning:
+
+\`\`\`
+1.2.3
+\`\`\`
+
+Alias: TO_VER
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',

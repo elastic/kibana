@@ -74,6 +74,35 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'pow',
+    insertText: 'pow',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.powDoc', {
+      defaultMessage:
+        'Returns the the value of a base (first argument) raised to a power (second argument).',
+    }),
+    documentation: {
+      value: buildDocumentation('pow(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval s = POW(field, exponent)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'log10',
+    insertText: 'log10',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.log10Doc', {
+      defaultMessage: 'Returns the log base 10.',
+    }),
+    documentation: {
+      value: buildDocumentation('log10(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval s = log10(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'concat',
     insertText: 'concat',
     kind: 1,
@@ -223,6 +252,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'to_unsigned_long',
+    insertText: 'to_unsigned_long',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toUnsignedLongDoc', {
+      defaultMessage: 'Converts to unsigned long.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL long = to_unsigned_long(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'to_ip',
     insertText: 'to_ip',
     kind: 1,
@@ -233,6 +277,21 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
       value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
         `from index where field="value""
         | EVAL ip = to_ip(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'to_version',
+    insertText: 'to_version',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toVersionDoc', {
+      defaultMessage: 'Converts to version.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL version = to_version(field)`,
       ]),
     },
     sortText: 'C',
@@ -436,6 +495,20 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
     documentation: {
       value: buildDocumentation('count(grouped[T]): aggregated[T]', [
         'from index | stats count = count_distinct(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'percentile',
+    insertText: 'percentile',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.percentiletDoc', {
+      defaultMessage: 'Returns the n percentile of a field.',
+    }),
+    documentation: {
+      value: buildDocumentation('percentile(grouped[T]): aggregated[T]', [
+        'from index | stats pct = percentile(field, 90)',
       ]),
     },
     sortText: 'C',

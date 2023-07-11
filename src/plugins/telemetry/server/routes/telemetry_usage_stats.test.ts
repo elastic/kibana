@@ -99,9 +99,28 @@ describe('registerTelemetryUsageStatsRoutes', () => {
       });
     });
 
+    it('calls getStats when unencrypted is set to true, there is security, but it is not enabled on ES', async () => {
+      const securityStartMock = securityMock.createStart();
+      getSecurity.mockImplementationOnce(() => {
+        securityStartMock.authz.mode.useRbacForRequest.mockReturnValue(false);
+        return securityStartMock;
+      });
+      registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
+      await runRequest(mockRouter, {
+        refreshCache: false,
+        unencrypted: true,
+      });
+      expect(telemetryCollectionManager.getStats).toBeCalledWith({
+        unencrypted: true,
+        refreshCache: true,
+      });
+      expect(securityStartMock.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+    });
+
     it('returns 403 when the user does not have enough permissions to request unencrypted telemetry', async () => {
       const getSecurityMock = jest.fn().mockImplementation(() => {
         const securityStartMock = securityMock.createStart();
+        securityStartMock.authz.mode.useRbacForRequest.mockReturnValue(true);
         securityStartMock.authz.checkPrivilegesWithRequest.mockReturnValue({
           globally: () => ({ hasAllRequested: false }),
         });

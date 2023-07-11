@@ -22,6 +22,8 @@ PROJECT : P R O J E C T -> pushMode(EXPRESSION);
 DROP : D R O P -> pushMode(EXPRESSION);
 RENAME : R E N A M E -> pushMode(EXPRESSION);
 SHOW : S H O W -> pushMode(EXPRESSION);
+ENRICH : E N R I C H -> pushMode(ENRICH_IDENTIFIERS);
+KEEP : K E E P -> pushMode(EXPRESSION);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
@@ -128,6 +130,7 @@ MINUS : '-';
 ASTERISK : '*';
 SLASH : '/';
 PERCENT : '%';
+TEN: '10';
 
 ORDERING
     : 'asc'
@@ -143,6 +146,10 @@ NULLS_ORDERING_DIRECTION
 MATH_FUNCTION
     : R O U N D
     | A B S
+    | P O W
+    | L O G TEN
+    | P I
+    | T A U
     | S U B S T R I N G
     | C O N C A T
     | S T A R T S UNDERSCORE W I T H
@@ -156,11 +163,13 @@ MATH_FUNCTION
     | L E N G T H
     | M V UNDERSCORE M A X
     | M V UNDERSCORE M I N
-    | M V UNDERSCORE M A X
+    | M V UNDERSCORE A V G
     | M V UNDERSCORE S U M
     | M V UNDERSCORE C O U N T
+    | M V UNDERSCORE C O N C A T
     | M V UNDERSCORE J O I N
     | M V UNDERSCORE M E D I A N
+    | M E T A D A T A
     | S P L I T
     | T O UNDERSCORE S T R I N G
     | T O UNDERSCORE S T R
@@ -174,6 +183,8 @@ MATH_FUNCTION
     | T O UNDERSCORE I N T E G E R
     | T O UNDERSCORE L O N G
     | T O UNDERSCORE I P
+    | T O UNDERSCORE V E R S I O N
+    | T O UNDERSCORE U N S I G N E D UNDERSCORE L O N G
     ;
 
 UNARY_FUNCTION
@@ -183,6 +194,7 @@ UNARY_FUNCTION
     | S U M
     | C O U N T
     | C O U N T UNDERSCORE D I S T I N C T
+    | P E R C E N T I L E
     ;
 
 WHERE_FUNCTIONS
@@ -191,7 +203,10 @@ WHERE_FUNCTIONS
     ;
 
 UNQUOTED_IDENTIFIER
-    : (LETTER | '_') (LETTER | DIGIT | '_' | ASTERISK)*
+    : LETTER (LETTER | DIGIT | '_' | ASTERISK)*
+    // only allow @ at beginning of identifier to keep the option to allow @ as infix operator in the future
+    // also, single `_` and `@` characters are not valid identifiers
+    | ('_' | '@') (LETTER | DIGIT | '_' | ASTERISK)+
     ;
 
 QUOTED_IDENTIFIER
@@ -240,6 +255,41 @@ SRC_MULTILINE_COMMENT
     ;
 
 SRC_WS
+    : WS -> channel(HIDDEN)
+    ;
+
+mode ENRICH_IDENTIFIERS;
+
+ON : O N;
+WITH : W I T H;
+
+ENR_PIPE : '|' -> type(PIPE), popMode;
+ENR_CLOSING_BRACKET : ']' -> popMode, popMode, type(CLOSING_BRACKET);
+ENR_COMMA : ',' -> type(COMMA);
+ENR_ASSIGN : '=' -> type(ASSIGN);
+
+ENR_UNQUOTED_IDENTIFIER
+    : ENR_UNQUOTED_IDENTIFIER_PART+
+    ;
+
+fragment ENR_UNQUOTED_IDENTIFIER_PART
+    : ~[=`|,[\]/ \t\r\n]+
+    | '/' ~[*/] // allow single / but not followed by another / or * which would start a comment
+    ;
+
+ENR_QUOTED_IDENTIFIER
+    : QUOTED_IDENTIFIER
+    ;
+
+ENR_LINE_COMMENT
+    : LINE_COMMENT -> channel(HIDDEN)
+    ;
+
+ENR_MULTILINE_COMMENT
+    : MULTILINE_COMMENT -> channel(HIDDEN)
+    ;
+
+ENR_WS
     : WS -> channel(HIDDEN)
     ;
 

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
   describe('Cloud Chat integration', function () {
@@ -21,10 +20,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('chat widget is present when enabled', async () => {
-      PageObjects.common.navigateToUrl('integrations', 'browse', { useActualUrl: true });
-      const chat = await find.byCssSelector('[data-test-subj="floatingChatTrigger"]', 20000);
-      expect(chat).to.not.be(null);
+    it('chat widget is present on integrations page', async () => {
+      await PageObjects.common.navigateToUrl('integrations', 'browse', {
+        useActualUrl: true,
+        shouldUseHashForSubUrl: false,
+      });
+      await testSubjects.existOrFail('cloud-chat');
+    });
+
+    it('chat widget is present on home getting_started page', async () => {
+      await PageObjects.common.navigateToUrl('home', '/getting_started', {
+        useActualUrl: true,
+        shouldUseHashForSubUrl: true,
+      });
+      await testSubjects.existOrFail('cloud-chat');
+    });
+
+    it('chat widget is present on observability/overview page', async () => {
+      await PageObjects.common.navigateToUrl('observability', '/overview', {
+        useActualUrl: true,
+        shouldUseHashForSubUrl: true,
+      });
+      await testSubjects.existOrFail('cloud-chat');
+    });
+
+    it('chat widget is present on security/get_started page', async () => {
+      await PageObjects.common.navigateToUrl('security', '/get_started', {
+        useActualUrl: true,
+        shouldUseHashForSubUrl: true,
+      });
+      await testSubjects.existOrFail('cloud-chat');
     });
   });
 }

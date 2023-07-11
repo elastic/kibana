@@ -1100,12 +1100,12 @@ describe('DragDrop', () => {
       expect(
         component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(0).prop('style')
       ).toEqual({
-        transform: 'translateY(-4px)',
+        transform: 'translateY(-8px)',
       });
       expect(
         component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual({
-        transform: 'translateY(-4px)',
+        transform: 'translateY(-8px)',
       });
 
       component
@@ -1258,7 +1258,7 @@ describe('DragDrop', () => {
       expect(
         component.find('[data-test-subj="testDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual({
-        transform: 'translateY(+4px)',
+        transform: 'translateY(+8px)',
       });
       expect(
         component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(0).prop('style')

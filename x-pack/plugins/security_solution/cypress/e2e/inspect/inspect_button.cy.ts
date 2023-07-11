@@ -17,8 +17,11 @@ import {
   openTableInspectModal,
 } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
-import { HOSTS_URL } from '../../urls/navigation';
-import { postDataView, waitForPageToBeLoaded } from '../../tasks/common';
+import {
+  postDataView,
+  waitForPageToBeLoaded,
+  waitForWelcomePanelToBeLoaded,
+} from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { selectDataView } from '../../tasks/sourcerer';
 
@@ -28,12 +31,10 @@ describe('Inspect Explore pages', () => {
   before(() => {
     esArchiverLoad('risk_users');
     esArchiverLoad('risk_hosts');
-    login();
 
+    login();
     // Create and select data view
     postDataView(DATA_VIEW);
-    visit(HOSTS_URL);
-    selectDataView(DATA_VIEW);
   });
 
   after(() => {
@@ -47,8 +48,14 @@ describe('Inspect Explore pages', () => {
      */
     it(`inspect ${pageName} page`, () => {
       login();
-      visit(url);
-      waitForPageToBeLoaded();
+
+      visit(url, {
+        onLoad: () => {
+          waitForWelcomePanelToBeLoaded();
+          waitForPageToBeLoaded();
+          selectDataView(DATA_VIEW);
+        },
+      });
 
       lensVisualizations.forEach((lens) => {
         cy.log(`inspects the ${lens.title} visualization`);

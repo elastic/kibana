@@ -12,7 +12,8 @@ import {
   niceTimeFormatter,
   Position,
   Settings,
-  TooltipValue,
+  TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -82,9 +83,9 @@ export const MetricsExplorerChart = ({
       ? niceTimeFormatter([firstRow.timestamp, lastRow.timestamp])
       : (value: number) => `${value}`;
   }, [series.rows]);
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+      ({ value }) => moment(value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };
@@ -158,11 +159,8 @@ export const MetricsExplorerChart = ({
               tickFormat={yAxisFormater}
               domain={domain}
             />
-            <Settings
-              tooltip={tooltipProps}
-              onBrushEnd={handleTimeChange}
-              theme={getChartTheme(isDarkMode)}
-            />
+            <Tooltip {...tooltipProps} />
+            <Settings onBrushEnd={handleTimeChange} theme={getChartTheme(isDarkMode)} />
           </Chart>
         ) : options.metrics.length > 0 ? (
           <MetricsExplorerEmptyChart />

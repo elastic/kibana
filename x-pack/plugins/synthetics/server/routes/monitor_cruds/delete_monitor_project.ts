@@ -6,17 +6,16 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, getKqlFilter } from '../common';
-import { INSUFFICIENT_FLEET_PERMISSIONS } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
     body: schema.object({
       monitors: schema.arrayOf(schema.string()),
@@ -55,22 +54,6 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       },
       { fields: [] }
     );
-
-    const {
-      integrations: { writeIntegrationPolicies },
-    } = await server.fleet.authz.fromRequest(request);
-
-    const hasPrivateMonitor = monitors.some((monitor) =>
-      monitor.attributes.locations.some((location) => !location.isServiceManaged)
-    );
-
-    if (!writeIntegrationPolicies && hasPrivateMonitor) {
-      return response.forbidden({
-        body: {
-          message: INSUFFICIENT_FLEET_PERMISSIONS,
-        },
-      });
-    }
 
     await deleteMonitorBulk({
       monitors,

@@ -12,6 +12,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -24,7 +25,7 @@ import {
   ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  PreConfiguredAction,
+  InMemoryConnector,
   RawAction,
   ValidatorServices,
 } from '../types';
@@ -40,11 +41,12 @@ const Millis2Nanos = 1000 * 1000;
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
+  security?: SecurityPluginStart;
   getServices: GetServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export interface TaskInfo {
@@ -101,7 +103,6 @@ export class ActionExecutor {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
-
     return withSpan(
       {
         name: `execute_action`,
@@ -117,7 +118,8 @@ export class ActionExecutor {
           encryptedSavedObjectsClient,
           actionTypeRegistry,
           eventLogger,
-          preconfiguredActions,
+          inMemoryConnectors,
+          security,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
@@ -127,7 +129,7 @@ export class ActionExecutor {
         const actionInfo = await getActionInfoInternal(
           this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
-          preconfiguredActions,
+          inMemoryConnectors,
           actionId,
           namespace.namespace
         );
@@ -184,7 +186,7 @@ export class ActionExecutor {
           relatedSavedObjects,
           name,
           actionExecutionId,
-          isPreconfigured: this.actionInfo.isPreconfigured,
+          isInMemory: this.actionInfo.isInMemory,
           ...(source ? { source } : {}),
         });
 
@@ -225,6 +227,7 @@ export class ActionExecutor {
             taskInfo,
             configurationUtilities,
             logger,
+            source,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
@@ -250,6 +253,39 @@ export class ActionExecutor {
         };
 
         event.event = event.event || {};
+
+        // start gen_ai extension
+        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
+        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
+          const data = result.data as unknown as {
+            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+          };
+          event.kibana = event.kibana || {};
+          event.kibana.action = event.kibana.action || {};
+          event.kibana = {
+            ...event.kibana,
+            action: {
+              ...event.kibana.action,
+              execution: {
+                ...event.kibana.action.execution,
+                gen_ai: {
+                  usage: {
+                    total_tokens: data.usage?.total_tokens,
+                    prompt_tokens: data.usage?.prompt_tokens,
+                    completion_tokens: data.usage?.completion_tokens,
+                  },
+                },
+              },
+            },
+          };
+        }
+        // end gen_ai extension
+
+        const currentUser = security?.authc.getCurrentUser(request);
+
+        event.user = event.user || {};
+        event.user.name = currentUser?.username;
+        event.user.id = currentUser?.profile_uid;
 
         if (result.status === 'ok') {
           span?.setOutcome('success');
@@ -305,7 +341,7 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const { spaces, encryptedSavedObjectsClient, preconfiguredActions, eventLogger } =
+    const { spaces, encryptedSavedObjectsClient, inMemoryConnectors, eventLogger } =
       this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
@@ -314,7 +350,7 @@ export class ActionExecutor {
       this.actionInfo = await getActionInfoInternal(
         this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
-        preconfiguredActions,
+        inMemoryConnectors,
         actionId,
         namespace.namespace
       );
@@ -349,7 +385,7 @@ export class ActionExecutor {
       ],
       relatedSavedObjects,
       actionExecutionId,
-      isPreconfigured: this.actionInfo.isPreconfigured,
+      isInMemory: this.actionInfo.isInMemory,
       ...(source ? { source } : {}),
     });
 
@@ -363,28 +399,29 @@ interface ActionInfo {
   config: unknown;
   secrets: unknown;
   actionId: string;
-  isPreconfigured?: boolean;
+  isInMemory?: boolean;
 }
 
 async function getActionInfoInternal(
   isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  preconfiguredActions: PreConfiguredAction[],
+  inMemoryConnectors: InMemoryConnector[],
   actionId: string,
   namespace: string | undefined
 ): Promise<ActionInfo> {
-  // check to see if it's a pre-configured action first
-  const pcAction = preconfiguredActions.find(
-    (preconfiguredAction) => preconfiguredAction.id === actionId
+  // check to see if it's in memory action first
+  const inMemoryAction = inMemoryConnectors.find(
+    (inMemoryConnector) => inMemoryConnector.id === actionId
   );
-  if (pcAction) {
+
+  if (inMemoryAction) {
     return {
-      actionTypeId: pcAction.actionTypeId,
-      name: pcAction.name,
-      config: pcAction.config,
-      secrets: pcAction.secrets,
+      actionTypeId: inMemoryAction.actionTypeId,
+      name: inMemoryAction.name,
+      config: inMemoryAction.config,
+      secrets: inMemoryAction.secrets,
       actionId,
-      isPreconfigured: true,
+      isInMemory: true,
     };
   }
 

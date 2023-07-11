@@ -147,6 +147,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -158,6 +159,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -169,6 +171,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 
@@ -246,6 +249,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       transactionName: 'tx-name-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -258,6 +262,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       transactionName: 'tx-name-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -270,6 +275,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       transactionName: 'tx-name-bar',
     });
   });
@@ -348,6 +354,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       errorGroupingKey: 'error-key-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -360,6 +367,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       errorGroupingKey: 'error-key-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
@@ -372,6 +380,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       errorGroupingKey: 'error-key-bar',
     });
   });
@@ -446,6 +455,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -457,6 +467,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -468,6 +479,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 
@@ -545,6 +557,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -556,6 +569,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -567,6 +581,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 });

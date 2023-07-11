@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIcon } from '@elastic/eui';
 import type { VFC } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash';
+import styled from 'styled-components';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
@@ -21,7 +23,14 @@ import {
   DOCUMENT_DESCRIPTION_EXPAND_BUTTON,
   DOCUMENT_DESCRIPTION_TITLE,
   RULE_DESCRIPTION_TITLE,
+  VIEW_RULE_TEXT,
 } from './translations';
+import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
+import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+
+const StyledEuiIcon = styled(EuiIcon)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
+`;
 
 export interface DescriptionProps {
   /**
@@ -39,8 +48,32 @@ export interface DescriptionProps {
 export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
   const [isExpanded, setIsExpanded] = useState(expanded);
 
-  const { dataFormattedForFieldBrowser } = useRightPanelContext();
-  const { isAlert, ruleDescription } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { dataFormattedForFieldBrowser, scopeId, eventId } = useRightPanelContext();
+  const { isAlert, ruleDescription, ruleId, ruleName } = useBasicDataFromDetailsData(
+    dataFormattedForFieldBrowser
+  );
+
+  const viewRule = useMemo(
+    () =>
+      !isEmpty(ruleName) && (
+        <EuiFlexItem grow={false}>
+          <RenderRuleName
+            contextId={scopeId}
+            eventId={eventId}
+            fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+            fieldType={'string'}
+            isAggregatable={false}
+            isDraggable={false}
+            linkValue={ruleId}
+            value={VIEW_RULE_TEXT}
+          >
+            {VIEW_RULE_TEXT}
+            <StyledEuiIcon type="popout" size="m" />
+          </RenderRuleName>
+        </EuiFlexItem>
+      ),
+    [ruleName, ruleId, scopeId, eventId]
+  );
 
   if (!dataFormattedForFieldBrowser) {
     return null;
@@ -55,7 +88,16 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem data-test-subj={DESCRIPTION_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
-          <h5>{isAlert ? RULE_DESCRIPTION_TITLE : DOCUMENT_DESCRIPTION_TITLE}</h5>
+          {isAlert ? (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <h5>{RULE_DESCRIPTION_TITLE}</h5>
+              </EuiFlexItem>
+              {viewRule}
+            </EuiFlexGroup>
+          ) : (
+            <h5>{DOCUMENT_DESCRIPTION_TITLE}</h5>
+          )}
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>

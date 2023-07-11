@@ -32,7 +32,7 @@ export const esqlSearchStrategyProvider = (
     const search = async () => {
       try {
         const { terminateAfter, ...requestParams } = request.params ?? {};
-        const rawResponse = await esClient.asCurrentUser.transport.request(
+        const { headers, body } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
 
@@ -43,12 +43,14 @@ export const esqlSearchStrategyProvider = (
           },
           {
             signal: abortSignal,
+            meta: true,
           }
         );
         return {
-          rawResponse,
+          rawResponse: body,
           isPartial: false,
           isRunning: false,
+          warning: headers?.warning,
         };
       } catch (e) {
         throw getKbnServerError(e);

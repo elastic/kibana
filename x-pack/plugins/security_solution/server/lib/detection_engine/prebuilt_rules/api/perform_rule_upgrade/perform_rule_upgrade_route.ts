@@ -23,6 +23,7 @@ import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
 import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
+import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
@@ -38,14 +39,14 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
         body: buildRouteValidation(PerformRuleUpgradeRequestBody),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution-all'],
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const ctx = await context.resolve(['core', 'alerting']);
+        const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
         const soClient = ctx.core.savedObjects.client;
         const rulesClient = ctx.alerting.getRulesClient();
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
@@ -147,20 +148,32 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
           rulesClient,
           targetRules
         );
-        const combinedErrors = [...fetchErrors, ...installationErrors];
+        const ruleErrors = [...fetchErrors, ...installationErrors];
+
+        const { error: timelineInstallationError } = await performTimelinesInstallation(
+          ctx.securitySolution
+        );
+
+        const allErrors = aggregatePrebuiltRuleErrors(ruleErrors);
+        if (timelineInstallationError) {
+          allErrors.push({
+            message: timelineInstallationError,
+            rules: [],
+          });
+        }
 
         const body: PerformRuleUpgradeResponseBody = {
           summary: {
-            total: updatedRules.length + skippedRules.length + combinedErrors.length,
+            total: updatedRules.length + skippedRules.length + ruleErrors.length,
             skipped: skippedRules.length,
             succeeded: updatedRules.length,
-            failed: combinedErrors.length,
+            failed: ruleErrors.length,
           },
           results: {
             updated: updatedRules.map(({ result }) => internalRuleToAPIResponse(result)),
             skipped: skippedRules,
           },
-          errors: aggregatePrebuiltRuleErrors(combinedErrors),
+          errors: allErrors,
         };
 
         return response.ok({ body });

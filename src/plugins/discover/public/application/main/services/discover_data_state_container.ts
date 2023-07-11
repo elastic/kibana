@@ -13,6 +13,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
@@ -72,6 +73,7 @@ export interface DataMainMsg extends DataMsg {
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
+  warning?: string;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
@@ -204,6 +206,7 @@ export function getDataStateContainer({
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
+      const fetchAllStartTime = window.performance.now();
       await fetchAll(dataSubjects, reset, {
         abortController,
         initialFetchStatus: getInitialFetchStatus(),
@@ -213,6 +216,11 @@ export function getDataStateContainer({
         getAppState,
         savedSearch: getSavedSearch(),
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+      });
+      const fetchAllDuration = window.performance.now() - fetchAllStartTime;
+      reportPerformanceMetricEvent(services.analytics, {
+        eventName: 'discoverFetchAll',
+        duration: fetchAllDuration,
       });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

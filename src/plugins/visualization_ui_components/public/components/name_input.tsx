@@ -32,7 +32,7 @@ export const NameInput = ({
       <DebouncedInput
         fullWidth
         compressed
-        data-test-subj="column-label-edit"
+        data-test-subj="name-input"
         value={value}
         onChange={onChange}
         defaultValue={defaultValue}

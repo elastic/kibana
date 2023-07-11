@@ -88,7 +88,7 @@ export function savedObjectsRoutes(
     })
     .addVersion(
       {
-        version: '2023-05-15',
+        version: '2023-10-31',
         validate: {
           request: {
             query: syncJobObjects,

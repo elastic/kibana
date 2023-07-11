@@ -62,15 +62,22 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
   }
 
   private buildMetricAggregations(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
-    return metricDef.metrics.reduce(
-      (acc, metric) => ({
+    return metricDef.metrics.reduce((acc, metric) => {
+      const filter = metric.filter
+        ? getElastichsearchQueryOrThrow(metric.filter)
+        : { match_all: {} };
+      return {
         ...acc,
         [`_${type}_${metric.name}`]: {
-          [metric.aggregation]: { field: metric.field },
+          filter,
+          aggs: {
+            sum: {
+              [metric.aggregation]: { field: metric.field },
+            },
+          },
         },
-      }),
-      {}
-    );
+      };
+    }, {});
   }
 
   private convertEquationToPainless(bucketsPath: Record<string, string>, equation: string) {
@@ -82,7 +89,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
 
   private buildMetricEquation(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
     const bucketsPath = metricDef.metrics.reduce(
-      (acc, metric) => ({ ...acc, [metric.name]: `_${type}_${metric.name}` }),
+      (acc, metric) => ({ ...acc, [metric.name]: `_${type}_${metric.name}>sum` }),
       {}
     );
     return {
@@ -117,8 +124,8 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {
-              goodEvents: 'slo.numerator',
-              totalEvents: 'slo.denominator',
+              goodEvents: 'slo.numerator>value',
+              totalEvents: 'slo.denominator>value',
             },
             script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
           },

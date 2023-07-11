@@ -33,9 +33,13 @@ import {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  EVENT_ACTION,
+  EVENT_KIND,
+  TAGS,
 } from '@kbn/rule-data-utils';
 
 export const alertFieldMap = {
@@ -173,10 +177,30 @@ export const alertFieldMap = {
     array: false,
     required: false,
   },
+  [ALERT_WORKFLOW_TAGS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [EVENT_ACTION]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [EVENT_KIND]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   [SPACE_IDS]: {
     type: 'keyword',
     array: true,
     required: true,
+  },
+  [TAGS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
   },
   [TIMESTAMP]: {
     type: 'date',

@@ -48,9 +48,10 @@ import {
   RenameVariableContext,
   BooleanExpressionContext,
   RegexBooleanExpressionContext,
+  WhereBooleanExpressionContext,
   LimitCommandContext,
   ValueExpressionContext,
-  ProjectCommandContext,
+  KeepCommandContext,
   DropCommandContext,
   RenameCommandContext,
   DissectCommandContext,
@@ -122,9 +123,11 @@ export class AutocompleteListener implements ESQLParserListener {
   exitSourceCommand(ctx: SourceCommandContext) {
     if (ctx.exception) {
       this.suggestions = sourceCommandsDefinitions;
-    } else if (!this.hasSuggestions) {
-      this.suggestions = this.getEndCommandSuggestions();
     }
+  }
+
+  enterSourceIdentifier(ctx: SourceIdentifierContext) {
+    this.suggestions = [DynamicAutocompleteItem.SourceIdentifier];
   }
 
   exitSourceIdentifier(ctx: SourceIdentifierContext) {
@@ -170,7 +173,7 @@ export class AutocompleteListener implements ESQLParserListener {
     }
   }
 
-  exitProjectCommand?(ctx: ProjectCommandContext) {
+  exitKeepCommand?(ctx: KeepCommandContext) {
     const qn = ctx.qualifiedNames();
     if (qn && qn.text) {
       if (qn.text.slice(-1) !== ',') {
@@ -230,6 +233,15 @@ export class AutocompleteListener implements ESQLParserListener {
   }
 
   exitQualifiedName(ctx: QualifiedNameContext) {
+    const isInEval = this.parentContext === ESQLParser.EVAL;
+    const isInStats = this.parentContext === ESQLParser.STATS;
+    if (this.parentContext && (isInStats || isInEval)) {
+      this.suggestions = [
+        ...this.getEndCommandSuggestions(),
+        ...(isInEval ? mathOperatorsCommandsDefinitions : []),
+      ];
+    }
+
     if (
       ctx
         .identifier()
@@ -294,12 +306,12 @@ export class AutocompleteListener implements ESQLParserListener {
       const ve = ctx.valueExpression();
       if (!ve) {
         if (this.parentContext === ESQLParser.STATS) {
-          this.suggestions = [...aggregationFunctionsDefinitions, ...this.fields];
+          this.suggestions = [...aggregationFunctionsDefinitions];
           return;
         }
 
         if (this.parentContext === ESQLParser.EVAL) {
-          this.suggestions = [...mathCommandDefinition, ...this.fields];
+          this.suggestions = [...mathCommandDefinition];
           return;
         }
       }
@@ -330,15 +342,21 @@ export class AutocompleteListener implements ESQLParserListener {
         }
       } else {
         if (ctx.childCount === 1) {
-          this.suggestions = [
-            ...this.getEndCommandSuggestions(),
-            ...(isInEval ? mathOperatorsCommandsDefinitions : []),
-          ];
+          if (ctx.text && ctx.text.indexOf('(') === -1) {
+            this.suggestions = [
+              ...(isInEval ? mathCommandDefinition : []),
+              ...(isInStats ? aggregationFunctionsDefinitions : []),
+            ];
+          }
           return;
         }
       }
       this.suggestions = this.fields;
     }
+  }
+
+  enterWhereBooleanExpression(ctx: WhereBooleanExpressionContext) {
+    this.suggestions = [];
   }
 
   enterWhereCommand(ctx: WhereCommandContext) {
@@ -357,7 +375,9 @@ export class AutocompleteListener implements ESQLParserListener {
       this.suggestions = this.fields;
       return;
     } else {
-      const innerBooleanExpressions = booleanExpression.getRuleContexts(BooleanExpressionContext);
+      const innerBooleanExpressions = booleanExpression.getRuleContexts(
+        WhereBooleanExpressionContext
+      );
       const regexBooleanExpression = booleanExpression.getRuleContexts(
         RegexBooleanExpressionContext
       );

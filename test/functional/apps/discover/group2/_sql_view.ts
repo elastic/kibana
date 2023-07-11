@@ -77,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
+        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
-        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         // here Lens suggests a heatmap so it is rendered
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-        expect(await testSubjects.exists('heatmapChart')).to.be(true);
+        expect(await testSubjects.exists('xyVisChart')).to.be(true);
         const cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
       });

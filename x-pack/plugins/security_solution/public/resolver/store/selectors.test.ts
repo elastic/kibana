@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ResolverState } from '../types';
+import type { AnalyzerState } from '../types';
+import type { Reducer, AnyAction } from 'redux';
 import { createStore } from 'redux';
-import type { ResolverAction } from './actions';
-import { resolverReducer } from './reducer';
+import { analyzerReducer } from './reducer';
 import * as selectors from './selectors';
 import {
   mockTreeWith2AncestorsAndNoChildren,
@@ -17,15 +17,26 @@ import {
 import type { ResolverNode } from '../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 import { endpointSourceSchema } from '../mocks/tree_schema';
+import { serverReturnedResolverData } from './data/action';
+import { userSetPositionOfCamera, userSetRasterSize } from './camera/action';
+import { EMPTY_RESOLVER } from './helpers';
 
 describe('resolver selectors', () => {
-  const actions: ResolverAction[] = [];
-
+  const actions: AnyAction[] = [];
+  const id = 'test-id';
   /**
    * Get state, given an ordered collection of actions.
    */
-  const state: () => ResolverState = () => {
-    const store = createStore(resolverReducer);
+  const testReducer: Reducer<AnalyzerState, AnyAction> = (
+    analyzerState = {
+      analyzerById: {
+        [id]: EMPTY_RESOLVER,
+      },
+    },
+    action
+  ): AnalyzerState => analyzerReducer(analyzerState, action);
+  const state: () => AnalyzerState = () => {
+    const store = createStore(testReducer, undefined);
     for (const action of actions) {
       store.dispatch(action);
     }
@@ -38,9 +49,9 @@ describe('resolver selectors', () => {
       const secondAncestorID = 'a';
       beforeEach(() => {
         const { schema, dataSource } = endpointSourceSchema();
-        actions.push({
-          type: 'serverReturnedResolverData',
-          payload: {
+        actions.push(
+          serverReturnedResolverData({
+            id,
             result: mockTreeWith2AncestorsAndNoChildren({
               originID,
               firstAncestorID,
@@ -50,26 +61,27 @@ describe('resolver selectors', () => {
             schema,
             // this value doesn't matter
             parameters: mockTreeFetcherParameters(),
-          },
-        });
+          })
+        );
       });
       describe('when all nodes are in view', () => {
         beforeEach(() => {
           const size = 1000000;
-          actions.push({
-            // set the size of the camera
-            type: 'userSetRasterSize',
-            payload: [size, size],
-          });
+          // set the size of the camera
+          actions.push(userSetRasterSize({ id, dimensions: [size, size] }));
         });
         it('should return no flowto for the second ancestor', () => {
-          expect(selectors.ariaFlowtoNodeID(state())(0)(secondAncestorID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(secondAncestorID)).toBe(
+            null
+          );
         });
         it('should return no flowto for the first ancestor', () => {
-          expect(selectors.ariaFlowtoNodeID(state())(0)(firstAncestorID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(firstAncestorID)).toBe(
+            null
+          );
         });
         it('should return no flowto for the origin', () => {
-          expect(selectors.ariaFlowtoNodeID(state())(0)(originID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(originID)).toBe(null);
         });
       });
     });
@@ -84,51 +96,57 @@ describe('resolver selectors', () => {
           secondChildID,
         });
         const { schema, dataSource } = endpointSourceSchema();
-        actions.push({
-          type: 'serverReturnedResolverData',
-          payload: {
+        actions.push(
+          serverReturnedResolverData({
+            id,
             result: resolverTree,
             dataSource,
             schema,
             // this value doesn't matter
             parameters: mockTreeFetcherParameters(),
-          },
-        });
+          })
+        );
       });
       describe('when all nodes are in view', () => {
         beforeEach(() => {
           const rasterSize = 1000000;
-          actions.push({
-            // set the size of the camera
-            type: 'userSetRasterSize',
-            payload: [rasterSize, rasterSize],
-          });
+          // set the size of the camera
+          actions.push(
+            userSetRasterSize({
+              id,
+              dimensions: [rasterSize, rasterSize],
+            })
+          );
         });
         it('should return no flowto for the origin', () => {
-          expect(selectors.ariaFlowtoNodeID(state())(0)(originID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(originID)).toBe(null);
         });
         it('should return the second child as the flowto for the first child', () => {
-          expect(selectors.ariaFlowtoNodeID(state())(0)(firstChildID)).toBe(secondChildID);
+          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(firstChildID)).toBe(
+            secondChildID
+          );
         });
         it('should return no flowto for second child', () => {
-          expect(selectors.ariaFlowtoNodeID(state())(0)(secondChildID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(secondChildID)).toBe(null);
         });
       });
       describe('when only the origin and first child are in view', () => {
         beforeEach(() => {
           // set the raster size
           const rasterSize = 1000000;
-          actions.push({
-            // set the size of the camera
-            type: 'userSetRasterSize',
-            payload: [rasterSize, rasterSize],
-          });
+          // set the size of the camera
+          actions.push(
+            userSetRasterSize({
+              id,
+              dimensions: [rasterSize, rasterSize],
+            })
+          );
 
           // get the layout
-          const layout = selectors.layout(state());
+          const layout = selectors.layout(state().analyzerById[id]);
 
           // find the position of the second child
-          const secondChild = selectors.graphNodeForID(state())(secondChildID);
+          const secondChild = selectors.graphNodeForID(state().analyzerById[id])(secondChildID);
           const positionOfSecondChild = layout.processNodePositions.get(
             secondChild as ResolverNode
           )!;
@@ -137,39 +155,41 @@ describe('resolver selectors', () => {
           const leftSideOfSecondChildAABB = positionOfSecondChild[0] - 720 / 2;
 
           // adjust the camera so that it doesn't quite see the second child
-          actions.push({
-            // set the position of the camera so that the left edge of the second child is at the right edge
-            // of the viewable area
-            type: 'userSetPositionOfCamera',
-            payload: [rasterSize / -2 + leftSideOfSecondChildAABB, 0],
-          });
+          actions.push(
+            userSetPositionOfCamera({
+              // set the position of the camera so that the left edge of the second child is at the right edge
+              // of the viewable area
+              id,
+              cameraView: [rasterSize / -2 + leftSideOfSecondChildAABB, 0],
+            })
+          );
         });
         it('the origin should be in view', () => {
-          const origin = selectors.graphNodeForID(state())(originID);
+          const origin = selectors.graphNodeForID(state().analyzerById[id])(originID);
           expect(
             selectors
-              .visibleNodesAndEdgeLines(state())(0)
+              .visibleNodesAndEdgeLines(state().analyzerById[id])(0)
               .processNodePositions.has(origin as ResolverNode)
           ).toBe(true);
         });
         it('the first child should be in view', () => {
-          const firstChild = selectors.graphNodeForID(state())(firstChildID);
+          const firstChild = selectors.graphNodeForID(state().analyzerById[id])(firstChildID);
           expect(
             selectors
-              .visibleNodesAndEdgeLines(state())(0)
+              .visibleNodesAndEdgeLines(state().analyzerById[id])(0)
               .processNodePositions.has(firstChild as ResolverNode)
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
-          const secondChild = selectors.graphNodeForID(state())(secondChildID);
+          const secondChild = selectors.graphNodeForID(state().analyzerById[id])(secondChildID);
           expect(
             selectors
-              .visibleNodesAndEdgeLines(state())(0)
+              .visibleNodesAndEdgeLines(state().analyzerById[id])(0)
               .processNodePositions.has(secondChild as ResolverNode)
           ).toBe(false);
         });
         it('should return nothing as the flowto for the first child', () => {
-          expect(selectors.ariaFlowtoNodeID(state())(0)(firstChildID)).toBe(null);
+          expect(selectors.ariaFlowtoNodeID(state().analyzerById[id])(0)(firstChildID)).toBe(null);
         });
       });
     });

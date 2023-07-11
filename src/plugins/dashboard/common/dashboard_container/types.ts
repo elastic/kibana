@@ -17,7 +17,8 @@ import { RefreshInterval } from '@kbn/data-plugin/common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import { DashboardOptions, GridData } from '../types';
+import { DashboardOptions } from '../types';
+import { GridData } from '../content_management';
 
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;

@@ -12,13 +12,16 @@ import type { EndpointActionListRequestQuery } from '../../../../common/endpoint
 
 export const fetchEndpointActionList = async (
   kbn: KbnClient,
-  options: EndpointActionListRequestQuery = { withAutomatedActions: true }
+  options: EndpointActionListRequestQuery = {}
 ): Promise<ActionListApiResponse> => {
   try {
     return (
       await kbn.request<ActionListApiResponse>({
         method: 'GET',
         path: BASE_ENDPOINT_ACTION_ROUTE,
+        headers: {
+          'Elastic-Api-Version': '2023-10-31',
+        },
         query: options,
       })
     ).data;

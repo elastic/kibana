@@ -9,6 +9,7 @@
     "browser": true,
     "configPath": ["xpack", "infra"],
     "requiredPlugins": [
+      "aiops",
       "alerting",
       "cases",
       "charts",
@@ -17,7 +18,9 @@
       "discover",
       "embeddable",
       "features",
+      "fieldFormats",
       "lens",
+      "logsShared",
       "observability",
       "observabilityShared",
       "ruleRegistry",

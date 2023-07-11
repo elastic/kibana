@@ -30,6 +30,7 @@ processingCommand
     : evalCommand
     | limitCommand
     | projectCommand
+    | keepCommand
     | renameCommand
     | dropCommand
     | dissectCommand
@@ -38,6 +39,15 @@ processingCommand
     | statsCommand
     | whereCommand
     | mvExpandCommand
+    | enrichCommand
+    ;
+
+enrichCommand
+    : ENRICH policyName=enrichIdentifier (ON matchField=enrichFieldIdentifier)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
+    ;
+
+enrichWithClause
+    : (newName=enrichFieldIdentifier ASSIGN)? enrichField=enrichFieldIdentifier
     ;
 
 mvExpandCommand
@@ -49,13 +59,13 @@ whereCommand
     ;
 
 whereBooleanExpression
-    : NOT booleanExpression
+    : NOT whereBooleanExpression
     | valueExpression
     | regexBooleanExpression
-    | left=booleanExpression operator=AND right=booleanExpression
-    | left=booleanExpression operator=OR right=booleanExpression
+    | left=whereBooleanExpression operator=AND right=whereBooleanExpression
+    | left=whereBooleanExpression operator=OR right=whereBooleanExpression
     | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP
-    | WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
+    | (NOT)? WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
     ;
 
 booleanExpression
@@ -116,6 +126,11 @@ field
     | userVariable ASSIGN booleanExpression
     ;
 
+enrichFieldIdentifier
+    : ENR_UNQUOTED_IDENTIFIER
+    | ENR_QUOTED_IDENTIFIER
+    ;
+
 userVariable
    :  identifier
    ;
@@ -137,9 +152,15 @@ sourceIdentifier
     | SRC_QUOTED_IDENTIFIER
     ;
 
+enrichIdentifier
+    : ENR_UNQUOTED_IDENTIFIER
+    | ENR_QUOTED_IDENTIFIER
+    ;
+
 functionExpressionArgument
    : qualifiedName
    | string
+   | number
    ;
 
 mathFunctionExpressionArgument
@@ -203,12 +224,17 @@ projectCommand
     :  PROJECT qualifiedNames
     ;
 
+keepCommand
+    :  KEEP qualifiedNames
+    ;
+
+
 dropCommand
     :  DROP qualifiedNames
     ;
 
 renameVariable
-   :  identifier
+   :  identifier (DOT identifier)*
    ;
 
 renameCommand

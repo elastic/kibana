@@ -28,13 +28,15 @@
       "ruleRegistry",
       "files",
       "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "uiActions",
     ],
     "optionalPlugins": [
       "home",
       "taskManager",
       "usageCollection",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
     "requiredBundles": [],
     "extraPublicDirs": [
