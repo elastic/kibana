@@ -40,7 +40,11 @@ export const PageTitle: React.FC = ({ children }) => (
   </EuiTitle>
 );
 
-export const PageTitleText = ({ title }: { title: React.ReactNode }) => <h2>{title}</h2>;
+export const PageTitleText = ({ title }: { title: React.ReactNode }) => (
+  <EuiText grow={false} size="s">
+    <h1>{title}</h1>
+  </EuiText>
+);
 
 export const getExpandColumn = <T extends unknown>({
   onClick,

@@ -10,7 +10,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
 import { clone, CloneArguments } from './methods/clone';
-import { create, CreateOptions } from './methods/create';
+import { createRule, CreateRuleParams } from '../application/rule/create';
 import { get, GetParams } from './methods/get';
 import { resolve, ResolveParams } from './methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
@@ -53,6 +53,7 @@ import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
+import { getTags, GetTagsParams } from './methods/get_tags';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -106,8 +107,8 @@ export class RulesClient {
     aggregate<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
-  public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>
-    create<Params>(this.context, params);
+  public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
+    createRule<Params>(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
     find<Params>(this.context, params);
@@ -164,6 +165,16 @@ export class RulesClient {
   public getSpaceId(): string | undefined {
     return this.context.spaceId;
   }
+
+  public getAuthorization() {
+    return this.context.authorization;
+  }
+
+  public getAuditLogger() {
+    return this.context.auditLogger;
+  }
+
+  public getTags = (params: GetTagsParams) => getTags(this.context, params);
 
   public getAlertFromRaw = (params: GetAlertFromRawParams) =>
     getAlertFromRaw(

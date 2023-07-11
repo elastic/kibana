@@ -8,7 +8,7 @@
 
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import supertest from 'supertest';
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 
 import { Root } from '@kbn/core-root-server-internal';
 import {
@@ -17,6 +17,8 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { ServiceStatus } from '@kbn/core-status-common';
+import { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
@@ -71,15 +73,17 @@ function createFakeElasticsearchServer() {
 describe('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
-  let kibanaHttpServer: http.Server;
+  let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
 
   beforeAll(async () => {
     kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
     esServer = createFakeElasticsearchServer();
 
-    const kibanaPreboot = await kibanaServer.preboot();
-    kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
-    await kibanaServer.setup();
+    await kibanaServer.preboot();
+    const { elasticsearch } = await kibanaServer.setup();
+    esStatus$ = new ReplaySubject(1);
+    elasticsearch.status$.subscribe(esStatus$);
+
     // give kibanaServer's status Observables enough time to bootstrap
     // and emit a status after the initial "unavailable: Waiting for Elasticsearch"
     // see https://github.com/elastic/kibana/issues/129754
@@ -94,9 +98,9 @@ describe('fake elasticsearch', () => {
   });
 
   test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
-    const resp = await supertest(kibanaHttpServer).get('/api/status').expect(503);
-    expect(resp.body.status.overall.level).toBe('critical');
-    expect(resp.body.status.core.elasticsearch.summary).toBe(
+    const esStatus = await firstValueFrom(esStatus$);
+    expect(esStatus.level.toString()).toBe('critical');
+    expect(esStatus.summary).toBe(
       'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
   });

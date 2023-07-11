@@ -74,6 +74,7 @@ export const elasticUser = {
 };
 
 export const tags: string[] = ['coke', 'pepsi'];
+export const categories: string[] = ['snickers', 'twix'];
 
 export const basicComment: CommentUI = {
   comment: 'Solve this fast!',

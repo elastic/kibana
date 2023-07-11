@@ -20,16 +20,11 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  RouteComponentProps,
-  RouteProps,
-  Router,
-  Switch,
-} from 'react-router-dom';
+import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -62,7 +57,7 @@ export const breadcrumbsApp = {
 function App() {
   return (
     <>
-      <Switch>
+      <Routes>
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
@@ -73,7 +68,7 @@ function App() {
             <Route key={path} path={path} exact={exact} component={Wrapper} />
           );
         })}
-      </Switch>
+      </Routes>
     </>
   );
 }

@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData).to.contain('"values":[0.3,1,3,4.2,4.8]');
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/159615
-    describe.skip('works in visualizations', () => {
+    describe('works in visualizations', () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
@@ -63,7 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(data[0]).to.have.property('length', 7);
         // Percentile values are not deterministic, so we can't check for the exact values here,
         // but just check they are all within the given range
-        // see https://github.com/elastic/elasticsearch/issues/49225
         expect(data[0].every((p: string) => Number(p) >= 0.3 && Number(p) <= 5)).to.be(true);
       });
 
@@ -78,13 +76,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with median aggregation', async () => {
-        // Percentile values (which are used by median behind the scenes) are not deterministic,
-        // so we can't check for the exact values here, but just check they are all within the given range
-        // see https://github.com/elastic/elasticsearch/issues/49225
         const data = await renderTableForAggregation('Median');
         const value = Number(data[0][0]);
-        expect(value).to.be.above(3.0);
-        expect(value).to.be.below(3.3);
+        // Percentile values are not deterministic, so we can't check for the exact values here,
+        // but just check they are all within the given range
+        expect(value).to.be.above(2.9);
+        expect(value).to.be.below(3.1);
       });
 
       it('with sum aggregation', async () => {

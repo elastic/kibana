@@ -22,26 +22,22 @@ jest.mock('../state', () => ({
 describe('useMonitorName', () => {
   const testMonitors = [
     {
-      attributes: {
-        name: 'Test monitor name',
-        config_id: '12345',
-        locations: [
-          {
-            id: 'us_central_qa',
-          },
-        ],
-      },
+      name: 'Test monitor name',
+      config_id: '12345',
+      locations: [
+        {
+          id: 'us_central_qa',
+        },
+      ],
     },
     {
-      attributes: {
-        name: 'Test monitor name 2',
-        config_id: '12346',
-        locations: [
-          {
-            id: 'us_central_qa',
-          },
-        ],
-      },
+      name: 'Test monitor name 2',
+      config_id: '12346',
+      locations: [
+        {
+          id: 'us_central_qa',
+        },
+      ],
     },
   ];
 

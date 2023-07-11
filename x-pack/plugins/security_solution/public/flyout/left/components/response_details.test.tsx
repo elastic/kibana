@@ -8,8 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import type { LeftPanelContext } from '../context';
-import { LeftFlyoutContext } from '../context';
+import { LeftPanelContext } from '../context';
 import { rawEventData, TestProviders } from '../../../common/mock';
 import { RESPONSE_DETAILS_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 import { ResponseDetails } from './response_details';
@@ -56,12 +55,12 @@ const defaultContextValue = {
   dataAsNestedObject: {
     _id: 'test',
   },
-  data: rawEventData,
+  searchHit: rawEventData,
 } as unknown as LeftPanelContext;
 
 const contextWithResponseActions = {
   ...defaultContextValue,
-  data: {
+  searchHit: {
     ...rawEventData,
     fields: {
       ...rawEventData.fields,
@@ -80,9 +79,9 @@ const contextWithResponseActions = {
 const renderSUT = (contextValue: LeftPanelContext) =>
   render(
     <TestProviders>
-      <LeftFlyoutContext.Provider value={contextValue}>
+      <LeftPanelContext.Provider value={contextValue}>
         <ResponseDetails />
-      </LeftFlyoutContext.Provider>
+      </LeftPanelContext.Provider>
     </TestProviders>
   );
 

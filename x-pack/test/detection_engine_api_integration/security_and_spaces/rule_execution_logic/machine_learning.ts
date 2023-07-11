@@ -14,6 +14,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
@@ -118,6 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           'event.kind': 'signal',
           [ALERT_ANCESTORS]: expect.any(Array),
           [ALERT_WORKFLOW_STATUS]: 'open',
+          [ALERT_WORKFLOW_TAGS]: [],
           [ALERT_STATUS]: 'active',
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',

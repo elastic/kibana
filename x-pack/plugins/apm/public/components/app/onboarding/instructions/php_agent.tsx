@@ -15,11 +15,19 @@ import {
   AgentInstructions,
 } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
+import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createPhpAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    apiKeyDetails,
+    checkAgentStatus,
+    agentStatus,
+    agentStatusLoading,
+  } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.onboarding.php.download.title', {
@@ -119,5 +127,10 @@ export const createPhpAgentInstructions = (
         </>
       ),
     },
+    agentStatusCheckInstruction({
+      checkAgentStatus,
+      agentStatus,
+      agentStatusLoading,
+    }),
   ];
 };

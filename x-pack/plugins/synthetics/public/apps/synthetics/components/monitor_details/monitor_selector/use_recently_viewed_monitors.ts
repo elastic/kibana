@@ -77,14 +77,14 @@ export const useRecentlyViewedMonitors = () => {
 
         // Reorder fetched monitors as per the persisted order
         const fetchedMonitorsInPersistedOrder = [...fetchedResult?.monitors].sort(
-          (a, b) => persistedOrderHash[a.attributes.id] - persistedOrderHash[b.attributes.id]
+          (a, b) => persistedOrderHash[a.id] - persistedOrderHash[b.id]
         );
         fetchedMonitorsRef.current = fetchedMonitorsInPersistedOrder.map((mon) => {
           return {
             key: mon.id,
-            monitorQueryId: mon.attributes.id,
-            label: mon.attributes.name,
-            locationIds: (mon.attributes.locations ?? []).map(({ id }) => id),
+            monitorQueryId: mon.id,
+            label: mon.name,
+            locationIds: (mon.locations ?? []).map(({ id }) => id),
             isGroupLabel: false,
           };
         });

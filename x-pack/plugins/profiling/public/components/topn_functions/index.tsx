@@ -46,19 +46,28 @@ interface Row {
 }
 
 function TotalSamplesStat({
-  totalSamples,
-  newSamples,
+  baselineTotalSamples,
+  baselineScaleFactor,
+  comparisonTotalSamples,
+  comparisonScaleFactor,
 }: {
-  totalSamples: number;
-  newSamples: number | undefined;
+  baselineTotalSamples: number;
+  baselineScaleFactor?: number;
+  comparisonTotalSamples?: number;
+  comparisonScaleFactor?: number;
 }) {
-  const value = totalSamples.toLocaleString();
+  const scaledBaselineTotalSamples = scaleValue({
+    value: baselineTotalSamples,
+    scaleFactor: baselineScaleFactor,
+  });
+
+  const value = scaledBaselineTotalSamples.toLocaleString();
 
   const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
     defaultMessage: ' Total sample estimate: ',
   });
 
-  if (newSamples === undefined || newSamples === 0) {
+  if (comparisonTotalSamples === undefined || comparisonTotalSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
@@ -67,8 +76,13 @@ function TotalSamplesStat({
     );
   }
 
-  const diffSamples = totalSamples - newSamples;
-  const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
+  const scaledComparisonTotalSamples = scaleValue({
+    value: comparisonTotalSamples,
+    scaleFactor: comparisonScaleFactor,
+  });
+
+  const diffSamples = scaledBaselineTotalSamples - scaledComparisonTotalSamples;
+  const percentDelta = (diffSamples / (scaledBaselineTotalSamples - diffSamples)) * 100;
 
   return (
     <EuiStat
@@ -87,12 +101,14 @@ function SampleStat({
   samples,
   diffSamples,
   totalSamples,
+  isSampled,
 }: {
   samples: number;
   diffSamples?: number;
   totalSamples: number;
+  isSampled: boolean;
 }) {
-  const samplesLabel = `${samples.toLocaleString()}`;
+  const samplesLabel = `${isSampled ? '~ ' : ''}${samples.toLocaleString()}`;
 
   if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;
@@ -114,7 +130,7 @@ function SampleStat({
   );
 }
 
-function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number }) {
+function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number; isSampled?: boolean }) {
   const cpuLabel = `${cpu.toFixed(2)}%`;
 
   if (diffCPU === undefined || diffCPU === 0) {
@@ -142,6 +158,13 @@ interface Props {
   comparisonTopNFunctions?: TopNFunctions;
   totalSeconds: number;
   isDifferentialView: boolean;
+  baselineScaleFactor?: number;
+  comparisonScaleFactor?: number;
+  onFrameClick?: (functionName: string) => void;
+}
+
+function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
+  return value * scaleFactor;
 }
 
 export function TopNFunctionsTable({
@@ -152,9 +175,12 @@ export function TopNFunctionsTable({
   comparisonTopNFunctions,
   totalSeconds,
   isDifferentialView,
+  baselineScaleFactor,
+  comparisonScaleFactor,
+  onFrameClick,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
-
+  const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -175,6 +201,11 @@ export function TopNFunctionsTable({
     return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
       const comparisonRow = comparisonDataById?.[topN.Id];
 
+      const topNCountExclusiveScaled = scaleValue({
+        value: topN.CountExclusive,
+        scaleFactor: baselineScaleFactor,
+      });
+
       const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
       const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
       const totalSamples = topN.CountExclusive;
@@ -189,31 +220,43 @@ export function TopNFunctionsTable({
             })
           : undefined;
 
-      const diff =
-        comparisonTopNFunctions && comparisonRow
-          ? {
-              rank: topN.Rank - comparisonRow.Rank,
-              samples: topN.CountExclusive - comparisonRow.CountExclusive,
-              exclusiveCPU:
-                exclusiveCPU -
-                (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-              inclusiveCPU:
-                inclusiveCPU -
-                (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
-            }
-          : undefined;
+      function calculateDiff() {
+        if (comparisonTopNFunctions && comparisonRow) {
+          const comparisonCountExclusiveScaled = scaleValue({
+            value: comparisonRow.CountExclusive,
+            scaleFactor: comparisonScaleFactor,
+          });
+
+          return {
+            rank: topN.Rank - comparisonRow.Rank,
+            samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
+            exclusiveCPU:
+              exclusiveCPU -
+              (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+            inclusiveCPU:
+              inclusiveCPU -
+              (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+          };
+        }
+      }
 
       return {
         rank: topN.Rank,
         frame: topN.Frame,
-        samples: topN.CountExclusive,
+        samples: topNCountExclusiveScaled,
         exclusiveCPU,
         inclusiveCPU,
         impactEstimates,
-        diff,
+        diff: calculateDiff(),
       };
     });
-  }, [topNFunctions, comparisonTopNFunctions, totalSeconds]);
+  }, [
+    topNFunctions,
+    comparisonTopNFunctions,
+    totalSeconds,
+    comparisonScaleFactor,
+    baselineScaleFactor,
+  ]);
 
   const theme = useEuiTheme();
 
@@ -233,7 +276,9 @@ export function TopNFunctionsTable({
       name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
         defaultMessage: 'Function',
       }),
-      render: (_, { frame }) => <StackFrameSummary frame={frame} />,
+      render: (_, { frame }) => {
+        return <StackFrameSummary frame={frame} onFrameClick={onFrameClick} />;
+      },
       width: '50%',
     },
     {
@@ -243,7 +288,12 @@ export function TopNFunctionsTable({
       }),
       render: (_, { samples, diff }) => {
         return (
-          <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />
+          <SampleStat
+            samples={samples}
+            diffSamples={diff?.samples}
+            totalSamples={totalCount}
+            isSampled={isEstimatedA}
+          />
         );
       },
       align: 'right',
@@ -369,12 +419,13 @@ export function TopNFunctionsTable({
     },
     [sortDirection]
   ).slice(0, 100);
-
   return (
     <>
       <TotalSamplesStat
-        totalSamples={totalCount}
-        newSamples={comparisonTopNFunctions?.TotalCount}
+        baselineTotalSamples={totalCount}
+        baselineScaleFactor={baselineScaleFactor}
+        comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
+        comparisonScaleFactor={comparisonScaleFactor}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
@@ -414,6 +465,7 @@ export function TopNFunctionsTable({
           }}
           totalSeconds={totalSeconds ?? 0}
           totalSamples={selectedRow.samples}
+          samplingRate={topNFunctions?.SamplingRate ?? 1.0}
         />
       )}
     </>

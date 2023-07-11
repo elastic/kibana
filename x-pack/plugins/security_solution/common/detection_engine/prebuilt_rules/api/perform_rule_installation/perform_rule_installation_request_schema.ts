@@ -14,12 +14,16 @@ export const RuleVersionSpecifier = t.exact(
 );
 export type RuleVersionSpecifier = t.TypeOf<typeof RuleVersionSpecifier>;
 
+export type InstallSpecificRulesRequest = t.TypeOf<typeof InstallSpecificRulesRequest>;
+
 export const InstallSpecificRulesRequest = t.exact(
   t.type({
     mode: t.literal(`SPECIFIC_RULES`),
     rules: t.array(RuleVersionSpecifier),
   })
 );
+
+export type InstallAllRulesRequest = t.TypeOf<typeof InstallAllRulesRequest>;
 
 export const InstallAllRulesRequest = t.exact(
   t.type({

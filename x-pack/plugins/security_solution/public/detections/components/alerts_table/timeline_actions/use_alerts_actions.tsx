@@ -19,7 +19,6 @@ interface Props {
   closePopover: () => void;
   eventId: string;
   scopeId: string;
-  indexName: string;
   refetch?: () => void;
 }
 
@@ -28,7 +27,6 @@ export const useAlertsActions = ({
   closePopover,
   eventId,
   scopeId,
-  indexName,
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
@@ -63,7 +61,6 @@ export const useAlertsActions = ({
   const actionItems = useBulkActionItems({
     eventIds: [eventId],
     currentStatus: alertStatus as AlertWorkflowStatus,
-    indexName,
     setEventsLoading: localSetEventsLoading,
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,

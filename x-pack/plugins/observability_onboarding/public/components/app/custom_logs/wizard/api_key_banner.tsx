@@ -94,7 +94,11 @@ export function ApiKeyBanner({
                 iconType="copyClipboard"
                 onClick={copy}
                 color="success"
-                style={{ backgroundColor: 'transparent' }}
+                css={{
+                  '> svg.euiIcon': {
+                    borderRadius: '0 !important',
+                  },
+                }}
                 aria-label={i18n.translate(
                   'xpack.observability_onboarding.apiKeyBanner.field.copyButton',
                   {

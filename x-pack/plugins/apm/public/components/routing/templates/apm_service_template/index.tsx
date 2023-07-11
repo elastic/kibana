@@ -217,7 +217,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   );
 
   const router = useApmRouter();
-
   const isInfraTabAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.InfrastructureTabAvailable
   );
@@ -402,5 +401,6 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       prepend,
       append,
       isSelected: key === selectedTab,
+      'data-test-subj': `${key}Tab`,
     }));
 }

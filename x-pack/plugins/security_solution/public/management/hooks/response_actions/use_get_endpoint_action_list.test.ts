@@ -51,12 +51,12 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         endDate: 'now',
-        withAutomatedActions: false,
       })
     );
 
     expect(apiMocks.responseProvider.actionList).toHaveBeenCalledWith({
       path: BASE_ENDPOINT_ACTION_ROUTE,
+      version: '2023-10-31',
       query: {
         agentIds: ['123', '456'],
         commands: ['isolate', 'unisolate'],
@@ -66,7 +66,6 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         userIds: ['*elastic*', '*citsale*'],
-        withAutomatedActions: false,
       },
     });
   });
@@ -75,7 +74,7 @@ describe('useGetEndpointActionList hook', () => {
     await renderReactQueryHook(
       () =>
         useGetEndpointActionList(
-          { withAutomatedActions: true },
+          {},
           {
             queryKey: ['1', '2'],
             enabled: false,

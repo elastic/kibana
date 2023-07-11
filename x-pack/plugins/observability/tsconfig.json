@@ -75,9 +75,13 @@
     "@kbn/ui-actions-plugin",
     "@kbn/field-types",
     "@kbn/safer-lodash-set",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/cloud-chat-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/stack-alerts-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-capabilities-common"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

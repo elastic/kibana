@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getObservabilityOnboardingState } from '../custom_logs/get_observability_onboarding_state';
@@ -12,10 +13,20 @@ import { generateYml } from './generate_yml';
 import { getFallbackUrls } from '../custom_logs/get_fallback_urls';
 
 const generateConfig = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
+  endpoint: 'GET /internal/observability_onboarding/elastic_agent/config',
+  params: t.type({
+    query: t.type({ onboardingId: t.string }),
+  }),
   options: { tags: [] },
   async handler(resources): Promise<string> {
-    const { core, plugins, request } = resources;
+    const {
+      params: {
+        query: { onboardingId },
+      },
+      core,
+      plugins,
+      request,
+    } = resources;
     const authApiKey = getAuthenticationAPIKey(request);
 
     const coreStart = await core.start();
@@ -28,7 +39,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
 
     const savedState = await getObservabilityOnboardingState({
       savedObjectsClient,
-      apiKeyId: authApiKey?.apiKeyId ?? '',
+      savedObjectId: onboardingId,
     });
 
     const yaml = generateYml({
@@ -41,6 +52,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
         : '$API_KEY',
       esHost: [elasticsearchUrl],
       logfileId: `custom-logs-${Date.now()}`,
+      serviceName: savedState?.state.serviceName,
     });
 
     return yaml;

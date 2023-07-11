@@ -121,6 +121,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
       });
@@ -133,6 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
       });
@@ -145,6 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(true);
@@ -165,6 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(true);
@@ -188,6 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
 
+        await PageObjects.header.awaitKibanaChrome();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);

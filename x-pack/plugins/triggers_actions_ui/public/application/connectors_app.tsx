@@ -6,8 +6,8 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Router, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -26,6 +26,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -47,6 +48,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -100,14 +102,14 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
-      <Switch>
+      <Routes>
         <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(ActionsConnectorsHome, 'xl')}
         />
 
         <Redirect from={'/'} to="connectors" />
-      </Switch>
+      </Routes>
     </ConnectorProvider>
   );
 };

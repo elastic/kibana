@@ -78,8 +78,9 @@ export class ComboBoxService extends FtrService {
     value: string,
     options = { clickWithMouse: false }
   ): Promise<void> {
-    this.log.debug(`comboBox.setElement, value: ${value}`);
-    const isOptionSelected = await this.isOptionSelected(comboBoxElement, value);
+    const trimmedValue = value.toLowerCase().trim();
+    this.log.debug(`comboBox.setElement, value: ${trimmedValue}`);
+    const isOptionSelected = await this.isOptionSelected(comboBoxElement, trimmedValue);
 
     if (isOptionSelected) {
       return;
@@ -89,18 +90,49 @@ export class ComboBoxService extends FtrService {
     await this.setFilterValue(comboBoxElement, value);
     await this.openOptionsList(comboBoxElement);
 
-    if (value !== undefined) {
+    if (trimmedValue !== undefined) {
       const selectOptions = await this.find.allByCssSelector(
-        `.euiFilterSelectItem[title^="${value.toString().trim()}"]`,
+        `.euiFilterSelectItem[title="${trimmedValue}"]`,
         this.WAIT_FOR_EXISTS_TIME
       );
 
       if (selectOptions.length > 0) {
         await this.clickOption(options.clickWithMouse, selectOptions[0]);
       } else {
-        // if it doesn't find the item which text starts with value, it will choose the first option
-        const firstOption = await this.find.byCssSelector('.euiFilterSelectItem', 5000);
-        await this.clickOption(options.clickWithMouse, firstOption);
+        // Try to find alternate title casing
+        const alternateTitle = (
+          await Promise.all(
+            (
+              await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
+            ).map(async (e) => {
+              const title = await e.getAttribute('title');
+              return { title, formattedTitle: title.toLowerCase().trim() };
+            })
+          )
+        ).find(({ formattedTitle }) => {
+          return formattedTitle === trimmedValue;
+        })?.title;
+
+        const [alternate] = alternateTitle
+          ? await this.find.allByCssSelector(
+              `.euiFilterSelectItem[title="${alternateTitle}"]`,
+              this.WAIT_FOR_EXISTS_TIME
+            )
+          : [];
+
+        if (alternate) {
+          this.log.warning(
+            `comboBox.setElement - Found similar option [${alternateTitle}] not [${trimmedValue}]`
+          );
+          await this.clickOption(options.clickWithMouse, alternate);
+        } else {
+          // if it doesn't find the item which text starts with value, it will choose the first option
+          this.log.warning(
+            `comboBox.setElement - Could not find option [${trimmedValue}], using first`
+          );
+          const firstOption = await this.find.byCssSelector('.euiFilterSelectItem', 5000);
+          await this.clickOption(options.clickWithMouse, firstOption);
+        }
       }
     } else {
       const firstOption = await this.find.byCssSelector('.euiFilterSelectItem');
@@ -259,6 +291,7 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxElement element that wraps up EuiComboBox
    */
   public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
+    this.log.debug('comboBox.closeOptionsList');
     const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
       timeout: 50,
     });
@@ -274,6 +307,7 @@ export class ComboBoxService extends FtrService {
    * @param comboBoxElement element that wraps up EuiComboBox
    */
   public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
+    this.log.debug('comboBox.openOptionsList');
     const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
       timeout: 50,
     });
@@ -301,7 +335,10 @@ export class ComboBoxService extends FtrService {
     const selectedOptions = $('.euiComboBoxPill')
       .toArray()
       .map((option) => $(option).text());
-    return selectedOptions.length === 1 && selectedOptions[0] === value;
+    return (
+      selectedOptions.length === 1 &&
+      selectedOptions[0].toLowerCase().trim() === value.toLowerCase().trim()
+    );
   }
 
   /**

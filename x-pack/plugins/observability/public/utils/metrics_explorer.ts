@@ -16,7 +16,7 @@ import {
   MetricsExplorerTimeOptions,
   MetricsExplorerTimestampsRT,
   MetricsExplorerYAxisMode,
-} from '../pages/threshold/hooks/use_metrics_explorer_options';
+} from '../components/threshold/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {
   limit: 3,

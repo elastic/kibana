@@ -971,38 +971,6 @@
             "path": "src/plugins/visualizations/public/plugin.ts"
           },
           {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/services/platform.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
           },
@@ -1129,18 +1097,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -1340,10 +1296,6 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/public/application/components/home_app.js"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1708,24 +1660,8 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/resolvers.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-              },
-              {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -1828,28 +1764,8 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/components/custom_urls/custom_url_editor/utils.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/route_resolver.ts"
-              },
-              {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "monitoring",
-                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -2301,14 +2217,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-browser-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -3184,12 +3092,12 @@
             "path": "x-pack/plugins/graph/public/types/app_state.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
           },
           {
             "plugin": "graph",
@@ -3771,7 +3679,7 @@
         "signature": [
           "{ type: string | string[]; search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",

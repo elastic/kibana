@@ -8,11 +8,8 @@
 
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
+import { Routes, Router, Route } from '@kbn/shared-ux-router';
 import { EuiPageTemplate } from '@elastic/eui';
-
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
@@ -45,7 +42,7 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
         {guidedOnboarding.guidedOnboardingApi?.isEnabled ? (
           <EuiPageTemplate.Section>
             <Router history={history}>
-              <Switch>
+              <Routes>
                 <Route exact path="/">
                   <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
                 </Route>
@@ -58,14 +55,10 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
                 <Route exact path="/stepThree">
                   <StepThree guidedOnboarding={guidedOnboarding} />
                 </Route>
-                p
-                <Route
-                  path="/stepFour/:indexName?"
-                  render={(routeProps) => (
-                    <StepFour guidedOnboarding={guidedOnboarding} {...routeProps} />
-                  )}
-                />
-              </Switch>
+                <Route path="/stepFour/:indexName?">
+                  <StepFour guidedOnboarding={guidedOnboarding} />
+                </Route>
+              </Routes>
             </Router>
           </EuiPageTemplate.Section>
         ) : (

@@ -20,7 +20,7 @@ import { MlPageHeader } from '../components/page_header';
 export const ExplainLogRateSpikesPage: FC = () => {
   const { services } = useMlKibana();
 
-  const { currentDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
+  const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
   return (
     <>
@@ -39,6 +39,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
       </MlPageHeader>
       {dataView && (
         <ExplainLogRateSpikes
+          // Default to false for now, until page restructure work to enable smooth sticky histogram is done
+          stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
           appDependencies={pick(services, [

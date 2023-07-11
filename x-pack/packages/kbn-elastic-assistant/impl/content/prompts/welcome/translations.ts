@@ -11,7 +11,7 @@ export const WELCOME_GENERAL = i18n.translate(
   'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.welcomeGeneralPrompt',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your 100% open-code portal into your Elastic life. In time, I will be able to answer questions and provide assistance across all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your mind to the possibilities of what we can create when we work together, in the open. Cheers!',
+      'Welcome to your Elastic AI Assistant! I am your 100% open-code portal into your Elastic life. In time, I will be able to answer questions and provide assistance across all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your mind to the possibilities of what we can create when we work together, in the open. Cheers!',
   }
 );
 
@@ -28,5 +28,13 @@ export const WELCOME_GENERAL_3 = i18n.translate(
   {
     defaultMessage:
       'Go ahead and click the add connector button below to continue the conversation!',
+  }
+);
+
+export const ENTERPRISE = i18n.translate(
+  'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt',
+  {
+    defaultMessage:
+      'Elastic AI Assistant is available to Enterprise users only. Please upgrade your license to use this feature.',
   }
 );

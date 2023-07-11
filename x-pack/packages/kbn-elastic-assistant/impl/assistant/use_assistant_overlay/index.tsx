@@ -58,7 +58,7 @@ export const useAssistantOverlay = (
   id: PromptContext['id'] | null,
 
   /**
-   * An optional user prompt that's filled in, but not sent, when the Elastic Assistant opens
+   * An optional user prompt that's filled in, but not sent, when the Elastic AI Assistant opens
    */
   suggestedUserPrompt: PromptContext['suggestedUserPrompt'] | null,
 

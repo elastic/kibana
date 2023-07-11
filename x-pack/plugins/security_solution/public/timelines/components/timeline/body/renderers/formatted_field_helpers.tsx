@@ -121,6 +121,12 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           {title ?? value}
         </Component>
       );
+    } else if (children) {
+      return (
+        <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="goToRuleDetails">
+          {children}
+        </LinkAnchor>
+      );
     } else {
       return (
         <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="ruleName">

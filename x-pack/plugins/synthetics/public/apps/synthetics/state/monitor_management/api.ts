@@ -12,9 +12,9 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
+  SyntheticsMonitorCodec,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 export const createMonitorAPI = async ({
   monitor,
@@ -51,20 +51,16 @@ export const updateMonitorAPI = async ({
   return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
 };
 
-export const getDecryptedMonitorAPI = async ({
-  id,
-}: {
-  id: string;
-}): Promise<DecryptedSyntheticsMonitorSavedObject> => {
-  return await apiService.get(
+export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitor> =>
+  apiService.get(
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id),
     {
       decrypted: true,
-    }
+    },
+    SyntheticsMonitorCodec
   );
-};
 
-export const fetchServiceAPIKey = async (): Promise<{
+export const fetchProjectAPIKey = async (): Promise<{
   apiKey: { encoded: string };
 }> => {
   return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_APIKEY);

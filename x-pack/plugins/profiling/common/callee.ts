@@ -43,7 +43,8 @@ export function createCalleeTree(
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>,
-  totalFrames: number
+  totalFrames: number,
+  samplingRate: number
 ): CalleeTree {
   const tree: CalleeTree = {
     Size: 1,
@@ -62,6 +63,9 @@ export function createCalleeTree(
     CountExclusive: new Array(totalFrames),
   };
 
+  // The inverse of the sampling rate is the number with which to multiply the number of
+  // samples to get an estimate of the actual number of samples the backend received.
+  const scalingFactor = 1.0 / samplingRate;
   tree.Edges[0] = new Map<FrameGroupID, NodeID>();
 
   tree.FileID[0] = '';
@@ -97,10 +101,12 @@ export function createCalleeTree(
     // e.g. when stopping the host agent or on network errors.
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
     const lenStackTrace = stackTrace.FrameIDs.length;
-    const samples = events.get(stackTraceID) ?? 0;
+    const samples = Math.floor((events.get(stackTraceID) ?? 0) * scalingFactor);
 
     let currentNode = 0;
 
+    // Increment the count by the number of samples observed, multiplied with the inverse of the
+    // samplingrate (this essentially means scaling up the total samples). It would incur
     tree.CountInclusive[currentNode] += samples;
     tree.CountExclusive[currentNode] = 0;
 

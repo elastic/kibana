@@ -27,6 +27,7 @@ import { DeleteCaseUserActionRt } from './delete_case';
 import { SeverityUserActionRt } from './severity';
 import { AssigneesUserActionRt } from './assignees';
 import { CaseUserActionStatsRt } from './stats';
+import { CategoryUserActionRt } from './category';
 
 const BasicUserActionsRt = rt.union([
   DescriptionUserActionRt,
@@ -37,6 +38,7 @@ const BasicUserActionsRt = rt.union([
   SeverityUserActionRt,
   AssigneesUserActionRt,
   DeleteCaseUserActionRt,
+  CategoryUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);

@@ -21,6 +21,10 @@ interface Page {
 }
 
 export type CertFields =
+  | 'monitorName'
+  | 'locationName'
+  | 'monitorType'
+  | 'monitorUrl'
   | 'sha256'
   | 'sha1'
   | 'issuer'
@@ -38,14 +42,10 @@ interface Props {
   page: Page;
   sort: CertSort;
   onChange: (page: Page, sort: CertSort) => void;
-  certificates: CertResult & { loading?: boolean };
+  certificates: CertResult & { isLoading?: boolean };
 }
 
 export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
-  const onTableChange = (newVal: Partial<Props>) => {
-    onChange(newVal.page as Page, newVal.sort as CertSort);
-  };
-
   const pagination = {
     pageIndex: page.index,
     pageSize: page.size,
@@ -97,11 +97,13 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
 
   return (
     <EuiBasicTable
-      loading={certificates.loading}
+      loading={certificates.isLoading}
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}
-      onChange={onTableChange}
+      onChange={(newVal) => {
+        onChange(newVal.page as Page, newVal.sort as CertSort);
+      }}
       sorting={{
         sort: {
           field: sort.field,
@@ -109,7 +111,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
         },
       }}
       noItemsMessage={
-        certificates.loading ? (
+        certificates.isLoading ? (
           LOADING_CERTIFICATES
         ) : (
           <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>

@@ -128,7 +128,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       extraFields?: string[];
     }) {
       // type * in the query editor
-      const queryInput = await testSubjects.find('lnsXY-annotation-query-based-query-input');
+      const queryInput = await testSubjects.find('annotation-query-based-query-input');
       await queryInput.type(opts.queryString);
       await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       await this.selectOptionFromComboBox(
@@ -773,7 +773,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
+      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
@@ -1076,6 +1076,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async getDatatableHeaderText(index = 0) {
       const el = await this.getDatatableHeader(index);
       return el.getVisibleText();
+    },
+
+    async getCurrentChartDebugStateForVizType(visType: string) {
+      await this.waitForVisualization(visType);
+      return await elasticChart.getChartDebugData(visType);
     },
 
     /**
@@ -1454,7 +1459,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (!opts.keepOpen) {
-        await this.closeDimensionEditor();
+        await testSubjects.click('collapseFlyoutButton');
       }
     },
 
@@ -1830,6 +1835,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         [void],
         Record<string, { content: string; type: string }> | undefined
       >(() => window.ELASTIC_LENS_CSV_CONTENT);
+    },
+
+    async closeSuggestionPanel() {
+      const isSuggestionPanelOpen = await testSubjects.exists('lnsSuggestionsPanel');
+      if (isSuggestionPanelOpen) {
+        await testSubjects.click('lensSuggestionsPanelToggleButton');
+      }
     },
   });
 }

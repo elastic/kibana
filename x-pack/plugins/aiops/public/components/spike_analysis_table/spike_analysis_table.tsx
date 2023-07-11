@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -20,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -195,7 +195,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueColumnTooltip',
             {
               defaultMessage:
-                'The significance of changes in the frequency of values; lower values indicate greater change',
+                'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
             }
           )}
         >
@@ -287,13 +287,17 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   }
 
   const onChange = useCallback((tableSettings) => {
-    const { index, size } = tableSettings.page;
-    const { field, direction } = tableSettings.sort;
+    if (tableSettings.page) {
+      const { index, size } = tableSettings.page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
 
-    setPageIndex(index);
-    setPageSize(size);
-    setSortField(field);
-    setSortDirection(direction);
+    if (tableSettings.sort) {
+      const { field, direction } = tableSettings.sort;
+      setSortField(field);
+      setSortDirection(direction);
+    }
   }, []);
 
   const { pagination, pageOfItems, sorting } = useMemo(() => {
@@ -301,14 +305,25 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     const itemCount = significantTerms?.length ?? 0;
 
     let items: SignificantTerm[] = significantTerms ?? [];
-    items = sortBy(significantTerms, (item) => {
-      if (item && typeof item[sortField] === 'string') {
-        // @ts-ignore Object is possibly null or undefined
-        return item[sortField].toLowerCase();
-      }
-      return item[sortField];
-    });
-    items = sortDirection === 'asc' ? items : items.reverse();
+
+    const sortIteratees = [
+      (item: SignificantTerm) => {
+        if (item && typeof item[sortField] === 'string') {
+          // @ts-ignore Object is possibly null or undefined
+          return item[sortField].toLowerCase();
+        }
+        return item[sortField];
+      },
+    ];
+    const sortDirections = [sortDirection];
+
+    // Only if the table is sorted by p-value, add a secondary sort by doc count.
+    if (sortField === 'pValue') {
+      sortIteratees.push((item: SignificantTerm) => item.doc_count);
+      sortDirections.push(sortDirection);
+    }
+
+    items = orderBy(significantTerms, sortIteratees, sortDirections);
 
     return {
       pageOfItems: items.slice(pageStart, pageStart + pageSize),

@@ -420,6 +420,15 @@ describe('Policy Form Layout', () => {
         const lockedCard = policyFormLayoutView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
         expect(lockedCard).toHaveLength(4);
       });
+
+      it('locked card has "Upgrade now" link to cloud server', () => {
+        const upgradeLinks = policyFormLayoutView.find(
+          'EuiLink[data-test-subj="upgradeNowCloudDeploymentLink"]'
+        );
+        upgradeLinks.forEach((link) => {
+          expect(link.prop('href')).toEqual('https://www.elastic.co/cloud/');
+        });
+      });
     });
 
     describe('and user has only READ privilege', () => {

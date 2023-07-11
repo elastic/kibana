@@ -27,6 +27,7 @@ export const configSchema = schema.object({
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
+  isCloud: schema.boolean({ defaultValue: false }),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
       schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])

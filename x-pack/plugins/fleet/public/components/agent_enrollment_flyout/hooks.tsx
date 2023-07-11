@@ -14,7 +14,7 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
-import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../services';
+import { getCloudFormationTemplateUrlFromAgentPolicy } from '../../services';
 
 import type { K8sMode, CloudSecurityIntegrationType } from './types';
 
@@ -80,7 +80,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
     }
 
     const integrationType = getCloudSecurityIntegrationTypeFromPackagePolicy(agentPolicy);
-    const cloudformationUrl = getCloudFormationTemplateUrlFromPackagePolicy(agentPolicy);
+    const cloudformationUrl = getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
 
     return {
       integrationType,

@@ -114,7 +114,7 @@ export class UserActionPersister {
       isStringArray(newValue)
     ) {
       return this.buildTagsUserActions({ ...params, originalValue, newValue });
-    } else if (isUserActionType(field) && newValue != null) {
+    } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(ActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
         caseId,

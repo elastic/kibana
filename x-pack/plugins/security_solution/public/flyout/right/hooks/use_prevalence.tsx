@@ -70,16 +70,22 @@ export const usePrevalence = ({
 
   const prevalenceRows = useMemo(
     () =>
-      summaryRows.map((row) => (
-        <PrevalenceOverviewRow
-          field={row.description.data.field}
-          values={row.description.values || []}
-          scopeId={scopeId}
-          callbackIfNull={() => setCount((prevCount) => prevCount + 1)}
-          data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
-          key={row.description.data.field}
-        />
-      )),
+      summaryRows.map((row) => {
+        const highlightedField = {
+          name: row.description.data.field,
+          values: row.description.values || [],
+        };
+
+        return (
+          <PrevalenceOverviewRow
+            highlightedField={highlightedField}
+            scopeId={scopeId}
+            callbackIfNull={() => setCount((prevCount) => prevCount + 1)}
+            data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}
+            key={row.description.data.field}
+          />
+        );
+      }),
     [summaryRows, scopeId]
   );
 

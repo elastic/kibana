@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 import {
@@ -263,9 +262,7 @@ export const buildPalettes: (
 ) => Record<string, PaletteDefinition> = (legacyColorsService) => {
   return {
     default: {
-      title: i18n.translate('charts.palettes.defaultPaletteLabel', {
-        defaultMessage: 'Default',
-      }),
+      title: i18n.translate('charts.palettes.defaultPaletteLabel', { defaultMessage: 'Default' }),
       ...buildRoundRobinCategoricalWithMappedColors(),
     },
     status: {

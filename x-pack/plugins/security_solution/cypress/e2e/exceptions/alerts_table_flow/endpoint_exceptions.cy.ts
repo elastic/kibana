@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
+  expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
+  openAddEndpointExceptionFromAlertActionButton,
   openAddEndpointExceptionFromFirstAlert,
 } from '../../../tasks/alerts';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
@@ -25,14 +28,20 @@ import {
 } from '../../../tasks/es_archiver';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
+  addExceptionEntryFieldValue,
+  addExceptionEntryFieldValueValue,
   addExceptionFlyoutItemName,
+  editExceptionFlyoutItemName,
   selectCloseSingleAlerts,
   submitNewExceptionItem,
+  validateExceptionConditionField,
 } from '../../../tasks/exceptions';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import {
-  EXCEPTION_ITEM_CONTAINER,
-  FIELD_INPUT_PARENT,
+  ADD_AND_BTN,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
   NO_EXCEPTIONS_EXIST_PROMPT,
 } from '../../../screens/exceptions';
 import {
@@ -43,10 +52,14 @@ import {
 
 describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
+  const ITEM_NAME = 'Sample Exception List Item';
+  const ITEM_NAME_EDIT = 'Sample Exception List Item';
+  const ADDITIONAL_ENTRY = 'host.hostname';
   beforeEach(() => {
     esArchiverResetKibana();
-    esArchiverLoad('endpoint');
     login();
+    deleteAlertsAndRules();
+    esArchiverLoad('endpoint');
     createRule(getEndpointRule());
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
@@ -64,15 +77,11 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     openAddEndpointExceptionFromFirstAlert();
 
     // As the endpoint.alerts-* is used to trigger the alert the
-    // file.Ext.code_signature will be populated as the first item
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(0)
-      .find(FIELD_INPUT_PARENT)
-      .eq(0)
-      .should('have.text', 'file.Ext.code_signature');
+    // file.Ext.code_signature will be auto-populated
+    validateExceptionConditionField('file.Ext.code_signature');
 
     selectCloseSingleAlerts();
-    addExceptionFlyoutItemName('Sample Exception');
+    addExceptionFlyoutItemName(ITEM_NAME);
     submitNewExceptionItem();
 
     // Alerts table should now be empty from having added exception and closed
@@ -102,5 +111,40 @@ describe('Endpoint Exceptions workflows from Alert', () => {
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
+  });
+
+  it('Should be able to create Endpoint exception from Alerts take action button, and change multiple exception items without resetting to initial auto-prefilled entries', () => {
+    // Open first Alert Summary
+    expandFirstAlert();
+
+    // The Endpoint should populated with predefined fields
+    openAddEndpointExceptionFromAlertActionButton();
+
+    // As the endpoint.alerts-* is used to trigger the alert the
+    // file.Ext.code_signature will be auto-populated
+    validateExceptionConditionField('file.Ext.code_signature');
+    addExceptionFlyoutItemName(ITEM_NAME);
+
+    cy.get(ADD_AND_BTN).click();
+    // edit conditions
+    addExceptionEntryFieldValue(ADDITIONAL_ENTRY, 6);
+    addExceptionEntryFieldValueValue('foo', 4);
+
+    // Change the name again
+    editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+
+    // validate the condition is still "agent.name" or got rest after the name is changed
+    validateExceptionConditionField(ADDITIONAL_ENTRY);
+
+    selectCloseSingleAlerts();
+    submitNewExceptionItem();
+
+    // Endpoint Exception will move to Endpoint List under Exception tab of rule
+    goToEndpointExceptionsTab();
+
+    // new exception item displays
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
   });
 });

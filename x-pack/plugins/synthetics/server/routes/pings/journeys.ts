@@ -7,15 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { getJourneyFailedSteps } from '../../legacy_uptime/lib/requests/get_journey_failed_steps';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import {
-  SyntheticsRestApiRouteFactory,
-  UMRestApiRouteFactory,
-} from '../../legacy_uptime/routes/types';
 import { getJourneyDetails } from '../../queries/get_journey_details';
+import { getJourneySteps } from '../../legacy_uptime/lib/requests/get_journey_steps';
 
-export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY,
   validate: {
@@ -36,7 +33,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
 
     try {
       const [result, details] = await Promise.all([
-        await libs.requests.getJourneySteps({
+        await getJourneySteps({
           uptimeEsClient,
           checkGroup,
           syntheticEventTypes,
@@ -58,9 +55,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
   },
 });
 
-export const createJourneyFailedStepsRoute: SyntheticsRestApiRouteFactory = (
-  libs: UMServerLibs
-) => ({
+export const createJourneyFailedStepsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
   validate: {

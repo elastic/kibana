@@ -19,6 +19,7 @@ import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } fr
 import type {
   AttachmentType,
   AttachmentViewObject,
+  CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
@@ -56,7 +57,10 @@ type BuilderArgs<C, R> = Pick<
 const getAttachmentRenderer = memoize((cachingKey: string) => {
   let AttachmentElement: React.ReactElement;
 
-  const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
+  const renderCallback = (
+    attachmentViewObject: AttachmentViewObject<CommonAttachmentViewProps>,
+    props: CommonAttachmentViewProps
+  ) => {
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
@@ -118,6 +122,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
+      attachmentId: comment.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 
@@ -147,6 +152,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
                   <EuiFlexItem
                     grow={false}
                     data-test-subj={`attachment-${attachmentTypeId}-${comment.id}`}
+                    key={`attachment-${attachmentTypeId}-${comment.id}`}
                   >
                     <EuiButtonIcon
                       aria-label={action.label}
@@ -154,6 +160,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
                       color={action.color ?? 'text'}
                       onClick={action.onClick}
                       data-test-subj={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
+                      key={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
                     />
                   </EuiFlexItem>
                 )) ||

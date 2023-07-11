@@ -41,21 +41,34 @@ import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
-const retrieveIntegrations = (specPattern: string[]) => {
+/**
+ * Retrieve test files using a glob pattern.
+ * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
+ */
+const retrieveIntegrations = (
+  /** Pattern passed to globby to find spec files. */ specPattern: string[]
+) => {
   const integrationsPaths = globby.sync(specPattern);
 
   if (process.env.RUN_ALL_TESTS === 'true') {
     return integrationsPaths;
   } else {
+    // The number of instances of this job were created
     const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
       ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
       : 1;
+    // An index which uniquely identifies this instance of the job
     const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
       ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
       : 0;
-    const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-    return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
+    const integrationsPathsForChunk: string[] = [];
+
+    for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
+      integrationsPathsForChunk.push(integrationsPaths[i]);
+    }
+
+    return integrationsPathsForChunk;
   }
 };
 
@@ -86,6 +99,10 @@ export const cli = () => {
       };
 
       const getKibanaPort = <T>(): T | number => {
+        if (isOpen) {
+          return 5620;
+        }
+
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
         if (kibanaPorts.includes(kibanaPort)) {
           return getKibanaPort();
@@ -95,6 +112,10 @@ export const cli = () => {
       };
 
       const getFleetServerPort = <T>(): T | number => {
+        if (isOpen) {
+          return 8220;
+        }
+
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
         if (fleetServerPorts.includes(fleetServerPort)) {
           return getFleetServerPort();
@@ -166,9 +187,10 @@ export const cli = () => {
                   }
                   return element.value as string;
                 });
+              } else if (property.value.type === 'StringLiteral') {
+                value = property.value.value;
               }
               if (key && value) {
-                // @ts-expect-error
                 acc[key] = value;
               }
               return acc;
@@ -267,6 +289,10 @@ export const cli = () => {
                   );
                 }
 
+                if (configFromTestFile?.license) {
+                  vars.esTestCluster.license = configFromTestFile.license;
+                }
+
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
@@ -360,7 +386,7 @@ export const cli = () => {
             }
 
             await procs.stop('kibana');
-            shutdownEs();
+            await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
             return result;

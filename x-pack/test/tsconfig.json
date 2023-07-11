@@ -128,6 +128,13 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-common",
     "@kbn/slo-schema",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/notifications-plugin",
+    "@kbn/logs-shared-plugin",
+    "@kbn/telemetry-tools",
+    "@kbn/profiling-plugin",
+    "@kbn/observability-onboarding-plugin",
+    "@kbn/bfetch-plugin",
+    "@kbn/uptime-plugin"
   ]
 }

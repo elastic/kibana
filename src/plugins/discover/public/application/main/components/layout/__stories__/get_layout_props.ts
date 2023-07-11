@@ -84,7 +84,6 @@ const getCommonProps = () => {
   const savedSearchMock = {} as unknown as SavedSearch;
   return {
     inspectorAdapters: { requests: new RequestAdapter() },
-    navigateTo: action('navigate to somewhere nice'),
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
     resetSavedSearch: action('reset the saved search the query'),

@@ -7,14 +7,14 @@
  */
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import React, { PropsWithChildren, useCallback, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 
 import {
-  TableListView,
-  TableListViewKibanaDependencies,
+  type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
   type UserContentCommonSchema,
-} from '@kbn/content-management-table-list';
+} from '@kbn/content-management-table-list-view-table';
+import { TableListView } from '@kbn/content-management-table-list-view';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
@@ -206,6 +206,14 @@ export const DashboardListing = ({
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
 
+  const savedObjectsTaggingFakePlugin = useMemo(() => {
+    return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+      ? ({
+          ui: savedObjectsTagging,
+        } as TableListViewKibanaDependencies['savedObjectsTagging'])
+      : undefined;
+  }, [savedObjectsTagging]);
+
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
@@ -217,11 +225,7 @@ export const DashboardListing = ({
             http,
           },
           toMountPoint,
-          savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-            ? ({
-                ui: savedObjectsTagging,
-              } as TableListViewKibanaDependencies['savedObjectsTagging'])
-            : undefined,
+          savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
         }}
       >
@@ -233,7 +237,7 @@ export const DashboardListing = ({
           createItem={!showWriteControls ? undefined : createItem}
           editItem={!showWriteControls ? undefined : editItem}
           entityNamePlural={getEntityNamePlural()}
-          tableListTitle={getTableListTitle()}
+          title={getTableListTitle()}
           headingId="dashboardListingHeading"
           initialPageSize={initialPageSize}
           initialFilter={initialFilter}

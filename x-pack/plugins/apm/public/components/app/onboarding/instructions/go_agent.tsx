@@ -15,11 +15,19 @@ import {
   AgentInstructions,
 } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
+import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createGoAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
+  const {
+    baseUrl,
+    apmServerUrl,
+    apiKeyDetails,
+    checkAgentStatus,
+    agentStatus,
+    agentStatusLoading,
+  } = commonOptions;
   const codeBlock = `\
 import (
   "net/http"
@@ -130,5 +138,10 @@ guide to instrumenting Go source code.',
         </>
       ),
     },
+    agentStatusCheckInstruction({
+      checkAgentStatus,
+      agentStatus,
+      agentStatusLoading,
+    }),
   ];
 };

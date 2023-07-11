@@ -9,7 +9,10 @@ import { DragContextState } from '@kbn/dom-drag-drop';
 import { getFieldByNameFactory } from './pure_helpers';
 import type { IndexPattern, IndexPatternField } from '../../types';
 
-export const createMockedIndexPattern = (someProps?: Partial<IndexPattern>): IndexPattern => {
+export const createMockedIndexPattern = (
+  someProps?: Partial<IndexPattern>,
+  customFields: IndexPatternField[] = []
+): IndexPattern => {
   const fields = [
     {
       name: 'timestamp',
@@ -101,6 +104,7 @@ export const createMockedIndexPattern = (someProps?: Partial<IndexPattern>): Ind
       lang: 'painless' as const,
       script: 'emit(123)',
     },
+    ...(customFields || []),
   ];
   return {
     id: '1',

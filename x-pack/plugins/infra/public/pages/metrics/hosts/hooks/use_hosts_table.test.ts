@@ -10,9 +10,13 @@ import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
+import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
+import * as useMetricsDataViewHooks from './use_data_view';
 
 jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');
+jest.mock('./use_data_view');
+jest.mock('../../../../hooks/use_kibana');
 
 const mockUseUnifiedSearchContext =
   useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
@@ -21,10 +25,39 @@ const mockUseUnifiedSearchContext =
 const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as jest.MockedFunction<
   typeof useHostsViewHooks.useHostsViewContext
 >;
+const mockUseMetricsDataViewContext =
+  useMetricsDataViewHooks.useMetricsDataViewContext as jest.MockedFunction<
+    typeof useMetricsDataViewHooks.useMetricsDataViewContext
+  >;
+
+const mockUseKibanaContextForPlugin =
+  useKibanaContextForPluginHook.useKibanaContextForPlugin as jest.MockedFunction<
+    typeof useKibanaContextForPluginHook.useKibanaContextForPlugin
+  >;
 
 const mockHostNode: InfraAssetMetricsItem[] = [
   {
     metrics: [
+      {
+        name: 'cpu',
+        value: 0.6353277777777777,
+      },
+      {
+        name: 'diskSpaceUsage',
+        value: 0.2040001,
+      },
+      {
+        name: 'memory',
+        value: 0.94525,
+      },
+      {
+        name: 'memoryFree',
+        value: 34359.738368,
+      },
+      {
+        name: 'normalizedLoad1m',
+        value: 239.2040001,
+      },
       {
         name: 'rx',
         value: 252456.92916666667,
@@ -32,18 +65,6 @@ const mockHostNode: InfraAssetMetricsItem[] = [
       {
         name: 'tx',
         value: 252758.425,
-      },
-      {
-        name: 'memory',
-        value: 0.94525,
-      },
-      {
-        name: 'cpu',
-        value: 0.6353277777777777,
-      },
-      {
-        name: 'memoryTotal',
-        value: 34359.738368,
       },
     ],
     metadata: [
@@ -55,24 +76,32 @@ const mockHostNode: InfraAssetMetricsItem[] = [
   {
     metrics: [
       {
-        name: 'rx',
-        value: 95.86339715321859,
+        name: 'cpu',
+        value: 0.8647805555555556,
       },
       {
-        name: 'tx',
-        value: 110.38566859563191,
+        name: 'diskSpaceUsage',
+        value: 0.5400000214576721,
       },
       {
         name: 'memory',
         value: 0.5400000214576721,
       },
       {
-        name: 'cpu',
-        value: 0.8647805555555556,
+        name: 'memoryFree',
+        value: 9.194304,
       },
       {
-        name: 'memoryTotal',
-        value: 9.194304,
+        name: 'normalizedLoad1m',
+        value: 100,
+      },
+      {
+        name: 'rx',
+        value: 95.86339715321859,
+      },
+      {
+        name: 'tx',
+        value: 110.38566859563191,
       },
     ],
     metadata: [
@@ -82,6 +111,13 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     name: 'host-1',
   },
 ];
+
+const mockKibanaServices = {
+  telemetry: { reportHostEntryClicked: () => {} },
+  data: {
+    query: { filterManager: () => {} },
+  },
+};
 
 describe('useHostTable hook', () => {
   beforeAll(() => {
@@ -94,6 +130,18 @@ describe('useHostTable hook', () => {
     mockUseHostsViewContext.mockReturnValue({
       hostNodes: mockHostNode,
     } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
+
+    mockUseHostsViewContext.mockReturnValue({
+      hostNodes: mockHostNode,
+    } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
+
+    mockUseMetricsDataViewContext.mockReturnValue({
+      dataView: { id: 'default' },
+    } as ReturnType<typeof useMetricsDataViewHooks.useMetricsDataViewContext>);
+
+    mockUseKibanaContextForPlugin.mockReturnValue({
+      services: mockKibanaServices,
+    } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
   });
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
     const expected = [
@@ -110,7 +158,9 @@ describe('useHostTable hook', () => {
         tx: 252758.425,
         memory: 0.94525,
         cpu: 0.6353277777777777,
-        memoryTotal: 34359.738368,
+        diskSpaceUsage: 0.2040001,
+        memoryFree: 34359.738368,
+        normalizedLoad1m: 239.2040001,
       },
       {
         name: 'host-1',
@@ -125,7 +175,9 @@ describe('useHostTable hook', () => {
         tx: 110.38566859563191,
         memory: 0.5400000214576721,
         cpu: 0.8647805555555556,
-        memoryTotal: 9.194304,
+        diskSpaceUsage: 0.5400000214576721,
+        memoryFree: 9.194304,
+        normalizedLoad1m: 100,
       },
     ];
 

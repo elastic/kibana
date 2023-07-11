@@ -11,7 +11,9 @@ import { useMutation } from '@tanstack/react-query';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../common/detection_engine/constants';
 import type { InstallFleetPackageProps } from '../api';
 import { installFleetPackage } from '../api';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 
 export const INSTALL_FLEET_PACKAGE_MUTATION_KEY = [
   'POST',
@@ -22,6 +24,8 @@ export const useInstallFleetPackageMutation = (
   options?: UseMutationOptions<InstallPackageResponse, Error, InstallFleetPackageProps>
 ) => {
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidatePrebuiltRulesInstallReview = useInvalidateFetchPrebuiltRulesInstallReviewQuery();
+  const invalidatePrebuiltRulesUpdateReview = useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
 
   return useMutation((props: InstallFleetPackageProps) => installFleetPackage(props), {
     ...options,
@@ -31,6 +35,8 @@ export const useInstallFleetPackageMutation = (
       if (packageName === PREBUILT_RULES_PACKAGE_NAME) {
         // Invalidate the pre-packaged rules status query as there might be new rules to install
         invalidatePrePackagedRulesStatus();
+        invalidatePrebuiltRulesInstallReview();
+        invalidatePrebuiltRulesUpdateReview();
       }
 
       if (options?.onSettled) {

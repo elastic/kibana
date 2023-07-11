@@ -274,8 +274,6 @@ describe('Execution Handler', () => {
     });
 
     expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
-      ruleId: '1',
-      spaceId: 'test1',
       actionTypeId: 'test',
       actionParams: {
         alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 1 goes here',
@@ -356,7 +354,7 @@ describe('Execution Handler', () => {
   });
 
   test('throw error message when action type is disabled', async () => {
-    mockActionsPlugin.preconfiguredActions = [];
+    mockActionsPlugin.inMemoryConnectors = [];
     mockActionsPlugin.isActionExecutable.mockReturnValue(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
     const executionHandler = new ExecutionHandler(
@@ -1642,11 +1640,28 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
           },
         ]
       `);
+    });
+
+    it('populates the rule.url in the action params when the base url contains pathname', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345/kbn',
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0][0].actionParams).toEqual({
+        val: 'rule url: http://localhost:12345/kbn/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
+      });
     });
 
     it('populates the rule.url with start and stop time when available', async () => {
@@ -1691,8 +1706,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
           },
         ]
       `);
@@ -1721,8 +1735,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "default",
+            "ruleUrl": "http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
           },
         ]
       `);
@@ -1748,8 +1761,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
           },
         ]
       `);
@@ -1775,8 +1787,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": undefined,
           },
         ]
       `);
@@ -1805,8 +1816,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": undefined,
           },
         ]
       `);
@@ -1835,8 +1845,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": undefined,
           },
         ]
       `);
@@ -1868,8 +1877,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/some/other/place",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/management/some/other/place",
           },
         ]
       `);

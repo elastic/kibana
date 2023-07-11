@@ -11,7 +11,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
-import { useCanUpdatePrivateMonitor, useMonitorEnableHandler } from '../../../../hooks';
+import { useMonitorEnableHandler } from '../../../../hooks';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import * as labels from './labels';
 
@@ -30,7 +30,6 @@ export const MonitorEnabled = ({
   initialLoading = false,
   isSwitchable = true,
 }: Props) => {
-  const canUpdatePrivateMonitor = useCanUpdatePrivateMonitor(monitor);
   const canEditSynthetics = useCanEditSynthetics();
 
   const monitorName = monitor[ConfigKey.NAME];
@@ -64,14 +63,11 @@ export const MonitorEnabled = ({
       {isLoading || initialLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <NoPermissionsTooltip
-          canEditSynthetics={canEditSynthetics}
-          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
-        >
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           <SwitchWithCursor
             compressed={true}
             checked={enabled}
-            disabled={isLoading || !canEditSynthetics || !canUpdatePrivateMonitor}
+            disabled={isLoading || !canEditSynthetics}
             showLabel={false}
             label={enabledDisableLabel}
             title={enabledDisableLabel}

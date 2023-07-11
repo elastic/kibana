@@ -56,7 +56,11 @@ export class CasesUiPlugin
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
 
-    registerInternalAttachments(externalReferenceAttachmentTypeRegistry);
+    registerInternalAttachments(
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry
+    );
+
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
     if (plugins.home) {
