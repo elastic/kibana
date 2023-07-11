@@ -836,9 +836,9 @@ test('allows declaring route access to flag a route as public or internal', asyn
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener).get('/with-access').expect(200, { access });
+  await supertest(innerServer.listener).get('/with-access').expect(200, { access: 'internal' });
 
-  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'public' });
+  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'internal' });
 });
 
 test(`sets access flag to 'internal' if not defined`, async () => {
