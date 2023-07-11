@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -462,6 +463,51 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
         <></>
       ) : (
         <>
+          <EuiCallOut
+            color="warning"
+            iconType="help"
+            title={
+              <FormattedMessage
+                id="xpack.profiling.tabs.debWarning"
+                defaultMessage="Due to a {linuxLink}, we have stopped host-agents on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more."
+                values={{
+                  versionFrom: <strong>5.19</strong>,
+                  versionTo: <strong>6.4</strong>,
+                  linuxLink: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d319f344561de23e810515d109c7278919bff7b0"
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.linuxLink', {
+                        defaultMessage: 'Linux kernel bug',
+                      })}
+                    </EuiLink>
+                  ),
+                  debianLink: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1033398"
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.debianLink', {
+                        defaultMessage: 'Debian',
+                      })}
+                    </EuiLink>
+                  ),
+                  fedoraLink: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://bugzilla.redhat.com/show_bug.cgi?id=2211455"
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
+                        defaultMessage: 'Fedora/CentOS',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
+          <EuiSpacer />
           <EuiText>
             {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
               defaultMessage: 'Select an option below to deploy the host-agent.',
