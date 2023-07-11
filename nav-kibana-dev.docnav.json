@@ -79,6 +79,9 @@
           "id": "kibBuildingBlocks"
         },
         {
+          "id": "kibDevDocsSecurityIntro"
+        },
+        {
           "id": "kibDevDocsSavedObjectsIntro",
           "label": "Saved objects"
         },
