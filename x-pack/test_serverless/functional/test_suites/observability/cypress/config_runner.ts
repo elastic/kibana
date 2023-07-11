@@ -7,13 +7,13 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { DefendWorkflowsCypressVisualTestRunner } from './runner';
+import { ObservabilityTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const defendWorkflowsCypressConfig = await readConfigFile(require.resolve('./config.ts'));
-  return {
-    ...defendWorkflowsCypressConfig.getAll(),
+  const svlConfig = await readConfigFile(require.resolve('./oblt_config.base.ts'));
 
-    testRunner: DefendWorkflowsCypressVisualTestRunner,
+  return {
+    ...svlConfig.getAll(),
+    testRunner: ObservabilityTestRunner,
   };
 }

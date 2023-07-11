@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-const CLEANUP_EVENTS = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
-export class Manager {
-  constructor() {
-    const cleanup = () => this.cleanup();
-    CLEANUP_EVENTS.forEach((ev) => process.on(ev, cleanup));
-  }
-  cleanup() {}
-}
+Cypress.on('uncaught:exception', (err, runnable) => {
+  return false;
+});
+
+import './commands';

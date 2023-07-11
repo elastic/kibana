@@ -22,11 +22,15 @@ const StyledEuiModal = styled(EuiModal)`
   min-width: 95vw;
   min-height: 25vh;
 `;
+interface Props {
+  isAssistantEnabled: boolean;
+}
+
 /**
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export const AssistantOverlay: React.FC = React.memo(() => {
+export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
@@ -79,7 +83,11 @@ export const AssistantOverlay: React.FC = React.memo(() => {
     <>
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
-          <Assistant conversationId={conversationId} promptContextId={promptContextId} />
+          <Assistant
+            isAssistantEnabled={isAssistantEnabled}
+            conversationId={conversationId}
+            promptContextId={promptContextId}
+          />
         </StyledEuiModal>
       )}
     </>
