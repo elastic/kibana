@@ -59,7 +59,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
           </EuiSkeletonTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" className="navEmbeddable_hoverActions">
+          <EuiFlexGroup gutterSize="none" responsive={false} className="navEmbeddable_hoverActions">
             <EuiFlexItem>
               <EuiButtonIcon size="xs" iconType="pencil" aria-label="Edit" onClick={editLink} />
             </EuiFlexItem>

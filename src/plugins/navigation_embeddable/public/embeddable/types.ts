@@ -33,7 +33,6 @@ export const EXTERNAL_LINK_TYPE = 'externalLink';
 export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
 export interface NavigationEmbeddableLink {
-  id: string;
   type: NavigationLinkType;
   destination: string;
   label?: string;

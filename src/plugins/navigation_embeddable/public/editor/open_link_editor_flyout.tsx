@@ -32,16 +32,28 @@ export async function openLinkEditorFlyout({
   idToEdit,
   parentDashboard,
 }: LinkEditorProps): Promise<NavigationEmbeddableLinkList | undefined> {
+  const unmountFlyout = async () => {
+    if (ref.current) {
+      ref.current.children[1].className = 'navEmbeddableLinkEditor out';
+    }
+    await new Promise(() => {
+      // wait for close animation before unmounting
+      setTimeout(() => {
+        if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
+      }, 180);
+    });
+  };
+
   return new Promise<NavigationEmbeddableLinkList | undefined>((resolve, reject) => {
-    const onSave = (newLinks: NavigationEmbeddableLinkList) => {
+    const onSave = async (newLinks: NavigationEmbeddableLinkList) => {
       // console.log('on save', newLinks);
       resolve(newLinks);
-      if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
+      await unmountFlyout();
     };
 
-    const onCancel = () => {
-      if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
+    const onCancel = async () => {
       reject();
+      await unmountFlyout();
     };
 
     ReactDOM.render(

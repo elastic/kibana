@@ -84,7 +84,7 @@ export const NavigationEmbeddableLinkEditor = ({
   }, []);
 
   return (
-    <EuiFocusTrap className={'navEmbeddableLinkEditor'}>
+    <EuiFocusTrap className={'navEmbeddableLinkEditor in'}>
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
           className="linkEditorBackButton"
@@ -178,7 +178,6 @@ export const NavigationEmbeddableLinkEditor = ({
                     ...links,
                     [linkId]: {
                       order: 0,
-                      id: linkId,
                       label: linkLabel,
                       type: selectedLinkType,
                       destination: linkDestination,

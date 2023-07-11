@@ -2,7 +2,14 @@
 
 .navEmbeddableLinkEditor {
   @include euiFlyout;
-  animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+
+  &.in { 
+    animation: euiFlyoutOpenAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+  }
+
+  &.out { 
+    animation: euiFlyoutCloseAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+  }
 
   .linkEditorBackButton {
     height: auto;
