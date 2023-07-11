@@ -45,7 +45,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
-import { WarningsCallout } from '../../../../components/common/warnings_callout/warnings_callout';
+import { WarningsCallout } from '../../../../components/common/warnings_callout';
 
 const containerStyles = css`
   position: relative;

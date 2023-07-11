@@ -26,7 +26,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord, SearchResponseInterceptedWarning } from '../../types';
 import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer';
-import { WarningsCallout } from '../../components/common/warnings_callout/warnings_callout';
+import { WarningsCallout } from '../../components/common/warnings_callout';
 
 export interface ContextAppContentProps {
   columns: string[];

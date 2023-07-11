@@ -66,7 +66,7 @@ import { getValidViewMode } from '../application/main/utils/get_valid_view_mode'
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getSearchResponseInterceptedWarnings } from '../utils/get_search_response_intercepted_warnings';
-import { WarningsCallout } from '../components/common/warnings_callout/warnings_callout';
+import { WarningsCallout } from '../components/common/warnings_callout';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
