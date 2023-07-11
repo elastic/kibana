@@ -7,48 +7,31 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewBase } from '@kbn/es-query';
-import type {
-  FieldFormat,
-  FieldFormatsStartCommon,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
-import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { cloneDeep, each, reject } from 'lodash';
-import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
+import type { DataViewBase } from '@kbn/es-query';
+import type { FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
   DataViewFieldMap,
   DataViewSpec,
   FieldConfiguration,
-  FieldFormatMap,
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeType,
-  SourceFilter,
-  TypeMeta,
 } from '../types';
 import { flattenHitWrapper } from './flatten_hit';
 import { removeFieldAttrs } from './utils';
+import { AbstractDataView } from './abstract_data_views';
 
 interface DataViewDeps {
   spec?: DataViewSpec;
   fieldFormats: FieldFormatsStartCommon;
   shortDotsEnable?: boolean;
   metaFields?: string[];
-}
-
-interface SavedObjectBody {
-  fieldAttrs?: string;
-  title?: string;
-  timeFieldName?: string;
-  fields?: string;
-  sourceFilters?: string;
-  fieldFormatMap?: string;
-  typeMeta?: string;
-  type?: string;
 }
 
 /**
@@ -68,89 +51,11 @@ export interface TimeBasedDataView extends DataView {
 /**
  * Data view class. Central kibana abstraction around multiple indices.
  */
-export class DataView implements DataViewBase {
-  /**
-   * Saved object id
-   */
-  public id?: string;
-  /**
-   * Title of data view
-   * @deprecated use getIndexPattern instead
-   */
-  public title: string = '';
-  /**
-   * Map of field formats by field name
-   */
-  public fieldFormatMap: FieldFormatMap;
-  /**
-   * Only used by rollup indices, used by rollup specific endpoint to load field list.
-   */
-  public typeMeta?: TypeMeta;
+export class DataView extends AbstractDataView implements DataViewBase {
   /**
    * Field list, in extended array format
    */
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
-  /**
-   * Timestamp field name
-   */
-  public timeFieldName: string | undefined;
-  /**
-   * Type is used to identify rollup index patterns.
-   */
-  public type: string | undefined;
-  /**
-   * @deprecated Use `flattenHit` utility method exported from data plugin instead.
-   */
-  public flattenHit: (hit: Record<string, unknown[]>, deep?: boolean) => Record<string, unknown>;
-  /**
-   * List of meta fields by name
-   */
-  public metaFields: string[];
-  /**
-   * SavedObject version
-   */
-  public version: string | undefined;
-  /**
-   * Array of filters - hides fields in discover
-   */
-  public sourceFilters?: SourceFilter[];
-  /**
-   * Array of namespace ids
-   */
-  public namespaces: string[];
-  /**
-   * Original saved object body. Used to check for saved object changes.
-   */
-  private originalSavedObjectBody: SavedObjectBody = {};
-  /**
-   * Returns true if short dot notation is enabled
-   */
-  private shortDotsEnable: boolean = false;
-  /**
-   * FieldFormats service interface
-   */
-  private fieldFormats: FieldFormatsStartCommon;
-  /**
-   * Map of field attributes by field name. Currently count and customLabel.
-   */
-  private fieldAttrs: FieldAttrs;
-  /**
-   * Map of runtime field definitions by field name
-   */
-  private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
-  /**
-   * Prevents errors when index pattern exists before indices
-   */
-  public readonly allowNoIndex: boolean = false;
-  /**
-   * Name of the data view. Human readable name used to differentiate data view.
-   */
-  public name: string = '';
-
-  /*
-   * list of indices that the index pattern matched
-   */
-  public matchedIndices: string[] = [];
 
   /**
    * constructor
@@ -158,6 +63,7 @@ export class DataView implements DataViewBase {
    */
 
   constructor(config: DataViewDeps) {
+    super(config);
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     // set dependencies
@@ -183,44 +89,10 @@ export class DataView implements DataViewBase {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
-    this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
   }
-
-  /**
-   * Get name of Data View
-   */
-  getName = () => (this.name ? this.name : this.title);
-
-  /**
-   * Get index pattern
-   * @returns index pattern string
-   */
-
-  getIndexPattern = () => this.title;
-
-  /**
-   * Set index pattern
-   * @param string index pattern string
-   */
-
-  setIndexPattern = (indexPattern: string) => {
-    this.title = indexPattern;
-  };
-
-  /**
-   * Get last saved saved object fields
-   */
-  getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
-
-  /**
-   * Reset last saved saved object fields. Used after saving.
-   */
-  resetOriginalSavedObjectBody = () => {
-    this.originalSavedObjectBody = this.getAsSavedObjectBody();
-  };
 
   /**
    * Returns field attributes map
@@ -297,10 +169,6 @@ export class DataView implements DataViewBase {
     };
   }
 
-  isPersisted() {
-    return typeof this.version === 'string';
-  }
-
   /**
    * Creates static representation of the data view.
    * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
@@ -330,15 +198,6 @@ export class DataView implements DataViewBase {
 
     // Filter undefined values from the spec
     return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
-  }
-
-  /**
-   * Get the source filtering configuration for that index.
-   */
-  getSourceFiltering() {
-    return {
-      excludes: (this.sourceFilters && this.sourceFilters.map((filter) => filter.value)) || [],
-    };
   }
 
   /**
@@ -410,52 +269,6 @@ export class DataView implements DataViewBase {
   getFieldByName(name: string): DataViewField | undefined {
     if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
-  }
-
-  /**
-   * Get aggregation restrictions. Rollup fields can only perform a subset of aggregations.
-   */
-
-  getAggregationRestrictions() {
-    return this.typeMeta?.aggs;
-  }
-
-  /**
-   * Returns index pattern as saved object body for saving
-   */
-  getAsSavedObjectBody(): DataViewAttributes {
-    const fieldAttrs = this.getFieldAttrs();
-    const runtimeFieldMap = this.runtimeFieldMap;
-
-    return {
-      fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
-      title: this.getIndexPattern(),
-      timeFieldName: this.timeFieldName,
-      sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
-      fieldFormatMap: this.fieldFormatMap ? JSON.stringify(this.fieldFormatMap) : undefined,
-      type: this.type!,
-      typeMeta: JSON.stringify(this.typeMeta ?? {}),
-      allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
-      runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
-      name: this.name,
-    };
-  }
-
-  /**
-   * Provide a field, get its formatter
-   * @param field field to get formatter for
-   */
-  getFormatterForField(field: DataViewField | DataViewField['spec']): FieldFormat {
-    const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
-    if (fieldFormat) {
-      return fieldFormat;
-    }
-
-    return this.fieldFormats.getDefaultInstance(
-      field.type as KBN_FIELD_TYPES,
-      field.esTypes as ES_FIELD_TYPES[]
-    );
   }
 
   /**
@@ -625,35 +438,6 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Get formatter for a given field name. Return undefined if none exists.
-   * @param fieldname name of field to get formatter for
-   */
-  getFormatterForFieldNoDefault(fieldname: string) {
-    const formatSpec = this.fieldFormatMap[fieldname];
-    if (formatSpec?.id) {
-      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
-    }
-  }
-
-  /**
-   * Set field attribute
-   * @param fieldName name of field to set attribute on
-   * @param attrName name of attribute to set
-   * @param value value of attribute
-   */
-
-  protected setFieldAttrs<K extends keyof FieldAttrSet>(
-    fieldName: string,
-    attrName: K,
-    value: FieldAttrSet[K]
-  ) {
-    if (!this.fieldAttrs[fieldName]) {
-      this.fieldAttrs[fieldName] = {} as FieldAttrSet;
-    }
-    this.fieldAttrs[fieldName][attrName] = value;
-  }
-
-  /**
    * Set field custom label
    * @param fieldName name of field to set custom label on
    * @param customLabel custom label value. If undefined, custom label is removed
@@ -686,24 +470,6 @@ export class DataView implements DataViewBase {
     }
     this.setFieldAttrs(fieldName, 'count', newCount);
   }
-
-  /**
-   * Set field formatter
-   * @param fieldName name of field to set format on
-   * @param format field format in serialized form
-   */
-  public readonly setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
-    this.fieldFormatMap[fieldName] = format;
-  };
-
-  /**
-   * Remove field format from the field format map.
-   * @param fieldName field name associated with the format for removal
-   */
-
-  public readonly deleteFieldFormat = (fieldName: string) => {
-    delete this.fieldFormatMap[fieldName];
-  };
 
   private getMappedFieldNames() {
     return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
