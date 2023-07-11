@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { ManagementServerPlugin } from './plugin';
-export { config } from './config';
+import { AppNavLinkStatus } from '@kbn/core/public';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new ManagementServerPlugin(initContext);
+export interface ConfigSchema {
+  deeplinks: {
+    navLinkStatus: keyof typeof AppNavLinkStatus;
+  };
+}
