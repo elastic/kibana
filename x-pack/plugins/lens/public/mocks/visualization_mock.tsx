@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Visualization, VisualizationMap } from '../types';
 
@@ -49,7 +49,7 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    renderDimensionEditor: jest.fn(),
+    DimensionEditorComponent: jest.fn(() => <div />),
   };
 }
 
