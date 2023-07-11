@@ -6,9 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { ManagementServerPlugin } from './plugin';
-export { config } from './config';
+import { PluginInitializerContext, Plugin } from '@kbn/core/server';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new ManagementServerPlugin(initContext);
+export class DevToolsServerPlugin implements Plugin<object, object> {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup() {
+    return {};
+  }
+
+  public start() {
+    return {};
+  }
+
+  public stop() {}
+}
