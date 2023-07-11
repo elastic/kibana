@@ -21,7 +21,15 @@ journey('OverviewScrolling', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const retry: RetryService = params.getService('retry');
 
+  const listOfRequests: string[] = [];
+
   before(async () => {
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.includes('/synthetics/') || url.includes('/uptime/')) {
+        listOfRequests.push(request.url());
+      }
+    });
     await enableMonitorManagedViaApi(params.kibanaUrl);
     await cleanTestMonitors(params);
 
@@ -46,6 +54,20 @@ journey('OverviewScrolling', async ({ page, params }) => {
     await syntheticsApp.loginToKibana();
     const invalid = await page.locator(`text=Username or password is incorrect. Please try again.`);
     expect(await invalid.isVisible()).toBeFalsy();
+  });
+
+  step('validates de-duplicate requests', async () => {
+    await page.waitForSelector(`text="test monitor 0"`);
+
+    const assertUnique = (value: string) => {
+      expect(listOfRequests.filter((req) => req.includes(value)).length).toBe(1);
+    };
+    assertUnique('/overview_status');
+    assertUnique('/overview?');
+    assertUnique('/service/monitors');
+    assertUnique('/monitor/filters');
+
+    expect(listOfRequests.length).toBe(16);
   });
 
   step('scroll until you see showing all monitors', async () => {
