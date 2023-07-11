@@ -6,6 +6,7 @@
  */
 
 // @ts-expect-error no definitions in component folder
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
 import React from 'react';
 
@@ -27,6 +28,7 @@ export function ResetSessionPage({
   basePath: IBasePath;
   customBranding: CustomBranding;
 }) {
+  const homeUrl = logoutUrl.split('/api/security')[0] + '/app/home';
   return (
     <PromptPage
       buildNumber={buildNumber}
@@ -50,12 +52,24 @@ export function ResetSessionPage({
             defaultMessage="Log in as different user"
           />
         </EuiButton>,
-        <EuiButtonEmpty id="goBackButton">
-          <FormattedMessage
-            id="xpack.security.resetSession.goBackButtonLabel"
-            defaultMessage="Go back"
-          />
-        </EuiButtonEmpty>,
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiButtonEmpty id="goBackButton">
+              <FormattedMessage
+                id="xpack.security.resetSession.goBackButtonLabel"
+                defaultMessage="Go back"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonEmpty id="goHomeButton" href={homeUrl}>
+              <FormattedMessage
+                id="xpack.security.resetSession.goHomeButtonLabel"
+                defaultMessage="Go Home"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>,
       ]}
       customBranding={customBranding}
     />

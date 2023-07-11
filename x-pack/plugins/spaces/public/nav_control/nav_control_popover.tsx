@@ -82,7 +82,7 @@ class NavControlPopoverUI extends Component<Props, State> {
     const { theme } = this.props;
 
     let element: React.ReactNode;
-    if (this.state.loading || this.state.spaces.length < 2) {
+    if ((this.state.loading && this.state.spaces.length === 0) || this.state.spaces.length < 2) {
       element = (
         <SpacesDescription
           id={popoutContentId}
