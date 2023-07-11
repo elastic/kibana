@@ -15,7 +15,10 @@ import {
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import {
+  ApmIndicesConfig,
+  getApmIndices,
+} from '../settings/apm_indices/get_apm_indices';
 import { ApmEvent } from './bundle/get_apm_events';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
@@ -53,6 +56,7 @@ const getDiagnosticsRoute = createApmServerRoute({
       indices: IndicesGetResponse;
       ingestPipelines: IngestGetPipelineResponse;
     };
+    apmIndices: ApmIndicesConfig;
     apmIndexTemplates: Array<{
       name: string;
       isNonStandard: boolean;

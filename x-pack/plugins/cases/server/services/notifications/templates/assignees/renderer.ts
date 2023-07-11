@@ -79,6 +79,7 @@ export const assigneesTemplateRenderer = async (
         ? `${caseData.attributes.description.slice(0, DESCRIPTION_LIMIT)}...`
         : caseData.attributes.description,
     url: caseUrl,
+    currentYear: new Date().getUTCFullYear(),
   });
 
   return template;

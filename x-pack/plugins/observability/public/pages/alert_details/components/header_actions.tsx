@@ -23,15 +23,13 @@ export interface HeaderActionsProps {
 
 export function HeaderActions({ alert }: HeaderActionsProps) {
   const {
-    http,
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
   } = useKibana().services;
 
-  const { rule, reloadRule } = useFetchRule({
-    http,
+  const { rule, refetch } = useFetchRule({
     ruleId: alert?.fields[ALERT_RULE_UUID] || '',
   });
 
@@ -142,7 +140,9 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           onClose={() => {
             setRuleConditionsFlyoutOpen(false);
           }}
-          onSave={reloadRule}
+          onSave={async () => {
+            refetch();
+          }}
         />
       ) : null}
 
@@ -150,7 +150,9 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
         <RuleSnoozeModal
           rule={rule}
           onClose={() => setSnoozeModalOpen(false)}
-          onRuleChanged={reloadRule}
+          onRuleChanged={async () => {
+            refetch();
+          }}
           onLoading={noop}
         />
       ) : null}

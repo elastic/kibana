@@ -48,6 +48,15 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
 
+    if (monitors.length === 0) {
+      return {
+        data: {
+          certs: [],
+          total: 0,
+        },
+      };
+    }
+
     const { enabledMonitorQueryIds } = await processMonitors(
       monitors,
       server,

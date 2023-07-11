@@ -10,12 +10,13 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 interface ExploreMatchingButtonProps {
   noDataViewMatches: boolean;
   indexMatches: number;
   dataViewSearchString: string;
-  onCreateDefaultAdHocDataView?: (pattern: string) => void;
+  onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
   setPopoverIsOpen: (isOpen: boolean) => void;
 }
 
@@ -47,7 +48,7 @@ export const ExploreMatchingButton = ({
             data-test-subj="explore-matching-indices-button"
             onClick={() => {
               setPopoverIsOpen(false);
-              onCreateDefaultAdHocDataView(dataViewSearchString);
+              onCreateDefaultAdHocDataView({ title: dataViewSearchString });
             }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.indexPattern.createForMatchingIndices', {

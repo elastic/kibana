@@ -46,7 +46,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const { spaces } = useStartServices();
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
-  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
+  const canReadPackageSettings = useAuthz().integrations.readPackageInfo;
 
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();

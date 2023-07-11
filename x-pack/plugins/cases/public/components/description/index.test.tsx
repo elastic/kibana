@@ -14,6 +14,7 @@ import { basicCase } from '../../containers/mock';
 import { Description } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -106,6 +107,62 @@ describe('Description', () => {
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();
       expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
+    });
+  });
+
+  it('shows an error when description is empty', async () => {
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
+
+    await waitFor(() => {
+      expect(screen.getByText('A description is required.')).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
+    });
+  });
+
+  it('shows an error when description is a sting of empty characters', async () => {
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
+
+    await waitFor(() => {
+      expect(screen.getByText('A description is required.')).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
+    });
+  });
+
+  it('shows an error when description is too long', async () => {
+    const longDescription = Array(MAX_DESCRIPTION_LENGTH / 2 + 1)
+      .fill('a')
+      .toString();
+
+    const res = appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} />
+    );
+
+    userEvent.click(res.getByTestId('description-edit-icon'));
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), longDescription);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'The length of the description is too long. The maximum length is 30000 characters.'
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
     });
   });
 
