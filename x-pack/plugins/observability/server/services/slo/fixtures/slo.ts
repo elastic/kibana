@@ -71,7 +71,7 @@ export const createKQLCustomIndicator = (
 
 export const createMetricCustomIndicator = (
   params: Partial<MetricCustomIndicator['params']> = {}
-): Indicator => ({
+): MetricCustomIndicator => ({
   type: 'sli.metric.custom',
   params: {
     index: 'my-index*',

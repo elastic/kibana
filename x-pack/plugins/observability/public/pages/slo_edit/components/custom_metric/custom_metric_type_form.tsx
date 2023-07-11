@@ -22,6 +22,7 @@ import {
   useFetchIndexPatternFields,
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
@@ -221,6 +222,7 @@ export function CustomMetricIndicatorTypeForm() {
           }
         />
       </EuiPanel>
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }
