@@ -6,22 +6,12 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiTextColor,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
 import type {
@@ -33,7 +23,6 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { DropIllustration } from '@kbn/chart-icons';
 import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -56,8 +45,6 @@ import {
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
-import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import { getOriginalRequestErrorMessages } from '../../error_helper';
 import {
   onActiveDataChange,
@@ -81,9 +68,10 @@ import {
   DataViewsState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
+import { inferTimeField } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { ApplyChangesPrompt } from './apply_changes_prompt';
+import { DragDropPrompt } from './drag_drop_prompt';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -474,62 +462,6 @@ export const WorkspacePanel = ({
     [dispatchLens, getSuggestionForField]
   );
 
-  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
-
-  const renderDragDropPrompt = () => {
-    return (
-      <EuiText
-        className={classNames('lnsWorkspacePanel__emptyContent')}
-        textAlign="center"
-        data-test-subj="workspace-drag-drop-prompt"
-        size="s"
-      >
-        <div>
-          <DropIllustration
-            aria-hidden={true}
-            className={classNames(
-              'lnsWorkspacePanel__promptIllustration',
-              'lnsWorkspacePanel__dropIllustration'
-            )}
-          />
-          <h2>
-            <strong>
-              {!expressionExists
-                ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
-                    defaultMessage: 'Drop some fields here to start',
-                  })
-                : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
-                    defaultMessage: 'Drop field here',
-                  })}
-            </strong>
-          </h2>
-          {!expressionExists && (
-            <>
-              <EuiTextColor color="subdued" component="div">
-                <p>
-                  {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
-                    defaultMessage: 'Lens is the recommended editor for creating visualizations',
-                  })}
-                </p>
-              </EuiTextColor>
-              <p className="lnsWorkspacePanel__actions">
-                <EuiLink
-                  href="https://www.elastic.co/products/kibana/feedback"
-                  target="_blank"
-                  external
-                >
-                  {i18n.translate('xpack.lens.editorFrame.goToForums', {
-                    defaultMessage: 'Make requests and give feedback',
-                  })}
-                </EuiLink>
-              </p>
-            </>
-          )}
-        </div>
-      </EuiText>
-    );
-  };
-
   const renderVisualization = () => {
     return (
       <VisualizationWrapper
@@ -575,7 +507,7 @@ export const WorkspacePanel = ({
       ? () => (
           <ApplyChangesPrompt core={core} onApplyButtonClick={() => dispatchLens(applyChanges())} />
         )
-      : renderDragDropPrompt;
+      : () => <DragDropPrompt expressionExists={expressionExists} />;
 
     return (
       <DragDrop
