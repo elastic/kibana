@@ -387,7 +387,6 @@ export async function persistedStateToExpression(
       { isLoading: false, state },
     ])
   );
-  // console.dir(datasourceStatesFromSO);
   const { indexPatterns, indexPatternRefs } = await initializeDataViews(
     {
       datasourceMap,
