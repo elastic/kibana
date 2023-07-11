@@ -39,7 +39,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
