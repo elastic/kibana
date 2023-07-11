@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useContext, useMemo } from 'react';
 import { NavigationKibanaDependencies, NavigationServices } from '../types';
 import { CloudLinks, getCloudLinks } from './cloud_links';
 
@@ -31,7 +31,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   const { basePath } = http;
   const { navigateToUrl } = core.application;
 
-  const cloudLinks: CloudLinks = cloud ? getCloudLinks(cloud) : {};
+  const cloudLinks: CloudLinks = useMemo(() => (cloud ? getCloudLinks(cloud) : {}), [cloud]);
 
   const value: NavigationServices = {
     basePath,

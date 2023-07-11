@@ -39,7 +39,7 @@ const navigationNodeToEuiItem = (
 
     return () => (
       <div className="euiSideNavItemButton" data-test-subj={dataTestSubj}>
-        <EuiLink href={href} external>
+        <EuiLink href={href} external color="text">
           {item.title}
         </EuiLink>
       </div>

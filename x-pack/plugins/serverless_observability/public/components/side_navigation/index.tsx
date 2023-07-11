@@ -150,12 +150,15 @@ const navigationTree: NavigationTreeDefinition = {
               link: 'fleet',
             },
             {
+              id: 'cloudLinkUserAndRoles',
               cloudLink: 'userAndRoles',
             },
             {
+              id: 'cloudLinkPerformance',
               cloudLink: 'performance',
             },
             {
+              id: 'cloudLinkBilling',
               cloudLink: 'billingAndSub',
             },
           ],

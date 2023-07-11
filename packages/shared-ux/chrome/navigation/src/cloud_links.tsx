@@ -22,7 +22,7 @@ export const getCloudLinks = (cloud: CloudStart): CloudLinks => {
   const links: CloudLinks = {};
 
   if (usersAndRolesUrl) {
-    links.billingAndSub = {
+    links.userAndRoles = {
       title: i18n.translate(
         'sharedUXPackages.chrome.sideNavigation.cloudLinks.usersAndRolesLinkText',
         {
@@ -34,7 +34,7 @@ export const getCloudLinks = (cloud: CloudStart): CloudLinks => {
   }
 
   if (performanceUrl) {
-    links.billingAndSub = {
+    links.performance = {
       title: i18n.translate(
         'sharedUXPackages.chrome.sideNavigation.cloudLinks.performanceLinkText',
         {
