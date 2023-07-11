@@ -24,7 +24,50 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
+const mockInterceptedWarnings = [
+  {
+    originalWarning: {
+      type: 'shard_failure',
+      message: '3 of 4 shards failed',
+      text: 'The data might be incomplete or wrong.',
+      reason: {
+        type: 'illegal_argument_exception',
+        reason: 'Field [__anonymous_] of type [boolean] does not support custom formats',
+      },
+    },
+    action: <div>test1</div>,
+  },
+  {
+    originalWarning: {
+      type: 'shard_failure',
+      message: '3 of 4 shards failed',
+      text: 'The data might be incomplete or wrong.',
+      reason: {
+        type: 'query_shard_exception',
+        reason:
+          'failed to create query: [.ds-kibana_sample_data_logs-2023.07.11-000001][0] Testing shard failures!',
+      },
+    },
+    action: <div>test2</div>,
+  },
+  {
+    originalWarning: {
+      type: 'shard_failure',
+      message: '1 of 4 shards failed',
+      text: 'The data might be incomplete or wrong.',
+      reason: {
+        type: 'query_shard_exception',
+        reason:
+          'failed to create query: [.ds-kibana_sample_data_logs-2023.07.11-000001][0] Testing shard failures!',
+      },
+    },
+    action: <div>test3</div>,
+  },
+];
+
 const mockFilterManager = createFilterManagerMock();
+
+let mockOverrideInterceptedWarnings = false;
 
 jest.mock('../services/context', () => {
   const originalModule = jest.requireActual('../services/context');
@@ -35,7 +78,12 @@ jest.mock('../services/context', () => {
       if (!dataView || !dataView.id) {
         throw new Error();
       }
-      return { rows: type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits };
+      return {
+        rows: type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits,
+        interceptedWarnings: mockOverrideInterceptedWarnings
+          ? [mockInterceptedWarnings[type === 'predecessors' ? 0 : 1]]
+          : undefined,
+      };
     },
   };
 });
@@ -45,7 +93,12 @@ jest.mock('../services/anchor', () => ({
     if (!dataView.id || !anchorId) {
       throw new Error();
     }
-    return { anchorRow: mockAnchorHit };
+    return {
+      anchorRow: mockAnchorHit,
+      interceptedWarnings: mockOverrideInterceptedWarnings
+        ? [mockInterceptedWarnings[2]]
+        : undefined,
+    };
   },
 }));
 
@@ -118,6 +171,9 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.anchor).toEqual({ ...mockAnchorHit, isAnchor: true });
     expect(result.current.fetchedState.predecessors).toEqual(mockPredecessorHits);
     expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
+    expect(result.current.fetchedState.predecessorsInterceptedWarnings).toBeUndefined();
+    expect(result.current.fetchedState.successorsInterceptedWarnings).toBeUndefined();
+    expect(result.current.fetchedState.anchorInterceptedWarnings).toBeUndefined();
   });
 
   it('should set anchorStatus to failed when tieBreakingField array is empty', async () => {
@@ -186,5 +242,35 @@ describe('test useContextAppFetch', () => {
     expect(result.current.fetchedState.successorsStatus.reason).toBe(FailureReason.UNKNOWN);
     expect(result.current.fetchedState.predecessors).toEqual([]);
     expect(result.current.fetchedState.successors).toEqual([]);
+  });
+
+  it('should handle warnings', async () => {
+    mockOverrideInterceptedWarnings = true;
+
+    const { result } = initDefaults(['_doc']);
+
+    expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.UNINITIALIZED);
+    expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
+    expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.UNINITIALIZED);
+
+    await act(async () => {
+      await result.current.fetchAllRows();
+    });
+
+    expect(result.current.fetchedState.anchorStatus.value).toBe(LoadingStatus.LOADED);
+    expect(result.current.fetchedState.predecessorsStatus.value).toBe(LoadingStatus.LOADED);
+    expect(result.current.fetchedState.successorsStatus.value).toBe(LoadingStatus.LOADED);
+    expect(result.current.fetchedState.anchor).toEqual({ ...mockAnchorHit, isAnchor: true });
+    expect(result.current.fetchedState.predecessors).toEqual(mockPredecessorHits);
+    expect(result.current.fetchedState.successors).toEqual(mockSuccessorHits);
+    expect(result.current.fetchedState.predecessorsInterceptedWarnings).toEqual([
+      mockInterceptedWarnings[0],
+    ]);
+    expect(result.current.fetchedState.successorsInterceptedWarnings).toEqual([
+      mockInterceptedWarnings[1],
+    ]);
+    expect(result.current.fetchedState.anchorInterceptedWarnings).toEqual([
+      mockInterceptedWarnings[2],
+    ]);
   });
 });

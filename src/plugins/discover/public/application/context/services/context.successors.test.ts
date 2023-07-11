@@ -248,7 +248,7 @@ describe('context successors', function () {
       ];
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
-        ({ rows }) => {
+        ({ rows, interceptedWarnings }) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
             buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
@@ -257,6 +257,95 @@ describe('context successors', function () {
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
+          expect(interceptedWarnings).toBeUndefined();
+        }
+      );
+    });
+  });
+
+  describe('function fetchSuccessors with shard failures', function () {
+    const mockWarnings = [
+      {
+        originalWarning: {
+          message: 'Data might be incomplete because your request timed out 1',
+          type: 'timed_out',
+        },
+      },
+      {
+        originalWarning: {
+          message: 'Data might be incomplete because your request timed out 2',
+          type: 'timed_out',
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      mockSearchSource = createContextSearchSourceStub('@timestamp');
+
+      dataPluginMock = {
+        search: {
+          searchSource: {
+            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
+          },
+          showWarnings: jest.fn((adapter, callback) => {
+            callback(mockWarnings[0].originalWarning, {});
+            callback(mockWarnings[1].originalWarning, {});
+            // plus duplicates
+            callback(mockWarnings[0].originalWarning, {});
+            callback(mockWarnings[1].originalWarning, {});
+          }),
+        },
+      } as unknown as DataPublicPluginStart;
+
+      fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
+        const anchor = buildDataTableRecord(
+          {
+            _id: '1',
+            _index: 'test',
+            _source: {
+              [dataView.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          },
+          dataView,
+          true
+        );
+
+        return fetchSurroundingDocs(
+          SurrDocType.SUCCESSORS,
+          dataView,
+          anchor,
+          tieBreakerField,
+          SortDirection.desc,
+          size,
+          [],
+          dataPluginMock,
+          true,
+          {
+            ...mockDiscoverServices,
+            data: dataPluginMock,
+          }
+        );
+      };
+    });
+
+    it('should intercept request warnings', function () {
+      mockSearchSource._stubHits = [
+        mockSearchSource._createStubHit(MS_PER_DAY * 5000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 4000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 - 1),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 - 2),
+      ];
+
+      return fetchSuccessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
+        ({ rows, interceptedWarnings }) => {
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
+          expect(rows).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+          );
+          expect(dataPluginMock.search.showWarnings).toHaveBeenCalledTimes(1);
+          expect(interceptedWarnings).toEqual(mockWarnings);
         }
       );
     });

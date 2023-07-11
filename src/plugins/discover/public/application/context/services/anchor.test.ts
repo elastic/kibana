@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SortDirection } from '@kbn/data-plugin/public';
+import { SearchResponseWarning, SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { dataViewMock } from '../../../__mocks__/data_view';
@@ -202,9 +202,49 @@ describe('context app', function () {
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
         mockDiscoverServices
-      ).then(({ anchorRow }) => {
+      ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
         expect(anchorRow).toHaveProperty('isAnchor', true);
+        expect(interceptedWarnings).toBeUndefined();
+      });
+    });
+
+    it('should intercept shard failures', function () {
+      searchSourceStub = createSearchSourceStub([
+        { _id: '1', _index: 't' },
+        { _id: '3', _index: 't' },
+      ]);
+
+      const mockWarnings = [
+        {
+          originalWarning: {
+            message: 'Data might be incomplete because your request timed out',
+            type: 'timed_out',
+          } as SearchResponseWarning,
+        },
+      ];
+
+      const services = mockDiscoverServices;
+      services.data.search.showWarnings = jest.fn((adapter, callback) => {
+        // @ts-expect-error for empty meta
+        callback?.(mockWarnings[0].originalWarning, {});
+
+        // plus duplicates
+        // @ts-expect-error for empty meta
+        callback?.(mockWarnings[0].originalWarning, {});
+      });
+
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        services
+      ).then(({ anchorRow, interceptedWarnings }) => {
+        expect(anchorRow).toHaveProperty('raw._id', '1');
+        expect(anchorRow).toHaveProperty('isAnchor', true);
+        expect(interceptedWarnings).toEqual(mockWarnings);
       });
     });
   });
