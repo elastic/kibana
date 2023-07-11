@@ -25,7 +25,12 @@ import {
 } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
 import { BasePayload, ReportingRequestHandlerContext } from '../../types';
-import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
+import {
+  ExportType,
+  BaseExportTypeSetupDeps,
+  BaseExportTypeStartDeps,
+  decryptJobHeaders,
+} from '../common';
 import { JobParamsDownloadCSV } from './types';
 
 /*
@@ -51,6 +56,8 @@ export type ImmediateExecuteFn = (
 ) => Promise<TaskRunResult>;
 
 export class CsvSearchSourceImmediateExportType extends ExportType<
+  JobParamsDownloadCSV,
+  ImmediateExecuteFn,
   CsvSearchSourceImmediateExportTypeSetupDeps,
   CsvSearchSourceImmediateExportTypeStartDeps
 > {
@@ -101,8 +108,10 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     req: KibanaRequest
   ) => {
     const job = this.createJob(immediateJobParams);
+    const { encryptionKey } = this.config;
 
     const dataPluginStart = await this.startDeps.data;
+    const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, this.logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, this.logger);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
