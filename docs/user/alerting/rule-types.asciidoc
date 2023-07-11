@@ -60,8 +60,8 @@ If you create a rule in the {observability} app, its alerts are not visible in
 | {observability-guide}/create-alerts.html[Metrics rules]
 | Detect complex conditions in the {metrics-app}.
 
-| <<kibana-alerts,{stack-monitor-app}>>
-| Provide {kib} alerting rules out-of-the box to notify you of potential issues in the {stack}.
+| {observability-guide}/create-alerts.html[SLO burn rate rule]
+| Detect when the burn rate is above a defined threshold.
 
 | {observability-guide}/create-alerts.html[Uptime rules]
 | Detect complex conditions in the {uptime-app}.
