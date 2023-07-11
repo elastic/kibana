@@ -513,7 +513,7 @@ export function InstallElasticAgent() {
             },
             {
               title: i18n.translate(
-                'xpack.observability_onboarding.installElasticAgent.progress.eaConfig.incompleteTitle',
+                'xpack.observability_onboarding.installElasticAgent.configureStep.title',
                 { defaultMessage: 'Configure the Elastic agent' }
               ),
               status:

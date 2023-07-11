@@ -97,7 +97,10 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
 
     const { id } = await saveObservabilityOnboardingState({
       savedObjectsClient,
-      observabilityOnboardingState: { state } as ObservabilityOnboardingState,
+      observabilityOnboardingState: {
+        state: state as ObservabilityOnboardingState['state'],
+        progress: {},
+      },
     });
 
     return { apiKeyEncoded, onboardingId: id };
