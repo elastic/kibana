@@ -50,11 +50,6 @@ export function useMonitorErrors(monitorIdArg?: string) {
               },
               {
                 term: {
-                  'state.up': 0,
-                },
-              },
-              {
-                term: {
                   config_id: monitorIdArg ?? monitorId,
                 },
               },
@@ -68,7 +63,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
         sort: [{ 'state.started_at': 'desc' }],
         aggs: {
-          errorStates: {
+          states: {
             terms: {
               field: 'state.id',
               size: 10000,
@@ -101,9 +96,24 @@ export function useMonitorErrors(monitorIdArg?: string) {
   );
 
   return useMemo(() => {
-    const errorStates = data?.aggregations?.errorStates.buckets?.map((loc) => {
-      return loc.summary.hits.hits?.[0]._source as PingState;
-    });
+    const defaultValues = { upStates: [], errorStates: [] };
+    // re-bucket states into error/up
+    // including the `up` states is useful for determining error duration
+    const reduced =
+      data?.aggregations?.states.buckets.reduce<{
+        upStates: PingState[];
+        errorStates: PingState[];
+      }>((prev, cur) => {
+        const source = cur.summary.hits.hits?.[0]._source as unknown as PingState | undefined;
+        if (source?.state.up === 0) {
+          prev.errorStates.push(source as PingState);
+        } else if (source?.state.up !== undefined && source?.state.up >= 1) {
+          prev.upStates.push(source as PingState);
+        }
+        return prev;
+      }, defaultValues) ?? defaultValues;
+
+    const { errorStates, upStates } = reduced;
 
     const hasActiveError: boolean =
       data?.aggregations?.latest.hits.hits.length === 1 &&
@@ -113,6 +123,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
     return {
       errorStates,
+      upStates,
       loading,
       data,
       hasActiveError,

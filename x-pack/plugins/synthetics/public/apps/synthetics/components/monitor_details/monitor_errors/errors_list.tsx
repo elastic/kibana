@@ -34,12 +34,21 @@ function isErrorActive(lastError: PingState, currentError: PingState, latestPing
   );
 }
 
+function getNextUpStateForResolvedError(errorState: PingState, upStates: PingState[]) {
+  for (const upState of upStates) {
+    if (moment(upState.state.started_at).valueOf() > moment(errorState['@timestamp']).valueOf())
+      return upState;
+  }
+}
+
 export const ErrorsList = ({
   errorStates,
+  upStates,
   loading,
   location,
 }: {
   errorStates: PingState[];
+  upStates: PingState[];
   loading: boolean;
   location: ReturnType<typeof useSelectedLocation>;
 }) => {
@@ -154,7 +163,9 @@ export const ErrorsList = ({
 
             activeDuration = currentDiff < diff ? currentDiff : diff;
           } else {
-            activeDuration = diff;
+            const resolvedState = getNextUpStateForResolvedError(item, upStates);
+
+            activeDuration = moment(resolvedState?.state.started_at).diff(item['@timestamp']) ?? 0;
           }
         }
         return (
