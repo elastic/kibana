@@ -55,14 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
         id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
-      await esClient.deleteByQuery({
-        index: THRESHOLD_RULE_ALERT_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-      });
-      await esClient.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'observability' } },
-      });
       await cleanup({ esClient, logger });
     });
 
