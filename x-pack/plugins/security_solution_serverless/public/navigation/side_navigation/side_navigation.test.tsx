@@ -7,15 +7,19 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SecuritySideNavigation } from './side_navigation';
-import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
+import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { ServicesWrapper } from '../../common/__mocks__/services.mock';
+import { SecuritySideNavigation } from './side_navigation';
+import { useSideNavItems } from './use_side_nav_items';
+import { ServicesProvider } from '../../common/services';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { ExternalPageName } from '../links/constants';
 
 jest.mock('./use_side_nav_items');
+jest.mock('../../common/services');
 
 const mockUseSideNavItems = useSideNavItems as jest.Mock;
-const mockUseSideNavSelectedId = useSideNavSelectedId as jest.Mock;
+// const mockUseSideNavSelectedId = useSideNavSelectedId as jest.Mock;
 
 const mockSolutionSideNav = jest.fn((_props: unknown) => <div data-test-subj="solutionSideNav" />);
 jest.mock('@kbn/security-solution-side-nav', () => ({
@@ -45,8 +49,9 @@ const sideNavItems = [
   },
 ];
 
+const wrapper = ServicesProvider as React.JSXElementConstructor<unknown>;
+
 mockUseSideNavItems.mockReturnValue(sideNavItems);
-mockUseSideNavSelectedId.mockReturnValue(SecurityPageName.alerts);
 
 describe('SecuritySideNavigation', () => {
   beforeEach(() => {
@@ -55,22 +60,22 @@ describe('SecuritySideNavigation', () => {
 
   it('should render loading when not items received', () => {
     mockUseSideNavItems.mockReturnValueOnce([]);
-    const component = render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
+    const component = render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
     expect(component.queryByTestId('sideNavLoader')).toBeInTheDocument();
   });
 
   it('should not render loading when items received', () => {
-    const component = render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
+    const component = render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
     expect(component.queryByTestId('sideNavLoader')).not.toBeInTheDocument();
   });
 
   it('should render the SideNav when items received', () => {
-    const component = render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
+    const component = render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
     expect(component.queryByTestId('solutionSideNav')).toBeInTheDocument();
   });
 
   it('should pass item props to the SolutionSideNav component', () => {
-    render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
+    render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -79,8 +84,43 @@ describe('SecuritySideNavigation', () => {
     );
   });
 
-  it('should selectedId the SolutionSideNav component', () => {
-    render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
+  it('should have empty selectedId the SolutionSideNav component', () => {
+    render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
+
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: '',
+      })
+    );
+  });
+
+  it('should have root external selectedId the SolutionSideNav component', () => {
+    const activeNodes = [[{ id: 'dev_tools' }]] as ChromeProjectNavigationNode[][];
+    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper });
+
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: ExternalPageName.devToolsRoot,
+      })
+    );
+  });
+
+  it('should have external page selectedId the SolutionSideNav component', () => {
+    const activeNodes = [[{ id: `ml:overview` }]] as ChromeProjectNavigationNode[][];
+    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper });
+
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: ExternalPageName.mlOverview,
+      })
+    );
+  });
+
+  it('should internal selectedId the SolutionSideNav component', () => {
+    const activeNodes = [
+      [{ id: `${APP_UI_ID}:${SecurityPageName.alerts}` }],
+    ] as ChromeProjectNavigationNode[][];
+    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({

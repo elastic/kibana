@@ -4,5 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getProjectNavLinks$ } from './nav_links';
-export type { ProjectNavLinks } from './types';
+
+export { ServicesProvider, withServicesProvider, useKibana } from './services';
+export type { Services } from './types';

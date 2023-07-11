@@ -6,8 +6,8 @@
  */
 
 import type { AppFeatureKeys } from '@kbn/security-solution-plugin/common';
-import uniq from 'lodash/fp/uniq';
 import type { SecurityProductTypes } from '../config';
+import { ProductTier } from '../product';
 import { PLI_APP_FEATURES } from './pli_config';
 
 /**
@@ -16,14 +16,13 @@ import { PLI_APP_FEATURES } from './pli_config';
 export const getProductAppFeatures = (productTypes: SecurityProductTypes): AppFeatureKeys => {
   const appFeatureKeys = productTypes.reduce<AppFeatureKeys>(
     (appFeatures, { product_line: line, product_tier: tier }) => {
-      if (tier === 'complete') {
-        // Adding all "essentials" PLIs when tier is "complete"
-        appFeatures.push(...PLI_APP_FEATURES[line].essentials);
+      if (tier === ProductTier.complete) {
+        appFeatures.push(...PLI_APP_FEATURES[line][ProductTier.essentials]);
       }
       appFeatures.push(...PLI_APP_FEATURES[line][tier]);
       return appFeatures;
     },
     []
   );
-  return uniq(appFeatureKeys);
+  return appFeatureKeys;
 };

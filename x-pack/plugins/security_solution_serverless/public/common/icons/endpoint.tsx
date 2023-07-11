@@ -40,3 +40,6 @@ export const IconEndpoint: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) =>
     </g>
   </svg>
 );
+
+// eslint-disable-next-line import/no-default-export
+export default IconEndpoint;

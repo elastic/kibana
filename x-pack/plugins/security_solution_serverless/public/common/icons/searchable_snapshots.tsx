@@ -68,3 +68,6 @@ export const IconSearchableSnapshots: React.FC<SVGProps<SVGSVGElement>> = ({ ...
     </g>
   </svg>
 );
+
+// eslint-disable-next-line import/no-default-export
+export default IconSearchableSnapshots;

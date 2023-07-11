@@ -41,3 +41,6 @@ export const IconSiem: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
     </defs>
   </svg>
 );
+
+// eslint-disable-next-line import/no-default-export
+export default IconSiem;

@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import type { SecuritySolutionServerlessPluginStartDeps } from '../types';
-import { getProjectNavLinks$, type ProjectNavLinks } from '../navigation/links';
-
-interface InternalServices {
-  getProjectNavLinks$: () => ProjectNavLinks;
-}
-export type Services = CoreStart & SecuritySolutionServerlessPluginStartDeps & InternalServices;
+import type { Services } from './types';
 
 export const ServicesProvider: React.FC<{
   services: Services;
@@ -44,12 +37,3 @@ export const withServicesProvider = <T extends object>(
 };
 
 export const useKibana = () => useKibanaReact<Services>();
-
-export const createServices = (
-  core: CoreStart,
-  pluginsStart: SecuritySolutionServerlessPluginStartDeps
-): Services => {
-  const { securitySolution } = pluginsStart;
-  const projectNavLinks$ = getProjectNavLinks$(securitySolution.getNavLinks$(), core);
-  return { ...core, ...pluginsStart, getProjectNavLinks$: () => projectNavLinks$ };
-};

@@ -6,7 +6,8 @@
  */
 
 import type { ChromeProjectNavigationNode, NodeDefinition } from '@kbn/core-chrome-browser';
-import { getPresets } from '@kbn/shared-ux-chrome-navigation';
+import { defaultNavigation as mlDefaultNav } from '@kbn/default-nav-ml';
+import { defaultNavigation as devToolsDefaultNav } from '@kbn/default-nav-devtools';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { Services } from '../common/services';
 import type { ProjectNavigationLink, ProjectPageName } from './links/types';
@@ -95,11 +96,12 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
     link: ChromeProjectNavigationNode
   ): ChromeProjectNavigationNode[] | undefined => {
     if (id === SecurityPageName.mlLanding) {
-      return processDefaultNav(getPresets('ml').children, link.path);
+      return processDefaultNav(mlDefaultNav.children, link.path);
     }
     if (id === ExternalPageName.devToolsRoot) {
-      return processDefaultNav(getPresets('devtools').children, link.path);
+      return processDefaultNav(devToolsDefaultNav.children, link.path);
     }
+    return undefined;
   };
 
   const processDefaultNav = (

@@ -16,7 +16,7 @@ import type {
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './upselling';
-import { createServices } from './common/services';
+import { createServices } from './common/services/create_services';
 import { configureNavigation } from './navigation';
 import { setRoutes } from './pages/routes';
 

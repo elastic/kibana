@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
@@ -26,11 +23,3 @@ export const mockServices: Services = {
   getProjectNavLinks$: jest.fn(() => new BehaviorSubject(mockProjectNavLinks())),
   management: managementPluginMock.createStartContract(),
 };
-
-export const ServicesWrapper = React.memo(function ServicesWrapper({ children }) {
-  return (
-    <I18nProvider>
-      <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
-    </I18nProvider>
-  );
-});
