@@ -30,10 +30,10 @@ import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/sy
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
-  conversationId?: string;
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
-  onSelectionChange?: (value: string) => void;
+  selectedConversationId: string | undefined;
+  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
 }
@@ -56,17 +56,16 @@ export type ConversationSelectorOption = EuiComboBoxOptionOption<{
 
 export const ConversationSelector: React.FC<Props> = React.memo(
   ({
-    conversationId = DEFAULT_CONVERSATION_TITLE,
+    selectedConversationId = DEFAULT_CONVERSATION_TITLE,
     defaultConnectorId,
     defaultProvider,
-    onSelectionChange,
+    setSelectedConversationId,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
   }) => {
     const { allSystemPrompts } = useAssistantContext();
 
     const { deleteConversation, setConversation } = useConversation();
-    const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
 
     const { conversations } = useAssistantContext();
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
@@ -112,7 +111,13 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         }
         setSelectedConversationId(searchValue);
       },
-      [allSystemPrompts, defaultConnectorId, defaultProvider, setConversation]
+      [
+        allSystemPrompts,
+        defaultConnectorId,
+        defaultProvider,
+        setConversation,
+        setSelectedConversationId,
+      ]
     );
 
     // Callback for when user deletes a conversation
@@ -124,32 +129,29 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         setTimeout(() => {
           deleteConversation(cId);
         }, 0);
-        // onSystemPromptDeleted(cId);
       },
-      [conversationIds, deleteConversation, selectedConversationId]
+      [conversationIds, deleteConversation, selectedConversationId, setSelectedConversationId]
     );
 
     const onChange = useCallback(
       (newOptions: ConversationSelectorOption[]) => {
         if (newOptions.length === 0) {
           setSelectedOptions([]);
-          // handleSelectionChange([]);
         } else if (conversationOptions.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
           setSelectedConversationId(newOptions?.[0].label);
         }
-        // setSelectedConversationId(value ?? DEFAULT_CONVERSATION_TITLE);
       },
-      [conversationOptions]
+      [conversationOptions, setSelectedConversationId]
     );
 
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
       setSelectedConversationId(prevId);
-    }, [conversationIds, selectedConversationId]);
+    }, [conversationIds, selectedConversationId, setSelectedConversationId]);
     const onRightArrowClick = useCallback(() => {
       const nextId = getNextConversationId(conversationIds, selectedConversationId);
       setSelectedConversationId(nextId);
-    }, [conversationIds, selectedConversationId]);
+    }, [conversationIds, selectedConversationId, setSelectedConversationId]);
 
     // Register keyboard listener for quick conversation switching
     const onKeyDown = useCallback(
@@ -186,9 +188,8 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     useEvent('keydown', onKeyDown);
 
     useEffect(() => {
-      onSelectionChange?.(selectedConversationId);
       setSelectedOptions(conversationOptions.filter((c) => c.label === selectedConversationId));
-    }, [conversationOptions, onSelectionChange, selectedConversationId]);
+    }, [conversationOptions, selectedConversationId]);
 
     const renderOption: (
       option: ConversationSelectorOption,

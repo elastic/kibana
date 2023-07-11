@@ -475,10 +475,10 @@ const AssistantComponent: React.FC<Props> = ({
                 `}
               >
                 <ConversationSelector
-                  conversationId={selectedConversationId}
                   defaultConnectorId={defaultConnectorId}
                   defaultProvider={defaultProvider}
-                  onSelectionChange={(id) => setSelectedConversationId(id)}
+                  selectedConversationId={selectedConversationId}
+                  setSelectedConversationId={setSelectedConversationId}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                   isDisabled={isDisabled}
                 />
@@ -510,6 +510,7 @@ const AssistantComponent: React.FC<Props> = ({
                       <AssistantSettingsButton
                         isDisabled={isDisabled}
                         selectedConversation={currentConversation}
+                        setSelectedConversationId={setSelectedConversationId}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

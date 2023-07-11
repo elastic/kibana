@@ -227,24 +227,20 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           renderOption={renderOption}
           compressed={true}
           prepend={
-            <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE} (⌘ + ←)`} display="block">
-              <EuiButtonIcon
-                iconType="arrowLeft"
-                aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
-                onClick={onLeftArrowClick}
-                disabled={conversationIds.length <= 1}
-              />
-            </EuiToolTip>
+            <EuiButtonIcon
+              iconType="arrowLeft"
+              aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
+              onClick={onLeftArrowClick}
+              disabled={conversationIds.length <= 1}
+            />
           }
           append={
-            <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE} (⌘ + →)`} display="block">
-              <EuiButtonIcon
-                iconType="arrowRight"
-                aria-label={i18n.NEXT_CONVERSATION_TITLE}
-                onClick={onRightArrowClick}
-                disabled={conversationIds.length <= 1}
-              />
-            </EuiToolTip>
+            <EuiButtonIcon
+              iconType="arrowRight"
+              aria-label={i18n.NEXT_CONVERSATION_TITLE}
+              onClick={onRightArrowClick}
+              disabled={conversationIds.length <= 1}
+            />
           }
         />
       </EuiFormRow>

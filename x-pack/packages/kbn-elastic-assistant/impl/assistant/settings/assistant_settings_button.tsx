@@ -15,6 +15,7 @@ import { useAssistantContext } from '../../assistant_context';
 
 interface Props {
   selectedConversation: Conversation;
+  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   isDisabled?: boolean;
 }
 
@@ -22,7 +23,7 @@ interface Props {
  * Gear button that opens the assistant settings modal
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
-  ({ isDisabled = false, selectedConversation }) => {
+  ({ isDisabled = false, selectedConversation, setSelectedConversationId }) => {
     const { isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab } =
       useAssistantContext();
 
@@ -60,6 +61,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
         {isSettingsModalVisible && (
           <AssistantSettings
             selectedConversation={selectedConversation}
+            setSelectedConversationId={setSelectedConversationId}
             onClose={handleCloseModal}
             onSave={handleSave}
           />

@@ -41,19 +41,18 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
   ({
     systemPromptSettings,
     onSelectedSystemPromptChange,
-    selectedSystemPrompt: defaultSystemPrompt,
+    selectedSystemPrompt,
     setUpdatedSystemPromptSettings,
   }) => {
     const { conversations } = useAssistantContext();
 
     // Form options
-    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState(defaultSystemPrompt);
     // Prompt
-    const [prompt, setPrompt] = useState(defaultSystemPrompt?.content ?? '');
+    const [prompt, setPrompt] = useState(selectedSystemPrompt?.content ?? '');
     const handlePromptTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setPrompt(e.target.value);
     }, []);
-    // Conversations this system prompt should be a default for // TODO: Calculate defaults from defaultSystemPrompt
+    // Conversations this system prompt should be a default for // TODO: Calculate defaults from selectedSystemPrompt
     const [selectedConversations, setSelectedConversations] = useState<Conversation[]>([]);
 
     const onConversationSelectionChange = useCallback(
@@ -92,7 +91,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
     }, [selectedSystemPrompt, conversations, selectedConversations]);
     // Whether this system prompt should be the default for new conversations
     const [isNewConversationDefault, setIsNewConversationDefault] = useState(
-      defaultSystemPrompt?.isNewConversationDefault ?? false
+      selectedSystemPrompt?.isNewConversationDefault ?? false
     );
     const handleNewConversationDefaultChange = useCallback(
       (e) => {
@@ -107,12 +106,13 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
               };
             });
           });
-          setSelectedSystemPrompt((prev) =>
-            prev != null ? { ...prev, isNewConversationDefault: isChecked } : prev
-          );
+          onSelectedSystemPromptChange?.({
+            ...selectedSystemPrompt,
+            isNewConversationDefault: isChecked,
+          });
         }
       },
-      [selectedSystemPrompt, setUpdatedSystemPromptSettings]
+      [onSelectedSystemPromptChange, selectedSystemPrompt, setUpdatedSystemPromptSettings]
     );
 
     // When top level system prompt selection changes
@@ -128,7 +128,6 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
               }
             : systemPrompt;
 
-        setSelectedSystemPrompt(newPrompt);
         setPrompt(newPrompt?.content ?? '');
         setIsNewConversationDefault(newPrompt?.isNewConversationDefault ?? false);
         // Find all conversations that have this system prompt as a default

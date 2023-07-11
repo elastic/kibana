@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -59,6 +59,7 @@ interface Props {
   ) => void;
   onSave: () => void;
   selectedConversation: Conversation;
+  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 /**
@@ -66,14 +67,14 @@ interface Props {
  * anonymization, functions (coming soon!), and advanced settings.
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
-  ({ onClose, onSave, selectedConversation: defaultSelectedConversation }) => {
-    const {
-      actionTypeRegistry,
-      allSystemPrompts,
-      http,
-      selectedSettingsTab,
-      setSelectedSettingsTab,
-    } = useAssistantContext();
+  ({
+    onClose,
+    onSave,
+    selectedConversation: defaultSelectedConversation,
+    setSelectedConversationId,
+  }) => {
+    const { actionTypeRegistry, http, selectedSettingsTab, setSelectedSettingsTab } =
+      useAssistantContext();
     const {
       conversationSettings,
       setUpdatedConversationSettings,
@@ -91,12 +92,14 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         return conversationSettings[defaultSelectedConversation.id];
       }
     );
-    const onHandleSelectedConversationChange = useCallback(
-      (conversation?: Conversation) => {
-        setSelectedConversation(conversation ? conversationSettings[conversation.id] : undefined);
-      },
-      [conversationSettings]
-    );
+    const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
+      setSelectedConversation(conversation);
+    }, []);
+    useEffect(() => {
+      if (selectedConversation != null) {
+        setSelectedConversation(conversationSettings[selectedConversation.id]);
+      }
+    }, [conversationSettings, selectedConversation]);
 
     // Quick Prompt Selection State
     const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
@@ -111,9 +114,22 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     }, []);
 
     const handleSave = useCallback(() => {
+      // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
+      const isSelectedConversationDeleted =
+        conversationSettings[defaultSelectedConversation.id] == null;
+      const newSelectedConversationId: string | undefined = Object.keys(conversationSettings)[0];
+      if (isSelectedConversationDeleted && newSelectedConversationId != null) {
+        setSelectedConversationId(conversationSettings[newSelectedConversationId].id);
+      }
       saveSettings();
       onSave();
-    }, [onSave, saveSettings]);
+    }, [
+      conversationSettings,
+      defaultSelectedConversation.id,
+      onSave,
+      saveSettings,
+      setSelectedConversationId,
+    ]);
 
     return (
       <StyledEuiModal data-test-subj={TEST_IDS.SETTINGS_MODAL} onClose={onClose}>
@@ -198,24 +214,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
-              {/* TODO: Additional settings coming soon! */}
-              {/* <EuiKeyPadMenuItem*/}
-              {/*  id={FUNCTIONS_TAB}*/}
-              {/*  label={i18n.FUNCTIONS_MENU_ITEM}*/}
-              {/*  isSelected={selectedSettingsTab === FUNCTIONS_TAB}*/}
-              {/*  isDisabled*/}
-              {/*  onClick={() => setSelectedSettingsTab(FUNCTIONS_TAB)}*/}
-              {/* >*/}
-              {/*  <EuiIcon type="function" size="l" />*/}
-              {/* </EuiKeyPadMenuItem>*/}
-              {/* <EuiKeyPadMenuItem*/}
-              {/*  id={ADVANCED_TAB}*/}
-              {/*  label={i18n.ADVANCED_MENU_ITEM}*/}
-              {/*  isSelected={selectedSettingsTab === ADVANCED_TAB}*/}
-              {/*  onClick={() => setSelectedSettingsTab(ADVANCED_TAB)}*/}
-              {/* >*/}
-              {/*  <EuiIcon type="wrench" size="l" />*/}
-              {/* </EuiKeyPadMenuItem>*/}
             </EuiKeyPadMenu>
           </EuiPageSidebar>
           <EuiPageBody paddingSize="none" panelled={true}>
@@ -232,7 +230,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   <ConversationSettings
                     conversationSettings={conversationSettings}
                     setUpdatedConversationSettings={setUpdatedConversationSettings}
-                    allSystemPrompts={allSystemPrompts}
+                    allSystemPrompts={systemPromptSettings}
                     actionTypeRegistry={actionTypeRegistry}
                     selectedConversation={selectedConversation}
                     onSelectedConversationChange={onHandleSelectedConversationChange}

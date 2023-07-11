@@ -28,6 +28,7 @@ export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
   http: HttpSetup;
+  isDisabled?: boolean;
   onConnectorSelectionChange: (connectorId: string, provider: OpenAiProviderType) => void;
   selectedConnectorId?: string;
   onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
@@ -41,6 +42,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
   ({
     actionTypeRegistry,
     http,
+    isDisabled = false,
     onConnectorModalVisibilityChange,
     selectedConnectorId,
     onConnectorSelectionChange,
@@ -135,13 +137,14 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     return (
       <>
         <EuiSuperSelect
+          aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
+          compressed={true}
+          disabled={isDisabled}
+          hasDividers={true}
+          isLoading={isLoading}
+          onChange={onChange}
           options={[...connectorOptions, addNewConnectorOption]}
           valueOfSelected={selectedConnectorId ?? ''}
-          hasDividers={true}
-          onChange={onChange}
-          compressed={true}
-          isLoading={isLoading}
-          aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
         />
         {isConnectorModalVisible && (
           <ConnectorAddModal

@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow, EuiLink, EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -21,31 +21,15 @@ import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_sys
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { UseAssistantContext } from '../../../assistant_context';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
-
-const getDefaultSystemPromptFromConversation = ({
-  conversation,
-  allSystemPrompts,
-}: {
-  conversation?: Conversation;
-  allSystemPrompts: Prompt[];
-}) => {
-  const convoDefaultSystemPromptId = conversation?.apiConfig.defaultSystemPromptId;
-  if (convoDefaultSystemPromptId && allSystemPrompts) {
-    return (
-      allSystemPrompts.find((prompt) => prompt.id === convoDefaultSystemPromptId) ??
-      allSystemPrompts[0]
-    );
-  }
-  return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? allSystemPrompts[0];
-};
+import { getDefaultSystemPromptFromConversation } from './helpers';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   conversationSettings: UseAssistantContext['conversations'];
   http: HttpSetup;
-  onSelectedConversationChange?: (conversation?: Conversation) => void;
-  selectedConversation?: Conversation;
+  onSelectedConversationChange: (conversation?: Conversation) => void;
+  selectedConversation: Conversation | undefined;
   setUpdatedConversationSettings: React.Dispatch<
     React.SetStateAction<UseAssistantContext['conversations']>
   >;
@@ -56,7 +40,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
   ({
     actionTypeRegistry,
     allSystemPrompts,
-    selectedConversation: defaultConversation,
+    selectedConversation,
     onSelectedConversationChange,
     conversationSettings,
     http,
@@ -65,65 +49,41 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
   }) => {
     // Defaults
     const defaultSystemPrompt = useMemo(() => {
-      return allSystemPrompts.find((systemPrompt) => systemPrompt.isNewConversationDefault);
+      return (
+        allSystemPrompts.find((systemPrompt) => systemPrompt.isNewConversationDefault) ??
+        allSystemPrompts[0]
+      );
     }, [allSystemPrompts]);
-
-    // Form Options
-    // Conversation
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
-      defaultConversation
-    );
-    // System Prompt
-    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>(() => {
-      return getDefaultSystemPromptFromConversation({
-        conversation: defaultConversation,
-        allSystemPrompts,
-      });
-    });
-    // Connector
-    const [selectedConnectorId, setSelectedConnectorId] = useState(() => {
-      return defaultConversation?.apiConfig?.connectorId;
-    });
-    const [selectedProvider, setSelectedProvider] = useState(() => {
-      return defaultConversation?.apiConfig?.provider;
-    });
-    // Model
-    const [selectedModel, setSelectedModel] = useState(() => {
-      return defaultConversation?.apiConfig?.model;
-    });
 
     // Conversation callbacks
     // When top level conversation selection changes
     const onConversationSelectionChange = useCallback(
       (c?: Conversation | string) => {
-        const newConversation: Conversation | undefined =
-          typeof c === 'string'
-            ? {
-                id: c ?? '',
-                messages: [],
-                apiConfig: {
-                  connectorId: undefined,
-                  provider: undefined,
-                  defaultSystemPromptId: defaultSystemPrompt?.id,
-                },
-              }
-            : c;
+        const isNew = typeof c === 'string';
+        const newSelectedConversation: Conversation | undefined = isNew
+          ? {
+              id: c ?? '',
+              messages: [],
+              apiConfig: {
+                connectorId: undefined,
+                provider: undefined,
+                defaultSystemPromptId: defaultSystemPrompt?.id,
+              },
+            }
+          : c;
 
-        setSelectedConversation(newConversation);
-        setSelectedSystemPrompt(
-          newConversation
-            ? getDefaultSystemPromptFromConversation({
-                conversation: newConversation,
-                allSystemPrompts,
-              })
-            : allSystemPrompts.find((prompt) => prompt.id === defaultSystemPrompt?.id)
-        );
-        setSelectedConnectorId(newConversation?.apiConfig.connectorId ?? undefined);
-        setSelectedProvider(newConversation?.apiConfig.provider ?? undefined);
-        setSelectedModel(newConversation?.apiConfig.model ?? undefined);
-        onSelectedConversationChange?.(newConversation);
+        if (newSelectedConversation != null) {
+          setUpdatedConversationSettings((prev) => {
+            return {
+              ...prev,
+              [newSelectedConversation.id]: newSelectedConversation,
+            };
+          });
+        }
+
+        onSelectedConversationChange(newSelectedConversation);
       },
-      [allSystemPrompts, defaultSystemPrompt?.id, onSelectedConversationChange]
+      [defaultSystemPrompt?.id, onSelectedConversationChange, setUpdatedConversationSettings]
     );
 
     const onConversationDeleted = useCallback(
@@ -139,54 +99,85 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [setUpdatedConversationSettings]
     );
 
+    const selectedSystemPrompt = useMemo(
+      () =>
+        getDefaultSystemPromptFromConversation({
+          allSystemPrompts,
+          conversation: selectedConversation,
+          defaultSystemPrompt,
+        }),
+      [allSystemPrompts, defaultSystemPrompt, selectedConversation]
+    );
+
     const handleOnSystemPromptSelectionChange = useCallback(
       (systemPromptId?: string) => {
-        setSelectedSystemPrompt(allSystemPrompts.find((prompt) => prompt.id === systemPromptId));
+        if (selectedConversation != null) {
+          setUpdatedConversationSettings((prev) => ({
+            ...prev,
+            [selectedConversation.id]: {
+              ...selectedConversation,
+              apiConfig: {
+                ...selectedConversation.apiConfig,
+                defaultSystemPromptId: systemPromptId,
+              },
+            },
+          }));
+        }
       },
-      [allSystemPrompts]
+      [selectedConversation, setUpdatedConversationSettings]
+    );
+
+    const selectedConnectorId = useMemo(
+      () => selectedConversation?.apiConfig.connectorId,
+      [selectedConversation?.apiConfig.connectorId]
+    );
+
+    const selectedProvider = useMemo(
+      () => selectedConversation?.apiConfig.provider,
+      [selectedConversation?.apiConfig.provider]
     );
 
     const handleOnConnectorSelectionChange = useCallback(
       (connectorId: string, provider: OpenAiProviderType) => {
-        setSelectedConnectorId(connectorId);
-        setSelectedProvider(provider);
-      },
-      []
-    );
-
-    const handleOnModelSelectionChange = useCallback((model?: string) => {
-      setSelectedModel(model);
-    }, []);
-
-    // useEffects
-    // Update conversation on any field change since editing is in place
-    useEffect(() => {
-      if (selectedConversation != null) {
-        setUpdatedConversationSettings((prev) => {
-          return {
+        if (selectedConversation != null) {
+          setUpdatedConversationSettings((prev) => ({
             ...prev,
             [selectedConversation.id]: {
               ...selectedConversation,
-              id: selectedConversation.id,
               apiConfig: {
                 ...selectedConversation.apiConfig,
-                connectorId: selectedConnectorId,
-                defaultSystemPromptId: selectedSystemPrompt?.id,
-                model: selectedModel,
-                provider: selectedProvider,
+                connectorId,
+                provider,
               },
             },
-          };
-        });
-      }
-    }, [
-      selectedConnectorId,
-      selectedConversation,
-      selectedModel,
-      selectedProvider,
-      selectedSystemPrompt?.id,
-      setUpdatedConversationSettings,
-    ]);
+          }));
+        }
+      },
+      [selectedConversation, setUpdatedConversationSettings]
+    );
+
+    const selectedModel = useMemo(
+      () => selectedConversation?.apiConfig.model,
+      [selectedConversation?.apiConfig.model]
+    );
+
+    const handleOnModelSelectionChange = useCallback(
+      (model?: string) => {
+        if (selectedConversation != null) {
+          setUpdatedConversationSettings((prev) => ({
+            ...prev,
+            [selectedConversation.id]: {
+              ...selectedConversation,
+              apiConfig: {
+                ...selectedConversation.apiConfig,
+                model,
+              },
+            },
+          }));
+        }
+      },
+      [selectedConversation, setUpdatedConversationSettings]
+    );
 
     return (
       <>
@@ -215,11 +206,12 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           <SelectSystemPrompt
             allSystemPrompts={allSystemPrompts}
             compressed
-            conversation={defaultConversation}
+            conversation={selectedConversation}
             isEditing={true}
+            isDisabled={selectedConversation == null}
+            onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
             showTitles={true}
-            onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
           />
         </EuiFormRow>
 
@@ -242,10 +234,11 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         >
           <ConnectorSelector
             actionTypeRegistry={actionTypeRegistry}
-            selectedConnectorId={selectedConnectorId}
             http={http}
+            isDisabled={selectedConversation == null}
             onConnectorModalVisibilityChange={() => {}}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
+            selectedConnectorId={selectedConnectorId}
           />
         </EuiFormRow>
 

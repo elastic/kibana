@@ -35,6 +35,7 @@ export interface Props {
   clearSelectedSystemPrompt?: () => void;
   isClearable?: boolean;
   isEditing?: boolean;
+  isDisabled?: boolean;
   isOpen?: boolean;
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
   showTitles?: boolean;
@@ -51,6 +52,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   clearSelectedSystemPrompt,
   isClearable = false,
   isEditing = false,
+  isDisabled = false,
   isOpen = false,
   onSystemPromptSelectionChange,
   setIsEditing,
@@ -177,6 +179,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               fullWidth
               hasDividers
               itemLayoutAlign="top"
+              disabled={isDisabled}
               isOpen={isOpenLocal && !isSettingsModalVisible}
               onChange={onChange}
               onBlur={handleOnBlur}

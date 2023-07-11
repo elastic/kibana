@@ -42,38 +42,37 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
   ({
     quickPromptSettings,
     onSelectedQuickPromptChange,
-    selectedQuickPrompt: defaultQuickPrompt,
+    selectedQuickPrompt,
     setUpdatedQuickPromptSettings,
   }) => {
     const { basePromptContexts } = useAssistantContext();
 
     // Form options
-    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState(defaultQuickPrompt);
     // Prompt
-    const [prompt, setPrompt] = useState(defaultQuickPrompt?.prompt ?? '');
+    const [prompt, setPrompt] = useState(selectedQuickPrompt?.prompt ?? '');
     const handlePromptTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setPrompt(e.target.value);
     }, []);
     // Color
     const [color, setColor, errors] = useColorPickerState(
-      defaultQuickPrompt?.color ?? DEFAULT_COLOR
+      selectedQuickPrompt?.color ?? DEFAULT_COLOR
     );
     const handleColorChange = useCallback<EuiSetColorMethod>(
       (text, { hex, isValid }) => {
         if (selectedQuickPrompt != null) {
-          setSelectedQuickPrompt({
+          onSelectedQuickPromptChange?.({
             ...selectedQuickPrompt,
             color: text,
           });
         }
         setColor(text, { hex, isValid });
       },
-      [selectedQuickPrompt, setColor]
+      [onSelectedQuickPromptChange, selectedQuickPrompt, setColor]
     );
     // Prompt Contexts/Categories
     const [selectedPromptContexts, setSelectedPromptContexts] = useState<PromptContextTemplate[]>(
       basePromptContexts.filter((bpc) =>
-        defaultQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
+        selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
       ) ?? []
     );
     const onPromptContextSelectionChange = useCallback((pc: PromptContextTemplate[]) => {
@@ -93,7 +92,6 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
               }
             : quickPrompt;
 
-        setSelectedQuickPrompt(newQuickPrompt);
         setPrompt(newQuickPrompt?.prompt ?? '');
         setColor(newQuickPrompt?.color ?? DEFAULT_COLOR, {
           hex: newQuickPrompt?.color ?? DEFAULT_COLOR,
