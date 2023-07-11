@@ -12,11 +12,10 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { Easteregg } from './easteregg';
-import { NativeRenderer } from '../../native_renderer';
 import {
   StateSetter,
   DatasourceDataPanelProps,
@@ -162,7 +161,6 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   const datasourceProps: DatasourceDataPanelProps = {
     ...externalContext,
-    dragDropContext: useDragDropContext(),
     state: activeDatasourceId ? datasourceStates[activeDatasourceId].state : null,
     setState: setDatasourceState,
     core: props.core,
@@ -187,16 +185,16 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
         []),
     ]),
   };
+  const DataPanelComponent =
+    activeDatasourceId && !datasourceIsLoading
+      ? props.datasourceMap[activeDatasourceId].DataPanelComponent
+      : null;
 
   return (
     <>
       <Easteregg query={externalContext?.query} />
-      {activeDatasourceId && !datasourceIsLoading && (
-        <NativeRenderer
-          className="lnsDataPanelWrapper"
-          render={props.datasourceMap[activeDatasourceId].renderDataPanel}
-          nativeProps={datasourceProps}
-        />
+      {DataPanelComponent && (
+        <div className="lnsDataPanelWrapper">{DataPanelComponent(datasourceProps)}</div>
       )}
     </>
   );
