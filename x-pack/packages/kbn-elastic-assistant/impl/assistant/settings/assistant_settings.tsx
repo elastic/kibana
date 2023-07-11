@@ -77,10 +77,14 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       useAssistantContext();
     const {
       conversationSettings,
-      setUpdatedConversationSettings,
+      defaultAllow,
+      defaultAllowReplacement,
       quickPromptSettings,
-      setUpdatedQuickPromptSettings,
       systemPromptSettings,
+      setUpdatedConversationSettings,
+      setUpdatedDefaultAllow,
+      setUpdatedDefaultAllowReplacement,
+      setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
     } = useSettingsUpdater();
@@ -268,7 +272,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   />
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
-                  <AnonymizationSettings pageSize={5} />
+                  <AnonymizationSettings
+                    defaultAllow={defaultAllow}
+                    defaultAllowReplacement={defaultAllowReplacement}
+                    pageSize={5}
+                    setUpdatedDefaultAllow={setUpdatedDefaultAllow}
+                    setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
+                  />
                 )}
                 {selectedSettingsTab === FUNCTIONS_TAB && <></>}
                 {selectedSettingsTab === ADVANCED_TAB && <AdvancedSettings />}

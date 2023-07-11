@@ -28,7 +28,7 @@ export interface Props {
   allow: string[];
   allowReplacement: string[];
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  onReset: () => void;
+  onReset?: () => void;
   rawData: Record<string, string[]> | null;
   pageSize?: number;
 }

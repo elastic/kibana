@@ -13,7 +13,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
@@ -29,64 +29,51 @@ const StatFlexItem = styled(EuiFlexItem)`
   margin-right: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
-interface Props {
-  closeModal?: () => void;
+export interface Props {
+  defaultAllow: string[];
+  defaultAllowReplacement: string[];
   pageSize?: number;
+  setUpdatedDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
+  setUpdatedDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal, pageSize }) => {
-  const {
-    baseAllow,
-    baseAllowReplacement,
-    defaultAllow,
-    defaultAllowReplacement,
-    // setDefaultAllow,
-    // setDefaultAllowReplacement,
-  } = useAssistantContext();
-
-  // Local state for default allow and default allow replacement to allow for intermediate changes
-  const [localDefaultAllow, setLocalDefaultAllow] = useState<string[]>(defaultAllow);
-  const [localDefaultAllowReplacement, setLocalDefaultAllowReplacement] =
-    useState<string[]>(defaultAllowReplacement);
+const AnonymizationSettingsComponent: React.FC<Props> = ({
+  defaultAllow,
+  defaultAllowReplacement,
+  pageSize,
+  setUpdatedDefaultAllow,
+  setUpdatedDefaultAllowReplacement,
+}) => {
+  const { baseAllow, baseAllowReplacement } = useAssistantContext();
 
   const onListUpdated = useCallback(
     (updates: BatchUpdateListItem[]) => {
       updateDefaults({
-        defaultAllow: localDefaultAllow,
-        defaultAllowReplacement: localDefaultAllowReplacement,
-        setDefaultAllow: setLocalDefaultAllow,
-        setDefaultAllowReplacement: setLocalDefaultAllowReplacement,
+        defaultAllow,
+        defaultAllowReplacement,
+        setDefaultAllow: setUpdatedDefaultAllow,
+        setDefaultAllowReplacement: setUpdatedDefaultAllowReplacement,
         updates,
       });
     },
-    [localDefaultAllow, localDefaultAllowReplacement]
+    [
+      defaultAllow,
+      defaultAllowReplacement,
+      setUpdatedDefaultAllow,
+      setUpdatedDefaultAllowReplacement,
+    ]
   );
 
   const onReset = useCallback(() => {
-    setLocalDefaultAllow(baseAllow);
-    setLocalDefaultAllowReplacement(baseAllowReplacement);
-  }, [baseAllow, baseAllowReplacement]);
-
-  // const onSave = useCallback(() => {
-  //   setDefaultAllow(localDefaultAllow);
-  //   setDefaultAllowReplacement(localDefaultAllowReplacement);
-  //   closeModal?.();
-  // }, [
-  //   closeModal,
-  //   localDefaultAllow,
-  //   localDefaultAllowReplacement,
-  //   setDefaultAllow,
-  //   setDefaultAllowReplacement,
-  // ]);
+    setUpdatedDefaultAllow(baseAllow);
+    setUpdatedDefaultAllowReplacement(baseAllowReplacement);
+  }, [baseAllow, baseAllowReplacement, setUpdatedDefaultAllow, setUpdatedDefaultAllowReplacement]);
 
   const anonymized: number = useMemo(() => {
-    const allowSet = new Set(localDefaultAllow);
+    const allowSet = new Set(defaultAllow);
 
-    return localDefaultAllowReplacement.reduce(
-      (acc, field) => (allowSet.has(field) ? acc + 1 : acc),
-      0
-    );
-  }, [localDefaultAllow, localDefaultAllowReplacement]);
+    return defaultAllowReplacement.reduce((acc, field) => (allowSet.has(field) ? acc + 1 : acc), 0);
+  }, [defaultAllow, defaultAllowReplacement]);
 
   return (
     <>
@@ -100,7 +87,7 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal, pageSize 
 
       <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
         <StatFlexItem grow={false}>
-          <AllowedStat allowed={localDefaultAllow.length} total={localDefaultAllow.length} />
+          <AllowedStat allowed={defaultAllow.length} total={defaultAllow.length} />
         </StatFlexItem>
 
         <StatFlexItem grow={false}>
@@ -111,8 +98,8 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal, pageSize 
       <EuiSpacer size="s" />
 
       <ContextEditor
-        allow={localDefaultAllow}
-        allowReplacement={localDefaultAllowReplacement}
+        allow={defaultAllow}
+        allowReplacement={defaultAllowReplacement}
         onListUpdated={onListUpdated}
         onReset={onReset}
         rawData={null}

@@ -101,20 +101,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
     };
   }, []);
 
-  // TODO: From previous onSystemPromptsChange = useCallback(
-  // if (updatedConversations && updatedConversations.length > 0) {
-  //   const updatedConversationObject = updatedConversations?.reduce<
-  //     Record<string, Conversation>
-  //   >((updatedObj, currentConv) => {
-  //     updatedObj[currentConv.id] = currentConv;
-  //     return updatedObj;
-  //   }, {});
-  //   setConversations({
-  //     ...conversations,
-  //     ...updatedConversationObject,
-  //   });
-  // }
-
   // SuperSelect State/Actions
   const options = useMemo(
     () => getOptions({ prompts: allSystemPrompts, showTitles }),

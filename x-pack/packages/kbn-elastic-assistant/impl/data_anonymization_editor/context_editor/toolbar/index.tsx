@@ -15,7 +15,7 @@ import { BatchUpdateListItem, ContextEditorRow } from '../types';
 export interface Props {
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
   onlyDefaults: boolean;
-  onReset: () => void;
+  onReset?: () => void;
   onSelectAll: () => void;
   selected: ContextEditorRow[];
   totalFields: number;
@@ -57,25 +57,27 @@ const ToolbarComponent: React.FC<Props> = ({
       />
     </EuiFlexItem>
 
-    <EuiFlexItem grow={true}>
-      <EuiFlexGroup
-        alignItems="center"
-        data-test-subj="toolbarTrailingActions"
-        gutterSize="none"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="resetFields"
-            iconType="eraser"
-            onClick={onReset}
-            size="xs"
-          >
-            {i18n.RESET}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    {onReset != null && (
+      <EuiFlexItem grow={true}>
+        <EuiFlexGroup
+          alignItems="center"
+          data-test-subj="toolbarTrailingActions"
+          gutterSize="none"
+          justifyContent="flexEnd"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="resetFields"
+              iconType="eraser"
+              onClick={onReset}
+              size="xs"
+            >
+              {i18n.RESET}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );
 
