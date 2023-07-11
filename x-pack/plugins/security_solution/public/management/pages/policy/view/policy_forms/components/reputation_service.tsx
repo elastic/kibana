@@ -61,7 +61,7 @@ export const ReputationService = React.memo(({ protection }: { protection: Polic
   return (
     <>
       <EuiSpacer size="m" />
-      <ConfigFormHeading>
+      <ConfigFormHeading data-test-subj={`${protection}ReputationServiceCard`}>
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiText size="s">

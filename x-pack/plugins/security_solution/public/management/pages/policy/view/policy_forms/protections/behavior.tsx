@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { ReputationService } from '../components/reputation_service';
 import type { Immutable } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
@@ -27,6 +28,8 @@ import { SecurityPageName } from '../../../../../../app/types';
  */
 
 export const BehaviorProtection = React.memo(() => {
+  const { cloud } = useKibana().services;
+
   const OSes: Immutable<BehaviorProtectionOSes[]> = [
     PolicyOperatingSystem.windows,
     PolicyOperatingSystem.mac,
@@ -51,7 +54,7 @@ export const BehaviorProtection = React.memo(() => {
       }
     >
       <RadioButtons protection={protection} osList={OSes} />
-      <ReputationService protection={protection} />
+      {cloud?.isCloudEnabled && <ReputationService protection={protection} />}
       <UserNotification protection={protection} osList={OSes} />
       <EuiSpacer size="m" />
       <EuiCallOut iconType="iInCircle">
