@@ -83,6 +83,7 @@ import {
 import type { LensInspector } from '../../../lens_inspector_service';
 import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
+import { ApplyChangesPrompt } from './apply_changes_prompt';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -529,48 +530,6 @@ export const WorkspacePanel = ({
     );
   };
 
-  const renderApplyChangesPrompt = () => {
-    const applyChangesString = i18n.translate('xpack.lens.editorFrame.applyChanges', {
-      defaultMessage: 'Apply changes',
-    });
-
-    return (
-      <EuiText
-        className={classNames('lnsWorkspacePanel__emptyContent')}
-        textAlign="center"
-        data-test-subj="workspace-apply-changes-prompt"
-        size="s"
-      >
-        <div>
-          <img
-            aria-hidden={true}
-            src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
-            alt={applyChangesString}
-            className="lnsWorkspacePanel__promptIllustration"
-          />
-          <h2>
-            <strong>
-              {i18n.translate('xpack.lens.editorFrame.applyChangesWorkspacePrompt', {
-                defaultMessage: 'Apply changes to render visualization',
-              })}
-            </strong>
-          </h2>
-          <p className="lnsWorkspacePanel__actions">
-            <EuiButtonEmpty
-              size="s"
-              className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-              iconType="checkInCircleFilled"
-              onClick={() => dispatchLens(applyChanges())}
-              data-test-subj="lnsApplyChanges__workspace"
-            >
-              {applyChangesString}
-            </EuiButtonEmpty>
-          </p>
-        </div>
-      </EuiText>
-    );
-  };
-
   const renderVisualization = () => {
     return (
       <VisualizationWrapper
@@ -613,7 +572,9 @@ export const WorkspacePanel = ({
     const renderWorkspaceContents = hasSomethingToRender
       ? renderVisualization
       : !changesApplied
-      ? renderApplyChangesPrompt
+      ? () => (
+          <ApplyChangesPrompt core={core} onApplyButtonClick={() => dispatchLens(applyChanges())} />
+        )
       : renderDragDropPrompt;
 
     return (
