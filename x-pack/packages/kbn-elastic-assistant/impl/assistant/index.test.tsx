@@ -49,26 +49,25 @@ const getInitialConversations = (): Record<string, Conversation> => ({
 const renderAssistant = () =>
   render(
     <TestProviders getInitialConversations={getInitialConversations}>
-      <Assistant />
+      <Assistant isAssistantEnabled />
     </TestProviders>
   );
 
 describe('Assistant', () => {
   beforeAll(() => {
     jest.mocked(useConnectorSetup).mockReturnValue({
-      connectorDialog: <></>,
-      connectorPrompt: <></>,
+      comments: [],
+      prompt: <></>,
     });
 
     jest.mocked(PromptEditor).mockReturnValue(null);
     jest.mocked(QuickPrompts).mockReturnValue(null);
   });
 
-  beforeEach(jest.clearAllMocks);
-
   let persistToLocalStorage: jest.Mock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     persistToLocalStorage = jest.fn();
 
     jest
@@ -96,12 +95,53 @@ describe('Assistant', () => {
       const previousConversationButton = screen.getByLabelText('Previous conversation');
 
       expect(previousConversationButton).toBeInTheDocument();
-
       await act(async () => {
         fireEvent.click(previousConversationButton);
       });
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith('electric sheep');
+    });
+
+    it('should not persist the conversation id to local storage when excludeFromLastConversationStorage flag is indicated', async () => {
+      const connectors: unknown[] = [{}];
+
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isSuccess: true,
+        data: connectors,
+      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
+
+      const { getByLabelText } = render(
+        <TestProviders
+          getInitialConversations={() => ({
+            [WELCOME_CONVERSATION_TITLE]: {
+              id: WELCOME_CONVERSATION_TITLE,
+              messages: [],
+              apiConfig: {},
+            },
+            [MOCK_CONVERSATION_TITLE]: {
+              id: MOCK_CONVERSATION_TITLE,
+              messages: [],
+              apiConfig: {},
+              excludeFromLastConversationStorage: true,
+            },
+          })}
+        >
+          <Assistant isAssistantEnabled />
+        </TestProviders>
+      );
+
+      expect(persistToLocalStorage).toHaveBeenCalled();
+
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+
+      const previousConversationButton = getByLabelText('Previous conversation');
+
+      expect(previousConversationButton).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(previousConversationButton);
+      });
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
     });
   });
 

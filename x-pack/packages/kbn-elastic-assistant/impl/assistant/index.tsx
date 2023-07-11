@@ -156,8 +156,11 @@ const AssistantComponent: React.FC<Props> = ({
     if (areConnectorsFetched && !connectors?.length) {
       return setLastConversationId('');
     }
-    setLastConversationId(selectedConversationId);
-  }, [areConnectorsFetched, connectors?.length, selectedConversationId, setLastConversationId]);
+
+    if (!currentConversation.excludeFromLastConversationStorage) {
+      setLastConversationId(currentConversation.id);
+    }
+  }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
 
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
   const isDisabled = isWelcomeSetup || !isAssistantEnabled;
@@ -228,11 +231,11 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Scroll to bottom on conversation change
   useEffect(() => {
-    bottomRef.current?.scrollIntoView?.({ behavior: 'auto' });
+    bottomRef.current?.scrollIntoView({ behavior: 'auto' });
   }, []);
   useEffect(() => {
     setTimeout(() => {
-      bottomRef.current?.scrollIntoView?.({ behavior: 'auto' });
+      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
       promptTextAreaRef?.current?.focus();
     }, 0);
   }, [currentConversation.messages.length, selectedPromptContextsCount]);
