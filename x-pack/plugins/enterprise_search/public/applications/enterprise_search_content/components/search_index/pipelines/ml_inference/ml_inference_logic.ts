@@ -99,13 +99,13 @@ const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
 const DEFAULT_CONNECTOR_FIELDS = ['body', 'title', 'id', 'type', 'url'];
 
 export interface MLInferencePipelineOption {
-  destinationField: string;
   disabled: boolean;
   disabledReason?: string;
   modelId: string;
   modelType: string;
   pipelineName: string;
-  sourceField: string;
+  sourceFields: string[];
+  indexFields: string[];
 }
 
 interface MLInferenceProcessorsActions {
@@ -570,7 +570,7 @@ export const MLInferenceLogic = kea<
       ],
       (
         mlInferencePipelinesData: MLInferenceProcessorsValues['mlInferencePipelinesData'],
-        sourceFields: MLInferenceProcessorsValues['sourceFields'],
+        indexFields: MLInferenceProcessorsValues['sourceFields'],
         supportedMLModels: MLInferenceProcessorsValues['supportedMLModels'],
         mlInferencePipelineProcessors: MLInferenceProcessorsValues['mlInferencePipelineProcessors']
       ) => {
@@ -587,16 +587,10 @@ export const MLInferenceLogic = kea<
             if (!pipeline) return undefined;
             const pipelineParams = parseMlInferenceParametersFromPipeline(pipelineName, pipeline);
             if (!pipelineParams) return undefined;
-            const {
-              destination_field: destinationField,
-              model_id: modelId,
-              source_field: sourceField,
-              field_mappings: fieldMappings,
-            } = pipelineParams;
+            const { model_id: modelId, field_mappings: fieldMappings } = pipelineParams;
 
-            const missingSourceFields =
-              fieldMappings?.map((f) => f.sourceField).filter((f) => !sourceFields?.includes(f)) ??
-              [];
+            const sourceFields = fieldMappings?.map((m) => m.sourceField) ?? [];
+            const missingSourceFields = sourceFields.filter((f) => !indexFields?.includes(f)) ?? [];
             const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
             const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
             const disabledReason = getDisabledReason(
@@ -606,13 +600,13 @@ export const MLInferenceLogic = kea<
             );
 
             return {
-              destinationField: destinationField ?? '',
               disabled: disabledReason !== undefined,
               disabledReason,
               modelId,
               modelType,
               pipelineName,
-              sourceField,
+              sourceFields,
+              indexFields: indexFields ?? [],
             };
           })
           .filter((p): p is MLInferencePipelineOption => p !== undefined);
