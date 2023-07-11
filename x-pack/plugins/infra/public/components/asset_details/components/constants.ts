@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const ALERTS_DOC_HREF = 'https://www.elastic.co/guide/en/observability/current/create-alerts.html';
+export const ALERTS_DOC_HREF =
+  'https://www.elastic.co/guide/en/observability/current/create-alerts.html';
