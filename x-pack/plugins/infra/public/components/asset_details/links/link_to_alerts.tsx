@@ -23,7 +23,7 @@ export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRuleProps) => {
       iconType="bell"
     >
       <FormattedMessage
-        id="xpack.infra.infra.nodeDetails.createAlertLink"
+        id="xpack.infra.infra.assetDetails.alerts.createAlertLink"
         defaultMessage="Create rule"
       />
     </EuiButtonEmpty>
