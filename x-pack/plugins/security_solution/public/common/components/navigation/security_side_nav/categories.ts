@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-side-nav';
+import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SecurityPageName } from '../../../../../common';
 
 export const CATEGORIES: SeparatorLinkCategory[] = [

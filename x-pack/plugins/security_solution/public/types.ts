@@ -50,6 +50,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
+import type { RouteProps } from 'react-router-dom';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -65,7 +66,7 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { NavigationLink } from './common/links';
+import type { AppLinkItems, NavigationLink } from './common/links';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
@@ -129,6 +130,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 }
 
 export interface ContractStartServices {
+  extraRoutes$: Observable<RouteProps[]>;
   isSidebarEnabled$: Observable<boolean>;
   getStartedComponent$: Observable<React.ComponentType | null>;
   upselling: UpsellingService;
@@ -161,6 +163,8 @@ export interface PluginSetup {
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
+  setExtraAppLinks: (extraAppLinks: AppLinkItems) => void;
+  setExtraRoutes: (extraRoutes: RouteProps[]) => void;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;

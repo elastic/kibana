@@ -25,6 +25,7 @@ export const links: LinkItem = {
   title: RULES,
   path: RULES_LANDING_PATH,
   hideTimeline: true,
+  skipUrlState: true,
   links: [
     {
       id: SecurityPageName.rules,

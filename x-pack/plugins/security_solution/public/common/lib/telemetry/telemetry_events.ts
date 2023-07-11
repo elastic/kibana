@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { TelemetryEvent } from './types';
-import { TelemetryEventTypes } from './types';
+import { TelemetryEventTypes } from './constants';
 
 const alertsGroupingToggledEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.AlertsGroupingToggled,

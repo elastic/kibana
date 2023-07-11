@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { SecuritySideNavigation } from './side_navigation';
 import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ServicesWrapper } from '../../common/__mocks__/services.mock';
 
 jest.mock('./use_side_nav_items');

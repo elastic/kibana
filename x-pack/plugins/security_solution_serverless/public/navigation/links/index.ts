@@ -5,4 +5,4 @@
  * 2.0.
  */
 export { getProjectNavLinks$ } from './nav_links';
-export type { ProjectNavLinks, ProjectNavigationLink } from './types';
+export type { ProjectNavLinks } from './types';

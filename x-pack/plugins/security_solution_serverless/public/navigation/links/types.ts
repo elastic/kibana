@@ -6,11 +6,15 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { NavigationLink } from '@kbn/security-solution-plugin/public';
+import type {
+  SecurityPageName,
+  NavigationLink,
+  LinkCategory,
+} from '@kbn/security-solution-navigation';
+import type { ExternalPageName } from './constants';
 
-export interface ProjectNavigationLink extends NavigationLink {
-  // The appId for external links
-  appId?: string;
-}
+export type ProjectPageName = SecurityPageName | ExternalPageName | 'root';
 
+export type ProjectNavigationLink = NavigationLink<ProjectPageName>;
+export type ProjectLinkCategory = LinkCategory<ProjectPageName>;
 export type ProjectNavLinks = Observable<ProjectNavigationLink[]>;

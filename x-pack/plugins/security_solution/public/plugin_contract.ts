@@ -6,8 +6,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { RouteProps } from 'react-router-dom';
 import { UpsellingService } from './common/lib/upsellings';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
+import type { AppLinkItems } from './common/links';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 
@@ -15,8 +17,12 @@ export class PluginContract {
   public isSidebarEnabled$: BehaviorSubject<boolean>;
   public getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
   public upsellingService: UpsellingService;
+  public extraAppLinks$: BehaviorSubject<AppLinkItems>;
+  public extraRoutes$: BehaviorSubject<RouteProps[]>;
 
   constructor() {
+    this.extraAppLinks$ = new BehaviorSubject<AppLinkItems>([]);
+    this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
     this.upsellingService = new UpsellingService();
@@ -24,6 +30,7 @@ export class PluginContract {
 
   public getStartServices(): ContractStartServices {
     return {
+      extraRoutes$: this.extraRoutes$.asObservable(),
       isSidebarEnabled$: this.isSidebarEnabled$.asObservable(),
       getStartedComponent$: this.getStartedComponent$.asObservable(),
       upselling: this.upsellingService,
@@ -40,6 +47,8 @@ export class PluginContract {
   public getStartContract(): PluginStart {
     return {
       getNavLinks$: () => navLinks$,
+      setExtraAppLinks: (extraAppLinks) => this.extraAppLinks$.next(extraAppLinks),
+      setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
       setGetStartedPage: (getStartedComponent) => {

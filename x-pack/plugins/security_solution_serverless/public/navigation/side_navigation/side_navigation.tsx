@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import type { SideNavComponent } from '@kbn/core-chrome-browser';
 import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { SolutionSideNav } from '@kbn/security-solution-side-nav';
-import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
+import { useSideNavItems } from './use_side_nav_items';
 import { CATEGORIES } from './categories';
+import { getProjectPageNameFromNavLinkId } from '../links/util';
 
-export const SecuritySideNavigation: React.FC = () => {
+export const SecuritySideNavigation: SideNavComponent = React.memo(function SecuritySideNavigation({
+  activeNodes: [activeChromeNodes],
+}) {
   const { euiTheme } = useEuiTheme();
   const items = useSideNavItems();
-  const selectedId = useSideNavSelectedId(items);
 
   const isLoading = items.length === 0;
+
+  const selectedId = useMemo(() => {
+    // TODO: change the following line to `const mainNode = activeChromeNodes[0]` when the root node is no longer present
+    const mainNode = activeChromeNodes?.find((node) => node.id !== 'root');
+    return mainNode ? getProjectPageNameFromNavLinkId(mainNode.id) : '';
+  }, [activeChromeNodes]);
 
   return isLoading ? (
     <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />
@@ -39,7 +48,7 @@ export const SecuritySideNavigation: React.FC = () => {
       />
     </SolutionNav>
   );
-};
+});
 
 // eslint-disable-next-line import/no-default-export
 export default SecuritySideNavigation;

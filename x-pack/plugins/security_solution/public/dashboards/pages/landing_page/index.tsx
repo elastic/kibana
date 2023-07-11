@@ -8,9 +8,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } fro
 import React from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { LandingLinksImageCards } from '@kbn/security-solution-navigation/landing_links';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { LandingImageCards } from '../../../common/components/landing_links/landing_links_images';
 import { SecurityPageName } from '../../../../common/constants';
 import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
 import { useRootNavLink } from '../../../common/links/nav_links';
@@ -21,6 +21,8 @@ import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemet
 import { DASHBOARDS_PAGE_TITLE } from '../translations';
 import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
 import { DashboardsTable } from '../../components/dashboards_table';
+import { useGlobalQueryString } from '../../../common/utils/global_query_string';
+import { trackLandingLinkClick } from '../../../common/lib/telemetry/trackers';
 
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
@@ -54,7 +56,8 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const dashboardLinks = useRootNavLink(SecurityPageName.dashboards)?.links ?? [];
+  const { links = [] } = useRootNavLink(SecurityPageName.dashboards) ?? {};
+  const urlState = useGlobalQueryString();
   const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 
@@ -67,7 +70,11 @@ export const DashboardsLandingPage = () => {
         <h2>{i18n.DASHBOARDS_PAGE_SECTION_DEFAULT}</h2>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
-      <LandingImageCards items={dashboardLinks} />
+      <LandingLinksImageCards
+        items={links}
+        urlState={urlState}
+        onLinkClick={trackLandingLinkClick}
+      />
       <EuiSpacer size="xxl" />
 
       {canReadDashboard && (

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { ChromeNavLink } from '@kbn/core/public';
-import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { subscribeNavigationTree } from './navigation_tree';
 import { BehaviorSubject } from 'rxjs';
 import { mockServices, mockProjectNavLinks } from '../common/__mocks__/services.mock';

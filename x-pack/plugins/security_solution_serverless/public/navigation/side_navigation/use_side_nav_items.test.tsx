@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { mockServices, mockProjectNavLinks } from '../../common/__mocks__/services.mock';
 
 jest.mock('../../common/hooks/use_link_props');
