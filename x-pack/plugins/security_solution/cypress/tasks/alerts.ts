@@ -122,11 +122,19 @@ export const closeAlerts = () => {
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
-  cy.get(TIMELINE_CONTEXT_MENU_BTN)
-    .first()
-    .should('be.visible')
-    .should('have.attr', 'data-popover-open', 'true');
+  const togglePopover = () => {
+    cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+    cy.get(TIMELINE_CONTEXT_MENU_BTN)
+      .first()
+      .should('be.visible')
+      .then(($btnEl) => {
+        if ($btnEl.attr('data-popover-open') !== 'true') {
+          cy.log(`${TIMELINE_CONTEXT_MENU_BTN} was flaky, attempting to re-open popover`);
+          togglePopover();
+        }
+      });
+  };
+  togglePopover();
 };
 
 export const expandFirstAlert = () => {

@@ -31,7 +31,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('todo embeddable updates', async () => {
       await testSubjects.setValue('taskTodo', 'read a book');
       await testSubjects.setValue('titleTodo', 'Learn');
-      await testSubjects.click('updateTodoButton');
 
       await retry.try(async () => {
         const title = await testSubjects.getVisibleText('todoEmbeddableTitle');
