@@ -61,7 +61,7 @@ Then the package gets installed in the background from EPR
 
 #### **Scenario: Package is installed via bundled Fleet package in Kibana**
 
-**Automation**: 1 integration test.
+**Automation**: 2 integration tests.
 
 ```Gherkin
 Given the package is not installed
