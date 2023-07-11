@@ -46,7 +46,16 @@ export const convertRawRuntimeFieldtoFieldOption = (
   rawFields: Record<string, estypes.MappingRuntimeField>
 ): FieldOption[] => {
   const result: FieldOption[] = [];
-  for (const name of Object.keys(rawFields)) {
+
+  // verifying that the raw fields are an object
+  let keys;
+  try {
+    keys = Object.keys(rawFields);
+  } catch (e) {
+    return result;
+  }
+
+  for (const name of keys) {
     const rawField = rawFields[name];
     const type = rawField.type;
 
@@ -55,7 +64,7 @@ export const convertRawRuntimeFieldtoFieldOption = (
     const aggregatable = isAggregatableAndSearchable;
     const searchable = isAggregatableAndSearchable;
 
-    result.push({ name, type, normalizedType, aggregatable, searchable });
+    if (type) result.push({ name, type, normalizedType, aggregatable, searchable });
   }
   return result;
 };
