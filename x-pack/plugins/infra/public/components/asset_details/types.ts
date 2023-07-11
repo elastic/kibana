@@ -7,23 +7,16 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
-import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
-export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
-
-interface HostMetadata {
-  os?: string | null;
+interface Metadata {
   ip?: string | null;
-  servicesOnHost?: number | null;
-  title: { name: string; cloudProvider?: CloudProvider | null };
-  id: string;
 }
-export type HostNodeRow = HostMetadata &
-  HostMetrics & {
-    name: string;
-  };
+export type Node = Metadata & {
+  id: string;
+  name: string;
+};
 
 export enum FlyoutTabIds {
   OVERVIEW = 'overview',
@@ -38,15 +31,8 @@ export enum FlyoutTabIds {
 
 export type TabIds = `${FlyoutTabIds}`;
 
-export interface StringDateRange {
-  from: string;
-  to: string;
-  mode?: 'absolute' | 'relative' | undefined;
-}
-
 export interface TabState {
   overview?: {
-    dateRange: StringDateRange;
     metricsDataView?: DataView;
     logsDataView?: DataView;
   };
@@ -59,11 +45,6 @@ export interface TabState {
   };
   anomalies?: {
     onClose?: () => void;
-  };
-  metrics?: {
-    accountId?: string;
-    region?: string;
-    customMetrics?: SnapshotCustomMetricInput[];
   };
   alertRule?: {
     onCreateRuleClick?: () => void;
@@ -97,13 +78,9 @@ export interface Tab {
 export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
 
 export interface AssetDetailsProps {
-  node: HostNodeRow;
+  node: Node;
   nodeType: InventoryItemType;
-  currentTimeRange: {
-    interval: string;
-    from: number;
-    to: number;
-  };
+  dateRange: TimeRange;
   tabs: Tab[];
   activeTabId?: TabIds;
   overrides?: TabState;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -24,7 +24,6 @@ export interface Props {
 const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { logViewReference, loading, getLogsDataView } = useLogViewReference({
@@ -36,25 +35,16 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
     [logViewReference]
   );
 
-  const currentTimeRange = useMemo(
-    () => ({
-      ...getDateRangeAsTimestamp(),
-      interval: '1m',
-    }),
-    [getDateRangeAsTimestamp]
-  );
-
   const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
   return (
     <AssetDetails
       node={node}
       nodeType={NODE_TYPE}
-      currentTimeRange={currentTimeRange}
+      dateRange={searchCriteria.dateRange}
       activeTabId={hostFlyoutState?.tabId}
       overrides={{
         overview: {
-          dateRange: searchCriteria.dateRange,
           logsDataView,
           metricsDataView: dataView,
         },

@@ -85,19 +85,7 @@ const stories: Meta<AssetDetailsProps> = {
     node: {
       name: 'host1',
       id: 'host1-macOS',
-      title: {
-        name: 'host1',
-        cloudProvider: null,
-      },
-      os: 'macOS',
       ip: '192.168.0.1',
-      rx: 123179.18222222221,
-      tx: 123030.54555555557,
-      memory: 0.9044444444444445,
-      cpu: 0.3979674157303371,
-      diskSpaceUsage: 0.3979674157303371,
-      normalizedLoad1m: 0.15291777273162221,
-      memoryFree: 34359738368,
     },
     overrides: {
       overview: {
@@ -109,20 +97,15 @@ const stories: Meta<AssetDetailsProps> = {
           id: 'default',
           getFieldByName: () => 'hostname' as unknown as DataViewField,
         } as unknown as DataView,
-        dateRange: {
-          from: '168363046800',
-          to: '168363046900',
-        },
       },
       metadata: {
         showActionsColumn: true,
       },
     },
     nodeType: 'host',
-    currentTimeRange: {
-      interval: '1s',
-      from: 168363046800,
-      to: 168363046900,
+    dateRange: {
+      from: '2023-04-09T11:07:49Z',
+      to: '2023-04-09T11:23:49Z',
     },
     tabs,
     links,

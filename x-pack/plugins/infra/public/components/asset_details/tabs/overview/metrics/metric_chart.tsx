@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import {
   buildCombinedHostsFilter,
   buildExistsHostsFilter,
@@ -25,13 +26,12 @@ import {
 import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
 import { useLensAttributes, type Layer } from '../../../../../hooks/use_lens_attributes';
 import type { FormulaConfig, XYLayerOptions } from '../../../../../common/visualizations';
-import type { StringDateRange } from '../../../types';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
   layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
   dataView?: DataView;
-  dateRange: StringDateRange;
+  timeRange: TimeRange;
   nodeName: string;
 }
 
@@ -41,8 +41,8 @@ export const MetricChart = ({
   id,
   title,
   layers,
-  dateRange,
   nodeName,
+  timeRange,
   dataView,
   overrides,
 }: MetricChartProps) => {
@@ -69,10 +69,10 @@ export const MetricChart = ({
   const extraActions: Action[] = useMemo(
     () =>
       getExtraActions({
-        timeRange: dateRange,
+        timeRange,
         filters,
       }),
-    [dateRange, filters, getExtraActions]
+    [timeRange, filters, getExtraActions]
   );
 
   const loading = !attributes;
@@ -115,7 +115,7 @@ export const MetricChart = ({
           attributes={attributes}
           style={{ height: MIN_HEIGHT }}
           extraActions={extraActions}
-          dateRange={dateRange}
+          dateRange={timeRange}
           filters={filters}
           overrides={overrides}
           loading={loading}

@@ -9,16 +9,16 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
-import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummary } from './metadata_summary';
 import { KPIGrid } from './kpis/kpi_grid';
-import type { StringDateRange } from '../../types';
 import { MetricsGrid } from './metrics/metrics_grid';
+import { toTimestampRange } from '../../utils';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -26,25 +26,17 @@ export interface MetadataSearchUrlState {
 }
 
 export interface OverviewProps {
-  currentTimeRange: MetricsTimeInput;
+  dateRange: TimeRange;
   nodeName: string;
   nodeType: InventoryItemType;
-  dateRange?: StringDateRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
 }
 
-const DEFAULT_DATE_RANGE = {
-  from: 'now-15m',
-  to: 'now',
-  mode: 'absolute' as const,
-};
-
 export const Overview = ({
   nodeName,
-  currentTimeRange,
-  nodeType,
   dateRange,
+  nodeType,
   metricsDataView,
   logsDataView,
 }: OverviewProps) => {
@@ -54,16 +46,18 @@ export const Overview = ({
     loading: metadataLoading,
     error: fetchMetadataError,
     metadata,
-  } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadata(
+    nodeName,
+    nodeType,
+    inventoryModel.requiredMetrics,
+    sourceId,
+    toTimestampRange(dateRange)
+  );
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <KPIGrid
-          nodeName={nodeName}
-          dateRange={dateRange ?? DEFAULT_DATE_RANGE}
-          dataView={metricsDataView}
-        />
+        <KPIGrid nodeName={nodeName} timeRange={dateRange} dataView={metricsDataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -98,7 +92,7 @@ export const Overview = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MetricsGrid
-          dateRange={dateRange ?? DEFAULT_DATE_RANGE}
+          timeRange={dateRange}
           logsDataView={logsDataView}
           metricsDataView={metricsDataView}
           nodeName={nodeName}

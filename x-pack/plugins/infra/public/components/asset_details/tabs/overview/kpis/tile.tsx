@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
@@ -26,12 +27,11 @@ import {
   buildExistsHostsFilter,
 } from '../../../../../utils/filters/build';
 import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
-import type { StringDateRange } from '../../../types';
 
 const MIN_HEIGHT = 150;
 
 export interface TileProps {
-  dateRange: StringDateRange;
+  timeRange: TimeRange;
   dataView?: DataView;
   nodeName: string;
 }
@@ -43,7 +43,7 @@ export const Tile = ({
   toolTip,
   dataView,
   nodeName,
-  dateRange,
+  timeRange,
 }: KPIChartProps & TileProps) => {
   const getSubtitle = () =>
     i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average', {
@@ -71,10 +71,10 @@ export const Tile = ({
   const extraActions: Action[] = useMemo(
     () =>
       getExtraActions({
-        timeRange: dateRange,
+        timeRange,
         filters,
       }),
-    [filters, getExtraActions, dateRange]
+    [filters, getExtraActions, timeRange]
   );
 
   const loading = !attributes;
@@ -117,7 +117,7 @@ export const Tile = ({
             attributes={attributes}
             style={{ height: MIN_HEIGHT }}
             extraActions={extraActions}
-            dateRange={dateRange}
+            dateRange={timeRange}
             filters={filters}
             loading={loading}
           />

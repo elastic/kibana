@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { HostMetricsDocsLink } from '../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
 import { MetricChart, type MetricChartProps } from './metric_chart';
-import { StringDateRange } from '../../../types';
 import { hostLensFormulas } from '../../../../../common/visualizations';
 
 const PERCENT_LEFT_AXIS: Pick<MetricChartProps, 'overrides'>['overrides'] = {
@@ -253,13 +253,13 @@ const CHARTS_IN_ORDER: Array<
 
 export interface MetricsGridProps {
   nodeName: string;
-  dateRange: StringDateRange;
+  timeRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
 }
 
 export const MetricsGrid = React.memo(
-  ({ nodeName, metricsDataView, logsDataView, dateRange }: MetricsGridProps) => {
+  ({ nodeName, metricsDataView, logsDataView, timeRange }: MetricsGridProps) => {
     return (
       <>
         <EuiTitle size="xxxs" textTransform="uppercase">
@@ -274,7 +274,7 @@ export const MetricsGrid = React.memo(
               <MetricChart
                 nodeName={nodeName}
                 dataView={dataViewType === 'metrics' ? metricsDataView : logsDataView}
-                dateRange={dateRange}
+                timeRange={timeRange}
                 {...chartProp}
               />
             </EuiFlexItem>

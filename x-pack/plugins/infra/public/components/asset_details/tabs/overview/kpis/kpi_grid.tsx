@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Tile, type TileProps } from './tile';
 import { KPI_CHARTS } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 
-export const KPIGrid = React.memo(({ nodeName, dataView, dateRange }: TileProps) => {
+export const KPIGrid = React.memo(({ nodeName, dataView, timeRange: dateRange }: TileProps) => {
   return (
     <>
       <EuiFlexGroup
@@ -20,7 +20,7 @@ export const KPIGrid = React.memo(({ nodeName, dataView, dateRange }: TileProps)
       >
         {KPI_CHARTS.map((chartProp, index) => (
           <EuiFlexItem key={index}>
-            <Tile {...chartProp} nodeName={nodeName} dataView={dataView} dateRange={dateRange} />
+            <Tile {...chartProp} nodeName={nodeName} dataView={dataView} timeRange={dateRange} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

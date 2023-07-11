@@ -6,22 +6,21 @@
  */
 
 import React from 'react';
+import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { Anomalies, Metadata, Processes, Osquery, Logs, Overview } from '../tabs';
-import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
+import { FlyoutTabIds, type TabState } from '../types';
+import { toTimestampRange } from '../utils';
 
-type Props = Pick<
-  AssetDetailsProps,
-  'currentTimeRange' | 'node' | 'nodeType' | 'overrides' | 'onTabsStateChange'
->;
+export const Content = () => {
+  const {
+    node,
+    nodeType,
+    overrides,
+    dateRange: timeRange,
+    onTabsStateChange,
+  } = useAssetDetailsStateContext();
 
-export const Content = ({
-  overrides,
-  currentTimeRange,
-  node,
-  onTabsStateChange,
-  nodeType = 'host',
-}: Props) => {
   const onChange = (state: TabState) => {
     if (!onTabsStateChange) {
       return;
@@ -30,6 +29,7 @@ export const Content = ({
     onTabsStateChange(state);
   };
 
+  const timeRangeTs = toTimestampRange(timeRange);
   return (
     <>
       <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
@@ -37,10 +37,9 @@ export const Content = ({
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
         <Overview
-          currentTimeRange={currentTimeRange}
+          dateRange={timeRange}
           nodeName={node.name}
           nodeType={nodeType}
-          dateRange={overrides?.overview?.dateRange}
           metricsDataView={overrides?.overview?.metricsDataView}
           logsDataView={overrides?.overview?.logsDataView}
         />
@@ -49,7 +48,7 @@ export const Content = ({
         <Logs
           nodeName={node.name}
           nodeType={nodeType}
-          currentTime={currentTimeRange.to}
+          currentTimestamp={timeRangeTs.to}
           logViewReference={overrides?.logs?.logView?.reference}
           logViewLoading={overrides?.logs?.logView?.loading}
           search={overrides?.logs?.query}
@@ -58,7 +57,7 @@ export const Content = ({
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
-          currentTimeRange={currentTimeRange}
+          dateRange={timeRange}
           nodeName={node.name}
           nodeType={nodeType}
           showActionsColumn={overrides?.metadata?.showActionsColumn}
@@ -67,13 +66,13 @@ export const Content = ({
         />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
-        <Osquery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
+        <Osquery nodeName={node.name} nodeType={nodeType} dateRange={timeRange} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
         <Processes
           nodeName={node.name}
           nodeType={nodeType}
-          currentTime={currentTimeRange.to}
+          currentTimestamp={timeRangeTs.to}
           search={overrides?.processes?.query}
           onSearchFilterChange={(query) => onChange({ processes: { query } })}
         />
