@@ -145,15 +145,10 @@ describe('LensEditConfigurationFlyout', () => {
     expect(instance.find(VisualizationToolbar).exists()).toBe(true);
     expect(instance.find(VisualizationToolbar).prop('framePublicAPI')).toMatchInlineSnapshot(`
       Object {
-        "activeData": Object {},
+        "activeData": undefined,
         "dataViews": Object {
           "indexPatternRefs": Array [],
-          "indexPatterns": Object {
-            "index1": Object {
-              "id": "index1",
-              "isPersisted": [Function],
-            },
-          },
+          "indexPatterns": Object {},
         },
         "datasourceLayers": Object {
           "a": Object {
@@ -206,12 +201,7 @@ describe('LensEditConfigurationFlyout', () => {
                   "activeData": Object {},
                   "dataViews": Object {
                     "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
+                    "indexPatterns": Object {},
                   },
                   "datasourceLayers": Object {
                     "a": Object {
@@ -256,12 +246,7 @@ describe('LensEditConfigurationFlyout', () => {
                   "activeData": Object {},
                   "dataViews": Object {
                     "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
+                    "indexPatterns": Object {},
                   },
                   "datasourceLayers": Object {
                     "a": Object {
