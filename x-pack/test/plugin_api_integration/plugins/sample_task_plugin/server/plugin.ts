@@ -159,7 +159,7 @@ export class SampleTaskManagerFixturePlugin
         title: 'Sample Recurring Task that has invalid indirect params',
         description: 'A sample task that returns invalid params in loadIndirectParams all the time',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+        createTaskRunner: () => ({
           async loadIndirectParams() {
             return { data: { indirectParams: { baz: 'foo' } } }; // invalid
           },
@@ -176,16 +176,16 @@ export class SampleTaskManagerFixturePlugin
         description:
           'A sample task that returns invalid params in loadIndirectParams all the time and throws error in the run method',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+        createTaskRunner: () => ({
           async loadIndirectParams() {
             return { data: { indirectParams: { baz: 'foo' } } }; // invalid
           },
           async run() {
             throwRetryableError(new Error('Retry'), true);
           },
-          indirectParamsSchema: schema.object({
-            param: schema.string(),
-          }),
+        }),
+        indirectParamsSchema: schema.object({
+          param: schema.string(),
         }),
       },
       sampleTaskWithParamsSchema: {
