@@ -104,7 +104,7 @@ export class GetPreviewData {
     }));
   }
 
-  private async getAPMTranscationErrorPreviewData(
+  private async getAPMTransactionErrorPreviewData(
     indicator: APMTransactionErrorRateIndicator
   ): Promise<GetPreviewDataResponse> {
     const filter = [];
