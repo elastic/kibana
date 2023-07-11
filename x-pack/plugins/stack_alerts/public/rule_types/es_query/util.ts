@@ -43,7 +43,7 @@ export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOpti
 };
 
 export const convertRawRuntimeFieldtoFieldOption = (
-  rawFields: estypes.MappingRuntimeFieldFetchFields
+  rawFields: Record<string, estypes.MappingRuntimeField>
 ): FieldOption[] => {
   const result: FieldOption[] = [];
   for (const name of Object.keys(rawFields)) {
@@ -51,7 +51,7 @@ export const convertRawRuntimeFieldtoFieldOption = (
     const type = rawField.type;
 
     const normalizedType = NORMALIZED_FIELD_TYPES[type] || type;
-    const isAggregatableAndSearchable = type !== 'lookup' && type !== 'composite';
+    const isAggregatableAndSearchable = type !== 'lookup';
     const aggregatable = isAggregatableAndSearchable;
     const searchable = isAggregatableAndSearchable;
 
