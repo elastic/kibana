@@ -6,6 +6,7 @@
  */
 
 import type { CriteriaWithPagination } from '@elastic/eui';
+import { EuiFieldSearch } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
@@ -29,14 +30,16 @@ import { UninstallCommandFlyout } from '../../../components';
 export const UninstallTokenListPage = () => {
   useBreadcrumbs('uninstall_tokens');
 
+  const [policyIdSearch, setPolicyIdSearch] = useState<string>('');
+  const [tokenIdForFlyout, setTokenIdForFlyout] = useState<string | null>(null);
+
   const { pagination, setPagination, pageSizeOptions } = usePagination();
 
   const { isLoading, data } = useGetUninstallTokens({
     perPage: pagination.pageSize,
     page: pagination.currentPage,
+    policyId: policyIdSearch,
   });
-
-  const [tokenIdForFlyout, setTokenIdForFlyout] = useState<string | null>(null);
 
   const tokens = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -51,12 +54,32 @@ export const UninstallTokenListPage = () => {
         />
       )}
 
-      <EuiText color="subdued">
+      <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.uninstallTokenList.pageDescription"
           defaultMessage="Uninstall token allows you to get the uninstall command if you need to uninstall the Agent/Endpoint on the Host."
         />
       </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiFieldSearch
+        onSearch={(searchString) => {
+          setPolicyIdSearch(searchString);
+          setPagination((prevPagination) => ({
+            ...prevPagination,
+            currentPage: 1,
+          }));
+        }}
+        incremental
+        fullWidth
+        placeholder={i18n.translate('xpack.fleet.uninstallTokenList.searchByPolicyPlaceholder', {
+          defaultMessage: 'Search by policy ID',
+        })}
+        data-test-subj="policyIdSearchField"
+      />
+
+      <EuiSpacer size="m" />
 
       <EuiBasicTable<UninstallTokenMetadata>
         data-test-subj="uninstallTokenListTable"

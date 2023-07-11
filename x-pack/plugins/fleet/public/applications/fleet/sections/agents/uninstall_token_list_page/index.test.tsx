@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
-import { waitFor } from '@testing-library/react';
+import { waitFor, fireEvent } from '@testing-library/react';
 
 import type {
   GetUninstallTokensMetadataResponse,
@@ -166,6 +166,20 @@ describe('UninstallTokenList page', () => {
         ).toBeInTheDocument();
       });
       expect(useGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenFixture.id);
+    });
+
+    it('should filter by policyID', async () => {
+      const renderResult = render();
+
+      fireEvent.change(renderResult.getByTestId('policyIdSearchField'), {
+        target: { value: 'searched policy id' },
+      });
+
+      expect(useGetUninstallTokensMock).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 20,
+        policyId: 'searched policy id',
+      });
     });
   });
 });
