@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { ReputationService } from '../components/reputation_service';
 import type { Immutable } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import type { BehaviorProtectionOSes } from '../../../types';
@@ -50,6 +51,7 @@ export const BehaviorProtection = React.memo(() => {
       }
     >
       <RadioButtons protection={protection} osList={OSes} />
+      <ReputationService protection={protection} />
       <UserNotification protection={protection} osList={OSes} />
       <EuiSpacer size="m" />
       <EuiCallOut iconType="iInCircle">

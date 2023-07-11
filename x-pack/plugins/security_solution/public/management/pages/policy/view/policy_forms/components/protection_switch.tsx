@@ -49,6 +49,9 @@ export const ProtectionSwitch = React.memo(
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
           if (event.target.checked === false) {
+            newPayload.windows.behavior_protection.reputation_service = event.target.checked;
+            newPayload.mac.behavior_protection.reputation_service = event.target.checked;
+            newPayload.linux.behavior_protection.reputation_service = event.target.checked;
             for (const os of osList) {
               if (os === 'windows') {
                 newPayload[os][protection].mode = ProtectionModes.off;
@@ -70,6 +73,9 @@ export const ProtectionSwitch = React.memo(
               }
             }
           } else {
+            newPayload.windows.behavior_protection.reputation_service = false;
+            newPayload.mac.behavior_protection.reputation_service = false;
+            newPayload.linux.behavior_protection.reputation_service = false;
             for (const os of osList) {
               if (os === 'windows') {
                 newPayload[os][protection].mode = ProtectionModes.prevent;
