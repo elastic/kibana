@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 import { AssetDetailsProps, FlyoutTabIds, LinkOptions, Tab, TabIds } from '../types';
 import {
   LinkToApmServices,
-  LinkToUptime,
   LinkToAlertsRule,
   LinkToNodeDetails,
   TabToApmTraces,
@@ -30,7 +29,7 @@ import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 
 type Props = Pick<
   AssetDetailsProps,
-  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs' | 'onTabsStateChange'
+  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs'
 > & {
   compact: boolean;
 };
@@ -45,16 +44,11 @@ export const Header = ({
   compact,
   currentTimeRange,
   overrides,
-  onTabsStateChange,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { showTab, activeTabId } = useTabSwitcherContext();
 
   const onTabClick = (tabId: TabIds) => {
-    if (onTabsStateChange) {
-      onTabsStateChange({ activeTabId: tabId });
-    }
-
     showTab(tabId);
   };
 
@@ -69,11 +63,14 @@ export const Header = ({
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = {
     nodeDetails: (
-      <LinkToNodeDetails nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
+      <LinkToNodeDetails
+        nodeName={node.name}
+        nodeType={nodeType}
+        currentTime={currentTimeRange.to}
+      />
     ),
     alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
     apmServices: <LinkToApmServices nodeName={node.name} apmField={APM_FIELD} />,
-    uptime: <LinkToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} />,
   };
 
   const tabEntries = tabs.map(({ name, ...tab }) => {

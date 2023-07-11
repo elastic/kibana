@@ -40,8 +40,16 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async clickMetadataFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-metadata');
+    },
+
     async clickProcessesFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-processes');
+    },
+
+    async clickShowAllMetadataOverviewTab() {
+      return testSubjects.click('infraMetadataSummaryShowAllMetadataButton');
     },
 
     async clickLogsFlyoutTab() {
@@ -50,10 +58,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async clickProcessesTableExpandButton() {
       return testSubjects.click('infraProcessRowButton');
-    },
-
-    async clickFlyoutUptimeLink() {
-      return testSubjects.click('hostsView-flyout-uptime-link');
     },
 
     async clickFlyoutApmServicesLink() {
@@ -188,8 +192,19 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Flyout Tabs
+    async getAssetDetailsKPITileValue(type: string) {
+      const container = await testSubjects.find('assetDetailsKPIGrid');
+      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const div = await element.findByClassName('echMetricText__value');
+      return div.getAttribute('title');
+    },
+
     getMetadataTab() {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
+    },
+
+    metadataTableExist() {
+      return testSubjects.exists('infraMetadataTable');
     },
 
     async getMetadataTabName() {
