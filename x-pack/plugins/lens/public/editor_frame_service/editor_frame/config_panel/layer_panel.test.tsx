@@ -390,7 +390,7 @@ describe('LayerPanel', () => {
           },
         ],
       });
-      mockVisualization.renderDimensionEditor = jest.fn();
+      mockVisualization.DimensionEditorComponent = jest.fn().mockImplementation(() => <div />);
 
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
       act(() => {
@@ -434,14 +434,13 @@ describe('LayerPanel', () => {
       });
       instance.update();
 
-      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'newid' })
       );
       const stateFn =
-        mockDatasource.renderDimensionEditor.mock.calls[
-          mockDatasource.renderDimensionEditor.mock.calls.length - 1
-        ][1].setState;
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0].setState;
 
       act(() => {
         stateFn(
@@ -512,14 +511,13 @@ describe('LayerPanel', () => {
       });
       instance.update();
 
-      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockDatasource.DimensionEditorComponent).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'y' })
       );
       const stateFn =
-        mockDatasource.renderDimensionEditor.mock.calls[
-          mockDatasource.renderDimensionEditor.mock.calls.length - 1
-        ][1].setState;
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0].setState;
 
       act(() => {
         stateFn(
@@ -586,9 +584,9 @@ describe('LayerPanel', () => {
       expect(instance.find('EuiFlyoutHeader').exists()).toBe(true);
 
       const lastArgs =
-        mockDatasource.renderDimensionEditor.mock.calls[
-          mockDatasource.renderDimensionEditor.mock.calls.length - 1
-        ][1];
+        mockDatasource.DimensionEditorComponent.mock.calls[
+          mockDatasource.DimensionEditorComponent.mock.calls.length - 1
+        ][0];
 
       // Simulate what is called by the dimension editor
       act(() => {
@@ -597,7 +595,7 @@ describe('LayerPanel', () => {
         });
       });
 
-      expect(mockVisualization.renderDimensionEditor).toHaveBeenCalled();
+      expect(mockVisualization.DimensionEditorComponent).toHaveBeenCalled();
     });
 
     it('should close the DimensionContainer when the active visualization changes', async () => {
@@ -1331,7 +1329,7 @@ describe('LayerPanel', () => {
         ],
       });
       await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
-      expect(mockDatasource.renderDimensionTrigger).toHaveBeenCalled();
+      expect(mockDatasource.DimensionTriggerComponent).toHaveBeenCalled();
     });
 
     it('should render visualization dimension trigger if there is no layer datasource', async () => {
@@ -1354,14 +1352,14 @@ describe('LayerPanel', () => {
         framePublicAPI: { ...props.framePublicAPI, datasourceLayers: {} },
       };
 
-      mockVisualization.renderDimensionTrigger = jest.fn();
+      mockVisualization.DimensionTriggerComponent = jest.fn().mockImplementation(() => <div />);
       mockVisualization.getUniqueLabels = jest.fn(() => ({
         x: 'A',
       }));
 
       await mountWithProvider(<LayerPanel {...propsWithVisOnlyLayer} />);
-      expect(mockDatasource.renderDimensionTrigger).not.toHaveBeenCalled();
-      expect(mockVisualization.renderDimensionTrigger).toHaveBeenCalled();
+      expect(mockDatasource.DimensionTriggerComponent).not.toHaveBeenCalled();
+      expect(mockVisualization.DimensionTriggerComponent).toHaveBeenCalled();
     });
 
     // TODO - test user message display

@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -16,7 +14,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -25,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { ChildDragDropProvider, type DraggingIdentifier } from '@kbn/dom-drag-drop';
+import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import memoizeOne from 'memoize-one';
 import type {
@@ -191,7 +188,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const { uiSettings, settings } = core;
+  const { uiSettings } = core;
 
   const DATASOURCE_ID = 'formBased';
   const ALIAS_IDS = ['indexpattern'];
@@ -452,68 +449,27 @@ export function getFormBasedDatasource({
         searchSessionId
       ),
 
-    renderLayerSettings(domElement, props) {
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                data,
-                dataViews,
-                fieldFormats,
-                charts,
-                unifiedSearch,
-                share,
-              }}
-            >
-              <LayerSettingsPanel {...props} />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
-      );
+    LayerSettingsComponent(props) {
+      return <LayerSettingsPanel {...props} />;
     },
-
-    renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
-      const { onChangeIndexPattern, dragDropContext, ...otherProps } = props;
+    DataPanelComponent(props: DatasourceDataPanelProps<FormBasedPrivateState>) {
+      const { onChangeIndexPattern, ...otherProps } = props;
       const layerFields = formBasedDatasource?.getSelectedFields?.(props.state);
-
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                data,
-                dataViews,
-                fieldFormats,
-                charts,
-                unifiedSearch,
-                share,
-              }}
-            >
-              <ChildDragDropProvider value={dragDropContext}>
-                <FormBasedDataPanel
-                  data={data}
-                  dataViews={dataViews}
-                  fieldFormats={fieldFormats}
-                  charts={charts}
-                  indexPatternFieldEditor={dataViewFieldEditor}
-                  {...otherProps}
-                  core={core}
-                  uiActions={uiActions}
-                  onIndexPatternRefresh={onRefreshIndexPattern}
-                  layerFields={layerFields}
-                />
-              </ChildDragDropProvider>
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <FormBasedDataPanel
+          data={data}
+          dataViews={dataViews}
+          fieldFormats={fieldFormats}
+          charts={charts}
+          indexPatternFieldEditor={dataViewFieldEditor}
+          {...otherProps}
+          core={core}
+          uiActions={uiActions}
+          onIndexPatternRefresh={onRefreshIndexPattern}
+          layerFields={layerFields}
+        />
       );
     },
-
     uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
@@ -540,115 +496,48 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
-    renderDimensionTrigger: (
-      domElement: Element,
-      props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
-    ) => {
+    DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<FormBasedPrivateState>) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                appName: 'lens',
-                storage,
-                uiSettings,
-                settings,
-                data,
-                fieldFormats,
-                savedObjects: core.savedObjects,
-                docLinks: core.docLinks,
-                unifiedSearch,
-              }}
-            >
-              <DimensionTrigger id={props.columnId} label={formattedLabel} />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
-      );
+      return <DimensionTrigger id={props.columnId} label={formattedLabel} />;
     },
 
-    renderDimensionEditor: (
-      domElement: Element,
-      props: DatasourceDimensionEditorProps<FormBasedPrivateState>
-    ) => {
+    DimensionEditorComponent: (props: DatasourceDimensionEditorProps<FormBasedPrivateState>) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
 
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                appName: 'lens',
-                storage,
-                uiSettings,
-                settings,
-                data,
-                fieldFormats,
-                savedObjects: core.savedObjects,
-                docLinks: core.docLinks,
-                http: core.http,
-                unifiedSearch,
-              }}
-            >
-              <FormBasedDimensionEditor
-                uiSettings={uiSettings}
-                storage={storage}
-                fieldFormats={fieldFormats}
-                http={core.http}
-                data={data}
-                unifiedSearch={unifiedSearch}
-                dataViews={dataViews}
-                uniqueLabel={columnLabelMap[props.columnId]}
-                notifications={core.notifications}
-                {...props}
-              />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <FormBasedDimensionEditor
+          uiSettings={uiSettings}
+          storage={storage}
+          fieldFormats={fieldFormats}
+          http={core.http}
+          data={data}
+          unifiedSearch={unifiedSearch}
+          dataViews={dataViews}
+          uniqueLabel={columnLabelMap[props.columnId]}
+          notifications={core.notifications}
+          {...props}
+        />
       );
     },
 
-    renderLayerPanel: (
-      domElement: Element,
-      props: DatasourceLayerPanelProps<FormBasedPrivateState>
-    ) => {
+    LayerPanelComponent: (props: DatasourceLayerPanelProps<FormBasedPrivateState>) => {
       const { onChangeIndexPattern, ...otherProps } = props;
-      render(
-        <KibanaThemeProvider theme$={core.theme.theme$}>
-          <I18nProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                data,
-                dataViews,
-                fieldFormats,
-                charts,
-                unifiedSearch,
-                share,
-              }}
-            >
-              <LayerPanel
-                onChangeIndexPattern={(indexPatternId) => {
-                  triggerActionOnIndexPatternChange({
-                    indexPatternId,
-                    state: props.state,
-                    layerId: props.layerId,
-                    uiActions,
-                  });
-                  onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
-                }}
-                {...otherProps}
-              />
-            </KibanaContextProvider>
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <LayerPanel
+          onChangeIndexPattern={(indexPatternId) => {
+            triggerActionOnIndexPatternChange({
+              indexPatternId,
+              state: props.state,
+              layerId: props.layerId,
+              uiActions,
+            });
+            onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
+          }}
+          {...otherProps}
+        />
       );
     },
 
