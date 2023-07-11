@@ -24,6 +24,8 @@ import {
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
+  SLO_DESTINATION_INDEX_NAME,
+  SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../assets/constants';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
@@ -81,6 +83,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
           ]
         )
       );
+
+      await this.esClient.indices.create({ index: SLO_DESTINATION_INDEX_NAME });
+      await this.esClient.indices.create({ index: SLO_SUMMARY_DESTINATION_INDEX_NAME });
 
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)

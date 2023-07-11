@@ -34,7 +34,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
 
     for (const transformTemplate of ALL_TRANSFORM_TEMPLATES) {
       const transformId = transformTemplate.transform_id;
-      const transform = existingTransforms.find((t) => t.id === transformId);
+      const transform = existingTransforms?.find((t) => t.id === transformId);
 
       const transformAlreadyInstalled =
         !!transform && transform._meta?.version === SLO_RESOURCES_VERSION;
@@ -42,7 +42,7 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
         !!transform && transform._meta?.version !== SLO_RESOURCES_VERSION;
 
       if (transformAlreadyInstalled) {
-        this.logger.info(`Skipping install SLO summary transform: ${transformId}`);
+        this.logger.info(`SLO summary transform: ${transformId} already installed - skipping`);
         await this.startTransform(transformId);
         continue;
       }
