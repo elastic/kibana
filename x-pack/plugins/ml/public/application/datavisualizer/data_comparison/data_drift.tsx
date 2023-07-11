@@ -8,7 +8,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataComparisonSpec } from '@kbn/data-visualizer-plugin/public';
+import type { DataComparisonSpec } from '@kbn/data-visualizer-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
@@ -28,7 +28,6 @@ export const DataComparisonWithDocCountPage: FC = () => {
     }
   }, [dataVisualizer]);
 
-  const { services } = useMlKibana();
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
   return (
@@ -47,25 +46,7 @@ export const DataComparisonWithDocCountPage: FC = () => {
         </EuiFlexGroup>
       </MlPageHeader>
       {dataView && DataComparisonView ? (
-        <DataComparisonView
-          dataView={dataView}
-          savedSearch={savedSearch}
-          // appDependencies={pick(services, [
-          //   'application',
-          //   'data',
-          //   'executionContext',
-          //   'charts',
-          //   'fieldFormats',
-          //   'http',
-          //   'notifications',
-          //   'share',
-          //   'storage',
-          //   'uiSettings',
-          //   'unifiedSearch',
-          //   'theme',
-          //   'lens',
-          // ])}
-        />
+        <DataComparisonView dataView={dataView} savedSearch={savedSearch} />
       ) : null}
     </>
   );
