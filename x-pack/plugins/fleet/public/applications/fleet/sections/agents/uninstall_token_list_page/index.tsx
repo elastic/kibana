@@ -90,12 +90,18 @@ export const UninstallTokenListPage = () => {
             name: i18n.translate('xpack.fleet.uninstallTokenList.policyIdTitle', {
               defaultMessage: 'Policy ID',
             }),
+            render: (policyId: string) => (
+              <EuiText size="s" className="eui-textTruncate" title={policyId}>
+                {policyId}
+              </EuiText>
+            ),
           },
           {
             field: 'created_at',
             name: i18n.translate('xpack.fleet.uninstallTokenList.createdAtTitle', {
               defaultMessage: 'Created at',
             }),
+            width: '130px',
             render: (createdAt: string) =>
               createdAt ? (
                 <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
@@ -106,6 +112,7 @@ export const UninstallTokenListPage = () => {
             name: i18n.translate('xpack.fleet.uninstallTokenList.tokenTitle', {
               defaultMessage: 'Token',
             }),
+            width: '300px',
             render: (uninstallTokenId: string) => (
               <ApiKeyField
                 apiKeyId={uninstallTokenId}
@@ -123,6 +130,7 @@ export const UninstallTokenListPage = () => {
               defaultMessage: 'Actions',
             }),
             align: 'center',
+            width: '70px',
             render: (_: any, uninstallTokenMetadata: UninstallTokenMetadata) => {
               return (
                 <EuiToolTip

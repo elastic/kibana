@@ -5,11 +5,17 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, EuiText } from '@elastic/eui';
-
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
-
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import { useStartServices } from '../hooks';
 
@@ -19,6 +25,7 @@ export const ApiKeyField: React.FunctionComponent<{
   sendGetAPIKey: (id: string) => Promise<SendRequestResponse>;
   tokenGetter: (response: SendRequestResponse) => string | undefined;
 }> = ({ apiKeyId, length, sendGetAPIKey, tokenGetter }) => {
+  const { euiTheme } = useEuiTheme();
   const { notifications } = useStartServices();
   const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
   const [key, setKey] = useState<string | undefined>();
@@ -48,8 +55,14 @@ export const ApiKeyField: React.FunctionComponent<{
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiText color="subdued" size="xs">
+      <EuiFlexItem grow={false}>
+        <EuiText
+          color="subdued"
+          size="xs"
+          css={css`
+            font-family: ${euiTheme.font.familyCode};
+          `}
+        >
           {state === 'VISIBLE' ? key : tokenMask}
         </EuiText>
       </EuiFlexItem>

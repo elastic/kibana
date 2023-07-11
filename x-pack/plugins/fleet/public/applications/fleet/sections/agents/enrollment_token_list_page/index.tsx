@@ -151,7 +151,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
             tokenGetter={(response: SendRequestResponse<GetOneEnrollmentAPIKeyResponse>) =>
               response.data?.item.api_key
             }
-            length={73}
+            length={60}
           />
         );
       },
