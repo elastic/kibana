@@ -34,6 +34,8 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react/dist/emotion-react.cjs';
 
+import { ExperimentalFeaturesService } from '../../../../../../services';
+
 import { outputType } from '../../../../../../../common/constants';
 
 import { MultiRowInput } from '../multi_row_input';
@@ -55,12 +57,6 @@ export interface EditOutputFlyoutProps {
   proxies: FleetProxy[];
 }
 
-const OUTPUT_TYPE_OPTIONS = [
-  { value: outputType.Elasticsearch, text: 'Elasticsearch' },
-  { value: outputType.Logstash, text: 'Logstash' },
-  { value: outputType.Kafka, text: 'Kafka' },
-];
-
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
   onClose,
   output,
@@ -78,6 +74,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   );
 
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+  const { kafkaOutput: isKafkaOutputEnabled } = ExperimentalFeaturesService.get();
+
+  const OUTPUT_TYPE_OPTIONS = [
+    { value: outputType.Elasticsearch, text: 'Elasticsearch' },
+    { value: outputType.Logstash, text: 'Logstash' },
+    ...(isKafkaOutputEnabled ? [{ value: outputType.Kafka, text: 'Kafka' }] : []),
+  ];
 
   const renderLogstashSection = () => {
     return (
@@ -184,6 +187,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
       </>
     );
   };
+
   const renderElasticsearchSection = () => {
     return (
       <>
@@ -227,7 +231,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderKafkaSection = () => {
-    return <OutputFormKafkaSection inputs={inputs} />;
+    if (isKafkaOutputEnabled) {
+      return <OutputFormKafkaSection inputs={inputs} />;
+    }
+    return null;
   };
 
   const renderOutputTypeSection = (type: string) => {
