@@ -344,7 +344,7 @@ export const DataComparisonView = ({
         isBrushCleared={isBrushCleared}
         onReset={onReset}
         progress={result.loaded}
-        progressMessage={''}
+        progressMessage={result.progressMessage ?? ''}
         isRunning={result.loaded > 0 && result.loaded < 1}
         onRefresh={updateFieldsAndTime}
         onCancel={() => {}}

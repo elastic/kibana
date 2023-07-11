@@ -133,11 +133,8 @@ export const ProgressControls: FC<ProgressControlProps> = ({
               <FormattedMessage
                 data-test-subj="aiopsProgressTitleMessage"
                 id="xpack.aiops.progressTitle"
-                defaultMessage="Progress: {progress}% {progressMessage}"
-                values={{
-                  progress: Math.round(progress * 100),
-                  progressMessage: progressMessage ? `- ${progressMessage}` : '',
-                }}
+                defaultMessage="Progress: {progress}% — {progressMessage}"
+                values={{ progress: Math.round(progress * 100), progressMessage }}
               />
             </EuiText>
           </EuiFlexItem>
