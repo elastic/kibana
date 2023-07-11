@@ -82,7 +82,7 @@ import {
 } from './types';
 
 import {
-  EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD,
+  EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS,
   validateInferencePipelineConfiguration,
   validateInferencePipelineFields,
   validatePipelineNameIsAvailable,
@@ -597,7 +597,7 @@ export const MLInferenceLogic = kea<
             const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
             const disabledReason =
               missingSourceFields.length > 0
-                ? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD(missingSourceFields.join(', '))
+                ? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS(missingSourceFields.join(', '))
                 : undefined;
 
             return {
