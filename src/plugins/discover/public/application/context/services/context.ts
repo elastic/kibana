@@ -38,7 +38,9 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  * @param {SortDirection} sortDir - direction of sorting
  * @param {number} size - number of records to retrieve
  * @param {Filter[]} filters - to apply in the elastic query
+ * @param {DataPublicPluginStart} data
  * @param {boolean} useNewFieldsApi
+ * @param {DiscoverServices} services
  * @returns {Promise<object[]>}
  */
 export async function fetchSurroundingDocs(

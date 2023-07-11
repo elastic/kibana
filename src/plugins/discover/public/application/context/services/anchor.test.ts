@@ -11,6 +11,7 @@ import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,19 +28,27 @@ describe('context app', function () {
     });
 
     it('should use the `fetch$` method of the SearchSource', function () {
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(() => {
         expect(searchSourceStub.fetch$.calledOnce).toBe(true);
       });
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(() => {
         const setParentSpy = searchSourceStub.setParent;
         expect(setParentSpy.calledOnce).toBe(true);
         expect(setParentSpy.firstCall.args[0]).toBe(undefined);
@@ -47,20 +56,28 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource data view', function () {
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(() => {
         const setFieldSpy = searchSourceStub.setField;
         expect(setFieldSpy.firstCall.args[1].id).toEqual('DATA_VIEW_ID');
       });
     });
 
     it('should set the SearchSource version flag to true', function () {
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(() => {
         const setVersionSpy = searchSourceStub.setField.withArgs('version');
         expect(setVersionSpy.calledOnce).toBe(true);
         expect(setVersionSpy.firstCall.args[1]).toEqual(true);
@@ -68,10 +85,14 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource size to 1', function () {
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(() => {
         const setSizeSpy = searchSourceStub.setField.withArgs('size');
         expect(setSizeSpy.calledOnce).toBe(true);
         expect(setSizeSpy.firstCall.args[1]).toEqual(1);
@@ -79,10 +100,14 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource query to an ids query', function () {
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(() => {
         const setQuerySpy = searchSourceStub.setField.withArgs('query');
         expect(setQuerySpy.calledOnce).toBe(true);
         expect(setQuerySpy.firstCall.args[1]).toEqual({
@@ -101,10 +126,14 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource sort order', function () {
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(() => {
         const setSortSpy = searchSourceStub.setField.withArgs('sort');
         expect(setSortSpy.calledOnce).toBe(true);
         expect(setSortSpy.firstCall.args[1]).toEqual([
@@ -143,10 +172,14 @@ describe('context app', function () {
     it('should reject with an error when no hits were found', function () {
       searchSourceStub = createSearchSourceStub([]);
 
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then(
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(
         () => {
           fail('expected the promise to be rejected');
         },
@@ -162,12 +195,16 @@ describe('context app', function () {
         { _id: '3', _index: 't' },
       ]);
 
-      return fetchAnchor('id', dataView, searchSourceStub, [
-        { '@timestamp': SortDirection.desc },
-        { _doc: SortDirection.desc },
-      ]).then((anchorDocument) => {
-        expect(anchorDocument).toHaveProperty('raw._id', '1');
-        expect(anchorDocument).toHaveProperty('isAnchor', true);
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        false,
+        mockDiscoverServices
+      ).then(({ anchorRow }) => {
+        expect(anchorRow).toHaveProperty('raw._id', '1');
+        expect(anchorRow).toHaveProperty('isAnchor', true);
       });
     });
   });
@@ -185,7 +222,8 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        true
+        true,
+        mockDiscoverServices
       ).then(() => {
         const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
         const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');

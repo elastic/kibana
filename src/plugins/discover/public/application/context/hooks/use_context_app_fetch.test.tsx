@@ -35,7 +35,7 @@ jest.mock('../services/context', () => {
       if (!dataView || !dataView.id) {
         throw new Error();
       }
-      return type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits;
+      return { rows: type === 'predecessors' ? mockPredecessorHits : mockSuccessorHits };
     },
   };
 });
@@ -45,7 +45,7 @@ jest.mock('../services/anchor', () => ({
     if (!dataView.id || !anchorId) {
       throw new Error();
     }
-    return mockAnchorHit;
+    return { anchorRow: mockAnchorHit };
   },
 }));
 
