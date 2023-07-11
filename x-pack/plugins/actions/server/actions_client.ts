@@ -787,6 +787,7 @@ export class ActionsClient {
         sources.push(option.source);
       }
     });
+
     const authCounts = await getBulkAuthorizationModeBySource(
       this.unsecuredSavedObjectsClient,
       sources

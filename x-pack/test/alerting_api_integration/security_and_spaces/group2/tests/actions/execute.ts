@@ -502,15 +502,17 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should authorize system actions correctly', async () => {
+          const startDate = new Date().toISOString();
           const connectorId = 'system-connector-test.system-action-kibana-privileges';
           const name = 'System action: test.system-action-kibana-privileges';
+          const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
 
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector/${connectorId}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              params: {},
+              params: { index: ES_TEST_INDEX_NAME, reference },
             });
 
           switch (scenario.id) {
@@ -531,15 +533,20 @@ export default function ({ getService }: FtrProviderContext) {
             case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
 
-              await validateEventLog({
+              await validateSystemEventLog({
                 spaceId: space.id,
                 connectorId,
-                actionTypeId: 'test.system-action-kibana-privileges',
+                startDate,
                 outcome: 'success',
                 message: `action executed: test.system-action-kibana-privileges:${connectorId}: ${name}`,
                 source: ActionExecutionSourceType.HTTP_REQUEST,
-                spaceAgnostic: true,
               });
+
+              await esTestIndexTool.waitForDocs(
+                'action:test.system-action-kibana-privileges',
+                reference,
+                1
+              );
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -632,4 +639,41 @@ export default function ({ getService }: FtrProviderContext) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);
     }
   }
+
+  const validateSystemEventLog = async (
+    params: Omit<ValidateEventLogParams, 'actionTypeId' | 'spaceAgnostic'> & { startDate: string }
+  ): Promise<void> => {
+    const { spaceId, connectorId, outcome, message, startDate, errorMessage, source } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      const events_ = await getEventLog({
+        getService,
+        spaceId,
+        type: 'action',
+        id: connectorId,
+        provider: 'actions',
+        actions: new Map([['execute', { gte: 1 }]]),
+      });
+
+      const filteredEvents = events_.filter((event) => event!['@timestamp']! >= startDate);
+      if (filteredEvents.length < 1) throw new Error('no recent events found yet');
+
+      return filteredEvents;
+    });
+
+    expect(events.length).to.be(1);
+
+    const event = events[0];
+
+    expect(event?.message).to.eql(message);
+    expect(event?.event?.outcome).to.eql(outcome);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+
+    if (source) {
+      expect(event?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());
+    }
+  };
 }
