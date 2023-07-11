@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'findings']);
+  const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
   // We need to use a dataset for the tests to run
@@ -122,6 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
+      pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -131,7 +132,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('SearchBar', () => {
       it('add filter', async () => {
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
-        sleep(1000);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
         expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
