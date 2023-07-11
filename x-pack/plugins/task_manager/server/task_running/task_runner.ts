@@ -387,13 +387,15 @@ export class TaskManagerRunner implements TaskRunner {
     let error;
     const { state, taskType, id, numSkippedRuns = 0 } = this.instance.task;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+    const indirectParamsSchema = this.definition.indirectParamsSchema;
 
-    if (this.task?.loadIndirectParams) {
+    if (this.task?.loadIndirectParams && !!indirectParamsSchema) {
       const { data } = await this.task.loadIndirectParams();
-
       if (data) {
         try {
-          this.definition.indirectParamsSchema.validate(data.indirectParams);
+          if (indirectParamsSchema) {
+            indirectParamsSchema.validate(data.indirectParams);
+          }
         } catch (err) {
           this.logger.warn(
             `Task (${taskType}/${id}) has a validation error in its indirect params: ${err.message}`
@@ -710,9 +712,7 @@ export class TaskManagerRunner implements TaskRunner {
       : TaskRunResult.RetryScheduled;
   }
 
-  private async processResultWhenDone(
-    result: Result<SuccessfulRunResult, FailedRunResult>
-  ): Promise<TaskRunResult> {
+  private async processResultWhenDone(): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
       this.instance = asRan(this.instance.task);
@@ -747,7 +747,7 @@ export class TaskManagerRunner implements TaskRunner {
                   : TaskPersistence.NonRecurring,
               result: await (runAt || schedule || task.schedule
                 ? this.processResultForRecurringTask(result)
-                : this.processResultWhenDone(result)),
+                : this.processResultWhenDone()),
             }),
             taskTiming
           )
