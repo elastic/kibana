@@ -214,7 +214,6 @@ export function getTextBasedDatasource({
       const initState = state || { layers: {} };
       return {
         ...initState,
-        fieldList: [],
         indexPatternRefs: refs,
         initialContext: context,
       };
@@ -419,7 +418,7 @@ export function getTextBasedDatasource({
         (column) => column.columnId === props.columnId
       );
 
-      const updatedFields = fields.map((f) => {
+      const updatedFields = fields?.map((f) => {
         return {
           ...f,
           compatible: props.isMetricDimension
@@ -443,10 +442,10 @@ export function getTextBasedDatasource({
               className="lnsIndexPatternDimensionEditor--padded"
             >
               <FieldSelect
-                existingFields={updatedFields}
+                existingFields={updatedFields ?? []}
                 selectedField={selectedField}
                 onChoose={(choice) => {
-                  const meta = fields.find((f) => f.name === choice.field)?.meta;
+                  const meta = fields?.find((f) => f.name === choice.field)?.meta;
                   const newColumn = {
                     columnId: props.columnId,
                     fieldName: choice.field,
@@ -646,7 +645,7 @@ export function getTextBasedDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
-      const field = state.fieldList.find((f) => f.id === (draggedField as TextBasedField).id);
+      const field = state.fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
       if (!field) return [];
       return Object.entries(state.layers)?.map(([id, layer]) => {
         const newId = generateId();
