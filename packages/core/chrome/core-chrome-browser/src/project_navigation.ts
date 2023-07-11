@@ -45,6 +45,9 @@ export type AppDeepLinkId =
   | ObservabilityLink;
 
 /** @public */
+export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub';
+
+/** @public */
 export interface ChromeProjectNavigationNode {
   /** Optional id, if not passed a "link" must be provided. */
   id: string;
@@ -123,6 +126,8 @@ export interface NodeDefinition<
   title?: string;
   /** App id or deeplink id */
   link?: LinkId;
+  /** Cloud link id */
+  cloudLink?: CloudLinkId;
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
   /** Optional children of the navigation node */

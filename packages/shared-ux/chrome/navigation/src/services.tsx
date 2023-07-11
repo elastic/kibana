@@ -8,6 +8,7 @@
 
 import React, { FC, useContext } from 'react';
 import { NavigationKibanaDependencies, NavigationServices } from '../types';
+import { CloudLinks, getCloudLinks } from './cloud_links';
 
 const Context = React.createContext<NavigationServices | null>(null);
 
@@ -25,10 +26,12 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
-  const { core, serverless } = dependencies;
+  const { core, serverless, cloud } = dependencies;
   const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
+
+  const cloudLinks: CloudLinks = cloud ? getCloudLinks(cloud) : {};
 
   const value: NavigationServices = {
     basePath,
@@ -38,6 +41,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     navIsOpen: true,
     onProjectNavigationChange: serverless.setNavigation,
     activeNodes$: serverless.getActiveNavigationNodes$(),
+    cloudLinks,
   };
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
