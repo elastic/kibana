@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -53,6 +54,7 @@ interface AssistantProviderProps {
   basePromptContexts?: PromptContextTemplate[];
   baseQuickPrompts?: QuickPrompt[];
   baseSystemPrompts?: Prompt[];
+  docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: ({
     currentConversation,
@@ -79,6 +81,7 @@ export interface UseAssistantContext {
   allSystemPrompts: Prompt[];
   baseAllow: string[];
   baseAllowReplacement: string[];
+  docLinks: Omit<DocLinksStart, 'links'>;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePromptContexts: PromptContextTemplate[];
@@ -124,6 +127,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseAllowReplacement,
   defaultAllow,
   defaultAllowReplacement,
+  docLinks,
   basePromptContexts = [],
   baseQuickPrompts = [],
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
@@ -251,6 +255,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       conversations,
       defaultAllow: uniq(defaultAllow),
       defaultAllowReplacement: uniq(defaultAllowReplacement),
+      docLinks,
       getComments,
       http,
       isSettingsModalVisible,
@@ -282,6 +287,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       conversations,
       defaultAllow,
       defaultAllowReplacement,
+      docLinks,
       getComments,
       http,
       isSettingsModalVisible,

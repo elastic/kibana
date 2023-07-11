@@ -16,11 +16,9 @@ import {
   EuiToolTip,
   EuiSwitchEvent,
   EuiSwitch,
-  EuiIcon,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalBody,
-  EuiModalHeaderTitle,
 } from '@elastic/eui';
 
 import { createPortal } from 'react-dom';
@@ -28,6 +26,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { AssistantTitle } from './assistant_title';
 import { UpgradeButtons } from '../upgrade/upgrade_buttons';
 import { getMessageFromRawResponse } from './helpers';
 
@@ -77,6 +76,7 @@ const AssistantComponent: React.FC<Props> = ({
     conversations,
     defaultAllow,
     defaultAllowReplacement,
+    docLinks,
     getComments,
     http,
     promptContexts,
@@ -452,14 +452,7 @@ const AssistantComponent: React.FC<Props> = ({
               justifyContent={'spaceBetween'}
             >
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle>
-                  <EuiFlexGroup alignItems={'center'}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type={currentTitle.titleIcon} size="xl" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{currentTitle.title}</EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiModalHeaderTitle>
+                <AssistantTitle currentTitle={currentTitle} docLinks={docLinks} />
               </EuiFlexItem>
 
               <EuiFlexItem
