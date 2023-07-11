@@ -10,7 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { ReportingCore } from '../../..';
 import { CancellationToken } from '@kbn/reporting-common';
-import { cryptoFactory } from '../../../lib';
+import { cryptoFactory } from '@kbn/reporting-common';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
 import { generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';

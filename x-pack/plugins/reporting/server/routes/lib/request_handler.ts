@@ -9,11 +9,12 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { BaseParams, cryptoFactory, ReportingRequestHandlerContext } from '@kbn/reporting-common';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
-import { checkParamsVersion, cryptoFactory } from '../../lib';
+import { checkParamsVersion } from '../../lib';
 import { Report } from '../../lib/store';
-import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import type { ReportingUser } from '../../types';
 import { Counters } from './get_counter';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {

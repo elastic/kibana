@@ -7,16 +7,12 @@
 
 import { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
+import type { BasePayload } from '@kbn/reporting-common';
+import { JobId } from '@kbn/reporting-common/export_types';
 
-export type {
-  JobParamsCsvFromSavedObject,
-  TaskPayloadCsvFromSavedObject,
-} from './export_types/csv_v2';
 export type { JobParamsPNGDeprecated } from './export_types/png';
-export type { JobParamsPNGV2 } from './export_types/png_v2';
+export type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png/types';
 export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './export_types/printable_pdf';
-export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './export_types/printable_pdf_v2';
 export type {
   DownloadReportFn,
   IlmPolicyMigrationStatus,
@@ -25,7 +21,6 @@ export type {
   ManagementLinkFn,
   UrlOrUrlLocatorTuple,
 } from './url';
-export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
 
 export interface ReportDocumentHead {
   _id: string;

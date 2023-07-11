@@ -40,13 +40,12 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, take } from 'rxjs/operators';
+import { CsvV2ExportType, CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
-import { CsvV2ExportType } from './export_types/csv_v2';
-import { PdfExportType } from './export_types/printable_pdf_v2';
-import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -187,7 +186,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    
+
     const reportingStart = this.getContract();
     const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
     this.csvSearchSourceExport.start(exportTypeStartDeps);
@@ -322,7 +321,6 @@ export class ReportingCore {
   }
 
   /*
-   *
    * Track usage of code paths for telemetry
    */
   public getUsageCounter(): UsageCounter | undefined {
