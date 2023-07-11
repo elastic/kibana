@@ -6,7 +6,12 @@
  */
 
 import { ProfilingPlugin } from './plugin';
+import type { ProfilingPluginSetup, ProfilingPluginStart } from './plugin';
 
 export function plugin() {
   return new ProfilingPlugin();
 }
+
+export type { ProfilingPluginSetup, ProfilingPluginStart };
+
+export type ProfilingLocators = ProfilingPluginSetup['locators'];

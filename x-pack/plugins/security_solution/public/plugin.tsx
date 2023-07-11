@@ -393,6 +393,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
+        entityAnalytics: new subPluginClasses.EntityAnalytics(),
       };
     }
     return this._subPlugins;
@@ -421,6 +422,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
       timelines: subPlugins.timelines.start(),
+      entityAnalytics: subPlugins.entityAnalytics.start(
+        this.experimentalFeatures.riskScoringRoutesEnabled
+      ),
     };
   }
   /**
