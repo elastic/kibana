@@ -8,7 +8,7 @@ import React from 'react';
 import { encode } from '@kbn/rison';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import type { StringDateRange } from '../types';
 
@@ -18,12 +18,14 @@ export interface LinkToAlertsPageProps {
   dateRange: StringDateRange;
 }
 
+const ALERTS_PATH = '/app/observability/alerts';
+
 export const LinkToAlertsPage = ({ nodeName, queryField, dateRange }: LinkToAlertsPageProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const linkToAlertsPage = http.basePath.prepend(
-    `/app/observability/alerts?_a=${encode({
+    `${ALERTS_PATH}?_a=${encode({
       kuery: `${queryField}:"${nodeName}"`,
       rangeFrom: dateRange.from,
       rangeTo: dateRange.to,
@@ -34,7 +36,7 @@ export const LinkToAlertsPage = ({ nodeName, queryField, dateRange }: LinkToAler
   return (
     <RedirectAppLinks coreStart={services}>
       <EuiButtonEmpty
-        data-test-subj="hostsView-flyout-alerts-link"
+        data-test-subj="assetDetails-flyout-alerts-link"
         size="xs"
         iconSide="right"
         iconType="sortRight"
@@ -42,10 +44,28 @@ export const LinkToAlertsPage = ({ nodeName, queryField, dateRange }: LinkToAler
         href={linkToAlertsPage}
       >
         <FormattedMessage
-          id="xpack.infra.hostsViewPage.flyout.AlertsPageLinkLabel"
+          id="xpack.infra.assetDetails.flyout.AlertsPageLinkLabel"
           defaultMessage="Show all"
         />
       </EuiButtonEmpty>
+    </RedirectAppLinks>
+  );
+};
+
+export const LinkToAlertsHomePage = () => {
+  const { services } = useKibanaContextForPlugin();
+  const { http } = services;
+
+  const linkToAlertsPage = http.basePath.prepend(ALERTS_PATH);
+
+  return (
+    <RedirectAppLinks coreStart={services}>
+      <EuiLink data-test-subj="assetDetailsTooltipDocumentationLink" href={linkToAlertsPage}>
+        <FormattedMessage
+          id="xpack.infra.assetDetails.table.tooltip.alertsLink"
+          defaultMessage="alerts"
+        />
+      </EuiLink>
     </RedirectAppLinks>
   );
 };

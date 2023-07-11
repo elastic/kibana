@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   calculateTimeRangeBucketSize,
   getAlertSummaryTimeRange,
   useTimeBuckets,
 } from '@kbn/observability-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiPopover, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
@@ -30,6 +31,7 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LinkToAlertsRule } from '../../links/link_to_alerts';
 import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
+import { useBoolean } from '../../../../hooks/use_boolean';
 
 const ALERT_STATUS: AlertStatus = 'all';
 
@@ -42,7 +44,7 @@ export const AlertsSummaryContent = ({
   nodeType: InventoryItemType;
   dateRange: StringDateRange;
 }) => {
-  const [isAlertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
+  const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
 
   const alertsEsQueryByStatus = useMemo(
     () =>
@@ -58,15 +60,10 @@ export const AlertsSummaryContent = ({
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
-          <EuiText style={{ fontWeight: 700, textTransform: 'uppercase' }} size="s">
-            <FormattedMessage
-              id="xpack.infra.assetDetails.overview.alertsSectionTitle"
-              defaultMessage="Alerts"
-            />
-          </EuiText>
+          <AlertsSectionTitle />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LinkToAlertsRule onClick={() => setAlertFlyoutVisible(true)} />
+          <LinkToAlertsRule onClick={toggleAlertFlyout} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LinkToAlertsPage
@@ -80,7 +77,7 @@ export const AlertsSummaryContent = ({
       <AlertFlyout
         filter={`${findInventoryFields(nodeType).name}: "${nodeName}"`}
         nodeType={nodeType}
-        setVisible={setAlertFlyoutVisible}
+        setVisible={toggleAlertFlyout}
         visible={isAlertFlyoutVisible}
       />
     </>
@@ -120,6 +117,40 @@ const MemoAlertSummaryWidget = React.memo(
     );
   }
 );
+
+const AlertsSectionTitle = () => {
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+
+  return (
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiText style={{ fontWeight: 700, textTransform: 'uppercase' }} size="s">
+          <FormattedMessage
+            id="xpack.infra.assetDetails.overview.alertsSectionTitle"
+            defaultMessage="Alerts"
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiIcon
+              data-test-subj="assetDetailsAlertsPopoverButton"
+              type="iInCircle"
+              onClick={togglePopover}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="s"
+          anchorPosition="upCenter"
+        >
+          <AlertsTooltipContent />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
   const timeBuckets = useTimeBuckets();
