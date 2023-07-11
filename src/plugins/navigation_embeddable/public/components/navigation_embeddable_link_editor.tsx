@@ -144,7 +144,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 linkLabelPlaceholder ||
                 NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
-              value={linkLabel || linkToEdit.current?.label}
+              value={linkLabel ?? linkToEdit.current?.label}
               onChange={(e) => {
                 setLinkLabel(e.target.value);
               }}
