@@ -14,7 +14,8 @@ Previous versions:  {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/
 [discrete]
 ==== Slack API connector channel improvements
 
-A channel white listing ability is now available as part of the <<slack-action-type,Slack API connector>> configuration so admins can restrict slack channels to be configured as part of the actions.
+A channel white listing ability is now available as part of the <<slack-action-type,Slack API connector>>.
+You can restrict the Slack channels that the connector provides for rules actions.
 
 [discrete]
 === Cases
