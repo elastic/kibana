@@ -763,7 +763,7 @@ Create or update an Android source map for a specific app and version.
 The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
 For more information, see <<kibana-privileges>>.
 
-[[apm-sourcemap-post-req]]
+[[android-sourcemap-post-req]]
 ===== Request
 
 `POST /api/apm/androidmaps`
