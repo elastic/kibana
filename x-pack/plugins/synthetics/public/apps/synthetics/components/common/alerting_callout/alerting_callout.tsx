@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash';
 import { selectDynamicSettings } from '../../../state/settings';
 import {
   selectSyntheticsAlerts,
-  selectSyntheticsAlertsLoading,
+  selectSyntheticsAlertsLoaded,
 } from '../../../state/alert_rules/selectors';
 import { selectMonitorListState } from '../../../state';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
@@ -28,10 +28,10 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const dispatch = useDispatch();
 
   const defaultRules = useSelector(selectSyntheticsAlerts);
-  const rulesLoading = useSelector(selectSyntheticsAlertsLoading);
-  const { loading, settings } = useSelector(selectDynamicSettings);
+  const rulesLoaded = useSelector(selectSyntheticsAlertsLoaded);
+  const { settings } = useSelector(selectDynamicSettings);
 
-  const hasDefaultConnector = !isEmpty(settings?.defaultConnectors) && !loading;
+  const hasDefaultConnector = !settings || !isEmpty(settings?.defaultConnectors);
 
   const { canSave } = useSyntheticsSettingsContext();
 
@@ -52,8 +52,10 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
     (monitorsLoaded &&
       monitors.some((monitor) => monitor[ConfigKey.ALERT_CONFIG]?.status?.enabled));
 
-  const showCallout = url && !hasDefaultConnector && hasAlertingConfigured;
-  const missingRules = !rulesLoading && Object.keys(defaultRules ?? {}).length !== 2 && !canSave;
+  const showCallout = !hasDefaultConnector && hasAlertingConfigured;
+  const hasDefaultRules =
+    !rulesLoaded || Boolean(defaultRules?.statusRule && defaultRules?.tlsRule);
+  const missingRules = !hasDefaultRules && !canSave;
 
   useEffect(() => {
     dispatch(getDynamicSettingsAction.get());

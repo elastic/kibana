@@ -34,12 +34,16 @@ describe('AlertingCallout', () => {
   ])('renders correctly', async (hasConnectors, statusAlertEnabled, shouldShowCallout) => {
     const { getByText, queryByText } = render(<AlertingCallout />, {
       state: {
+        dynamicSettings: {
+          ...(shouldShowCallout ? { settings: {} } : {}),
+        },
         defaultAlerting: {
           data: {
             statusRule: {},
             tlsRule: {},
           },
           loading: false,
+          success: true,
         },
         monitorList: {
           loaded: true,
@@ -80,12 +84,16 @@ describe('AlertingCallout', () => {
         <AlertingCallout isAlertingEnabled={statusAlertEnabled} />,
         {
           state: {
+            dynamicSettings: {
+              ...(shouldShowCallout ? { settings: {} } : {}),
+            },
             defaultAlerting: {
               data: {
                 statusRule: {},
                 tlsRule: {},
               },
               loading: false,
+              success: true,
             },
           },
         }
@@ -107,6 +115,7 @@ describe('AlertingCallout', () => {
         defaultAlerting: {
           data: {},
           loading: false,
+          success: true,
         },
       },
     });

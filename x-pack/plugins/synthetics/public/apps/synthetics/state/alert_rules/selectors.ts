@@ -11,3 +11,4 @@ import type { SyntheticsAppState } from '../root_reducer';
 const getState = (appState: SyntheticsAppState) => appState.defaultAlerting;
 export const selectSyntheticsAlerts = createSelector(getState, (state) => state.data);
 export const selectSyntheticsAlertsLoading = createSelector(getState, (state) => state.loading);
+export const selectSyntheticsAlertsLoaded = createSelector(getState, (state) => state.success);
