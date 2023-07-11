@@ -15,11 +15,15 @@ import { CustomizePanelAction } from '../panel_actions';
 import { useSelectFromEmbeddableInput } from '../use_select_from_embeddable';
 import { getEditTitleAriaLabel, placeholderTitle } from '../embeddable_panel_strings';
 
-export const useEmbeddablePanelTitle = (
-  embeddable: IEmbeddable,
-  customizePanelAction?: CustomizePanelAction,
-  hideTitle?: boolean
-) => {
+export const EmbeddablePanelTitle = ({
+  hideTitle,
+  embeddable,
+  customizePanelAction,
+}: {
+  hideTitle?: boolean;
+  embeddable: IEmbeddable;
+  customizePanelAction?: CustomizePanelAction;
+}) => {
   const title = embeddable.getTitle();
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
   const description = useSelectFromEmbeddableInput('description', embeddable);

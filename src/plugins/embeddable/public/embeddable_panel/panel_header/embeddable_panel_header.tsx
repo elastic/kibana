@@ -10,15 +10,12 @@ import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 
-import {
-  useSelectFromEmbeddableInput,
-  useSelectFromOptionalEmbeddableInput,
-} from '../use_select_from_embeddable';
 import { isSelfStyledEmbeddable, ViewMode } from '../../lib';
+import { EmbeddablePanelTitle } from './embeddable_panel_title';
 import { getAriaLabelForTitle } from '../embeddable_panel_strings';
-import { UnwrappedEmbeddablePanelProps, PanelUniversalActions } from '../types';
-import { useEmbeddablePanelTitle } from './use_embeddable_panel_title';
 import { useEmbeddablePanelBadges } from './use_embeddable_panel_badges';
+import { useSelectFromEmbeddableInput } from '../use_select_from_embeddable';
+import { UnwrappedEmbeddablePanelProps, PanelUniversalActions } from '../types';
 import { useEmbeddablePanelContextMenu } from './use_embeddable_panel_context_menu';
 
 export const EmbeddablePanelHeader = ({
@@ -55,22 +52,13 @@ export const EmbeddablePanelHeader = ({
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
   const description = useSelectFromEmbeddableInput('description', embeddable);
   const hidePanelTitle = useSelectFromEmbeddableInput('hidePanelTitles', embeddable);
-  const parentHidePanelTitle = useSelectFromOptionalEmbeddableInput(
-    'hidePanelTitles',
-    embeddable.parent
-  );
+  const parentHidePanelTitle = useSelectFromEmbeddableInput('hidePanelTitles', embeddable.parent);
 
   const hideTitle =
     Boolean(hidePanelTitle) ||
     Boolean(parentHidePanelTitle) ||
     Boolean(selfStyledEmbeddableOptions?.hideTitle) ||
     (viewMode === ViewMode.VIEW && !Boolean(title));
-
-  const titleElement = useEmbeddablePanelTitle(
-    embeddable,
-    universalActions.customizePanel,
-    hideTitle
-  );
 
   const showPanelBar =
     !hideTitle ||
@@ -110,7 +98,11 @@ export const EmbeddablePanelHeader = ({
     >
       <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
-        {titleElement}
+        <EmbeddablePanelTitle
+          hideTitle={hideTitle}
+          embeddable={embeddable}
+          customizePanelAction={universalActions.customizePanel}
+        />
         {showBadges && badgeComponents}
       </h2>
       {showNotifications && notificationComponents}

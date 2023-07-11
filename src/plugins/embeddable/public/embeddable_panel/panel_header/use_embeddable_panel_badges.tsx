@@ -7,6 +7,7 @@
  */
 
 import { Subscription } from 'rxjs';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiBadge, EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -133,7 +134,7 @@ export const useEmbeddablePanelBadges = (
           <EuiNotificationBadge
             data-test-subj={`embeddablePanelNotification-${notification.id}`}
             key={notification.id}
-            style={{ marginTop: '4px', marginRight: '4px' }}
+            style={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
             onClick={() => notification.execute({ ...context, trigger: panelNotificationTrigger })}
           >
             {notification.getDisplayName({ ...context, trigger: panelNotificationTrigger })}

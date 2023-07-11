@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { distinctUntilKeyChanged } from 'rxjs';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib';
 
-export const useSelectFromOptionalEmbeddableInput = <
+export const useSelectFromEmbeddableInput = <
   InputType extends EmbeddableInput,
   KeyType extends keyof InputType
 >(
@@ -24,25 +24,6 @@ export const useSelectFromOptionalEmbeddableInput = <
       .pipe(distinctUntilKeyChanged(key))
       .subscribe(() => setValue(embeddable.getInput()[key]));
     return () => subscription?.unsubscribe();
-  }, [embeddable, key]);
-
-  return value;
-};
-
-export const useSelectFromEmbeddableInput = <
-  InputType extends EmbeddableInput,
-  KeyType extends keyof InputType
->(
-  key: KeyType,
-  embeddable: IEmbeddable<InputType>
-): InputType[KeyType] => {
-  const [value, setValue] = useState<InputType[KeyType]>(embeddable.getInput()[key]);
-  useEffect(() => {
-    const subscription = embeddable
-      .getInput$()
-      .pipe(distinctUntilKeyChanged(key))
-      .subscribe(() => setValue(embeddable.getInput()[key]));
-    return () => subscription.unsubscribe();
   }, [embeddable, key]);
 
   return value;
