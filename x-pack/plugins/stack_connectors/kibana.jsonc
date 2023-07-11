@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/stack-connectors-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "stackConnectors",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "stack_connectors"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "esUiShared",
+      "triggersActionsUi"
+    ],
+    "extraPublicDirs": [
+      "public/common"
+    ]
+  }
+}

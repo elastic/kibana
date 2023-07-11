@@ -20,7 +20,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiFlexGroup,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
@@ -33,6 +33,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 
+import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
@@ -40,6 +41,7 @@ import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
   filterIndexPatterns,
+  getPrepopulatedRuleExceptionWithHighlightFields,
 } from '../../utils/helpers';
 import type { AlertData } from '../../utils/types';
 import { initialState, createExceptionItemsReducer } from './reducer';
@@ -54,6 +56,7 @@ import { enrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
+import { ExceptionsExpireTime } from '../flyout_components/expire_time';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`
@@ -78,7 +81,6 @@ export interface AddExceptionFlyoutProps {
   sharedListToAddTo?: ExceptionListSchema[];
   onCancel: (didRuleChange: boolean) => void;
   onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
-  isNonTimeline?: boolean;
 }
 
 const FlyoutBodySection = styled(EuiFlyoutBody)`
@@ -112,9 +114,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   sharedListToAddTo,
   onCancel,
   onConfirm,
-  isNonTimeline = false,
 }: AddExceptionFlyoutProps) {
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -153,6 +154,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       newComment,
       itemConditionValidationErrorExists,
       errorSubmitting,
+      expireTime,
+      expireErrorExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -312,13 +315,47 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
+  const setExpireTime = useCallback(
+    (exceptionExpireTime: Moment | undefined): void => {
+      dispatch({
+        type: 'setExpireTime',
+        expireTime: exceptionExpireTime,
+      });
+    },
+    [dispatch]
+  );
+
+  const setExpireError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setExpireError',
+        errorExists,
+      });
+    },
+    [dispatch]
+  );
+
   useEffect((): void => {
-    if (listType === ExceptionListTypeEnum.ENDPOINT && alertData != null) {
-      setInitialExceptionItems(
-        defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
-      );
+    if (alertData) {
+      switch (listType) {
+        case ExceptionListTypeEnum.ENDPOINT: {
+          return setInitialExceptionItems(
+            defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
+          );
+        }
+        case ExceptionListTypeEnum.RULE_DEFAULT: {
+          const populatedException = getPrepopulatedRuleExceptionWithHighlightFields({
+            alertData,
+            exceptionItemName,
+          });
+          if (populatedException) {
+            setComment(i18n.ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT(alertData._id));
+            return setInitialExceptionItems([populatedException]);
+          }
+        }
+      }
     }
-  }, [listType, exceptionItemName, alertData, setInitialExceptionItems]);
+  }, [listType, exceptionItemName, alertData, setInitialExceptionItems, setComment]);
 
   const osTypesSelection = useMemo((): OsTypeArray => {
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
@@ -343,6 +380,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         sharedLists,
         listType,
         selectedOs: osTypesSelection,
+        expireTime,
         items: exceptionItems,
       });
 
@@ -391,6 +429,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     bulkCloseIndex,
     setErrorSubmitting,
     invalidateFetchRuleByIdQuery,
+    expireTime,
   ]);
 
   const isSubmitButtonDisabled = useMemo(
@@ -401,7 +440,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItemName.trim() === '' ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       itemConditionValidationErrorExists ||
-      (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)),
+      expireErrorExists ||
+      (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
+      (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
+        isEmpty(selectedRulesToAddTo) &&
+        listType === ExceptionListTypeEnum.RULE_DEFAULT),
     [
       isSubmitting,
       isClosingAlerts,
@@ -411,6 +454,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       itemConditionValidationErrorExists,
       addExceptionToRadioSelection,
       exceptionListsToAddTo,
+      expireErrorExists,
+      selectedRulesToAddTo,
+      listType,
     ]
   );
 
@@ -429,13 +475,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [listType]);
 
   return (
-    <EuiFlyout
-      ownFocus
-      maskProps={{ style: isNonTimeline === false ? 'z-index: 5000' : 'z-index: 1000' }} // For an edge case to display above the timeline flyout
-      size="l"
-      onClose={handleCloseFlyout}
-      data-test-subj="addExceptionFlyout"
-    >
+    <EuiFlyout size="l" onClose={handleCloseFlyout} data-test-subj="addExceptionFlyout">
       <FlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="exceptionFlyoutTitle">{addExceptionMessage}</h2>
@@ -443,12 +483,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         <EuiSpacer size="m" />
       </FlyoutHeader>
 
-      {isLoading && <EuiLoadingContent data-test-subj="loadingAddExceptionFlyout" lines={4} />}
-      {!isLoading && (
-        <FlyoutBodySection className="builder-section">
+      <FlyoutBodySection className="builder-section">
+        <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} isLoading={isLoading}>
           {errorSubmitting != null && (
             <>
-              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="alert">
+              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
                 <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
                 <EuiSpacer size="s" />
                 <EuiButton color="danger" onClick={handleDismissError}>
@@ -477,6 +516,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             onExceptionItemAdd={setExceptionItemsToAdd}
             onSetErrorExists={setConditionsValidationError}
             onFilterIndexPatterns={filterIndexPatterns}
+            getExtendedFields={getExtendedFields}
           />
 
           {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
@@ -496,12 +536,23 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <ExceptionItemComments
             accordionTitle={
               <SectionHeader size="xs">
-                <h3>{i18n.COMMENTS_SECTION_TITLE(0)}</h3>
+                <h3>{i18n.COMMENTS_SECTION_TITLE(newComment ? 1 : 0)}</h3>
               </SectionHeader>
             }
+            initialIsOpen={!!newComment}
             newCommentValue={newComment}
             newCommentOnChange={setComment}
           />
+          {listType !== ExceptionListTypeEnum.ENDPOINT && (
+            <>
+              <EuiHorizontalRule />
+              <ExceptionsExpireTime
+                expireTime={expireTime}
+                setExpireTime={setExpireTime}
+                setExpireError={setExpireError}
+              />
+            </>
+          )}
           {showAlertCloseOptions && (
             <>
               <EuiHorizontalRule />
@@ -521,8 +572,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               />
             </>
           )}
-        </FlyoutBodySection>
-      )}
+        </EuiSkeletonText>
+      </FlyoutBodySection>
       <EuiFlyoutFooter>
         <FlyoutFooterGroup justifyContent="spaceBetween">
           <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={handleCloseFlyout}>

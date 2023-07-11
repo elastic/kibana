@@ -69,14 +69,13 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyoutInList"
           showAlertCloseOptions={false} // TODO ask if we need it
-          isNonTimeline={true}
           // ask if we need the add to rule/list section and which list should we link the exception here
         />
       ) : viewerStatus === ViewerStatus.EMPTY || viewerStatus === ViewerStatus.LOADING ? (
         <EmptyViewerState
           isReadOnly={isReadOnly}
           viewerStatus={viewerStatus as ViewerStatus}
-          onCreateExceptionListItem={onAddExceptionClick}
+          onEmptyButtonStateClick={onAddExceptionClick}
           title={i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE}
           body={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(listName)}
           buttonText={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON}

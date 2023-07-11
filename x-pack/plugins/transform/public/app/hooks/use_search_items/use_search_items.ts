@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-
+import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import { isDataView } from '../../../../common/types/data_view';
-
-import { getSavedSearch, getSavedSearchUrlConflictMessage } from '../../../shared_imports';
-
 import { useAppDependencies } from '../../app_dependencies';
-
 import { createSearchItems, getDataViewIdByTitle, loadDataViews, SearchItems } from './common';
 
 export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
@@ -27,6 +21,13 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
 
   const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   async function fetchSavedObject(id: string) {
     let fetchedDataView;
     let fetchedSavedSearch;
@@ -38,31 +39,24 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      fetchedSavedSearch = await getSavedSearch(id, {
-        search: appDeps.data.search,
-        savedObjectsClient: appDeps.savedObjects.client,
-        spaces: appDeps.spaces,
-      });
-
-      if (fetchedSavedSearch?.sharingSavedObjectProps?.errorJSON) {
-        setError(await getSavedSearchUrlConflictMessage(fetchedSavedSearch));
-        return;
-      }
+      fetchedSavedSearch = await appDeps.savedSearch.get(id);
     } catch (e) {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
 
-    if (!isDataView(fetchedDataView) && fetchedSavedSearch === undefined) {
-      setError(
-        i18n.translate('xpack.transform.searchItems.errorInitializationTitle', {
-          defaultMessage: `An error occurred initializing the Kibana data view or saved search.`,
-        })
-      );
-      return;
-    }
+    if (isMounted.current) {
+      if (!isDataView(fetchedDataView) && fetchedSavedSearch === undefined) {
+        setError(
+          i18n.translate('xpack.transform.searchItems.errorInitializationTitle', {
+            defaultMessage: `An error occurred initializing the Kibana data view or saved search.`,
+          })
+        );
+        return;
+      }
 
-    setSearchItems(createSearchItems(fetchedDataView, fetchedSavedSearch, uiSettings));
-    setError(undefined);
+      setSearchItems(createSearchItems(fetchedDataView, fetchedSavedSearch, uiSettings));
+      setError(undefined);
+    }
   }
 
   useEffect(() => {

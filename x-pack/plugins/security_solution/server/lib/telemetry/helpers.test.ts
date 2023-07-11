@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { createMockPackagePolicy } from './__mocks__';
+import { createMockPackagePolicy, stubClusterInfo, stubLicenseInfo } from './__mocks__';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
@@ -21,14 +21,16 @@ import {
   isPackagePolicyList,
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
-  metricsResponseToValueListMetaData,
+  formatValueListMetaData,
   tlog,
   setIsElasticCloudDeployment,
   createTaskMetric,
+  processK8sUsernames,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
-import { cloneDeep, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
@@ -805,10 +807,11 @@ describe('test advanced policy config overlap ', () => {
 
 describe('test metrics response to value list meta data', () => {
   test('can succeed when metrics response is fully populated', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-01-30'));
     const stubMetricResponses = {
       listMetricsResponse: {
         aggregations: {
-          total_value_list_count: 5,
+          total_value_list_count: { value: 5 },
           type_breakdown: {
             buckets: [
               {
@@ -858,8 +861,12 @@ describe('test metrics response to value list meta data', () => {
         },
       },
     };
-    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
     expect(response).toEqual({
+      '@timestamp': '2023-01-30T00:00:00.000Z',
+      cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+      cluster_name: 'elasticsearch',
+      license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 5,
       types: [
         {
@@ -901,8 +908,12 @@ describe('test metrics response to value list meta data', () => {
       indicatorMatchMetricsResponse: {},
     };
     // @ts-ignore
-    const response = metricsResponseToValueListMetaData(stubMetricResponses);
+    const response = formatValueListMetaData(stubMetricResponses, stubClusterInfo, stubLicenseInfo);
     expect(response).toEqual({
+      '@timestamp': '2023-01-30T00:00:00.000Z',
+      cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+      cluster_name: 'elasticsearch',
+      license_id: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
       total_list_count: 0,
       types: [],
       lists: [],
@@ -953,6 +964,7 @@ describe.skip('test create task metrics', () => {
       passed: true,
     });
   });
+
   test('can succeed when error given', async () => {
     const stubTaskName = 'test';
     const stubPassed = false;
@@ -970,5 +982,97 @@ describe.skip('test create task metrics', () => {
       passed: false,
       error_message: 'failed',
     });
+  });
+});
+
+describe('Pii is removed from a kubernetes prebuilt rule alert', () => {
+  test('a document without the sensitive values is ignored', async () => {
+    const clusterUuid = '7c5f1d31-ce87-4090-8dbf-decaac0261ca';
+    const testDocument = {
+      kubernetes: {
+        audit: {},
+        pod: {
+          uid: 'test',
+          name: 'test',
+          ip: 'test',
+          labels: 'test',
+          annotations: 'test',
+        },
+      },
+      powershell: {
+        command_line: 'test',
+        module: 'test',
+        module_loaded: 'test',
+        module_version: 'test',
+        process_name: 'test',
+      },
+    };
+
+    const ignoredDocument = processK8sUsernames(clusterUuid, testDocument);
+    expect(ignoredDocument).toEqual(testDocument);
+  });
+
+  test('kubernetes system usernames are not sanitized from a document', async () => {
+    const clusterUuid = '7c5f1d31-ce87-4090-8dbf-decaac0261ca';
+    const testDocument = {
+      kubernetes: {
+        pod: {
+          uid: 'test',
+          name: 'test',
+          ip: 'test',
+          labels: 'test',
+          annotations: 'test',
+        },
+        audit: {
+          user: {
+            username: 'system:serviceaccount:default:default',
+            groups: [
+              'system:serviceaccounts',
+              'system:serviceaccounts:default',
+              'system:authenticated',
+            ],
+          },
+          impersonated_user: {
+            username: 'system:serviceaccount:default:default',
+            groups: [
+              'system:serviceaccounts',
+              'system:serviceaccounts:default',
+              'system:authenticated',
+            ],
+          },
+        },
+      },
+    };
+
+    const sanitizedDocument = processK8sUsernames(clusterUuid, testDocument);
+    expect(sanitizedDocument).toEqual(testDocument);
+  });
+
+  test('kubernetes system usernames are sanitized from a document when not system users', async () => {
+    const clusterUuid = '7c5f1d31-ce87-4090-8dbf-decaac0261ca';
+    const testDocument = {
+      kubernetes: {
+        pod: {
+          uid: 'test',
+          name: 'test',
+          ip: 'test',
+          labels: 'test',
+          annotations: 'test',
+        },
+        audit: {
+          user: {
+            username: 'user1',
+            groups: ['group1', 'group2', 'group3'],
+          },
+          impersonated_user: {
+            username: 'impersonatedUser1',
+            groups: ['group4', 'group5', 'group6'],
+          },
+        },
+      },
+    };
+
+    const sanitizedDocument = processK8sUsernames(clusterUuid, testDocument);
+    expect(sanitizedDocument).toEqual(testDocument);
   });
 });

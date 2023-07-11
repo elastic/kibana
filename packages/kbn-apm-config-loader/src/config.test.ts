@@ -156,27 +156,52 @@ describe('ApmConfiguration', () => {
       delete process.env.NODE_ENV;
     });
 
-    it('correctly sets environment by reading env vars', () => {
-      let config = new ApmConfiguration(mockedRootDir, {}, false);
-      expect(config.getConfig('serviceName')).toEqual(
-        expect.objectContaining({
-          environment: 'development',
-        })
-      );
+    describe('correctly sets environment by reading env vars', () => {
+      it('no env var', () => {
+        const config = new ApmConfiguration(mockedRootDir, {}, false);
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            environment: 'development',
+          })
+        );
+      });
+
+      it('NODE_ENV', () => {
+        process.env.NODE_ENV = 'production';
+        const config = new ApmConfiguration(mockedRootDir, {}, false);
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            environment: 'production',
+          })
+        );
+      });
+
+      it('ELASTIC_APM_ENVIRONMENT', () => {
+        process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
+        const config = new ApmConfiguration(mockedRootDir, {}, false);
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            environment: 'ci',
+          })
+        );
+      });
+    });
+
+    it('does not override the environment from NODE_ENV if already set in the config file', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            environment: 'local',
+          },
+        },
+      };
 
       process.env.NODE_ENV = 'production';
-      config = new ApmConfiguration(mockedRootDir, {}, false);
-      expect(config.getConfig('serviceName')).toEqual(
-        expect.objectContaining({
-          environment: 'production',
-        })
-      );
 
-      process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
-      config = new ApmConfiguration(mockedRootDir, {}, false);
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
       expect(config.getConfig('serviceName')).toEqual(
         expect.objectContaining({
-          environment: 'ci',
+          environment: 'local',
         })
       );
     });

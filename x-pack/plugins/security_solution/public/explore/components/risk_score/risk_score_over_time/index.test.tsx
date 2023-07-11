@@ -10,9 +10,11 @@ import React from 'react';
 import { RiskScoreOverTime, scoreFormatter } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { LineSeries } from '@elastic/charts';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const mockLineSeries = LineSeries as jest.Mock;
-
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
   return {
@@ -21,19 +23,35 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
+
+const props = {
+  riskEntity: RiskScoreEntity.host,
+  riskScore: [],
+  loading: false,
+  from: '2020-07-07T08:20:18.966Z',
+  to: '2020-07-08T08:20:18.966Z',
+  queryId: 'test_query_id',
+  title: 'test_query_title',
+  toggleStatus: true,
+};
+
 describe('Risk Score Over Time', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+  });
+
   it('renders', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskScoreOverTime
-          riskScore={[]}
-          loading={false}
-          from={'2020-07-07T08:20:18.966Z'}
-          to={'2020-07-08T08:20:18.966Z'}
-          queryId={'test_query_id'}
-          title={'test_query_title'}
-          toggleStatus={true}
-        />
+        <RiskScoreOverTime {...props} />
       </TestProviders>
     );
 
@@ -43,33 +61,30 @@ describe('Risk Score Over Time', () => {
   it('renders loader when loading', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskScoreOverTime
-          loading={true}
-          from={'2020-07-07T08:20:18.966Z'}
-          to={'2020-07-08T08:20:18.966Z'}
-          queryId={'test_query_id'}
-          title={'test_query_title'}
-          toggleStatus={true}
-        />
+        <RiskScoreOverTime {...props} loading={true} />
       </TestProviders>
     );
 
     expect(queryByTestId('RiskScoreOverTime-loading')).toBeInTheDocument();
   });
 
+  it('renders VisualizationEmbeddable when isChartEmbeddablesEnabled = true and spaceId exists', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskScoreOverTime {...props} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('visualization-embeddable')).toBeInTheDocument();
+  });
+
   describe('scoreFormatter', () => {
     it('renders score formatted', () => {
       render(
         <TestProviders>
-          <RiskScoreOverTime
-            riskScore={[]}
-            loading={false}
-            from={'2020-07-07T08:20:18.966Z'}
-            to={'2020-07-08T08:20:18.966Z'}
-            queryId={'test_query_id'}
-            title={'test_query_title'}
-            toggleStatus={true}
-          />
+          <RiskScoreOverTime {...props} />
         </TestProviders>
       );
 

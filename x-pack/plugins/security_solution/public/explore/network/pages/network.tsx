@@ -14,7 +14,7 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { TableId } from '../../../../common/types';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
@@ -22,7 +22,7 @@ import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../../common/components/search_bar';
@@ -51,8 +51,6 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { dataTableSelectors } from '../../../common/store/data_table';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -209,7 +207,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
-                    <SecuritySolutionTabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
+                    <TabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
                     <EuiSpacer />
                   </Display>
 

@@ -44,6 +44,10 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-around',
+          '.euiText h6': {
+            textTransform: 'capitalize',
+            fontSize: euiTheme.size.m,
+          },
         }}
         titleSize="s"
         title={counter.title}
@@ -53,8 +57,9 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
       />
       {counter.onClick && (
         <EuiIcon
-          type="link"
+          type={'pivot'}
           css={css`
+            color: ${euiTheme.colors.lightShade};
             position: absolute;
             top: ${euiTheme.size.s};
             right: ${euiTheme.size.s};

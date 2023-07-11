@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const testEndpointsPlugin = resolve(
     __dirname,
-    '../interactive_setup_api_integration/fixtures/test_endpoints'
+    '../interactive_setup_api_integration/plugins/test_endpoints'
   );
 
   const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);

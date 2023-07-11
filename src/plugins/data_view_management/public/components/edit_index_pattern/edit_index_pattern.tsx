@@ -128,7 +128,10 @@ export const EditIndexPattern = withRouter(
     const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={() => setShowEditDialog(false)}
+        onSave={() => {
+          setFields(indexPattern.getNonScriptedFields());
+          setShowEditDialog(false);
+        }}
         onCancel={() => setShowEditDialog(false)}
         defaultTypeIsRollup={isRollup}
         editData={indexPattern}
@@ -210,7 +213,9 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{indexPatternHeading}</EuiText>
-                  <EuiCode style={codeStyle}>{indexPattern.title}</EuiCode>
+                  <EuiCode data-test-subj="currentIndexPatternTitle" style={codeStyle}>
+                    {indexPattern.title}
+                  </EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -218,7 +223,9 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{timeFilterHeading}</EuiText>
-                  <EuiCode style={codeStyle}>{indexPattern.timeFieldName}</EuiCode>
+                  <EuiCode data-test-subj="currentIndexPatternTimeField" style={codeStyle}>
+                    {indexPattern.timeFieldName}
+                  </EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -242,7 +249,7 @@ export const EditIndexPattern = withRouter(
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
-              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="alert">
+              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="warning">
                 <p>{mappingConflictLabel}</p>
               </EuiCallOut>
             </>

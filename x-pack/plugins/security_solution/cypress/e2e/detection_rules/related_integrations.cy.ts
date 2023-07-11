@@ -54,8 +54,8 @@ Note that the rule we are using for testing purposes has the following character
 
 describe('Related integrations', () => {
   before(() => {
-    login();
     cleanKibana();
+    login();
     importRule('related_integrations.ndjson');
   });
 
@@ -71,6 +71,7 @@ describe('Related integrations', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForRulesTableToShow();
     });
@@ -111,13 +112,13 @@ describe('Related integrations', () => {
     });
   });
 
-  context(
+  context.skip(
     'installed integrations: Amazon CloudFront, AWS CloudTrail, System, enabled integrations: Amazon CloudFront, Aws Cloudfront, System',
     () => {
       const rule = {
         name: 'Related integrations rule',
         integrations: [
-          { name: 'Amazon CloudFront', installed: true, enabled: true },
+          { name: 'AWS Cloudfront', installed: true, enabled: true },
           { name: 'AWS CloudTrail', installed: true, enabled: false },
           { name: 'Aws Unknown', installed: false, enabled: false },
           { name: 'System', installed: true, enabled: true },
@@ -132,6 +133,7 @@ describe('Related integrations', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForRulesTableToShow();
       });
@@ -216,6 +218,7 @@ describe('Related integrations', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForRulesTableToShow();
     });

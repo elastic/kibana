@@ -16,14 +16,13 @@ import { omit } from 'lodash';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
-// import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { SearchBar } from '../../../shared/search_bar';
+import { MobileSearchBar } from '../../../app/mobile/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -37,8 +36,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
 interface Props {
   title: string;
   children: React.ReactChild;
-  selectedTab: Tab['key'];
-  searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  selectedTabKey: Tab['key'];
+  searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
 }
 
 export function MobileServiceTemplate(props: Props) {
@@ -52,7 +51,7 @@ export function MobileServiceTemplate(props: Props) {
 function TemplateWithContext({
   title,
   children,
-  selectedTab,
+  selectedTabKey,
   searchBarOptions,
 }: Props) {
   const {
@@ -65,20 +64,38 @@ function TemplateWithContext({
 
   const router = useApmRouter();
 
-  const tabs = useTabs({ selectedTab });
+  const tabs = useTabs({ selectedTabKey });
+  const selectedTab = tabs?.find(({ isSelected }) => isSelected);
+
+  const servicesLink = router.link('/services', {
+    query: { ...query },
+  });
 
   useBreadcrumb(
-    () => ({
-      title,
-      href: router.link(
-        `/mobile-services/{serviceName}/${selectedTab}` as const,
-        {
-          path: { serviceName },
-          query,
-        }
-      ),
-    }),
-    [query, router, selectedTab, serviceName, title]
+    () => [
+      {
+        title: i18n.translate('xpack.apm.mobileServices.breadcrumb.title', {
+          defaultMessage: 'Services',
+        }),
+        href: servicesLink,
+      },
+      ...(selectedTab
+        ? [
+            {
+              title: serviceName,
+              href: router.link('/mobile-services/{serviceName}', {
+                path: { serviceName },
+                query,
+              }),
+            },
+            {
+              title: selectedTab.label,
+              href: selectedTab.href,
+            } as { title: string; href: string },
+          ]
+        : []),
+    ],
+    [query, router, selectedTab, serviceName, servicesLink]
   );
 
   return (
@@ -116,7 +133,7 @@ function TemplateWithContext({
         ),
       }}
     >
-      <SearchBar {...searchBarOptions} />
+      <MobileSearchBar {...searchBarOptions} />
       <ServiceAnomalyTimeseriesContextProvider>
         {children}
       </ServiceAnomalyTimeseriesContextProvider>
@@ -124,7 +141,7 @@ function TemplateWithContext({
   );
 }
 
-function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
+function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
@@ -137,7 +154,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const {
     path: { serviceName },
     query: queryFromUrl,
-  } = useApmParams(`/mobile-services/{serviceName}/${selectedTab}` as const);
+  } = useApmParams(`/mobile-services/{serviceName}/${selectedTabKey}` as const);
 
   const query = omit(
     queryFromUrl,
@@ -204,6 +221,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       href,
       label,
       append,
-      isSelected: key === selectedTab,
+      isSelected: key === selectedTabKey,
+      'data-test-subj': `${key}Tab`,
     }));
 }

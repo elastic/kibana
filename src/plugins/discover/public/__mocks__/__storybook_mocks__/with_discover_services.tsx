@@ -8,8 +8,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { action } from '@storybook/addon-actions';
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { LIGHT_THEME } from '@elastic/charts';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { identity } from 'lodash';
 import { CoreStart, IUiSettingsClient, PluginInitializerContext } from '@kbn/core/public';
@@ -57,8 +56,23 @@ export const uiSettingsMock = {
   },
 } as unknown as IUiSettingsClient;
 
-const services = {
-  core: { http: { basePath: { prepend: () => void 0 } } },
+const filterManager = {
+  getGlobalFilters: () => [],
+  getAppFilters: () => [],
+  getFetches$: () => new Observable(),
+};
+
+const theme = {
+  theme$: of({ darkMode: false }),
+};
+
+export const services = {
+  core: {
+    http: { basePath: { prepend: () => void 0 } },
+    notifications: { toasts: {} },
+    docLinks: { links: { discover: {} } },
+    theme,
+  },
   storage: new LocalStorageMock({
     [SIDEBAR_CLOSED_KEY]: false,
   }) as unknown as Storage,
@@ -74,12 +88,53 @@ const services = {
             from: 'now-7d',
             to: 'now',
           }),
+          getRefreshInterval: () => ({}),
+          getFetch$: () => new Observable(),
+          getAutoRefreshFetch$: () => new Observable(),
+          calculateBounds: () => ({ min: undefined, max: undefined }),
+          getTimeDefaults: () => ({}),
+          createFilter: () => ({}),
         },
       },
       savedQueries: { findSavedQueries: () => Promise.resolve({ queries: [] as SavedQuery[] }) },
+      queryString: {
+        getDefaultQuery: () => {
+          return { query: '', language: 'kuery' };
+        },
+        getUpdates$: () => new Observable(),
+      },
+      filterManager,
+      getState: () => {
+        return {
+          filters: [],
+          query: { query: '', language: 'kuery' },
+        };
+      },
+      state$: new Observable(),
+    },
+    search: {
+      session: {
+        getSession$: () => {
+          return new BehaviorSubject('test').asObservable();
+        },
+        state$: new Observable(),
+      },
+      searchSource: {
+        createEmpty: () => {
+          const empty = {
+            setField: () => {
+              return empty;
+            },
+            fetch$: () => new Observable(),
+          };
+          return empty;
+        },
+      },
     },
     dataViews: {
       getIdsWithTitle: () => Promise.resolve([]),
+      get: () => Promise.resolve({}),
+      find: () => Promise.resolve([]),
     },
   },
   uiSettings: uiSettingsMock,
@@ -94,19 +149,7 @@ const services = {
       ui: { SearchBar, AggregateQuerySearchBar: SearchBar },
     } as unknown as UnifiedSearchPublicPluginStart,
   }),
-  theme: {
-    useChartsTheme: () => ({
-      ...EUI_CHARTS_THEME_LIGHT.theme,
-      chartPaddings: {
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-      },
-      heatmap: { xAxisLabel: { rotation: {} } },
-    }),
-    useChartsBaseTheme: () => LIGHT_THEME,
-  },
+  theme,
   capabilities: {
     visualize: {
       show: true,
@@ -120,10 +163,7 @@ const services = {
   },
   docLinks: { links: { discover: {} } },
   addBasePath: (path: string) => path,
-  filterManager: {
-    getGlobalFilters: () => [],
-    getAppFilters: () => [],
-  },
+  filterManager,
   history: () => ({}),
   fieldFormats: {
     deserialize: () => {
@@ -133,6 +173,15 @@ const services = {
   },
   toastNotifications: {
     addInfo: action('add toast'),
+  },
+  lens: {
+    EmbeddableComponent: <div>Histogram</div>,
+  },
+  unifiedSearch: {
+    autocomplete: {
+      hasQuerySuggestions: () => Promise.resolve([]),
+      getQuerySuggestions: () => Promise.resolve([]),
+    },
   },
 } as unknown as DiscoverServices;
 

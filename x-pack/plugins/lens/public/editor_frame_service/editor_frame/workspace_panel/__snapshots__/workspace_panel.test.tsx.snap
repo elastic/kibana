@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workspace_panel should show an error message if the expression fails to parse 1`] = `
+Array [
+  Array [
+    Object {
+      "displayLocations": Array [
+        Object {
+          "id": "visualization",
+        },
+      ],
+      "fixableInEditor": true,
+      "longMessage": <React.Fragment>
+        <p
+          data-test-subj="expression-failure"
+        >
+          <FormattedMessage
+            defaultMessage="An error occurred in the expression"
+            id="xpack.lens.editorFrame.expressionFailure"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          Error: Unable to parse expression: Expected "/*", "//", [ ,\\t,\\r,\\n], or function but "|" found.
+        </p>
+      </React.Fragment>,
+      "severity": "error",
+      "shortMessage": "An unexpected error occurred while preparing the chart",
+      "uniqueId": "expression_build_error",
+    },
+  ],
+]
+`;

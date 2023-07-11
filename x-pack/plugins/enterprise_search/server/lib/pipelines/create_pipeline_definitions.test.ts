@@ -8,8 +8,6 @@ import { merge } from 'lodash';
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
-
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
@@ -22,19 +20,13 @@ describe('createIndexPipelineDefinitions util function', () => {
     },
   };
 
-  const expectedResult = {
-    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should create the pipelines', async () => {
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-    await expect(
-      createIndexPipelineDefinitions(indexName, mockClient as unknown as ElasticsearchClient)
-    ).resolves.toEqual(expectedResult);
+    await createIndexPipelineDefinitions(indexName, mockClient as unknown as ElasticsearchClient);
     expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(3);
   });
 });
@@ -70,10 +62,11 @@ describe('formatMlPipelineBody util function', () => {
             {
               append: {
                 field: '_source._ingest.inference_errors',
+                allow_duplicates: false,
                 value: [
                   {
                     pipeline: pipelineName,
-                    message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+                    message: `Processor 'inference' in pipeline '${pipelineName}' failed for field '${sourceField}' with message '{{ _ingest.on_failure_message }}'`,
                     timestamp: '{{{ _ingest.timestamp }}}',
                   },
                 ],
@@ -130,6 +123,7 @@ describe('formatMlPipelineBody util function', () => {
       modelId,
       sourceField,
       destField,
+      undefined,
       mockClient as unknown as ElasticsearchClient
     );
     expect(actualResult).toEqual(expectedResult);
@@ -144,6 +138,7 @@ describe('formatMlPipelineBody util function', () => {
       modelId,
       sourceField,
       destField,
+      undefined,
       mockClient as unknown as ElasticsearchClient
     );
     await expect(asyncCall).rejects.toThrow(Error);
@@ -184,6 +179,7 @@ describe('formatMlPipelineBody util function', () => {
       modelId,
       sourceField,
       destField,
+      undefined,
       mockClient as unknown as ElasticsearchClient
     );
     expect(actualResult).toEqual(expectedResultWithNoInputField);

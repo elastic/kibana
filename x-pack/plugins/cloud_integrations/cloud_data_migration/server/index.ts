@@ -7,4 +7,6 @@
 
 import { CloudDataMigrationPlugin } from './plugin';
 
+export { config } from './config';
+
 export const plugin = () => new CloudDataMigrationPlugin();

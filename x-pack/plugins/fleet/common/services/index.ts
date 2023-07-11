@@ -15,11 +15,14 @@ export {
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
-export { decodeCloudId } from './decode_cloud_id';
 export { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export { isAgentUpgradeable } from './is_agent_upgradeable';
+export {
+  isAgentRequestDiagnosticsSupported,
+  MINIMUM_DIAGNOSTICS_AGENT_VERSION,
+} from './is_agent_request_diagnostics_supported';
 export {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
@@ -51,3 +54,23 @@ export {
 } from './datastream_es_name';
 
 export * from './file_storage';
+export {
+  getPackageReleaseLabel,
+  isPackagePrerelease,
+  mapPackageReleaseToIntegrationCardRelease,
+} from './package_prerelease';
+
+export { getAllowedOutputTypeForPolicy } from './output_helpers';
+export { agentStatusesToSummary } from './agent_statuses_to_summary';
+
+export { policyHasFleetServer, policyHasAPMIntegration } from './agent_policies_helpers';
+
+export {
+  generateNewAgentPolicyWithDefaults,
+  agentPolicyWithoutPaidFeatures,
+} from './generate_new_agent_policy';
+
+export {
+  isAgentPolicyValidForLicense,
+  unsetAgentPolicyAccordingToLicenseLevel,
+} from './agent_policy_config';

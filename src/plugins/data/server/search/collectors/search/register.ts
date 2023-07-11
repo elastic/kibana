@@ -21,12 +21,15 @@ export interface ReportedUsage {
   averageDuration: number | null;
 }
 
-export function registerUsageCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
+export function registerUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  getIndexForType: (type: string) => Promise<string>
+) {
   try {
     const collector = usageCollection.makeUsageCollector<ReportedUsage>({
       type: 'search',
       isReady: () => true,
-      fetch: fetchProvider(kibanaIndex),
+      fetch: fetchProvider(getIndexForType),
       schema: {
         successCount: { type: 'long' },
         errorCount: { type: 'long' },

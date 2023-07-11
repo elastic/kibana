@@ -6,7 +6,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
@@ -141,13 +144,13 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations" component={EsDeprecations} />
       <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
-    </Switch>
+    </Routes>
   );
 };
 

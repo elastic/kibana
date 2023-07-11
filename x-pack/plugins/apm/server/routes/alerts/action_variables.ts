@@ -13,10 +13,11 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.alertDetailsUrl',
       {
         defaultMessage:
-          'Link to the view within Elastic that shows further details and context surrounding this alert',
+          'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
       }
     ),
     name: 'alertDetailsUrl' as const,
+    usesPublicBaseUrl: true,
   },
   environment: {
     description: i18n.translate(
@@ -65,6 +66,13 @@ export const apmActionVariables = {
     ),
     name: 'transactionType' as const,
   },
+  transactionName: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.transactionName',
+      { defaultMessage: 'The transaction name the alert is created for' }
+    ),
+    name: 'transactionName' as const,
+  },
   triggerValue: {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.triggerValue',
@@ -79,10 +87,19 @@ export const apmActionVariables = {
     description: i18n.translate(
       'xpack.apm.alerts.action_variables.viewInAppUrl',
       {
-        defaultMessage:
-          'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+        defaultMessage: 'Link to the alert source',
       }
     ),
     name: 'viewInAppUrl' as const,
+    usesPublicBaseUrl: true,
+  },
+  errorGroupingKey: {
+    description: i18n.translate(
+      'xpack.apm.alerts.action_variables.errorGroupingKey',
+      {
+        defaultMessage: 'The error grouping key the alert is created for',
+      }
+    ),
+    name: 'errorGroupingKey' as const,
   },
 };

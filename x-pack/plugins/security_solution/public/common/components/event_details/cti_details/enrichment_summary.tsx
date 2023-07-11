@@ -7,15 +7,19 @@
 
 import styled from 'styled-components';
 import { get } from 'lodash/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { partition } from 'lodash';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import * as i18n from './translations';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpers';
 
 import type { FieldsData } from '../types';
-import { ActionCell } from '../table/action_cell';
 import type {
   BrowserField,
   BrowserFields,
@@ -23,6 +27,7 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
+import { getSourcererScopeId } from '../../../../helpers';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -42,16 +47,16 @@ const EnrichmentFieldFeedName = styled.span`
 `;
 
 export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  .hoverActions-active {
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      opacity: 1;
-    }
+  .inlineActions {
+    opacity: 0;
+  }
+
+  .inlineActions-popoverOpen {
+    opacity: 1;
   }
 
   &:hover {
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
+    .inlineActions {
       opacity: 1;
     }
   }
@@ -68,8 +73,11 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   isDraggable,
   isReadOnly,
 }) => {
+  const metadata = useMemo(() => ({ scopeId }), [scopeId]);
+
   if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${scopeId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
+
   return (
     <StyledEuiFlexGroup key={key} direction="row" gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -95,14 +103,16 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {value && !isReadOnly && (
-          <ActionCell
-            data={data}
-            contextId={scopeId}
-            eventId={key}
-            fieldFromBrowserField={browserField}
-            scopeId={scopeId}
-            values={[value]}
-            applyWidthAndPadding={false}
+          <SecurityCellActions
+            data={{
+              field: data.field,
+              value,
+            }}
+            triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+            mode={CellActionsMode.INLINE}
+            sourcererScopeId={getSourcererScopeId(scopeId)}
+            metadata={metadata}
+            visibleCellActions={3}
           />
         )}
       </EuiFlexItem>

@@ -8,14 +8,15 @@
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
   '[data-test-subj="globalDatePicker"] [data-test-subj="addFilter"]';
 
-export const GLOBAL_SEARCH_BAR_SUBMIT_BUTTON =
-  '[data-test-subj="globalDatePicker"] [data-test-subj="querySubmitButton"]';
+export const LOCAL_SEACH_BAR_SUBMMIT_BUTTON = '[data-test-subj="querySubmitButton"]';
+
+export const GLOBAL_SEARCH_BAR_SUBMIT_BUTTON = `[data-test-subj="globalDatePicker"] ${LOCAL_SEACH_BAR_SUBMMIT_BUTTON}`;
 
 export const ADD_FILTER_FORM_FIELD_INPUT =
   '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 
 export const ADD_FILTER_FORM_FIELD_OPTION = (value: string) =>
-  `[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"] mark`;
+  `[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"]`;
 
 export const ADD_FILTER_FORM_OPERATOR_FIELD =
   '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';
@@ -31,10 +32,15 @@ export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '#popoverFor_filter0';
 
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM_AT = (value: number) => `#popoverFor_filter${value}`;
 
+export const GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE = '#popoverFor_filter0 button[title^="Delete"]';
+
 export const GLOBAL_SEARCH_BAR_PINNED_FILTER = '.globalFilterItem-isPinned';
 
-export const GLOBAL_KQL_INPUT =
-  '[data-test-subj="filters-global-container"] [data-test-subj="unifiedQueryInput"] textarea';
+export const GLOBAL_KQL_WRAPPER = '[data-test-subj="filters-global-container"]';
+
+export const LOCAL_KQL_INPUT = `[data-test-subj="unifiedQueryInput"] textarea`;
+
+export const GLOBAL_KQL_INPUT = `[data-test-subj="filters-global-container"] ${LOCAL_KQL_INPUT}`;
 
 export const AUTO_SUGGEST_AGENT_NAME = `[data-test-subj="autocompleteSuggestion-field-agent.name-"]`;
 

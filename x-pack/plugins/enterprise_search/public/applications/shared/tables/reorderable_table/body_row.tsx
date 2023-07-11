@@ -66,7 +66,7 @@ export const BodyRow = <Item extends object>({
         <EuiFlexGroup direction="column">
           {errors.map((errorMessage, errorMessageIndex) => (
             <EuiFlexItem key={errorMessageIndex}>
-              <EuiCallOut iconType="alert" size="s" color="danger" title={errorMessage} />
+              <EuiCallOut iconType="warning" size="s" color="danger" title={errorMessage} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

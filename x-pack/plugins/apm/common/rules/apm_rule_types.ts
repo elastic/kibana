@@ -14,7 +14,16 @@ import type {
 } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../ml_constants';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import {
+  ERROR_GROUP_ID,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../es_fields/apm';
+import { getEnvironmentLabel } from '../environment_filter_values';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 
@@ -40,29 +49,66 @@ const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
   }),
 };
 
+const getFieldNameLabel = (field: string): string => {
+  switch (field) {
+    case SERVICE_NAME:
+      return 'service';
+    case SERVICE_ENVIRONMENT:
+      return 'env';
+    case TRANSACTION_TYPE:
+      return 'type';
+    case TRANSACTION_NAME:
+      return 'name';
+    case ERROR_GROUP_ID:
+      return 'error key';
+    default:
+      return field;
+  }
+};
+
+export const getFieldValueLabel = (
+  field: string,
+  fieldValue: string
+): string => {
+  return field === SERVICE_ENVIRONMENT
+    ? getEnvironmentLabel(fieldValue)
+    : fieldValue;
+};
+
+const formatGroupByFields = (groupByFields: Record<string, string>): string => {
+  const groupByFieldLabels = Object.keys(groupByFields).map(
+    (field) =>
+      `${getFieldNameLabel(field)}: ${getFieldValueLabel(
+        field,
+        groupByFields[field]
+      )}`
+  );
+  return groupByFieldLabels.join(', ');
+};
+
 export function formatErrorCountReason({
   threshold,
   measured,
-  serviceName,
   windowSize,
   windowUnit,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   windowSize: number;
   windowUnit: string;
+  groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-    defaultMessage: `Error count is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `Error count is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold,
       measured,
-      serviceName,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -70,19 +116,19 @@ export function formatErrorCountReason({
 export function formatTransactionDurationReason({
   threshold,
   measured,
-  serviceName,
   asDuration,
   aggregationType,
   windowSize,
   windowUnit,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   asDuration: AsDuration;
   aggregationType: string;
   windowSize: number;
   windowUnit: string;
+  groupByFields: Record<string, string>;
 }) {
   let aggregationTypeFormatted =
     aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
@@ -90,16 +136,16 @@ export function formatTransactionDurationReason({
     aggregationTypeFormatted = aggregationTypeFormatted + '.';
 
   return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
-    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold: asDuration(threshold),
       measured: asDuration(measured),
-      serviceName,
       aggregationType: aggregationTypeFormatted,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -107,28 +153,28 @@ export function formatTransactionDurationReason({
 export function formatTransactionErrorRateReason({
   threshold,
   measured,
-  serviceName,
   asPercent,
   windowSize,
   windowUnit,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   asPercent: AsPercent;
   windowSize: number;
   windowUnit: string;
+  groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Failed transactions is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `Failed transactions is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
-      serviceName,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -218,32 +264,32 @@ export const RULE_TYPES_CONFIG: Record<
 
 export const ANOMALY_ALERT_SEVERITY_TYPES = [
   {
-    type: ANOMALY_SEVERITY.CRITICAL,
+    type: ML_ANOMALY_SEVERITY.CRITICAL,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.criticalLabel', {
       defaultMessage: 'critical',
     }),
-    threshold: ANOMALY_THRESHOLD.CRITICAL,
+    threshold: ML_ANOMALY_THRESHOLD.CRITICAL,
   },
   {
-    type: ANOMALY_SEVERITY.MAJOR,
+    type: ML_ANOMALY_SEVERITY.MAJOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.majorLabel', {
       defaultMessage: 'major',
     }),
-    threshold: ANOMALY_THRESHOLD.MAJOR,
+    threshold: ML_ANOMALY_THRESHOLD.MAJOR,
   },
   {
-    type: ANOMALY_SEVERITY.MINOR,
+    type: ML_ANOMALY_SEVERITY.MINOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.minor', {
       defaultMessage: 'minor',
     }),
-    threshold: ANOMALY_THRESHOLD.MINOR,
+    threshold: ML_ANOMALY_THRESHOLD.MINOR,
   },
   {
-    type: ANOMALY_SEVERITY.WARNING,
+    type: ML_ANOMALY_SEVERITY.WARNING,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.warningLabel', {
       defaultMessage: 'warning',
     }),
-    threshold: ANOMALY_THRESHOLD.WARNING,
+    threshold: ML_ANOMALY_THRESHOLD.WARNING,
   },
 ] as const;
 

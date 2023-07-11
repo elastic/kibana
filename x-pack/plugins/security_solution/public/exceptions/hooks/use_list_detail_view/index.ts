@@ -11,7 +11,6 @@ import type {
   Rule as UIRule,
 } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
-import { useParams } from 'react-router-dom';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 import { isEqual } from 'lodash';
@@ -46,17 +45,13 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
-export const useListDetailsView = () => {
+export const useListDetailsView = (exceptionListId: string) => {
   const toasts = useToasts();
   const { services } = useKibana();
   const { http, notifications } = services;
   const { navigateToApp } = services.application;
 
-  const { exportExceptionList, deleteExceptionList } = useApi(http);
-
-  const { detailName: exceptionListId } = useParams<{
-    detailName: string;
-  }>();
+  const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
@@ -158,7 +153,7 @@ export const useListDetailsView = () => {
               list_id: exceptionListId,
               type: list.type,
               name: listDetails.name,
-              description: listDetails.description || list.description,
+              description: listDetails.description ?? '',
               namespace_type: list.namespace_type,
             },
           });
@@ -168,28 +163,65 @@ export const useListDetailsView = () => {
     },
     [exceptionListId, handleErrorStatus, http, list]
   );
-  const onExportList = useCallback(async () => {
-    try {
-      if (!list) return;
-      await exportExceptionList({
-        id: list.id,
-        listId: list.list_id,
-        namespaceType: list.namespace_type,
-        onError: (error: Error) => handleErrorStatus(error),
-        onSuccess: (blob) => {
-          setExportedList(blob);
-          toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
-        },
-      });
-    } catch (error) {
-      handleErrorStatus(
-        error,
-        undefined,
-        i18n.EXCEPTION_EXPORT_ERROR,
-        i18n.EXCEPTION_EXPORT_ERROR_DESCRIPTION
-      );
-    }
-  }, [list, exportExceptionList, handleErrorStatus, toasts]);
+  const onExportList = useCallback(
+    async (includeExpiredExceptions: boolean) => {
+      try {
+        if (!list) return;
+        await exportExceptionList({
+          id: list.id,
+          listId: list.list_id,
+          includeExpiredExceptions,
+          namespaceType: list.namespace_type,
+          onError: (error: Error) => handleErrorStatus(error),
+          onSuccess: (blob) => {
+            setExportedList(blob);
+            toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.name));
+          },
+        });
+      } catch (error) {
+        handleErrorStatus(
+          error,
+          undefined,
+          i18n.EXCEPTION_EXPORT_ERROR,
+          i18n.EXCEPTION_EXPORT_ERROR_DESCRIPTION
+        );
+      }
+    },
+    [list, exportExceptionList, handleErrorStatus, toasts]
+  );
+
+  const onDuplicateList = useCallback(
+    async (includeExpiredExceptions: boolean) => {
+      try {
+        if (!list) return;
+        await duplicateExceptionList({
+          listId: list.list_id,
+          includeExpiredExceptions,
+          namespaceType: list.namespace_type,
+          onError: (error: Error) => handleErrorStatus(error),
+          onSuccess: (newList: ExceptionListSchema) => {
+            toasts?.addSuccess(i18n.EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY(list.name));
+            navigateToApp(APP_UI_ID, {
+              deepLinkId: SecurityPageName.exceptions,
+              path: `/details/${newList.list_id}`,
+            });
+          },
+        });
+      } catch (error) {
+        handleErrorStatus(
+          error,
+          undefined,
+          i18n.EXCEPTION_DUPLICATE_ERROR,
+          i18n.EXCEPTION_DUPLICATE_ERROR_DESCRIPTION
+        );
+      }
+    },
+    [list, duplicateExceptionList, handleErrorStatus, toasts, navigateToApp]
+  );
+
+  const handleOnDownload = useCallback(() => {
+    setExportedList(undefined);
+  }, []);
 
   // #region DeleteList
 
@@ -337,6 +369,9 @@ export const useListDetailsView = () => {
             i18n.EXCEPTION_MANAGE_RULES_ERROR_DESCRIPTION
           );
           setShowManageButtonLoader(false);
+        })
+        .finally(() => {
+          initializeList();
         });
     } catch (err) {
       handleErrorStatus(err);
@@ -345,10 +380,11 @@ export const useListDetailsView = () => {
     list,
     getRulesToAdd,
     getRulesToRemove,
-    exceptionListId,
     resetManageRulesAfterSaving,
-    handleErrorStatus,
+    exceptionListId,
     invalidateFetchRuleByIdQuery,
+    handleErrorStatus,
+    initializeList,
   ]);
   const onCancelManageRules = useCallback(() => {
     setShowManageRulesFlyout(false);
@@ -367,6 +403,7 @@ export const useListDetailsView = () => {
     canUserEditList,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     showManageRulesFlyout,
     headerBackOptions,
@@ -376,6 +413,7 @@ export const useListDetailsView = () => {
     refreshExceptions,
     disableManageButton,
     handleDelete,
+    onDuplicateList,
     onEditListDetails,
     onExportList,
     onDeleteList,

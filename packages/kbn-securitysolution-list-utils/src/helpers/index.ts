@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
@@ -35,6 +35,7 @@ import {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeNested,
 } from '@kbn/es-query';
+import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
   ALL_OPERATORS,
@@ -53,12 +54,14 @@ import {
 import {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
+  DataViewField,
   EmptyEntry,
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
+  SavedObjectType,
 } from '../types';
 
 export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
@@ -159,7 +162,7 @@ export const getNewExceptionItem = ({
     item_id: undefined,
     list_id: listId,
     meta: {
-      temporaryUuid: uuid.v4(),
+      temporaryUuid: uuidv4(),
     },
     name,
     namespace_type: namespaceType,
@@ -674,8 +677,13 @@ export const getEntryOnOperatorChange = (
   }
 };
 
-const fieldSupportsMatches = (field: DataViewFieldBase) => {
-  return field.type === 'string';
+export const isKibanaStringType = (type: string) => {
+  const kbnFieldType = castEsToKbnFieldTypeName(type);
+  return kbnFieldType === KBN_FIELD_TYPES.STRING;
+};
+
+export const fieldSupportsMatches = (field: DataViewFieldBase) => {
+  return field.esTypes?.some(isKibanaStringType);
 };
 
 /**
@@ -897,7 +905,7 @@ export const getFormattedBuilderEntries = (
 
 export const getDefaultEmptyEntry = (): EmptyEntry => ({
   field: '',
-  id: uuid.v4(),
+  id: uuidv4(),
   operator: OperatorEnum.INCLUDED,
   type: OperatorTypeEnum.MATCH,
   value: '',
@@ -906,9 +914,108 @@ export const getDefaultEmptyEntry = (): EmptyEntry => ({
 export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
   entries: [],
   field: '',
-  id: uuid.v4(),
+  id: uuidv4(),
   type: OperatorTypeEnum.NESTED,
 });
 
 export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
   items.some((item) => item.entries.some(({ type }) => type === OperatorTypeEnum.LIST));
+
+export const buildShowActiveExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const now = new Date().toISOString();
+  const filters = savedObjectPrefix.map(
+    (prefix) =>
+      `${prefix}.attributes.expire_time > "${now}" OR NOT ${prefix}.attributes.expire_time: *`
+  );
+  return filters.join(',');
+};
+
+export const buildShowExpiredExceptionsFilter = (savedObjectPrefix: SavedObjectType[]): string => {
+  const now = new Date().toISOString();
+  const filters = savedObjectPrefix.map((prefix) => `${prefix}.attributes.expire_time <= "${now}"`);
+  return filters.join(',');
+};
+
+const getIndexGroupName = (indexName: string): string => {
+  // Check whether it is a Data Stream index
+  const dataStreamExp = /.ds-(.*?)-[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[0-9]{6}/;
+  let result = indexName.match(dataStreamExp);
+  if (result && result.length === 2) {
+    return result[1];
+  }
+
+  // Check whether it is an old '.siem' index group
+  const siemSignalsExp = /.siem-(.*?)-[0-9]{6}/;
+  result = indexName.match(siemSignalsExp);
+  if (result && result.length === 2) {
+    return `.siem-${result[1]}`;
+  }
+
+  // Otherwise return index name
+  return indexName;
+};
+
+export interface FieldConflictsInfo {
+  /**
+   * Kibana field type
+   */
+  type: string;
+  /**
+   * Total count of the indices of this type
+   */
+  totalIndexCount: number;
+  /**
+   * Grouped indices info
+   */
+  groupedIndices: Array<{
+    /**
+     * Index group name (like '.ds-...' or '.siem-signals-...')
+     */
+    name: string;
+    /**
+     * Count of indices in the group
+     */
+    count: number;
+  }>;
+}
+
+export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInfo[] | null => {
+  if (!field.conflictDescriptions) {
+    return null;
+  }
+  const conflicts: FieldConflictsInfo[] = [];
+  for (const [key, value] of Object.entries(field.conflictDescriptions)) {
+    const groupedIndices: Array<{
+      name: string;
+      count: number;
+    }> = [];
+
+    // Group indices and calculate count of indices in each group
+    const groupedInfo: { [key: string]: number } = {};
+    value.forEach((index) => {
+      const groupName = getIndexGroupName(index);
+      if (!groupedInfo[groupName]) {
+        groupedInfo[groupName] = 0;
+      }
+      groupedInfo[groupName]++;
+    });
+    for (const [name, count] of Object.entries(groupedInfo)) {
+      groupedIndices.push({
+        name,
+        count,
+      });
+    }
+
+    // Sort groups by the indices count
+    groupedIndices.sort((group1, group2) => {
+      return group2.count - group1.count;
+    });
+
+    conflicts.push({
+      type: key,
+      totalIndexCount: value.length,
+      groupedIndices,
+    });
+  }
+  return conflicts;
+};

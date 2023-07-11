@@ -7,16 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
-import {
-  flashAPIErrors,
-  clearFlashMessages,
-  flashSuccessToast,
-} from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   DeleteAnalyticsCollectionAPILogic,
@@ -25,9 +18,8 @@ import {
 import { ROOT_PATH } from '../../routes';
 
 export interface DeleteAnalyticsCollectionActions {
-  apiError: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['apiError'];
   apiSuccess: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['apiSuccess'];
-  deleteAnalyticsCollection(id: string): { id: string };
+  deleteAnalyticsCollection(name: string): { name: string };
   makeRequest: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['makeRequest'];
 }
 export interface DeleteAnalyticsCollectionValues {
@@ -40,30 +32,23 @@ export const DeleteAnalyticsCollectionLogic = kea<
   MakeLogicType<DeleteAnalyticsCollectionValues, DeleteAnalyticsCollectionActions>
 >({
   actions: {
-    deleteAnalyticsCollection: (id) => ({ id }),
+    deleteAnalyticsCollection: (name) => ({ name }),
   },
   connect: {
-    actions: [DeleteAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    actions: [DeleteAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess']],
     values: [DeleteAnalyticsCollectionAPILogic, ['status']],
   },
   listeners: ({ actions }) => ({
-    apiError: (e) => flashAPIErrors(e),
-    apiSuccess: async (undefined, breakpoint) => {
-      flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.analytics.collectionsDelete.action.successMessage', {
-          defaultMessage: 'The collection has been successfully deleted',
-        })
-      );
+    apiSuccess: async (_, breakpoint) => {
       // Wait for propagation of the collection deletion
       await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(ROOT_PATH);
     },
-    deleteAnalyticsCollection: ({ id }) => {
-      actions.makeRequest({ id });
+    deleteAnalyticsCollection: ({ name }) => {
+      actions.makeRequest({ name });
     },
-    makeRequest: () => clearFlashMessages(),
   }),
-  path: ['enterprise_search', 'analytics', 'collections', 'delete'],
+  path: ['enterprise_search', 'analytics', 'collection', 'delete'],
   selectors: ({ selectors }) => ({
     isLoading: [
       () => [selectors.status],

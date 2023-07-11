@@ -21,7 +21,6 @@ interface ConnectorSelectorProps {
   disabled: boolean;
   field: FieldHook<string>;
   idAria: string;
-  isEdit: boolean;
   isLoading: boolean;
   handleChange?: (newValue: string) => void;
 }
@@ -38,7 +37,6 @@ export const ConnectorSelector = ({
   disabled = false,
   field,
   idAria,
-  isEdit = true,
   isLoading = false,
   handleChange,
 }: ConnectorSelectorProps) => {
@@ -53,7 +51,7 @@ export const ConnectorSelector = ({
     [handleChange, field]
   );
 
-  return isEdit ? (
+  return (
     <EuiFormRowWrapper
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -72,6 +70,6 @@ export const ConnectorSelector = ({
         selectedConnector={isEmpty(field.value) ? 'none' : field.value}
       />
     </EuiFormRowWrapper>
-  ) : null;
+  );
 };
 ConnectorSelector.displayName = 'ConnectorSelector';

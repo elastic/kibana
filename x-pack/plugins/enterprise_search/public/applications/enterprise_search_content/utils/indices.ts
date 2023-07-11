@@ -81,7 +81,7 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
   if (!index || isApiIndex(index)) {
     return IngestionStatus.CONNECTED;
   }
-  if (isConnectorIndex(index) || isCrawlerIndex(index)) {
+  if (isConnectorIndex(index) || (isCrawlerIndex(index) && index.connector)) {
     if (
       index.connector.last_seen &&
       moment(index.connector.last_seen).isBefore(moment().subtract(30, 'minutes'))
@@ -108,6 +108,17 @@ export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string 
   return isConnectorIndex(index) ? index.connector.last_synced ?? 'never' : null;
 }
 
+export function getContentExtractionDisabled(index?: ElasticsearchIndexWithIngestion): boolean {
+  if (!index) return false;
+  if (isConnectorIndex(index)) {
+    const contentExtractionDisabled =
+      index.connector.configuration?.use_text_extraction_service?.value;
+    return !!contentExtractionDisabled;
+  }
+
+  return false;
+}
+
 export function indexToViewIndex(index: ElasticsearchIndex): ConnectorViewIndex;
 export function indexToViewIndex(index: ElasticsearchIndex): CrawlerViewIndex;
 export function indexToViewIndex(index: ElasticsearchIndex): ApiViewIndex {
@@ -129,20 +140,26 @@ export function indexToViewIndex(index: ElasticsearchIndex): ApiViewIndex {
 }
 
 export function ingestionMethodToText(ingestionMethod: IngestionMethod) {
-  if (ingestionMethod === IngestionMethod.CONNECTOR) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.connector',
-      {
-        defaultMessage: 'Connector',
-      }
-    );
+  switch (ingestionMethod) {
+    case IngestionMethod.CONNECTOR:
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.connector',
+        {
+          defaultMessage: 'Connector',
+        }
+      );
+    case IngestionMethod.CRAWLER:
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.crawler',
+        {
+          defaultMessage: 'Crawler',
+        }
+      );
+    case IngestionMethod.API:
+      return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.api', {
+        defaultMessage: 'API',
+      });
+    default:
+      return ingestionMethod;
   }
-  if (ingestionMethod === IngestionMethod.CRAWLER) {
-    return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.crawler', {
-      defaultMessage: 'Crawler',
-    });
-  }
-  return i18n.translate('xpack.enterpriseSearch.content.searchIndices.ingestionMethod.api', {
-    defaultMessage: 'API',
-  });
 }

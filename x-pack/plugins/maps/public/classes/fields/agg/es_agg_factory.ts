@@ -26,6 +26,7 @@ export function esAggFieldsFactory(
       label: aggDescriptor.label,
       source,
       origin,
+      mask: aggDescriptor.mask,
     });
   } else if (aggDescriptor.type === AGG_TYPE.PERCENTILE) {
     aggField = new PercentileAggField({
@@ -40,6 +41,7 @@ export function esAggFieldsFactory(
           : DEFAULT_PERCENTILE,
       source,
       origin,
+      mask: aggDescriptor.mask,
     });
   } else {
     aggField = new AggField({
@@ -51,6 +53,7 @@ export function esAggFieldsFactory(
       aggType: aggDescriptor.type,
       source,
       origin,
+      mask: aggDescriptor.mask,
     });
   }
 

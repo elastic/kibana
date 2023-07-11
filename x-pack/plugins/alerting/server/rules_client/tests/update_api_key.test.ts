@@ -49,6 +49,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -64,6 +66,7 @@ describe('updateApiKey()', () => {
     id: '1',
     type: 'alert',
     attributes: {
+      revision: 0,
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
       consumer: 'myApp',
@@ -98,6 +101,7 @@ describe('updateApiKey()', () => {
   });
 
   test('updates the API key for the alert', async () => {
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(false);
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
@@ -117,6 +121,8 @@ describe('updateApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
+        revision: 0,
         updatedBy: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
@@ -142,6 +148,110 @@ describe('updateApiKey()', () => {
       expect.any(Object),
       expect.any(Object)
     );
+  });
+
+  test('updates the API key for the alert and does not invalidate the old api key if created by a user authenticated using an api key', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingEncryptedAlert,
+      attributes: {
+        ...existingEncryptedAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(false);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '123', api_key: 'abc' },
+    });
+    await rulesClient.updateApiKey({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
+        revision: 0,
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+      },
+      { version: '123' }
+    );
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+  });
+
+  test('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingEncryptedAlert,
+      attributes: {
+        ...existingEncryptedAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '123', api_key: 'abc' },
+    });
+    await rulesClient.updateApiKey({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: true,
+        revision: 0,
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+      },
+      { version: '123' }
+    );
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
   test('throws an error if API key creation throws', async () => {
@@ -177,6 +287,7 @@ describe('updateApiKey()', () => {
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        revision: 0,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [

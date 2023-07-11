@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isEqual, xor } from 'lodash';
 import { EMPTY, merge, Subscription } from 'rxjs';
 import {
@@ -64,7 +64,7 @@ export abstract class Container<
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: IContainer,
-    settings?: EmbeddableContainerSettings<TContainerInput>
+    settings?: EmbeddableContainerSettings
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
@@ -74,11 +74,7 @@ export abstract class Container<
       settings?.initializeSequentially || settings?.childIdInitializeOrder
     );
 
-    const initSource = settings?.readyToInitializeChildren$
-      ? settings?.readyToInitializeChildren$
-      : this.getInput$();
-
-    const init$ = initSource.pipe(
+    const init$ = this.getInput$().pipe(
       take(1),
       mergeMap(async (currentInput) => {
         const initPromise = this.initializeChildEmbeddables(currentInput, settings);
@@ -336,7 +332,7 @@ export abstract class Container<
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
   ): PanelState<TEmbeddableInput> {
-    const embeddableId = partial.id || uuid.v4();
+    const embeddableId = partial.id || uuidv4();
 
     const explicitInput = this.createNewExplicitEmbeddableInput<TEmbeddableInput>(
       embeddableId,
@@ -372,7 +368,7 @@ export abstract class Container<
 
   private async initializeChildEmbeddables(
     initialInput: TContainerInput,
-    initializeSettings?: EmbeddableContainerSettings<TContainerInput>
+    initializeSettings?: EmbeddableContainerSettings
   ) {
     let initializeOrder = Object.keys(initialInput.panels);
 

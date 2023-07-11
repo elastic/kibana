@@ -50,7 +50,8 @@ describe('buildEditFieldButton', () => {
   it('should return null if the field is not editable', () => {
     const field = dataView.getFieldByName('unknown_field') as DataViewField;
     const button = buildEditFieldButton({
-      services: discoverServiceMock,
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewEditor.userPermissions.editDataView(),
       dataView,
       field,
       editField: jest.fn(),
@@ -64,7 +65,8 @@ describe('buildEditFieldButton', () => {
       .mockReturnValueOnce(false);
     const field = dataView.getFieldByName('bytes') as DataViewField;
     const button = buildEditFieldButton({
-      services: discoverServiceMock,
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewEditor.userPermissions.editDataView(),
       dataView,
       field,
       editField: jest.fn(),
@@ -75,7 +77,8 @@ describe('buildEditFieldButton', () => {
   it('should return null if passed the _source field', () => {
     const field = dataView.getFieldByName('_source') as DataViewField;
     const button = buildEditFieldButton({
-      services: discoverServiceMock,
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewEditor.userPermissions.editDataView(),
       dataView,
       field,
       editField: jest.fn(),
@@ -86,7 +89,8 @@ describe('buildEditFieldButton', () => {
   it('should return EuiListGroupItemProps if the field and data view are editable', () => {
     const field = dataView.getFieldByName('bytes') as DataViewField;
     const button = buildEditFieldButton({
-      services: discoverServiceMock,
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewEditor.userPermissions.editDataView(),
       dataView,
       field,
       editField: jest.fn(),
@@ -114,7 +118,8 @@ describe('buildEditFieldButton', () => {
     const field = dataView.getFieldByName('bytes') as DataViewField;
     const editField = jest.fn();
     const buttonProps = buildEditFieldButton({
-      services: discoverServiceMock,
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewEditor.userPermissions.editDataView(),
       dataView,
       field,
       editField,

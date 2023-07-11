@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
@@ -25,13 +26,14 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   readOnly,
   children,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
 
   if (error) {
     if (doesErrorIndicateAPIKeysAreDisabled(error)) {
       return (
         <KibanaPageTemplate.EmptyPrompt
-          iconType="alert"
+          iconType="warning"
           body={
             <>
               <p>
@@ -76,7 +78,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
 
     return (
       <KibanaPageTemplate.EmptyPrompt
-        iconType="alert"
+        iconType="warning"
         body={
           <p>
             <FormattedMessage
@@ -92,16 +94,18 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
             <EuiSpacer size="xl" />
             <EuiAccordion
               id={accordionId}
-              buttonClassName="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+              buttonClassName={css({
+                display: 'flex',
+                justifyContent: 'center',
+              })}
               buttonContent={
-                <FormattedMessage
-                  id="xpack.security.management.apiKeysEmptyPrompt.technicalDetailsButton"
-                  defaultMessage="Technical details"
-                />
+                <EuiText size="xs" className={css({ fontWeight: euiTheme.font.weight.medium })}>
+                  <FormattedMessage
+                    id="xpack.security.management.apiKeysEmptyPrompt.technicalDetailsButton"
+                    defaultMessage="Technical details"
+                  />
+                </EuiText>
               }
-              buttonProps={{
-                style: { display: 'flex', justifyContent: 'center' },
-              }}
               arrowDisplay="right"
               paddingSize="m"
             >
@@ -120,7 +124,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   if (readOnly) {
     return (
       <KibanaPageTemplate.EmptyPrompt
-        iconType="crossInACircleFilled"
+        iconType="error"
         title={
           <h1>
             <FormattedMessage

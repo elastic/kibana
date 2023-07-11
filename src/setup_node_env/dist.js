@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('./no_transpilation_dist');
+// the dist env setup does not include babel/register, just the polyfill
+require('./setup_env');
 require('./polyfill');

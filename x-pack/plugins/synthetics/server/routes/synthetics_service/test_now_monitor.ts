@@ -6,72 +6,81 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { TestNowResponse } from '../../../common/types';
 import {
   ConfigKey,
   MonitorFields,
-  SyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
-import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
-export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
+export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'GET',
-  path: API_URLS.TRIGGER_MONITOR + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.TRIGGER_MONITOR + '/{monitorId}',
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({
-    request,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
-    const { monitorId } = request.params;
-    const monitor = await savedObjectsClient.get<SyntheticsMonitor>(
-      syntheticsMonitorType,
-      monitorId
-    );
-
-    const encryptedClient = server.encryptedSavedObjects.getClient();
-
-    const monitorWithSecrets =
-      await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitorType,
-        monitorId
-      );
-    const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
-
-    const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } = monitor.attributes;
-
-    const { syntheticsService } = syntheticsMonitorClient;
-
-    const testRunId = uuidv4();
-
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
-
-    const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
-
-    const errors = await syntheticsService.runOnceConfigs([
-      formatHeartbeatRequest({
-        // making it enabled, even if it's disabled in the UI
-        monitor: { ...normalizedMonitor.attributes, enabled: true },
-        monitorId,
-        heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
-        testRunId,
-        params: paramsBySpace[spaceId],
-      }),
-    ]);
-
-    if (errors && errors?.length > 0) {
-      return { errors, testRunId, monitorId, schedule, locations };
-    }
-
-    return { testRunId, monitorId, schedule, locations };
+  handler: async (routeContext) => {
+    const { monitorId } = routeContext.request.params;
+    return triggerTestNow(monitorId, routeContext);
   },
 });
+
+export const triggerTestNow = async (
+  monitorId: string,
+  { server, spaceId, syntheticsMonitorClient }: RouteContext
+): Promise<TestNowResponse> => {
+  const encryptedClient = server.encryptedSavedObjects.getClient();
+
+  const monitorWithSecrets =
+    await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+      syntheticsMonitorType,
+      monitorId,
+      {
+        namespace: spaceId,
+      }
+    );
+  const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
+
+  const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
+    monitorWithSecrets.attributes;
+
+  const { syntheticsService } = syntheticsMonitorClient;
+
+  const testRunId = uuidv4();
+
+  const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
+
+  const errors = await syntheticsService.runOnceConfigs({
+    // making it enabled, even if it's disabled in the UI
+    monitor: { ...normalizedMonitor.attributes, enabled: true },
+    configId: monitorId,
+    heartbeatId: (normalizedMonitor.attributes as MonitorFields)[ConfigKey.MONITOR_QUERY_ID],
+    testRunId,
+    params: paramsBySpace[spaceId],
+  });
+
+  if (errors && errors?.length > 0) {
+    return {
+      errors,
+      testRunId,
+      schedule,
+      locations,
+      configId: monitorId,
+      monitor: normalizedMonitor.attributes,
+    };
+  }
+
+  return {
+    testRunId,
+    schedule,
+    locations,
+    configId: monitorId,
+    monitor: normalizedMonitor.attributes,
+  };
+};

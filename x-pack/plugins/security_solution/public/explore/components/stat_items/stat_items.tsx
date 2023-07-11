@@ -27,7 +27,7 @@ import { areachartConfigs, barchartConfigs, FlexItem, ChartHeight } from './util
 import { Metric } from './metric';
 import { MetricEmbeddable } from './metric_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { LensEmbeddable } from '../../../common/components/visualization_actions/lens_embeddable';
+import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
   ({
@@ -112,11 +112,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                 {enableBarChart && (
                   <FlexItem>
                     {isChartEmbeddablesEnabled && barChartLensAttributes ? (
-                      <LensEmbeddable
+                      <VisualizationEmbeddable
                         data-test-subj="embeddable-bar-chart"
                         lensAttributes={barChartLensAttributes}
                         timerange={timerange}
-                        id={id}
+                        id={`${id}-bar-embeddable`}
                         height={ChartHeight}
                         inspectTitle={description}
                       />
@@ -140,11 +140,11 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   <>
                     <FlexItem>
                       {isChartEmbeddablesEnabled && areaChartLensAttributes ? (
-                        <LensEmbeddable
+                        <VisualizationEmbeddable
                           data-test-subj="embeddable-area-chart"
                           lensAttributes={areaChartLensAttributes}
                           timerange={timerange}
-                          id={id}
+                          id={`${id}-area-embeddable`}
                           height={ChartHeight}
                           inspectTitle={description}
                         />

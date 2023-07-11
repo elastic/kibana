@@ -16,6 +16,7 @@ import {
   ApmRuleType,
   APM_SERVER_FEATURE_ID,
 } from '../common/rules/apm_rule_types';
+import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '../common/apm_saved_object_constants';
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,
@@ -38,7 +39,7 @@ export const APM_FEATURE = {
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
-        read: [],
+        read: [APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE],
       },
       alerting: {
         alert: {
@@ -59,7 +60,7 @@ export const APM_FEATURE = {
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
-        read: [],
+        read: [APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE],
       },
       alerting: {
         alert: {

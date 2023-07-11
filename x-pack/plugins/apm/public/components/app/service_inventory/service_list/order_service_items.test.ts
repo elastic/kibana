@@ -191,40 +191,47 @@ describe('orderServiceItems', () => {
   });
 
   describe('when sorting by alphabetical fields', () => {
-    const sortedItems = orderServiceItems({
-      primarySortField: ServiceInventoryFieldName.ServiceName,
-      sortDirection: 'asc',
-      tiebreakerField: ServiceInventoryFieldName.ServiceName,
-      items: [
-        {
-          serviceName: 'd-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: 'a-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: 'b-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: 'c-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: '0-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-      ],
-    });
+    it('sorts correctly', () => {
+      const sortedItems = orderServiceItems({
+        primarySortField: ServiceInventoryFieldName.ServiceName,
+        sortDirection: 'asc',
+        tiebreakerField: ServiceInventoryFieldName.ServiceName,
+        items: [
+          {
+            serviceName: '_other',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'd-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'a-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'b-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'c-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: '0-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+        ],
+      });
 
-    expect(sortedItems.map((item) => item.serviceName)).toEqual([
-      '0-service',
-      'a-service',
-      'b-service',
-      'c-service',
-      'd-service',
-    ]);
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        '0-service',
+        '_other',
+        'a-service',
+        'b-service',
+        'c-service',
+        'd-service',
+      ]);
+    });
   });
 });

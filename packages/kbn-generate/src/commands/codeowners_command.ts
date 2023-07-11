@@ -9,21 +9,34 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { discoverBazelPackages } from '@kbn/bazel-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages } from '@kbn/repo-packages';
 
 import type { GenerateCommand } from '../generate_command';
 
 const REL = '.github/CODEOWNERS';
 
-const GENERATED_START = `
-
+const GENERATED_START = `####
+## Everything at the top of the codeowners file is auto generated based on the
+## "owner" fields in the kibana.jsonc files at the root of each package. This
+## file is automatically updated by CI or can be updated locally by running
+## \`node scripts/generate codeowners\`.
 ####
-## Everything below this comment is automatically generated based on kibana.jsonc
-## "owner" fields. This file is automatically updated by CI or can be updated locally
-## by running \`node scripts/generate codeowners\`.
-####
 
+`;
+
+const GENERATED_END = `
+####
+## Everything below this line overrides the default assignments for each package.
+## Items lower in the file have higher precedence:
+##  https://help.github.com/articles/about-codeowners/
+####
+`;
+
+const ULTIMATE_PRIORITY_RULES = `
+####
+## These rules are always last so they take ultimate priority over everything else
+####
 `;
 
 export const CodeownersCommand: GenerateCommand = {
@@ -31,26 +44,33 @@ export const CodeownersCommand: GenerateCommand = {
   description: 'Update the codeowners file based on the package manifest files',
   usage: 'node scripts/generate codeowners',
   async run({ log }) {
-    const coPath = Path.resolve(REPO_ROOT, REL);
-    const codeowners = await Fsp.readFile(coPath, 'utf8');
-    const pkgs = await discoverBazelPackages(REPO_ROOT);
+    const pkgs = getPackages(REPO_ROOT);
+    const path = Path.resolve(REPO_ROOT, REL);
+    const oldCodeowners = await Fsp.readFile(path, 'utf8');
+    let content = oldCodeowners;
 
-    let genStart = codeowners.indexOf(GENERATED_START);
-    if (genStart === -1) {
-      genStart = codeowners.length;
-      log.warning(`${REL} doesn't include the expected start-marker for injecting generated text`);
+    // strip the old generated output
+    const genEnd = content.indexOf(GENERATED_END);
+    if (genEnd !== -1) {
+      content = content.slice(genEnd + GENERATED_END.length);
     }
 
-    const newCodeowners = `${codeowners.slice(0, genStart)}${GENERATED_START}${pkgs
-      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
-      .join('\n')}\n`;
+    // strip the old ultimate rules
+    const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES);
+    if (ultStart !== -1) {
+      content = content.slice(0, ultStart);
+    }
 
-    if (codeowners === newCodeowners) {
+    const newCodeowners = `${GENERATED_START}${pkgs
+      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
+      .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
+
+    if (newCodeowners === oldCodeowners) {
       log.success(`${REL} is already up-to-date`);
       return;
     }
 
-    await Fsp.writeFile(coPath, newCodeowners);
+    await Fsp.writeFile(path, newCodeowners);
     log.info(`${REL} updated`);
   },
 };

@@ -17,7 +17,7 @@ export const cleanupTargetIndices = async (getService: GetService, user: User, s
     const aliasMap = await es.indices.getAlias({
       name: targetIndices,
       allow_no_indices: true,
-      expand_wildcards: 'open',
+      expand_wildcards: 'all',
     });
     const indices = Object.keys(aliasMap);
     expect(indices.length > 0).to.be(true);

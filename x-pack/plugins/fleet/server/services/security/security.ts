@@ -8,7 +8,8 @@
 import { pick } from 'lodash';
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+
+import { TRANSFORM_PLUGIN_ID } from '../../../common/constants/plugin';
 
 import type { FleetAuthz } from '../../../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../common';
@@ -37,6 +38,7 @@ export function checkSuperuser(req: KibanaRequest) {
 
   const security = appContextService.getSecurity();
   const user = security.authc.getCurrentUser(req);
+
   if (!user) {
     return false;
   }
@@ -66,8 +68,13 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
-    const endpointPrivileges = ENDPOINT_PRIVILEGES.map((privilege) =>
-      security.authz.actions.api.get(`${DEFAULT_APP_CATEGORIES.security.id}-${privilege}`)
+    const endpointPrivileges = Object.entries(ENDPOINT_PRIVILEGES).map(
+      ([_, { appId, privilegeType, privilegeName }]) => {
+        if (privilegeType === 'ui') {
+          return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
+        }
+        return security.authz.actions[privilegeType].get(`${appId}-${privilegeName}`);
+      }
     );
     const { privileges } = await checkPrivileges({
       kibana: [
@@ -75,6 +82,10 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
         security.authz.actions.api.get(`${PLUGIN_ID}-setup`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-read`),
+        security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-all`),
+        security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-admin`),
+        security.authz.actions.api.get(`${TRANSFORM_PLUGIN_ID}-read`),
+
         ...endpointPrivileges,
       ],
     });
@@ -89,7 +100,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     );
     const fleetSetupAuth = getAuthorizationFromPrivileges(privileges.kibana, 'fleet-setup');
 
-    return {
+    const authz = {
       ...calculateAuthz({
         fleet: { all: fleetAllAuth, setup: fleetSetupAuth },
         integrations: {
@@ -100,6 +111,8 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       }),
       packagePrivileges: calculatePackagePrivilegesFromKibanaPrivileges(privileges.kibana),
     };
+
+    return authz;
   }
 
   return calculateAuthz({

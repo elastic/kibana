@@ -55,16 +55,9 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
-  return {
-    ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
-    ),
-  };
-});
+jest.mock('react-virtualized/dist/commonjs/AutoSizer', () => ({ children }: { children: any }) => (
+  <div>{children({ height: 500, width: 500 })}</div>
+));
 
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => <ProcessorsEditorWithDeps {...props} />,
@@ -130,12 +123,14 @@ type TestSubject =
   | 'addProcessorButton'
   | 'addProcessorForm.submitButton'
   | 'appendValueField.input'
+  | 'allowDuplicatesSwitch.input'
   | 'formatsValueField.input'
   | 'timezoneField.input'
   | 'outputFormatField.input'
   | 'localeField.input'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'policyNameField.input'
   | 'messageField.input'
   | 'mockCodeEditor'
   | 'pathField.input'
@@ -185,4 +180,23 @@ type TestSubject =
   | 'droppableList.addButton'
   | 'droppableList.input-0'
   | 'droppableList.input-1'
-  | 'droppableList.input-2';
+  | 'droppableList.input-2'
+  | 'prefixField.input'
+  | 'suffixField.input'
+  | 'indexedCharsField.input'
+  | 'indexedCharsFieldField.input'
+  | 'removeBinaryField.input'
+  | 'resourceNameField.input'
+  | 'propertiesField'
+  | 'tileTypeField'
+  | 'targetFormatField'
+  | 'parentField.input'
+  | 'childrenField.input'
+  | 'nonChildrenField.input'
+  | 'precisionField.input'
+  | 'patternDefinitionsField'
+  | 'pipelineNameField.input'
+  | 'ignoreMissingPipelineSwitch.input'
+  | 'destinationField.input'
+  | 'datasetField.input'
+  | 'namespaceField.input';

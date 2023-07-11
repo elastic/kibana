@@ -22,11 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../common/constants';
-
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
 import { sendCreateAgentPolicy, useStartServices } from '../../../hooks';
+
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../common/services/generate_new_agent_policy';
 
 import { agentPolicyFormValidation } from '.';
 
@@ -57,13 +57,12 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
-    name: agentPolicyName,
-    description: '',
-    namespace: 'default',
-    monitoring_enabled: Object.values(dataTypes),
-    has_fleet_server: isFleetServerPolicy,
-  });
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
+    generateNewAgentPolicyWithDefaults({
+      name: agentPolicyName,
+      has_fleet_server: isFleetServerPolicy,
+    })
+  );
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {

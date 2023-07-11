@@ -10,7 +10,7 @@ import Path from 'path';
 
 import * as Rx from 'rxjs';
 import dedent from 'dedent';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
@@ -40,7 +40,16 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       procs,
       config,
       installDir: options.installDir,
-      extraKbnOpts: options.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+      extraKbnOpts: options.installDir
+        ? []
+        : [
+            '--dev',
+            '--no-dev-config',
+            '--no-dev-credentials',
+            config.get('serverless')
+              ? '--server.versioned.versionResolution=newest'
+              : '--server.versioned.versionResolution=oldest',
+          ],
     });
 
     reportTime(runStartTime, 'ready', {

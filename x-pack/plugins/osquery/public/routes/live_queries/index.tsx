@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { LiveQueriesPage } from './list';
 import { NewLiveQueryPage } from './new';
@@ -25,7 +26,7 @@ const LiveQueriesComponent = () => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route path={`${match.url}/new`}>
         {(permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks)) ||
         permissions.writeLiveQueries ? (
@@ -40,7 +41,7 @@ const LiveQueriesComponent = () => {
       <Route path={`${match.url}`}>
         <LiveQueriesPage />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

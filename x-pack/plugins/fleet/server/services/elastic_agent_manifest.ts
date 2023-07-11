@@ -33,13 +33,23 @@ spec:
       serviceAccountName: elastic-agent
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      # Uncomment if using hints feature
+      #initContainers:
+      #  - name: k8s-templates-downloader
+      #    image: busybox:1.28
+      #    command: ['sh']
+      #    args:
+      #      - -c
+      #      - >-
+      #        mkdir -p /etc/elastic-agent/inputs.d &&
+      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #    volumeMounts:
+      #      - name: external-inputs
+      #        mountPath: /etc/elastic-agent/inputs.d
       containers:
         - name: elastic-agent
           image: docker.elastic.co/beats/elastic-agent:VERSION
-          args: [
-            "-c", "/etc/agent.yml",
-            "-e",
-          ]
+          args: ["-c", "/etc/elastic-agent/agent.yml", "-e"]
           env:
             # The basic authentication username used to connect to Elasticsearch
             # This user needs the privileges required to publish events to Elasticsearch.
@@ -56,8 +66,26 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: STATE_PATH
+              value: "/etc/elastic-agent"
           securityContext:
             runAsUser: 0
+            # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+            # If you are using this integration, please uncomment these lines before applying.
+            #capabilities:
+            #  add:
+            #    - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+            #    - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+            #    - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
+            ########################################################################################
+            # The following capabilities are needed for Universal Profiling.
+            # More fine graded capabilities are only available for newer Linux kernels.
+            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            #procMount: "Unmasked"
+            #privileged: true
+            #capabilities:
+            #  add:
+            #    - SYS_ADMIN
           resources:
             limits:
               memory: 700Mi
@@ -66,9 +94,12 @@ spec:
               memory: 400Mi
           volumeMounts:
             - name: datastreams
-              mountPath: /etc/agent.yml
+              mountPath: /etc/elastic-agent/agent.yml
               readOnly: true
               subPath: agent.yml
+            # Uncomment if using hints feature
+            #- name: external-inputs
+            #  mountPath: /etc/elastic-agent/inputs.d
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
@@ -87,11 +118,21 @@ spec:
             - name: var-lib
               mountPath: /hostfs/var/lib
               readOnly: true
+            - name: sys-kernel-debug
+              mountPath: /sys/kernel/debug
+            - name: elastic-agent-state
+              mountPath: /usr/share/elastic-agent/state
+            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            #- name: universal-profiling-cache
+            #  mountPath: /var/cache/Elastic
       volumes:
         - name: datastreams
           configMap:
             defaultMode: 0640
             name: agent-node-datastreams
+        # Uncomment if using hints feature
+        #- name: external-inputs
+        #  emptyDir: {}
         - name: proc
           hostPath:
             path: /proc
@@ -113,6 +154,24 @@ spec:
         - name: var-lib
           hostPath:
             path: /var/lib
+        # Needed for 'Defend for containers' integration (cloud-defend) and Universal Profiling
+        # If you are not using one of these integrations, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: sys-kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
+        # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
+        # Update 'kube-system' with the namespace of your agent installation
+        - name: elastic-agent-state
+          hostPath:
+            path: /var/lib/elastic-agent/kube-system/state
+            type: DirectoryOrCreate
+        # Mount required for Universal Profiling.
+        # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+        #- name: universal-profiling-cache
+        #  hostPath:
+        #    path: /var/cache/Elastic
+        #    type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -220,6 +279,10 @@ rules:
     resources:
       - podsecuritypolicies
     verbs: ["get", "list", "watch"]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources:
+      - storageclasses
+    verbs: [ "get", "list", "watch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -262,7 +325,7 @@ metadata:
 `;
 
 export const elasticAgentManagedManifest = `---
-# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-managed-by-fleet.html
+# For more information https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-managed-by-fleet.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -328,12 +391,28 @@ spec:
                   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
+            # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+            # If you are using this integration, please uncomment these lines before applying.
+            #capabilities:
+            #  add:
+            #    - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+            #    - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+            #    - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by 'Defend for Containers' to modify 'rlimit_memlock'
+            ########################################################################################
+            # The following capabilities are needed for Universal Profiling.
+            # More fine graded capabilities are only available for newer Linux kernels.
+            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            #procMount: "Unmasked"
+            #privileged: true
+            #capabilities:
+            #  add:
+            #    - SYS_ADMIN
           resources:
             limits:
-              memory: 500Mi
+              memory: 700Mi
             requests:
               cpu: 100m
-              memory: 200Mi
+              memory: 400Mi
           volumeMounts:
             - name: proc
               mountPath: /hostfs/proc
@@ -356,6 +435,13 @@ spec:
             - name: etc-mid
               mountPath: /etc/machine-id
               readOnly: true
+            - name: sys-kernel-debug
+              mountPath: /sys/kernel/debug
+            - name: elastic-agent-state
+              mountPath: /usr/share/elastic-agent/state
+            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            #- name: universal-profiling-cache
+            #  mountPath: /var/cache/Elastic
       volumes:
         - name: proc
           hostPath:
@@ -384,6 +470,24 @@ spec:
           hostPath:
             path: /etc/machine-id
             type: File
+        # Needed for 'Defend for containers' integration (cloud-defend) and Universal Profiling
+        # If you are not using one of these integrations, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: sys-kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
+        # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
+        # Update 'kube-system' with the namespace of your agent installation
+        - name: elastic-agent-state
+          hostPath:
+            path: /var/lib/elastic-agent-managed/kube-system/state
+            type: DirectoryOrCreate
+        # Mount required for Universal Profiling.
+        # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+        #- name: universal-profiling-cache
+        #  hostPath:
+        #    path: /var/cache/Elastic
+        #    type: DirectoryOrCreate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -491,6 +595,10 @@ rules:
     resources:
       - podsecuritypolicies
     verbs: ["get", "list", "watch"]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources:
+      - storageclasses
+    verbs: [ "get", "list", "watch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

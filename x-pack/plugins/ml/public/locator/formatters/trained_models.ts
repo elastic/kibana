@@ -6,10 +6,7 @@
  */
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type {
-  TrainedModelsNodesUrlState,
-  TrainedModelsUrlState,
-} from '../../../common/types/locator';
+import type { MemoryUsageUrlState, TrainedModelsUrlState } from '../../../common/types/locator';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { AppPageState, ListingPageUrlState } from '../../../common/types/common';
 
@@ -41,11 +38,11 @@ export function formatTrainedModelsManagementUrl(
   return url;
 }
 
-export function formatTrainedModelsNodesManagementUrl(
+export function formatMemoryUsageUrl(
   appBasePath: string,
-  mlUrlGeneratorState: TrainedModelsNodesUrlState['pageState']
+  mlUrlGeneratorState: MemoryUsageUrlState['pageState']
 ): string {
-  let url = `${appBasePath}/${ML_PAGES.TRAINED_MODELS_NODES}`;
+  let url = `${appBasePath}/${ML_PAGES.MEMORY_USAGE}`;
   if (mlUrlGeneratorState) {
     const { nodeId } = mlUrlGeneratorState;
     if (nodeId) {
@@ -54,7 +51,7 @@ export function formatTrainedModelsNodesManagementUrl(
       };
 
       const queryState: AppPageState<ListingPageUrlState> = {
-        [ML_PAGES.TRAINED_MODELS_NODES]: nodesListState,
+        [ML_PAGES.MEMORY_USAGE]: nodesListState,
       };
 
       url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(

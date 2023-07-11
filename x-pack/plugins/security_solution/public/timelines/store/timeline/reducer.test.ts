@@ -7,12 +7,8 @@
 
 import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import {
-  TimelineType,
-  TimelineStatus,
-  TimelineTabs,
-  TimelineId,
-} from '../../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 
 import type {
   DataProvider,
@@ -123,6 +119,7 @@ const basicTimeline: TimelineModel = {
   pinnedEventsSaveObject: {},
   queryFields: [],
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   sessionViewConfig: null,
   show: true,

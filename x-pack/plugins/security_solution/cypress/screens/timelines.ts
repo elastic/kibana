@@ -30,6 +30,12 @@ export const TIMELINE_CHECKBOX = (id: string) => {
   return `[data-test-subj="checkboxSelectRow-${id}"]`;
 };
 
+export const TIMELINE_ITEM_ACTION_BTN = (id: string) => {
+  return `[id="${id}-actions"`;
+};
+
+export const EXPORT_TIMELINE = '[data-test-subj="export-timeline"]';
+
 export const TIMELINE_NAME = '[data-test-subj^=title]';
 
 export const TIMELINES_FAVORITE = '[data-test-subj="favorite-starFilled-star"]';

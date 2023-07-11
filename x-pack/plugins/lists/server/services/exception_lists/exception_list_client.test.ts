@@ -247,6 +247,7 @@ describe('exception_list_client', () => {
         (): ReturnType<ExceptionListClient['exportExceptionListAndItems']> => {
           return exceptionListClient.exportExceptionListAndItems({
             id: '1',
+            includeExpiredExceptions: true,
             listId: '1',
             namespaceType: 'agnostic',
           });

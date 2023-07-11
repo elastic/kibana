@@ -41,9 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { skipBrowserRefresh: true }
       );
 
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
     });
 
@@ -430,7 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('switch panel interval test', () => {
       beforeEach(async () => {
-        await visualBuilder.resetPage();
+        await visualBuilder.setTime();
         await visualBuilder.clickMetric();
         await visualBuilder.checkMetricTabIsPresent();
         await visualBuilder.clickPanelOptions('metric');
@@ -551,7 +548,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await visualBuilder.resetPage();
+        await visualBuilder.setTime();
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('bytes');
         await visualBuilder.setMetricsGroupByTerms('machine.os.raw');

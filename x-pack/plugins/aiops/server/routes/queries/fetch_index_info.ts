@@ -9,7 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getSampleProbability } from '@kbn/ml-agg-utils';
 
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
@@ -51,7 +50,7 @@ export const fetchIndexInfo = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
   abortSignal?: AbortSignal
-): Promise<{ fieldCandidates: string[]; sampleProbability: number; totalDocCount: number }> => {
+): Promise<{ fieldCandidates: string[]; totalDocCount: number }> => {
   const { index } = params;
   // Get all supported fields
   const respMapping = await esClient.fieldCaps(
@@ -68,9 +67,10 @@ export const fetchIndexInfo = async (
   Object.entries(respMapping.fields).forEach(([key, value]) => {
     const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
     const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
+    const isAggregatable = fieldTypes.some((type) => value[type].aggregatable);
 
     // Check if fieldName is something we can aggregate on
-    if (isSupportedType) {
+    if (isSupportedType && isAggregatable) {
       acceptableFields.add(key);
     }
   });
@@ -95,7 +95,6 @@ export const fetchIndexInfo = async (
   });
 
   const totalDocCount = (resp.hits.total as estypes.SearchTotalHits).value;
-  const sampleProbability = getSampleProbability(totalDocCount);
 
-  return { fieldCandidates: [...finalFieldCandidates], sampleProbability, totalDocCount };
+  return { fieldCandidates: [...finalFieldCandidates], totalDocCount };
 };

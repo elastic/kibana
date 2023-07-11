@@ -16,35 +16,31 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { Meta } from '../../../../../common/types';
+import { NATIVE_CONNECTOR_DEFINITIONS } from '../../../../../common/connectors/native_connectors';
+
+import { Meta } from '../../../../../common/types/pagination';
+import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components';
-import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
-import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
-import { ingestionMethodToText } from '../../utils/indices';
+import { ElasticsearchViewIndex } from '../../types';
+import { ingestionMethodToText, isConnectorIndex } from '../../utils/indices';
 import {
   ingestionStatusToColor,
   ingestionStatusToText,
 } from '../../utils/ingestion_status_helpers';
-
-const healthColorsMap = {
-  green: 'success',
-  red: 'danger',
-  unavailable: '',
-  yellow: 'warning',
-};
 
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];
   isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
-  onDelete: (index: ElasticsearchViewIndex) => void;
+  onDelete: (indexName: string) => void;
 }
 
 export const IndicesTable: React.FC<IndicesTableProps> = ({
@@ -70,8 +66,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
         </EuiLinkTo>
       ),
       sortable: true,
-      truncateText: true,
-      width: '40%',
+      width: '33%',
     },
     {
       field: 'health',
@@ -86,7 +81,6 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
       ),
       sortable: true,
       truncateText: true,
-      width: '10%',
     },
     {
       field: 'count',
@@ -95,21 +89,43 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
       }),
       sortable: true,
       truncateText: true,
-      width: '10%',
     },
     {
-      field: 'ingestionMethod',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndices.ingestionName.columnTitle',
+        {
+          defaultMessage: 'Ingestion name',
+        }
+      ),
+      render: (index: ElasticsearchViewIndex) => (
+        <EuiText size="s">
+          {(isConnectorIndex(index) &&
+            index.connector.service_type &&
+            NATIVE_CONNECTOR_DEFINITIONS[index.connector.service_type]?.name) ??
+            '--'}
+        </EuiText>
+      ),
+      truncateText: true,
+    },
+    {
       name: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndices.ingestionMethod.columnTitle',
         {
           defaultMessage: 'Ingestion method',
         }
       ),
-      render: (ingestionMethod: IngestionMethod) => (
-        <EuiText size="s">{ingestionMethodToText(ingestionMethod)}</EuiText>
+      render: (index: ElasticsearchViewIndex) => (
+        <EuiText size="s">
+          {isConnectorIndex(index) && index.connector.is_native
+            ? i18n.translate(
+                'xpack.enterpriseSearch.content.searchIndices.ingestionmethod.nativeConnector',
+                {
+                  defaultMessage: 'Native connector',
+                }
+              )
+            : ingestionMethodToText(index.ingestionMethod)}
+        </EuiText>
       ),
-      truncateText: true,
-      width: '10%',
     },
     {
       name: i18n.translate(
@@ -130,7 +146,6 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
         );
       },
       truncateText: true,
-      width: '15%',
     },
     {
       actions: [
@@ -181,14 +196,13 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
                 },
               }
             ),
-          onClick: (index) => onDelete(index),
+          onClick: (index) => onDelete(index.name),
           type: 'icon',
         },
       ],
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '10%',
     },
   ];
   return (
@@ -196,7 +210,12 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
       items={indices}
       columns={columns}
       onChange={onChange}
-      pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
+      pagination={{
+        pageIndex: meta.page.from / (meta.page.size || 1),
+        pageSize: meta.page.size,
+        showPerPageOptions: false,
+        totalItemCount: meta.page.total,
+      }}
       tableLayout="fixed"
       loading={isLoading}
     />

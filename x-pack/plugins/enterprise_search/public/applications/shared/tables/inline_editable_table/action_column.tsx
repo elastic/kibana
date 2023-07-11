@@ -76,7 +76,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
           <EuiButtonEmpty
             data-test-subj="cancelButton"
             color="danger"
-            iconType="crossInACircleFilled"
+            iconType="cross"
             onClick={doneEditing}
             disabled={isLoading}
           >

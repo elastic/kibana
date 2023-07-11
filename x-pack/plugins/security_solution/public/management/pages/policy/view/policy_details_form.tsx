@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +58,7 @@ export const PolicyDetailsForm = memo(() => {
   const { loading: authzLoading } = useUserPrivileges().endpointPrivileges;
 
   if (authzLoading) {
-    return <EuiLoadingContent lines={5} />;
+    return <EuiSkeletonText lines={5} />;
   }
 
   return (

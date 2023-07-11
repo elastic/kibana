@@ -23,14 +23,14 @@ import {
 import {
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
   getSimpleThreatMatch,
   getStats,
   getThresholdRuleForSignalTesting,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   deleteAllEventLogExecutionEvents,
 } from '../../../../utils';
@@ -62,8 +62,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         const rule = getRuleForSignalTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {
@@ -259,7 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         const rule = getEqlRuleForSignalTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {
@@ -452,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {
@@ -661,7 +661,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {

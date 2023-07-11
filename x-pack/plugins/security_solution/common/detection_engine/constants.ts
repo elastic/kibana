@@ -25,3 +25,10 @@ export enum RULE_PREVIEW_FROM {
   WEEK = 'now-65m',
   MONTH = 'now-25h',
 }
+
+export const PREBUILT_RULES_PACKAGE_NAME = 'security_detection_engine';
+
+/**
+ * Rule signature id (`rule.rule_id`) of the prebuilt "Endpoint Security" rule.
+ */
+export const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';

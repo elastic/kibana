@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/runtime-fields-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "runtimeFields",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "runtime_fields"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

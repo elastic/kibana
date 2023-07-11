@@ -26,9 +26,9 @@ import { initialUserPrivilegesState } from '../../common/components/user_privile
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { useRiskScore } from '../../explore/containers/risk_score';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { LandingPageComponent } from '../../common/components/landing_page';
 
 const mockNavigateToApp = jest.fn();
+jest.mock('../../common/components/landing_page');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -50,6 +50,7 @@ jest.mock('../../common/lib/kibana', () => {
 });
 jest.mock('../../common/containers/source');
 jest.mock('../../common/containers/sourcerer');
+jest.mock('../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -87,9 +88,7 @@ jest.mock('../../common/containers/local_storage/use_messages_storage');
 
 jest.mock('../containers/overview_cti_links');
 
-jest.mock('../../common/components/visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../../common/components/visualization_actions/actions');
 
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
@@ -309,7 +308,7 @@ describe('Overview', () => {
           </TestProviders>
         );
 
-        expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
+        expect(wrapper.find(`[data-test-subj="siem-landing-page"]`).exists()).toBe(true);
       });
     });
   });

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse, SearchRequest } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse, SearchRequest, TimeRange } from '@kbn/data-plugin/common';
 import { get, getOr } from 'lodash/fp';
-
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { SecuritySolutionFactory } from '../../types';
@@ -54,7 +53,14 @@ export const riskScore: SecuritySolutionFactory<
 
     const enhancedData =
       deps && options.includeAlertsCount
-        ? await enhanceData(data, names, nameField, deps.ruleDataClient, deps.spaceId)
+        ? await enhanceData(
+            data,
+            names,
+            nameField,
+            deps.ruleDataClient,
+            deps.spaceId,
+            options.alertsTimerange
+          )
         : data;
 
     return {
@@ -75,23 +81,20 @@ async function enhanceData(
   names: string[],
   nameField: string,
   ruleDataClient?: IRuleDataClient | null,
-  spaceId?: string
+  spaceId?: string,
+  timerange?: TimeRange
 ): Promise<Array<HostRiskScore | UserRiskScore>> {
   const ruleDataReader = ruleDataClient?.getReader({ namespace: spaceId });
-  const query = getAlertsQueryForEntity(names, nameField);
+  const query = getAlertsQueryForEntity(names, nameField, timerange);
   const response = await ruleDataReader?.search(query);
   const buckets: EnhancedDataBucket[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
 
-  const enhancedAlertsDataByEntityName: Record<
-    string,
-    { count: number; oldestAlertTimestamp: string }
-  > = buckets.reduce(
-    (acc, { key, doc_count: count, oldestAlertTimestamp }) => ({
-      ...acc,
-      [key]: { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string },
-    }),
-    {}
-  );
+  const enhancedAlertsDataByEntityName = buckets.reduce<
+    Record<string, { count: number; oldestAlertTimestamp: string }>
+  >((acc, { key, doc_count: count, oldestAlertTimestamp }) => {
+    acc[key] = { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string as string };
+    return acc;
+  }, {});
 
   return data.map((risk) => ({
     ...risk,
@@ -101,26 +104,45 @@ async function enhanceData(
   }));
 }
 
-const getAlertsQueryForEntity = (names: string[], nameField: string): SearchRequest => ({
-  size: 0,
-  query: {
-    bool: {
-      filter: [
-        { term: { 'kibana.alert.workflow_status': 'open' } },
-        { terms: { [nameField]: names } },
-      ],
-    },
-  },
-  aggs: {
-    alertsByEntity: {
-      terms: {
-        field: nameField,
+const getAlertsQueryForEntity = (
+  names: string[],
+  nameField: string,
+  timerange: TimeRange | undefined
+): SearchRequest => {
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'kibana.alert.workflow_status': 'open' } },
+          { terms: { [nameField]: names } },
+          ...(timerange
+            ? [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: timerange.from,
+                      lte: timerange.to,
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
       },
-      aggs: {
-        oldestAlertTimestamp: {
-          min: { field: '@timestamp' },
+    },
+    aggs: {
+      alertsByEntity: {
+        terms: {
+          field: nameField,
+        },
+        aggs: {
+          oldestAlertTimestamp: {
+            min: { field: '@timestamp' },
+          },
         },
       },
     },
-  },
-});
+  };
+};

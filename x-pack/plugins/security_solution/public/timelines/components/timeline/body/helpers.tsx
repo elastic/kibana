@@ -7,10 +7,11 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import type { TimelineEventsType } from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import type { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 

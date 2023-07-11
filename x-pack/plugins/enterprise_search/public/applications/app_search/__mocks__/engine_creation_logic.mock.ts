@@ -257,7 +257,7 @@ export const mockSearchIndexOptions: SearchIndexSelectableOption[] = [
     badge: {
       color: 'danger',
       label: 'Alias',
-      icon: 'alert',
+      icon: 'warning',
       toolTipTitle: 'Alias name is incompatible',
       toolTipContent: 'You\'ll have to create a new alias prefixed with "search-".',
     },

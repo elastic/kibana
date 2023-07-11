@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { taskStoreMock } from './task_store.mock';
 import { BufferedTaskStore } from './buffered_task_store';
 import { asErr, asOk } from './lib/result_type';
-import { TaskStatus } from './task';
+import { taskManagerMock } from './mocks';
 
 describe('Buffered Task Store', () => {
   test('proxies the TaskStore for `maxAttempts` and `remove`', async () => {
@@ -26,35 +25,83 @@ describe('Buffered Task Store', () => {
       const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
-      const task = mockTask();
+      const task = taskManagerMock.createTask();
 
       taskStore.bulkUpdate.mockResolvedValue([asOk(task)]);
 
-      expect(await bufferedStore.update(task)).toMatchObject(task);
-      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task]);
+      expect(await bufferedStore.update(task, { validate: true })).toMatchObject(task);
+      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task], { validate: false });
+
+      expect(taskStore.taskValidator.getValidatedTaskInstanceForUpdating).toHaveBeenCalledTimes(1);
+      expect(taskStore.taskValidator.getValidatedTaskInstanceFromReading).toHaveBeenCalledTimes(1);
+      expect(taskStore.taskValidator.getValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
+        task,
+        { validate: true }
+      );
+      expect(taskStore.taskValidator.getValidatedTaskInstanceFromReading).toHaveBeenCalledWith(
+        task,
+        { validate: true }
+      );
+    });
+
+    test(`doesn't validate when specified`, async () => {
+      const taskStore = taskStoreMock.create();
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
+
+      const task = taskManagerMock.createTask();
+
+      taskStore.bulkUpdate.mockResolvedValue([asOk(task)]);
+
+      expect(await bufferedStore.update(task, { validate: false })).toMatchObject(task);
+      expect(taskStore.bulkUpdate).toHaveBeenCalledWith([task], { validate: false });
+
+      expect(taskStore.taskValidator.getValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(
+        task,
+        { validate: false }
+      );
     });
 
     test('handles partially successfull bulkUpdates resolving each call appropriately', async () => {
       const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
-      const tasks = [mockTask(), mockTask(), mockTask()];
+      const tasks = [
+        taskManagerMock.createTask(),
+        taskManagerMock.createTask({ id: 'task_7c149afd-6250-4ca5-a314-20af1348d5e9' }),
+        taskManagerMock.createTask(),
+      ];
 
       taskStore.bulkUpdate.mockResolvedValueOnce([
         asOk(tasks[0]),
-        asErr({ entity: tasks[1], error: new Error('Oh no, something went terribly wrong') }),
+        asErr({
+          type: 'task',
+          id: tasks[1].id,
+          error: {
+            statusCode: 400,
+            error: 'Oh no, something went terribly wrong',
+            message: 'Oh no, something went terribly wrong',
+          },
+        }),
         asOk(tasks[2]),
       ]);
 
       const results = [
-        bufferedStore.update(tasks[0]),
-        bufferedStore.update(tasks[1]),
-        bufferedStore.update(tasks[2]),
+        bufferedStore.update(tasks[0], { validate: true }),
+        bufferedStore.update(tasks[1], { validate: true }),
+        bufferedStore.update(tasks[2], { validate: true }),
       ];
       expect(await results[0]).toMatchObject(tasks[0]);
-      expect(results[1]).rejects.toMatchInlineSnapshot(
-        `[Error: Oh no, something went terribly wrong]`
-      );
+      expect(results[1]).rejects.toMatchInlineSnapshot(`
+        Object {
+          "error": Object {
+            "error": "Oh no, something went terribly wrong",
+            "message": "Oh no, something went terribly wrong",
+            "statusCode": 400,
+          },
+          "id": "task_7c149afd-6250-4ca5-a314-20af1348d5e9",
+          "type": "task",
+        }
+      `);
       expect(await results[2]).toMatchObject(tasks[2]);
     });
 
@@ -62,53 +109,49 @@ describe('Buffered Task Store', () => {
       const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
-      const duplicateIdTask = mockTask();
+      const duplicateIdTask = taskManagerMock.createTask();
       const tasks = [
         duplicateIdTask,
-        mockTask(),
-        mockTask(),
-        { ...mockTask(), id: duplicateIdTask.id },
+        taskManagerMock.createTask({ id: 'task_16748083-bc28-4599-893b-c8ec16e55c10' }),
+        taskManagerMock.createTask(),
+        taskManagerMock.createTask({ id: duplicateIdTask.id }),
       ];
 
       taskStore.bulkUpdate.mockResolvedValueOnce([
         asOk(tasks[0]),
-        asErr({ entity: tasks[1], error: new Error('Oh no, something went terribly wrong') }),
+        asErr({
+          type: 'task',
+          id: tasks[1].id,
+          error: {
+            statusCode: 400,
+            error: 'Oh no, something went terribly wrong',
+            message: 'Oh no, something went terribly wrong',
+          },
+        }),
         asOk(tasks[2]),
         asOk(tasks[3]),
       ]);
 
       const results = [
-        bufferedStore.update(tasks[0]),
-        bufferedStore.update(tasks[1]),
-        bufferedStore.update(tasks[2]),
-        bufferedStore.update(tasks[3]),
+        bufferedStore.update(tasks[0], { validate: true }),
+        bufferedStore.update(tasks[1], { validate: true }),
+        bufferedStore.update(tasks[2], { validate: true }),
+        bufferedStore.update(tasks[3], { validate: true }),
       ];
       expect(await results[0]).toMatchObject(tasks[0]);
-      expect(results[1]).rejects.toMatchInlineSnapshot(
-        `[Error: Oh no, something went terribly wrong]`
-      );
+      expect(results[1]).rejects.toMatchInlineSnapshot(`
+        Object {
+          "error": Object {
+            "error": "Oh no, something went terribly wrong",
+            "message": "Oh no, something went terribly wrong",
+            "statusCode": 400,
+          },
+          "id": "task_16748083-bc28-4599-893b-c8ec16e55c10",
+          "type": "task",
+        }
+      `);
       expect(await results[2]).toMatchObject(tasks[2]);
       expect(await results[3]).toMatchObject(tasks[3]);
     });
   });
 });
-
-function mockTask() {
-  return {
-    id: `task_${uuid.v4()}`,
-    attempts: 0,
-    schedule: undefined,
-    params: { hello: 'world' },
-    retryAt: null,
-    runAt: new Date(),
-    scheduledAt: new Date(),
-    scope: undefined,
-    startedAt: null,
-    state: { foo: 'bar' },
-    status: TaskStatus.Idle,
-    taskType: 'report',
-    user: undefined,
-    version: '123',
-    ownerId: '123',
-  };
-}

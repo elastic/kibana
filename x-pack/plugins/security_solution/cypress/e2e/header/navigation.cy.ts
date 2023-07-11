@@ -28,7 +28,7 @@ import {
   CSP_FINDINGS,
   POLICIES,
   EXPLORE,
-  MANAGE,
+  SETTINGS,
   ENTITY_ANALYTICS,
 } from '../../screens/security_header';
 
@@ -77,12 +77,9 @@ import {
   THREAT_INTELLIGENCE_PAGE,
 } from '../../screens/kibana_navigation';
 
-before(() => {
-  login();
-});
-
 describe('top-level navigation common to all pages in the Security app', () => {
-  before(() => {
+  beforeEach(() => {
+    login();
     visit(TIMELINES_URL);
   });
 
@@ -172,7 +169,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
 
   it('navigates to the Manage landing page', () => {
-    navigateFromHeaderTo(MANAGE);
+    navigateFromHeaderTo(SETTINGS);
     cy.url().should('include', MANAGE_URL);
   });
 
@@ -203,12 +200,12 @@ describe('top-level navigation common to all pages in the Security app', () => {
 });
 
 describe('Kibana navigation to all pages in the Security app ', () => {
-  before(() => {
-    visit(KIBANA_HOME);
-  });
   beforeEach(() => {
+    login();
+    visit(KIBANA_HOME);
     openKibanaNavigation();
   });
+
   it('navigates to the Dashboards page', () => {
     navigateFromKibanaCollapsibleTo(DASHBOARDS_PAGE);
     cy.url().should('include', DASHBOARDS_URL);

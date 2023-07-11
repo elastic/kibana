@@ -101,7 +101,6 @@ export const fieldMappings = {
   },
   bytes: {
     type: 'long',
-    time_series_metric: 'gauge',
   },
   tags: {
     type: 'text',
@@ -133,11 +132,17 @@ export const fieldMappings = {
   },
   phpmemory: {
     type: 'long',
+  },
+  bytes_counter: {
+    type: 'long',
     time_series_metric: 'counter',
+  },
+  bytes_gauge: {
+    type: 'long',
+    time_series_metric: 'gauge',
   },
   memory: {
     type: 'double',
-    time_series_metric: 'gauge',
   },
   extension: {
     type: 'text',

@@ -35,12 +35,13 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { RecordRawType } from '../application/main/hooks/use_saved_search';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import {
@@ -56,10 +57,10 @@ import { handleSourceColumnState } from '../utils/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
-import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
+import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
+import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
@@ -131,6 +132,7 @@ export class SavedSearchEmbeddable
       initialInput,
       {
         defaultTitle: savedSearch.title,
+        defaultDescription: savedSearch.description,
         editUrl,
         editPath,
         editApp: 'discover',
@@ -145,7 +147,7 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
-    this.panelTitle = savedSearch.title ?? '';
+    this.panelTitle = this.input.title ? this.input.title : savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
 
     this.subscription = this.getUpdated$().subscribe(() => {
@@ -168,6 +170,11 @@ export class SavedSearchEmbeddable
     return true;
   }
 
+  private isTextBasedSearch = (savedSearch: SavedSearch): boolean => {
+    const query = savedSearch.searchSource.getField('query');
+    return isTextBasedQuery(query);
+  };
+
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
@@ -175,10 +182,11 @@ export class SavedSearchEmbeddable
 
     const { searchSource } = this.savedSearch;
 
-    const prevAbortController = this.abortController;
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
-    this.abortController = new AbortController();
+
+    const currentAbortController = new AbortController();
+    this.abortController = currentAbortController;
 
     updateSearchSource(
       searchSource,
@@ -196,12 +204,19 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
+    const wasAlreadyRendered = this.getOutput().rendered;
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
       rendered: false,
       error: undefined,
     });
+
+    if (wasAlreadyRendered && this.node) {
+      // to show a loading indicator during a refetch, we need to rerender here
+      this.render(this.node);
+    }
 
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
@@ -219,17 +234,18 @@ export class SavedSearchEmbeddable
       : child;
 
     const query = this.savedSearch.searchSource.getField('query');
-    const recordRawType = getRawRecordType(query);
-    const useSql = recordRawType === RecordRawType.PLAIN;
+    const dataView = this.savedSearch.searchSource.getField('index')!;
+    const useSql = this.isTextBasedSearch(this.savedSearch);
 
     try {
       // Request SQL data
       if (useSql && query) {
         const result = await fetchSql(
           this.savedSearch.searchSource.getField('query')!,
-          this.services.dataViews,
+          dataView,
           this.services.data,
           this.services.expressions,
+          this.services.inspector,
           this.input.filters,
           this.input.query
         );
@@ -238,19 +254,19 @@ export class SavedSearchEmbeddable
           loading: false,
         });
 
-        this.searchProps!.rows = result;
-        this.searchProps!.totalHitCount = result.length;
+        this.searchProps!.rows = result.records;
+        this.searchProps!.totalHitCount = result.records.length;
         this.searchProps!.isLoading = false;
         this.searchProps!.isPlainRecord = true;
         this.searchProps!.showTimeCol = false;
-        this.searchProps!.isSortEnabled = false;
+        this.searchProps!.isSortEnabled = true;
         return;
       }
 
       // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
-          abortSignal: this.abortController.signal,
+          abortSignal: currentAbortController.signal,
           sessionId: searchSessionId,
           inspector: {
             adapter: this.inspectorAdapters.requests,
@@ -277,7 +293,7 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      const cancelled = !!prevAbortController?.signal.aborted;
+      const cancelled = !!currentAbortController?.signal.aborted;
       if (!this.destroyed && !cancelled) {
         this.updateOutput({
           ...this.getOutput(),
@@ -384,6 +400,7 @@ export class SavedSearchEmbeddable
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
       },
+      cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -421,7 +438,6 @@ export class SavedSearchEmbeddable
     if (!searchProps || !searchProps.dataView) {
       return false;
     }
-
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
@@ -459,6 +475,7 @@ export class SavedSearchEmbeddable
     );
 
     searchProps.sharedItemTitle = this.panelTitle;
+    searchProps.searchTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
@@ -504,9 +521,14 @@ export class SavedSearchEmbeddable
       return;
     }
 
+    const viewMode = getValidViewMode({
+      viewMode: this.savedSearch.viewMode,
+      isTextBasedQueryMode: this.isTextBasedSearch(this.savedSearch),
+    });
+
     if (
       this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
-      this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
+      viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
       searchProps.services &&
       searchProps.dataView &&
       Array.isArray(searchProps.columns)
@@ -536,17 +558,23 @@ export class SavedSearchEmbeddable
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
+    const query = this.savedSearch.searchSource.getField('query');
+
     const props = {
       savedSearch: this.savedSearch,
       searchProps,
       useLegacyTable,
+      query,
     };
     if (searchProps.services) {
+      const { getTriggerCompatibleActions } = searchProps.services.uiActions;
       ReactDOM.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
-              <SavedSearchEmbeddableComponent {...props} />
+              <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
+                <SavedSearchEmbeddableComponent {...props} />
+              </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>
         </I18nProvider>,
@@ -591,10 +619,6 @@ export class SavedSearchEmbeddable
 
   public getInspectorAdapters() {
     return this.inspectorAdapters;
-  }
-
-  public getDescription() {
-    return this.savedSearch.description;
   }
 
   /**

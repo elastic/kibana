@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
+
+import { InferencePipelineInferenceConfig } from '../../../../../../../common/types/pipelines';
+
 export interface InferencePipelineConfiguration {
   destinationField: string;
   existingPipeline?: boolean;
+  inferenceConfig?: InferencePipelineInferenceConfig;
   modelID: string;
   pipelineName: string;
   sourceField: string;
+  fieldMappings?: FieldMapping[];
 }
 
 export interface AddInferencePipelineFormErrors {
@@ -22,6 +28,7 @@ export interface AddInferencePipelineFormErrors {
 
 export enum AddInferencePipelineSteps {
   Configuration,
+  Fields,
   Test,
   Review,
 }

@@ -6,7 +6,7 @@
  */
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
-import { nerModel } from '../../../../__mocks__/ml_models.mock';
+import { nerModel, textExpansionModel } from '../../../../__mocks__/ml_models.mock';
 
 import { HttpResponse } from '@kbn/core/public';
 
@@ -16,6 +16,7 @@ import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
+import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/attach_ml_inference_pipeline';
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
@@ -39,6 +40,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
     step: AddInferencePipelineSteps.Configuration,
   },
   createErrors: [],
+  existingPipeline: undefined,
   existingInferencePipelines: [],
   formErrors: {
     modelID: 'Field is required.',
@@ -46,8 +48,10 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
     sourceField: 'Field is required.',
   },
   index: null,
+  isConfigureStepValid: false,
   isLoading: true,
   isPipelineDataValid: false,
+  isTextExpansionModelSelected: false,
   mappingData: undefined,
   mappingStatus: 0,
   mlInferencePipeline: undefined,
@@ -55,6 +59,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   mlInferencePipelinesData: undefined,
   mlModelsData: null,
   mlModelsStatus: 0,
+  selectedMLModel: null,
   sourceFields: undefined,
   supportedMLModels: [],
 };
@@ -82,6 +87,7 @@ describe('MlInferenceLogic', () => {
     FetchMlInferencePipelinesApiLogic
   );
   const { mount: mountGetDocumentsApiLogic } = new LogicMounter(GetDocumentsApiLogic);
+  const { mount: mountStartTextExpansionModel } = new LogicMounter(StartTextExpansionModelApiLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -94,6 +100,7 @@ describe('MlInferenceLogic', () => {
     mountCreateMlInferencePipelineApiLogic();
     mountAttachMlInferencePipelineApiLogic();
     mountGetDocumentsApiLogic();
+    mountStartTextExpansionModel();
     mount();
   });
 
@@ -204,26 +211,44 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'test-field',
             disabled: false,
             modelId: 'test-model',
             modelType: '',
             pipelineName: 'unit-test',
-            sourceField: 'body',
+            sourceFields: ['body'],
+            indexFields: ['body'],
           },
         ]);
       });
-      it('returns disabled pipeline option if missing source field', () => {
+      it('returns disabled pipeline option if missing source fields', () => {
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
           'unit-test': {
             processors: [
               {
                 inference: {
                   field_map: {
-                    body_content: 'text_field',
+                    title: 'text_field', // Does not exist in index
                   },
                   model_id: 'test-model',
-                  target_field: 'ml.inference.test-field',
+                  target_field: 'ml.inference.title',
+                },
+              },
+              {
+                inference: {
+                  field_map: {
+                    body: 'text_field', // Exists in index
+                  },
+                  model_id: 'test-model',
+                  target_field: 'ml.inference.body',
+                },
+              },
+              {
+                inference: {
+                  field_map: {
+                    body_content: 'text_field', // Does not exist in index
+                  },
+                  model_id: 'test-model',
+                  target_field: 'ml.inference.body_content',
                 },
               },
             ],
@@ -233,13 +258,13 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'test-field',
             disabled: true,
-            disabledReason: expect.any(String),
+            disabledReason: expect.stringContaining('title, body_content'),
             modelId: 'test-model',
             modelType: '',
             pipelineName: 'unit-test',
-            sourceField: 'body_content',
+            sourceFields: ['title', 'body', 'body_content'],
+            indexFields: ['body'],
           },
         ]);
       });
@@ -263,16 +288,16 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'test-field',
             disabled: false,
             pipelineName: 'unit-test',
             modelType: '',
             modelId: '',
-            sourceField: 'body',
+            sourceFields: ['body'],
+            indexFields: ['body'],
           },
         ]);
       });
-      it('returns disabled pipeline option if pipeline already attached', () => {
+      it('filters pipeline if pipeline already attached', () => {
         FetchMlInferencePipelineProcessorsApiLogic.actions.apiSuccess([
           {
             modelId: 'test-model',
@@ -299,17 +324,7 @@ describe('MlInferenceLogic', () => {
           },
         });
 
-        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
-          {
-            destinationField: 'test-field',
-            disabled: true,
-            disabledReason: expect.any(String),
-            pipelineName: 'unit-test',
-            modelType: '',
-            modelId: 'test-model',
-            sourceField: 'body',
-          },
-        ]);
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([]);
       });
     });
     describe('mlInferencePipeline', () => {
@@ -362,6 +377,152 @@ describe('MlInferenceLogic', () => {
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
         expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
+      });
+    });
+    describe('supportedMLModels', () => {
+      it('filters unsupported ML models', () => {
+        MLModelsApiLogic.actions.apiSuccess([
+          {
+            inference_config: {
+              ner: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'ner-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+          {
+            inference_config: {
+              some_unsupported_task_type: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'unsupported-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+        ]);
+
+        expect(MLInferenceLogic.values.supportedMLModels).toEqual([
+          expect.objectContaining({
+            inference_config: {
+              ner: {},
+            },
+          }),
+        ]);
+      });
+
+      it('promotes text_expansion ML models and sorts others by ID', () => {
+        MLModelsApiLogic.actions.apiSuccess([
+          {
+            inference_config: {
+              ner: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'ner-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+          {
+            inference_config: {
+              text_expansion: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'text-expansion-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+          {
+            inference_config: {
+              text_embedding: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'text-embedding-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+        ]);
+
+        expect(MLInferenceLogic.values.supportedMLModels).toEqual([
+          expect.objectContaining({
+            inference_config: {
+              text_expansion: {},
+            },
+          }),
+          expect.objectContaining({
+            inference_config: {
+              ner: {},
+            },
+          }),
+          expect.objectContaining({
+            inference_config: {
+              text_embedding: {},
+            },
+          }),
+        ]);
+      });
+    });
+    describe('formErrors', () => {
+      it('has errors when configuration is empty', () => {
+        expect(MLInferenceLogic.values.formErrors).toEqual({
+          modelID: 'Field is required.',
+          pipelineName: 'Field is required.',
+          sourceField: 'Field is required.',
+        });
+      });
+      it('has error for invalid pipeline names', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+          sourceField: 'body',
+          pipelineName: 'Invalid Pipeline Name',
+        });
+        const expectedErrors = {
+          pipelineName: 'Name must only contain letters, numbers, underscores, and hyphens.',
+        };
+
+        expect(MLInferenceLogic.values.formErrors).toEqual(expectedErrors);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'pipeline-name-$%^&',
+        });
+        expect(MLInferenceLogic.values.formErrors).toEqual(expectedErrors);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'pipeline-name',
+        });
+        expect(MLInferenceLogic.values.formErrors).toEqual({});
+      });
+      it('has pipelineName error when existing pipeline returned from fetch', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+          sourceField: 'body',
+        });
+        MLInferenceLogic.actions.fetchPipelineSuccess({
+          'mock-pipeline': {},
+        });
+
+        expect(MLInferenceLogic.values.formErrors).toEqual({
+          pipelineName: 'Name already used by another pipeline.',
+        });
       });
     });
   });
@@ -418,6 +579,99 @@ describe('MlInferenceLogic', () => {
           pipelineName: mockModelConfiguration.configuration.pipelineName,
           sourceField: mockModelConfiguration.configuration.sourceField,
         });
+      });
+
+      it('calls makeCreatePipelineRequest with passed pipelineDefinition when text_expansion model is selected', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+          },
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
+
+        MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          destinationField: mockModelConfiguration.configuration.destinationField,
+          fieldMappings: [
+            {
+              sourceField: 'source',
+              targetField: 'ml.inference.dest',
+            },
+          ],
+          modelID: textExpansionModel.model_id,
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
+          sourceField: mockModelConfiguration.configuration.sourceField,
+        });
+        MLInferenceLogic.actions.createPipeline();
+
+        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
+          indexName: mockModelConfiguration.indexName,
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
+          pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
+          fieldMappings: [
+            {
+              sourceField: 'source',
+              targetField: 'ml.inference.dest',
+            },
+          ],
+        });
+      });
+    });
+    describe('startTextExpansionModelSuccess', () => {
+      it('fetches ml models', () => {
+        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
+        StartTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: 'started',
+          modelId: 'foo',
+        });
+
+        expect(MLInferenceLogic.actions.makeMLModelsRequest).toHaveBeenCalledWith(undefined);
+      });
+    });
+    describe('onAddInferencePipelineStepChange', () => {
+      it('calls setAddInferencePipelineStep with given step', () => {
+        jest.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
+        MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
+        expect(MLInferenceLogic.actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+          AddInferencePipelineSteps.Fields
+        );
+      });
+      it('triggers pipeline fetch when moving from configuration step', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: false,
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
+        expect(MLInferenceLogic.actions.fetchPipelineByName).toHaveBeenCalledWith({
+          pipelineName: 'ml-inference-unit-test-pipeline',
+        });
+      });
+      it('does not trigger pipeline fetch existing pipeline is selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          ...MLInferenceLogic.values.addInferencePipelineModal.configuration,
+          pipelineName: 'unit-test-pipeline',
+          modelID: 'unit-test-model',
+          existingPipeline: true,
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
+        MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
+        expect(MLInferenceLogic.actions.fetchPipelineByName).not.toHaveBeenCalled();
+      });
+    });
+    describe('fetchPipelineSuccess', () => {
+      it('goes back to configuration step when pipeline is found', () => {
+        jest.spyOn(MLInferenceLogic.actions, 'setAddInferencePipelineStep');
+
+        MLInferenceLogic.actions.fetchPipelineSuccess({
+          'mock-pipeline': {},
+        });
+        expect(MLInferenceLogic.actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
+          AddInferencePipelineSteps.Configuration
+        );
       });
     });
   });

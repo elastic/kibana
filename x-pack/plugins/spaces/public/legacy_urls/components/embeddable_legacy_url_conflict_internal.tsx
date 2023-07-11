@@ -73,7 +73,7 @@ export const EmbeddableLegacyUrlConflictInternal = (
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <EuiCodeBlock fontSize="s" language="json" isCopyable={true} paddingSize="none">
               {aliasJsonString}

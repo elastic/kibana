@@ -20,7 +20,8 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
 
-  describe('Deprecation pages', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160833
+  describe.skip('Deprecation pages', function () {
     this.tags('skipFirefox');
 
     before(async () => {

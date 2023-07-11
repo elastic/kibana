@@ -11,6 +11,7 @@ import { isJavaAgentName } from '../../../common/agent_name';
 import { GenericMetricsChart } from './fetch_and_transform_metrics';
 import { APMConfig } from '../..';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { hasOTelMetrics } from './has_otel_metrics';
 
 export async function getMetricsChartDataByAgent({
   environment,
@@ -42,13 +43,15 @@ export async function getMetricsChartDataByAgent({
     start,
     end,
   };
+  const isOpenTelemetry = await hasOTelMetrics(options);
 
   if (isJavaAgentName(agentName)) {
     return getJavaMetricsCharts({
       ...options,
       serviceNodeName,
+      isOpenTelemetry,
     });
   }
 
-  return getDefaultMetricsCharts(options);
+  return getDefaultMetricsCharts({ ...options, isOpenTelemetry });
 }

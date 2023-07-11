@@ -53,7 +53,7 @@
 {
   "type": "index",
   "value": {
-    "index": ".alerts-observability.logs.alerts-default",
+    "index": ".alerts-observability.logs.alerts-000001",
     "mappings": {
       "properties": {
         "message": {

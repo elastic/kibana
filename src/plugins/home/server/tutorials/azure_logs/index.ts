@@ -60,6 +60,6 @@ export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema 
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['azure', 'cloud', 'network', 'security'],
+    integrationBrowserCategories: ['azure', 'observability'],
   };
 }

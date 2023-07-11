@@ -8,15 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { IndexPatternRef } from '../../types';
-
-export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
-  label: string;
-  title?: string;
-  isDisabled?: boolean;
-};
+import { type IndexPatternRef } from '../../types';
+import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 
 export function ChangeIndexPattern({
   indexPatternRefs,
@@ -35,33 +29,17 @@ export function ChangeIndexPattern({
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  // be careful to only add color with a value, otherwise it will fallbacks to "primary"
-  const colorProp = isMissingCurrent
-    ? {
-        color: 'danger' as const,
-      }
-    : {};
-
-  const createTrigger = function () {
-    const { label, title, ...rest } = trigger;
-    return (
-      <ToolbarButton
-        title={title}
-        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-        fullWidth
-        {...colorProp}
-        {...rest}
-      >
-        {label}
-      </ToolbarButton>
-    );
-  };
-
   return (
     <>
       <EuiPopover
         panelClassName="lnsChangeIndexPatternPopover"
-        button={createTrigger()}
+        button={
+          <TriggerButton
+            {...trigger}
+            isMissingCurrent={isMissingCurrent}
+            togglePopover={() => setPopoverIsOpen(!isPopoverOpen)}
+          />
+        }
         panelProps={{
           ['data-test-subj']: 'lnsChangeIndexPatternPopover',
         }}

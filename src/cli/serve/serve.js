@@ -8,12 +8,16 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
+import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
+import { compileConfigStack } from './compile_config_stack';
+import { getConfigFromFiles } from '@kbn/config';
+
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 function canRequire(path) {
   try {
@@ -28,9 +32,6 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = '@kbn/cli-dev-mode';
-const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
-
 const getBootstrapScript = (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
     // need dynamic require to exclude it from production build
@@ -43,13 +44,13 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
-const pathCollector = function () {
+function pathCollector() {
   const paths = [];
   return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
-};
+}
 
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
@@ -151,7 +152,7 @@ export default function (program) {
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
-      [getConfigPath()]
+      []
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
     .option('-Q, --silent', 'Set the root logger level to off')
@@ -176,6 +177,11 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
+      )
+      .option(
+        '--serverless [oblt|security|es]',
+        'Start Kibana in a specific serverless project mode. ' +
+          'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
   }
 
@@ -199,19 +205,21 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
-    if (opts.dev && opts.devConfig !== false) {
-      try {
-        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
-        if (statSync(kbnDevConfig).isFile()) {
-          opts.config.push(kbnDevConfig);
-        }
-      } catch (err) {
-        // ignore, kibana.dev.yml does not exist
-      }
-    }
-
     const unknownOptions = this.getUnknownOptions();
-    const configs = [].concat(opts.config || []);
+    const configs = compileConfigStack({
+      configOverrides: opts.config,
+      devConfig: opts.devConfig,
+      dev: opts.dev,
+      serverless: opts.serverless || unknownOptions.serverless,
+    });
+
+    const configsEvaluted = getConfigFromFiles(configs);
+    const isServerlessMode = !!(
+      configsEvaluted.serverless ||
+      opts.serverless ||
+      unknownOptions.serverless
+    );
+
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -230,6 +238,7 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
+      serverless: isServerlessMode,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode

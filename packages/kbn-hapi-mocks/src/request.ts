@@ -35,6 +35,10 @@ export const createRequestMock = (customization: DeepPartial<Request> = {}): Req
           url: path,
           socket: {},
         },
+        res: {
+          addListener: jest.fn(),
+          removeListener: jest.fn(),
+        } as {},
       },
     },
     customization

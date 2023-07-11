@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, ChangeEvent, MouseEvent } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
@@ -13,9 +13,10 @@ import {
   EuiButtonIcon,
   EuiToolTip,
   EuiButtonIconProps,
+  EuiRangeProps,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
-import { ProcessStartMarker, ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessStartMarker, ProcessEvent } from '../../../common';
 import { useStyles } from './styles';
 import {
   TTY_END,
@@ -62,9 +63,9 @@ export const TTYPlayerControls = ({
     css: styles.controlButton,
   };
 
-  const onLineChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
-      const line = parseInt((event?.target as HTMLInputElement).value || '0', 10);
+  const onLineChange: EuiRangeProps['onChange'] = useCallback(
+    (event) => {
+      const line = parseInt(event.currentTarget.value || '0', 10);
       onSeekLine(line);
     },
     [onSeekLine]

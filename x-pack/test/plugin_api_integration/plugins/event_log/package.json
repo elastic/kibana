@@ -1,6 +1,7 @@
 {
-  "name": "event_log_fixture",
-  "version": "0.0.0",
+  "name": "@kbn/event-log-fixture-plugin",
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
   "kibana": {
     "version": "kibana"
   },

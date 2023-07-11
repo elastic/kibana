@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 export function opbeans({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
@@ -40,7 +40,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
         .transaction({ transactionName: 'GET /api/product' })
         .timestamp(timestamp)
         .duration(1000)
-        .success()
+        .failure()
         .errors(
           opbeansJava
             .error({ message: '[MockError] Foo', type: `Exception` })
@@ -55,7 +55,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
             })
             .timestamp(timestamp)
             .duration(50)
-            .success()
+            .failure()
             .destination('postgresql')
         ),
       opbeansNode

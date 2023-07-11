@@ -63,7 +63,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
     skip: querySkip || isChartEmbeddablesEnabled,
   });
 
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId: InputsModelId.global,
     queryId: id,
   });
@@ -81,7 +81,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
       refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
+      session={isChartEmbeddablesEnabled ? session : undefined}
     />
   );
 };

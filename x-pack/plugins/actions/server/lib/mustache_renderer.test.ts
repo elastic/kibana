@@ -58,6 +58,12 @@ describe('mustache_renderer', () => {
         expect(renderMustacheString('{{f.g}}', variables, escape)).toBe('3');
         expect(renderMustacheString('{{f.h}}', variables, escape)).toBe('');
         expect(renderMustacheString('{{i}}', variables, escape)).toBe('42,43,44');
+
+        if (escape === 'markdown') {
+          expect(renderMustacheString('{{i.asJSON}}', variables, escape)).toBe('\\[42,43,44\\]');
+        } else {
+          expect(renderMustacheString('{{i.asJSON}}', variables, escape)).toBe('[42,43,44]');
+        }
       });
     }
 
@@ -339,6 +345,11 @@ describe('mustache_renderer', () => {
 
     const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
     expect(renderMustacheString('{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(expected);
+
+    expect(renderMustacheString('{{e}}', deepVariables, 'none')).toEqual('5,{"f":6,"g":7}');
+    expect(renderMustacheString('{{e.asJSON}}', deepVariables, 'none')).toEqual(
+      '[5,{"f":6,"g":7}]'
+    );
   });
 
   describe('converting dot variables', () => {

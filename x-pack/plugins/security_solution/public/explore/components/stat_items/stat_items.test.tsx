@@ -28,6 +28,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import * as module from '../../../common/containers/query_toggle';
 import type { LensAttributes } from '../../../common/components/visualization_actions/types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
@@ -40,14 +41,15 @@ jest.mock('../../../common/components/charts/barchart', () => {
   return { BarChart: () => <div className="barchart" /> };
 });
 
-jest.mock('../../../common/components/visualization_actions', () => {
-  return {
-    VisualizationActions: () => <div className="visualizationActions" />,
-    HISTOGRAM_ACTIONS_BUTTON_CLASS: 'histogram-actions-trigger',
-  };
-});
+jest.mock('../../../common/components/visualization_actions/actions');
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 const mockSetToggle = jest.fn();
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest
   .spyOn(module, 'useQueryToggle')
@@ -115,6 +117,7 @@ describe('Stat Items Component', () => {
 
   const mockStatItemsData: StatItemsProps = {
     ...testProps,
+    id: 'UniqueIps',
     areaChart: [
       {
         key: 'uniqueSourceIpsHistogram',
@@ -164,6 +167,8 @@ describe('Stat Items Component', () => {
         lensAttributes: {} as LensAttributes,
       },
     ],
+    barChartLensAttributes: {} as LensAttributes,
+    areaChartLensAttributes: {} as LensAttributes,
   };
 
   let wrapper: ReactWrapper;
@@ -229,6 +234,25 @@ describe('Stat Items Component', () => {
 
       expect(wrapper.find('.viz-actions').first().exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(false);
+    });
+  });
+
+  describe('when isChartEmbeddablesEnabled = true', () => {
+    beforeAll(() => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      jest
+        .spyOn(module, 'useQueryToggle')
+        .mockImplementation(() => ({ toggleStatus: true, setToggleStatus: mockSetToggle }));
+
+      wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <StatItemsComponent {...mockStatItemsData} />
+        </ReduxStoreProvider>
+      );
+    });
+
+    test('renders Lens Embeddables', () => {
+      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').length).toEqual(4);
     });
   });
 });

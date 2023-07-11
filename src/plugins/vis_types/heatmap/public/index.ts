@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+import { HeatmapPublicConfig } from '../config';
 import { VisTypeHeatmapPlugin } from './plugin';
 
 export { heatmapVisType } from './vis_type';
 
-export const plugin = () => new VisTypeHeatmapPlugin();
+export const plugin = (initializerContext: PluginInitializerContext<HeatmapPublicConfig>) =>
+  new VisTypeHeatmapPlugin(initializerContext);

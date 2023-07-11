@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, useState, type FC } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { AnomalyDetectionPanel } from './anomaly_detection_panel';
 import { AnalyticsPanel } from './analytics_panel';
+import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
+import { mlResultsServiceProvider } from '../../services/results_service';
+import { useMlKibana } from '../../contexts/kibana';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
@@ -20,13 +25,44 @@ export const OverviewContent: FC<Props> = ({
   createAnomalyDetectionJobDisabled,
   setAdLazyJobCount,
   setDfaLazyJobCount,
-}) => (
-  <>
-    <AnomalyDetectionPanel
-      jobCreationDisabled={createAnomalyDetectionJobDisabled}
-      setLazyJobCount={setAdLazyJobCount}
-    />
-    <EuiSpacer size="m" />
-    <AnalyticsPanel setLazyJobCount={setDfaLazyJobCount} />
-  </>
-);
+}) => {
+  const {
+    services: {
+      uiSettings,
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+
+  const [isADEnabled, isDFAEnabled] = usePermissionCheck(['isADEnabled', 'isDFAEnabled']);
+
+  const timefilter = useTimefilter();
+
+  const [anomalyTimelineService, setAnomalyTimelineService] = useState<AnomalyTimelineService>();
+
+  useEffect(() => {
+    setAnomalyTimelineService(
+      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApiServices))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (anomalyTimelineService === undefined) {
+    return null;
+  }
+
+  return (
+    <>
+      {isADEnabled ? (
+        <>
+          <AnomalyDetectionPanel
+            anomalyTimelineService={anomalyTimelineService}
+            setLazyJobCount={setAdLazyJobCount}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
+      {isDFAEnabled ? <AnalyticsPanel setLazyJobCount={setDfaLazyJobCount} /> : null}
+    </>
+  );
+};

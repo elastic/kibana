@@ -6,6 +6,10 @@
  */
 import { ApmPluginRequestHandlerContext } from '../typings';
 
+export interface InvalidateAgentKeyResponse {
+  invalidatedAgentKeys: string[];
+}
+
 export async function invalidateAgentKey({
   context,
   id,
@@ -14,7 +18,7 @@ export async function invalidateAgentKey({
   context: ApmPluginRequestHandlerContext;
   id: string;
   isAdmin: boolean;
-}) {
+}): Promise<InvalidateAgentKeyResponse> {
   const esClient = (await context.core).elasticsearch.client;
   const { invalidated_api_keys: invalidatedAgentKeys } =
     await esClient.asCurrentUser.security.invalidateApiKey({

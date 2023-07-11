@@ -7,12 +7,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import {
+import type { IRouter } from '@kbn/core/server';
+import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { v2 } from '../../common/types';
 
 export type SecurityGetter = () => SecurityPluginStart | undefined;
 
@@ -45,7 +46,8 @@ export function registerTelemetryUsageStatsRoutes(
       }
 
       const security = getSecurity();
-      if (security && unencrypted) {
+      // We need to check useRbacForRequest to figure out if ES has security enabled before making the privileges check
+      if (security && unencrypted && security.authz.mode.useRbacForRequest(req)) {
         // Normally we would use `options: { tags: ['access:decryptedTelemetry'] }` in the route definition to check authorization for an
         // API action, however, we want to check this conditionally based on the `unencrypted` parameter. In this case we need to use the
         // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
@@ -64,8 +66,10 @@ export function registerTelemetryUsageStatsRoutes(
           refreshCache: unencrypted || refreshCache,
         };
 
-        const stats = await telemetryCollectionManager.getStats(statsConfig);
-        return res.ok({ body: stats });
+        const body: v2.UnencryptedTelemetryPayload = await telemetryCollectionManager.getStats(
+          statsConfig
+        );
+        return res.ok({ body });
       } catch (err) {
         if (isDev) {
           // don't ignore errors when running in dev mode

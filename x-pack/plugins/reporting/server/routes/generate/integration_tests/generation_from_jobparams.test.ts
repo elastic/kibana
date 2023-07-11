@@ -45,7 +45,7 @@ describe('POST /api/reporting/generate', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: jest.fn() })
+      () => ({ usesUiCapabilities: jest.fn(), registerExportTypes: jest.fn() })
     );
 
     const mockSetupDeps = createMockPluginSetup({
@@ -206,7 +206,7 @@ describe('POST /api/reporting/generate', () => {
             },
             status: 'pending',
           },
-          path: 'undefined/api/reporting/jobs/download/foo',
+          path: '/mock-server-basepath/api/reporting/jobs/download/foo',
         });
       });
   });

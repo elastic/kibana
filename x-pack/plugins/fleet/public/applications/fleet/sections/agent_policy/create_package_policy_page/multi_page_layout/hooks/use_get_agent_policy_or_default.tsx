@@ -8,6 +8,8 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
+
 import {
   sendCreateAgentPolicy,
   sendGetOneAgentPolicy,
@@ -24,14 +26,14 @@ interface UseGetAgentPolicyOrDefaultResponse {
   created?: boolean;
 }
 export const DEFAULT_AGENT_POLICY_ID: string = 'fleet-first-agent-policy';
-export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze({
-  id: DEFAULT_AGENT_POLICY_ID,
-  name: i18n.translate('xpack.fleet.createPackagePolicy.firstAgentPolicyNameText', {
-    defaultMessage: 'My first agent policy',
-  }),
-  namespace: 'default',
-  monitoring_enabled: ['logs', 'metrics'] as NewAgentPolicy['monitoring_enabled'],
-});
+export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze(
+  generateNewAgentPolicyWithDefaults({
+    id: DEFAULT_AGENT_POLICY_ID,
+    name: i18n.translate('xpack.fleet.createPackagePolicy.firstAgentPolicyNameText', {
+      defaultMessage: 'My first agent policy',
+    }),
+  })
+);
 
 const sendGetAgentPolicy = async (agentPolicyId: string) => {
   let result;

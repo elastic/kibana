@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Filter } from '@kbn/es-query';
 import { NamespaceType } from '../common/default_namespace';
 import { ExceptionListType, ExceptionListTypeEnum } from '../common/exception_list';
@@ -20,13 +22,22 @@ import { UpdateExceptionListSchema } from '../request/update_exception_list_sche
 import { ExceptionListItemSchema } from '../response/exception_list_item_schema';
 import { ExceptionListSchema } from '../response/exception_list_schema';
 
-// TODO: Replace these with kbn packaged versions once we have those available to us
-// These originally came from this location below before moving them to this hacked "any" types:
-// import { HttpStart, NotificationsStart } from '../../../../../src/core/public';
-interface HttpStart {
-  fetch: <T>(...args: any) => any;
+interface BaseParams {
+  http: HttpStart;
+  signal: AbortSignal;
 }
-type NotificationsStart = any;
+
+export interface DuplicateExceptionListProps extends BaseParams {
+  listId: string;
+  namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
+}
+
+export interface ApiListDuplicateProps
+  extends Omit<DuplicateExceptionListProps, 'http' | 'signal'> {
+  onError: (err: Error) => void;
+  onSuccess: (newList: ExceptionListSchema) => void;
+}
 
 export interface ExceptionListFilter {
   name?: string | null;
@@ -77,6 +88,7 @@ export interface ApiCallMemoProps {
 // remove unnecessary validation checks
 export interface ApiListExportProps {
   id: string;
+  includeExpiredExceptions: boolean;
   listId: string;
   namespaceType: NamespaceType;
   onError: (err: Error) => void;
@@ -133,6 +145,7 @@ export interface ExportExceptionListProps {
   id: string;
   listId: string;
   namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
   signal: AbortSignal;
 }
 

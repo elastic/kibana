@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
 import {
   createSecuritySolutionStorageMock,
@@ -19,6 +19,7 @@ import { SeverityBadge } from '../../../../detections/components/rules/severity_
 import type { State } from '../../../store';
 import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 
 const state: State = {
   ...mockGlobalState,
@@ -74,23 +75,33 @@ const props = {
 
 jest.mock('../../../lib/kibana');
 
+jest.mock('../../../hooks/use_get_field_spec');
+
+const mockAction = createAction({
+  id: 'test_action',
+  execute: async () => {},
+  getIconType: () => 'test-icon',
+  getDisplayName: () => 'test-actions',
+});
+
 describe('OverviewCardWithActions', () => {
-  test('it renders correctly', () => {
-    const { getByText } = render(
-      <TestProviders store={store}>
-        <OverviewCardWithActions {...props}>
-          <SeverityBadge value="medium" />
-        </OverviewCardWithActions>
-      </TestProviders>
-    );
+  test('it renders correctly', async () => {
+    await act(async () => {
+      const { getByText, findByTestId } = render(
+        <TestProviders store={store} cellActions={[mockAction]}>
+          <OverviewCardWithActions {...props}>
+            <SeverityBadge value="medium" />
+          </OverviewCardWithActions>
+        </TestProviders>
+      );
+      // Headline
+      getByText('Severity');
 
-    // Headline
-    getByText('Severity');
+      // Content
+      getByText('Medium');
 
-    // Content
-    getByText('Medium');
-
-    // Hover actions
-    getByText('Add To Timeline');
+      // Hover actions
+      await findByTestId('actionItem-test_action');
+    });
   });
 });

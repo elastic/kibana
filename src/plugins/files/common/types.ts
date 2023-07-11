@@ -9,11 +9,21 @@
 import type { SavedObject } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import type { Readable } from 'stream';
-import type { FileJSON, FileStatus, FileMetadata } from '@kbn/shared-ux-file-types';
+import type {
+  FileJSON,
+  FileStatus,
+  FileMetadata,
+  FileShare,
+  FileShareJSON,
+  FileKindBase,
+  FileShareJSONWithToken,
+} from '@kbn/shared-ux-file-types';
+import type { UploadOptions } from '../server/blob_storage_service';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type {
-  FileKind,
+  FileKindBase,
+  FileKindBrowser,
   FileJSON,
   FileStatus,
   FileMetadata,
@@ -22,6 +32,82 @@ export type {
   BaseFileMetadata,
   FileImageMetadata,
 } from '@kbn/shared-ux-file-types';
+
+/*
+ * A descriptor of meta values associated with a set or "kind" of files.
+ *
+ * @note In order to use the file service consumers must register a {@link FileKind}
+ * in the {@link FileKindsRegistry}.
+ */
+export interface FileKind extends FileKindBase {
+  /**
+   * Max file contents size, in bytes. Can be customized per file using the
+   * {@link FileJSON} object. This is enforced on the server-side as well as
+   * in the upload React component.
+   *
+   * @default 4MiB
+   */
+  maxSizeBytes?: number | ((file: FileJSON) => number);
+
+  /**
+   * Blob store specific settings that enable configuration of storage
+   * details.
+   */
+  blobStoreSettings?: BlobStorageSettings;
+
+  /**
+   * Specify which HTTP routes to create for the file kind.
+   *
+   * You can always create your own HTTP routes for working with files but
+   * this interface allows you to expose basic CRUD operations, upload, download
+   * and sharing of files over a RESTful-like interface.
+   *
+   * @note The public {@link FileClient} uses these endpoints.
+   */
+  http: {
+    /**
+     * Expose file creation (and upload) over HTTP.
+     */
+    create?: HttpEndpointDefinition;
+    /**
+     * Expose file updates over HTTP.
+     */
+    update?: HttpEndpointDefinition;
+    /**
+     * Expose file deletion over HTTP.
+     */
+    delete?: HttpEndpointDefinition;
+    /**
+     * Expose "get by ID" functionality over HTTP.
+     */
+    getById?: HttpEndpointDefinition;
+    /**
+     * Expose the ability to list all files of this kind over HTTP.
+     */
+    list?: HttpEndpointDefinition;
+    /**
+     * Expose the ability to download a file's contents over HTTP.
+     */
+    download?: HttpEndpointDefinition;
+    /**
+     * Expose file share functionality over HTTP.
+     */
+    share?: HttpEndpointDefinition;
+  };
+}
+
+/** Definition for an endpoint that the File's service will generate */
+interface HttpEndpointDefinition {
+  /**
+   * Specify the tags for this endpoint.
+   *
+   * @example
+   * // This will enable access control to this endpoint for users that can access "myApp" only.
+   * { tags: ['access:myApp'] }
+   *
+   */
+  tags: string[];
+}
 
 /**
  * Values for paginating through results.
@@ -47,72 +133,7 @@ export type FileSavedObject<Meta = unknown> = SavedObject<FileMetadata<Meta>>;
  */
 export type UpdatableFileMetadata<Meta = unknown> = Pick<FileJSON<Meta>, 'meta' | 'alt' | 'name'>;
 
-/**
- * Data stored with a file share object
- */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FileShare = {
-  /**
-   * ISO timestamp of when the file share was created.
-   */
-  created: string;
-
-  /**
-   * Secret token used to access the associated file.
-   */
-  token: string;
-
-  /**
-   * Human friendly name for this share token.
-   */
-  name?: string;
-
-  /**
-   * The unix timestamp (in milliseconds) this file share will expire.
-   *
-   * TODO: in future we could add a special value like "forever", but this should
-   * not be the default.
-   */
-  valid_until: number;
-};
-
-/**
- * Attributes of a file that represent a serialised version of the file.
- */
-export interface FileShareJSON {
-  /**
-   * Unique ID share instance
-   */
-  id: string;
-  /**
-   * ISO timestamp the share was created
-   */
-  created: FileShare['created'];
-  /**
-   * Unix timestamp (in milliseconds) of when this share expires
-   */
-  validUntil: FileShare['valid_until'];
-  /**
-   * A user-friendly name for the file share
-   */
-  name?: FileShare['name'];
-  /**
-   * The ID of the file this share is linked to
-   */
-  fileId: string;
-}
-
-/**
- * A version of the file share with a token included.
- *
- * @note This should only be shown when the file share is first created
- */
-export type FileShareJSONWithToken = FileShareJSON & {
-  /**
-   * Secret token that can be used to access files
-   */
-  token: string;
-};
+export type { FileShare, FileShareJSON, FileShareJSONWithToken };
 
 /**
  * Set of attributes that can be updated in a file share.
@@ -159,7 +180,7 @@ export interface File<Meta = unknown> {
    */
   data: FileJSON<Meta>;
   /**
-   * Update a file object's metadatathat can be updated.
+   * Update a file object's metadata that can be updated.
    *
    * @param attr - The of attributes to update.
    */
@@ -170,8 +191,13 @@ export interface File<Meta = unknown> {
    *
    * @param content - The content to stream to storage.
    * @param abort$ - An observable that can be used to abort the upload at any time.
+   * @param options - additional options.
    */
-  uploadContent(content: Readable, abort$?: Observable<unknown>): Promise<File<Meta>>;
+  uploadContent(
+    content: Readable,
+    abort$?: Observable<unknown>,
+    options?: Partial<Pick<UploadOptions, 'transforms'>>
+  ): Promise<File<Meta>>;
 
   /**
    * Stream file content from storage.

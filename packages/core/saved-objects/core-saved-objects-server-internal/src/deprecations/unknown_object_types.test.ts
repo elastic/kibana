@@ -12,7 +12,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { type SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 const createAggregateTypesSearchResponse = (
   typesIds: Record<string, string[]> = {}
@@ -50,7 +50,7 @@ describe('unknown saved object types deprecation', () => {
 
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
   let esClient: ReturnType<typeof elasticsearchClientMock.createScopedClusterClient>;
-  const kibanaIndex = '.kibana';
+  const kibanaIndex = MAIN_SAVED_OBJECT_INDEX;
 
   beforeEach(() => {
     typeRegistry = typeRegistryMock.create();

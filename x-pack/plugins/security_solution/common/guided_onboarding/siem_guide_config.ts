@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { GuideConfig } from '@kbn/guided-onboarding-plugin/common';
+import type { GuideConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 
 export const siemGuideId = 'siem';
 export const siemGuideConfig: GuideConfig = {
   title: i18n.translate('xpack.securitySolution.guideConfig.title', {
-    defaultMessage: 'Elastic Security guided setup',
+    defaultMessage: 'Detect threats in my data with SIEM',
   }),
   guideName: 'Security',
   telemetryId: 'siem',
@@ -20,22 +20,37 @@ export const siemGuideConfig: GuideConfig = {
     path: '/dashboards',
   },
   description: i18n.translate('xpack.securitySolution.guideConfig.description', {
-    defaultMessage: `We'll help you get set up quickly, using Elastic Defend.`,
+    defaultMessage: `There are many ways to get your SIEM data into Elastic. In this guide, we'll help you get set up quickly using the Elastic Defend integration.`,
   }),
+  docs: {
+    text: i18n.translate('xpack.securitySolution.guideConfig.documentationLink', {
+      defaultMessage: 'Learn more',
+    }),
+    url: 'https://www.elastic.co/guide/en/security/current/ingest-data.html',
+  },
   steps: [
     {
       id: 'add_data',
       title: i18n.translate('xpack.securitySolution.guideConfig.addDataStep.title', {
         defaultMessage: 'Add data with Elastic Defend',
       }),
-      descriptionList: [
-        i18n.translate('xpack.securitySolution.guideConfig.addDataStep.description1', {
-          defaultMessage: 'Use Elastic Defend to add your data.',
-        }),
-        i18n.translate('xpack.securitySolution.guideConfig.addDataStep.description2', {
-          defaultMessage: 'See data coming in to your SIEM.',
-        }),
-      ],
+      description: {
+        descriptionText: i18n.translate(
+          'xpack.securitySolution.guideConfig.addDataStep.description',
+          {
+            defaultMessage:
+              'Install Elastic Agent and its Elastic Defend integration on one of your computers to get SIEM data flowing.',
+          }
+        ),
+        linkUrl: 'https://docs.elastic.co/en/integrations/endpoint',
+        isLinkExternal: true,
+        linkText: i18n.translate(
+          'xpack.securitySolution.guideConfig.addDataStep.description.linkText',
+          {
+            defaultMessage: 'Learn more',
+          }
+        ),
+      },
       integration: 'endpoint',
       location: {
         appID: 'integrations',
@@ -47,17 +62,10 @@ export const siemGuideConfig: GuideConfig = {
       title: i18n.translate('xpack.securitySolution.guideConfig.rulesStep.title', {
         defaultMessage: 'Turn on rules',
       }),
-      descriptionList: [
-        i18n.translate('xpack.securitySolution.guideConfig.rulesStep.description1', {
-          defaultMessage: 'Load the Elastic prebuilt rules.',
-        }),
-        i18n.translate('xpack.securitySolution.guideConfig.rulesStep.description2', {
-          defaultMessage: 'Select and enable rules.',
-        }),
-        i18n.translate('xpack.securitySolution.guideConfig.rulesStep.description3', {
-          defaultMessage: 'Enable rules to generate alerts.',
-        }),
-      ],
+      description: i18n.translate('xpack.securitySolution.guideConfig.rulesStep.description', {
+        defaultMessage:
+          'Load the Elastic prebuilt rules, select the rules you want, and enable them to generate alerts.',
+      }),
       manualCompletion: {
         title: i18n.translate(
           'xpack.securitySolution.guideConfig.rulesStep.manualCompletion.title',
@@ -68,7 +76,7 @@ export const siemGuideConfig: GuideConfig = {
         description: i18n.translate(
           'xpack.securitySolution.guideConfig.rulesStep.manualCompletion.description',
           {
-            defaultMessage: 'After you’ve enabled the rules you need, continue.',
+            defaultMessage: `After you've enabled the rules you need, continue.`,
           }
         ),
       },
@@ -82,14 +90,9 @@ export const siemGuideConfig: GuideConfig = {
       title: i18n.translate('xpack.securitySolution.guideConfig.alertsStep.title', {
         defaultMessage: 'Manage alerts and cases',
       }),
-      descriptionList: [
-        i18n.translate('xpack.securitySolution.guideConfig.alertsStep.description1', {
-          defaultMessage: 'View and triage alerts.',
-        }),
-        i18n.translate('xpack.securitySolution.guideConfig.alertsStep.description2', {
-          defaultMessage: 'Create a case.',
-        }),
-      ],
+      description: i18n.translate('xpack.securitySolution.guideConfig.alertsStep.description', {
+        defaultMessage: 'Learn how to view and triage alerts with cases.',
+      }),
       location: {
         appID: 'securitySolutionUI',
         path: '/alerts',

@@ -7,7 +7,7 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
@@ -27,14 +27,14 @@ import {
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
-  TimelineTypeLiteral,
-  RowRendererId,
   SerializedFilterQuery,
   TimelinePersistInput,
   ToggleDetailPanel,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
+import type { RowRendererId, TimelineTypeLiteral } from '../../../../common/types/timeline/api';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -173,7 +173,7 @@ export const addNewTimeline = ({
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {
-          templateTimelineId: uuid.v4(),
+          templateTimelineId: uuidv4(),
           templateTimelineVersion: 1,
         }
       : {};

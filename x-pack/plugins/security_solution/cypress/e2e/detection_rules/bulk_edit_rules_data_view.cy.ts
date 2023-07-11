@@ -16,6 +16,7 @@ import {
   waitForRulesTableToBeLoaded,
   goToRuleDetails,
   selectNumberOfRules,
+  goToTheRuleDetailsOf,
 } from '../../tasks/alerts_detection_rules';
 
 import {
@@ -32,14 +33,7 @@ import { hasIndexPatterns, getDetails, assertDetailsNotExist } from '../../tasks
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import {
-  createCustomRule,
-  createCustomIndicatorRule,
-  createEventCorrelationRule,
-  createThresholdRule,
-  createNewTermsRule,
-  createSavedQueryRule,
-} from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../tasks/common';
 
 import {
@@ -58,43 +52,45 @@ const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
 const expectedNumberOfCustomRulesToBeEdited = 6;
 
-const indexDataSource = { dataView: DATA_VIEW_ID, type: 'dataView' } as const;
-
-const defaultRuleData = {
-  dataSource: indexDataSource,
-};
-
-describe('Detection rules, bulk edit, data view', () => {
+describe('Bulk editing index patterns of rules with a data view only', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
     deleteAlertsAndRules();
     esArchiverResetKibana();
+    login();
 
     postDataView(DATA_VIEW_ID);
 
-    createCustomRule({ ...getNewRule(), ...defaultRuleData }, '1');
-    createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
-    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '3');
-    createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '4');
-    createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '5');
-    createSavedQueryRule({ ...getNewRule(), ...defaultRuleData, savedId: 'mocked' }, '6');
+    createRule(getNewRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '1' }));
+    createRule(getEqlRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '2' }));
+    createRule(
+      getNewThreatIndicatorRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '3' })
+    );
+    createRule(getNewThresholdRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '4' }));
+    createRule(getNewTermsRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '5' }));
+    createRule(
+      getNewRule({ index: undefined, data_view_id: DATA_VIEW_ID, saved_id: 'mocked', rule_id: '6' })
+    );
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
     waitForRulesTableToBeLoaded();
   });
 
-  it('Add index patterns to custom rules with configured data view', () => {
+  it('Add index patterns to custom rules with configured data view: all rules are skipped', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
     typeIndexPatterns(expectedIndexPatterns);
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinish({
+      skippedCount: expectedNumberOfCustomRulesToBeEdited,
+      showDataViewsWarning: true,
+    });
 
     // check if rule still has data view and index patterns field does not exist
     goToRuleDetails();
@@ -102,7 +98,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
   });
 
-  it('Add index patterns to custom rules with configured data view when data view checkbox is checked', () => {
+  it('Add index patterns to custom rules with configured data view when data view checkbox is checked: rules are updated', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
@@ -115,7 +111,7 @@ describe('Detection rules, bulk edit, data view', () => {
 
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
 
     // check if rule has been updated with index patterns and data view does not exist
     goToRuleDetails();
@@ -123,7 +119,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(DATA_VIEW_DETAILS);
   });
 
-  it('Overwrite index patterns in custom rules with configured data view', () => {
+  it('Overwrite index patterns in custom rules with configured data view when overwrite data view checkbox is NOT checked:: rules are skipped', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
@@ -131,7 +127,10 @@ describe('Detection rules, bulk edit, data view', () => {
     checkOverwriteIndexPatternsCheckbox();
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinish({
+      skippedCount: expectedNumberOfCustomRulesToBeEdited,
+      showDataViewsWarning: true,
+    });
 
     // check if rule still has data view and index patterns field does not exist
     goToRuleDetails();
@@ -139,7 +138,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
   });
 
-  it('Overwrite index patterns in custom rules with configured data view when data view checkbox is checked', () => {
+  it('Overwrite index patterns in custom rules with configured data view when overwrite data view checkbox is checked: rules are updated', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditAddIndexPatternsForm();
@@ -149,7 +148,7 @@ describe('Detection rules, bulk edit, data view', () => {
 
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinish({ updatedCount: expectedNumberOfCustomRulesToBeEdited });
 
     // check if rule has been overwritten with index patterns and data view does not exist
     goToRuleDetails();
@@ -157,7 +156,7 @@ describe('Detection rules, bulk edit, data view', () => {
     assertDetailsNotExist(DATA_VIEW_DETAILS);
   });
 
-  it('Delete index patterns in custom rules with configured data view', () => {
+  it('Delete index patterns in custom rules with configured data view: rules are skipped', () => {
     selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
     openBulkEditDeleteIndexPatternsForm();
@@ -168,10 +167,74 @@ describe('Detection rules, bulk edit, data view', () => {
 
     submitBulkEditForm();
 
-    waitForBulkEditActionToFinish({ rulesCount: expectedNumberOfCustomRulesToBeEdited });
+    waitForBulkEditActionToFinish({
+      skippedCount: expectedNumberOfCustomRulesToBeEdited,
+      showDataViewsWarning: true,
+    });
 
     // check if rule still has data view and index patterns field does not exist
     goToRuleDetails();
     getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
+  });
+});
+
+describe('Bulk editing index patterns of rules with index patterns and rules with a data view', () => {
+  const customRulesNumber = 2;
+
+  before(() => {
+    cleanKibana();
+  });
+
+  beforeEach(() => {
+    login();
+    deleteAlertsAndRules();
+    esArchiverResetKibana();
+
+    postDataView(DATA_VIEW_ID);
+
+    createRule(
+      getNewRule({ name: 'with dataview', index: [], data_view_id: DATA_VIEW_ID, rule_id: '1' })
+    );
+    createRule(getNewRule({ name: 'no data view', index: ['test-index-1-*'], rule_id: '2' }));
+
+    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+
+    waitForRulesTableToBeLoaded();
+  });
+
+  it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {
+    selectNumberOfRules(customRulesNumber);
+
+    openBulkEditAddIndexPatternsForm();
+    typeIndexPatterns(expectedIndexPatterns);
+    submitBulkEditForm();
+
+    waitForBulkEditActionToFinish({
+      updatedCount: 1,
+      skippedCount: 1,
+      showDataViewsWarning: true,
+    });
+
+    // check if rule still has data view and index patterns field does not exist
+    goToTheRuleDetailsOf('with dataview');
+    getDetails(DATA_VIEW_DETAILS).contains(DATA_VIEW_ID);
+    assertDetailsNotExist(INDEX_PATTERNS_DETAILS);
+  });
+
+  it('Add index patterns to custom rules when overwrite data view checkbox is checked: all rules are updated', () => {
+    selectNumberOfRules(customRulesNumber);
+
+    openBulkEditAddIndexPatternsForm();
+    typeIndexPatterns(expectedIndexPatterns);
+    checkOverwriteDataViewCheckbox();
+    submitBulkEditForm();
+
+    waitForBulkEditActionToFinish({
+      updatedCount: 2,
+    });
+
+    // check if rule still has data view and index patterns field does not exist
+    goToRuleDetails();
+    assertDetailsNotExist(DATA_VIEW_DETAILS);
   });
 });

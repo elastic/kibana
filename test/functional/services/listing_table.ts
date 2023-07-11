@@ -20,6 +20,12 @@ export class ListingTableService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
 
+  private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
+    name: 'Tag Popover',
+    menuTestSubject: 'tagSelectableList',
+    toggleButtonTestSubject: 'tagFilterPopoverButton',
+  });
+
   private async getSearchFilter() {
     return await this.testSubjects.find('tableListSearchBox');
   }
@@ -72,6 +78,7 @@ export class ListingTableService extends FtrService {
       } else {
         throw new Error('Waiting');
       }
+      await this.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -92,10 +99,33 @@ export class ListingTableService extends FtrService {
       );
       if (morePages) {
         await this.testSubjects.click('pagerNextButton');
-        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilTableIsLoaded();
       }
     }
     return visualizationNames;
+  }
+
+  /**
+   * Select tags in the searchbar's tag filter.
+   */
+  public async selectFilterTags(...tagNames: string[]): Promise<void> {
+    await this.openTagPopover();
+    // select the tags
+    for (const tagName of tagNames) {
+      await this.testSubjects.click(`tag-searchbar-option-${tagName.replace(' ', '_')}`);
+    }
+    await this.closeTagPopover();
+    await this.waitUntilTableIsLoaded();
+  }
+
+  public async openTagPopover(): Promise<void> {
+    this.log.debug('ListingTable.openTagPopover');
+    await this.tagPopoverToggle.open();
+  }
+
+  public async closeTagPopover(): Promise<void> {
+    this.log.debug('ListingTable.closeTagPopover');
+    await this.tagPopoverToggle.close();
   }
 
   /**
@@ -112,7 +142,7 @@ export class ListingTableService extends FtrService {
       );
       if (morePages) {
         await this.testSubjects.click('pagerNextButton');
-        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilTableIsLoaded();
       }
     }
     return visualizationNames;
@@ -154,7 +184,7 @@ export class ListingTableService extends FtrService {
       await this.common.pressEnterKey();
     });
 
-    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilTableIsLoaded();
   }
 
   /**
@@ -174,6 +204,10 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('deleteSelectedItems');
   }
 
+  public async selectFirstItemInList() {
+    await this.find.clickByCssSelector('.euiTableCellContent .euiCheckbox__input');
+  }
+
   public async clickItemCheckbox(id: string) {
     await this.testSubjects.click(`checkboxSelectRow-${id}`);
   }
@@ -183,9 +217,13 @@ export class ListingTableService extends FtrService {
    * @param name item name
    * @param id row id
    */
-  public async deleteItem(name: string, id: string) {
+  public async deleteItem(name: string, id?: string) {
     await this.searchForItemWithName(name);
-    await this.clickItemCheckbox(id);
+    if (id) {
+      await this.clickItemCheckbox(id);
+    } else {
+      await this.selectFirstItemInList();
+    }
     await this.clickDeleteSelected();
     await this.common.clickConfirmOnModal();
   }
@@ -218,9 +256,17 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('newItemButton');
   }
 
+  public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
+    await this.testSubjects.existOrFail('newItemButton');
+  }
+
   public async onListingPage(appName: AppName) {
     return await this.testSubjects.exists(`${appName}LandingPage`, {
       timeout: 5000,
     });
+  }
+
+  public async selectTab(which: number) {
+    await this.find.clickByCssSelector(`.euiTab:nth-child(${which})`);
   }
 }

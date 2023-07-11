@@ -9,7 +9,13 @@ export const TIMELINE_SEARCHBOX = '[data-test-subj="timeline-super-select-search
 
 export const EUI_FILTER_SELECT_ITEM = '.euiFilterSelectItem';
 
+export const EUI_SELECTABLE_LIST_ITEM = '[data-test-subj="euiSelectableList"] li';
+
 export const EUI_CHECKBOX = '.euiCheckbox__input';
+
+export const EUI_ICON_IS_LOADING = 'svg[data-test-loading="true"]';
+
+export const EUI_BASIC_TABLE_LOADING = '.euiBasicTable-loading';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 

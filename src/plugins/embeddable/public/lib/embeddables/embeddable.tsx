@@ -19,8 +19,14 @@ import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
-  return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
+  if (input.hidePanelTitles) return '';
+  return input.title ?? output.defaultTitle;
 }
+function getPanelDescription(input: EmbeddableInput, output: EmbeddableOutput) {
+  if (input.hidePanelTitles) return '';
+  return input.description ?? output.defaultDescription;
+}
+
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
@@ -61,6 +67,7 @@ export abstract class Embeddable<
 
     this.output = {
       title: getPanelTitle(input, output),
+      description: getPanelDescription(input, output),
       ...(this.reportsEmbeddableLoad()
         ? {}
         : {
@@ -184,7 +191,11 @@ export abstract class Embeddable<
   }
 
   public getTitle(): string {
-    return this.output.title || '';
+    return this.output.title ?? '';
+  }
+
+  public getDescription(): string {
+    return this.output.description ?? '';
   }
 
   /**
@@ -266,6 +277,11 @@ export abstract class Embeddable<
     }
   }
 
+  /**
+   * Call this **only** when your embeddable has encountered a non-recoverable error; recoverable errors
+   * should be handled by the individual embeddable types
+   * @param e The fatal, unrecoverable Error that was thrown
+   */
   protected onFatalError(e: Error) {
     this.fatalError = e;
     this.outputSubject.error(e);
@@ -283,6 +299,7 @@ export abstract class Embeddable<
       this.inputSubject.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
+        description: getPanelDescription(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
       if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
         this.reload();

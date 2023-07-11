@@ -17,7 +17,7 @@ import {
   LOG_ENTRIES_HIGHLIGHTS_PATH,
   logEntriesHighlightsRequestRT,
   logEntriesHighlightsResponseRT,
-} from '@kbn/infra-plugin/common/http_api';
+} from '@kbn/logs-shared-plugin/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -32,6 +32,7 @@ const KEY_AFTER_END = {
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'Elastic-Api-Version': '1',
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -54,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(COMMON_HEADERS)
             .send(
               logEntriesHighlightsRequestRT.encode({
-                sourceId: 'default',
+                logView: { type: 'log-view-reference', logViewId: 'default' },
                 startTimestamp: KEY_BEFORE_START.time,
                 endTimestamp: KEY_AFTER_END.time,
                 highlightTerms: ['some string that does not exist'],
@@ -82,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(COMMON_HEADERS)
             .send(
               logEntriesHighlightsRequestRT.encode({
-                sourceId: 'default',
+                logView: { type: 'log-view-reference', logViewId: 'default' },
                 startTimestamp: KEY_BEFORE_START.time,
                 endTimestamp: KEY_AFTER_END.time,
                 highlightTerms: ['message of document 0'],
@@ -130,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(COMMON_HEADERS)
             .send(
               logEntriesHighlightsRequestRT.encode({
-                sourceId: 'default',
+                logView: { type: 'log-view-reference', logViewId: 'default' },
                 startTimestamp: KEY_BEFORE_START.time,
                 endTimestamp: KEY_AFTER_END.time,
                 highlightTerms: ['generate_test_data/simple_logs'],
@@ -166,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set(COMMON_HEADERS)
             .send(
               logEntriesHighlightsRequestRT.encode({
-                sourceId: 'default',
+                logView: { type: 'log-view-reference', logViewId: 'default' },
                 startTimestamp: KEY_BEFORE_START.time,
                 endTimestamp: KEY_AFTER_END.time,
                 query: JSON.stringify({

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { random } from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
@@ -16,6 +17,7 @@ import {
   EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
+import { schema } from '@kbn/config-schema';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -143,15 +145,59 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
-      sampleOneTimeTaskTimingOut: {
-        title: 'Sample One-Time Task that Times Out',
-        description: 'A sample task that times out each run.',
+      sampleOneTimeTaskThrowingError: {
+        title: 'Sample One-Time Task that throws an error',
+        description: 'A sample task that throws an error each run.',
         maxAttempts: 3,
-        timeout: '1s',
-        getRetry: (attempts: number, error: object) => new Date(Date.now() + _.random(2, 5) * 1000),
         createTaskRunner: () => ({
           async run() {
-            return await new Promise((resolve) => {});
+            throwRetryableError(new Error('Error'), new Date(Date.now() + random(2, 5) * 1000));
+          },
+        }),
+      },
+      sampleRecurringTaskWithInvalidIndirectParam: {
+        title: 'Sample Recurring Task that has invalid indirect params',
+        description: 'A sample task that returns invalid params in loadIndirectParams all the time',
+        maxAttempts: 1,
+        createTaskRunner: () => ({
+          async loadIndirectParams() {
+            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
+          },
+          async run() {
+            return { state: {}, schedule: { interval: '1s' }, hasError: true };
+          },
+        }),
+        indirectParamsSchema: schema.object({
+          param: schema.string(),
+        }),
+      },
+      sampleOneTimeTaskWithInvalidIndirectParam: {
+        title: 'Sample One Time Task that has invalid indirect params',
+        description:
+          'A sample task that returns invalid params in loadIndirectParams all the time and throws error in the run method',
+        maxAttempts: 1,
+        createTaskRunner: () => ({
+          async loadIndirectParams() {
+            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
+          },
+          async run() {
+            throwRetryableError(new Error('Retry'), true);
+          },
+        }),
+        indirectParamsSchema: schema.object({
+          param: schema.string(),
+        }),
+      },
+      sampleTaskWithParamsSchema: {
+        title: 'Sample Task That has paramsSchema',
+        description: 'A sample task that has paramsSchema to validate params',
+        maxAttempts: 1,
+        paramsSchema: schema.object({
+          param: schema.string(),
+        }),
+        createTaskRunner: () => ({
+          async run() {
+            throwRetryableError(new Error('Retry'), true);
           },
         }),
       },

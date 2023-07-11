@@ -8,7 +8,7 @@
 import { isEqual, intersection, union } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { Document } from '../persistence/saved_object_store';
-import { DatasourceMap } from '../types';
+import { AnnotationGroups, DatasourceMap, VisualizationMap } from '../types';
 import { removePinnedFilters } from './save_modal_container';
 
 const removeNonSerializable = (obj: Parameters<JSON['stringify']>[0]) =>
@@ -18,7 +18,9 @@ export const isLensEqual = (
   doc1In: Document | undefined,
   doc2In: Document | undefined,
   injectFilterReferences: FilterManager['inject'],
-  datasourceMap: DatasourceMap
+  datasourceMap: DatasourceMap,
+  visualizationMap: VisualizationMap,
+  annotationGroups: AnnotationGroups
 ) => {
   if (doc1In === undefined || doc2In === undefined) {
     return doc1In === doc2In;
@@ -36,7 +38,23 @@ export const isLensEqual = (
     return false;
   }
 
-  if (!isEqual(doc1.state.visualization, doc2.state.visualization)) {
+  const isEqualFromVis = visualizationMap[doc1.visualizationType]?.isEqual;
+  const visualizationStateIsEqual = isEqualFromVis
+    ? (() => {
+        try {
+          return isEqualFromVis(
+            doc1.state.visualization,
+            doc1.references,
+            doc2.state.visualization,
+            doc2.references,
+            annotationGroups
+          );
+        } catch (err) {
+          return false;
+        }
+      })()
+    : isEqual(doc1.state.visualization, doc2.state.visualization);
+  if (!visualizationStateIsEqual) {
     return false;
   }
 

@@ -10,18 +10,24 @@ import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { finished, Writable } from 'stream';
-import { promisify } from 'util';
+import { Writable } from 'stream';
+import { finished } from 'stream/promises';
+import { setTimeout } from 'timers/promises';
 import type {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
+import {
+  CancellationToken,
+  ReportingError,
+  QueueTimeoutError,
+  KibanaShuttingDownError,
+  TaskRunResult,
+} from '@kbn/reporting-common';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
-import { CancellationToken } from '../../../common/cancellation_token';
-import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
@@ -29,13 +35,7 @@ import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
-import {
-  ReportingTask,
-  ReportingTaskStatus,
-  REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
-  TaskRunResult,
-} from '.';
+import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
@@ -57,6 +57,22 @@ function isOutput(output: CompletedReportOutput | Error): output is CompletedRep
 
 function reportFromTask(task: ReportTaskParams) {
   return new Report({ ...task, _id: task.id, _index: task.index });
+}
+
+async function finishedWithNoPendingCallbacks(stream: Writable) {
+  await finished(stream, { readable: false });
+
+  // Race condition workaround:
+  // `finished(...)` will resolve while there's still pending callbacks in the writable part of the `stream`.
+  // This introduces a race condition where the code continues before the writable part has completely finished.
+  // The `pendingCallbacks` function is a hack to ensure that all pending callbacks have been called before continuing.
+  // For more information, see: https://github.com/nodejs/node/issues/46170
+  await (async function pendingCallbacks(delay = 1) {
+    if ((stream as any)._writableState.pendingcb > 0) {
+      await setTimeout(delay);
+      await pendingCallbacks(delay < 32 ? delay * 2 : delay);
+    }
+  })();
 }
 
 export class ExecuteReportTask implements ReportingTask {
@@ -100,9 +116,9 @@ export class ExecuteReportTask implements ReportingTask {
 
     this.taskExecutors = executors;
 
-    const config = reporting.getConfig();
-    this.kibanaId = config.kbnConfig.get('server', 'uuid');
-    this.kibanaName = config.kbnConfig.get('server', 'name');
+    const { uuid, name } = reporting.getServerInfo();
+    this.kibanaId = uuid;
+    this.kibanaName = name;
   }
 
   /*
@@ -177,12 +193,12 @@ export class ExecuteReportTask implements ReportingTask {
       ...doc,
     });
 
-    this.logger.debug(
+    this.logger.info(
       `Claiming ${claimedReport.jobtype} ${report._id} ` +
-        `[_index: ${report._index}]  ` +
-        `[_seq_no: ${report._seq_no}]  ` +
-        `[_primary_term: ${report._primary_term}]  ` +
-        `[attempts: ${report.attempts}]  ` +
+        `[_index: ${report._index}] ` +
+        `[_seq_no: ${report._seq_no}] ` +
+        `[_primary_term: ${report._primary_term}] ` +
+        `[attempts: ${report.attempts}] ` +
         `[process_expiration: ${expirationTime}]`
     );
 
@@ -377,7 +393,7 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
-            await promisify(finished)(stream, { readable: false });
+            await finishedWithNoPendingCallbacks(stream);
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;

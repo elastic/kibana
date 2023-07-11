@@ -26,14 +26,12 @@ const TopNContainer = styled.div`
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
-  z-index: 999999;
   position: absolute;
   right: 4px;
   top: 4px;
 `;
 
 const ViewSelect = styled(EuiSuperSelect)`
-  z-index: 999999;
   width: 170px;
 `;
 
@@ -60,7 +58,6 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
-  value?: string[] | string | null;
 }
 
 const TopNComponent: React.FC<Props> = ({
@@ -145,6 +142,7 @@ const TopNComponent: React.FC<Props> = ({
             toggleTopN={toggleTopN}
             scopeId={scopeId}
             to={to}
+            hideQueryToggle
           />
         ) : (
           <SignalsByCategory
@@ -157,6 +155,7 @@ const TopNComponent: React.FC<Props> = ({
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             runtimeMappings={runtimeMappings}
+            hideQueryToggle
           />
         )}
       </TopNContent>

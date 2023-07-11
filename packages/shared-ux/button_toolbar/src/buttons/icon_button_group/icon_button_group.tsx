@@ -30,6 +30,8 @@ export interface IconButton {
   onClick: () => void;
   /** HTML `title` attribute for tooltips if different from `label` */
   title?: string;
+  /** Test subject for button */
+  'data-test-subj'?: string;
 }
 
 /**
@@ -40,6 +42,8 @@ export interface Props {
   legend: EuiButtonGroupProps['legend'];
   /** Array of `IconButton` */
   buttons: IconButton[];
+  /** Button size */
+  buttonSize?: EuiButtonGroupProps['buttonSize'];
 }
 
 type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
@@ -47,13 +51,12 @@ type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
 /**
  * A group of buttons each performing an action, represented by an icon.
  */
-export const IconButtonGroup = ({ buttons, legend }: Props) => {
+export const IconButtonGroup = ({ buttons, legend, buttonSize = 'm' }: Props) => {
   const euiTheme = useEuiTheme();
   const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
     const { label, title = label, ...rest } = button;
-
     return {
       ...rest,
       'aria-label': title ?? label,
@@ -70,12 +73,13 @@ export const IconButtonGroup = ({ buttons, legend }: Props) => {
 
   return (
     <EuiButtonGroup
-      buttonSize="m"
+      buttonSize={buttonSize}
       legend={legend}
       options={buttonGroupOptions}
       onChange={onChangeIconsMulti}
       type="multi"
       isIconOnly
+      css={iconButtonGroupStyles.buttonGroup}
     />
   );
 };

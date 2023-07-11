@@ -6,8 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
-import { getActionDetailsById } from '../../services';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { validateActionId } from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
@@ -18,8 +18,6 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { getFileDownloadStream } from '../../services/actions/action_files';
 
 export const registerActionFileDownloadRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -27,18 +25,29 @@ export const registerActionFileDownloadRoutes = (
 ) => {
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
+      // NOTE:
+      // Because this API is used in the browser via `href` (ex. on link to download a file),
+      // we need to enable setting the version number via query params
+      enableQueryVersion: true,
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
-      validate: EndpointActionFileDownloadSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      getActionFileDownloadRouteHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionFileDownloadSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        getActionFileDownloadRouteHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionFileDownloadRouteHandler = (
@@ -52,20 +61,22 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const { action_id: actionId, agent_id: agentId } = req.params;
+    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
+    const { action_id: actionId, file_id: fileId } = req.params;
 
     try {
-      // Ensure action id is valid and that it was sent to the Agent ID requested.
-      const actionDetails = await getActionDetailsById(esClient, endpointMetadataService, actionId);
+      await validateActionId(esClient, actionId);
+      const file = await fleetFiles.get(fileId);
 
-      if (!actionDetails.agents.includes(agentId)) {
-        throw new CustomHttpRequestError(`Action was not sent to agent id [${agentId}]`, 400);
+      if (file.id !== fileId) {
+        throw new CustomHttpRequestError(
+          `Invalid file id [${fileId}] for action [${actionId}]`,
+          400
+        );
       }
 
-      const fileDownloadId = getFileDownloadId(actionDetails, agentId);
-      const { stream, fileName } = await getFileDownloadStream(esClient, logger, fileDownloadId);
+      const { stream, fileName } = await fleetFiles.download(fileId);
 
       return res.ok({
         body: stream,

@@ -14,15 +14,19 @@ import { TECHNICAL_PREVIEW } from './translations';
 const RiskScoreHeaderTitleComponent = ({
   riskScoreEntity,
   title,
+  showTechnicalPreviewBadge = false,
 }: {
   riskScoreEntity: RiskScoreEntity;
   title?: string;
+  showTechnicalPreviewBadge?: boolean;
 }) => {
   return (
     <>
       {title ??
         (riskScoreEntity === RiskScoreEntity.user ? i18n.USER_RISK_TITLE : i18n.HOST_RISK_TITLE)}
-      <NavItemBetaBadge text={TECHNICAL_PREVIEW} className="eui-alignMiddle" />
+      {showTechnicalPreviewBadge && (
+        <NavItemBetaBadge text={TECHNICAL_PREVIEW} className="eui-alignMiddle" />
+      )}
     </>
   );
 };

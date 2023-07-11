@@ -104,6 +104,8 @@ describe('suggestion_panel', () => {
       },
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
+      getUserMessages: () => [],
+      nowProvider: { get: jest.fn(() => new Date()) },
     };
   });
 

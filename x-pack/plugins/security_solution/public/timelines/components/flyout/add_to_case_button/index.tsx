@@ -10,13 +10,14 @@ import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { Case } from '@kbn/cases-plugin/common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
-import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineDefaults } from '../../../store/timeline/defaults';
@@ -49,7 +50,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   const [isCaseModalOpen, openCaseModal] = useState(false);
 
   const onRowClick = useCallback(
-    async (theCase?: Case) => {
+    async (theCase?: CaseUI) => {
       openCaseModal(false);
       await navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,

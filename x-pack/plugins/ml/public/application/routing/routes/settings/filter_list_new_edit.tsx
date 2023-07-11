@@ -7,24 +7,15 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { NavigateToPath } from '../../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-
-import { useTimefilter } from '../../../contexts/kibana';
-import { checkFullLicense } from '../../../license';
-import {
-  checkGetJobsCapabilitiesResolver,
-  checkPermission,
-} from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
-import { EditFilterList } from '../../../settings/filter_lists';
-
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
+import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
+import { EditFilterList } from '../../../settings/filter_lists';
+import { NavigateToPath } from '../../../contexts/kibana';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 enum MODE {
   NEW,
@@ -39,7 +30,7 @@ export const newFilterListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/filter_lists/new_filter_list',
+  path: createPath(ML_PAGES.FILTER_LISTS_NEW),
   title: i18n.translate('xpack.ml.settings.createFilter.docTitle', {
     defaultMessage: 'Create Filter',
   }),
@@ -61,7 +52,7 @@ export const editFilterListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/filter_lists/edit_filter_list/:filterId',
+  path: createPath(ML_PAGES.FILTER_LISTS_EDIT, '/:filterId'),
   title: i18n.translate('xpack.ml.settings.editFilter.docTitle', {
     defaultMessage: 'Edit Filter',
   }),
@@ -78,27 +69,23 @@ export const editFilterListRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
+const PageWrapper: FC<NewFilterPageProps> = ({ location, mode }) => {
   let filterId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     filterId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
-  const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
+  const { context } = useRouteResolver('full', ['canGetFilters', 'canCreateFilter'], {
+    getMlNodeCount,
   });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
-  const canCreateFilter = checkPermission('canCreateFilter');
-  const canDeleteFilter = checkPermission('canDeleteFilter');
+  const [canCreateFilter, canDeleteFilter] = usePermissionCheck([
+    'canCreateFilter',
+    'canDeleteFilter',
+  ]);
 
   return (
     <PageLoader context={context}>

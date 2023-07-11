@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  CoreSetup,
   CoreStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -16,7 +15,7 @@ import { Artifact } from '@kbn/fleet-plugin/server';
 import { SourceMap } from '../source_maps/route';
 import { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
-import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
+import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
 
 const doUnzip = promisify(unzip);
 
@@ -41,6 +40,25 @@ export function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
   return fleetPluginStart.createArtifactsClient('apm');
 }
 
+export interface ListSourceMapArtifactsResponse {
+  artifacts: Array<{
+    body: ApmSourceMapArtifactBody;
+    id: string;
+    created: string;
+    compressionAlgorithm: 'none' | 'zlib';
+    encryptionAlgorithm: 'none';
+    decodedSha256: string;
+    decodedSize: number;
+    encodedSha256: string;
+    encodedSize: number;
+    identifier: string;
+    packageName: string;
+    relative_url: string;
+    type?: string | undefined;
+  }>;
+  total: number;
+}
+
 export async function listSourceMapArtifacts({
   fleetPluginStart,
   perPage = 20,
@@ -49,7 +67,7 @@ export async function listSourceMapArtifacts({
   fleetPluginStart: FleetPluginStart;
   perPage?: number;
   page?: number;
-}) {
+}): Promise<ListSourceMapArtifactsResponse> {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
   const artifactsResponse = await apmArtifactClient.listArtifacts({
     kuery: 'type: sourcemap',
@@ -97,57 +115,20 @@ export async function deleteFleetSourcemapArtifact({
   return apmArtifactClient.deleteArtifact(id);
 }
 
-export function getPackagePolicyWithSourceMap({
-  packagePolicy,
-  artifacts,
-}: {
-  packagePolicy: PackagePolicy;
-  artifacts: ArtifactSourceMap[];
-}) {
-  const [firstInput, ...restInputs] = packagePolicy.inputs;
-  return {
-    ...packagePolicy,
-    inputs: [
-      {
-        ...firstInput,
-        config: {
-          ...firstInput.config,
-          [APM_SERVER]: {
-            value: {
-              ...firstInput?.config?.[APM_SERVER].value,
-              rum: {
-                source_mapping: {
-                  metadata: artifacts.map((artifact) => ({
-                    'service.name': artifact.body.serviceName,
-                    'service.version': artifact.body.serviceVersion,
-                    'bundle.filepath': artifact.body.bundleFilepath,
-                    'sourcemap.url': artifact.relative_url,
-                  })),
-                },
-              },
-            },
-          },
-        },
-      },
-      ...restInputs,
-    ],
-  };
-}
-
 export async function updateSourceMapsOnFleetPolicies({
-  core,
+  coreStart,
   fleetPluginStart,
   savedObjectsClient,
   internalESClient,
 }: {
-  core: { setup: CoreSetup; start: () => Promise<CoreStart> };
+  coreStart: CoreStart;
   fleetPluginStart: FleetPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
   internalESClient: ElasticsearchClient;
 }) {
   const { artifacts } = await listSourceMapArtifacts({ fleetPluginStart });
   const apmFleetPolicies = await getApmPackagePolicies({
-    core,
+    coreStart,
     fleetPluginStart,
   });
 

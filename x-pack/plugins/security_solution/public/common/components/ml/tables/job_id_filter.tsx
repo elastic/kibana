@@ -10,9 +10,10 @@ import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from
 export const JobIdFilter: React.FC<{
   selectedJobIds: string[];
   jobIds: string[];
+  jobNameById: Record<string, string | undefined>;
   onSelect: (jobIds: string[]) => void;
   title: string;
-}> = ({ selectedJobIds, onSelect, title, jobIds }) => {
+}> = ({ selectedJobIds, onSelect, title, jobIds, jobNameById }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -50,7 +51,7 @@ export const JobIdFilter: React.FC<{
         {title}
       </EuiFilterButton>
     ),
-    [isPopoverOpen, onButtonClick, title, selectedJobIds.length, jobIds]
+    [jobIds.length, selectedJobIds.length, isPopoverOpen, onButtonClick, title]
   );
 
   return (
@@ -69,7 +70,7 @@ export const JobIdFilter: React.FC<{
               key={id}
               onClick={() => updateSelection(id)}
             >
-              {id}
+              {jobNameById[id] ?? id}
             </EuiFilterSelectItem>
           ))}
         </div>

@@ -27,11 +27,11 @@ export const AGENT_ACTIONS_INDEX = '.fleet-actions';
 export const AGENT_ACTIONS_RESULTS_INDEX = '.fleet-actions-results';
 
 export const FleetServerAgentComponentStatuses = [
-  'starting',
-  'configuring',
-  'healthy',
-  'degraded',
-  'failed',
-  'stopping',
-  'stopped',
+  'STARTING',
+  'CONFIGURING',
+  'HEALTHY',
+  'DEGRADED',
+  'FAILED',
+  'STOPPING',
+  'STOPPED',
 ] as const;

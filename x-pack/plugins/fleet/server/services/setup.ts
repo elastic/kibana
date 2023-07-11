@@ -12,7 +12,7 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { AUTO_UPDATE_PACKAGES, FILE_STORAGE_INTEGRATION_NAMES } from '../../common/constants';
+import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type {
   DefaultPackagesInstallationError,
@@ -40,10 +40,7 @@ import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
-import {
-  ensureDefaultComponentTemplates,
-  ensureFileUploadWriteIndices,
-} from './epm/elasticsearch/template/install';
+import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
@@ -56,7 +53,6 @@ import {
   ensurePreconfiguredFleetServerHosts,
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
-import { getInstallationsByName } from './epm/packages/get';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -116,14 +112,11 @@ async function createSetupSideEffects(
     settingsService.settingsSetup(soClient),
   ]);
 
-  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
+  const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
-  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
-    logger.debug('Setting up Fleet Elasticsearch assets');
-    await ensureFleetGlobalEsAssets(soClient, esClient);
-  }
+  logger.debug('Setting up Fleet Elasticsearch assets');
+  await ensureFleetGlobalEsAssets(soClient, esClient);
 
-  await ensureFleetFileUploadIndices(soClient, esClient);
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
 
@@ -165,6 +158,27 @@ async function createSetupSideEffects(
   logger.debug('Upgrade Fleet package install versions');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
 
+  logger.debug('Generating key pair for message signing');
+  if (!appContextService.getMessageSigningService()?.isEncryptionAvailable) {
+    logger.warn(
+      'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
+    );
+  }
+  await appContextService.getMessageSigningService()?.generateKeyPair();
+
+  logger.debug('Generating Agent uninstall tokens');
+  if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    logger.warn(
+      'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
+    );
+  }
+  await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+
+  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    logger.debug('Checking for and encrypting plain text uninstall tokens');
+    await appContextService.getUninstallTokenService()?.encryptTokens();
+  }
+
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
 
@@ -184,30 +198,6 @@ async function createSetupSideEffects(
   };
 }
 
-/**
- * Ensure ES assets shared by all Fleet index template are installed
- */
-export async function ensureFleetFileUploadIndices(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) {
-  const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
-  if (!diagnosticFileUploadEnabled) return;
-  const logger = appContextService.getLogger();
-  const installedFileUploadIntegrations = await getInstallationsByName({
-    savedObjectsClient: soClient,
-    pkgNames: [...FILE_STORAGE_INTEGRATION_NAMES],
-  });
-
-  if (!installedFileUploadIntegrations.length) return [];
-  const integrationNames = installedFileUploadIntegrations.map(({ name }) => name);
-  logger.debug(`Ensuring file upload write indices for ${integrationNames}`);
-  return ensureFileUploadWriteIndices({
-    esClient,
-    logger,
-    integrationNames,
-  });
-}
 /**
  * Ensure ES assets shared by all Fleet index template are installed
  */

@@ -8,9 +8,10 @@
 import expect from '@kbn/expect';
 
 import {
-  CaseResponse,
+  Case,
   CaseSeverity,
   CaseStatuses,
+  CommentRequestUserType,
   CommentType,
   ConnectorTypes,
   getCaseUserActionUrl,
@@ -22,14 +23,14 @@ import {
   deleteAllCaseItems,
   createCase,
   updateCase,
-  getCaseUserActions,
   superUserSpace1Auth,
   deleteCases,
   createComment,
   updateComment,
   deleteComment,
   extractWarningValueFromWarningHeader,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -49,6 +50,23 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('get_all_user_actions', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
+    });
+
+    it('populates the action_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].action_id).not.to.be(undefined);
+      expect(userActions[0]).not.to.have.property('id');
+    });
+
+    it('populates the case_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].case_id).not.to.be(undefined);
     });
 
     it('creates a create case user action when a case is created', async () => {
@@ -315,17 +333,26 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
       const { id, version: _, ...restComment } = caseWithComments.comments![0];
 
+      const castedUserComment = restComment as CommentRequestUserType;
+
       expect(userActions.length).to.eql(3);
       expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('delete');
       expect(commentUserAction.comment_id).to.eql(id);
-      expect(commentUserAction.payload).to.eql({ comment: restComment });
+
+      expect(commentUserAction.payload).to.eql({
+        comment: {
+          comment: castedUserComment.comment,
+          type: castedUserComment.type,
+          owner: castedUserComment.owner,
+        },
+      });
     });
 
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-      let caseInfo: CaseResponse;
+      let caseInfo: Case;
       beforeEach(async () => {
         caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
           user: superUser,

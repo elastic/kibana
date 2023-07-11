@@ -7,7 +7,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Route, Router, Switch, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import {
   EuiButton,
@@ -203,7 +204,7 @@ export const TodoAppPage: React.FC<{
         </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>
-            <Switch>
+            <Routes>
               <Route path={'/completed'}>
                 <TodoApp filter={'completed'} stateContainer={stateContainer} />
               </Route>
@@ -213,7 +214,7 @@ export const TodoAppPage: React.FC<{
               <Route path={'/'}>
                 <TodoApp filter={null} stateContainer={stateContainer} />
               </Route>
-            </Switch>
+            </Routes>
             <EuiSpacer size={'xxl'} />
             <EuiText size={'s'}>
               <p>Most of kibana apps persist state in the URL in two ways:</p>

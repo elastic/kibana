@@ -14,15 +14,20 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
+import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import {
-  AggregatedFindingsByCluster,
-  ScoreBucket,
   FindingsStatsTaskResult,
   TaskHealthStatus,
+  ScoreByPolicyTemplateBucket,
+  VulnSeverityAggs,
 } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_SEVERITY,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
 import { CspServerPluginStartServices } from '../types';
@@ -109,16 +114,209 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
   };
 }
 
-const aggregateLatestFindings = async (
+const getScoreQuery = (): SearchRequest => ({
+  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  size: 0,
+  // creates the safe_posture_type and asset_identifier runtime fields
+  runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
+  query: {
+    match_all: {},
+  },
+  aggs: {
+    score_by_policy_template: {
+      terms: {
+        field: 'safe_posture_type',
+      },
+      aggs: {
+        total_findings: {
+          value_count: {
+            field: 'result.evaluation',
+          },
+        },
+        passed_findings: {
+          filter: {
+            term: {
+              'result.evaluation': 'passed',
+            },
+          },
+        },
+        failed_findings: {
+          filter: {
+            term: {
+              'result.evaluation': 'failed',
+            },
+          },
+        },
+        score_by_cluster_id: {
+          terms: {
+            field: 'asset_identifier',
+          },
+          aggregations: {
+            total_findings: {
+              value_count: {
+                field: 'result.evaluation',
+              },
+            },
+            passed_findings: {
+              filter: {
+                term: {
+                  'result.evaluation': 'passed',
+                },
+              },
+            },
+            failed_findings: {
+              filter: {
+                term: {
+                  'result.evaluation': 'failed',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+const getVulnStatsTrendQuery = (): SearchRequest => ({
+  index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  size: 0,
+  query: {
+    match_all: {},
+  },
+  aggs: {
+    critical: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
+    },
+    high: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.HIGH } },
+    },
+    medium: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.MEDIUM } },
+    },
+    low: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
+    },
+    vulnerabilities_stats_by_cloud_account: {
+      terms: {
+        field: 'cloud.account.id',
+      },
+      aggs: {
+        cloud_account_id: {
+          terms: {
+            field: 'cloud.account.id',
+            size: 1,
+          },
+        },
+        cloud_account_name: {
+          terms: {
+            field: 'cloud.account.name',
+            size: 1,
+          },
+        },
+        critical: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
+        },
+        high: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.HIGH } },
+        },
+        medium: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.MEDIUM } },
+        },
+        low: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
+        },
+      },
+    },
+  },
+});
+
+const getFindingsScoresDocIndexingPromises = (
+  esClient: ElasticsearchClient,
+  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets']
+) =>
+  scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
+    // creating score per cluster id objects
+    const clustersStats = Object.fromEntries(
+      policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
+        const clusterId = clusterStats.key;
+
+        return [
+          clusterId,
+          {
+            total_findings: clusterStats.total_findings.value,
+            passed_findings: clusterStats.passed_findings.doc_count,
+            failed_findings: clusterStats.failed_findings.doc_count,
+          },
+        ];
+      })
+    );
+
+    // each document contains the policy template and its scores
+    return esClient.index({
+      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+      document: {
+        policy_template: policyTemplateTrend.key,
+        passed_findings: policyTemplateTrend.passed_findings.doc_count,
+        failed_findings: policyTemplateTrend.failed_findings.doc_count,
+        total_findings: policyTemplateTrend.total_findings.value,
+        score_by_cluster_id: clustersStats,
+      },
+    });
+  });
+
+const getVulnStatsTrendDocIndexingPromises = (
+  esClient: ElasticsearchClient,
+  vulnStatsAggs?: VulnSeverityAggs
+) => {
+  if (!vulnStatsAggs) return;
+
+  const scoreByCloudAccount = Object.fromEntries(
+    vulnStatsAggs.vulnerabilities_stats_by_cloud_account.buckets.map((accountScore) => {
+      const cloudAccountId = accountScore.key;
+
+      return [
+        cloudAccountId,
+        {
+          cloudAccountId: accountScore.key,
+          cloudAccountName: accountScore.cloud_account_name.buckets[0].key,
+          critical: accountScore.critical.doc_count,
+          high: accountScore.high.doc_count,
+          medium: accountScore.medium.doc_count,
+          low: accountScore.low.doc_count,
+        },
+      ];
+    })
+  );
+
+  return esClient.index({
+    index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+    document: {
+      policy_template: VULN_MGMT_POLICY_TEMPLATE,
+      critical: vulnStatsAggs.critical.doc_count,
+      high: vulnStatsAggs.high.doc_count,
+      medium: vulnStatsAggs.medium.doc_count,
+      low: vulnStatsAggs.low.doc_count,
+      vulnerabilities_stats_by_cloud_account: scoreByCloudAccount,
+    },
+  });
+};
+
+export const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
   stateRuns: number,
   logger: Logger
 ): Promise<TaskHealthStatus> => {
   try {
     const startAggTime = performance.now();
-    const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
+    const scoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+      getScoreQuery()
+    );
+    const vulnStatsTrendIndexQueryResult = await esClient.search<unknown, VulnSeverityAggs>(
+      getVulnStatsTrendQuery()
+    );
 
-    if (!evaluationsQueryResult.aggregations) {
+    if (!scoreIndexQueryResult.aggregations && !vulnStatsTrendIndexQueryResult.aggregations) {
       logger.warn(`No data found in latest findings index`);
       return 'warning';
     }
@@ -130,31 +328,27 @@ const aggregateLatestFindings = async (
       ).toFixed(2)}ms]`
     );
 
-    const clustersStats = Object.fromEntries(
-      evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
-        (clusterStats: AggregatedFindingsByCluster) => {
-          return [
-            clusterStats.key,
-            {
-              total_findings: clusterStats.total_findings.value,
-              passed_findings: clusterStats.passed_findings.doc_count,
-              failed_findings: clusterStats.failed_findings.doc_count,
-            },
-          ];
-        }
-      )
+    // getting score per policy template buckets
+    const scoresByPolicyTemplatesBuckets =
+      scoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
+
+    // iterating over the buckets and return promises which will index a modified document into the scores index
+    const findingsScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
+      esClient,
+      scoresByPolicyTemplatesBuckets
+    );
+
+    const vulnStatsTrendDocIndexingPromises = getVulnStatsTrendDocIndexingPromises(
+      esClient,
+      vulnStatsTrendIndexQueryResult.aggregations
     );
 
     const startIndexTime = performance.now();
-    await esClient.index({
-      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-      document: {
-        passed_findings: evaluationsQueryResult.aggregations.passed_findings.doc_count,
-        failed_findings: evaluationsQueryResult.aggregations.failed_findings.doc_count,
-        total_findings: evaluationsQueryResult.aggregations.total_findings.value,
-        score_by_cluster_id: clustersStats,
-      },
-    });
+
+    // executing indexing commands
+    await Promise.all(
+      [...findingsScoresDocIndexingPromises, vulnStatsTrendDocIndexingPromises].filter(Boolean)
+    );
 
     const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
     logger.debug(
@@ -176,58 +370,3 @@ const aggregateLatestFindings = async (
     return 'error';
   }
 };
-
-const getScoreQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  size: 0,
-  query: {
-    match_all: {},
-  },
-  aggs: {
-    total_findings: {
-      value_count: {
-        field: 'result.evaluation',
-      },
-    },
-    passed_findings: {
-      filter: {
-        term: {
-          'result.evaluation': 'passed',
-        },
-      },
-    },
-    failed_findings: {
-      filter: {
-        term: {
-          'result.evaluation': 'failed',
-        },
-      },
-    },
-    score_by_cluster_id: {
-      terms: {
-        field: 'cluster_id',
-      },
-      aggregations: {
-        total_findings: {
-          value_count: {
-            field: 'result.evaluation',
-          },
-        },
-        passed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'passed',
-            },
-          },
-        },
-        failed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'failed',
-            },
-          },
-        },
-      },
-    },
-  },
-});

@@ -6,10 +6,10 @@
  */
 
 import { CommentType } from '../../../../common/api';
-import type { Comment } from '../../../containers/types';
+import type { CommentUI } from '../../../containers/types';
 
-export const getManualAlertIds = (comments: Comment[]): string[] => {
-  const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {
+export const getManualAlertIds = (comments: CommentUI[]): string[] => {
+  const dedupeAlerts = comments.reduce((alertIds, comment: CommentUI) => {
     if (comment.type === CommentType.alert) {
       const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
       ids.forEach((id) => alertIds.add(id));
@@ -20,8 +20,8 @@ export const getManualAlertIds = (comments: Comment[]): string[] => {
   return Array.from(dedupeAlerts);
 };
 
-export const getRegistrationContextFromAlerts = (comments: Comment[]): string[] => {
-  const dedupeRegistrationContext = comments.reduce((registrationContexts, comment: Comment) => {
+export const getRegistrationContextFromAlerts = (comments: CommentUI[]): string[] => {
+  const dedupeRegistrationContext = comments.reduce((registrationContexts, comment: CommentUI) => {
     if (comment.type === CommentType.alert) {
       const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
       indices.forEach((index) => {

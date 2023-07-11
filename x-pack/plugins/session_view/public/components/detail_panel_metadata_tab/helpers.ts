@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
   ProcessEventCloud,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { DASH } from '../../constants';
 import {
   DetailPanelHost,
@@ -132,6 +132,7 @@ export const getCloudData = (cloud: ProcessEventCloud | undefined): DetailPanelC
     },
     project: {
       id: DASH,
+      name: DASH,
     },
     provider: DASH,
     region: DASH,
@@ -144,6 +145,7 @@ export const getCloudData = (cloud: ProcessEventCloud | undefined): DetailPanelC
   detailPanelCloud.instance.name = dataOrDash(cloud?.instance?.name).toString();
   detailPanelCloud.account.id = dataOrDash(cloud?.account?.id).toString();
   detailPanelCloud.project.id = dataOrDash(cloud?.project?.id).toString();
+  detailPanelCloud.project.name = dataOrDash(cloud?.project?.name).toString();
   detailPanelCloud.provider = dataOrDash(cloud?.provider).toString();
   detailPanelCloud.region = dataOrDash(cloud?.region).toString();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Route, useHistory } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
@@ -20,7 +20,7 @@ import {
   sendGetAgentStatus,
   useIntraAppState,
   useStartServices,
-  useGetPackageInfoByKey,
+  useGetPackageInfoByKeyQuery,
 } from '../../../../hooks';
 
 jest.mock('../../../../hooks', () => {
@@ -42,7 +42,10 @@ jest.mock('../../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
-    useGetPackageInfoByKey: jest.fn(),
+    useGetPackageInfoByKeyQuery: jest.fn(),
+    sendGetSettings: jest.fn().mockResolvedValue({
+      data: { item: {} },
+    }),
     sendCreatePackagePolicy: jest
       .fn()
       .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
@@ -84,6 +87,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ search: '' }),
   useHistory: jest.fn().mockReturnValue({
     push: jest.fn(),
+    listen: jest.fn(),
     location: {
       search: '',
     },
@@ -122,6 +126,8 @@ describe('when on the package policy create page', () => {
     testRenderer = createFleetTestRendererMock();
     mockApiCalls(testRenderer.startServices.http);
     testRenderer.mountHistory.push(createPageUrlPath);
+
+    jest.mocked(useStartServices().application.navigateToApp).mockReset();
 
     mockPackageInfo = {
       data: {
@@ -183,7 +189,7 @@ describe('when on the package policy create page', () => {
       isLoading: false,
     };
 
-    (useGetPackageInfoByKey as jest.Mock).mockReturnValue(mockPackageInfo);
+    (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
   });
 
   describe('and Route state is provided via Fleet HashRouter', () => {
@@ -304,6 +310,15 @@ describe('when on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
+        await waitFor(
+          async () => {
+            expect(
+              await renderResult.findByText(/Add Elastic Agent to your hosts/)
+            ).toBeInTheDocument();
+          },
+          { timeout: 10000 }
+        );
+
         await act(async () => {
           fireEvent.click(
             renderResult.getByText(/Add Elastic Agent to your hosts/).closest('button')!
@@ -326,12 +341,15 @@ describe('when on the package policy create page', () => {
       test('should navigate to save navigate path with query param if set', async () => {
         const routeState = {
           onSaveNavigateTo: [PLUGIN_ID, { path: '/save/url/here' }],
+          onSaveQueryParams: {
+            openEnrollmentFlyout: true,
+          },
         };
         const queryParamsPolicyId = 'agent-policy-1';
         await setupSaveNavigate(routeState, queryParamsPolicyId);
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1',
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
         });
       });
 
@@ -344,15 +362,17 @@ describe('when on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should set history if no routeState', async () => {
+      test('should navigate to agent policy if no route state is set', async () => {
         await setupSaveNavigate({});
 
-        expect(useHistory().push).toHaveBeenCalledWith('/policies/agent-policy-1');
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+        });
       });
     });
 
     test('should create agent policy without sys monitoring when new hosts is selected for system integration', async () => {
-      (useGetPackageInfoByKey as jest.Mock).mockReturnValue({
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
         ...mockPackageInfo,
         data: {
           item: {
@@ -380,6 +400,8 @@ describe('when on the package policy create page', () => {
           monitoring_enabled: ['logs', 'metrics'],
           name: 'Agent policy 2',
           namespace: 'default',
+          inactivity_timeout: 1209600,
+          is_protected: false,
         },
         { withSysMonitoring: false }
       );
@@ -410,6 +432,8 @@ describe('when on the package policy create page', () => {
             monitoring_enabled: ['logs', 'metrics'],
             name: 'Agent policy 2',
             namespace: 'default',
+            inactivity_timeout: 1209600,
+            is_protected: false,
           },
           { withSysMonitoring: true }
         );

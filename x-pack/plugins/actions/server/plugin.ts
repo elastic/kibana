@@ -32,18 +32,18 @@ import {
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
-  ensureCleanupFailedExecutionsTaskScheduled,
-  registerCleanupFailedExecutionsTaskDefinition,
-} from './cleanup_failed_executions';
+  IEventLogClientService,
+  IEventLogger,
+  IEventLogService,
+} from '@kbn/event-log-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
+import { ActionTypeRegistry } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
@@ -60,14 +60,14 @@ import {
 import {
   Services,
   ActionType,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
   ActionsRequestHandlerContext,
 } from './types';
 
-import { getActionsConfigurationUtilities } from './actions_config';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
@@ -106,6 +106,7 @@ import {
   UnsecuredActionsClient,
 } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
+import { createSystemConnectors } from './create_system_actions';
 
 export interface PluginSetupContract {
   registerType<
@@ -116,16 +117,20 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
+
   registerSubActionConnectorType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
+
   isPreconfiguredConnector(connectorId: string): boolean;
+
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
+  getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
 }
 
 export interface PluginStartContract {
@@ -143,7 +148,7 @@ export interface PluginStartContract {
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 
   getUnsecuredActionsClient(): IUnsecuredActionsClient;
 
@@ -171,7 +176,9 @@ export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
+  eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
 }
 
 const includedHiddenTypes = [
@@ -194,9 +201,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private isESOCanEncrypt?: boolean;
   private usageCounter?: UsageCounter;
   private readonly telemetryLogger: Logger;
-  private readonly preconfiguredActions: PreConfiguredAction[];
+  private inMemoryConnectors: InMemoryConnector[];
   private inMemoryMetrics: InMemoryMetrics;
-  private kibanaIndex?: string;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -205,7 +211,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
     );
     this.telemetryLogger = initContext.logger.get('usage');
-    this.preconfiguredActions = [];
+    this.inMemoryConnectors = [];
     this.inMemoryMetrics = new InMemoryMetrics(initContext.logger.get('in_memory_metrics'));
   }
 
@@ -213,8 +219,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     core: CoreSetup<ActionsPluginsStart>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
-    this.kibanaIndex = core.savedObjects.getKibanaIndex();
-
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -241,7 +245,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
-      this.preconfiguredActions.push(getAlertHistoryEsIndex());
+      this.inMemoryConnectors.push(getAlertHistoryEsIndex());
     }
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
@@ -250,8 +254,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,
           isPreconfigured: true,
+          isSystemAction: false,
         };
-        this.preconfiguredActions.push({
+        this.inMemoryConnectors.push({
           ...rawPreconfiguredConnector,
           isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
         });
@@ -268,7 +273,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       taskManager: plugins.taskManager,
       actionsConfigUtils,
       licenseState: this.licenseState,
-      preconfiguredActions: this.preconfiguredActions,
+      inMemoryConnectors: this.inMemoryConnectors,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -280,7 +285,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.preconfiguredActions
+      this.inMemoryConnectors
     );
 
     const usageCollection = plugins.usageCollection;
@@ -294,18 +299,16 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core, this.kibanaIndex)
+      this.createRouteHandlerContext(core)
     );
     if (usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
-      const kibanaIndex = this.kibanaIndex;
 
       initializeActionsTelemetry(
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        kibanaIndex,
-        this.preconfiguredActions,
+        this.getInMemoryConnectors,
         eventLogIndex
       );
     }
@@ -338,18 +341,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       usageCounter: this.usageCounter,
     });
 
-    // Cleanup failed execution task definition
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
-        actionTypeRegistry,
-        logger: this.logger,
-        coreStartServices: core.getStartServices(),
-        config: this.actionsConfig.cleanupFailedExecutionsTask,
-        kibanaIndex: this.kibanaIndex,
-        taskManagerIndex: plugins.taskManager.index,
-      });
-    }
-
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -360,7 +351,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
-        actionType.maxAttempts = actionType.maxAttempts ?? MAX_ATTEMPTS;
         actionTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <
@@ -372,8 +362,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         subActionFramework.registerConnector(connector);
       },
       isPreconfiguredConnector: (connectorId: string): boolean => {
-        return !!this.preconfiguredActions.find(
-          (preconfigured) => preconfigured.id === connectorId
+        return !!this.inMemoryConnectors.find(
+          (inMemoryConnector) =>
+            inMemoryConnector.isPreconfigured && inMemoryConnector.id === connectorId
         );
       },
       getSubActionConnectorClass: () => SubActionConnector,
@@ -383,6 +374,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
         };
       },
+      getActionsConfigurationUtilities: () => actionsConfigUtils,
     };
   }
 
@@ -393,9 +385,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
-      kibanaIndex,
       isESOCanEncrypt,
-      preconfiguredActions,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
     } = this;
@@ -405,6 +395,16 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
+
+    /**
+     * Warning: this call mutates the inMemory collection
+     *
+     * Warning: it maybe possible for the task manager to start before
+     * the system actions are being set.
+     *
+     * Issue: https://github.com/elastic/kibana/issues/160797
+     */
+    this.setSystemActions();
 
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
@@ -425,9 +425,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
-        defaultKibanaIndex: kibanaIndex!,
+        kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
-        preconfiguredActions,
+        inMemoryConnectors: this.inMemoryConnectors,
         request,
         authorization: instantiateAuthorization(
           request,
@@ -438,19 +438,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
-          preconfiguredActions,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
-          preconfiguredActions,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
-          preconfiguredActions,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
@@ -459,6 +459,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           encryptedSavedObjectsClient,
           logger: this.logger,
         }),
+        async getEventLogClient() {
+          return plugins.eventLog.getClient(request);
+        },
       });
     };
 
@@ -472,7 +475,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
-          preconfiguredConnectors: preconfiguredActions,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
       });
     };
@@ -500,7 +503,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
-      getActionsClientWithRequest,
+      security: plugins.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
@@ -509,7 +512,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
-      preconfiguredActions,
+      inMemoryConnectors: this.inMemoryConnectors,
     });
 
     taskRunnerFactory!.initialize({
@@ -518,8 +521,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
-      getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
-        this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+      savedObjectsRepository: core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]),
     });
 
     this.eventLogService!.isEsContextReady().then(() => {
@@ -531,15 +535,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
       });
-    }
-
-    // Cleanup failed execution task
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      ensureCleanupFailedExecutionsTaskScheduled(
-        plugins.taskManager,
-        this.logger,
-        this.actionsConfig.cleanupFailedExecutionsTask
-      );
     }
 
     return {
@@ -559,7 +554,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       getUnsecuredActionsClient,
-      preconfiguredActions,
+      inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(actionTypeRegistry, ...args),
     };
@@ -605,14 +600,20 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     };
   }
 
+  private getInMemoryConnectors = () => this.inMemoryConnectors;
+
+  private setSystemActions = () => {
+    const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
+    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+  };
+
   private createRouteHandlerContext = (
-    core: CoreSetup<ActionsPluginsStart>,
-    defaultKibanaIndex: string
+    core: CoreSetup<ActionsPluginsStart>
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
       isESOCanEncrypt,
-      preconfiguredActions,
+      getInMemoryConnectors,
       actionExecutor,
       instantiateAuthorization,
       security,
@@ -621,9 +622,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
+      const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
         await core.getStartServices();
+
       const coreContext = await context.core;
+      const inMemoryConnectors = getInMemoryConnectors();
 
       return {
         getActionsClient: () => {
@@ -640,9 +643,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
-            defaultKibanaIndex,
+            kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
-            preconfiguredActions,
+            inMemoryConnectors,
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
@@ -650,19 +653,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
-              preconfiguredActions,
+              inMemoryConnectors,
             }),
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
-              preconfiguredActions,
+              inMemoryConnectors,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
-              preconfiguredActions,
+              inMemoryConnectors,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,
@@ -673,6 +676,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               }),
               logger,
             }),
+            async getEventLogClient() {
+              return eventLog.getClient(request);
+            },
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

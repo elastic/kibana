@@ -23,10 +23,18 @@ import {
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { TextBasedPersistedState } from '../datasources/text_based/types';
 import type { XYState } from '../visualizations/xy/types';
-import type { PieVisualizationState, LegacyMetricState } from '../../common';
+import type {
+  PieVisualizationState,
+  LegacyMetricState,
+  AllowedGaugeOverrides,
+  AllowedPartitionOverrides,
+  AllowedSettingsOverrides,
+  AllowedXYOverrides,
+} from '../../common/types';
 import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
-import type { MetricVisualizationState } from '../visualizations/metric/visualization';
+import type { MetricVisualizationState } from '../visualizations/metric/types';
 import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
@@ -38,6 +46,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
       formBased: FormBasedPersistedState;
+      textBased?: TextBasedPersistedState;
     };
     visualization: TVisState;
   };
@@ -47,16 +56,28 @@ type LensAttributes<TVisType, TVisState> = Omit<
  * Type-safe variant of by value embeddable input for Lens.
  * This can be used to hardcode certain Lens chart configurations within another app.
  */
-export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
+export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes' | 'overrides'> & {
   attributes:
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
+    | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
+    | LensAttributes<'lnsGauge', GaugeVisualizationState>
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
     | LensAttributes<'lnsLegacyMetric', LegacyMetricState>
     | LensAttributes<'lnsMetric', MetricVisualizationState>
-    | LensAttributes<'lnsHeatmap', HeatmapVisualizationState>
-    | LensAttributes<'lnsGauge', GaugeVisualizationState>
     | LensAttributes<string, unknown>;
+
+  /**
+   * Overrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.
+   * XY charts offer an override of the Settings ('settings') and Axis ('axisX', 'axisLeft', 'axisRight') components.
+   * While it is not possible to pass function/callback/handlers to the renderer, it is possible to stop them by passing the
+   * "ignore" string as override value (i.e. onBrushEnd: "ignore")
+   */
+  overrides?:
+    | AllowedSettingsOverrides
+    | AllowedXYOverrides
+    | AllowedPartitionOverrides
+    | AllowedGaugeOverrides;
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {

@@ -79,7 +79,7 @@ export const SyncRulesTable: React.FC = () => {
     <EuiText size="s" color="default">
       {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.description', {
         defaultMessage:
-          'Add a sync rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of indexing rules starting from the top listed down.',
+          'Add a sync rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of sync rules in the listed order.',
         values: { indexName },
       })}
       <EuiSpacer />

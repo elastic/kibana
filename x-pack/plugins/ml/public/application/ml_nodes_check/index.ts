@@ -6,7 +6,6 @@
  */
 
 export {
-  checkMlNodesAvailable,
   getMlNodeCount,
   mlNodesAvailable,
   lazyMlNodesAvailable,

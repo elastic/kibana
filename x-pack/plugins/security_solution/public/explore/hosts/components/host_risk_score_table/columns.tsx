@@ -8,21 +8,20 @@
 import React from 'react';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import type { HostRiskScoreColumns } from '.';
-
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/model';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreFields } from '../../../../../common/search_strategy';
+import { RiskScoreFields, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScore } from '../../../components/risk_score/severity/common';
+import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -37,31 +36,22 @@ export const getHostRiskScoreColumns = ({
     sortable: true,
     render: (hostName) => {
       if (hostName != null && hostName.length > 0) {
-        const id = escapeDataProviderId(`host-risk-score-table-hostName-${hostName}`);
         return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              excluded: false,
-              id,
-              name: hostName,
-              kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName, operator: IS_OPERATOR },
+          <SecurityCellActions
+            mode={CellActionsMode.HOVER_DOWN}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            data={{
+              value: hostName,
+              field: 'host.name',
             }}
-            isAggregatable={true}
-            fieldType={'keyword'}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
-              )
-            }
-          />
+            metadata={{
+              telemetry: CELL_ACTIONS_TELEMETRY,
+            }}
+          >
+            <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />
+          </SecurityCellActions>
         );
       }
       return getEmptyTagValue();
@@ -89,7 +79,8 @@ export const getHostRiskScoreColumns = ({
     name: (
       <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
         <>
-          {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
+          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
     ),

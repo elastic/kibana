@@ -15,13 +15,17 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
+import {
+  registerApmRuleTypes,
+  apmRuleTypeAlertFieldMap,
+  APM_RULE_TYPE_ALERT_CONTEXT,
+} from './routes/alerts/register_apm_rule_types';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -46,18 +50,12 @@ import {
 } from './types';
 import { registerRoutes } from './routes/apm_routes/register_apm_server_routes';
 import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_global_apm_server_route_repository';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  AGENT_NAME,
-  SERVICE_LANGUAGE_NAME,
-} from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
 import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
+import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
+import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 
 export class APMPlugin
   implements
@@ -70,6 +68,7 @@ export class APMPlugin
 {
   private currentConfig?: APMConfig;
   private logger?: Logger;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
@@ -118,40 +117,13 @@ export class APMPlugin
     const { ruleDataService } = plugins.ruleRegistry;
     const ruleDataClient = ruleDataService.initializeIndex({
       feature: APM_SERVER_FEATURE_ID,
-      registrationContext: 'observability.apm',
+      registrationContext: APM_RULE_TYPE_ALERT_CONTEXT,
       dataset: Dataset.alerts,
       componentTemplateRefs: [],
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(
-            {
-              ...experimentalRuleFieldMap,
-              [SERVICE_NAME]: {
-                type: 'keyword',
-              },
-              [SERVICE_ENVIRONMENT]: {
-                type: 'keyword',
-              },
-              [TRANSACTION_TYPE]: {
-                type: 'keyword',
-              },
-              [PROCESSOR_EVENT]: {
-                type: 'keyword',
-              },
-              [AGENT_NAME]: {
-                type: 'keyword',
-              },
-              [SERVICE_LANGUAGE_NAME]: {
-                type: 'keyword',
-              },
-              labels: {
-                type: 'object',
-                dynamic: true,
-              },
-            },
-            'strict'
-          ),
+          mappings: mappingFromFieldMap(apmRuleTypeAlertFieldMap, 'strict'),
         },
       ],
     });
@@ -169,22 +141,34 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
-    const boundGetApmIndices = async () =>
-      getApmIndices({
-        savedObjectsClient: await getInternalSavedObjectsClient(core),
+    const boundGetApmIndices = async () => {
+      const coreStart = await getCoreStart();
+      return getApmIndices({
+        savedObjectsClient: await getInternalSavedObjectsClient(coreStart),
         config: await firstValueFrom(config$),
       });
+    };
 
-    boundGetApmIndices().then((indices) => {
-      plugins.home?.tutorials.registerTutorial(
-        tutorialProvider({
-          apmConfig: currentConfig,
-          apmIndices: indices,
-          cloud: plugins.cloud,
-          isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-        })
+    // This if else block will go away in favour of removing Home Tutorial Integration
+    // Ideally we will directly register a custom integration and pass the configs
+    // for cloud, onPrem and Serverless so that the actual component can take
+    // care of rendering
+    if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
+      plugins.customIntegrations?.registerCustomIntegration(
+        apmTutorialCustomIntegration
       );
-    });
+    } else {
+      boundGetApmIndices().then((indices) => {
+        plugins.home?.tutorials.registerTutorial(
+          tutorialProvider({
+            apmConfig: currentConfig,
+            apmIndices: indices,
+            cloud: plugins.cloud,
+            isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+          })
+        );
+      });
+    }
 
     const telemetryUsageCounter =
       resourcePlugins.usageCollection?.setup.createUsageCounter(
@@ -198,6 +182,7 @@ export class APMPlugin
       },
       logger: this.logger,
       config: currentConfig,
+      featureFlags: currentConfig.featureFlags,
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
       plugins: resourcePlugins,
@@ -214,25 +199,36 @@ export class APMPlugin
         ml: plugins.ml,
         observability: plugins.observability,
         ruleDataClient,
+        alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
       });
     }
 
     registerFleetPolicyCallbacks({
-      plugins: resourcePlugins,
-      ruleDataClient,
-      config: currentConfig,
       logger: this.logger,
-      kibanaVersion: this.initContext.env.packageInfo.version,
+      coreStartPromise: getCoreStart(),
+      plugins: resourcePlugins,
+      config: currentConfig,
+    }).catch((e) => {
+      this.logger?.error('Failed to register APM Fleet policy callbacks');
+      this.logger?.error(e);
     });
 
-    const fleetStartPromise = resourcePlugins.fleet?.start();
+    // This will add an API key to all existing APM package policies
+    addApiKeysToEveryPackagePolicyIfMissing({
+      coreStartPromise: getCoreStart(),
+      pluginStartPromise: getPluginStart(),
+      logger: this.logger,
+    }).catch((e) => {
+      this.logger?.error('Failed to add API keys to APM package policies');
+      this.logger?.error(e);
+    });
+
     const taskManager = plugins.taskManager;
 
     // create source map index and run migrations
     scheduleSourceMapMigration({
       coreStartPromise: getCoreStart(),
       pluginStartPromise: getPluginStart(),
-      fleetStartPromise,
       taskManager,
       logger: this.logger,
     }).catch((e) => {

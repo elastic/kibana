@@ -14,13 +14,14 @@ import { euiLightVars } from '@kbn/ui-theme';
 
 import { WithHoverActions } from '../../../../../common/components/with_hover_actions';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
+import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
 
 export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
   [RiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
-  [RiskSeverity.low]: euiLightVars.euiColorVis0,
-  [RiskSeverity.moderate]: euiLightVars.euiColorWarning,
-  [RiskSeverity.high]: euiLightVars.euiColorVis9_behindText,
-  [RiskSeverity.critical]: euiLightVars.euiColorDanger,
+  [RiskSeverity.low]: SEVERITY_COLOR.low,
+  [RiskSeverity.moderate]: SEVERITY_COLOR.medium,
+  [RiskSeverity.high]: SEVERITY_COLOR.high,
+  [RiskSeverity.critical]: SEVERITY_COLOR.critical,
 };
 
 const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`

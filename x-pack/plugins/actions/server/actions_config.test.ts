@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ActionsConfig } from './config';
 import {
@@ -30,16 +29,11 @@ const defaultActionsConfig: ActionsConfig = {
   rejectUnauthorized: true, // legacy
   maxResponseContentLength: new ByteSizeValue(1000000),
   responseTimeout: moment.duration(60000),
-  cleanupFailedExecutionsTask: {
-    enabled: true,
-    cleanupInterval: schema.duration().validate('5m'),
-    idleInterval: schema.duration().validate('1h'),
-    pageSize: 100,
-  },
   ssl: {
     proxyVerificationMode: 'full',
     verificationMode: 'full',
   },
+  enableFooterInEmail: true,
 };
 
 describe('ensureUriAllowed', () => {
@@ -532,5 +526,40 @@ describe('validateEmailAddresses()', () => {
     expect(message).toMatchInlineSnapshot(
       `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
     );
+  });
+});
+
+describe('getMaxAttempts()', () => {
+  test('returns the maxAttempts defined in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      run: { maxAttempts: 1 },
+    });
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(1);
+  });
+
+  test('returns the maxAttempts defined in config for the action type', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      run: { maxAttempts: 1, connectorTypeOverrides: [{ id: 'slack', maxAttempts: 4 }] },
+    });
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(4);
+  });
+
+  test('returns the maxAttempts passed by the action type', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const maxAttempts = acu.getMaxAttempts({ actionTypeMaxAttempts: 2, actionTypeId: 'slack' });
+    expect(maxAttempts).toEqual(2);
+  });
+
+  test('returns the default maxAttempts', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const maxAttempts = acu.getMaxAttempts({
+      actionTypeMaxAttempts: undefined,
+      actionTypeId: 'slack',
+    });
+    expect(maxAttempts).toEqual(3);
   });
 });

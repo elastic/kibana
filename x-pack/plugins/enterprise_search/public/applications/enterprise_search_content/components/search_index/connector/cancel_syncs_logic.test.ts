@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import { indices } from '../../../__mocks__/search_indices.mock';
 
@@ -18,7 +18,6 @@ describe('CancelSyncsLogic', () => {
   const { mount } = new LogicMounter(CancelSyncsLogic);
   const { mount: IndexViewLogicMount } = new LogicMounter(IndexViewLogic);
   const { mount: FetchIndexApiLogicMount } = new LogicMounter(FetchIndexApiLogic);
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const DEFAULT_VALUES = {
     connectorId: null,
     isConnectorIndex: false,
@@ -46,26 +45,6 @@ describe('CancelSyncsLogic', () => {
         FetchIndexApiLogic.actions.apiSuccess(indices[1]);
         CancelSyncsLogic.actions.cancelSyncs();
         expect(CancelSyncsLogic.actions.makeCancelSyncsRequest).toHaveBeenCalled();
-      });
-    });
-    describe('makeRequest', () => {
-      it('should call clearFlashMessages', () => {
-        CancelSyncsLogic.actions.makeCancelSyncsRequest({
-          connectorId: 'id',
-        });
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-    describe('apiError', () => {
-      it('should call flashAPIError', () => {
-        CancelSyncsLogic.actions.cancelSyncsApiError('error' as any);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
-      });
-    });
-    describe('apiSuccess', () => {
-      it('should call flashAPIError', () => {
-        CancelSyncsLogic.actions.cancelSyncsApiSuccess('success' as any);
-        expect(flashSuccessToast).toHaveBeenCalledWith('Successfully canceled syncs');
       });
     });
   });

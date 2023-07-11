@@ -8,15 +8,13 @@
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 
 import type {
   HostAggEsItem,
   HostsRequestOptions,
 } from '../../../../../../../common/search_strategy';
 import { Direction, HostsFields, HostsQueries } from '../../../../../../../common/search_strategy';
-import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
-import type { EndpointAppContext } from '../../../../../../endpoint/types';
+import { createMockEndpointAppContext } from '../../../../../../endpoint/mocks';
 
 export const mockOptions: HostsRequestOptions = {
   defaultIndex: [
@@ -713,15 +711,6 @@ export const expectedDsl = {
 export const mockDeps = {
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: {} as SavedObjectsClientContract,
-  endpointContext: {
-    logFactory: {
-      get: jest.fn(),
-    },
-    config: jest.fn().mockResolvedValue({}),
-    experimentalFeatures: {
-      ...allowedExperimentalValues,
-    },
-    service: {} as EndpointAppContextService,
-  } as EndpointAppContext,
+  endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
 };

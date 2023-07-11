@@ -1,0 +1,84 @@
+{
+  "id": "@kbn/ml-number-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-number-utils",
+        "id": "def-common.roundToDecimalPlace",
+        "type": "Function",
+        "tags": [],
+        "label": "roundToDecimalPlace",
+        "description": [
+          "\nRounds a number to a specified decimal place.\nIf the specified number is undefined, an empty string is returned.\n"
+        ],
+        "signature": [
+          "(num: number | undefined, dp: number) => string | number"
+        ],
+        "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-number-utils",
+            "id": "def-common.roundToDecimalPlace.$1",
+            "type": "number",
+            "tags": [],
+            "label": "num",
+            "description": [
+              "- number to round"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-number-utils",
+            "id": "def-common.roundToDecimalPlace.$2",
+            "type": "number",
+            "tags": [],
+            "label": "dp",
+            "description": [
+              "- decimal place, default value is 2"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "rounded number"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

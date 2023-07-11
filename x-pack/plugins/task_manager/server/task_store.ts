@@ -10,9 +10,10 @@
  */
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
+import type { SavedObjectsBulkDeleteResponse, Logger } from '@kbn/core/server';
 
 import {
   SavedObject,
@@ -35,6 +36,7 @@ import {
 
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { TaskValidator } from './task_validator';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -44,6 +46,8 @@ export interface StoreOpts {
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
   adHocTaskCounter: AdHocTaskCounter;
+  allowReadingInvalidState: boolean;
+  logger: Logger;
 }
 
 export interface SearchOpts {
@@ -75,7 +79,11 @@ export interface FetchResult {
 
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
-  { entity: ConcreteTaskInstance; error: Error }
+  { type: string; id: string; error: SavedObjectError }
+>;
+
+export type BulkGetResult = Array<
+  Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
 
 export interface UpdateByQueryResult {
@@ -92,8 +100,10 @@ export class TaskStore {
   public readonly index: string;
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
+  public readonly taskValidator: TaskValidator;
 
   private esClient: ElasticsearchClient;
+  private esClientWithoutRetries: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
@@ -116,6 +126,16 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.taskValidator = new TaskValidator({
+      logger: opts.logger,
+      definitions: opts.definitions,
+      allowReadingInvalidState: opts.allowReadingInvalidState,
+    });
+    this.esClientWithoutRetries = opts.esClient.child({
+      // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
+      // The poller doesn't need retry logic because it will try again at the next polling cycle
+      maxRetries: 0,
+    });
   }
 
   /**
@@ -139,9 +159,11 @@ export class TaskStore {
 
     let savedObject;
     try {
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
-        taskInstanceToAttributes(taskInstance),
+        taskInstanceToAttributes(validatedTaskInstance),
         { id: taskInstance.id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
@@ -152,7 +174,8 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjectToConcreteTaskInstance(savedObject);
+    const result = savedObjectToConcreteTaskInstance(savedObject);
+    return this.taskValidator.getValidatedTaskInstanceFromReading(result);
   }
 
   /**
@@ -163,9 +186,11 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(taskInstance),
+        attributes: taskInstanceToAttributes(validatedTaskInstance),
         id: taskInstance.id,
       };
     });
@@ -186,7 +211,10 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjects.saved_objects.map((so) => savedObjectToConcreteTaskInstance(so));
+    return savedObjects.saved_objects.map((so) => {
+      const taskInstance = savedObjectToConcreteTaskInstance(so);
+      return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+    });
   }
 
   /**
@@ -211,8 +239,14 @@ export class TaskStore {
    * @param {TaskDoc} doc
    * @returns {Promise<TaskDoc>}
    */
-  public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const attributes = taskInstanceToAttributes(doc);
+  public async update(
+    doc: ConcreteTaskInstance,
+    options: { validate: boolean }
+  ): Promise<ConcreteTaskInstance> {
+    const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
+      validate: options.validate,
+    });
+    const attributes = taskInstanceToAttributes(taskInstance);
 
     let updatedSavedObject;
     try {
@@ -230,13 +264,16 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjectToConcreteTaskInstance(
+    const result = savedObjectToConcreteTaskInstance(
       // The SavedObjects update api forces a Partial on the `attributes` on the response,
       // but actually returns the whole object that is passed to it, so as we know we're
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
+    return this.taskValidator.getValidatedTaskInstanceFromReading(result, {
+      validate: options.validate,
+    });
   }
 
   /**
@@ -246,20 +283,26 @@ export class TaskStore {
    * @param {Array<TaskDoc>} docs
    * @returns {Promise<Array<TaskDoc>>}
    */
-  public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
+  public async bulkUpdate(
+    docs: ConcreteTaskInstance[],
+    options: { validate: boolean }
+  ): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      attrsById.set(doc.id, taskInstanceToAttributes(doc));
+      const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
+        validate: options.validate,
+      });
+      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance));
       return attrsById;
     }, new Map());
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
+    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
           docs.map((doc) => ({
             type: 'task',
             id: doc.id,
-            options: { version: doc.version },
+            version: doc.version,
             attributes: attributesByDocId.get(doc.id)!,
           })),
           {
@@ -271,25 +314,27 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
-      isSavedObjectsUpdateResponse(updatedSavedObject)
-        ? asOk(
-            savedObjectToConcreteTaskInstance({
-              ...updatedSavedObject,
-              attributes: defaults(
-                updatedSavedObject.attributes,
-                attributesByDocId.get(updatedSavedObject.id)!
-              ),
-            })
-          )
-        : asErr({
-            // The SavedObjectsRepository maintains the order of the docs
-            // so we can rely on the index in the `docs` to match an error
-            // on the same index in the `bulkUpdate` result
-            entity: docs[index],
-            error: updatedSavedObject,
-          })
-    );
+    return updatedSavedObjects.map((updatedSavedObject) => {
+      if (updatedSavedObject.error !== undefined) {
+        return asErr({
+          type: 'task',
+          id: updatedSavedObject.id,
+          error: updatedSavedObject.error,
+        });
+      }
+
+      const taskInstance = savedObjectToConcreteTaskInstance({
+        ...updatedSavedObject,
+        attributes: defaults(
+          updatedSavedObject.attributes,
+          attributesByDocId.get(updatedSavedObject.id)!
+        ),
+      });
+      const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
+        validate: options.validate,
+      });
+      return asOk(result);
+    });
   }
 
   /**
@@ -337,7 +382,35 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
-    return savedObjectToConcreteTaskInstance(result);
+    const taskInstance = savedObjectToConcreteTaskInstance(result);
+    return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+  }
+
+  /**
+   * Gets tasks by ids
+   *
+   * @param {Array<string>} ids
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async bulkGet(ids: string[]): Promise<BulkGetResult> {
+    let result;
+    try {
+      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        ids.map((id) => ({ type: 'task', id }))
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+    return result.saved_objects.map((task) => {
+      if (task.error) {
+        return asErr({ id: task.id, type: task.type, error: task.error });
+      }
+      const taskInstance = savedObjectToConcreteTaskInstance(task);
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+      return asOk(validatedTaskInstance);
+    });
   }
 
   /**
@@ -364,7 +437,7 @@ export class TaskStore {
     try {
       const {
         hits: { hits: tasks },
-      } = await this.esClient.search<SavedObjectsRawDoc['_source']>({
+      } = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
         body: {
@@ -380,7 +453,9 @@ export class TaskStore {
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-          .map(savedObjectToConcreteTaskInstance),
+          .map((doc) => savedObjectToConcreteTaskInstance(doc))
+          .map((doc) => this.taskValidator.getValidatedTaskInstanceFromReading(doc))
+          .filter((doc): doc is ConcreteTaskInstance => !!doc),
       };
     } catch (e) {
       this.errors$.next(e);
@@ -420,7 +495,7 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
       const // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClient.updateByQuery({
+        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery({
           index: this.index,
           ignore_unavailable: true,
           refresh: true,
@@ -534,10 +609,4 @@ function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): Aggrega
     ...opts,
     query,
   };
-}
-
-function isSavedObjectsUpdateResponse(
-  result: SavedObjectsUpdateResponse | Error
-): result is SavedObjectsUpdateResponse {
-  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }

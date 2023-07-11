@@ -1,0 +1,404 @@
+{
+  "id": "@kbn/repo-file-maps",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/repo-file-maps",
+        "id": "def-common.PackageFileMap",
+        "type": "Class",
+        "tags": [],
+        "label": "PackageFileMap",
+        "description": [],
+        "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.PackageFileMap.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.PackageFileMap.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "packages",
+                "description": [],
+                "signature": [
+                  "Package",
+                  "[]"
+                ],
+                "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.PackageFileMap.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "allFiles",
+                "description": [],
+                "signature": [
+                  "Iterable<",
+                  {
+                    "pluginId": "@kbn/repo-path",
+                    "scope": "common",
+                    "docId": "kibKbnRepoPathPluginApi",
+                    "section": "def-common.RepoPath",
+                    "text": "RepoPath"
+                  },
+                  ">"
+                ],
+                "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.PackageFileMap.getAllFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllFiles",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/repo-path",
+                "scope": "common",
+                "docId": "kibKbnRepoPathPluginApi",
+                "section": "def-common.RepoPath",
+                "text": "RepoPath"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.PackageFileMap.getFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiles",
+            "description": [],
+            "signature": [
+              "(pkg: ",
+              "Package",
+              ") => Iterable<",
+              {
+                "pluginId": "@kbn/repo-path",
+                "scope": "common",
+                "docId": "kibKbnRepoPathPluginApi",
+                "section": "def-common.RepoPath",
+                "text": "RepoPath"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.PackageFileMap.getFiles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "pkg",
+                "description": [],
+                "signature": [
+                  "Package"
+                ],
+                "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.PackageFileMap.getPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "getPackage",
+            "description": [],
+            "signature": [
+              "(repoRel: string) => ",
+              "Package",
+              " | undefined"
+            ],
+            "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.PackageFileMap.getPackage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "repoRel",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.PackageFileMap.getUnassigned",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnassigned",
+            "description": [],
+            "signature": [
+              "() => Iterable<",
+              {
+                "pluginId": "@kbn/repo-path",
+                "scope": "common",
+                "docId": "kibKbnRepoPathPluginApi",
+                "section": "def-common.RepoPath",
+                "text": "RepoPath"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.PackageFileMap.getFilesForLintTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilesForLintTarget",
+            "description": [],
+            "signature": [
+              "(target: ",
+              {
+                "pluginId": "@kbn/repo-linter",
+                "scope": "common",
+                "docId": "kibKbnRepoLinterPluginApi",
+                "section": "def-common.LintTarget",
+                "text": "LintTarget"
+              },
+              ") => Iterable<",
+              {
+                "pluginId": "@kbn/repo-path",
+                "scope": "common",
+                "docId": "kibKbnRepoPathPluginApi",
+                "section": "def-common.RepoPath",
+                "text": "RepoPath"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.PackageFileMap.getFilesForLintTarget.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "target",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/repo-linter",
+                    "scope": "common",
+                    "docId": "kibKbnRepoLinterPluginApi",
+                    "section": "def-common.LintTarget",
+                    "text": "LintTarget"
+                  }
+                ],
+                "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/repo-file-maps",
+        "id": "def-common.TsProjectFileMap",
+        "type": "Class",
+        "tags": [],
+        "label": "TsProjectFileMap",
+        "description": [],
+        "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.TsProjectFileMap.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.TsProjectFileMap.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "pkgFileMap",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/repo-file-maps",
+                    "scope": "common",
+                    "docId": "kibKbnRepoFileMapsPluginApi",
+                    "section": "def-common.PackageFileMap",
+                    "text": "PackageFileMap"
+                  }
+                ],
+                "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.TsProjectFileMap.Unnamed.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "tsProjects",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ts-projects",
+                    "scope": "common",
+                    "docId": "kibKbnTsProjectsPluginApi",
+                    "section": "def-common.TsProject",
+                    "text": "TsProject"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/repo-file-maps",
+            "id": "def-common.TsProjectFileMap.getFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiles",
+            "description": [],
+            "signature": [
+              "(tsProject: ",
+              {
+                "pluginId": "@kbn/ts-projects",
+                "scope": "common",
+                "docId": "kibKbnTsProjectsPluginApi",
+                "section": "def-common.TsProject",
+                "text": "TsProject"
+              },
+              ") => Iterable<",
+              {
+                "pluginId": "@kbn/repo-path",
+                "scope": "common",
+                "docId": "kibKbnRepoPathPluginApi",
+                "section": "def-common.RepoPath",
+                "text": "RepoPath"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/repo-file-maps",
+                "id": "def-common.TsProjectFileMap.getFiles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tsProject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ts-projects",
+                    "scope": "common",
+                    "docId": "kibKbnTsProjectsPluginApi",
+                    "section": "def-common.TsProject",
+                    "text": "TsProject"
+                  }
+                ],
+                "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

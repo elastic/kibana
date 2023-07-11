@@ -46,16 +46,14 @@ export const resolveCapabilities = async (
   applications: string[],
   useDefaultCapabilities: boolean
 ): Promise<Capabilities> => {
-  const mergedCaps = cloneDeep({
+  const mergedCaps: Capabilities = cloneDeep({
     ...capabilities,
-    navLinks: applications.reduce(
-      (acc, app) => ({
-        ...acc,
-        [app]: true,
-      }),
-      capabilities.navLinks
-    ),
+    navLinks: applications.reduce((acc, app) => {
+      acc[app] = true;
+      return acc;
+    }, capabilities.navLinks),
   });
+
   return switchers.reduce(async (caps, switcher) => {
     const resolvedCaps = await caps;
     const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
@@ -79,11 +77,8 @@ function recursiveApplyChanges<
       }
       return [key, typeof orig === typeof changed ? changed : orig];
     })
-    .reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value,
-      }),
-      {} as TDestination
-    );
+    .reduce((acc, [key, value]) => {
+      acc[key as keyof TDestination] = value;
+      return acc;
+    }, {} as TDestination);
 }

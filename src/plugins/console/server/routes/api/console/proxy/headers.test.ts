@@ -96,5 +96,23 @@ describe('Console Proxy Route', () => {
       expect(headers).toHaveProperty('x-elastic-product-origin');
       expect(headers['x-elastic-product-origin']).toBe('kibana');
     });
+
+    it('sends es status code and status text as headers', async () => {
+      const response = await handler(
+        {} as any,
+        {
+          headers: {},
+          query: {
+            method: 'POST',
+            path: '/api/console/proxy?path=_aliases&method=GET',
+          },
+        } as any,
+        kibanaResponseFactory
+      );
+
+      const { headers } = response.options;
+      expect(headers).toHaveProperty('x-console-proxy-status-code');
+      expect(headers).toHaveProperty('x-console-proxy-status-text');
+    });
   });
 });

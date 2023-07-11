@@ -11,7 +11,7 @@ import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { EqlRuleParams } from '../../rule_schema';
 import { eqlRuleParams } from '../../rule_schema';
-import { eqlExecutor } from '../../signals/executors/eql';
+import { eqlExecutor } from './eql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 

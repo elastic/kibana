@@ -40,7 +40,7 @@ const ErrorPage: React.FC<Props> = ({ title, children }) => {
       <EuiPageBody>
         <EuiPageContent verticalPosition="center" horizontalPosition="center">
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             iconColor="danger"
             title={<h2>{title}</h2>}
             body={children}

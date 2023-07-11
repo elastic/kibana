@@ -15,7 +15,7 @@ experimental[] Create a {kib} space.
 ==== Request body
 
 `id`::
-  (Required, string) The space ID that is part of the Kibana URL when inside the space. You are unable to change the ID with the update operation.
+  (Required, string) The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, '_', and '-'). You are unable to change the ID with the update operation.
 
 `name`::
   (Required, string) The display name for the space.

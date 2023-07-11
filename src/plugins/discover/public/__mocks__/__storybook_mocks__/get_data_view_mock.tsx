@@ -11,13 +11,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 export function getDataViewMock(isTimebased = true) {
   const fields = [
     {
-      name: '_index',
-      type: 'string',
-      scripted: false,
-      filterable: true,
-      aggregatable: false,
-    },
-    {
       name: 'date',
       type: 'date',
       displayName: 'Date',
@@ -80,14 +73,16 @@ export function getDataViewMock(isTimebased = true) {
     getFormatterForField: () => ({
       convert: (name: string) => name,
     }),
-    getFieldByName: () => {
-      return fields[0];
+    getFieldByName: (name: string) => {
+      return fields.find((field) => field.name === name);
     },
+    getIndexPattern: () => 'test',
     metaFields: [],
     timeFieldName: isTimebased ? 'date' : undefined,
+    isPersisted: () => true,
   } as unknown as DataView;
 
-  dataViewMock.fields.getByName = () => fields[0];
+  dataViewMock.fields.getByName = (name: string) => fields.find((field) => field.name === name);
   dataViewMock.fields.getAll = () => fields;
   return dataViewMock;
 }

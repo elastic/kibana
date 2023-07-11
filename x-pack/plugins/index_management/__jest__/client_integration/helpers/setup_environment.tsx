@@ -14,11 +14,13 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
   uiSettingsServiceMock,
+  themeServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
@@ -60,6 +62,8 @@ export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
+  settings: settingsServiceMock.createStartContract(),
+  theme: themeServiceMock.createStartContract(),
   kibanaVersion: {
     get: () => kibanaVersion,
   },
@@ -68,7 +72,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
 export const setupEnvironment = () => {
   breadcrumbService.setup(() => undefined);
   documentationService.setup(docLinksServiceMock.createStartContract());
-  notificationService.setup(notificationServiceMock.createSetupContract());
+  notificationService.setup(notificationServiceMock.createStartContract());
 
   return initHttpRequests();
 };

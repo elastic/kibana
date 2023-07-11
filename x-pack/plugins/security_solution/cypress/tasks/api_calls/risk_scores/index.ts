@@ -283,7 +283,7 @@ export const installLegacyRiskScoreModule = (
   }
 };
 
-export const intercepInstallRiskScoreModule = () => {
+export const interceptInstallRiskScoreModule = () => {
   cy.intercept(`POST`, RISK_SCORE_URL).as('install');
 };
 

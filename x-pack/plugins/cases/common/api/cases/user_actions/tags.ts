@@ -9,9 +9,9 @@ import * as rt from 'io-ts';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const TagsUserActionPayloadRt = rt.type({ tags: rt.array(rt.string) });
+export const TagsUserActionPayloadRt = rt.strict({ tags: rt.array(rt.string) });
 
-export const TagsUserActionRt = rt.type({
+export const TagsUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.tags),
   payload: TagsUserActionPayloadRt,
 });

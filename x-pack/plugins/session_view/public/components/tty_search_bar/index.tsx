@@ -7,7 +7,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import stripAnsi from 'strip-ansi';
 import { SessionViewSearchBar } from '../session_view_search_bar';
-import { IOLine } from '../../../common/types/process_tree';
+import type { IOLine } from '../../../common';
 
 interface SearchResult {
   line: IOLine;

@@ -19,9 +19,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { TableId } from '../../../../../common/types';
-import { tableDefaults } from '../../../../common/store/data_table/defaults';
-import { dataTableSelectors } from '../../../../common/store/data_table';
+import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -37,7 +35,7 @@ import { hostToCriteria } from '../../../../common/components/ml/criteria/host_t
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -51,7 +49,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import type { HostDetailsProps } from './types';
-import { type } from './utils';
+import { HostsType } from '../../store/model';
 import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -192,8 +190,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 }
                 title={detailName}
                 rightSideItems={[
-                  hostOverview.endpoint?.fleetAgentId && (
-                    <ResponderActionButton endpointId={hostOverview.endpoint?.fleetAgentId} />
+                  hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
+                    <ResponderActionButton
+                      endpointId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                    />
                   ),
                 ]}
               />
@@ -204,7 +204,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 endDate={to}
                 skip={isInitializing}
               >
-                {({ isLoadingAnomaliesData, anomaliesData }) => (
+                {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                   <HostOverviewManage
                     id={id}
                     isInDetailsSidePanel={false}
@@ -220,6 +220,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     inspect={inspect}
                     hostName={detailName}
                     indexNames={selectedPatterns}
+                    jobNameById={jobNameById}
                   />
                 )}
               </AnomalyTableProvider>
@@ -248,7 +249,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 </>
               )}
 
-              <SecuritySolutionTabNavigation
+              <TabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: isPlatinumOrTrialLicense,
@@ -268,7 +269,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               to={to}
               from={from}
               detailName={detailName}
-              type={type}
+              type={HostsType.details}
               setQuery={setQuery}
               filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}

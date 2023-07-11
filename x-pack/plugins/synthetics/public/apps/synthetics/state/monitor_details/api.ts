@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/types';
+import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsSavedMonitor,
+  EncryptedSyntheticsMonitorCodec,
   PingsResponse,
   PingsResponseType,
-  SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export const fetchMonitorLastRun = async ({
   monitorId,
@@ -47,7 +47,7 @@ export const fetchMonitorRecentPings = async ({
     SYNTHETICS_API_URLS.PINGS,
     {
       monitorId,
-      from: from ?? new Date(0).toISOString(),
+      from: from ?? moment().subtract(30, 'days').toISOString(),
       to: to ?? new Date().toISOString(),
       locations,
       sort,
@@ -62,14 +62,9 @@ export const fetchSyntheticsMonitor = async ({
   monitorId,
 }: {
   monitorId: string;
-}): Promise<EncryptedSyntheticsSavedMonitor> => {
-  const savedObject = (await apiService.get(
-    `${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
-  )) as SavedObject<SyntheticsMonitor>;
-
-  return {
-    ...savedObject.attributes,
-    updated_at: savedObject.updated_at,
-    created_at: savedObject.created_at,
-  } as EncryptedSyntheticsSavedMonitor;
-};
+}): Promise<EncryptedSyntheticsSavedMonitor> =>
+  apiService.get<EncryptedSyntheticsSavedMonitor>(
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
+    undefined,
+    EncryptedSyntheticsMonitorCodec
+  );

@@ -18,22 +18,28 @@ const StyledJobEuiLInk = styled(EuiLink)`
 
 interface MlJobLinkProps {
   jobId: string;
+  jobName: string | undefined;
 }
 
-const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId }) => {
+const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId, jobName }) => {
   const {
     services: { http, ml },
   } = useKibana();
-  const jobUrl = useMlHref(ml, http.basePath.get(), {
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    pageState: {
-      jobId: [jobId],
+  const jobUrl = useMlHref(
+    ml,
+    http.basePath.get(),
+    {
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+      pageState: {
+        jobId: [jobId],
+      },
     },
-  });
+    [jobId]
+  );
 
   return (
     <StyledJobEuiLInk data-test-subj="machineLearningJobLink" href={jobUrl} target="_blank">
-      <span data-test-subj="machineLearningJobId">{jobId}</span>
+      <span data-test-subj="machineLearningJob">{jobName ?? jobId}</span>
     </StyledJobEuiLInk>
   );
 };

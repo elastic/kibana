@@ -103,6 +103,7 @@ describe('helpers', () => {
         updated_at: '2022-01-01',
         updated_by: 'qwerty',
         download_source_id: 'test-ds-1',
+        is_protected: false,
       };
 
       expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual(
@@ -120,6 +121,7 @@ describe('helpers', () => {
         name: 'Policy',
         updated_at: '2022-01-01',
         updated_by: 'qwerty',
+        is_protected: false,
       };
 
       expect(await getSourceUriForAgentPolicy(soClientMock, agentPolicy)).toEqual(

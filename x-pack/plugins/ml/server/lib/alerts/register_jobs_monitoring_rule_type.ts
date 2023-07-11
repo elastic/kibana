@@ -179,6 +179,8 @@ export function registerJobsMonitoringRuleType({
           recoveredAlert.setContext(testResult.context);
         }
       }
+
+      return { state: {} };
     },
   });
 }

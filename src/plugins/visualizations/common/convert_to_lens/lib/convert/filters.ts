@@ -7,7 +7,7 @@
  */
 
 import { AggParamsFilters } from '@kbn/data-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FiltersColumn } from './types';
 
 export const convertToFiltersColumn = (
@@ -20,7 +20,7 @@ export const convertToFiltersColumn = (
   }
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'filters',
     dataType: 'string',
     isBucketed: true,

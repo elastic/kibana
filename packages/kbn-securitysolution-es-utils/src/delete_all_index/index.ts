@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '../elasticsearch_client';
 export const deleteAllIndex = async (
   esClient: ElasticsearchClient,
   pattern: string,
+  specifyAlias: boolean = false,
   maxAttempts = 5
 ): Promise<boolean> => {
   for (let attempt = 1; ; attempt++) {
@@ -22,9 +23,14 @@ export const deleteAllIndex = async (
 
     // resolve pattern to concrete index names
     const { body: resp } = await esClient.indices.getAlias(
-      {
-        index: pattern,
-      },
+      specifyAlias
+        ? {
+            name: pattern,
+            index: `${pattern}-*`,
+          }
+        : {
+            index: pattern,
+          },
       { ignore: [404], meta: true }
     );
 

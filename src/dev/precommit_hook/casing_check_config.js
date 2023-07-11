@@ -26,8 +26,11 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/canvas/server/templates/assets/*.{png,jpg,svg}',
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
+  'x-pack/plugins/fleet/cypress/packages/*.zip',
+  'x-pack/plugins/apm/ftr_e2e/cypress/e2e/power_user/diagnostics/apm-diagnostics-*.json',
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
@@ -41,6 +44,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
+  'x-pack/plugins/security_solution/scripts/endpoint/endpoint_agent_runner/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
   // Required to match the name in the docs.elastic.dev repo.
@@ -81,7 +85,7 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack', 'x-pack/packages/*'];
 
 /**
  * These patterns are matched against directories and indicate

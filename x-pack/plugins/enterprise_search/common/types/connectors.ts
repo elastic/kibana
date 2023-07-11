@@ -5,17 +5,85 @@
  * 2.0.
  */
 
-export interface KeyValuePair {
+export interface SelectOption {
   label: string;
-  value: string | null;
+  value: string;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+export interface Dependency {
+  field: string;
+  value: string | number | boolean | null;
+}
+
+export type DependencyLookup = Record<string, string | number | boolean | null>;
+
+export enum DisplayType {
+  TEXTBOX = 'textbox',
+  TEXTAREA = 'textarea',
+  NUMERIC = 'numeric',
+  TOGGLE = 'toggle',
+  DROPDOWN = 'dropdown',
+}
+
+export enum FieldType {
+  STRING = 'str',
+  INTEGER = 'int',
+  LIST = 'list',
+  BOOLEAN = 'bool',
+}
+
+export interface ConnectorConfigCategoryProperties {
+  label: string;
+  order: number;
+  type: 'category';
+}
+
+export interface Validation {
+  constraint: string | number;
+  type: string;
+}
+
+export interface ConnectorConfigProperties {
+  category?: string;
+  default_value: string | number | boolean | null;
+  depends_on: Dependency[];
+  display: DisplayType;
+  label: string;
+  options: SelectOption[];
+  order?: number | null;
+  placeholder?: string;
+  required: boolean;
+  sensitive: boolean;
+  tooltip: string | null;
+  type: FieldType;
+  ui_restrictions: string[];
+  validations: Validation[];
+  value: string | number | boolean | null;
+}
+
+export type ConnectorConfiguration = Record<
+  string,
+  ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
+> & {
+  extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
+  use_document_level_security?: ConnectorConfigProperties;
+  use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
+};
 
 export interface ConnectorScheduling {
   enabled: boolean;
-  interval: string;
+  interval: string; // interval has crontab syntax
 }
+
+export interface CustomScheduling {
+  configuration_overrides: Record<string, unknown>;
+  enabled: boolean;
+  interval: string;
+  last_synced: string | null;
+  name: string;
+}
+
+export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
 
 export enum ConnectorStatus {
   CREATED = 'created',
@@ -103,32 +171,65 @@ export enum TriggerMethod {
   SCHEDULED = 'scheduled',
 }
 
+export enum SyncJobType {
+  FULL = 'full',
+  INCREMENTAL = 'incremental',
+  ACCESS_CONTROL = 'access_control',
+}
+
 export enum FeatureName {
   FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
   FILTERING_RULES = 'filtering_rules',
+  DOCUMENT_LEVEL_SECURITY = 'document_level_security',
+  INCREMENTAL_SYNC = 'incremental_sync',
+  SYNC_RULES = 'sync_rules',
+}
+
+export type ConnectorFeatures = Partial<{
+  [FeatureName.DOCUMENT_LEVEL_SECURITY]: { enabled: boolean };
+  [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
+  [FeatureName.FILTERING_RULES]: boolean;
+  [FeatureName.INCREMENTAL_SYNC]: { enabled: boolean };
+  [FeatureName.SYNC_RULES]: {
+    advanced?: {
+      enabled: boolean;
+    };
+    basic?: {
+      enabled: boolean;
+    };
+  };
+}> | null;
+
+export interface SchedulingConfiguraton {
+  access_control: ConnectorScheduling;
+  full: ConnectorScheduling;
+  incremental: ConnectorScheduling;
 }
 
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
-  features: Partial<Record<FeatureName, boolean>> | null;
+  features: ConnectorFeatures;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;
   is_native: boolean;
   language: string | null;
+  last_access_control_sync_error: string | null;
+  last_access_control_sync_scheduled_at: string | null;
+  last_access_control_sync_status: SyncStatus | null;
+  last_incremental_sync_scheduled_at: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
+  last_sync_scheduled_at: string | null;
   last_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
-  scheduling: {
-    enabled: boolean;
-    interval: string; // crontab syntax
-  };
+  scheduling: SchedulingConfiguraton;
   service_type: string | null;
   status: ConnectorStatus;
   sync_now: boolean;
@@ -142,12 +243,12 @@ export interface ConnectorSyncJob {
   completed_at: string | null;
   connector: {
     configuration: ConnectorConfiguration;
-    filtering: FilteringRules[] | null;
+    filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
-    language: string;
+    language: string | null;
     pipeline: IngestPipelineParams | null;
-    service_type: string;
+    service_type: string | null;
   };
   created_at: string;
   deleted_document_count: number;
@@ -155,12 +256,14 @@ export interface ConnectorSyncJob {
   id: string;
   indexed_document_count: number;
   indexed_document_volume: number;
-  last_seen: string;
+  job_type: SyncJobType;
+  last_seen: string | null;
   metadata: Record<string, unknown>;
-  started_at: string;
+  started_at: string | null;
   status: SyncStatus;
+  total_document_count: number | null;
   trigger_method: TriggerMethod;
-  worker_hostname: string;
+  worker_hostname: string | null;
 }
 
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;

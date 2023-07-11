@@ -6,8 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+
 import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -20,12 +21,10 @@ import {
 } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { getPolicyDetailPath } from '../../common/routing';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export const PolicyContainer = memo(() => {
-  const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   return (
-    <Switch>
+    <Routes>
       <Route
         path={[
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -42,11 +41,9 @@ export const PolicyContainer = memo(() => {
         exact
         render={(props) => <Redirect to={getPolicyDetailPath(props.match.params.policyId)} />}
       />
-      {isPolicyListEnabled && (
-        <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
-      )}
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

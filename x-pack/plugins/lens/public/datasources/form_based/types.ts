@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DragDropIdentifier } from '../../drag_drop/providers';
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import type { IndexPattern, IndexPatternField, DragDropOperation } from '../../types';
 
@@ -55,6 +55,7 @@ export interface FormBasedLayer {
   // Partial columns represent the temporary invalid states
   incompleteColumns?: Record<string, IncompleteColumn>;
   sampling?: number;
+  ignoreGlobalFilters?: boolean;
 }
 
 export interface FormBasedPersistedState {

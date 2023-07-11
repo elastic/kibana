@@ -5,5 +5,8 @@
  * 2.0.
  */
 
+export * from './invalid_state_callout';
 export * from './notification_channel';
 export * from './send_actions';
+export * from './types';
+export * from './state_machine_playground';

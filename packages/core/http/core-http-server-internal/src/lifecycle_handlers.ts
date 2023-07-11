@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Env } from '@kbn/config';
 import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import { HttpConfig } from './http_config';
-import { LifecycleRegistrar } from './http_server';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
@@ -35,6 +34,27 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
       return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
     }
 
+    return toolkit.next();
+  };
+};
+
+export const createRestrictInternalRoutesPostAuthHandler = (
+  config: HttpConfig
+): OnPostAuthHandler => {
+  const isRestrictionEnabled = config.restrictInternalApis;
+
+  return (request, response, toolkit) => {
+    const isInternalRoute = request.route.options.access === 'internal';
+
+    // only check if the header is present, not it's content.
+    const hasInternalKibanaRequestHeader = X_ELASTIC_INTERNAL_ORIGIN_REQUEST in request.headers;
+
+    if (isRestrictionEnabled && isInternalRoute && !hasInternalKibanaRequestHeader) {
+      // throw 400
+      return response.badRequest({
+        body: `uri [${request.url}] with method [${request.route.method}] exists but is not available with the current configuration`,
+      });
+    }
     return toolkit.next();
   };
 };
@@ -75,17 +95,6 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
       'Content-Security-Policy': cspHeader,
       [KIBANA_NAME_HEADER]: serverName,
     };
-
     return toolkit.next({ headers: additionalHeaders });
   };
-};
-
-export const registerCoreHandlers = (
-  registrar: LifecycleRegistrar,
-  config: HttpConfig,
-  env: Env
-) => {
-  registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
-  registrar.registerOnPostAuth(createXsrfPostAuthHandler(config));
-  registrar.registerOnPostAuth(createVersionCheckPostAuthHandler(env.packageInfo.version));
 };

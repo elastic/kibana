@@ -113,10 +113,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // in that case, this `catch` block is actually the "happy" path.
             // However, if the thrown error looks different from what we
             // expect, then re-throw it.
-            if (err.res === undefined) {
+            if (err.response === undefined) {
               throw err;
             }
-            response = err.res;
+            response = err.response;
           }
 
           return {

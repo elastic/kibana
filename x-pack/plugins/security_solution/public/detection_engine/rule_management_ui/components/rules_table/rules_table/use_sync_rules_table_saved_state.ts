@@ -6,10 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import {
-  encodeRisonUrlState,
-  useReplaceUrlParams,
-} from '../../../../../common/utils/global_query_string/helpers';
+import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
@@ -53,6 +50,11 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.tags = state.filterOptions.tags;
     }
 
+    if (state.filterOptions.enabled !== undefined) {
+      urlStateToSave.enabled = state.filterOptions.enabled;
+      storageStateToSave.enabled = state.filterOptions.enabled;
+    }
+
     if (state.sortingOptions.field !== DEFAULT_SORTING_OPTIONS.field) {
       urlStateToSave.field = state.sortingOptions.field;
       storageStateToSave.field = state.sortingOptions.field;
@@ -72,11 +74,16 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.perPage = state.pagination.perPage;
     }
 
+    if (state.filterOptions.ruleExecutionStatus !== undefined) {
+      urlStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
+      storageStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
+    }
+
     const hasUrlStateToSave = Object.keys(urlStateToSave).length > 0;
     const hasStorageStateToSave = Object.keys(storageStateToSave).length > 0;
 
     if (!hasUrlStateToSave) {
-      replaceUrlParams([{ key: URL_PARAM_KEY.rulesTable, value: null }]);
+      replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: null });
     }
 
     if (!hasStorageStateToSave) {
@@ -87,9 +94,7 @@ export function useSyncRulesTableSavedState(): void {
       return;
     }
 
-    replaceUrlParams([
-      { key: URL_PARAM_KEY.rulesTable, value: encodeRisonUrlState(urlStateToSave) },
-    ]);
+    replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: urlStateToSave });
     sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, storageStateToSave);
   }, [replaceUrlParams, sessionStorage, state]);
 }

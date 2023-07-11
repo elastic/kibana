@@ -48,7 +48,7 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(
           aria-label={`firstLastSeenError-${type}`}
           id={`firstLastSeenError-${field}-${type}`}
         >
-          <EuiIcon aria-describedby={`firstLastSeenError-${field}-${type}`} type="alert" />
+          <EuiIcon aria-describedby={`firstLastSeenError-${field}-${type}`} type="warning" />
         </EuiToolTip>
       );
     }

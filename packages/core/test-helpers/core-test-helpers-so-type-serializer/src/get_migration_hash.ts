@@ -8,7 +8,7 @@
 
 import { createHash } from 'crypto';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { extractMigrationInfo } from './extract_migration_info';
+import { extractMigrationInfo, ModelVersionSummary } from './extract_migration_info';
 
 type SavedObjectTypeMigrationHash = string;
 
@@ -26,8 +26,21 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
     migInfo.migrationVersions.join(','),
     migInfo.schemaVersions.join(','),
     JSON.stringify(migInfo.mappings, Object.keys(migInfo.mappings).sort()),
+    migInfo.switchToModelVersionAt ?? 'none',
+    migInfo.modelVersions.map(serializeModelVersion).join(','),
   ];
   const hashFeed = hashParts.join('-');
 
   return hash.update(hashFeed).digest('hex');
+};
+
+const serializeModelVersion = (modelVersion: ModelVersionSummary): string => {
+  const schemas = [modelVersion.schemas.forwardCompatibility];
+  return [
+    modelVersion.version,
+    modelVersion.changeTypes.join(','),
+    modelVersion.hasTransformation,
+    schemas.join(','),
+    ...modelVersion.newMappings,
+  ].join('|');
 };

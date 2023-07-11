@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import { ProfilingConfig } from '..';
 import {
   ProfilingPluginSetupDeps,
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
 } from '../types';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
-
-import { registerCacheExecutablesRoute, registerCacheStackFramesRoute } from './cache';
-
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
-
+import { registerSetupRoute } from './setup';
 import {
   registerTraceEventsTopNContainersSearchRoute,
   registerTraceEventsTopNDeploymentsSearchRoute,
@@ -34,18 +32,18 @@ export interface RouteRegisterParameters {
   dependencies: {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
+    config: ProfilingConfig;
   };
   services: {
     createProfilingEsClient: (params: {
       request: KibanaRequest;
       esClient: ElasticsearchClient;
+      useDefaultAuth?: boolean;
     }) => ProfilingESClient;
   };
 }
 
 export function registerRoutes(params: RouteRegisterParameters) {
-  registerCacheExecutablesRoute(params);
-  registerCacheStackFramesRoute(params);
   registerFlameChartSearchRoute(params);
   registerTopNFunctionsSearchRoute(params);
   registerTraceEventsTopNContainersSearchRoute(params);
@@ -53,4 +51,7 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerTraceEventsTopNHostsSearchRoute(params);
   registerTraceEventsTopNStackTracesSearchRoute(params);
   registerTraceEventsTopNThreadsSearchRoute(params);
+  // Setup of Profiling resources, automates the configuration of Universal Profiling
+  // and will show instructions on how to add data
+  registerSetupRoute(params);
 }

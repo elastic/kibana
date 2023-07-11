@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-base-server-mocks",
-        "id": "def-server.mockCoreContext",
+        "id": "def-common.mockCoreContext",
         "type": "Object",
         "tags": [],
         "label": "mockCoreContext",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-base-server-mocks",
-            "id": "def-server.mockCoreContext.create",
+            "id": "def-common.mockCoreContext.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,17 +45,17 @@
               "({ env, logger, configService, }?: { env?: ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.Env",
+                "section": "def-common.Env",
                 "text": "Env"
               },
               " | undefined; logger?: jest.Mocked<",
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.LoggerFactory",
+                "section": "def-common.LoggerFactory",
                 "text": "LoggerFactory"
               },
               "> | undefined; configService?: jest.Mocked<",
@@ -55,9 +63,9 @@
               "> | undefined; }) => ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -71,7 +79,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-base-server-mocks",
-                "id": "def-server.mockCoreContext.create.$1",
+                "id": "def-common.mockCoreContext.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -80,17 +88,17 @@
                   "{ env?: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-server.Env",
+                    "section": "def-common.Env",
                     "text": "Env"
                   },
                   " | undefined; logger?: jest.Mocked<",
                   {
                     "pluginId": "@kbn/logging",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-server.LoggerFactory",
+                    "section": "def-common.LoggerFactory",
                     "text": "LoggerFactory"
                   },
                   "> | undefined; configService?: jest.Mocked<",
@@ -107,13 +115,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

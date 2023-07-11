@@ -11,8 +11,9 @@ import {
   ACTION_STATUS_ROUTE,
   AGENT_POLICY_SUMMARY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
-  ENDPOINTS_ACTION_LIST_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
   GET_PROCESSES_ROUTE,
+  GET_FILE_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
@@ -20,6 +21,7 @@ import {
   METADATA_TRANSFORMS_STATUS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
+  EXECUTE_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -33,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
   interface ApiCallsInterface {
     method: keyof Pick<typeof supertest, 'post' | 'get'>;
     path: string;
+    version?: string;
     body: Record<string, unknown> | undefined;
   }
 
@@ -46,10 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'get',
         path: ACTION_DETAILS_ROUTE,
         body: undefined,
+        version: '2023-10-31',
       },
       {
         method: 'get',
         path: `${ACTION_STATUS_ROUTE}?agent_ids=1,2`,
+        version: '2023-10-31',
         body: undefined,
       },
       {
@@ -77,8 +82,9 @@ export default function ({ getService }: FtrProviderContext) {
     const canReadActionsLogManagementApiList: ApiCallsInterface[] = [
       {
         method: 'get',
-        path: ENDPOINTS_ACTION_LIST_ROUTE,
+        path: BASE_ENDPOINT_ACTION_ROUTE,
         body: undefined,
+        version: '2023-10-31',
       },
     ];
 
@@ -87,11 +93,13 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: ISOLATE_HOST_ROUTE_V2,
         body: { endpoint_ids: ['one'] },
+        version: '2023-10-31',
       },
       {
         method: 'post',
         path: UNISOLATE_HOST_ROUTE_V2,
         body: { endpoint_ids: ['one'] },
+        version: '2023-10-31',
       },
     ];
 
@@ -100,16 +108,37 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: GET_PROCESSES_ROUTE,
         body: { endpoint_ids: ['one'] },
+        version: '2023-10-31',
       },
       {
         method: 'post',
         path: KILL_PROCESS_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+        version: '2023-10-31',
       },
       {
         method: 'post',
         path: SUSPEND_PROCESS_ROUTE,
         body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+        version: '2023-10-31',
+      },
+    ];
+
+    const canWriteFileOperationsApiList: ApiCallsInterface[] = [
+      {
+        method: 'post',
+        path: GET_FILE_ROUTE,
+        body: { endpoint_ids: ['one'], parameters: { path: '/opt/file/doc.txt' } },
+        version: '2023-10-31',
+      },
+    ];
+
+    const canWriteExecuteOperationsApiList: ApiCallsInterface[] = [
+      {
+        method: 'post',
+        path: EXECUTE_ROUTE,
+        version: '2023-10-31',
+        body: { endpoint_ids: ['one'], parameters: { command: 'ls -la' } },
       },
     ];
 
@@ -117,6 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'get',
         path: `${AGENT_POLICY_SUMMARY_ROUTE}?package_name=endpoint`,
+        version: '2023-10-31',
         body: undefined,
       },
     ];
@@ -131,8 +161,8 @@ export default function ({ getService }: FtrProviderContext) {
       actionId = indexedData.actions[0].action_id;
     });
 
-    after(() => {
-      endpointTestResources.unloadEndpointData(indexedData);
+    after(async () => {
+      await endpointTestResources.unloadEndpointData(indexedData);
     });
 
     describe('with minimal_all', () => {
@@ -148,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth[apiListItem.method](replacePathIds(apiListItem.path))
             .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'xxx')
+            .set(apiListItem.version ? 'Elastic-Api-Version' : 'foo', '2023-10-31')
             .send(apiListItem.body)
             .expect(403, {
               statusCode: 403,
@@ -251,6 +282,8 @@ export default function ({ getService }: FtrProviderContext) {
         ...canReadActionsLogManagementApiList,
         ...canIsolateHostApiList,
         ...canWriteProcessOperationsApiList,
+        ...canWriteExecuteOperationsApiList,
+        ...canWriteFileOperationsApiList,
         ...superuserApiList,
       ]) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${

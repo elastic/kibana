@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
 import { createMockDataViewsState } from '../data_views_service/mocks';
 import { FramePublicAPI, FrameDatasourceAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
@@ -35,7 +36,9 @@ export const createMockFramePublicAPI = ({
   dateRange,
   dataViews,
   activeData,
-}: Partial<FramePublicAPI> = {}): FrameMock => ({
+}: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
+  dataViews?: Partial<FramePublicAPI['dataViews']>;
+} = {}): FrameMock => ({
   datasourceLayers: datasourceLayers ?? {},
   dateRange: dateRange ?? {
     fromDate: '2022-03-17T08:25:00.000Z',
@@ -63,3 +66,20 @@ export const createMockFrameDatasourceAPI = ({
   filters: filters ?? [],
   dataViews: createMockDataViewsState(dataViews),
 });
+
+export function createMockedDragDropContext(
+  partialState?: Partial<DragContextState>,
+  setState?: jest.Mocked<DragContextValue>[1]
+): jest.Mocked<DragContextValue> {
+  return [
+    {
+      dataTestSubjPrefix: 'lnsDragDrop',
+      dragging: undefined,
+      keyboardMode: false,
+      activeDropTarget: undefined,
+      dropTargetsByOrder: undefined,
+      ...partialState,
+    },
+    setState ? setState : jest.fn(),
+  ];
+}

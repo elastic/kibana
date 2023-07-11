@@ -28,9 +28,54 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getAllowMultiselectTitle: () =>
-      i18n.translate('controls.optionsList.editor.allowMultiselectTitle', {
-        defaultMessage: 'Allow multiple selections in dropdown',
+    getSelectionOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.selectionOptionsTitle', {
+        defaultMessage: 'Selections',
+      }),
+    selectionTypes: {
+      multi: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.multiSelectLabel', {
+            defaultMessage: 'Allow  multiple selections',
+          }),
+      },
+      single: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.singleSelectLabel', {
+            defaultMessage: 'Only allow a single selection',
+          }),
+      },
+    },
+    getSearchOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.searchOptionsTitle', {
+        defaultMessage: `Searching`,
+      }),
+    searchTypes: {
+      prefix: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchLabel', {
+            defaultMessage: 'Prefix',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchTooltip', {
+            defaultMessage: 'Matches values that begin with the given search string.',
+          }),
+      },
+      wildcard: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.wildcardSearchLabel', {
+            defaultMessage: 'Contains',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.wildcardSearchTooltip', {
+            defaultMessage:
+              'Matches values that contain the given search string. Results might take longer to populate.',
+          }),
+      },
+    },
+    getAdditionalSettingsTitle: () =>
+      i18n.translate('controls.optionsList.editor.additionalSettingsTitle', {
+        defaultMessage: `Additional settings`,
       }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
@@ -48,9 +93,25 @@ export const OptionsListStrings = {
         defaultMessage: 'Popover for {fieldName} control',
         values: { fieldName },
       }),
-    getLoadingMessage: () =>
-      i18n.translate('controls.optionsList.popover.loading', {
-        defaultMessage: 'Loading options',
+    getSuggestionsAriaLabel: (fieldName: string, optionCount: number) =>
+      i18n.translate('controls.optionsList.popover.suggestionsAriaLabel', {
+        defaultMessage:
+          'Available {optionCount, plural, one {option} other {options}} for {fieldName}',
+        values: { fieldName, optionCount },
+      }),
+    getAllowExpensiveQueriesWarning: () =>
+      i18n.translate('controls.optionsList.popover.allowExpensiveQueriesWarning', {
+        defaultMessage:
+          'The cluster setting to allow expensive queries is off, so some features are disabled.',
+      }),
+    getLoadingMoreMessage: () =>
+      i18n.translate('controls.optionsList.popover.loadingMore', {
+        defaultMessage: 'Loading more options...',
+      }),
+    getAtEndOfOptionsMessage: () =>
+      i18n.translate('controls.optionsList.popover.endOfOptions', {
+        defaultMessage:
+          'The top 1,000 available options are displayed. View more options by searching for the name.',
       }),
     getEmptyMessage: () =>
       i18n.translate('controls.optionsList.popover.empty', {
@@ -68,25 +129,31 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectedOptionsTitle', {
         defaultMessage: 'Show only selected options',
       }),
-    getClearAllSelectionsButtonTitle: () =>
-      i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
-        defaultMessage: 'Clear selections',
-      }),
-    getTotalCardinalityTooltip: (totalOptions: number) =>
-      i18n.translate('controls.optionsList.popover.cardinalityTooltip', {
-        defaultMessage: '{totalOptions} available options.',
-        values: { totalOptions },
-      }),
-    getTotalCardinalityPlaceholder: (totalOptions: number) =>
-      i18n.translate('controls.optionsList.popover.cardinalityPlaceholder', {
+    searchPlaceholder: {
+      prefix: {
+        getPlaceholderText: () =>
+          i18n.translate('controls.optionsList.popover.prefixSearchPlaceholder', {
+            defaultMessage: 'Starts with...',
+          }),
+      },
+      wildcard: {
+        getPlaceholderText: () =>
+          i18n.translate('controls.optionsList.popover.wildcardSearchPlaceholder', {
+            defaultMessage: 'Contains...',
+          }),
+      },
+    },
+    getCardinalityLabel: (totalOptions: number) =>
+      i18n.translate('controls.optionsList.popover.cardinalityLabel', {
         defaultMessage:
-          'Search {totalOptions} available {totalOptions, plural, one {option} other {options}}',
+          '{totalOptions, number} {totalOptions, plural, one {option} other {options}}',
         values: { totalOptions },
       }),
-    getInvalidSelectionsTitle: (invalidSelectionCount: number) =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionsTitle', {
-        defaultMessage: '{invalidSelectionCount} selected options ignored',
-        values: { invalidSelectionCount },
+    getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
+        defaultMessage:
+          'Ignored {invalidSelectionCount, plural, one {selection} other {selections}} for {fieldName}',
+        values: { fieldName, invalidSelectionCount },
       }),
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
@@ -94,15 +161,15 @@ export const OptionsListStrings = {
           'Ignored {invalidSelectionCount, plural, one {selection} other {selections}}',
         values: { invalidSelectionCount },
       }),
-    getInvalidSelectionsAriaLabel: () =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionsAriaLabel', {
-        defaultMessage: 'Deselect all ignored selections',
-      }),
-    getInvalidSelectionsTooltip: (selectedOptions: number) =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionsTooltip', {
+    getInvalidSelectionsLabel: (selectedOptions: number) =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsLabel', {
         defaultMessage:
-          '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
+          '{selectedOptions} {selectedOptions, plural, one {selection} other {selections}} ignored',
         values: { selectedOptions },
+      }),
+    getInvalidSelectionScreenReaderText: () =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionScreenReaderText', {
+        defaultMessage: 'Invalid selection.',
       }),
     getIncludeLabel: () =>
       i18n.translate('controls.optionsList.popover.includeLabel', {
@@ -126,7 +193,19 @@ export const OptionsListStrings = {
       }),
     getSortDisabledTooltip: () =>
       i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
-        defaultMessage: 'Ignore sorting when “Show only selected” is true.',
+        defaultMessage: 'Sorting is ignored when “Show only selected” is true',
+      }),
+    getDocumentCountTooltip: (documentCount: number) =>
+      i18n.translate('controls.optionsList.popover.documentCountTooltip', {
+        defaultMessage:
+          'This value appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
+        values: { documentCount },
+      }),
+    getDocumentCountScreenReaderText: (documentCount: number) =>
+      i18n.translate('controls.optionsList.popover.documentCountScreenReaderText', {
+        defaultMessage:
+          'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
+        values: { documentCount },
       }),
   },
   controlAndPopover: {

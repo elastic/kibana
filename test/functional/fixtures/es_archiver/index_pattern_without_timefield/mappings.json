@@ -30,3 +30,23 @@
     }
   }
 }
+
+{
+  "type": "index",
+  "value": {
+    "index": "with-different-timefield",
+    "mappings": {
+      "properties": {
+        "different-timefield": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

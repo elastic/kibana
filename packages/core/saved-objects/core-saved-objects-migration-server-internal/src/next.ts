@@ -6,45 +6,58 @@
  * Side Public License, v 1.
  */
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as Option from 'fp-ts/lib/Option';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
+import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
-  ReindexSourceToTempOpenPit,
-  ReindexSourceToTempRead,
-  ReindexSourceToTempClosePit,
-  ReindexSourceToTempTransform,
-  MarkVersionIndexReady,
+  CalculateExcludeFiltersState,
+  CheckTargetMappingsState,
+  CheckUnknownDocumentsState,
+  CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
+  CloneTempToTarget,
+  CreateNewTargetState,
+  CreateReindexTempState,
   InitState,
   LegacyCreateReindexTargetState,
   LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacySetWriteBlockState,
-  OutdatedDocumentsTransform,
-  SetSourceWriteBlockState,
-  State,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
-  CreateReindexTempState,
+  MarkVersionIndexReady,
   MarkVersionIndexReadyConflict,
-  CreateNewTargetState,
-  CloneTempToSource,
-  SetTempWriteBlock,
-  WaitForYellowSourceState,
-  TransformedDocumentsBulkIndex,
-  ReindexSourceToTempIndexBulk,
+  OutdatedDocumentsRefresh,
+  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
-  OutdatedDocumentsSearchClosePit,
+  OutdatedDocumentsTransform,
+  PrepareCompatibleMigration,
+  RefreshSource,
   RefreshTarget,
-  OutdatedDocumentsRefresh,
-  CheckUnknownDocumentsState,
-  CalculateExcludeFiltersState,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndexBulk,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  ReindexSourceToTempTransform,
+  SetSourceWriteBlockState,
+  SetTempWriteBlock,
+  State,
+  TransformedDocumentsBulkIndex,
+  UpdateSourceMappingsPropertiesState,
+  UpdateTargetMappingsMeta,
+  UpdateTargetMappingsPropertiesState,
+  UpdateTargetMappingsPropertiesWaitForTaskState,
   WaitForMigrationCompletionState,
-  CheckTargetMappingsState,
+  WaitForYellowSourceState,
 } from './state';
+import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
+import { REMOVED_TYPES } from './core';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -58,7 +71,13 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
+export const nextActionMap = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  readyToReindex: WaitGroup<void>,
+  doneReindexing: WaitGroup<void>,
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+) => {
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
@@ -66,6 +85,39 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
+      sourceIndex,
+      sourceIndexMappings,
+      targetIndexMappings,
+    }: UpdateSourceMappingsPropertiesState) =>
+      Actions.updateSourceMappingsProperties({
+        client,
+        sourceIndex: sourceIndex.value,
+        sourceMappings: sourceIndexMappings.value,
+        targetMappings: targetIndexMappings,
+      }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
+      Actions.cleanupUnknownAndExcluded({
+        client,
+        indexName: state.sourceIndex.value,
+        discardUnknownDocs: state.discardUnknownObjects,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+        knownTypes: state.knownTypes,
+        removedTypes: REMOVED_TYPES,
+      }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK: (
+      state: CleanupUnknownAndExcludedWaitForTaskState
+    ) =>
+      Actions.waitForDeleteByQueryTask({
+        client,
+        taskId: state.deleteByQueryTaskId,
+        timeout: '120s',
+      }),
+    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
+      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
+    REFRESH_SOURCE: (state: RefreshSource) =>
+      Actions.refreshIndex({ client, index: state.sourceIndex.value }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -90,7 +142,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.createIndex({
         client,
         indexName: state.tempIndex,
+        aliases: [state.tempIndexAlias],
         mappings: state.tempIndexMappings,
+      }),
+    READY_TO_REINDEX_SYNC: () =>
+      Actions.synchronizeMigrators({
+        waitGroup: readyToReindex,
       }),
     REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
       Actions.openPit({ client, index: state.sourceIndex.value }),
@@ -113,8 +170,14 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     REINDEX_SOURCE_TO_TEMP_INDEX_BULK: (state: ReindexSourceToTempIndexBulk) =>
       Actions.bulkOverwriteTransformedDocuments({
         client,
-        index: state.tempIndex,
-        transformedDocs: state.transformedDocBatches[state.currentBatch],
+        /*
+         * Since other nodes can delete the temp index while we're busy writing
+         * to it, we use the alias to prevent the auto-creation of the index if
+         * it doesn't exist.
+         */
+        index: state.tempIndexAlias,
+        useAliasToPreventAutoCreate: true,
+        operations: state.bulkOperationBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
@@ -124,35 +187,44 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
          */
         refresh: false,
       }),
+    DONE_REINDEXING_SYNC: () =>
+      Actions.synchronizeMigrators({
+        waitGroup: doneReindexing,
+      }),
     SET_TEMP_WRITE_BLOCK: (state: SetTempWriteBlock) =>
       Actions.setWriteBlock({ client, index: state.tempIndex }),
-    CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
+    CLONE_TEMP_TO_TARGET: (state: CloneTempToTarget) =>
       Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
     REFRESH_TARGET: (state: RefreshTarget) =>
-      Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
+      Actions.refreshIndex({ client, index: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: state.targetIndexCurrentMappings,
+        actualMappings: Option.toUndefined(state.sourceIndexMappings),
         expectedMappings: state.targetIndexMappings,
       }),
-    UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
+    UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
       Actions.updateAndPickupMappings({
         client,
         index: state.targetIndex,
-        mappings: state.targetIndexMappings,
+        mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
+        batchSize: state.batchSize,
+        query: Option.toUndefined(state.updatedTypesQuery),
       }),
-    UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
+    UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK: (
+      state: UpdateTargetMappingsPropertiesWaitForTaskState
+    ) =>
       Actions.waitForPickupUpdatedMappingsTask({
         client,
         taskId: state.updateTargetMappingsTaskId,
         timeout: '60s',
       }),
-    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsState) =>
-      Actions.updateTargetMappingsMeta({
+    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsMeta) => {
+      return Actions.updateMappings({
         client,
         index: state.targetIndex,
-        meta: state.targetIndexMappings._meta,
-      }),
+        mappings: omit(state.targetIndexMappings, ['properties']), // properties already updated on a previous step
+      });
+    },
     CHECK_VERSION_INDEX_READY_ACTIONS: () => Actions.noop,
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
       Actions.openPit({ client, index: state.targetIndex }),
@@ -164,28 +236,42 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         query: state.outdatedDocumentsQuery,
         batchSize: state.batchSize,
         searchAfter: state.lastHitSortValue,
+        maxResponseSizeBytes: state.maxReadBatchSizeBytes,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
       Actions.closePit({ client, pitId: state.pitId }),
     OUTDATED_DOCUMENTS_REFRESH: (state: OutdatedDocumentsRefresh) =>
-      Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
+      Actions.refreshIndex({ client, index: state.targetIndex }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       Actions.transformDocs({ transformRawDocs, outdatedDocuments: state.outdatedDocuments }),
     TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: TransformedDocumentsBulkIndex) =>
       Actions.bulkOverwriteTransformedDocuments({
         client,
         index: state.targetIndex,
-        transformedDocs: state.transformedDocBatches[state.currentBatch],
+        operations: state.bulkOperationBatches[state.currentBatch],
         /**
          * Since we don't run a search against the target index, we disable "refresh" to speed up
          * the migration process.
          * Although any further step must run "refresh" for the target index
-         * before we reach out to the MARK_VERSION_INDEX_READY step.
          * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
          */
+        refresh: false,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
+    MARK_VERSION_INDEX_READY_SYNC: (state: MarkVersionIndexReady) =>
+      pipe(
+        // First, we wait for all the migrators involved in a relocation to reach this point.
+        Actions.synchronizeMigrators<Actions.AliasAction[]>({
+          waitGroup: updateRelocationAliases,
+          payload: state.versionIndexReadyActions.value,
+        }),
+        // Then, all migrators will try to update all aliases (from all indices). Only the first one will succeed.
+        // The others will receive alias_not_found_exception and cause MARK_VERSION_INDEX_READY_CONFLICT (that's acceptable).
+        TaskEither.chainW(({ data }) =>
+          Actions.updateAliases({ client, aliasActions: data.flat() })
+        )
+      ),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
@@ -194,7 +280,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.createIndex({
         client,
         indexName: state.sourceIndex.value,
-        mappings: state.legacyReindexTargetMappings,
+        mappings: state.sourceIndexMappings.value,
       }),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex({
@@ -204,6 +290,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         reindexScript: state.preMigrationScript,
         requireAlias: false,
         excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        batchSize: state.batchSize,
       }),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask({ client, taskId: state.legacyReindexTaskId, timeout: '60s' }),
@@ -212,16 +299,22 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   };
 };
 
-export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
-  const map = nextActionMap(client, transformRawDocs);
+export const next = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  readyToReindex: WaitGroup<void>,
+  doneReindexing: WaitGroup<void>,
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+) => {
+  const map = nextActionMap(
+    client,
+    transformRawDocs,
+    readyToReindex,
+    doneReindexing,
+    updateRelocationAliases
+  );
   return (state: State) => {
-    const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
-      return () => {
-        return state.retryDelay > 0
-          ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
-          : fn();
-      };
-    };
+    const delay = createDelayFn(state);
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states

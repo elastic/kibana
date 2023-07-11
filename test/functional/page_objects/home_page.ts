@@ -57,7 +57,11 @@ export class HomePageObject extends FtrService {
   }
 
   async isGuidedOnboardingLandingDisplayed() {
-    return await this.testSubjects.isDisplayed('onboarding--landing-page');
+    return await this.testSubjects.isDisplayed('guided-onboarding--landing-page');
+  }
+
+  async isHomePageDisplayed() {
+    return await this.testSubjects.isDisplayed('homeApp');
   }
 
   async getVisibileSolutions() {
@@ -210,6 +214,10 @@ export class HomePageObject extends FtrService {
   async clickGoHome() {
     await this.openCollapsibleNav();
     await this.testSubjects.click('homeLink');
+  }
+
+  async clickHomeBreadcrumb() {
+    await this.testSubjects.click('breadcrumb first');
   }
 
   // open global nav if it's closed

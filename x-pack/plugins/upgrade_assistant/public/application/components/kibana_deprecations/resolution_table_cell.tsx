@@ -95,7 +95,7 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="alert" color="danger" />
+                <EuiIcon type="warning" color="danger" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">{i18nTexts.automationFailedCellLabel}</EuiText>

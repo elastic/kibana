@@ -6,7 +6,9 @@
  */
 
 import React, { Component } from 'react';
-import { Route, Switch, Router, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+
 import { ScopedHistory, ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -165,14 +167,14 @@ class AppComponent extends Component<AppProps, AppState> {
 
     return (
       <Router history={this.props.history}>
-        <Switch>
+        <Routes>
           <Redirect exact from="/" to="/follower_indices" />
           <Route exact path="/auto_follow_patterns/add" component={AutoFollowPatternAdd} />
           <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
           <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />
           <Route exact path="/follower_indices/edit/:id" component={FollowerIndexEdit} />
           <Route exact path={['/:section']} component={CrossClusterReplicationHome} />
-        </Switch>
+        </Routes>
       </Router>
     );
   }

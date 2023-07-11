@@ -26,7 +26,11 @@ export const PLUGIN = {
   },
 };
 
-export const API_BASE_PATH = '/api/transform/';
+const INTERNAL_API_BASE_PATH = '/internal/transform/';
+const EXTERNAL_API_BASE_PATH = '/api/transform/';
+
+export const addInternalBasePath = (uri: string): string => `${INTERNAL_API_BASE_PATH}${uri}`;
+export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE_PATH}${uri}`;
 
 // In order to create a transform, the API requires the following privileges:
 // - transform_admin (builtin)
@@ -58,6 +62,7 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/preview',
   'cluster:admin/transform/put',
   'cluster:admin/transform/reset',
+  'cluster:admin/transform/schedule_now',
   'cluster:admin/transform/start',
   'cluster:admin/transform/start_task',
   'cluster:admin/transform/stop',
@@ -84,7 +89,7 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L214
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -95,16 +100,61 @@ export const TRANSFORM_STATE = {
   WAITING: 'waiting',
 } as const;
 
-const transformStates = Object.values(TRANSFORM_STATE);
-export type TransformState = typeof transformStates[number];
+export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
+
+export const TRANSFORM_HEALTH = {
+  green: 'green',
+  unknown: 'unknown',
+  yellow: 'yellow',
+  red: 'red',
+} as const;
+
+export type TransformHealth = typeof TRANSFORM_HEALTH[keyof typeof TRANSFORM_HEALTH];
+
+export const TRANSFORM_HEALTH_COLOR = {
+  green: 'success',
+  unknown: 'subdued',
+  yellow: 'warning',
+  red: 'danger',
+} as const;
+
+export const TRANSFORM_HEALTH_LABEL = {
+  green: i18n.translate('xpack.transform.transformHealth.greenLabel', {
+    defaultMessage: 'Healthy',
+  }),
+  unknown: i18n.translate('xpack.transform.transformHealth.unknownLabel', {
+    defaultMessage: 'Unknown',
+  }),
+  yellow: i18n.translate('xpack.transform.transformHealth.yellowLabel', {
+    defaultMessage: 'Degraded',
+  }),
+  red: i18n.translate('xpack.transform.transformHealth.redLabel', {
+    defaultMessage: 'Unavailable',
+  }),
+} as const;
+
+export const TRANSFORM_HEALTH_DESCRIPTION = {
+  green: i18n.translate('xpack.transform.transformHealth.greenDescription', {
+    defaultMessage: 'The transform is running as expected.',
+  }),
+  unknown: i18n.translate('xpack.transform.transformHealth.unknownDescription', {
+    defaultMessage: 'The health of the transform could not be determined.',
+  }),
+  yellow: i18n.translate('xpack.transform.transformHealth.yellowDescription', {
+    defaultMessage:
+      'The functionality of the transform is in a degraded state and may need remediation to avoid the health becoming red.',
+  }),
+  red: i18n.translate('xpack.transform.transformHealth.redDescription', {
+    defaultMessage: 'The transform is experiencing an outage or is unavailable for use.',
+  }),
+} as const;
 
 export const TRANSFORM_MODE = {
   BATCH: 'batch',
   CONTINUOUS: 'continuous',
 } as const;
 
-const transformModes = Object.values(TRANSFORM_MODE);
-export type TransformMode = typeof transformModes[number];
+export type TransformMode = typeof TRANSFORM_MODE[keyof typeof TRANSFORM_MODE];
 
 export const TRANSFORM_FUNCTION = {
   PIVOT: 'pivot',
@@ -145,6 +195,17 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
       }
     ),
   },
+  healthCheck: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckName', {
+      defaultMessage: 'Unhealthy transform',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.healthCheckDescription',
+      {
+        defaultMessage: 'Get alerts if a transform health status is not green.',
+      }
+    ),
+  },
 };
 
 // Transform API default values https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html
@@ -152,3 +213,6 @@ export const DEFAULT_CONTINUOUS_MODE_DELAY = '60s';
 export const DEFAULT_TRANSFORM_FREQUENCY = '1m';
 export const DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND = null;
 export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE = 500;
+
+// Used in the transform list's expanded row for the messages and issues table.
+export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

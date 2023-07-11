@@ -1,0 +1,86 @@
+{
+    "type": "index",
+    "value": {
+      "index": "ecs_non_compliant",
+      "mappings": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "@timestamp": {
+            "type": "date"
+          },
+          "agent": {
+            "properties": {
+              "name": {
+                "properties": {
+                  "first": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "type": {
+                "type": "long"
+              }
+            }
+          },
+          "container": {
+            "properties": {
+              "image": {
+                "type": "keyword"
+              }
+            }
+          },
+          "client": {
+            "properties": {
+              "ip": {
+                "type": "keyword"
+              }
+            }
+          },
+          "event": {
+            "properties": {
+              "created": {
+                "type": "keyword"
+              }
+            }
+          },
+          "dll": {
+            "properties": {
+              "code_signature": {
+                "properties": {
+                  "valid": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "process.command_line": {
+            "type": "keyword",
+            "ignore_above": 10, 
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "nonEcs.command_line": {
+            "type": "keyword",
+            "ignore_above": 10, 
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "settings": {
+        "index": {
+          "number_of_replicas": "1",
+          "number_of_shards": "1"
+        }
+      }
+    }
+  }

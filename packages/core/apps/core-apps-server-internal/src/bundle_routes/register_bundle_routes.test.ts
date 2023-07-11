@@ -21,6 +21,7 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   dist: true,
   branch: 'master',
   version: '8.0.0',
+  buildDate: new Date('2023-05-15T23:12:09.000Z'),
 });
 
 const createUiPlugins = (...ids: string[]): UiPlugins => ({
@@ -56,7 +57,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins(),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(3);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
@@ -77,9 +78,17 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: expect.stringMatching(/src\/core\/target\/public/),
+      bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
       publicPath: '/server-base-path/42/bundles/core/',
       routePath: '/42/bundles/core/',
+    });
+
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
+      fileHashCache: expect.any(FileHashCache),
+      isDist: true,
+      bundlesPath: 'kbnMonacoBundleDir',
+      publicPath: '/server-base-path/42/bundles/kbn-monaco/',
+      routePath: '/42/bundles/kbn-monaco/',
     });
   });
 
@@ -91,7 +100,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(6);
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),

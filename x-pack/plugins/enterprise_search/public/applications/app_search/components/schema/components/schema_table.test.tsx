@@ -21,6 +21,7 @@ describe('SchemaTable', () => {
   const values = {
     schema: {},
     unconfirmedFields: [],
+    incompleteFields: [],
     myRole: { canManageEngines: true },
   };
   const actions = {
@@ -95,5 +96,17 @@ describe('SchemaTable', () => {
     const wrapper = shallow(<SchemaTable />);
 
     expect(wrapper.find(SchemaFieldTypeSelect).at(0).prop('disabled')).toEqual(true);
+  });
+
+  it('renders a missing subfields status if a field is incomplete', () => {
+    setMockValues({
+      ...values,
+      schema: { some_incomplete_field: 'text' },
+      incompleteFields: ['some_incomplete_field'],
+    });
+    const wrapper = shallow(<SchemaTable />);
+
+    expect(wrapper.find(EuiHealth)).toHaveLength(1);
+    expect(wrapper.find(EuiHealth).childAt(0).prop('children')).toEqual('Missing subfields');
   });
 });

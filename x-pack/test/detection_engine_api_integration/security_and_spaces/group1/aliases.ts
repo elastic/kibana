@@ -11,11 +11,11 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../utils';
 
@@ -24,6 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   interface HostAlias {
     name: string;
@@ -43,14 +44,14 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
       const rule = getRuleForSignalTesting(['host_alias']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits
@@ -62,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
       const rule = getRuleForSignalTesting(['host_alias']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForSignalsToBePresent(supertest, log, 4, [id]);
       const signalsOpen = await getSignalsById(supertest, log, id);
       const hits = signalsOpen.hits.hits

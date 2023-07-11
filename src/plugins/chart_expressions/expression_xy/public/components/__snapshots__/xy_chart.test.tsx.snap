@@ -557,6 +557,19 @@ exports[`XYChart component it renders area 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -594,27 +607,22 @@ exports[`XYChart component it renders area 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -1214,6 +1222,19 @@ exports[`XYChart component it renders area 1`] = `
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -1539,6 +1560,19 @@ exports[`XYChart component it renders bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -1576,27 +1610,22 @@ exports[`XYChart component it renders bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -2196,6 +2225,19 @@ exports[`XYChart component it renders bar 1`] = `
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -2521,6 +2563,19 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -2558,27 +2613,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -3178,6 +3228,19 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "right",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -3503,6 +3566,19 @@ exports[`XYChart component it renders line 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -3540,27 +3616,22 @@ exports[`XYChart component it renders line 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -4160,6 +4231,19 @@ exports[`XYChart component it renders line 1`] = `
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -4485,6 +4569,19 @@ exports[`XYChart component it renders stacked area 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -4522,27 +4619,22 @@ exports[`XYChart component it renders stacked area 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -5142,6 +5234,19 @@ exports[`XYChart component it renders stacked area 1`] = `
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -5467,6 +5572,19 @@ exports[`XYChart component it renders stacked bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -5504,27 +5622,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -6124,6 +6237,19 @@ exports[`XYChart component it renders stacked bar 1`] = `
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -6449,6 +6575,19 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -6486,27 +6625,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -7106,6 +7240,19 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "right",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -7461,6 +7608,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -7498,27 +7658,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -8318,6 +8473,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -8681,6 +8849,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -8718,27 +8899,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -9531,6 +9707,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {
@@ -9894,6 +10083,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
     <Chart
       renderer="canvas"
     >
+      <Tooltip
+        actions={
+          Array [
+            Object {
+              "disabled": [Function],
+              "label": [Function],
+              "onSelect": [Function],
+            },
+          ]
+        }
+        headerFormatter={[Function]}
+        type="vertical"
+      />
       <Settings
         allowBrushingLastHistogramBin={false}
         ariaUseDefaultSummary={true}
@@ -9931,27 +10133,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
-        }
-        tooltip={
-          Object {
-            "boundary": undefined,
-            "customTooltip": undefined,
-            "headerFormatter": [Function],
-            "type": "vertical",
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -10744,6 +10941,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           }
         }
         valueLabels="hide"
+        xAxisConfiguration={
+          Object {
+            "groupId": "bottom",
+            "labelsOrientation": 0,
+            "position": "bottom",
+            "series": Array [],
+            "showGridLines": true,
+            "showLabels": true,
+            "showTitle": true,
+            "title": "",
+            "type": "xAxisConfig",
+          }
+        }
         yAxesConfiguration={
           Array [
             Object {

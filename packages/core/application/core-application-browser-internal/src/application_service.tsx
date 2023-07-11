@@ -17,6 +17,7 @@ import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type {
   App,
   AppDeepLink,
@@ -29,24 +30,34 @@ import type {
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
-import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
+import {
+  appendAppPath,
+  parseAppUrl,
+  relativeToAbsolute,
+  getAppInfo,
+  getLocationObservable,
+} from './utils';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: HttpSetup;
+  analytics: AnalyticsServiceSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
   redirectTo?: (path: string) => void;
 }
 
-interface StartDeps {
+export interface StartDeps {
   http: HttpStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
+  customBranding: CustomBrandingStart;
 }
 
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
@@ -105,9 +116,11 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private hasCustomBranding$: Observable<boolean> | undefined;
 
   public setup({
     http: { basePath },
+    analytics,
     redirectTo = (path: string) => {
       window.location.assign(path);
     },
@@ -122,6 +135,12 @@ export class ApplicationService {
           overlayPromise: firstValueFrom(this.overlayStart$.pipe(take(1))),
         }),
       });
+
+    const location$ = getLocationObservable(window.location, this.history);
+    registerAnalyticsContextProvider({
+      analytics,
+      location$,
+    });
 
     this.navigate = (url, state, replace) => {
       // basePath not needed here because `history` is configured with basename
@@ -204,13 +223,18 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({
+    http,
+    overlays,
+    theme,
+    customBranding,
+  }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
     this.overlayStart$.next(overlays);
-
+    this.hasCustomBranding$ = customBranding.hasCustomBranding$.pipe(takeUntil(this.stop$));
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);
 
@@ -345,6 +369,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            hasCustomBranding$={this.hasCustomBranding$}
           />
         );
       },

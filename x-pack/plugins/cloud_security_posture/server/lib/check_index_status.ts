@@ -6,19 +6,35 @@
  */
 
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { IndexStatus } from '../../common/types';
+import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { IndexStatus, PostureTypes } from '../../common/types';
 
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
-  logger: Logger
+  logger: Logger,
+  postureType?: PostureTypes
 ): Promise<IndexStatus> => {
+  const query =
+    !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
+      ? undefined
+      : {
+          bool: {
+            filter: {
+              term: {
+                safe_posture_type: postureType,
+              },
+            },
+          },
+        };
+
   try {
     const queryResult = await esClient.search({
       index,
-      query: {
-        match_all: {},
+      runtime_mappings: {
+        ...getSafePostureTypeRuntimeMapping(),
       },
+      query,
       size: 1,
     });
 

@@ -9,6 +9,11 @@ import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { CountryFlagAndName } from '../source_destination/country_flag';
 import type {
   NetworkTopCountriesEdges,
@@ -16,15 +21,9 @@ import type {
 } from '../../../../../common/search_strategy/security_solution/network';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
-import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import * as i18n from './translations';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
@@ -59,31 +58,19 @@ export const getNetworkTopCountriesColumns = (
       const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-country-${geo}`);
       if (geo != null) {
         return (
-          <DraggableWrapper
+          <SecurityCellActions
             key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: geo,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: geoAttr, value: geo, operator: IS_OPERATOR },
+            mode={CellActionsMode.HOVER_DOWN}
+            visibleCellActions={5}
+            showActionTooltips
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            data={{
+              value: geo,
+              field: geoAttr,
             }}
-            isAggregatable={true}
-            fieldType={'keyword'}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>
-                  <CountryFlagAndName countryCode={geo} />
-                </>
-              )
-            }
-          />
+          >
+            <CountryFlagAndName countryCode={geo} />
+          </SecurityCellActions>
         );
       } else {
         return getEmptyTagValue();

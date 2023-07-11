@@ -5,56 +5,68 @@
  * 2.0.
  */
 
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
-import { EuiButtonGroup } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
 import type { FilterMode } from '../types';
 
 import * as i18n from '../translations';
 
-const MY_RECENTLY_REPORTED_ID = 'myRecentlyReported';
+interface RecentCasesFilterOptions {
+  id: string;
+  label: string;
+}
 
-const toggleButtonIcons: EuiButtonGroupOptionProps[] = [
+const MY_RECENTLY_CREATED_ID = 'recentlyCreated';
+const MY_RECENTLY_REPORTED_ID = 'myRecentlyReported';
+const MY_RECENTLY_ASSIGNED_ID = 'myRecentlyAssigned';
+
+export const caseFilterOptions: RecentCasesFilterOptions[] = [
   {
-    id: 'recentlyCreated',
+    id: MY_RECENTLY_CREATED_ID,
     label: i18n.RECENTLY_CREATED_CASES,
-    iconType: 'folderExclamation',
   },
   {
     id: MY_RECENTLY_REPORTED_ID,
     label: i18n.MY_RECENTLY_REPORTED_CASES,
-    iconType: 'reporter',
+  },
+  {
+    id: MY_RECENTLY_ASSIGNED_ID,
+    label: i18n.MY_RECENTLY_ASSIGNED_CASES,
   },
 ];
 
 export const RecentCasesFilters = React.memo<{
   filterBy: FilterMode;
   setFilterBy: (filterBy: FilterMode) => void;
-  showMyRecentlyReported: boolean;
-}>(({ filterBy, setFilterBy, showMyRecentlyReported }) => {
-  const options = useMemo(
-    () =>
-      showMyRecentlyReported
-        ? toggleButtonIcons
-        : toggleButtonIcons.filter((x) => x.id !== MY_RECENTLY_REPORTED_ID),
-    [showMyRecentlyReported]
-  );
+  hasCurrentUserInfo: boolean;
+  isLoading?: boolean;
+}>(({ filterBy, setFilterBy, hasCurrentUserInfo, isLoading = false }) => {
+  const options: EuiSelectOption[] = caseFilterOptions.map((option) => {
+    return {
+      value: option.id,
+      text: option.label,
+    };
+  });
 
   const onChange = useCallback(
-    (filterMode: string) => {
-      setFilterBy(filterMode as FilterMode);
+    (e) => {
+      setFilterBy(e.target.value as FilterMode);
     },
     [setFilterBy]
   );
 
   return (
-    <EuiButtonGroup
-      options={options}
-      idSelected={filterBy}
+    <EuiSelect
+      data-test-subj="recent-cases-filter"
+      disabled={!hasCurrentUserInfo}
+      fullWidth
+      hasNoInitialSelection
+      isLoading={isLoading}
       onChange={onChange}
-      isIconOnly
-      legend={i18n.CASES_FILTER_CONTROL}
+      options={options}
+      value={filterBy}
     />
   );
 });

@@ -11,13 +11,13 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import {
   SelectSeverityUI,
   TableSeverity,
 } from '../../components/controls/select_severity/select_severity';
 import type { TimeBuckets } from '../../util/time_buckets';
-import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
 
@@ -30,7 +30,11 @@ interface ExplorerAnomaliesContainerProps {
   mlLocator: MlLocator;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
-  onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
+  onSelectEntity: (
+    fieldName: string,
+    fieldValue: string,
+    operation: MlEntityFieldOperation
+  ) => void;
   showSelectedInterval?: boolean;
   chartsService: ChartsPluginStart;
   timeRange: { from: string; to: string } | undefined;

@@ -15,11 +15,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>
@@ -68,8 +68,6 @@ export const tagcloudRenderer: (
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
 
-    const showNoResult = config.visData.rows.length === 0;
-
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <I18nProvider>
@@ -81,7 +79,6 @@ export const tagcloudRenderer: (
                 // It is used for rendering at `Canvas`.
                 className={cx('tagCloudContainer', css(tagCloudVisClass))}
                 renderComplete={renderComplete}
-                showNoResult={showNoResult}
               >
                 <TagCloudChart
                   {...config}
@@ -89,6 +86,7 @@ export const tagcloudRenderer: (
                   renderComplete={renderComplete}
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
+                  overrides={config.overrides}
                 />
               </VisualizationContainer>
             )}

@@ -38,7 +38,6 @@ export type WaitResult = Either<Error, ElasticsearchClient>;
 
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
-  private _isWriteInitializationFailed: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
 
   // Writers cached by namespace
@@ -72,14 +71,6 @@ export class RuleDataClient implements IRuleDataClient {
     this._isWriteEnabled = isEnabled;
   }
 
-  private get writeInitializationFailed(): boolean {
-    return this._isWriteInitializationFailed;
-  }
-
-  private set writeInitializationFailed(isFailed: boolean) {
-    this._isWriteInitializationFailed = isFailed;
-  }
-
   public isWriteEnabled(): boolean {
     return this.writeEnabled;
   }
@@ -106,20 +97,19 @@ export class RuleDataClient implements IRuleDataClient {
     };
 
     return {
-      search: async <TSearchRequest extends ESSearchRequest>(
+      search: async <
+        TSearchRequest extends ESSearchRequest,
+        TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>
+      >(
         request: TSearchRequest
-      ): Promise<
-        ESSearchResponse<Partial<ParsedTechnicalFields & ParsedExperimentalFields>, TSearchRequest>
-      > => {
+      ): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>> => {
         try {
           const clusterClient = await waitUntilReady();
           return (await clusterClient.search({
             ...request,
             index: indexPattern,
-          })) as unknown as ESSearchResponse<
-            Partial<ParsedTechnicalFields & ParsedExperimentalFields>,
-            TSearchRequest
-          >;
+            ignore_unavailable: true,
+          })) as unknown as ESSearchResponse<TAlertDoc, TSearchRequest>;
         } catch (err) {
           this.options.logger.error(`Error performing search in RuleDataClient - ${err.message}`);
           throw err;
@@ -174,11 +164,6 @@ export class RuleDataClient implements IRuleDataClient {
 
   private async initializeWriter(namespace: string): Promise<IRuleDataWriter> {
     const isWriteEnabled = () => this.writeEnabled;
-    const isWriteInitializationError = () => this.writeInitializationFailed;
-    const turnOffWriteDueToInitializationError = () => {
-      this.writeEnabled = false;
-      this.writeInitializationFailed = true;
-    };
 
     const { indexInfo, resourceInstaller } = this.options;
     const alias = indexInfo.getPrimaryAlias(namespace);
@@ -187,7 +172,7 @@ export class RuleDataClient implements IRuleDataClient {
     if (!isWriteEnabled()) {
       this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
       throw new RuleDataWriteDisabledError({
-        reason: isWriteInitializationError() ? 'error' : 'config',
+        reason: 'config',
         registrationContext: indexInfo.indexOptions.registrationContext,
       });
     }
@@ -217,9 +202,8 @@ export class RuleDataClient implements IRuleDataClient {
       if (error instanceof RuleDataWriterInitializationError) {
         this.options.logger.error(error);
         this.options.logger.error(
-          `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
+          `The writer for the Rule Data Client for the ${indexInfo.indexOptions.registrationContext} registration context was not initialized properly, bulk() cannot continue.`
         );
-        turnOffWriteDueToInitializationError();
       }
 
       throw error;

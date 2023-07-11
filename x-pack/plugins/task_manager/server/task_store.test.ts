@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { first } from 'rxjs/operators';
@@ -22,6 +24,20 @@ import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/serve
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { asErr } from './lib/result_type';
+
+const mockGetValidatedTaskInstanceFromReading = jest.fn();
+const mockGetValidatedTaskInstanceForUpdating = jest.fn();
+jest.mock('./task_validator', () => {
+  return {
+    TaskValidator: jest.fn().mockImplementation(() => {
+      return {
+        getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
+        getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
+      };
+    }),
+  };
+});
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
@@ -29,7 +45,17 @@ const adHocTaskCounter = new AdHocTaskCounter();
 
 const randomId = () => `id-${_.random(1, 20)}`;
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  jest.requireMock('./task_validator').TaskValidator.mockImplementation(() => {
+    return {
+      getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
+      getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
+    };
+  });
+  mockGetValidatedTaskInstanceFromReading.mockImplementation((task) => task);
+  mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => task);
+});
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,6 +73,14 @@ const taskDefinitions = new TaskTypeDictionary(mockLogger());
 taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
+    stateSchemaByVersion: {
+      1: {
+        schema: schema.object({
+          foo: schema.string(),
+        }),
+        up: (doc) => doc,
+      },
+    },
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
@@ -65,6 +99,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -72,6 +107,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -226,10 +262,16 @@ describe('TaskStore', () => {
   describe('fetch', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -237,21 +279,22 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
     async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
-      esClient.search.mockResponse({
+      childEsClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
       const result = await store.fetch(opts);
 
-      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(childEsClient.search).toHaveBeenCalledTimes(1);
 
       return {
         result,
-        args: esClient.search.mock.calls[0][0],
+        args: childEsClient.search.mock.calls[0][0],
       };
     }
 
@@ -286,7 +329,7 @@ describe('TaskStore', () => {
 
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      esClient.search.mockRejectedValue(new Error('Failure'));
+      childEsClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -299,6 +342,7 @@ describe('TaskStore', () => {
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -306,6 +350,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -397,6 +442,7 @@ describe('TaskStore', () => {
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -404,6 +450,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -436,8 +483,16 @@ describe('TaskStore', () => {
         }
       );
 
-      const result = await store.update(task);
+      const result = await store.update(task, { validate: true });
 
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledTimes(1);
+      expect(mockGetValidatedTaskInstanceFromReading).toHaveBeenCalledTimes(1);
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: true,
+      });
+      expect(mockGetValidatedTaskInstanceFromReading).toHaveBeenCalledWith(task, {
+        validate: true,
+      });
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         'task',
         task.id,
@@ -471,6 +526,42 @@ describe('TaskStore', () => {
       });
     });
 
+    test(`doesn't go through validation process to inject stateVersion when validate:false`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: 'myTraceparent',
+      };
+
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return {
+            id,
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          };
+        }
+      );
+
+      await store.update(task, { validate: false });
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: false,
+      });
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
       const task = {
         runAt: mockedDate,
@@ -490,7 +581,9 @@ describe('TaskStore', () => {
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.update.mockRejectedValue(new Error('Failure'));
-      await expect(store.update(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      await expect(
+        store.update(task, { validate: true })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
@@ -500,6 +593,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -507,6 +601,47 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
+      });
+    });
+
+    test(`doesn't validate whenever validate:false is passed-in`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...task,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task], { validate: false });
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: false,
       });
     });
 
@@ -529,9 +664,9 @@ describe('TaskStore', () => {
 
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
-      await expect(store.bulkUpdate([task])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failure"`
-      );
+      await expect(
+        store.bulkUpdate([task], { validate: true })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
@@ -541,6 +676,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -548,6 +684,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -575,6 +712,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -582,6 +720,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -609,6 +748,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -616,6 +756,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -628,6 +769,7 @@ describe('TaskStore', () => {
         id: randomId(),
         params: { hello: 'world' },
         state: { foo: 'bar' },
+        stateVersion: 1,
         taskType: 'report',
         attempts: 3,
         status: 'idle' as TaskStatus,
@@ -661,9 +803,75 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('bulkGet', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+      });
+    });
+
+    test('gets a task specified by id', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+      await store.bulkGet(['1', '2']);
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'task', id: '1' },
+        { type: 'task', id: '2' },
+      ]);
+    });
+
+    test('returns error when task not found', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'task',
+            id: '1',
+            attributes: {},
+            references: [],
+            error: {
+              error: 'Oh no',
+              message: 'Oh no',
+              statusCode: 404,
+            },
+          },
+        ],
+      });
+      const result = await store.bulkGet(['1']);
+      expect(result).toEqual([
+        asErr({
+          type: 'task',
+          id: '1',
+          error: {
+            error: 'Oh no',
+            message: 'Oh no',
+            statusCode: 404,
+          },
+        }),
+      ]);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkGet.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkGet([randomId()])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
   describe('getLifecycle', () => {
     test('returns the task status if the task exists ', async () => {
-      expect.assertions(5);
+      expect.assertions(6);
       return Promise.all(
         Object.values(TaskStatus).map(async (status) => {
           const task = {
@@ -674,6 +882,7 @@ describe('TaskStore', () => {
             id: randomId(),
             params: { hello: 'world' },
             state: { foo: 'bar' },
+            stateVersion: 1,
             taskType: 'report',
             attempts: 3,
             status: status as TaskStatus,
@@ -694,6 +903,7 @@ describe('TaskStore', () => {
           }));
 
           const store = new TaskStore({
+            logger: mockLogger(),
             index: 'tasky',
             taskManagerId: '',
             serializer,
@@ -701,6 +911,7 @@ describe('TaskStore', () => {
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
+            allowReadingInvalidState: false,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -714,6 +925,7 @@ describe('TaskStore', () => {
       );
 
       const store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -721,6 +933,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -732,6 +945,7 @@ describe('TaskStore', () => {
       );
 
       const store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -739,6 +953,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -750,6 +965,7 @@ describe('TaskStore', () => {
 
     beforeAll(() => {
       store = new TaskStore({
+        logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -757,6 +973,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -778,6 +995,7 @@ describe('TaskStore', () => {
               scheduledAt: '2019-02-12T21:01:22.479Z',
               startedAt: null,
               state: '{"foo":"bar"}',
+              stateVersion: 1,
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
@@ -838,6 +1056,7 @@ describe('TaskStore', () => {
           scope: undefined,
           startedAt: null,
           state: { foo: 'bar' },
+          stateVersion: 1,
           status: 'idle',
           taskType: 'report',
           user: undefined,
@@ -908,6 +1127,52 @@ describe('TaskStore', () => {
 
       await testBulkSchedule([task]);
       expect(adHocTaskCounter.count).toEqual(0);
+    });
+  });
+
+  describe('TaskValidator', () => {
+    test(`should pass allowReadingInvalidState:false accordingly`, () => {
+      const logger = mockLogger();
+
+      new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+      });
+
+      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
+        logger,
+        definitions: taskDefinitions,
+        allowReadingInvalidState: false,
+      });
+    });
+
+    test(`should pass allowReadingInvalidState:true accordingly`, () => {
+      const logger = mockLogger();
+
+      new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: true,
+      });
+
+      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
+        logger,
+        definitions: taskDefinitions,
+        allowReadingInvalidState: true,
+      });
     });
   });
 });

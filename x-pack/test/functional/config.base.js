@@ -54,7 +54,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
-        '--uiSettings.overrides.observability:enableNewSyntheticsView=true', // for OSS test management/_import_objects,
+        '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
       ],
     },
     uiSettings: {
@@ -177,6 +177,9 @@ export default async function ({ readConfigFile }) {
       },
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
     },
 
@@ -461,7 +464,7 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             indices: [
               {
-                names: ['rollup-*'],
+                names: ['rollup-*', 'regular-index*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
@@ -633,6 +636,45 @@ export default async function ({ readConfigFile }) {
             },
           ],
           elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        slo_all: {
+          kibana: [
+            {
+              feature: {
+                slo: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+        slo_read_only: {
+          kibana: [
+            {
+              feature: {
+                slo: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
             indices: [
               {
                 names: ['*'],

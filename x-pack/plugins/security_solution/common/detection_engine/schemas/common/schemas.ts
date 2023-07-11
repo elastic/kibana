@@ -45,6 +45,9 @@ export type SignalIds = t.TypeOf<typeof signal_ids>;
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
 
+export const alert_tag_ids = t.array(t.string);
+export type AlertTagIds = t.TypeOf<typeof alert_tag_ids>;
+
 export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
 export const fieldsOrUndefined = t.union([fields, t.undefined]);
@@ -59,6 +62,7 @@ export const status_code = PositiveInteger;
 export const message = t.string;
 export const perPage = PositiveInteger;
 export const total = PositiveInteger;
+export const revision = PositiveInteger;
 export const success = t.boolean;
 export const success_count = PositiveInteger;
 
@@ -124,3 +128,10 @@ export const privilege = t.type({
 });
 
 export type Privilege = t.TypeOf<typeof privilege>;
+
+export const alert_tags = t.type({
+  tags_to_add: t.array(t.string),
+  tags_to_remove: t.array(t.string),
+});
+
+export type AlertTags = t.TypeOf<typeof alert_tags>;

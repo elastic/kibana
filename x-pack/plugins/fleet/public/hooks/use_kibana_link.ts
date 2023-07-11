@@ -32,7 +32,7 @@ export const getHrefToObjectInKibanaApp = ({
   id,
   http,
 }: {
-  type: KibanaAssetType;
+  type: KibanaAssetType | undefined;
   id: string;
   http: HttpStart;
 }): undefined | string => {

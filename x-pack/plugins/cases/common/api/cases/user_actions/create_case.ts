@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { AssigneesUserActionPayloadRt } from './assignees';
+import { CategoryUserActionPayloadRt } from './category';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 import {
@@ -18,35 +19,43 @@ import { SettingsUserActionPayloadRt } from './settings';
 import { TagsUserActionPayloadRt } from './tags';
 import { TitleUserActionPayloadRt } from './title';
 
-export const CommonFieldsRt = rt.type({
+export const CommonFieldsRt = rt.strict({
   type: rt.literal(ActionTypes.create_case),
 });
 
-const CommonPayloadAttributesRt = rt.type({
-  assignees: AssigneesUserActionPayloadRt.props.assignees,
-  description: DescriptionUserActionPayloadRt.props.description,
+const CommonPayloadAttributesRt = rt.strict({
+  assignees: AssigneesUserActionPayloadRt.type.props.assignees,
+  description: DescriptionUserActionPayloadRt.type.props.description,
   status: rt.string,
   severity: rt.string,
-  tags: TagsUserActionPayloadRt.props.tags,
-  title: TitleUserActionPayloadRt.props.title,
-  settings: SettingsUserActionPayloadRt.props.settings,
+  tags: TagsUserActionPayloadRt.type.props.tags,
+  title: TitleUserActionPayloadRt.type.props.title,
+  settings: SettingsUserActionPayloadRt.type.props.settings,
   owner: rt.string,
 });
 
+const OptionalPayloadAttributesRt = rt.exact(
+  rt.partial({
+    category: CategoryUserActionPayloadRt.type.props.category,
+  })
+);
+
+const PayloadAttributesRt = rt.intersection([
+  CommonPayloadAttributesRt,
+  OptionalPayloadAttributesRt,
+]);
+
 export const CreateCaseUserActionRt = rt.intersection([
   CommonFieldsRt,
-  rt.type({
-    payload: rt.intersection([ConnectorUserActionPayloadRt, CommonPayloadAttributesRt]),
+  rt.strict({
+    payload: rt.intersection([ConnectorUserActionPayloadRt, PayloadAttributesRt]),
   }),
 ]);
 
 export const CreateCaseUserActionWithoutConnectorIdRt = rt.intersection([
   CommonFieldsRt,
-  rt.type({
-    payload: rt.intersection([
-      ConnectorUserActionPayloadWithoutConnectorIdRt,
-      CommonPayloadAttributesRt,
-    ]),
+  rt.strict({
+    payload: rt.intersection([ConnectorUserActionPayloadWithoutConnectorIdRt, PayloadAttributesRt]),
   }),
 ]);
 

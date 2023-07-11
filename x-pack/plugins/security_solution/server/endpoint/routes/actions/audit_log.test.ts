@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type {
@@ -22,16 +19,16 @@ import type {
 } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionLogRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { registerActionAuditLogRoutes } from './audit_log';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Results } from './mocks';
 import { mockAuditLogSearchResult } from './mocks';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -53,7 +50,7 @@ describe('Action Log API', () => {
 
     it('should accept a single agent ID', () => {
       expect(() => {
-        EndpointActionLogRequestSchema.params.validate({ agent_id: uuid.v4() });
+        EndpointActionLogRequestSchema.params.validate({ agent_id: uuidv4() });
       }).not.toThrow();
     });
 
@@ -136,12 +133,7 @@ describe('Action Log API', () => {
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
-      registerActionAuditLogRoutes(routerMock, {
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-      });
+      registerActionAuditLogRoutes(routerMock, createMockEndpointAppContext());
 
       getActivityLog = async (
         params: { agent_id: string },
@@ -151,18 +143,15 @@ describe('Action Log API', () => {
           params,
           query,
         });
+
         const mockResponse = httpServerMock.createResponseFactory();
-        const [, routeHandler]: [
-          RouteConfig<any, any, any, any>,
-          RequestHandler<
-            EndpointActionLogRequestParams,
-            EndpointActionLogRequestQuery,
-            unknown,
-            SecuritySolutionRequestHandlerContext
-          >
-        ] = routerMock.get.mock.calls.find(([{ path }]) =>
-          path.startsWith(ENDPOINT_ACTION_LOG_ROUTE)
-        )!;
+        const { routeHandler } = getRegisteredVersionedRouteMock(
+          routerMock,
+          'get',
+          ENDPOINT_ACTION_LOG_ROUTE,
+          '2023-10-31'
+        );
+
         await routeHandler(
           coreMock.createCustomRequestHandlerContext(
             createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())

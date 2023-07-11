@@ -18,14 +18,14 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getRuleList } from '../findings/findings_flyout/rule_tab';
-import { getRemediationList } from '../findings/findings_flyout/overview_tab';
-import type { RuleSavedObject } from './use_csp_rules';
+import { CspRuleTemplate, CspRuleTemplateMetadata } from '../../../common/schemas';
+import { getRuleList } from '../configurations/findings_flyout/rule_tab';
+import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: RuleSavedObject;
+  rule: CspRuleTemplate;
 }
 
 const tabs = [
@@ -55,10 +55,11 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
       ownFocus={false}
       onClose={onClose}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
+      outsideClickCloses
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{rule.attributes.metadata.name}</h2>
+          <h2>{rule.metadata.name}</h2>
         </EuiTitle>
         <EuiSpacer />
         <EuiTabs>
@@ -75,22 +76,19 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {tab === 'overview' && <RuleOverviewTab rule={rule} />}
+        {tab === 'overview' && <RuleOverviewTab rule={rule.metadata} />}
         {tab === 'remediation' && (
-          <EuiDescriptionList
-            compressed={false}
-            listItems={getRemediationList(rule.attributes.metadata)}
-          />
+          <EuiDescriptionList compressed={false} listItems={getRemediationList(rule.metadata)} />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
 };
 
-const RuleOverviewTab = ({ rule }: { rule: RuleSavedObject }) => (
+const RuleOverviewTab = ({ rule }: { rule: CspRuleTemplateMetadata }) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
-      <EuiDescriptionList listItems={getRuleList(rule.attributes.metadata)} />
+      <EuiDescriptionList listItems={getRuleList(rule)} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

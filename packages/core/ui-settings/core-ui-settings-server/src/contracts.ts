@@ -56,7 +56,7 @@ export interface UiSettingsServiceStart {
    * Creates a {@link IUiSettingsClient} with provided *scoped* saved objects client.
    *
    * This should only be used in the specific case where the client needs to be accessed
-   * from outside of the scope of a {@link RequestHandler}.
+   * from outside the scope of a {@link RequestHandler}.
    *
    * @example
    * ```ts
@@ -72,13 +72,13 @@ export interface UiSettingsServiceStart {
    * Creates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.
    *
    * This should only be used in the specific case where the client needs to be accessed
-   * from outside of the scope of a {@link RequestHandler}.
+   * from outside the scope of a {@link RequestHandler}.
    *
    * @example
    * ```ts
    * start(core: CoreStart) {
    *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
-   *  const uiSettingsClient = core.uiSettings.asScopedToGlobalClient(soClient);
+   *  const uiSettingsClient = core.uiSettings.globalAsScopedToClient(soClient);
    * }
    * ```
    */

@@ -23,8 +23,9 @@ export const callDeleteJobs = async <JobType extends string>(
   const { spaceId, sourceId, jobTypes } = requestArgs;
 
   // NOTE: Deleting the jobs via this API will delete the datafeeds at the same time
-  const deleteJobsResponse = await fetch('/api/ml/jobs/delete_jobs', {
+  const deleteJobsResponse = await fetch('/internal/ml/jobs/delete_jobs', {
     method: 'POST',
+    version: '1',
     body: JSON.stringify(
       deleteJobsRequestPayloadRT.encode({
         jobIds: jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType)),
@@ -36,7 +37,9 @@ export const callDeleteJobs = async <JobType extends string>(
 };
 
 export const callGetJobDeletionTasks = async (fetch: HttpHandler) => {
-  const jobDeletionTasksResponse = await fetch('/api/ml/jobs/deleting_jobs_tasks');
+  const jobDeletionTasksResponse = await fetch('/internal/ml/jobs/deleting_jobs_tasks', {
+    version: '1',
+  });
 
   return decodeOrThrow(getJobDeletionTasksResponsePayloadRT)(jobDeletionTasksResponse);
 };
@@ -54,8 +57,9 @@ export const callStopDatafeeds = async <JobType extends string>(
   const { spaceId, sourceId, jobTypes } = requestArgs;
 
   // Stop datafeed due to https://github.com/elastic/kibana/issues/44652
-  const stopDatafeedResponse = await fetch('/api/ml/jobs/stop_datafeeds', {
+  const stopDatafeedResponse = await fetch('/internal/ml/jobs/stop_datafeeds', {
     method: 'POST',
+    version: '1',
     body: JSON.stringify(
       stopDatafeedsRequestPayloadRT.encode({
         datafeedIds: jobTypes.map((jobType) => getDatafeedId(spaceId, sourceId, jobType)),

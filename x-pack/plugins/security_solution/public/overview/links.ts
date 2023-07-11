@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  COVERAGE_OVERVIEW_PATH,
+  DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENTITY_ANALYTICS_PATH,
   LANDING_PATH,
@@ -15,13 +17,16 @@ import {
   SERVER_APP_ID,
 } from '../../common/constants';
 import {
+  DATA_QUALITY,
   DETECTION_RESPONSE,
   GETTING_STARTED,
   OVERVIEW,
   ENTITY_ANALYTICS,
+  COVERAGE_OVERVIEW,
 } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
+import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
 
@@ -52,6 +57,7 @@ export const gettingStartedLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
+  sideNavIcon: 'launch',
   skipUrlState: true,
   hideTimeline: true,
 };
@@ -79,10 +85,51 @@ export const entityAnalyticsLinks: LinkItem = {
   landingImage: entityAnalyticsDashboard,
   description: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsDescription', {
     defaultMessage:
-      'Entity analytics, notable anomalies, and threats to narrow down the monitoring surface area.',
+      'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
   }),
   path: ENTITY_ANALYTICS_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SERVER_APP_ID}.entity-analytics`],
   isBeta: false,
   globalSearchKeywords: [ENTITY_ANALYTICS],
+};
+
+export const ecsDataQualityDashboardLinks: LinkItem = {
+  id: SecurityPageName.dataQuality,
+  title: DATA_QUALITY,
+  landingImage: dataQualityDashboardPageImg,
+  description: i18n.translate(
+    'xpack.securitySolution.appLinks.ecsDataQualityDashboardDescription',
+    {
+      defaultMessage:
+        'Check index mappings and values for compatibility with the Elastic Common Schema (ECS)',
+    }
+  ),
+  path: DATA_QUALITY_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.ecsDataQualityDashboard', {
+      defaultMessage: 'Data Quality',
+    }),
+  ],
+};
+
+export const coverageOverviewDashboardLinks: LinkItem = {
+  id: SecurityPageName.coverageOverview,
+  title: COVERAGE_OVERVIEW,
+  landingImage: overviewPageImg, // TODO: change with updated image before removing feature flag https://github.com/elastic/security-team/issues/2905
+  description: i18n.translate(
+    'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
+    {
+      defaultMessage:
+        'An overview of rule coverage according to the MITRE ATT&CK\u00AE specifications',
+    }
+  ),
+  path: COVERAGE_OVERVIEW_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
+      defaultMessage: 'MITRE ATT&CK Coverage',
+    }),
+  ],
+  experimentalKey: 'detectionsCoverageOverview',
 };

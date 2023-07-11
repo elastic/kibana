@@ -18,12 +18,12 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../../common/types/timeline/api';
 import { persistFavoriteSchema } from '../../../schemas/timelines/persist_favorite_schema';
 
 export const persistFavoriteRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.patch(

@@ -190,7 +190,7 @@ export const BEATS_SYSTEM_ID = 'beats';
  * The name of the Enterprise Search System ID used to publish and look up Enterprise Search stats through the Monitoring system.
  * @type {string}
  */
-export const ENTERPRISE_SEARCH_SYSTEM_ID = 'enterprise_search';
+export const ENTERPRISE_SEARCH_SYSTEM_ID = 'enterprisesearch';
 
 /**
  * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.

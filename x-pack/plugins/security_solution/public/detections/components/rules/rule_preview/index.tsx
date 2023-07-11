@@ -16,6 +16,8 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSuperUpdateButton,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import moment from 'moment';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
@@ -210,6 +212,13 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 
   return (
     <>
+      <EuiTitle size="m">
+        <h2>{i18n.RULE_PREVIEW_TITLE}</h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
+        <p>{i18n.RULE_PREVIEW_DESCRIPTION}</p>
+      </EuiText>
       <EuiSpacer size="s" />
       {showInvocationCountWarning && (
         <>

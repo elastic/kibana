@@ -85,6 +85,9 @@ function migrateLastRun(
 
   return {
     ...doc,
+    // @ts-expect-error - we are changing the type of rule.lastRun.outcomeMsg to be string[]
+    // instead of string. Since this change was introduced after the migration was created,
+    // we will expect the TS error and handle the transformation on the API side.
     attributes: {
       ...attributes,
       ...(lastRun ? { lastRun } : {}),

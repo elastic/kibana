@@ -56,6 +56,8 @@ export async function getAlertSummary(
           start: parsedDateStart.toISOString(),
           sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
           end: dateNow.toISOString(),
+          // filter out execute-action event logs
+          filter: 'NOT event.action: execute-action AND event.provider: alerting',
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
       ),

@@ -13,7 +13,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
+  // Test requires access to Elastic Maps Service
+  // Do not skip test if failure is "Test requires access to Elastic Maps Service (EMS). EMS is not available"
   describe('choropleth chart', () => {
+    before('', async () => {
+      await PageObjects.maps.expectEmsToBeAvailable();
+    });
+
     it('should allow creation of choropleth chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -50,7 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.dragFieldToWorkspace('geo.dest', 'xyVisChart');
 
       // add filter to force data fetch to set activeData
-      await filterBar.addFilter('bytes', 'is between', '200', '10000');
+      await filterBar.addFilter({
+        field: 'bytes',
+        operation: 'is between',
+        value: { from: '200', to: '10000' },
+      });
 
       await testSubjects.click('lnsSuggestion-worldCountriesByCountOfRecords > lnsSuggestion');
 

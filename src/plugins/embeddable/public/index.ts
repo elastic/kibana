@@ -29,6 +29,7 @@ export type {
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   ValueClickContext,
+  MultiValueClickContext,
   CellValueContext,
   RangeSelectContext,
   IContainer,
@@ -69,6 +70,7 @@ export {
   PanelNotFoundError,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
+  MULTI_VALUE_CLICK_TRIGGER,
   CELL_VALUE_TRIGGER,
   cellValueTrigger,
   ViewMode,
@@ -78,12 +80,17 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isMultiValueClickTriggerContext,
   isRowClickTriggerContext,
   isContextMenuTriggerContext,
   EmbeddableStateTransfer,
   EmbeddableRenderer,
   useEmbeddableFactory,
   isFilterableEmbeddable,
+  shouldFetch$,
+  shouldRefreshFilterCompareOptions,
+  PANEL_HOVER_TRIGGER,
+  panelHoverTrigger,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';

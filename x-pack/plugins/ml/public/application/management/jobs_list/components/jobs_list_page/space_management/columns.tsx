@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui';
-import { TrainedModelLink } from '../../../../../trained_models/models_management';
+import { TrainedModelLink } from '../../../../../model_management';
 import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   AnalyticsManagementItems,

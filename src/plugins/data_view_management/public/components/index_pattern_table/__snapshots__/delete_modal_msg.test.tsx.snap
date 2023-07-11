@@ -4,7 +4,7 @@ exports[`delete modal content render 1`] = `
 <div>
   <EuiCallOut
     color="warning"
-    iconType="alert"
+    iconType="warning"
     title="Data views are deleted from every space they are shared in."
   />
   <EuiSpacer
@@ -75,7 +75,7 @@ exports[`delete modal content render 2`] = `
 <div>
   <EuiCallOut
     color="warning"
-    iconType="alert"
+    iconType="warning"
     title="Data views are deleted from every space they are shared in."
   />
   <EuiSpacer
@@ -138,7 +138,7 @@ exports[`delete modal content render 3`] = `
 <div>
   <EuiCallOut
     color="warning"
-    iconType="alert"
+    iconType="warning"
     title="Data views are deleted from every space they are shared in."
   />
   <EuiSpacer
@@ -207,7 +207,7 @@ exports[`delete modal content render 4`] = `
 <div>
   <EuiCallOut
     color="warning"
-    iconType="alert"
+    iconType="warning"
     title="Data views are deleted from every space they are shared in."
   />
   <EuiSpacer

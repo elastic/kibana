@@ -14,12 +14,14 @@ import {
   getDataTablesInStorageByIds,
   getAllDataTablesInStorage,
   addTableInStorage,
+  migrateAlertTableStateToTriggerActionsState,
 } from '.';
 
 import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import type { DataTableModel } from '../../../common/store/data_table/model';
-import { TableId } from '../../../../common/types';
+import { VIEW_SELECTION } from '../../../../common/constants';
+import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -639,6 +641,11 @@ describe('SiemLocalStorage', () => {
         initialized: true,
         updated: 1665943295913,
         totalCount: 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
       };
       const dataTables = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
       expect(dataTables).toStrictEqual({
@@ -778,6 +785,606 @@ describe('SiemLocalStorage', () => {
         id: '@timestamp',
         initialWidth: 190,
       });
+    });
+  });
+
+  describe('Trigger Actions Alert Table Migration', () => {
+    const legacyDataTableState: DataTableState['dataTable']['tableById'] = {
+      'alerts-page': {
+        queryFields: [],
+        isLoading: false,
+        defaultColumns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            initialWidth: 180,
+          },
+        ],
+        dataViewId: null,
+        deletedEventIds: [],
+        expandedDetail: {
+          query: {
+            params: { hostName: 'Host-riizqhdnoy' },
+            panelView: 'hostDetail',
+          },
+        },
+        filters: [],
+        indexNames: [],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: false,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+        selectAll: false,
+        graphEventId: '',
+        sessionViewConfig: null,
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            initialWidth: 180,
+          },
+        ],
+        title: 'Sessions',
+        totalCount: 419,
+        viewMode: 'gridView',
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
+        id: 'alerts-page',
+        initialized: true,
+      },
+      'hosts-page-events': {
+        isLoading: false,
+        queryFields: [],
+        defaultColumns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 190,
+            esTypes: ['date'],
+            type: 'date',
+          },
+          { columnHeaderType: 'not-filtered', id: 'message' },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'event.module' },
+          { columnHeaderType: 'not-filtered', id: 'agent.type' },
+          { columnHeaderType: 'not-filtered', id: 'event.dataset' },
+          { columnHeaderType: 'not-filtered', id: 'event.action' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        dataViewId: 'security-solution-default',
+        deletedEventIds: [],
+        expandedDetail: {},
+        filters: [],
+        indexNames: ['logs-*'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: true,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+        selectAll: false,
+        graphEventId: '',
+        sessionViewConfig: null,
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 190,
+            esTypes: ['date'],
+            type: 'date',
+          },
+          { columnHeaderType: 'not-filtered', id: 'message' },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'event.module' },
+          { columnHeaderType: 'not-filtered', id: 'agent.type' },
+          { columnHeaderType: 'not-filtered', id: 'event.dataset' },
+          { columnHeaderType: 'not-filtered', id: 'event.action' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        title: '',
+        totalCount: 486,
+        viewMode: 'gridView',
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
+        id: 'hosts-page-events',
+        initialized: true,
+        updated: 1676474453149,
+      },
+      'alerts-rules-details-page': {
+        isLoading: false,
+        queryFields: [],
+        defaultColumns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            initialWidth: 180,
+          },
+        ],
+        dataViewId: null,
+        deletedEventIds: [],
+        expandedDetail: {},
+        filters: [],
+        indexNames: [],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: false,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+
+          {
+            columnId: 'kibana.alert.rule.name',
+            columnType: 'string',
+            esTypes: ['keyword'],
+            sortDirection: 'desc',
+          },
+        ],
+        selectAll: false,
+        graphEventId: '',
+        sessionViewConfig: null,
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            initialWidth: 180,
+          },
+        ],
+        title: 'Sessions',
+        totalCount: 403,
+        viewMode: 'gridView',
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
+        id: 'alerts-rules-details-page',
+        initialized: true,
+      },
+    };
+
+    const expectedMigratedResult: Array<Record<string, Record<string, unknown>>> = [
+      {
+        'detection-engine-alert-table-securitySolution-alerts-page-gridView': {
+          columns: [
+            {
+              columnHeaderType: 'not-filtered',
+              id: '@timestamp',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Rule',
+              id: 'kibana.alert.rule.name',
+              initialWidth: 180,
+              linkField: 'kibana.alert.rule.uuid',
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Severity',
+              id: 'kibana.alert.severity',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Risk Score',
+              id: 'kibana.alert.risk_score',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Reason',
+              id: 'kibana.alert.reason',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'host.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'user.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'process.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'file.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'source.ip',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'destination.ip',
+              initialWidth: 180,
+            },
+          ],
+          sort: [{ '@timestamp': { order: 'desc' } }],
+          visibleColumns: [
+            '@timestamp',
+            'kibana.alert.rule.name',
+            'kibana.alert.severity',
+            'kibana.alert.risk_score',
+            'kibana.alert.reason',
+            'host.name',
+            'user.name',
+            'process.name',
+            'file.name',
+            'source.ip',
+            'destination.ip',
+          ],
+        },
+      },
+      {
+        'detection-engine-alert-table-securitySolution-rule-details-gridView': {
+          columns: [
+            {
+              columnHeaderType: 'not-filtered',
+              id: '@timestamp',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Rule',
+              id: 'kibana.alert.rule.name',
+              initialWidth: 180,
+              linkField: 'kibana.alert.rule.uuid',
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Severity',
+              id: 'kibana.alert.severity',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Risk Score',
+              id: 'kibana.alert.risk_score',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Reason',
+              id: 'kibana.alert.reason',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'host.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'user.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'process.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'file.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'source.ip',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'destination.ip',
+              initialWidth: 180,
+            },
+          ],
+          sort: [
+            { '@timestamp': { order: 'desc' } },
+            { 'kibana.alert.rule.name': { order: 'desc' } },
+          ],
+          visibleColumns: [
+            '@timestamp',
+            'kibana.alert.rule.name',
+            'kibana.alert.severity',
+            'kibana.alert.risk_score',
+            'kibana.alert.reason',
+            'host.name',
+            'user.name',
+            'process.name',
+            'file.name',
+            'source.ip',
+            'destination.ip',
+          ],
+        },
+      },
+    ];
+    beforeEach(() => {
+      storage.clear();
+    });
+
+    it('User Table preference already exists in local storage - GridView', () => {
+      migrateAlertTableStateToTriggerActionsState(storage, legacyDataTableState);
+      for (const item of expectedMigratedResult) {
+        for (const key of Object.keys(item)) {
+          expect(item[key]).toMatchObject(storage.get(key));
+        }
+      }
+    });
+    it('Trigger Actions state already exists for Alerts Table', () => {
+      const existingKey = 'detection-engine-alert-table-securitySolution-alerts-page-gridView';
+      storage.set(existingKey, 'Some value');
+
+      migrateAlertTableStateToTriggerActionsState(storage, legacyDataTableState);
+      for (const item of expectedMigratedResult) {
+        for (const key of Object.keys(item)) {
+          if (key === existingKey) {
+            expect(storage.get(key)).toEqual('Some value');
+          } else {
+            expect(storage.get(key)).toMatchObject(item[key]);
+          }
+        }
+      }
     });
   });
 });

@@ -36,6 +36,33 @@ describe('getDisplayValueFromFilter', () => {
     expect(displayValue).toBe('');
   });
 
+  it('returns 0 if value undefined and numeric field', () => {
+    const filter = {
+      meta: {
+        negate: false,
+        index: 'logstash-*',
+        type: 'phrase',
+        key: 'bytes',
+        value: undefined,
+        disabled: false,
+        alias: null,
+        params: {
+          query: undefined,
+        },
+      },
+      $state: {
+        store: FilterStateStore.APP_STATE,
+      },
+      query: {
+        match_phrase: {
+          bytes: '0',
+        },
+      },
+    };
+    const displayValue = getDisplayValueFromFilter(filter, [stubIndexPattern]);
+    expect(displayValue).toBe('0');
+  });
+
   it('phrase filters without formatter', () => {
     jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);

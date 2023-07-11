@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Request Diagnostics
-  tags: []
+  summary: Request agent diagnostics
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -17,7 +18,8 @@ post:
             properties:
               actionId:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: request-diagnostics-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, FC } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
@@ -18,11 +18,11 @@ import {
 
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainerContext } from '../../dashboard_container_renderer';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
-interface Props extends DivProps {
+export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
@@ -55,7 +55,9 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const {
       embeddable: { EmbeddablePanel: PanelComponent },
     } = pluginServices.getServices();
-    const { embeddableInstance: container } = useDashboardContainerContext();
+    const container = useDashboardContainer();
+    const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
+    const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -66,11 +68,23 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
 
+    useLayoutEffect(() => {
+      if (typeof ref !== 'function' && ref?.current) {
+        if (scrollToPanelId === id) {
+          container.scrollToPanel(ref.current);
+        }
+        if (highlightPanelId === id) {
+          container.highlightPanel(ref.current);
+        }
+      }
+    }, [id, container, scrollToPanelId, highlightPanelId, ref]);
+
     return (
       <div
         style={{ ...style, zIndex: focusedPanelId === id ? 2 : 'auto' }}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
+        id={`panel-${id}`}
         ref={ref}
         {...rest}
       >
@@ -96,21 +110,20 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
   }
 );
 
-export const ObservedItem: FC<Props> = (props: Props) => {
+export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, panelRef) => {
   const [intersection, updateIntersection] = useState<IntersectionObserverEntry>();
   const [isRenderable, setIsRenderable] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
 
   const observerRef = useRef(
     new window.IntersectionObserver(([value]) => updateIntersection(value), {
-      root: panelRef.current,
+      root: (panelRef as React.RefObject<HTMLDivElement>).current,
     })
   );
 
   useEffect(() => {
     const { current: currentObserver } = observerRef;
     currentObserver.disconnect();
-    const { current } = panelRef;
+    const { current } = panelRef as React.RefObject<HTMLDivElement>;
 
     if (current) {
       currentObserver.observe(current);
@@ -126,17 +139,19 @@ export const ObservedItem: FC<Props> = (props: Props) => {
   }, [intersection, isRenderable]);
 
   return <Item ref={panelRef} isRenderable={isRenderable} {...props} />;
-};
+});
 
-export const DashboardGridItem: FC<Props> = (props: Props) => {
+// ReactGridLayout passes ref to children. Functional component children require forwardRef to avoid react warning
+// https://github.com/react-grid-layout/react-grid-layout#custom-child-components-and-draggable-handles
+export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
   const {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
 
-  const { useEmbeddableSelector: select } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
-  const isPrintMode = select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
+  const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
   const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
 
-  return isEnabled ? <ObservedItem {...props} /> : <Item {...props} />;
-};
+  return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
+});

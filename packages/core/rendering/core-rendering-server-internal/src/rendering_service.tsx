@@ -17,6 +17,8 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
+import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -32,8 +34,13 @@ import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never })
-  | RenderingSetupDeps;
+  | RenderingSetupDeps
+  | (RenderingPrebootDeps & {
+      status?: never;
+      elasticsearch?: never;
+      customBranding?: never;
+      userSettings?: never;
+    });
 
 /** @internal */
 export class RenderingService {
@@ -65,6 +72,8 @@ export class RenderingService {
     http,
     status,
     uiPlugins,
+    customBranding,
+    userSettings,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -73,16 +82,24 @@ export class RenderingService {
         serverBasePath: http.basePath.serverBasePath,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
+        userSettingsService: userSettings,
       }),
     });
 
     return {
-      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status }),
+      render: this.render.bind(this, {
+        elasticsearch,
+        http,
+        uiPlugins,
+        status,
+        customBranding,
+        userSettings,
+      }),
     };
   }
 
   private async render(
-    { elasticsearch, http, uiPlugins, status }: RenderOptions,
+    renderOptions: RenderOptions,
     request: KibanaRequest,
     uiSettings: {
       client: IUiSettingsClient;
@@ -90,6 +107,8 @@ export class RenderingService {
     },
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
+    const { elasticsearch, http, uiPlugins, status, customBranding, userSettings } = renderOptions;
+
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
@@ -97,19 +116,35 @@ export class RenderingService {
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
+
+    let settingsUserValues: Record<string, UserProvidedValues> = {};
+    let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
+
+    if (!isAnonymousPage) {
+      const userValues = await Promise.all([
+        uiSettings.client?.getUserProvided(),
+        uiSettings.globalClient?.getUserProvided(),
+      ]);
+
+      settingsUserValues = userValues[0];
+      globalSettingsUserValues = userValues[1];
+    }
+
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
+      user: settingsUserValues,
     };
     const globalSettings = {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
+      user: globalSettingsUserValues,
     };
 
     let clusterInfo = {};
+    let branding: CustomBranding = {};
     try {
       // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
-      if (isAuthenticated(http.auth, request) && elasticsearch) {
+      const authenticated = isAuthenticated(http.auth, request);
+      if (authenticated && elasticsearch) {
         clusterInfo = await firstValueFrom(
           elasticsearch.clusterInfo$.pipe(
             timeout(50), // If not available, just return undefined
@@ -117,11 +152,29 @@ export class RenderingService {
           )
         );
       }
+      branding = await customBranding?.getBrandingFor(request, {
+        unauthenticated: !authenticated,
+      })!;
     } catch (err) {
       // swallow error
     }
 
-    const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    let userSettingDarkMode: boolean | undefined;
+
+    if (!isAnonymousPage) {
+      userSettingDarkMode = await userSettings?.getUserSettingDarkMode(request);
+    }
+
+    let darkMode: boolean;
+
+    const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
+
+    if (userSettingDarkMode !== undefined && !isThemeOverridden) {
+      darkMode = userSettingDarkMode;
+    } else {
+      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
+    }
+
     const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({
@@ -142,6 +195,12 @@ export class RenderingService {
       darkMode,
       themeVersion,
       stylesheetPaths,
+      customBranding: {
+        faviconSVG: branding?.faviconSVG,
+        faviconPNG: branding?.faviconPNG,
+        pageTitle: branding?.pageTitle,
+        logo: branding?.logo,
+      },
       injectedMetadata: {
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,
@@ -158,6 +217,11 @@ export class RenderingService {
         theme: {
           darkMode,
           version: themeVersion,
+        },
+        customBranding: {
+          logo: branding?.logo,
+          customizedLogo: branding?.customizedLogo,
+          pageTitle: branding?.pageTitle,
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-custom-branding-common",
+  "owner": "@elastic/appex-sharedux",
+}

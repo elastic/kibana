@@ -11,7 +11,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CaseSeverity,
-  CasesResponse,
+  Cases,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
@@ -30,20 +30,20 @@ import {
   createCase,
   createComment,
   updateCase,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
   delay,
   calculateDuration,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   deleteAllAlerts,
+  deleteAllRules,
   getRuleForSignalTesting,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   getSignalsByIds,
   createRule,
@@ -195,6 +195,62 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(data).to.eql({
           ...postCaseResp(),
           severity: CaseSeverity.MEDIUM,
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should patch the category of a case correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // the default category
+        expect(postedCase.category).equal(null);
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                category: 'foobar',
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          category: 'foobar',
+          updated_by: defaultUser,
+        });
+      });
+
+      it('should unset the category of a case correctly', async () => {
+        const postedCase = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        // the default category
+        expect(postedCase.category).equal('foobar');
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                category: null,
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          category: null,
           updated_by: defaultUser,
         });
       });
@@ -391,7 +447,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('406s when excess data sent', async () => {
+      it('400s when excess data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
           supertest,
@@ -405,7 +461,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          expectedHttpCode: 406,
+          expectedHttpCode: 400,
         });
       });
 
@@ -505,22 +561,260 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s if the title is too long', async () => {
-        const longTitle = 'a'.repeat(161);
-
-        const postedCase = await createCase(supertest, postCaseReq);
+      it('400s when trying to update too many cases', async () => {
         await updateCase({
           supertest,
           params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                title: longTitle,
-              },
-            ],
+            cases: Array(101).fill({ id: 'foo', version: 'bar', title: 'coolTitle' }),
           },
           expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to update zero cases', async () => {
+        await updateCase({
+          supertest,
+          params: {
+            cases: [],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      describe('title', async () => {
+        it('400s if the title is too long', async () => {
+          const longTitle = 'a'.repeat(161);
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: longTitle,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the title an empty string', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the title is a string with empty characters', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  title: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('description', async () => {
+        it('400s if the description is too long', async () => {
+          const longDescription = 'a'.repeat(30001);
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: longDescription,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the description an empty string', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s if the description is a string with empty characters', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  description: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('categories', async () => {
+        it('400s when a too long category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: 'A very long category with more than fifty characters!',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when an empty string category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: '',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when a string with spaces category value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  category: '  ',
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+      });
+
+      describe('tags', async () => {
+        it('400s when tags array is too long', async () => {
+          const tags = Array(201).fill('foo');
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags,
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when tag string is too long', async () => {
+          const tag = 'a'.repeat(257);
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags: [tag],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when an empty string is passed in tags', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags: ['', 'one'],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when a string with spaces tag value is passed', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  tags: ['  '],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
         });
       });
     });
@@ -597,7 +891,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           // does NOT updates alert status when the status is updated and syncAlerts=false
-          const updatedIndWithStatus: CasesResponse = (await setStatus({
+          const updatedIndWithStatus: Cases = (await setStatus({
             supertest,
             cases: [
               {
@@ -611,7 +905,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses['in-progress'],
               },
             ],
-          })) as CasesResponse;
+          })) as Cases;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
 
@@ -730,7 +1024,7 @@ export default ({ getService }: FtrProviderContext): void => {
             signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
 
-          const updatedIndWithStatus: CasesResponse = (await setStatus({
+          const updatedIndWithStatus: Cases = (await setStatus({
             supertest,
             cases: [
               {
@@ -739,7 +1033,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses.closed,
               },
             ],
-          })) as CasesResponse;
+          })) as Cases;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
           await es.indices.refresh({ index: signalsIndex2 });
@@ -794,17 +1088,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('updates alert status when the status is updated and syncAlerts=true', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const postedCase = await createCase(supertest, postCaseReq);
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -856,7 +1153,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
@@ -864,7 +1164,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -909,7 +1209,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('it updates alert status when syncAlerts is turned on', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
@@ -917,7 +1220,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -982,11 +1285,14 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
 
           const postedCase = await createCase(supertest, postCaseReq);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 

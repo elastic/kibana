@@ -10,6 +10,17 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+
+  readOnly: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.maybe(schema.boolean({ defaultValue: false })),
+    schema.never()
+  ),
 });
 
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export type PieConfig = TypeOf<typeof configSchema>;
+
+export interface PiePublicConfig {
+  readOnly?: boolean;
+}

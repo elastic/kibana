@@ -31,6 +31,7 @@ describe('common_transformations', () => {
           group: 'some group',
           id: 'some-connector-id',
           params: { foo: 'car', bar: [1, 2, 3] },
+          uuid: '123-456',
         },
       ],
       params: { bar: 'foo', numbers: { 1: [2, 3] } } as never,
@@ -45,6 +46,7 @@ describe('common_transformations', () => {
       notify_when: 'onActiveAlert',
       mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
+      revision: 0,
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
         last_duration: 42,
@@ -81,7 +83,8 @@ describe('common_transformations', () => {
       },
       last_run: {
         outcome: RuleLastRunOutcomeValues[2],
-        outcome_msg: 'this is just a test',
+        outcome_order: 20,
+        outcome_msg: ['this is just a test'],
         warning: RuleExecutionStatusErrorReasons.Unknown,
         alerts_count: {
           new: 1,
@@ -107,6 +110,7 @@ describe('common_transformations', () => {
               ],
               "foo": "car",
             },
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": "some-rule-type",
@@ -134,7 +138,10 @@ describe('common_transformations', () => {
             "recovered": 3,
           },
           "outcome": "failed",
-          "outcomeMsg": "this is just a test",
+          "outcomeMsg": Array [
+            "this is just a test",
+          ],
+          "outcomeOrder": 20,
           "warning": "unknown",
         },
         "monitoring": Object {
@@ -179,6 +186,7 @@ describe('common_transformations', () => {
             ],
           },
         },
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },
@@ -209,6 +217,7 @@ describe('common_transformations', () => {
           group: 'some group',
           id: 'some-connector-id',
           params: {},
+          uuid: '123-456',
         },
       ],
       params: {} as never,
@@ -222,6 +231,7 @@ describe('common_transformations', () => {
       notify_when: 'onActiveAlert',
       mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
+      revision: 0,
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
         status: 'error',
@@ -253,7 +263,8 @@ describe('common_transformations', () => {
       },
       last_run: {
         outcome: 'failed',
-        outcome_msg: 'this is just a test',
+        outcome_order: 20,
+        outcome_msg: ['this is just a test'],
         warning: RuleExecutionStatusErrorReasons.Unknown,
         alerts_count: {
           new: 1,
@@ -272,6 +283,7 @@ describe('common_transformations', () => {
             "group": "some group",
             "id": "some-connector-id",
             "params": Object {},
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": "some-rule-type",
@@ -295,7 +307,10 @@ describe('common_transformations', () => {
             "recovered": 3,
           },
           "outcome": "failed",
-          "outcomeMsg": "this is just a test",
+          "outcomeMsg": Array [
+            "this is just a test",
+          ],
+          "outcomeOrder": 20,
           "warning": "unknown",
         },
         "monitoring": Object {
@@ -332,6 +347,7 @@ describe('common_transformations', () => {
         "nextRun": 2021-12-15T12:34:55.789Z,
         "notifyWhen": "onActiveAlert",
         "params": Object {},
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },

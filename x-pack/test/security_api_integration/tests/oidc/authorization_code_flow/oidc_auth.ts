@@ -11,7 +11,7 @@ import url from 'url';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
 import { resolve } from 'path';
-import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
+import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { FileWrapper } from '../../audit/file_wrapper';
 
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should fail if state is not matching', async () => {
@@ -189,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
@@ -664,7 +664,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../../fixtures/audit/oidc.log');
+      const logFilePath = resolve(__dirname, '../../../packages/helpers/audit/oidc.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

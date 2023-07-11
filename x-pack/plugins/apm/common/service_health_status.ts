@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { ANOMALY_SEVERITY } from './ml_constants';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 export enum ServiceHealthStatus {
   healthy = 'healthy',
@@ -19,21 +19,21 @@ export enum ServiceHealthStatus {
 export function getServiceHealthStatus({
   severity,
 }: {
-  severity: ANOMALY_SEVERITY;
+  severity: ML_ANOMALY_SEVERITY;
 }) {
   switch (severity) {
-    case ANOMALY_SEVERITY.CRITICAL:
-    case ANOMALY_SEVERITY.MAJOR:
+    case ML_ANOMALY_SEVERITY.CRITICAL:
+    case ML_ANOMALY_SEVERITY.MAJOR:
       return ServiceHealthStatus.critical;
 
-    case ANOMALY_SEVERITY.MINOR:
-    case ANOMALY_SEVERITY.WARNING:
+    case ML_ANOMALY_SEVERITY.MINOR:
+    case ML_ANOMALY_SEVERITY.WARNING:
       return ServiceHealthStatus.warning;
 
-    case ANOMALY_SEVERITY.LOW:
+    case ML_ANOMALY_SEVERITY.LOW:
       return ServiceHealthStatus.healthy;
 
-    case ANOMALY_SEVERITY.UNKNOWN:
+    case ML_ANOMALY_SEVERITY.UNKNOWN:
       return ServiceHealthStatus.unknown;
   }
 }

@@ -85,13 +85,44 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulesTab');
     });
 
+    it('should delete the right action when the same action has been added twice', async () => {
+      // create a new rule
+      const ruleName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(ruleName);
+
+      // create webhook connector
+      await testSubjects.click('.webhook-alerting-ActionTypeSelectOption');
+      await testSubjects.click('createActionConnectorButton-0');
+      await testSubjects.setValue('nameInput', 'webhook-test');
+      await testSubjects.setValue('webhookUrlText', 'https://test.test');
+      await testSubjects.setValue('webhookUserInput', 'fakeuser');
+      await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
+
+      // save rule
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      await find.setValueByClass('kibanaCodeEditor', 'myUniqueKey');
+      await testSubjects.click('saveRuleButton');
+
+      // add new action and remove first one
+      await testSubjects.click('ruleSidebarEditAction');
+      await testSubjects.click('.webhook-alerting-ActionTypeSelectOption');
+      await find.clickByCssSelector(
+        '[data-test-subj="alertActionAccordion-0"] [aria-label="Delete"]'
+      );
+
+      // check that the removed action is the right one
+      const doesExist = await find.existsByXpath(".//*[text()='myUniqueKey']");
+      expect(doesExist).to.eql(false);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(ruleName);
+      await deleteAlerts(alertsToDelete.map((rule: { id: string }) => rule.id));
+      expect(true).to.eql(true);
+    });
+
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
       await rules.common.defineIndexThresholdAlert(alertName);
-
-      await testSubjects.click('notifyWhenSelect');
-      await testSubjects.click('onThrottleInterval');
-      await testSubjects.setValue('throttleInput', '10');
 
       // filterKuery validation
       await testSubjects.setValue('filterKuery', 'group:');
@@ -108,6 +139,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         `alert '{{alertName}}' is active for group '{{context.group}}':
@@ -125,6 +159,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
+      await testSubjects.setValue('messageVariablesSelectableSearch', 'rule.id');
       await testSubjects.click('variableMenuButton-rule.id');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
@@ -236,7 +271,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('intervalInput', '10');
+      await testSubjects.setValue('ruleNameInput', 'alertName');
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');

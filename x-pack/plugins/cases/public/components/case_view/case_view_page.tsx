@@ -5,35 +5,27 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import styled from 'styled-components';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
+import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
-import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
-import { WhitePageWrapperNoBorder } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
+import { CaseViewFiles } from './components/case_view_files';
 import { CaseViewMetrics } from './metrics';
-import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 
-const ExperimentalBadge = styled(EuiBetaBadge)`
-  margin-left: 5px;
-`;
-
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
-    caseId,
     onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
@@ -42,7 +34,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     useFetchAlertData,
   }) => {
     const { features } = useCasesContext();
-    const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
 
@@ -59,7 +50,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const timelineUi = useTimelineContext()?.ui;
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-      caseId,
       caseData,
     });
 
@@ -102,72 +92,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       }
     }, [onComponentInitialized]);
 
-    const tabs = useMemo(
-      () => [
-        {
-          id: CASE_VIEW_PAGE_TABS.ACTIVITY,
-          name: ACTIVITY_TAB,
-          content: (
-            <CaseViewActivity
-              ruleDetailsNavigation={ruleDetailsNavigation}
-              caseData={caseData}
-              actionsNavigation={actionsNavigation}
-              showAlertDetails={showAlertDetails}
-              useFetchAlertData={useFetchAlertData}
-            />
-          ),
-        },
-        ...(features.alerts.enabled
-          ? [
-              {
-                id: CASE_VIEW_PAGE_TABS.ALERTS,
-                name: (
-                  <>
-                    {ALERTS_TAB}
-                    {features.alerts.isExperimental ? (
-                      <ExperimentalBadge
-                        label={EXPERIMENTAL_LABEL}
-                        size="s"
-                        iconType="beaker"
-                        tooltipContent={EXPERIMENTAL_DESC}
-                        tooltipPosition="bottom"
-                        data-test-subj="case-view-alerts-table-experimental-badge"
-                      />
-                    ) : null}
-                  </>
-                ),
-                content: <CaseViewAlerts caseData={caseData} />,
-              },
-            ]
-          : []),
-      ],
-      [
-        actionsNavigation,
-        caseData,
-        features.alerts.enabled,
-        features.alerts.isExperimental,
-        ruleDetailsNavigation,
-        showAlertDetails,
-        useFetchAlertData,
-      ]
-    );
-    const selectedTabContent = useMemo(() => {
-      return tabs.find((obj) => obj.id === activeTabId)?.content;
-    }, [activeTabId, tabs]);
-
-    const renderTabs = useCallback(() => {
-      return tabs.map((tab, index) => (
-        <EuiTab
-          data-test-subj={`case-view-tab-title-${tab.id}`}
-          key={index}
-          onClick={() => navigateToCaseView({ detailName: caseId, tabId: tab.id })}
-          isSelected={tab.id === activeTabId}
-        >
-          {tab.name}
-        </EuiTab>
-      ));
-    }, [activeTabId, caseId, navigateToCaseView, tabs]);
-
     return (
       <>
         <HeaderPage
@@ -190,23 +114,29 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           />
         </HeaderPage>
 
-        <WhitePageWrapperNoBorder>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <EuiSpacer size="xs" />
+        <EuiSpacer size="l" />
 
-          <EuiTabs>{renderTabs()}</EuiTabs>
-
-          <EuiSpacer size="l" />
-
-          <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
-            {selectedTabContent}
-          </EuiFlexGroup>
-        </WhitePageWrapperNoBorder>
+        <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
+          {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
+            <CaseViewActivity
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              caseData={caseData}
+              actionsNavigation={actionsNavigation}
+              showAlertDetails={showAlertDetails}
+              useFetchAlertData={useFetchAlertData}
+            />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
+            <CaseViewAlerts caseData={caseData} />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
+        </EuiFlexGroup>
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
     );

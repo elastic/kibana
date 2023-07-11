@@ -7,30 +7,26 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
-  const client = getService('es');
+  const client = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('/api/telemetry/v2/userHasSeenNotice API Telemetry User has seen OptIn Notice', () => {
     it('should update telemetry setting field via PUT', async () => {
-      await client.delete(
-        {
-          index: '.kibana',
-          id: 'telemetry:telemetry',
-        },
-        { ignore: [404] }
-      );
+      await client.savedObjects.delete({ type: 'telemetry', id: 'telemetry' });
 
       await supertest.put('/api/telemetry/v2/userHasSeenNotice').set('kbn-xsrf', 'xxx').expect(200);
 
-      const { _source } = await client.get<{ telemetry: { userHasSeenNotice: boolean } }>({
-        index: '.kibana',
-        id: 'telemetry:telemetry',
+      const {
+        attributes: { userHasSeenNotice },
+      } = await client.savedObjects.get<{ userHasSeenNotice: boolean }>({
+        type: 'telemetry',
+        id: 'telemetry',
       });
 
-      expect(_source?.telemetry.userHasSeenNotice).to.be(true);
+      expect(userHasSeenNotice).to.be(true);
     });
   });
 }

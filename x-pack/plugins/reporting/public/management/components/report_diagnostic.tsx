@@ -178,7 +178,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
         <Fragment>
           {help.length ? (
             <Fragment>
-              <EuiCallOut color="danger" iconType="alert">
+              <EuiCallOut color="danger" iconType="warning">
                 <p>
                   <EuiMarkdownFormat>{help.join('\n')}</EuiMarkdownFormat>
                 </p>

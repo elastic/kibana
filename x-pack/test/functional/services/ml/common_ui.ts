@@ -344,7 +344,7 @@ export function MachineLearningCommonUIProvider({
     },
 
     async waitForRefreshButtonEnabled() {
-      await testSubjects.waitForEnabled('~mlRefreshPageButton');
+      await testSubjects.waitForEnabled('~mlDatePickerRefreshPageButton');
     },
 
     async assertOneOfExists(subjectsToCheck: string[], timeout: number = 0) {
@@ -399,6 +399,14 @@ export function MachineLearningCommonUIProvider({
         await browser.pressKeys(browser.keys.ESCAPE);
         const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
         expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    },
+
+    async ensureComboBoxClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const comboBoxOpen = await testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
+        expect(comboBoxOpen).to.eql(false, 'Combo box should be closed');
       });
     },
 

@@ -40,7 +40,8 @@ import type { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
 import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -53,8 +54,8 @@ jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: jest.fn(() => 'uuidv1()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 
@@ -846,6 +847,8 @@ describe('helpers', () => {
             updated: 1585233356356,
             noteId: 'note-id',
             note: 'I am a note',
+            timelineId: null,
+            version: 'testVersion',
           },
         ],
       })();
@@ -863,7 +866,7 @@ describe('helpers', () => {
             user: 'unknown',
             saveObjectId: 'note-id',
             timelineId: null,
-            version: undefined,
+            version: 'testVersion',
           },
         ],
       });
@@ -876,7 +879,7 @@ describe('helpers', () => {
       })();
       const expectedNote: Note = {
         created: new Date(anchor),
-        id: 'uuid.v4()',
+        id: 'uuidv4()',
         lastEdit: null,
         note: '# this would be some markdown',
         saveObjectId: null,
@@ -888,7 +891,7 @@ describe('helpers', () => {
       expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
       expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
         id: TimelineId.active,
-        noteId: 'uuid.v4()',
+        noteId: 'uuidv4()',
       });
     });
   });

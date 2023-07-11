@@ -7,13 +7,16 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { encode } from '@kbn/rison';
 
-import { RULE_FROM_TIMELINE_URL_PARAM } from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { encodeRisonUrlState } from '../../../common/utils/global_query_string/helpers';
+import {
+  RULE_FROM_EQL_URL_PARAM,
+  RULE_FROM_TIMELINE_URL_PARAM,
+} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import type { SortFieldTimeline } from '../../../../common/types/timeline';
+import type { SortFieldTimeline } from '../../../../common/types/timeline/api';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/timeline/model';
 import { timelineSelectors } from '../../store/timeline';
@@ -283,7 +286,16 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (savedObjectId) =>
         navigateTo({
           deepLinkId: SecurityPageName.rulesCreate,
-          path: `?${RULE_FROM_TIMELINE_URL_PARAM}=${encodeRisonUrlState(savedObjectId)}`,
+          path: `?${RULE_FROM_TIMELINE_URL_PARAM}=${encode(savedObjectId)}`,
+        }),
+      [navigateTo]
+    );
+
+    const onCreateRuleFromEql: OnCreateRuleFromTimeline = useCallback(
+      (savedObjectId) =>
+        navigateTo({
+          deepLinkId: SecurityPageName.rulesCreate,
+          path: `?${RULE_FROM_EQL_URL_PARAM}=${encode(savedObjectId)}`,
         }),
       [navigateTo]
     );
@@ -339,6 +351,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         importDataModalToggle={importDataModalToggle}
         onAddTimelinesToFavorites={undefined}
         onCreateRule={onCreateRule}
+        onCreateRuleFromEql={onCreateRuleFromEql}
         onDeleteSelected={onDeleteSelected}
         onlyFavorites={onlyFavorites}
         onOpenTimeline={openTimeline}

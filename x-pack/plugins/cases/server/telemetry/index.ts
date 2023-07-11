@@ -14,6 +14,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { collectTelemetryData } from './collect_telemetry_data';
 import {
   CASE_TELEMETRY_SAVED_OBJECT,
@@ -42,7 +43,7 @@ export const createCasesTelemetry = async ({
 }: CreateCasesTelemetryArgs) => {
   const getInternalSavedObjectClient = async (): Promise<ISavedObjectsRepository> => {
     const [coreStart] = await core.getStartServices();
-    return coreStart.savedObjects.createInternalRepository(SAVED_OBJECT_TYPES);
+    return coreStart.savedObjects.createInternalRepository([...SAVED_OBJECT_TYPES, FILE_SO_TYPE]);
   };
 
   taskManager.registerTaskDefinitions({

@@ -13,10 +13,17 @@ import { promisify } from 'util';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { AuditServiceSetup } from '..';
 import type { AuthenticationProvider } from '../../common';
+import { userSessionConcurrentLimitLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
-import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
+import {
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionMissingError,
+  SessionUnexpectedError,
+} from './session_errors';
 import type { SessionIndex, SessionIndexValue } from './session_index';
 
 /**
@@ -85,6 +92,7 @@ export interface SessionOptions {
   readonly sessionIndex: PublicMethodsOf<SessionIndex>;
   readonly sessionCookie: PublicMethodsOf<SessionCookie>;
   readonly config: Pick<ConfigType, 'encryptionKey' | 'session'>;
+  readonly audit: AuditServiceSetup;
 }
 
 export interface SessionValueContentToEncrypt {
@@ -192,6 +200,26 @@ export class Session {
       );
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionUnexpectedError(), value: null };
+    }
+
+    // The only reason why we check if the session is within the concurrent session limit _after_ decryption
+    // is to record decrypted username and profile id in the audit logs.
+    const isSessionWithinConcurrentSessionLimit =
+      await this.options.sessionIndex.isWithinConcurrentSessionLimit(sessionIndexValue);
+    if (!isSessionWithinConcurrentSessionLimit) {
+      this.options.audit.asScoped(request).log(
+        userSessionConcurrentLimitLogoutEvent({
+          username: decryptedContent.username,
+          userProfileId: decryptedContent.userProfileId,
+          provider: sessionIndexValue.provider,
+        })
+      );
+
+      sessionLogger.warn(
+        'Session is outside the concurrent session limit and will be invalidated.'
+      );
+      await this.invalidate(request, { match: 'current' });
+      return { error: new SessionConcurrencyLimitError(), value: null };
     }
 
     return {

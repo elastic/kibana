@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { SortingOptions, PaginationOptions } from '../../../../rule_management/logic';
+import { TRuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
 
 export enum RuleSource {
   Prebuilt = 'prebuilt',
@@ -19,6 +20,8 @@ export const RulesTableSavedFilter = t.partial({
   searchTerm: t.string,
   source: enumeration('RuleSource', RuleSource),
   tags: t.array(t.string),
+  enabled: t.boolean,
+  ruleExecutionStatus: TRuleExecutionStatus,
 });
 
 export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableSavedSorting>;

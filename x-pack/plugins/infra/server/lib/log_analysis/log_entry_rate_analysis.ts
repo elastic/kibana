@@ -24,13 +24,13 @@ export async function getLogEntryRateBuckets(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logViewId: string,
   startTime: number,
   endTime: number,
   bucketDuration: number,
   datasets?: string[]
 ) {
-  const logRateJobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
+  const logRateJobId = getJobId(context.infra.spaceId, logViewId, 'log-entry-rate');
   let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
   let afterLatestBatchKey: CompositeTimestampPartitionKey | undefined;
 

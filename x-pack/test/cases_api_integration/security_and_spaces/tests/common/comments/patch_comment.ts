@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import {
@@ -20,6 +21,8 @@ import {
   postCommentUserReq,
   postCommentAlertReq,
   getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -30,7 +33,8 @@ import {
   createComment,
   updateComment,
   superUserSpace1Auth,
-} from '../../../../common/lib/utils';
+  removeServerGeneratedPropertiesFromSavedObject,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -166,6 +170,73 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
         },
         expectedHttpCode: 404,
+      });
+    });
+
+    it('unhappy path - 400s when comment is too long', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+      const longComment = Array(30001).fill('a').toString();
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: CommentType.user,
+          comment: longComment,
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when comment is empty', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: CommentType.user,
+          comment: '',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when comment is a string of empty characters', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const patchedCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+      });
+
+      await updateComment({
+        supertest,
+        caseId: postedCase.id,
+        req: {
+          id: patchedCase.comments![0].id,
+          version: patchedCase.comments![0].version,
+          type: CommentType.user,
+          comment: '   ',
+          owner: 'securitySolutionFixture',
+        },
+        expectedHttpCode: 400,
       });
     });
 
@@ -325,6 +396,89 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
         },
         expectedHttpCode: 409,
+      });
+    });
+
+    describe('files', () => {
+      it('should update the file attachment name to superfile', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        const attachmentWithUpdatedFileName = set(
+          getFilesAttachmentReq(),
+          'externalReferenceMetadata.files[0].name',
+          'superfile'
+        );
+
+        const updatedCase = await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...attachmentWithUpdatedFileName,
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+        });
+
+        const comparableAttachmentFields = removeServerGeneratedPropertiesFromSavedObject(
+          updatedCase.comments![0]
+        );
+
+        expect(comparableAttachmentFields).to.eql({
+          ...attachmentWithUpdatedFileName,
+          pushed_at: null,
+          pushed_by: null,
+          updated_by: defaultUser,
+          created_by: defaultUser,
+          owner: 'securitySolutionFixture',
+        });
+      });
+
+      it('should return a 400 when attempting to update a file attachment with empty metadata', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...getFilesAttachmentReq({ externalReferenceMetadata: {} }),
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('should return a 400 when attempting to update a file attachment with invalid metadata', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: getFilesAttachmentReq(),
+        });
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            ...getFilesAttachmentReq({
+              // intentionally creating an invalid format here by using foo instead of files
+              externalReferenceMetadata: { foo: fileAttachmentMetadata.files },
+            }),
+            id: patchedCase.comments![0].id,
+            version: patchedCase.comments![0].version,
+          },
+          expectedHttpCode: 400,
+        });
       });
     });
 

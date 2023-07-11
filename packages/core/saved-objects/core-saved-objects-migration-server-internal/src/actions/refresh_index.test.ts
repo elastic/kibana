@@ -31,7 +31,7 @@ describe('refreshIndex', () => {
   );
 
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-    const task = refreshIndex({ client, targetIndex: 'target_index' });
+    const task = refreshIndex({ client, index: 'target_index' });
     try {
       await task();
     } catch (e) {

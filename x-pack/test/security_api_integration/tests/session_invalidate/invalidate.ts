@@ -9,7 +9,10 @@ import { parse as parseCookie, Cookie } from 'tough-cookie';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common/model';
-import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
+import {
+  getSAMLRequestId,
+  getSAMLResponse,
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -63,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: 'saml1' });
+    await es.indices.refresh({ index: '.kibana_security_session*' });
     return cookie;
   }
 
@@ -80,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, credentials.username, { type: 'basic', name: 'basic1' });
+    await es.indices.refresh({ index: '.kibana_security_session*' });
     return cookie;
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('./generate_csv/generate_csv', () => ({
+jest.mock('@kbn/generate-csv', () => ({
   CsvGenerator: class CsvGeneratorMock {
     generateData() {
       return {
@@ -20,7 +20,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { ReportingCore } from '../..';
-import { CancellationToken } from '../../../common/cancellation_token';
+import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 

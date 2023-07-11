@@ -7,18 +7,18 @@
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
-import { CspSetupStatus } from '../../../common/types';
-import { STATUS_ROUTE_PATH } from '../../../common/constants';
+import { type CspSetupStatus } from '../../../common/types';
+import { STATUS_API_CURRENT_VERSION, STATUS_ROUTE_PATH } from '../../../common/constants';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
 
-export const useCspSetupStatusApi = ({
-  options,
-}: { options?: UseQueryOptions<CspSetupStatus, unknown, CspSetupStatus> } = {}) => {
+export const useCspSetupStatusApi = (
+  options?: UseQueryOptions<CspSetupStatus, unknown, CspSetupStatus>
+) => {
   const { http } = useKibana().services;
   return useQuery<CspSetupStatus, unknown, CspSetupStatus>(
     [getCspSetupStatusQueryKey],
-    () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH),
+    () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH, { version: STATUS_API_CURRENT_VERSION }),
     options
   );
 };

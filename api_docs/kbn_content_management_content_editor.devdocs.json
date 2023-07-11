@@ -1,0 +1,151 @@
+{
+  "id": "@kbn/content-management-content-editor",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.ContentEditorKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentEditorKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps to known dependency types."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "ContentEditorKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/content-management/content_editor/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-common.ContentEditorKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "ContentEditorKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/content-management/content_editor/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.ContentEditorProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentEditorProvider",
+        "description": [
+          "\nAbstract external service Provider."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "Services",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/content-management/content_editor/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-editor",
+            "id": "def-common.ContentEditorProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "Services",
+              ">"
+            ],
+            "path": "packages/content-management/content_editor/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.useOpenContentEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "useOpenContentEditor",
+        "description": [],
+        "signature": [
+          "() => (args: ",
+          {
+            "pluginId": "@kbn/content-management-content-editor",
+            "scope": "common",
+            "docId": "kibKbnContentManagementContentEditorPluginApi",
+            "section": "def-common.OpenContentEditorParams",
+            "text": "OpenContentEditorParams"
+          },
+          ") => () => void"
+        ],
+        "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-content-editor",
+        "id": "def-common.OpenContentEditorParams",
+        "type": "Type",
+        "tags": [],
+        "label": "OpenContentEditorParams",
+        "description": [],
+        "signature": [
+          "{ onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; item: ",
+          "Item",
+          "; isReadonly?: boolean | undefined; entityName: string; customValidators?: ",
+          "CustomValidators",
+          " | undefined; }"
+        ],
+        "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

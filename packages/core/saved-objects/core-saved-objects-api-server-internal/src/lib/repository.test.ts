@@ -23,7 +23,6 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -48,15 +47,17 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
-import type {
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-  SavedObjectUnsanitizedDoc,
-} from '@kbn/core-saved-objects-server';
 import {
-  SavedObjectsErrorHelpers,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
+  type SavedObjectUnsanitizedDoc,
+  type SavedObject,
+  type SavedObjectReference,
+  type BulkResolveError,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SavedObjectsRepository } from './repository';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -69,10 +70,8 @@ import { kibanaMigratorMock } from '../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { InternalBulkResolveError } from './internal_bulk_resolve';
 
 import {
-  KIBANA_VERSION,
   CUSTOM_INDEX_TYPE,
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_TYPE,
@@ -149,7 +148,13 @@ describe('SavedObjectsRepository', () => {
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
     const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
-    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(n, obj);
+    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(
+      n,
+      obj,
+      expect.objectContaining({
+        allowDowngrade: expect.any(Boolean),
+      })
+    );
   };
 
   beforeEach(() => {
@@ -191,6 +196,7 @@ describe('SavedObjectsRepository', () => {
       ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
     },
     migrationVersion: mockMigrationVersion,
+    managed: doc.managed ?? false,
     references: [{ name: 'search_0', type: 'search', id: '123' }],
   });
 
@@ -207,12 +213,14 @@ describe('SavedObjectsRepository', () => {
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
       references: [{ name: 'ref_0', type: 'test', id: '1' }],
+      managed: false,
     };
     const obj2 = {
       type: 'index-pattern',
       id: 'logstash-*',
       attributes: { title: 'Test Two' },
       references: [{ name: 'ref_0', type: 'test', id: '2' }],
+      managed: false,
     };
     const namespace = 'foo-namespace';
 
@@ -261,7 +269,6 @@ describe('SavedObjectsRepository', () => {
         ...mockTimestampFields,
       }),
     ];
-
     describe('client calls', () => {
       it(`should use the ES bulk action by default`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
@@ -320,6 +327,7 @@ describe('SavedObjectsRepository', () => {
 
         const obj1WithSeq = {
           ...obj1,
+          managed: obj1.managed,
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         };
@@ -332,9 +340,33 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([obj1, obj2], { method: 'create' });
       });
 
+      it(`should use the ES index method if ID is defined, overwrite=true and managed=true in a document`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], {
+          overwrite: true,
+          managed: true,
+        });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index' });
+      });
+
+      it(`should use the ES create method if ID is defined, overwrite=false and managed=true in a document`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { managed: true });
+        expectClientCallArgsAction([obj1, obj2], { method: 'create' });
+      });
+
       it(`formats the ES request`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
         const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+      // this test only ensures that the client accepts the managed field in a document
+      it(`formats the ES request with managed=true in a document`, async () => {
+        const obj1WithManagedTrue = { ...obj1, managed: true };
+        const obj2WithManagedTrue = { ...obj2, managed: true };
+        await bulkCreateSuccess(client, repository, [obj1WithManagedTrue, obj2WithManagedTrue]);
+        const body = [...expectObjArgs(obj1WithManagedTrue), ...expectObjArgs(obj2WithManagedTrue)];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
           expect.anything()
@@ -434,6 +466,27 @@ describe('SavedObjectsRepository', () => {
       it(`adds namespace to request body for any types that are single-namespace`, async () => {
         await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
         const expected = expect.objectContaining({ namespace });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+
+      // this only ensures we don't override any other options
+      it(`adds managed=false to request body if declared for any types that are single-namespace`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace, managed: false });
+        const expected = expect.objectContaining({ namespace, managed: false });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+      // this only ensures we don't override any other options
+      it(`adds managed=true to request body if declared for any types that are single-namespace`, async () => {
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace, managed: true });
+        const expected = expect.objectContaining({ namespace, managed: true });
         const body = [expect.any(Object), expected, expect.any(Object), expected];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
@@ -827,10 +880,8 @@ describe('SavedObjectsRepository', () => {
       it(`migrates the docs and serializes the migrated docs`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
         const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
-
         await bulkCreateSuccess(client, repository, [modifiedObj1, obj2]);
         const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFieldsWithCreated }));
-
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
@@ -931,29 +982,131 @@ describe('SavedObjectsRepository', () => {
         });
 
         // Assert that both raw docs from the ES response are deserialized
-        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
-          ...response.items[0].create,
-          _source: {
-            ...response.items[0].create._source,
-            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
-            namespaces: response.items[0].create._source.namespaces,
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(
+          1,
+          {
+            ...response.items[0].create,
+            _source: {
+              ...response.items[0].create._source,
+              namespaces: response.items[0].create._source.namespaces,
+              coreMigrationVersion: expect.any(String),
+              typeMigrationVersion: '1.1.1',
+            },
+            _id: expect.stringMatching(
+              /^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/
+            ),
           },
-          _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
-        });
-        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, {
-          ...response.items[1].create,
-          _source: {
-            ...response.items[1].create._source,
-            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
-            namespaces: response.items[1].create._source.namespaces,
+          expect.any(Object)
+        );
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(
+          2,
+          {
+            ...response.items[1].create,
+            _source: {
+              ...response.items[1].create._source,
+              namespaces: response.items[1].create._source.namespaces,
+              coreMigrationVersion: expect.any(String),
+              typeMigrationVersion: '1.1.1',
+            },
           },
-        });
+          expect.any(Object)
+        );
 
         // Assert that ID's are deserialized to remove the type and namespace
         expect(result.saved_objects[0].id).toEqual(
           expect.stringMatching(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/)
         );
         expect(result.saved_objects[1].id).toEqual(obj2.id);
+
+        // Assert that managed is not changed
+        expect(result.saved_objects[0].managed).toBeFalsy();
+        expect(result.saved_objects[1].managed).toEqual(obj2.managed);
+      });
+
+      it(`sets managed=false if not already set`, async () => {
+        const obj1WithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2WithoutManaged = {
+          type: 'index-pattern',
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+        const result = await bulkCreateSuccess(client, repository, [
+          obj1WithoutManaged,
+          obj2WithoutManaged,
+        ]);
+        expect(result).toEqual({
+          saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
+        });
+      });
+
+      it(`sets managed=false only on documents without managed already set`, async () => {
+        const objWithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const result = await bulkCreateSuccess(client, repository, [objWithoutManaged, obj2]);
+        expect(result).toEqual({
+          saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
+        });
+      });
+
+      it(`sets managed=true if provided as an override`, async () => {
+        const obj1WithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2WithoutManaged = {
+          type: 'index-pattern',
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+        const result = await bulkCreateSuccess(
+          client,
+          repository,
+          [obj1WithoutManaged, obj2WithoutManaged],
+          { managed: true }
+        );
+        expect(result).toEqual({
+          saved_objects: [
+            { ...obj1WithoutManaged, managed: true },
+            { ...obj2WithoutManaged, managed: true },
+          ].map((x) => expectCreateResult(x)),
+        });
+      });
+
+      it(`sets managed=false if provided as an override`, async () => {
+        const obj1WithoutManaged = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+          references: [{ name: 'ref_0', type: 'test', id: '1' }],
+        };
+        const obj2WithoutManaged = {
+          type: 'index-pattern',
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+          references: [{ name: 'ref_0', type: 'test', id: '2' }],
+        };
+        const result = await bulkCreateSuccess(
+          client,
+          repository,
+          [obj1WithoutManaged, obj2WithoutManaged],
+          { managed: false }
+        );
+        expect(result).toEqual({
+          saved_objects: [obj1, obj2].map((x) => expectCreateResult(x)),
+        });
       });
     });
   });
@@ -1169,7 +1322,9 @@ describe('SavedObjectsRepository', () => {
         version: encodeHitVersion(doc),
         attributes: doc._source![type],
         references: doc._source!.references || [],
-        migrationVersion: doc._source!.migrationVersion,
+        coreMigrationVersion: expect.any(String),
+        typeMigrationVersion: expect.any(String),
+        managed: expect.any(Boolean),
       });
 
       it(`returns early for empty objects argument`, async () => {
@@ -1241,6 +1396,24 @@ describe('SavedObjectsRepository', () => {
             expect.objectContaining({ namespaces: expect.any(Array) }),
           ],
         });
+      });
+
+      it('migrates the fetched documents', async () => {
+        const response = getMockMgetResponse(registry, [obj1, obj2]);
+        client.mget.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+        migrator.migrateDocument.mockReturnValue(
+          'migrated' as unknown as ReturnType<typeof migrator.migrateDocument>
+        );
+
+        await expect(bulkGet(repository, [obj1, obj2])).resolves.toHaveProperty('saved_objects', [
+          'migrated',
+          'migrated',
+        ]);
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs({ id: obj1.id }, true, 1);
+        expectMigrationArgs({ id: obj2.id }, true, 2);
       });
     });
   });
@@ -2382,14 +2555,38 @@ describe('SavedObjectsRepository', () => {
     };
 
     describe('client calls', () => {
-      it(`should use the ES index action if ID is not defined and overwrite=true`, async () => {
+      it(`should use the ES index action if ID is not defined`, async () => {
         await createSuccess(type, attributes, { overwrite: true });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.index).toHaveBeenCalled();
+      });
+
+      it(`should use the ES index action if ID is not defined and a doc has managed=true`, async () => {
+        await createSuccess(type, attributes, { overwrite: true, managed: true });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.index).toHaveBeenCalled();
+      });
+
+      it(`should use the ES index action if ID is not defined and a doc has managed=false`, async () => {
+        await createSuccess(type, attributes, { overwrite: true, managed: false });
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalled();
       });
 
       it(`should use the ES create action if ID is not defined and overwrite=false`, async () => {
         await createSuccess(type, attributes);
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.create).toHaveBeenCalled();
+      });
+
+      it(`should use the ES create action if ID is not defined, overwrite=false and a doc has managed=true`, async () => {
+        await createSuccess(type, attributes, { managed: true });
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.create).toHaveBeenCalled();
+      });
+
+      it(`should use the ES create action if ID is not defined, overwrite=false and a doc has managed=false`, async () => {
+        await createSuccess(type, attributes, { managed: false });
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.create).toHaveBeenCalled();
       });
@@ -2875,17 +3072,20 @@ describe('SavedObjectsRepository', () => {
       it(`migrates a document and serializes the migrated doc`, async () => {
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
+        const managed = false;
         await createSuccess(type, attributes, {
           id,
           references,
           migrationVersion,
           coreMigrationVersion,
+          managed,
         });
         const doc = {
           type,
           id,
           attributes,
           references,
+          managed,
           migrationVersion,
           coreMigrationVersion,
           ...mockTimestampFieldsWithCreated,
@@ -2893,6 +3093,60 @@ describe('SavedObjectsRepository', () => {
         expectMigrationArgs(doc);
 
         const migratedDoc = migrator.migrateDocument(doc);
+        expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
+      });
+
+      it(`migrates a document, adds managed=false and serializes the migrated doc`, async () => {
+        const migrationVersion = mockMigrationVersion;
+        const coreMigrationVersion = '8.0.0';
+        await createSuccess(type, attributes, {
+          id,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+          managed: undefined,
+        });
+        const doc = {
+          type,
+          id,
+          attributes,
+          references,
+          managed: undefined,
+          migrationVersion,
+          coreMigrationVersion,
+          ...mockTimestampFieldsWithCreated,
+        };
+        expectMigrationArgs({ ...doc, managed: false });
+
+        const migratedDoc = migrator.migrateDocument(doc);
+        expect(migratedDoc.managed).toBe(false);
+        expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
+      });
+
+      it(`migrates a document, does not change managed=true to managed=false and serializes the migrated doc`, async () => {
+        const migrationVersion = mockMigrationVersion;
+        const coreMigrationVersion = '8.0.0';
+        await createSuccess(type, attributes, {
+          id,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+          managed: true,
+        });
+        const doc = {
+          type,
+          id,
+          attributes,
+          references,
+          managed: true,
+          migrationVersion,
+          coreMigrationVersion,
+          ...mockTimestampFieldsWithCreated,
+        };
+        expectMigrationArgs(doc);
+
+        const migratedDoc = migrator.migrateDocument(doc);
+        expect(migratedDoc.managed).toBe(true);
         expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
       });
 
@@ -2950,8 +3204,29 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
-          coreMigrationVersion: KIBANA_VERSION,
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
+        });
+      });
+      it(`allows setting 'managed' to true`, async () => {
+        const result = await createSuccess(MULTI_NAMESPACE_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+          managed: true,
+        });
+        expect(result).toEqual({
+          type: MULTI_NAMESPACE_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: true,
         });
       });
     });
@@ -3538,10 +3813,11 @@ describe('SavedObjectsRepository', () => {
                 'references',
                 'migrationVersion',
                 'coreMigrationVersion',
+                'typeMigrationVersion',
+                'managed',
                 'updated_at',
                 'created_at',
                 'originId',
-                'title',
               ],
             }),
           }),
@@ -3660,6 +3936,9 @@ describe('SavedObjectsRepository', () => {
             attributes: doc._source![doc._source!.type],
             references: [],
             namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : ['default'],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: expect.any(String),
+            managed: expect.any(Boolean),
           });
         });
       });
@@ -3687,6 +3966,9 @@ describe('SavedObjectsRepository', () => {
             attributes: doc._source![doc._source!.type],
             references: [],
             namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: expect.any(String),
+            managed: expect.any(Boolean),
           });
         });
       });
@@ -3701,6 +3983,28 @@ describe('SavedObjectsRepository', () => {
         await test('unknownType');
         await test(HIDDEN_TYPE);
         await test(['unknownType', HIDDEN_TYPE]);
+      });
+
+      it('migrates the found document', async () => {
+        const noNamespaceSearchResults = generateIndexPatternSearchResults();
+        client.search.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(noNamespaceSearchResults)
+        );
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        await expect(repository.find({ type })).resolves.toHaveProperty(
+          'saved_objects.0.migrated',
+          true
+        );
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(
+          noNamespaceSearchResults.hits.hits.length
+        );
+        expectMigrationArgs({
+          type,
+          id: noNamespaceSearchResults.hits.hits[0]._id.replace(
+            /(index-pattern|config|globalType)\:/,
+            ''
+          ),
+        });
       });
     });
 
@@ -4022,6 +4326,9 @@ describe('SavedObjectsRepository', () => {
           },
           references: [],
           namespaces: ['default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
 
@@ -4050,6 +4357,18 @@ describe('SavedObjectsRepository', () => {
         expect(result).toMatchObject({ originId });
       });
     });
+
+    it('migrates the fetched document', async () => {
+      migrator.migrateDocument.mockReturnValueOnce(
+        'migrated' as unknown as ReturnType<typeof migrator.migrateDocument>
+      );
+      await expect(getSuccess(client, repository, registry, type, id)).resolves.toBe('migrated');
+      expect(migrator.migrateDocument).toHaveBeenCalledTimes(1);
+      expectMigrationArgs({
+        id,
+        type,
+      });
+    });
   });
 
   describe('#resolve', () => {
@@ -4073,7 +4392,7 @@ describe('SavedObjectsRepository', () => {
 
     it('throws when internalBulkResolve result is an error', async () => {
       const error = SavedObjectsErrorHelpers.decorateBadRequestError(new Error('Oh no!'));
-      const expectedResult: InternalBulkResolveError = { type: 'obj-type', id: 'obj-id', error };
+      const expectedResult: BulkResolveError = { type: 'obj-type', id: 'obj-id', error };
       mockInternalBulkResolve.mockResolvedValue({ resolved_objects: [expectedResult] });
 
       await expect(repository.resolve('foo', '2')).rejects.toEqual(error);
@@ -4114,7 +4433,7 @@ describe('SavedObjectsRepository', () => {
           body: {
             _id: params.id,
             ...mockVersionProps,
-            _index: '.kibana',
+            _index: MAIN_SAVED_OBJECT_INDEX,
             get: {
               found: true,
               _source: {
@@ -4418,7 +4737,7 @@ describe('SavedObjectsRepository', () => {
             body: {
               _id: params.id,
               ...mockVersionProps,
-              _index: '.kibana',
+              _index: MAIN_SAVED_OBJECT_INDEX,
               get: {
                 found: true,
                 _source: {
@@ -5225,6 +5544,26 @@ describe('SavedObjectsRepository', () => {
       mockUpdateObjectsSpaces.mockRejectedValue(expectedResult);
 
       await expect(repository.updateObjectsSpaces([], [], [])).rejects.toEqual(expectedResult);
+    });
+  });
+
+  describe('#getCurrentNamespace', () => {
+    it('returns `undefined` for `undefined` namespace argument', async () => {
+      expect(repository.getCurrentNamespace()).toBeUndefined();
+    });
+
+    it('throws if `*` namespace argument is provided', async () => {
+      expect(() => repository.getCurrentNamespace('*')).toThrowErrorMatchingInlineSnapshot(
+        `"\\"options.namespace\\" cannot be \\"*\\": Bad Request"`
+      );
+    });
+
+    it('properly handles `default` namespace', async () => {
+      expect(repository.getCurrentNamespace('default')).toBeUndefined();
+    });
+
+    it('properly handles non-`default` namespace', async () => {
+      expect(repository.getCurrentNamespace('space-a')).toBe('space-a');
     });
   });
 });

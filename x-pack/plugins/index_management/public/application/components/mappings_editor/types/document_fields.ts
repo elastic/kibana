@@ -39,6 +39,7 @@ export interface ParameterDefinition {
 
 export type MainType =
   | 'text'
+  | 'match_only_text'
   | 'keyword'
   | 'numeric'
   | 'binary'

@@ -8,15 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import moment, { Moment } from 'moment';
 
+import { ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
 import { RecurrenceSchedule, RRuleFrequency } from '../../../../../../types';
 import { i18nMonthDayDate } from '../../../../../lib/i18n_month_day_date';
-import { ISO_WEEKDAYS, ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from './constants';
+import { ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from './constants';
 import { i18nFreqSummary, i18nNthWeekdayShort } from './translations';
 
 export interface CustomFrequencyState {
   freq: RRuleFrequency;
   interval: number;
-  byweekday: string[];
+  byweekday?: string[];
   bymonthday: number[];
   bymonth: number[];
 }
@@ -37,7 +38,7 @@ export const getInitialByweekday = (
     (result, n) => ({
       ...result,
       [n]:
-        initialStateByweekday?.length > 0
+        initialStateByweekday && initialStateByweekday.length > 0
           ? initialStateByweekday
               // Sanitize nth day strings, e.g. +2MO, -1FR, into just days of the week
               .map((w) => w.replace(/[0-9+\-]/g, ''))

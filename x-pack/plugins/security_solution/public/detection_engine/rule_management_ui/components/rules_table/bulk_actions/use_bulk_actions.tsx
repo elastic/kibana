@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { convertRulesFilterToKQL } from '../../../../../../common/utils/kql';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import {
@@ -29,7 +30,6 @@ import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/us
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
-import { convertRulesFilterToKQL } from '../../../../rule_management/logic/utils';
 import { getExportedRulesDetails } from '../helpers';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
@@ -66,7 +66,7 @@ export const useBulkActions = ({
   const rulesTableContext = useRulesTableContext();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
-  const filterQuery = convertRulesFilterToKQL(filterOptions);
+  const kql = convertRulesFilterToKQL(filterOptions);
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
@@ -108,7 +108,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionType.enable,
-          ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
+          ...(isAllSelected ? { query: kql } : { ids: ruleIds }),
         });
       };
 
@@ -120,7 +120,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionType.disable,
-          ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
+          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
         });
       };
 
@@ -136,9 +136,15 @@ export const useBulkActions = ({
           type: BulkActionType.duplicate,
           duplicatePayload: {
             include_exceptions:
-              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
+              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions ||
+              modalDuplicationConfirmationResult ===
+                DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+            include_expired_exceptions: !(
+              modalDuplicationConfirmationResult ===
+              DuplicateOptions.withExceptionsExcludeExpiredExceptions
+            ),
           },
-          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
+          ...(isAllSelected ? { query: kql } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
       };
@@ -157,7 +163,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionType.delete,
-          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
+          ...(isAllSelected ? { query: kql } : { ids: selectedRuleIds }),
         });
       };
 
@@ -166,7 +172,7 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
         const response = await bulkExport(
-          isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }
+          isAllSelected ? { query: kql } : { ids: selectedRuleIds }
         );
 
         // if response null, likely network error happened and export rules haven't been received
@@ -466,7 +472,7 @@ export const useBulkActions = ({
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
-      filterQuery,
+      kql,
       toasts,
       showBulkDuplicateConfirmation,
       clearRulesSelection,

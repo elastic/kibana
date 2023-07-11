@@ -111,7 +111,9 @@ export interface AlertThreadPoolRejectionsState extends AlertNodeState {
 }
 
 export interface AlertLicenseState extends AlertState {
-  expiryDateMS: number;
+  meta: {
+    expiryDateMS: number;
+  };
 }
 
 export interface AlertNodesChangedState extends AlertState {
@@ -167,10 +169,10 @@ export interface AlertNodeStats {
 }
 
 export interface AlertCpuUsageNodeStats extends AlertNodeStats {
-  cpuUsage: number;
-  containerUsage: number;
-  containerPeriods: number;
-  containerQuota: number;
+  cpuUsage?: number;
+  limitsChanged?: boolean;
+  missingLimits?: boolean;
+  unexpectedLimits?: boolean;
 }
 
 export interface AlertThreadPoolRejectionsStats {

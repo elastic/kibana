@@ -5,18 +5,125 @@
  * 2.0.
  */
 
-import {
-  arraysDifference,
-  buildNestedFilter,
-  buildRangeFilter,
-  constructQueryOptions,
-  convertSortField,
-} from './utils';
+import { v1 as uuidv1 } from 'uuid';
+
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { toElasticsearchQuery } from '@kbn/es-query';
+
 import { CaseStatuses } from '../../common';
 import { CaseSeverity } from '../../common/api';
+import { createSavedObjectsSerializerMock } from './mocks';
+import {
+  arraysDifference,
+  buildFilter,
+  buildRangeFilter,
+  constructQueryOptions,
+  constructSearch,
+  convertSortField,
+} from './utils';
+import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 
 describe('utils', () => {
+  describe('buildFilter', () => {
+    it('returns undefined if filters is undefined', () => {
+      expect(buildFilter({ filters: undefined, field: 'abc', operator: 'or' })).toBeUndefined();
+    });
+
+    it('returns undefined if filters is is an empty array', () => {
+      expect(buildFilter({ filters: [], field: 'abc', operator: 'or' })).toBeUndefined();
+    });
+
+    it('returns a KueryNode using or operator', () => {
+      expect(buildFilter({ filters: ['value1'], field: 'abc', operator: 'or' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.abc",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "value1",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+
+    it("returns multiple nodes or'd together", () => {
+      expect(buildFilter({ filters: ['value1', 'value2'], field: 'abc', operator: 'or' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.abc",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "value1",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.abc",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "value2",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('does not escape special kql characters in the filter values', () => {
+      const specialCharacters = 'awesome:()\\<>"*';
+
+      expect(buildFilter({ filters: [specialCharacters], field: 'abc', operator: 'or' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "cases.attributes.abc",
+            },
+            Object {
+              "isQuoted": false,
+              "type": "literal",
+              "value": "awesome:()\\\\<>\\"*",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
+    });
+  });
+
   describe('convertSortField', () => {
     it('transforms status correctly', () => {
       expect(convertSortField('status')).toBe('status');
@@ -28,6 +135,14 @@ describe('utils', () => {
 
     it('transforms created_at correctly', () => {
       expect(convertSortField('created_at')).toBe('created_at');
+    });
+
+    it('transforms updated_at correctly', () => {
+      expect(convertSortField('updated_at')).toBe('updated_at');
+    });
+
+    it('transforms updatedAt correctly', () => {
+      expect(convertSortField('updatedAt')).toBe('updated_at');
     });
 
     it('transforms closedAt correctly', () => {
@@ -385,8 +500,12 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the status', () => {
-      expect(constructQueryOptions({ status: CaseStatuses.open }).filter).toMatchInlineSnapshot(`
+    it.each([
+      [CaseStatuses.open, CasePersistedStatus.OPEN],
+      [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+      [CaseStatuses.closed, CasePersistedStatus.CLOSED],
+    ])('creates a filter for status "%s"', (status, expectedStatus) => {
+      expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -397,7 +516,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "open",
+              "value": "${expectedStatus}",
             },
           ],
           "function": "is",
@@ -406,9 +525,13 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter for the severity', () => {
-      expect(constructQueryOptions({ severity: CaseSeverity.CRITICAL }).filter)
-        .toMatchInlineSnapshot(`
+    it.each([
+      [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+      [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+      [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+      [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
+    ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
+      expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -419,13 +542,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "critical",
+              "value": "${expectedSeverity}",
             },
           ],
           "function": "is",
           "type": "function",
         }
-      `);
+        `);
     });
 
     it('creates a filter for the time range', () => {
@@ -561,163 +684,6 @@ describe('utils', () => {
           ],
           "function": "and",
           "type": "function",
-        }
-      `);
-    });
-  });
-
-  describe('buildNestedFilter', () => {
-    it('returns undefined if filters is undefined', () => {
-      expect(buildNestedFilter({ field: '', nestedField: '', operator: 'or' })).toBeUndefined();
-    });
-
-    it('returns undefined when the filters array is empty', () => {
-      expect(
-        buildNestedFilter({ filters: [], field: '', nestedField: '', operator: 'or' })
-      ).toBeUndefined();
-    });
-
-    it('returns a KueryNode for a single filter', () => {
-      expect(
-        toElasticsearchQuery(
-          buildNestedFilter({
-            filters: ['hello'],
-            field: 'uid',
-            nestedField: 'nestedField',
-            operator: 'or',
-          })!
-        )
-      ).toMatchInlineSnapshot(`
-        Object {
-          "nested": Object {
-            "path": "cases.attributes.nestedField",
-            "query": Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "match": Object {
-                      "cases.attributes.nestedField.uid": "hello",
-                    },
-                  },
-                ],
-              },
-            },
-            "score_mode": "none",
-          },
-        }
-      `);
-    });
-
-    it("returns a KueryNode for multiple filters or'd together", () => {
-      expect(
-        toElasticsearchQuery(
-          buildNestedFilter({
-            filters: ['uid1', 'uid2'],
-            field: 'uid',
-            nestedField: 'nestedField',
-            operator: 'or',
-          })!
-        )
-      ).toMatchInlineSnapshot(`
-        Object {
-          "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
-              Object {
-                "nested": Object {
-                  "path": "cases.attributes.nestedField",
-                  "query": Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "cases.attributes.nestedField.uid": "uid1",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  "score_mode": "none",
-                },
-              },
-              Object {
-                "nested": Object {
-                  "path": "cases.attributes.nestedField",
-                  "query": Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "cases.attributes.nestedField.uid": "uid2",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  "score_mode": "none",
-                },
-              },
-            ],
-          },
-        }
-      `);
-    });
-
-    it("returns a KueryNode for multiple filters and'ed together", () => {
-      expect(
-        toElasticsearchQuery(
-          buildNestedFilter({
-            filters: ['uid1', 'uid2'],
-            field: 'uid',
-            nestedField: 'nestedField',
-            operator: 'and',
-          })!
-        )
-      ).toMatchInlineSnapshot(`
-        Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "nested": Object {
-                  "path": "cases.attributes.nestedField",
-                  "query": Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "cases.attributes.nestedField.uid": "uid1",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  "score_mode": "none",
-                },
-              },
-              Object {
-                "nested": Object {
-                  "path": "cases.attributes.nestedField",
-                  "query": Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "cases.attributes.nestedField.uid": "uid2",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  "score_mode": "none",
-                },
-              },
-            ],
-          },
         }
       `);
     });
@@ -897,6 +863,38 @@ describe('utils', () => {
           }
         `);
       });
+    });
+  });
+
+  describe('constructSearchById', () => {
+    const savedObjectsSerializer = createSavedObjectsSerializerMock();
+
+    it('returns the rootSearchFields and search with correct values when given a uuid', () => {
+      const uuid = uuidv1(); // the specific version is irrelevant
+
+      expect(constructSearch(uuid, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer))
+        .toMatchInlineSnapshot(`
+        Object {
+          "rootSearchFields": Array [
+            "_id",
+          ],
+          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
+        }
+      `);
+    });
+
+    it('search value not changed and no rootSearchFields when search is non-uuid', () => {
+      const search = 'foobar';
+      const result = constructSearch(search, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer);
+
+      expect(result).not.toHaveProperty('rootSearchFields');
+      expect(result).toEqual({ search });
+    });
+
+    it('returns undefined if search term undefined', () => {
+      expect(constructSearch(undefined, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
+        undefined
+      );
     });
   });
 });

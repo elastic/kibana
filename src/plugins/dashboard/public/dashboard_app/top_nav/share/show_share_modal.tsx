@@ -159,7 +159,7 @@ export function ShowShareModal({
   if (_g?.filters && _g.filters.length === 0) {
     _g = omit(_g, 'filters');
   }
-  const baseUrl = setStateToKbnUrl('_g', _g);
+  const baseUrl = setStateToKbnUrl('_g', _g, undefined, window.location.href);
 
   const shareableUrl = setStateToKbnUrl(
     '_a',

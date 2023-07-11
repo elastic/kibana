@@ -11,26 +11,25 @@ import type {
   CasesFindRequest,
   User,
   AllTagsFindRequest,
+  AllCategoriesFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
+  Case,
+  CaseResolveResponse,
+  Cases,
+  CasesFindResponse,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
-import type {
-  ICasePostRequest,
-  ICaseResolveResponse,
-  ICaseResponse,
-  ICasesFindRequest,
-  ICasesFindResponse,
-  ICasesPatchRequest,
-  ICasesResponse,
-} from '../typedoc_interfaces';
 import type { CasesClientArgs } from '../types';
+import { bulkGet } from './bulk_get';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
 import type { CasesByAlertIDParams, GetParams } from './get';
-import { get, resolve, getCasesByAlertID, getReporters, getTags } from './get';
+import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
 import type { PushParams } from './push';
 import { push } from './push';
 import { update } from './update';
@@ -42,30 +41,34 @@ export interface CasesSubClient {
   /**
    * Creates a case.
    */
-  create(data: ICasePostRequest): Promise<ICaseResponse>;
+  create(data: CasePostRequest): Promise<Case>;
   /**
    * Returns cases that match the search criteria.
    *
    * If the `owner` field is left empty then all the cases that the user has access to will be returned.
    */
-  find(params: ICasesFindRequest): Promise<ICasesFindResponse>;
+  find(params: CasesFindRequest): Promise<CasesFindResponse>;
   /**
    * Retrieves a single case with the specified ID.
    */
-  get(params: GetParams): Promise<ICaseResponse>;
+  get(params: GetParams): Promise<Case>;
   /**
    * @experimental
    * Retrieves a single case resolving the specified ID.
    */
-  resolve(params: GetParams): Promise<ICaseResolveResponse>;
+  resolve(params: GetParams): Promise<CaseResolveResponse>;
+  /**
+   * Retrieves multiple cases with the specified IDs.
+   */
+  bulkGet(params: CasesBulkGetRequest): Promise<CasesBulkGetResponse>;
   /**
    * Pushes a specific case to an external system.
    */
-  push(args: PushParams): Promise<ICaseResponse>;
+  push(args: PushParams): Promise<Case>;
   /**
    * Update the specified cases with the passed in values.
    */
-  update(cases: ICasesPatchRequest): Promise<ICasesResponse>;
+  update(cases: CasesPatchRequest): Promise<Cases>;
   /**
    * Delete a case and all its comments.
    *
@@ -76,6 +79,10 @@ export interface CasesSubClient {
    * Retrieves all the tags across all cases the user making the request has access to.
    */
   getTags(params: AllTagsFindRequest): Promise<string[]>;
+  /**
+   * Retrieves all the categories across all cases the user making the request has access to.
+   */
+  getCategories(params: AllCategoriesFindRequest): Promise<string[]>;
   /**
    * Retrieves all the reporters across all accessible cases.
    */
@@ -101,10 +108,12 @@ export const createCasesSubClient = (
     find: (params: CasesFindRequest) => find(params, clientArgs),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
-    push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
+    bulkGet: (params) => bulkGet(params, clientArgs),
+    push: (params: PushParams) => push(params, clientArgs, casesClient),
     update: (cases: CasesPatchRequest) => update(cases, clientArgs),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
+    getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
   };

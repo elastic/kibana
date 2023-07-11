@@ -6,35 +6,28 @@
  */
 
 import { Logger, CoreSetup } from '@kbn/core/server';
-import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import { PreConfiguredAction } from '../types';
+import { InMemoryConnector } from '../types';
 import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
 export const TASK_ID = `Actions-${TELEMETRY_TASK_TYPE}`;
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[],
+  getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
-  registerActionsTelemetryTask(
-    logger,
-    taskManager,
-    core,
-    kibanaIndex,
-    preconfiguredActions,
-    eventLogIndex
-  );
+  registerActionsTelemetryTask(logger, taskManager, core, getInMemoryConnectors, eventLogIndex);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -45,21 +38,14 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[],
+  getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(
-        logger,
-        core,
-        kibanaIndex,
-        preconfiguredActions,
-        eventLogIndex
-      ),
+      createTaskRunner: telemetryTaskRunner(logger, core, getInMemoryConnectors, eventLogIndex),
     },
   });
 }
@@ -71,6 +57,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
       taskType: TELEMETRY_TASK_TYPE,
       state: {},
       params: {},
+      schedule: SCHEDULE,
     });
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
@@ -80,10 +67,17 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
-  kibanaIndex: string,
-  preconfiguredActions: PreConfiguredAction[],
+  getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
+  /**
+   * Filter out system actions from the
+   * inMemoryConnectors list.
+   */
+  const inMemoryConnectors = getInMemoryConnectors().filter(
+    (inMemoryConnector) => inMemoryConnector.isPreconfigured
+  );
+
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const getEsClient = () =>
@@ -94,12 +88,17 @@ export function telemetryTaskRunner(
           },
         ]) => client.asInternalUser
       );
+    const getActionIndex = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndexForType('action'));
     return {
       async run() {
+        const actionIndex = await getActionIndex();
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(esClient, kibanaIndex, logger, preconfiguredActions),
-          getInUseTotalCount(esClient, kibanaIndex, logger, undefined, preconfiguredActions),
+          getTotalCount(esClient, actionIndex, logger, inMemoryConnectors),
+          getInUseTotalCount(esClient, actionIndex, logger, undefined, inMemoryConnectors),
           getExecutionsPerDayCount(esClient, eventLogIndex, logger),
         ]).then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
           const hasErrors =
@@ -133,14 +132,12 @@ export function telemetryTaskRunner(
               count_connector_types_by_action_run_outcome_per_day:
                 totalExecutionsPerDay.countRunOutcomeByConnectorType,
             },
-            runAt: getNextMidnight(),
+            // Useful for setting a schedule for the old tasks that don't have one
+            // or to update the schedule if ever the frequency changes in code
+            schedule: SCHEDULE,
           };
         });
       },
     };
   };
-}
-
-function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
 }

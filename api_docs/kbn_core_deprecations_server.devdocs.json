@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-deprecations-server",
-        "id": "def-server.DeprecationRegistryProvider",
+        "id": "def-common.DeprecationRegistryProvider",
         "type": "Interface",
         "tags": [],
         "label": "DeprecationRegistryProvider",
@@ -25,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
-            "id": "def-server.DeprecationRegistryProvider.getRegistry",
+            "id": "def-common.DeprecationRegistryProvider.getRegistry",
             "type": "Function",
             "tags": [],
             "label": "getRegistry",
@@ -34,9 +42,9 @@
               "(domainId: string) => ",
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationsServiceSetup",
+                "section": "def-common.DeprecationsServiceSetup",
                 "text": "DeprecationsServiceSetup"
               }
             ],
@@ -46,7 +54,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server",
-                "id": "def-server.DeprecationRegistryProvider.getRegistry.$1",
+                "id": "def-common.DeprecationRegistryProvider.getRegistry.$1",
                 "type": "string",
                 "tags": [],
                 "label": "domainId",
@@ -67,7 +75,7 @@
       },
       {
         "parentPluginId": "@kbn/core-deprecations-server",
-        "id": "def-server.DeprecationsClient",
+        "id": "def-common.DeprecationsClient",
         "type": "Interface",
         "tags": [],
         "label": "DeprecationsClient",
@@ -80,7 +88,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
-            "id": "def-server.DeprecationsClient.getAllDeprecations",
+            "id": "def-common.DeprecationsClient.getAllDeprecations",
             "type": "Function",
             "tags": [],
             "label": "getAllDeprecations",
@@ -107,7 +115,7 @@
       },
       {
         "parentPluginId": "@kbn/core-deprecations-server",
-        "id": "def-server.DeprecationsRequestHandlerContext",
+        "id": "def-common.DeprecationsRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "DeprecationsRequestHandlerContext",
@@ -120,7 +128,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
-            "id": "def-server.DeprecationsRequestHandlerContext.client",
+            "id": "def-common.DeprecationsRequestHandlerContext.client",
             "type": "Object",
             "tags": [],
             "label": "client",
@@ -128,9 +136,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationsClient",
+                "section": "def-common.DeprecationsClient",
                 "text": "DeprecationsClient"
               }
             ],
@@ -143,7 +151,7 @@
       },
       {
         "parentPluginId": "@kbn/core-deprecations-server",
-        "id": "def-server.DeprecationsServiceSetup",
+        "id": "def-common.DeprecationsServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "DeprecationsServiceSetup",
@@ -156,7 +164,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
-            "id": "def-server.DeprecationsServiceSetup.registerDeprecations",
+            "id": "def-common.DeprecationsServiceSetup.registerDeprecations",
             "type": "Function",
             "tags": [],
             "label": "registerDeprecations",
@@ -165,9 +173,9 @@
               "(deprecationContext: ",
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.RegisterDeprecationsConfig",
+                "section": "def-common.RegisterDeprecationsConfig",
                 "text": "RegisterDeprecationsConfig"
               },
               ") => void"
@@ -178,7 +186,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server",
-                "id": "def-server.DeprecationsServiceSetup.registerDeprecations.$1",
+                "id": "def-common.DeprecationsServiceSetup.registerDeprecations.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deprecationContext",
@@ -186,9 +194,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-deprecations-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                    "section": "def-server.RegisterDeprecationsConfig",
+                    "section": "def-common.RegisterDeprecationsConfig",
                     "text": "RegisterDeprecationsConfig"
                   }
                 ],
@@ -205,7 +213,7 @@
       },
       {
         "parentPluginId": "@kbn/core-deprecations-server",
-        "id": "def-server.GetDeprecationsContext",
+        "id": "def-common.GetDeprecationsContext",
         "type": "Interface",
         "tags": [],
         "label": "GetDeprecationsContext",
@@ -216,7 +224,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
-            "id": "def-server.GetDeprecationsContext.esClient",
+            "id": "def-common.GetDeprecationsContext.esClient",
             "type": "Object",
             "tags": [],
             "label": "esClient",
@@ -224,9 +232,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
+                "section": "def-common.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               }
             ],
@@ -236,7 +244,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-server",
-            "id": "def-server.GetDeprecationsContext.savedObjectsClient",
+            "id": "def-common.GetDeprecationsContext.savedObjectsClient",
             "type": "Object",
             "tags": [],
             "label": "savedObjectsClient",
@@ -244,9 +252,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
+                "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -259,7 +267,7 @@
       },
       {
         "parentPluginId": "@kbn/core-deprecations-server",
-        "id": "def-server.RegisterDeprecationsConfig",
+        "id": "def-common.RegisterDeprecationsConfig",
         "type": "Interface",
         "tags": [],
         "label": "RegisterDeprecationsConfig",
@@ -270,7 +278,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server",
-            "id": "def-server.RegisterDeprecationsConfig.getDeprecations",
+            "id": "def-common.RegisterDeprecationsConfig.getDeprecations",
             "type": "Function",
             "tags": [],
             "label": "getDeprecations",
@@ -279,17 +287,17 @@
               "(context: ",
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.GetDeprecationsContext",
+                "section": "def-common.GetDeprecationsContext",
                 "text": "GetDeprecationsContext"
               },
               ") => ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
+                "section": "def-common.MaybePromise",
                 "text": "MaybePromise"
               },
               "<",
@@ -308,7 +316,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server",
-                "id": "def-server.RegisterDeprecationsConfig.getDeprecations.$1",
+                "id": "def-common.RegisterDeprecationsConfig.getDeprecations.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -316,9 +324,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-deprecations-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                    "section": "def-server.GetDeprecationsContext",
+                    "section": "def-common.GetDeprecationsContext",
                     "text": "GetDeprecationsContext"
                   }
                 ],
@@ -334,14 +342,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

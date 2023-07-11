@@ -9,17 +9,19 @@ import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
-import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
+import { SourceProvider } from '../containers/metrics_source';
+
+export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
 
 export const renderApp = (
   core: CoreStart,
@@ -29,7 +31,7 @@ export const renderApp = (
 ) => {
   const storage = new Storage(window.localStorage);
 
-  prepareMountElement(element, 'infraMetricsPage');
+  prepareMountElement(element, METRICS_APP_DATA_TEST_SUBJ);
 
   ReactDOM.render(
     <MetricsApp
@@ -69,25 +71,27 @@ const MetricsApp: React.FC<{
         storage={storage}
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
+        observabilityCopilot={plugins.observability.getCoPilotService()}
       >
-        <Router history={history}>
-          <Switch>
-            <Route path="/link-to" component={LinkToMetricsPage} />
-            {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <Route path="/" component={InfrastructurePage} />
-            )}
-            <Route component={NotFoundPage} />
-          </Switch>
-        </Router>
+        <SourceProvider sourceId="default">
+          <Router history={history}>
+            <Routes>
+              <Route path="/link-to" component={LinkToMetricsPage} />
+              {uiCapabilities?.infrastructure?.show && (
+                <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
+              )}
+              {uiCapabilities?.infrastructure?.show && (
+                <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
+              )}
+              {uiCapabilities?.infrastructure?.show && (
+                <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
+              )}
+              {uiCapabilities?.infrastructure?.show && (
+                <Route path="/" component={InfrastructurePage} />
+              )}
+            </Routes>
+          </Router>
+        </SourceProvider>
       </CommonInfraProviders>
     </CoreProviders>
   );

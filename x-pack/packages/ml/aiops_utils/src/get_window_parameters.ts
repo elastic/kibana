@@ -5,15 +5,47 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 /**
  * Time range definition for baseline and deviation to be used by spike log analysis.
+ *
+ * @export
+ * @interface WindowParameters
+ * @typedef {WindowParameters}
  */
 export interface WindowParameters {
+  /**
+   * Baseline minimum value
+   * @type {number}
+   */
   baselineMin: number;
+  /**
+   * Baseline maximum value
+   * @type {number}
+   */
   baselineMax: number;
+  /**
+   * Deviation minimum value
+   * @type {number}
+   */
   deviationMin: number;
+  /**
+   * Deviation maximum value
+   * @type {number}
+   */
   deviationMax: number;
 }
+
+/**
+ * Type guard for WindowParameters
+ *
+ * @param {unknown} arg - The argument to be checked.
+ * @returns {arg is WindowParameters}
+ */
+export const isWindowParameters = (arg: unknown): arg is WindowParameters =>
+  isPopulatedObject(arg, ['baselineMin', 'baselineMax', 'deviationMin', 'deviationMax']) &&
+  Object.values(arg).every((d) => typeof d === 'number');
 
 /**
  * Given a point in time (e.g. where a user clicks), use simple heuristics to compute:
@@ -22,7 +54,7 @@ export interface WindowParameters {
  * 2. The historical time window prior to the click to use as a baseline.
  *
  * The philosophy here is that charts are displayed with different granularities according to their
- * overall time window. We select the change point and historical time windows inline with the
+ * overall time window. We select the log spike and historical time windows inline with the
  * overall time window.
  *
  * The algorithm for doing this is based on the typical granularities that exist in machine data.

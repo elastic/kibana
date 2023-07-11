@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
@@ -26,11 +25,11 @@ import { useSyntheticsSettingsContext } from '../../../contexts';
 import { setAddingNewPrivateLocation } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
-import { ClientPluginsStart } from '../../../../../plugin';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -125,22 +124,21 @@ export const PrivateLocationsTable = ({
 
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
-  const { fleet } = useKibana<ClientPluginsStart>().services;
-
-  const hasFleetPermissions = Boolean(fleet?.authz.fleet.readAgentPolicies);
-
   const renderToolRight = () => {
     return [
-      <EuiButton
-        fill
-        data-test-subj={'addPrivateLocationButton'}
-        isLoading={loading}
-        disabled={!hasFleetPermissions || !canSave}
-        onClick={() => setIsAddingNew(true)}
-        iconType="plusInCircle"
-      >
-        {ADD_LABEL}
-      </EuiButton>,
+      <NoPermissionsTooltip canEditSynthetics={canSave}>
+        <EuiButton
+          key="addPrivateLocationButton"
+          fill
+          data-test-subj={'addPrivateLocationButton'}
+          isLoading={loading}
+          disabled={!canSave}
+          onClick={() => setIsAddingNew(true)}
+          iconType="plusInCircle"
+        >
+          {ADD_LABEL}
+        </EuiButton>
+      </NoPermissionsTooltip>,
     ];
   };
 

@@ -7,17 +7,23 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { UrlConfig } from '../../../../../../common/types/custom_urls';
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import {
+  type Aggregation,
+  type Field,
+  type MlUrlConfig,
   ML_JOB_AGGREGATION,
-  aggregations,
-  mlOnlyAggregations,
-} from '../../../../../../common/constants/aggregation_types';
-import {
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
+} from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
+import type {
   Job,
   Datafeed,
   Detector,
@@ -26,12 +32,10 @@ import {
   BucketSpan,
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
-import { addExcludeFrozenToQuery } from '../../../../../../common/util/query_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
-import { JobRunner, ProgressSubscriber } from '../job_runner';
+import { JobRunner, type ProgressSubscriber } from '../job_runner';
 import {
   JOB_TYPE,
   CREATED_BY_LABEL,
@@ -40,7 +44,7 @@ import {
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
-import { Calendar } from '../../../../../../common/types/calendars';
+import type { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
@@ -49,7 +53,7 @@ import { ml } from '../../../../services/ml_api_service';
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: DataView;
-  protected _savedSearch: SavedSearchSavedObject | null;
+  protected _savedSearch: SavedSearch | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _indexPatternDisplayName: string = '';
   protected _job_config: Job;
@@ -77,7 +81,7 @@ export class JobCreator {
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
 
@@ -103,6 +107,18 @@ export class JobCreator {
 
   public get type(): JOB_TYPE {
     return this._type;
+  }
+
+  public get savedSearch(): SavedSearch | null {
+    return this._savedSearch;
+  }
+
+  public get dataView(): DataView {
+    return this._indexPattern;
+  }
+
+  public get dataViewId(): string | undefined {
+    return this._indexPattern.id;
   }
 
   public get indexPatternTitle(): string {
@@ -141,6 +157,10 @@ export class JobCreator {
     this._fields.length = 0;
   }
 
+  public get savedSearchQuery(): { query: Query; filter: any[] } | null {
+    return this._savedSearch ? getQueryFromSavedSearchObject(this._savedSearch) : null;
+  }
+
   public get detectors(): Detector[] {
     return this._detectors;
   }
@@ -173,7 +193,7 @@ export class JobCreator {
   }
 
   public get bucketSpan(): BucketSpan {
-    return this._job_config.analysis_config.bucket_span;
+    return this._job_config.analysis_config.bucket_span!;
   }
 
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
@@ -293,7 +313,11 @@ export class JobCreator {
   public set useDedicatedIndex(enable: boolean) {
     this._useDedicatedIndex = enable;
     if (enable) {
-      this._job_config.results_index_name = this._job_config.job_id;
+      if (this._job_config.results_index_name === undefined) {
+        // only set the results_index_name if it hasn't been set before.
+        // this allows it to be overwritten in the advanced JSON editor.
+        this._job_config.results_index_name = this._job_config.job_id;
+      }
     } else {
       // @ts-expect-error The operand of a 'delete' operator must be optional
       delete this._job_config.results_index_name;
@@ -520,6 +544,28 @@ export class JobCreator {
     this._datafeed_config.indices = indics;
   }
 
+  public get ignoreUnavailable(): boolean {
+    return !!this._datafeed_config.indices_options?.ignore_unavailable;
+  }
+
+  public set ignoreUnavailable(ignore: boolean) {
+    if (ignore === true) {
+      if (this._datafeed_config.indices_options === undefined) {
+        this._datafeed_config.indices_options = {};
+      }
+      this._datafeed_config.indices_options.ignore_unavailable = true;
+    } else {
+      if (this._datafeed_config.indices_options !== undefined) {
+        delete this._datafeed_config.indices_options.ignore_unavailable;
+
+        // if no other properties are set, remove indices_options
+        if (Object.keys(this._datafeed_config.indices_options).length === 0) {
+          delete this._datafeed_config.indices_options;
+        }
+      }
+    }
+  }
+
   public get scriptFields(): Field[] {
     return this._scriptFields;
   }
@@ -673,12 +719,12 @@ export class JobCreator {
     return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
   }
 
-  public set customUrls(customUrls: UrlConfig[] | null) {
+  public set customUrls(customUrls: MlUrlConfig[] | null) {
     this._setCustomSetting('custom_urls', customUrls);
   }
 
-  public get customUrls(): UrlConfig[] | null {
-    return this._getCustomSetting('custom_urls') as UrlConfig[] | null;
+  public get customUrls(): MlUrlConfig[] | null {
+    return this._getCustomSetting('custom_urls') as MlUrlConfig[] | null;
   }
 
   public get formattedJobJson() {
@@ -753,12 +799,13 @@ export class JobCreator {
             name: id,
             type: Array.isArray(runtimeField) ? runtimeField[0].type : runtimeField.type,
             aggregatable: true,
+            counter: false,
             aggs: [],
             runtimeField,
           } as Field)
       );
 
-      const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+      const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
       this._runtimeFields = combineFieldsAndAggs(tempRuntimeFields, aggs, {}).fields;
     }
   }
@@ -771,6 +818,7 @@ export class JobCreator {
         name: f,
         type: ES_FIELD_TYPES.KEYWORD,
         aggregatable: true,
+        counter: false,
       }));
     }
   }

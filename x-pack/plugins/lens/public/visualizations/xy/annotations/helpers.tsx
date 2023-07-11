@@ -8,15 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
+  getAnnotationAccessor,
   isQueryAnnotationConfig,
-  isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import {
+  createCopiedAnnotation,
+  EventAnnotationConfig,
+  getDefaultQueryAnnotation,
+} from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { isDraggedDataViewField } from '../../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
@@ -43,7 +45,7 @@ export const defaultRangeAnnotationLabel = i18n.translate(
   }
 );
 
-const isDateHistogram = (
+export const isDateHistogram = (
   dataLayers: XYDataLayerConfig[],
   frame?: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'> | undefined
 ) =>
@@ -124,50 +126,6 @@ export const getAnnotationsSupportedLayer = (
       : undefined,
     initialDimensions,
     noDatasource: true,
-  };
-};
-
-const getDefaultManualAnnotation = (id: string, timestamp: string): EventAnnotationConfig => ({
-  label: defaultAnnotationLabel,
-  type: 'manual',
-  key: {
-    type: 'point_in_time',
-    timestamp,
-  },
-  icon: 'triangle',
-  id,
-});
-
-const getDefaultQueryAnnotation = (
-  id: string,
-  fieldName: string,
-  timeField: string
-): EventAnnotationConfig => ({
-  filter: {
-    type: 'kibana_query',
-    query: `${fieldName}: *`,
-    language: 'kuery',
-  },
-  timeField,
-  type: 'query',
-  key: {
-    type: 'point_in_time',
-  },
-  id,
-  label: `${fieldName}: *`,
-});
-
-const createCopiedAnnotation = (
-  newId: string,
-  timestamp: string,
-  source?: EventAnnotationConfig
-): EventAnnotationConfig => {
-  if (!source) {
-    return getDefaultManualAnnotation(newId, timestamp);
-  }
-  return {
-    ...source,
-    id: newId,
   };
 };
 
@@ -444,16 +402,8 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   };
 };
 
-export const getSingleColorAnnotationConfig = (annotation: EventAnnotationConfig) => ({
-  columnId: annotation.id,
-  triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
-  color:
-    annotation?.color ||
-    (isRangeAnnotationConfig(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
-});
-
 export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>
-  layer.annotations.map((annotation) => getSingleColorAnnotationConfig(annotation));
+  layer.annotations.map((annotation) => getAnnotationAccessor(annotation));
 
 export const getAnnotationsConfiguration = ({
   state,
@@ -464,19 +414,7 @@ export const getAnnotationsConfiguration = ({
   frame: Pick<FramePublicAPI, 'datasourceLayers'>;
   layer: XYAnnotationLayerConfig;
 }) => {
-  const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
-
   const groupLabel = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
-
-  const emptyButtonLabels = {
-    buttonAriaLabel: i18n.translate('xpack.lens.indexPattern.addColumnAriaLabelClick', {
-      defaultMessage: 'Add an annotation to {groupLabel}',
-      values: { groupLabel },
-    }),
-    buttonLabel: i18n.translate('xpack.lens.configure.emptyConfigClick', {
-      defaultMessage: 'Add an annotation',
-    }),
-  };
 
   return {
     groups: [
@@ -492,16 +430,11 @@ export const getAnnotationsConfiguration = ({
         ),
         accessors: getAnnotationsAccessorColorConfig(layer),
         dataTestSubj: 'lnsXY_xAnnotationsPanel',
-        invalid: !hasDateHistogram,
-        invalidMessage: i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp', {
-          defaultMessage: 'Annotations require a time based chart to work. Add a date histogram.',
-        }),
         requiredMinDimensionCount: 0,
         supportsMoreColumns: true,
         supportFieldFormat: false,
         enableDimensionEditor: true,
         filterOperations: () => false,
-        labels: emptyButtonLabels,
       },
     ],
   };
@@ -510,29 +443,15 @@ export const getAnnotationsConfiguration = ({
 export const getUniqueLabels = (layers: XYLayerConfig[]) => {
   const annotationLayers = getAnnotationsLayers(layers);
   const columnLabelMap = {} as Record<string, string>;
-  const counts = {} as Record<string, number>;
 
-  const makeUnique = (label: string) => {
-    let uniqueLabel = label;
-
-    while (counts[uniqueLabel] >= 0) {
-      const num = ++counts[uniqueLabel];
-      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
-        defaultMessage: '{label} [{num}]',
-        values: { label, num },
-      });
-    }
-
-    counts[uniqueLabel] = 0;
-    return uniqueLabel;
-  };
+  const uniqueLabelGenerator = getUniqueLabelGenerator();
 
   annotationLayers.forEach((layer) => {
     if (!layer.annotations) {
       return;
     }
     layer.annotations.forEach((l) => {
-      columnLabelMap[l.id] = makeUnique(l.label);
+      columnLabelMap[l.id] = uniqueLabelGenerator(l.label);
     });
   });
   return columnLabelMap;

@@ -1,6 +1,8 @@
-[role="xpack"]
 [[maps-connect-to-ems]]
 == Connect to Elastic Maps Service
+
+:ems-docker-repo: docker.elastic.co/elastic-maps-service/elastic-maps-server-ubi8
+:ems-docker-image: {ems-docker-repo}:{version}
 
 https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] is a service that hosts
 tile layers and vector shapes of administrative boundaries.
@@ -31,8 +33,6 @@ To disable EMS, change your <<settings, kibana.yml>> file.
 If you cannot connect to Elastic Maps Service from the {kib} server or browser clients, and your cluster has the appropriate license level, you can opt to host the service on your own infrastructure.
 
 {hosted-ems} is a self-managed version of Elastic Maps Service offered as a Docker image that provides both the EMS basemaps and EMS boundaries. The image is bundled with basemaps up to zoom level 8. After connecting it to your {es} cluster for license validation, you have the option to download and configure a more detailed basemaps database.
-
-IMPORTANT: {hosted-ems} does not serve raster tiles, needed by Vega, coordinate, and region map visualizations.
 
 You can use +docker pull+ to download the {hosted-ems} image from the Elastic Docker registry.
 
@@ -66,7 +66,7 @@ endif::[]
 [[elastic-maps-server-configuration]]
 ==== Configuration
 
-{hosted-ems} reads properties from a configuration file in YAML format that is validated on startup. The location of this file is provided by the `EMS_PATH_CONF` environment variable and defaults to `/usr/src/app/server/config/elastic-maps-server.yml`.
+{hosted-ems} reads properties from a configuration file in YAML format that is validated on startup. The location of this file is provided by the `EMS_PATH_CONF` container environment variable and defaults to `/usr/src/app/server/config/elastic-maps-server.yml`. This environment variable can be changed by making use of the `-e` docker flag of the start command.
 
 *General settings*
 

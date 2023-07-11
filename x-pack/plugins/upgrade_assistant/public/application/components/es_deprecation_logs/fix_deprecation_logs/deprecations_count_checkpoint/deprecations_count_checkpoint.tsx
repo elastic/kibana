@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiSkeletonText } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
 import { uiMetricService, UIM_RESET_LOGS_COUNTER_CLICK } from '../../../../lib/ui_metric';
@@ -73,7 +73,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const logsCount = data?.count || 0;
   const hasLogs = logsCount > 0;
   const calloutTint = hasLogs ? 'warning' : 'success';
-  const calloutIcon = hasLogs ? 'alert' : 'check';
+  const calloutIcon = hasLogs ? 'warning' : 'check';
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   const onResetClick = async () => {
@@ -95,7 +95,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   };
 
   if (isInitialRequest && isLoading) {
-    return <EuiLoadingContent lines={6} />;
+    return <EuiSkeletonText lines={6} />;
   }
 
   if (error) {
@@ -103,7 +103,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       <EuiCallOut
         title={i18nTexts.loadingError}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="errorCallout"
       >
         <p>

@@ -16,20 +16,21 @@ import {
   useEuiTheme,
   EuiText,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
-import { EntityCell, EntityCellFilter } from '../entity_cell';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import {
-  showActualForFunction,
-  showTypicalForFunction,
-} from '../../../../common/util/anomaly_utils';
-import { AnomaliesTableRecord, MLAnomalyDoc } from '../../../../common/types/anomalies';
-import { formatValue } from '../../formatters/format_value';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import {
   getAnomalyScoreExplanationImpactValue,
   getSeverityColor,
-} from '../../../../common/util/anomaly_utils';
+  showActualForFunction,
+  showTypicalForFunction,
+  type MlAnomaliesTableRecord,
+  type MlAnomalyRecordDoc,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { EntityCell, EntityCellFilter } from '../entity_cell';
+import { formatValue } from '../../formatters/format_value';
+import { useMlKibana } from '../../contexts/kibana';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -66,7 +67,7 @@ export function getInfluencersItems(
 }
 
 export const DetailsItems: FC<{
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   filter: EntityCellFilter;
   modelPlotEnabled: boolean;
 }> = ({ anomaly, filter, modelPlotEnabled }) => {
@@ -326,7 +327,12 @@ export const DetailsItems: FC<{
   );
 };
 
-export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = ({ anomaly }) => {
+export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> = ({ anomaly }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const docsUrl = docLinks.links.ml.anomalyDetectionScoreExplanation;
+
   const explanation = anomaly.source.anomaly_score_explanation;
   if (explanation === undefined) {
     return null;
@@ -481,6 +487,31 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
       description: explanation.high_variance_penalty ? yes : no,
     });
   }
+  if (explanation.multimodal_distribution !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodalTooltip',
+            {
+              defaultMessage:
+                'Indicates whether the prior distribution of the time series is multi-modal or has a single mode.',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodal"
+              defaultMessage="Multi-modal distribution"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: explanation.multimodal_distribution ? yes : no,
+    });
+  }
   if (explanation.incomplete_bucket_penalty !== undefined) {
     impactDetails.push({
       title: (
@@ -513,10 +544,21 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
         <h4>
           <FormattedMessage
             id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
-            defaultMessage="Anomaly explanation"
+            defaultMessage="Anomaly explanation {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink href={docsUrl} target="_blank" css={{ marginLeft: '8px' }}>
+                  <FormattedMessage
+                    id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         </h4>
       </EuiText>
+
       <EuiSpacer size="s" />
 
       {explanationDetails.map(({ title, description }) => (
@@ -576,7 +618,7 @@ const RecordScore: FC<{ score: number }> = ({ score }) => {
   );
 };
 
-function getAnomalyType(explanation: MLAnomalyDoc['anomaly_score_explanation']) {
+function getAnomalyType(explanation: MlAnomalyRecordDoc['anomaly_score_explanation']) {
   if (
     explanation === undefined ||
     explanation.anomaly_length === undefined ||

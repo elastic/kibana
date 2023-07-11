@@ -28,14 +28,13 @@ import {
   patchRule,
   fetchRules,
   fetchRuleById,
-  createPrepackagedRules,
   importRules,
   exportRules,
-  fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
   findRuleExceptionReferences,
   performBulkAction,
+  fetchRulesSnoozeSettings,
 } from './api';
 
 const abortCtrl = new AbortController();
@@ -185,7 +184,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            '(alert.attributes.name: "\\" OR (foo:bar)" OR alert.attributes.params.index: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo:bar)")',
+            '(alert.attributes.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.index: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" \\OR \\(foo\\:bar\\)")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -288,7 +287,7 @@ describe('Detections Rules API', () => {
           tags: ['hello', 'world'],
         },
         sortingOptions: {
-          field: 'updated_at',
+          field: 'updatedAt',
           order: 'desc',
         },
         signal: abortCtrl.signal,
@@ -396,7 +395,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.tags:("hello" AND "world") AND (alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName")',
+            '(alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") AND alert.attributes.tags:("hello" AND "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -435,34 +434,6 @@ describe('Detections Rules API', () => {
     });
   });
 
-  describe('createPrepackagedRules', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
-    });
-
-    test('check parameter url when creating pre-packaged rules', async () => {
-      await createPrepackagedRules();
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        method: 'PUT',
-      });
-    });
-    test('happy path', async () => {
-      const resp = await createPrepackagedRules();
-      expect(resp).toEqual({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
-    });
-  });
-
   describe('importRules', () => {
     const fileToImport: File = {
       lastModified: 33,
@@ -494,6 +465,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: false,
+          overwrite_action_connectors: false,
           overwrite_exceptions: false,
         },
       });
@@ -511,6 +483,7 @@ describe('Detections Rules API', () => {
         query: {
           overwrite: true,
           overwrite_exceptions: false,
+          overwrite_action_connectors: false,
         },
       });
     });
@@ -524,6 +497,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
       const resp = await importRules({ fileToImport, signal: abortCtrl.signal });
       expect(resp).toEqual({
@@ -534,6 +511,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
     });
   });
@@ -627,26 +608,6 @@ describe('Detections Rules API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toEqual(blob);
-    });
-  });
-
-  describe('fetchTags', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(['some', 'tags']);
-    });
-
-    test('check parameter url when fetching tags', async () => {
-      await fetchTags({ signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/tags', {
-        signal: abortCtrl.signal,
-        method: 'GET',
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await fetchTags({ signal: abortCtrl.signal });
-      expect(resp).toEqual(['some', 'tags']);
     });
   });
 
@@ -795,6 +756,90 @@ describe('Detections Rules API', () => {
       });
 
       expect(result).toBe(fetchMockResult);
+    });
+  });
+
+  describe('fetchRulesSnoozeSettings', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({
+        data: [],
+      });
+    });
+
+    test('requests snooze settings of multiple rules by their IDs', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            filter: 'alert.id:"alert:id1" or alert.id:"alert:id2"',
+          }),
+        })
+      );
+    });
+
+    test('requests the same number of rules as the number of ids provided', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            per_page: 2,
+          }),
+        })
+      );
+    });
+
+    test('requests only snooze settings fields', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            fields: JSON.stringify([
+              'muteAll',
+              'activeSnoozes',
+              'isSnoozedUntil',
+              'snoozeSchedule',
+            ]),
+          }),
+        })
+      );
+    });
+
+    test('returns mapped data', async () => {
+      fetchMock.mockResolvedValue({
+        data: [
+          {
+            id: '1',
+            mute_all: false,
+          },
+          {
+            id: '2',
+            mute_all: false,
+            active_snoozes: [],
+            is_snoozed_until: '2023-04-24T19:31:46.765Z',
+          },
+        ],
+      });
+
+      const result = await fetchRulesSnoozeSettings({ ids: ['1', '2'] });
+
+      expect(result).toEqual({
+        '1': {
+          muteAll: false,
+          activeSnoozes: [],
+        },
+        '2': {
+          muteAll: false,
+          activeSnoozes: [],
+          isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
+        },
+      });
     });
   });
 });

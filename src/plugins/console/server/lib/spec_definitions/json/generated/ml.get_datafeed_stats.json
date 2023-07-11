@@ -1,8 +1,7 @@
 {
   "ml.get_datafeed_stats": {
     "url_params": {
-      "allow_no_match": "__flag__",
-      "allow_no_datafeeds": "__flag__"
+      "allow_no_match": "__flag__"
     },
     "methods": [
       "GET"

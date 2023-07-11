@@ -276,7 +276,7 @@ describe('validateEsPrivilegeResponse', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  it('fails validation when the resource propertry is malformed in the response', () => {
+  it('fails validation when the resource property is malformed in the response', () => {
     const response = {
       ...commonResponse,
       application: {

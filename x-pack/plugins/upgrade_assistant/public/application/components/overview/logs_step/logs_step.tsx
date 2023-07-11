@@ -7,14 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import {
-  EuiText,
-  EuiSpacer,
-  EuiButton,
-  EuiCallOut,
-  EuiLoadingContent,
-  EuiCode,
-} from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiButton, EuiCallOut, EuiSkeletonText, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -152,7 +145,7 @@ const LogsStep = ({
   }
 
   if (isLoading && isInitialRequest) {
-    return <EuiLoadingContent lines={3} />;
+    return <EuiSkeletonText lines={3} />;
   }
 
   if (hasPrivileges && error) {
@@ -160,7 +153,7 @@ const LogsStep = ({
       <EuiCallOut
         title={i18nTexts.loadingError}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="deprecationLogsErrorCallout"
       >
         <p>

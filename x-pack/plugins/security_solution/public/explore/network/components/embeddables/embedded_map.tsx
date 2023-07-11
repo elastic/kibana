@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+// embedded map v2
+
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
-
 import type { Filter, Query } from '@kbn/es-query';
 import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
+import { isEqual } from 'lodash/fp';
+import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useIsFieldInIndexPattern } from '../../../containers/fields';
 import { Loader } from '../../../../common/components/loader';
-import { displayErrorToast, useStateToaster } from '../../../../common/components/toasters';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
 import { createEmbeddable } from './create_embeddable';
@@ -26,6 +29,7 @@ import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../../common/store/sourcerer';
+import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -110,7 +114,7 @@ export const EmbeddedMapComponent = ({
   const [isIndexError, setIsIndexError] = useState(false);
   const [storageValue, setStorageValue] = useState(storage.get(NETWORK_MAP_VISIBLE) ?? true);
 
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
 
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
@@ -119,30 +123,55 @@ export const EmbeddedMapComponent = ({
   const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
 
-  const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaDataViews.filter((dataView) => selectedPatterns.includes(dataView.title))
-  );
+  const isFieldInIndexPattern = useIsFieldInIndexPattern();
+
+  const [mapDataViews, setMapDataViews] = useState<SourcererDataView[]>([]);
+  const [availableDataViews, setAvailableDataViews] = useState<SourcererDataView[]>([]);
+
+  useEffect(() => {
+    let canceled = false;
+
+    const fetchData = async () => {
+      try {
+        const apiResponse = await Promise.all(
+          availableDataViews.map(async ({ title }) => isFieldInIndexPattern(title))
+        );
+        // ensures only index patterns with maps fields are passed
+        const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
+        if (!canceled) {
+          setMapDataViews(goodDataViews);
+        }
+      } catch (e) {
+        if (!canceled) {
+          setMapDataViews([]);
+          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
+          setIsError(true);
+        }
+      }
+    };
+    if (availableDataViews.length) {
+      fetchData();
+    }
+    return () => {
+      canceled = true;
+    };
+  }, [addError, availableDataViews, isFieldInIndexPattern]);
+
+  useEffect(() => {
+    const dataViews = kibanaDataViews.filter((dataView) =>
+      selectedPatterns.includes(dataView.title)
+    );
+    if (selectedPatterns.length > 0 && dataViews.length === 0) {
+      setIsIndexError(true);
+    }
+    setAvailableDataViews((prevViews) => (isEqual(prevViews, dataViews) ? prevViews : dataViews));
+  }, [kibanaDataViews, selectedPatterns]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
   // the Redux store, theme provider, etc, which is required to register and un-register the draggable
   // Search InPortal/OutPortal for implementation touch points
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
-
-  useEffect(() => {
-    setMapIndexPatterns((prevMapIndexPatterns) => {
-      const newIndexPatterns = kibanaDataViews.filter((dataView) =>
-        selectedPatterns.includes(dataView.title)
-      );
-      if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
-        if (newIndexPatterns.length === 0) {
-          setIsError(true);
-        }
-        return newIndexPatterns;
-      }
-      return prevMapIndexPatterns;
-    });
-  }, [kibanaDataViews, selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {
@@ -152,7 +181,7 @@ export const EmbeddedMapComponent = ({
       try {
         const embeddableObject = await createEmbeddable(
           filters,
-          mapIndexPatterns,
+          mapDataViews,
           query,
           startDate,
           endDate,
@@ -161,21 +190,17 @@ export const EmbeddedMapComponent = ({
           services.embeddable
         );
         if (isSubscribed) {
-          if (mapIndexPatterns.length === 0) {
-            setIsIndexError(true);
-          } else {
-            setEmbeddable(embeddableObject);
-            setIsIndexError(false);
-          }
+          setEmbeddable(embeddableObject);
         }
       } catch (e) {
         if (isSubscribed) {
-          displayErrorToast(i18n.ERROR_CREATING_EMBEDDABLE, [e.message], dispatchToaster);
+          addError(e, { title: i18n.ERROR_CREATING_EMBEDDABLE });
           setIsError(true);
         }
       }
     }
-    if (embeddable == null && selectedPatterns.length > 0) {
+
+    if (embeddable == null && selectedPatterns.length > 0 && !isIndexError) {
       setupEmbeddable();
     }
 
@@ -183,32 +208,33 @@ export const EmbeddedMapComponent = ({
       isSubscribed = false;
     };
   }, [
-    dispatchToaster,
+    addError,
     endDate,
     embeddable,
     filters,
-    mapIndexPatterns,
+    mapDataViews,
     query,
     portalNode,
     services.embeddable,
     selectedPatterns,
     setQuery,
     startDate,
+    isIndexError,
   ]);
 
   // update layer with new index patterns
   useEffect(() => {
     const setLayerList = async () => {
-      if (embeddable != null) {
+      if (embeddable != null && mapDataViews.length) {
         // @ts-expect-error
-        await embeddable.setLayerList(getLayerList(mapIndexPatterns));
+        await embeddable.setLayerList(getLayerList(mapDataViews));
         embeddable.reload();
       }
     };
     if (embeddable != null && !isErrorEmbeddable(embeddable)) {
       setLayerList();
     }
-  }, [embeddable, mapIndexPatterns]);
+  }, [embeddable, mapDataViews]);
 
   // queryExpression updated useEffect
   useEffect(() => {
@@ -217,22 +243,19 @@ export const EmbeddedMapComponent = ({
     }
   }, [embeddable, query]);
 
+  const timeRangeFilter = useMemo(
+    () => buildTimeRangeFilter(startDate, endDate),
+    [startDate, endDate]
+  );
+
   useEffect(() => {
     if (embeddable != null) {
-      embeddable.updateInput({ filters });
+      // pass time range as filter instead of via timeRange param
+      // if user's data view does not have a time field, the timeRange param is not applied
+      // using filter will always apply the time range
+      embeddable.updateInput({ filters: [...filters, ...timeRangeFilter] });
     }
-  }, [embeddable, filters]);
-
-  // DateRange updated useEffect
-  useEffect(() => {
-    if (embeddable != null && startDate != null && endDate != null) {
-      const timeRange = {
-        from: new Date(startDate).toISOString(),
-        to: new Date(endDate).toISOString(),
-      };
-      embeddable.updateInput({ timeRange });
-    }
-  }, [embeddable, startDate, endDate]);
+  }, [embeddable, filters, timeRangeFilter]);
 
   const setDefaultMapVisibility = useCallback(
     (isOpen: boolean) => {
@@ -267,6 +290,7 @@ export const EmbeddedMapComponent = ({
 
   return isError ? null : (
     <StyledEuiAccordion
+      data-test-subj="EmbeddedMapComponent"
       onToggle={setDefaultMapVisibility}
       id={'network-map'}
       arrowDisplay="right"

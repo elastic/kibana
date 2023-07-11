@@ -12,8 +12,8 @@ import {
   getPinTooltip,
   stringifyEvent,
 } from './helpers';
-import type { Ecs } from '../../../../../common/ecs';
-import { TimelineType } from '../../../../../common/types/timeline';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {

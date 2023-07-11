@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLES } from '../../test';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
 
 describe('Admin', () => {
   beforeEach(() => {
-    login(ROLES.admin);
+    login(ROLE.admin);
     navigateTo('/app/osquery');
   });
 
   it('should be able to run live query with BASE All permissions', () => {
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
   });

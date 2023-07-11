@@ -7,6 +7,7 @@
  */
 
 import Path from 'path';
+import { Package } from '@kbn/repo-packages';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { ImportResolver } from '../import_resolver';
@@ -15,27 +16,17 @@ const FIXTURES_DIR = Path.resolve(__dirname, '../__fixtures__');
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const resolver = new ImportResolver(
-  FIXTURES_DIR,
-  new Map([['@pkg/box', 'packages/box']]),
-  new Map([['@synth/bar', 'src/bar']])
-);
+const resolver = ImportResolver.create(FIXTURES_DIR, [
+  Package.fromManifest(FIXTURES_DIR, Path.resolve(FIXTURES_DIR, 'packages/box/kibana.jsonc')),
+  Package.fromManifest(FIXTURES_DIR, Path.resolve(FIXTURES_DIR, 'src/bar/kibana.jsonc')),
+]);
 
 describe('#resolve()', () => {
-  it('resolves imports to synth packages', () => {
-    expect(resolver.resolve('@synth/bar', FIXTURES_DIR)).toMatchInlineSnapshot(`
+  it('resolves imports to packages', () => {
+    expect(resolver.resolve('@kbn/box', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar/index.js,
-        "type": "file",
-      }
-    `);
-  });
-
-  it('resolves imports to bazel packages that are also found in node_modules', () => {
-    expect(resolver.resolve('@pkg/box', FIXTURES_DIR)).toMatchInlineSnapshot(`
-      Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/node_modules/@pkg/box/index.js,
-        "nodeModule": "@pkg/box",
+        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box/index.js,
+        "pkgId": "@kbn/box",
         "type": "file",
       }
     `);
@@ -64,6 +55,7 @@ describe('#resolve()', () => {
     expect(resolver.resolve('./bar', Path.resolve(FIXTURES_DIR, 'src/bar'))).toMatchInlineSnapshot(`
       Object {
         "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar/bar.js,
+        "pkgId": "@kbn/bar",
         "type": "file",
       }
     `);
@@ -117,16 +109,14 @@ describe('#resolve()', () => {
 });
 
 describe('#getPackageIdForPath()', () => {
-  it('returns package id for bazel package', () => {
+  it('returns package id for package', () => {
     expect(
       resolver.getPackageIdForPath(Path.resolve(FIXTURES_DIR, 'packages/box/index.js'))
-    ).toMatchInlineSnapshot(`"@pkg/box"`);
-  });
+    ).toMatchInlineSnapshot(`"@kbn/box"`);
 
-  it('returns package id for synth package', () => {
     expect(
       resolver.getPackageIdForPath(Path.resolve(FIXTURES_DIR, 'src/bar/index.js'))
-    ).toMatchInlineSnapshot(`"@synth/bar"`);
+    ).toMatchInlineSnapshot(`"@kbn/bar"`);
   });
 
   it('returns null for files outside of a package', () => {
@@ -137,13 +127,11 @@ describe('#getPackageIdForPath()', () => {
 });
 
 describe('#getAbsolutePackageDir()', () => {
-  it('returns path for bazel package', () => {
-    expect(resolver.getAbsolutePackageDir('@pkg/box')).toMatchInlineSnapshot(
+  it('returns path for package', () => {
+    expect(resolver.getAbsolutePackageDir('@kbn/box')).toMatchInlineSnapshot(
       `<absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box`
     );
-  });
-  it('returns path for synth package', () => {
-    expect(resolver.getAbsolutePackageDir('@synth/bar')).toMatchInlineSnapshot(
+    expect(resolver.getAbsolutePackageDir('@kbn/bar')).toMatchInlineSnapshot(
       `<absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar`
     );
   });
@@ -152,35 +140,5 @@ describe('#getAbsolutePackageDir()', () => {
   });
   it('returns null for unknown packages', () => {
     expect(resolver.getAbsolutePackageDir('@kbn/invalid')).toMatchInlineSnapshot(`null`);
-  });
-});
-
-describe('#isBazelPackage()', () => {
-  it('returns true for bazel packages', () => {
-    expect(resolver.isBazelPackage('@pkg/box')).toBe(true);
-  });
-  it('returns false for synth packages', () => {
-    expect(resolver.isBazelPackage('@synth/bar')).toBe(false);
-  });
-  it('returns false for node_modules packages', () => {
-    expect(resolver.isBazelPackage('foo')).toBe(false);
-  });
-  it('returns false for unknown packages', () => {
-    expect(resolver.isBazelPackage('@kbn/invalid')).toBe(false);
-  });
-});
-
-describe('#isSyntheticPackage()', () => {
-  it('returns true for synth packages', () => {
-    expect(resolver.isSyntheticPackage('@synth/bar')).toBe(true);
-  });
-  it('returns false for bazel packages', () => {
-    expect(resolver.isSyntheticPackage('@pkg/box')).toBe(false);
-  });
-  it('returns false for node_modules packages', () => {
-    expect(resolver.isSyntheticPackage('foo')).toBe(false);
-  });
-  it('returns false for unknown packages', () => {
-    expect(resolver.isSyntheticPackage('@kbn/invalid')).toBe(false);
   });
 });

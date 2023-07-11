@@ -8,7 +8,12 @@
 import React, { FC } from 'react';
 import { EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePageUrlState } from '../../../util/url_state';
+import { usePageUrlState } from '@kbn/ml-url-state';
+
+interface TableIntervalPageUrlState {
+  pageKey: 'mlSelectInterval';
+  pageUrlState: TableInterval;
+}
 
 export interface TableInterval {
   display: string;
@@ -55,7 +60,7 @@ function optionValueToInterval(value: string) {
 export const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 
 export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] => {
-  const [interval, updateCallback] = usePageUrlState<TableInterval>(
+  const [interval, updateCallback] = usePageUrlState<TableIntervalPageUrlState>(
     'mlSelectInterval',
     TABLE_INTERVAL_DEFAULT
   );
@@ -82,12 +87,13 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
 
   return (
     <EuiSelect
-      prepend={i18n.translate('xpack.ml.explorer.intervalLabel', {
+      data-test-subj="mlAnomalyIntervalControls"
+      prepend={i18n.translate('xpack.ml.controls.selectInterval.intervalLabel', {
         defaultMessage: 'Interval',
       })}
       append={
         <EuiToolTip
-          content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
+          content={i18n.translate('xpack.ml.controls.selectInterval.intervalTooltip', {
             defaultMessage:
               'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
           })}
@@ -96,10 +102,12 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
         </EuiToolTip>
       }
       compressed
-      id="selectInterval"
       options={OPTIONS}
       value={interval.val}
       onChange={handleOnChange}
+      aria-label={i18n.translate('xpack.ml.controls.selectInterval.ariaLabel', {
+        defaultMessage: 'Select interval',
+      })}
     />
   );
 };

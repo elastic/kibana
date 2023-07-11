@@ -7,3 +7,20 @@
  */
 
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
+export { fromSavedSearchAttributes } from './saved_searches_utils';
+
+export type {
+  DiscoverGridSettings,
+  DiscoverGridSettingsColumn,
+  SavedSearch,
+  SavedSearchAttributes,
+} from './types';
+
+export enum VIEW_MODE {
+  DOCUMENT_LEVEL = 'documents',
+  AGGREGATED_LEVEL = 'aggregated',
+}
+
+export { SavedSearchType } from './constants';
+export { LATEST_VERSION } from './constants';
+export { getKibanaContextFn } from './expressions/kibana_context';

@@ -212,6 +212,8 @@ export interface OSFields {
   platform: string;
   family: string;
   Ext: OSFieldsExt;
+  kernel?: string;
+  type?: string;
 }
 
 /**
@@ -471,8 +473,10 @@ export type PolicyInfo = Immutable<{
   id: string;
 }>;
 
-export type HostInfo = Immutable<{
-  metadata: HostMetadata;
+// Host Information as returned by the Host Details API.
+// NOTE:The `HostInfo` type is the original and defined as Immutable.
+export interface HostInfoInterface {
+  metadata: HostMetadataInterface;
   host_status: HostStatus;
   policy_info?: {
     agent: {
@@ -481,7 +485,7 @@ export type HostInfo = Immutable<{
        */
       configured: PolicyInfo;
       /**
-       * Last reported running in agent (may lag behind configured)
+       * Last reported running in agent (might lag behind configured)
        */
       applied: PolicyInfo;
     };
@@ -490,12 +494,22 @@ export type HostInfo = Immutable<{
      */
     endpoint: PolicyInfo;
   };
-}>;
+  /**
+   * The time when the Elastic Agent associated with this Endpoint host checked in with fleet
+   * Conceptually the value is the same as Agent['last_checkin'] if present, but we fall back to
+   * UnitedAgentMetadataPersistedData['united']['endpoint']['metadata']['@timestamp']
+   * if `Agent.last_checkin` value is `undefined`
+   */
+  last_checkin: string;
+}
+
+export type HostInfo = Immutable<HostInfoInterface>;
 
 // Host metadata document streamed up to ES by the Endpoint running on host machines.
-// NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
+// NOTE: The `HostMetadata` type is the original and defined as Immutable. If you need to
 //        work with metadata that is not mutable, use `HostMetadataInterface`
 export type HostMetadata = Immutable<HostMetadataInterface>;
+
 export interface HostMetadataInterface {
   '@timestamp': number;
   event: {
@@ -550,7 +564,10 @@ export interface HostMetadataInterface {
   data_stream: DataStream;
 }
 
-export type UnitedAgentMetadata = Immutable<{
+/**
+ * The persisted data (to the index) for both endpoint and agent data.
+ * */
+export type UnitedAgentMetadataPersistedData = Immutable<{
   agent: {
     id: string;
   };
@@ -697,6 +714,7 @@ export type SafeEndpointEvent = Partial<{
   }>;
   event: Partial<{
     category: ECSField<string>;
+    outcome: ECSField<string>;
     type: ECSField<string>;
     id: ECSField<string>;
     kind: ECSField<string>;
@@ -765,6 +783,7 @@ export type SafeEndpointEvent = Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
+      start: ECSField<string[]>;
     }>;
     group_leader: Partial<{
       entity_id: ECSField<string>;
@@ -920,6 +939,10 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  * Endpoint Policy configuration
  */
 export interface PolicyConfig {
+  meta: {
+    license: string;
+    cloud: boolean;
+  };
   windows: {
     advanced?: {
       [key: string]: unknown;
@@ -933,6 +956,7 @@ export interface PolicyConfig {
       };
     };
     events: {
+      credential_access: boolean;
       dll_and_driver_load: boolean;
       dns: boolean;
       file: boolean;
@@ -1224,6 +1248,19 @@ export interface HostPolicyResponse {
             events: HostPolicyResponseConfigurationStatus;
             logging: HostPolicyResponseConfigurationStatus;
             streaming: HostPolicyResponseConfigurationStatus;
+            behavior_protection: HostPolicyResponseConfigurationStatus;
+            attack_surface_reduction: HostPolicyResponseConfigurationStatus;
+            antivirus_registration: HostPolicyResponseConfigurationStatus;
+            host_isolation: HostPolicyResponseConfigurationStatus;
+            response_actions: HostPolicyResponseConfigurationStatus;
+            ransomware: HostPolicyResponseConfigurationStatus;
+            memory_protection: HostPolicyResponseConfigurationStatus;
+          };
+          diagnostic: {
+            behavior_protection: HostPolicyResponseConfigurationStatus;
+            malware: HostPolicyResponseConfigurationStatus;
+            ransomware: HostPolicyResponseConfigurationStatus;
+            memory_protection: HostPolicyResponseConfigurationStatus;
           };
         };
         artifacts: {

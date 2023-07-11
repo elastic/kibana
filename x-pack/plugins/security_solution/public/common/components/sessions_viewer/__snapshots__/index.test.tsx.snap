@@ -33,7 +33,7 @@ exports[`SessionsView renders correctly against snapshot 1`] = `
         Executable
       </div>
       <div>
-        User
+        User ID
       </div>
       <div>
         Interactive

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/prebuilt_rules';
 import type { RuleAlertType } from '../../rule_schema';
+import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset';
 
 export const getRulesToInstall = (
-  latestPrebuiltRules: Map<string, PrebuiltRuleToInstall>,
+  latestPrebuiltRules: PrebuiltRuleAsset[],
   installedRules: Map<string, RuleAlertType>
 ) => {
-  return Array.from(latestPrebuiltRules.values()).filter(
-    (rule) => !installedRules.has(rule.rule_id)
-  );
+  return latestPrebuiltRules.filter((rule) => !installedRules.has(rule.rule_id));
 };

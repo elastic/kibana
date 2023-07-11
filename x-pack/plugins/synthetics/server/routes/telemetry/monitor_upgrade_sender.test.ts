@@ -17,13 +17,10 @@ import {
 } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
-import type { TelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/sender';
-import { createMockTelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/__mocks__';
+import type { TelemetryEventsSender } from '../../telemetry/sender';
+import { createMockTelemetryEventsSender } from '../../telemetry/__mocks__';
 
-import {
-  MONITOR_UPDATE_CHANNEL,
-  MONITOR_CURRENT_CHANNEL,
-} from '../../legacy_uptime/lib/telemetry/constants';
+import { MONITOR_UPDATE_CHANNEL, MONITOR_CURRENT_CHANNEL } from '../../telemetry/constants';
 
 import {
   formatTelemetryEvent,
@@ -117,7 +114,6 @@ describe('monitor upgrade telemetry helpers', () => {
     [ConfigKey.MONITOR_SOURCE_TYPE, SourceType.PROJECT, 'project', false, false],
     [ConfigKey.SOURCE_INLINE, 'test', 'recorder', true, true],
     [ConfigKey.SOURCE_INLINE, 'test', 'inline', false, true],
-    [ConfigKey.SOURCE_ZIP_URL, 'test', 'zip', false, false],
   ])(
     'handles formatting scriptType for browser monitors',
     (config, value, scriptType, isRecorder, isInlineScript) => {

@@ -76,10 +76,13 @@ describe('getClustersFromAggs', () => {
       {
         meta: {
           lastUpdate: '123',
-          clusterName: 'cluster_name',
           clusterId: 'cluster_id',
-          benchmarkName: 'CIS Kubernetes',
-          benchmarkId: 'cis_k8s',
+          assetIdentifierId: 'cluster_id',
+          benchmark: { name: 'CIS Kubernetes', id: 'cis_k8s' },
+          cloud: undefined,
+          cluster: {
+            name: 'cluster_name',
+          },
         },
         stats: {
           totalFindings: 12,

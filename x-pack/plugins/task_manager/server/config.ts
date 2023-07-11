@@ -10,7 +10,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
-export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
@@ -18,8 +17,11 @@ export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 // ===================
 // Refresh aggregated monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
-export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
+export const DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW = 50;
 export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
+
+// At the default poll interval of 3sec, this averages over the last 15sec.
+export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -49,6 +51,12 @@ const eventLoopDelaySchema = schema.object({
   }),
 });
 
+const requeueInvalidTasksConfig = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  delay: schema.number({ defaultValue: 3000, min: 0 }),
+  max_attempts: schema.number({ defaultValue: 100, min: 1, max: 500 }),
+});
+
 export const configSchema = schema.object(
   {
     /* The maximum number of times a task will be attempted before being abandoned as failed */
@@ -60,11 +68,6 @@ export const configSchema = schema.object(
     poll_interval: schema.number({
       defaultValue: DEFAULT_POLL_INTERVAL,
       min: 100,
-    }),
-    /* How many poll interval cycles can work take before it's timed out. */
-    max_poll_inactivity_cycles: schema.number({
-      defaultValue: DEFAULT_MAX_POLL_INACTIVITY_CYCLES,
-      min: 1,
     }),
     /* How many requests can Task Manager buffer before it rejects new requests. */
     request_capacity: schema.number({
@@ -98,7 +101,7 @@ export const configSchema = schema.object(
     }),
     /* The size of the running average window for monitored stats. */
     monitored_stats_running_average_window: schema.number({
-      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW,
+      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW,
       max: 100,
       min: 10,
     }),
@@ -130,10 +133,18 @@ export const configSchema = schema.object(
       }),
     }),
     event_loop_delay: eventLoopDelaySchema,
+    worker_utilization_running_average_window: schema.number({
+      defaultValue: DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW,
+      max: 100,
+      min: 1,
+    }),
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
+    requeue_invalid_tasks: requeueInvalidTasksConfig,
+    allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
   },
   {
     validate: (config) => {
@@ -148,6 +159,7 @@ export const configSchema = schema.object(
   }
 );
 
+export type RequeueInvalidTasksConfig = TypeOf<typeof requeueInvalidTasksConfig>;
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

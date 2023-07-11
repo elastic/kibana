@@ -17,8 +17,7 @@ import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { isPromise } from '@kbn/std';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
@@ -43,13 +42,12 @@ import { ViewMode } from '../types';
 import { EmbeddablePanelError } from './embeddable_panel_error';
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
-import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
+import { CustomizePanelAction } from './panel_header/panel_actions/customize_panel/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from '../actions';
-import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
-import { EmbeddableStateTransfer, isSelfStyledEmbeddable } from '..';
+import { EmbeddableStateTransfer, isSelfStyledEmbeddable, CommonlyUsedRange } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -85,6 +83,8 @@ interface Props {
   getActions?: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
+  dateFormat?: string;
+  commonlyUsedRanges?: CommonlyUsedRange[];
   overlays?: CoreStart['overlays'];
   notifications?: CoreStart['notifications'];
   application?: CoreStart['application'];
@@ -121,7 +121,7 @@ interface InspectorPanelAction {
 }
 
 interface BasePanelActions {
-  customizePanelTitle: CustomizePanelTitleAction;
+  customizePanel: CustomizePanelAction;
   addPanel: AddPanelAction;
   inspectPanel: InspectPanelAction;
   removePanel: RemovePanelAction;
@@ -157,16 +157,22 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshBadges() {
-    if (!this.mounted) {
-      return;
-    }
     if (this.props.showBadges === false) {
       return;
     }
-    let badges =
-      (await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
+
+    type BadgeAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
+
+    let badges: BadgeAction[] =
+      ((await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
         embeddable: this.props.embeddable,
-      })) ?? [];
+      })) as BadgeAction[]) ?? [];
+
+    if (!this.mounted) {
+      return;
+    }
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -181,16 +187,22 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshNotifications() {
-    if (!this.mounted) {
-      return;
-    }
     if (this.props.showNotifications === false) {
       return;
     }
-    let notifications =
-      (await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
+
+    type NotificationAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
+
+    let notifications: NotificationAction[] =
+      ((await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
         embeddable: this.props.embeddable,
-      })) ?? [];
+      })) as NotificationAction[]) ?? [];
+
+    if (!this.mounted) {
+      return;
+    }
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -271,6 +283,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.state.error) contentAttrs['data-error'] = true;
 
     const title = this.props.embeddable.getTitle();
+    const description = this.props.embeddable.getDescription();
     const headerId = this.generateId();
 
     const selfStyledOptions = isSelfStyledEmbeddable(this.props.embeddable)
@@ -292,13 +305,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             getActionContextMenuPanel={this.getActionContextMenuPanel}
             hidePanelTitle={this.state.hidePanelTitle || !!selfStyledOptions?.hideTitle}
             isViewMode={viewOnlyMode}
-            customizeTitle={
-              'customizePanelTitle' in this.state.universalActions
-                ? this.state.universalActions.customizePanelTitle
+            customizePanel={
+              'customizePanel' in this.state.universalActions
+                ? this.state.universalActions.customizePanel
                 : undefined
             }
             closeContextMenu={this.state.closeContextMenu}
             title={title}
+            description={description}
             index={this.props.index}
             badges={this.state.badges}
             notifications={this.state.notifications}
@@ -341,20 +355,28 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.subscription.add(
       this.props.embeddable.getOutput$().subscribe(
         (output: EmbeddableOutput) => {
-          this.setState({
-            error: output.error,
-            loading: output.loading,
-          });
+          if (this.mounted) {
+            this.setState({
+              error: output.error,
+              loading: output.loading,
+            });
+          }
         },
         (error) => {
-          this.setState({ error });
+          if (this.mounted) {
+            this.setState({ error });
+          }
         }
       )
     );
 
     const node = this.props.embeddable.render(this.embeddableRoot.current) ?? undefined;
     if (isPromise(node)) {
-      node.then((resolved) => this.setState({ node: resolved }));
+      node.then((resolved) => {
+        if (this.mounted) {
+          this.setState({ node: resolved });
+        }
+      });
     } else {
       this.setState({ node });
     }
@@ -387,34 +409,16 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     ) {
       return actions;
     }
-    const createGetUserData = (overlays: OverlayStart, theme: ThemeServiceStart) =>
-      async function getUserData(context: { embeddable: IEmbeddable }) {
-        return new Promise<{ title: string | undefined; hideTitle?: boolean }>((resolve) => {
-          const session = overlays.openModal(
-            toMountPoint(
-              <CustomizePanelModal
-                embeddable={context.embeddable}
-                updateTitle={(title, hideTitle) => {
-                  session.close();
-                  resolve({ title, hideTitle });
-                }}
-                cancel={() => session.close()}
-              />,
-              { theme$: theme.theme$ }
-            ),
-            {
-              'data-test-subj': 'customizePanel',
-            }
-          );
-        });
-      };
 
     // Universal actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.
     return {
       ...actions,
-      customizePanelTitle: new CustomizePanelTitleAction(
-        createGetUserData(this.props.overlays, this.props.theme)
+      customizePanel: new CustomizePanelAction(
+        this.props.overlays,
+        this.props.theme,
+        this.props.commonlyUsedRanges,
+        this.props.dateFormat
       ),
       addPanel: new AddPanelAction(
         this.props.getEmbeddableFactory,

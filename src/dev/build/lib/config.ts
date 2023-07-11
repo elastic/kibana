@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { dirname, resolve, relative } from 'path';
+import Path from 'path';
 import os from 'os';
-import loadJsonFile from 'load-json-file';
+
+import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
+import {
+  Package,
+  getPackages,
+  PluginSelector,
+  PluginPackage,
+  getPluginPackagesFilter,
+} from '@kbn/repo-packages';
 
 import { getVersionInfo, VersionInfo } from './version_info';
 import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
@@ -19,62 +27,67 @@ interface Options {
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
+  dockerNamespace: string | null;
+  dockerTag: string | null;
   dockerTagQualifier: string | null;
   dockerPush: boolean;
-}
-
-interface Package {
-  version: string;
-  engines: { node: string };
-  workspaces: {
-    packages: string[];
-  };
-  [key: string]: unknown;
+  withExamplePlugins: boolean;
+  withTestPlugins: boolean;
+  downloadFreshNode: boolean;
 }
 
 export class Config {
-  static async create({
-    isRelease,
-    targetAllPlatforms,
-    versionQualifier,
-    dockerContextUseLocalArtifact,
-    dockerCrossCompile,
-    dockerTagQualifier,
-    dockerPush,
-  }: Options) {
-    const pkgPath = resolve(__dirname, '../../../../package.json');
-    const pkg: Package = loadJsonFile.sync(pkgPath);
+  static async create(opts: Options) {
+    const nodeVersion = kibanaPackageJson.engines?.node;
+    if (!nodeVersion) {
+      throw new Error('missing node version in package.json');
+    }
 
     return new Config(
-      targetAllPlatforms,
-      pkg,
-      pkg.engines.node,
-      dirname(pkgPath),
+      opts.targetAllPlatforms,
+      kibanaPackageJson,
+      nodeVersion,
+      REPO_ROOT,
       await getVersionInfo({
-        isRelease,
-        versionQualifier,
-        pkg,
+        isRelease: opts.isRelease,
+        versionQualifier: opts.versionQualifier,
+        pkg: kibanaPackageJson,
       }),
-      dockerContextUseLocalArtifact,
-      dockerCrossCompile,
-      dockerTagQualifier,
-      dockerPush,
-      isRelease
+      opts.dockerContextUseLocalArtifact,
+      opts.dockerCrossCompile,
+      opts.dockerNamespace,
+      opts.dockerTag,
+      opts.dockerTagQualifier,
+      opts.dockerPush,
+      opts.isRelease,
+      opts.downloadFreshNode,
+      {
+        examples: opts.withExamplePlugins,
+        testPlugins: opts.withTestPlugins,
+      }
     );
   }
 
+  private readonly pluginFilter: (pkg: Package) => pkg is PluginPackage;
+
   constructor(
     private readonly targetAllPlatforms: boolean,
-    private readonly pkg: Package,
+    private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
     private readonly dockerContextUseLocalArtifact: boolean | null,
     private readonly dockerCrossCompile: boolean,
+    private readonly dockerNamespace: string | null,
+    private readonly dockerTag: string | null,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
-    public readonly isRelease: boolean
-  ) {}
+    public readonly isRelease: boolean,
+    public readonly downloadFreshNode: boolean,
+    public readonly pluginSelector: PluginSelector
+  ) {
+    this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
+  }
 
   /**
    * Get Kibana's parsed package.json file
@@ -93,6 +106,13 @@ export class Config {
   /**
    * Get the docker tag qualifier
    */
+  getDockerTag() {
+    return this.dockerTag;
+  }
+
+  /**
+   * Get the docker tag qualifier
+   */
   getDockerTagQualfiier() {
     return this.dockerTagQualifier;
   }
@@ -102,6 +122,13 @@ export class Config {
    */
   getDockerPush() {
     return this.dockerPush;
+  }
+
+  /**
+   * Get docker repository namespace
+   */
+  getDockerNamespace() {
+    return this.dockerNamespace;
   }
 
   /**
@@ -122,14 +149,14 @@ export class Config {
    * Convert an absolute path to a relative path, based from the repo
    */
   getRepoRelativePath(absolutePath: string) {
-    return relative(this.repoRoot, absolutePath);
+    return Path.relative(this.repoRoot, absolutePath);
   }
 
   /**
    * Resolve a set of relative paths based from the directory of the Kibana repo
    */
   resolveFromRepo(...subPaths: string[]) {
-    return resolve(this.repoRoot, ...subPaths);
+    return Path.resolve(this.repoRoot, ...subPaths);
   }
 
   /**
@@ -202,9 +229,28 @@ export class Config {
   }
 
   /**
+   * Get the ISO 8601 date for this build
+   */
+  getBuildDate() {
+    return this.versionInfo.buildDate;
+  }
+
+  /**
    * Resolve a set of paths based from the target directory for this build.
    */
   resolveFromTarget(...subPaths: string[]) {
-    return resolve(this.repoRoot, 'target', ...subPaths);
+    return Path.resolve(this.repoRoot, 'target', ...subPaths);
+  }
+
+  getDistPackagesFromRepo() {
+    return getPackages(this.repoRoot).filter(
+      (p) =>
+        (this.pluginSelector.testPlugins || !p.isDevOnly()) &&
+        (!p.isPlugin() || this.pluginFilter(p))
+    );
+  }
+
+  getDistPluginsFromRepo() {
+    return getPackages(this.repoRoot).filter(this.pluginFilter);
   }
 }

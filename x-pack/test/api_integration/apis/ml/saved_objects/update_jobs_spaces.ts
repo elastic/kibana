@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -34,9 +34,9 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/api/ml/saved_objects/update_jobs_spaces`)
+      .post(`/internal/ml/saved_objects/update_jobs_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
@@ -70,8 +70,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should assign AD job to space for user with access to that space', async () => {
-      await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [defaultSpaceId]);
       const jobType = 'anomaly-detector';
+      await ml.api.assertJobSpaces(adJobId, jobType, [defaultSpaceId]);
       const body = await runRequest(
         {
           jobType,
@@ -88,8 +88,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should assign DFA job to space for user with access to that space', async () => {
-      await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', [defaultSpaceId]);
       const jobType = 'data-frame-analytics';
+      await ml.api.assertJobSpaces(dfaJobId, jobType, [defaultSpaceId]);
       const body = await runRequest(
         {
           jobType,
@@ -106,8 +106,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail to update AD job spaces for space the user has no access to', async () => {
-      await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [defaultSpaceId]);
       const jobType = 'anomaly-detector';
+      await ml.api.assertJobSpaces(adJobId, jobType, [defaultSpaceId]);
       const body = await runRequest(
         {
           jobType,
@@ -124,8 +124,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail to update DFA job spaces for space the user has no access to', async () => {
-      await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', [defaultSpaceId]);
       const jobType = 'data-frame-analytics';
+      await ml.api.assertJobSpaces(dfaJobId, jobType, [defaultSpaceId]);
       const body = await runRequest(
         {
           jobType,

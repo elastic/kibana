@@ -5,18 +5,54 @@
  * 2.0.
  */
 
-import type { LogViewStatus } from '../../../../../common/log_views';
+import { TimeRange } from '@kbn/es-query';
+import type { LogViewStatus } from '@kbn/logs-shared-plugin/common';
 import type {
   LogViewContextWithError,
   LogViewContextWithResolvedLogView,
   LogViewNotificationEvent,
-} from '../../../log_view_state';
+} from '@kbn/logs-shared-plugin/public';
+import { TimeKey } from '../../../../../common/time';
+import {
+  JumpToTargetPositionEvent,
+  LogStreamPositionContext,
+  ReportVisiblePositionsEvent,
+  VisiblePositions,
+} from '../../../log_stream_position_state';
+import { LogStreamPositionNotificationEvent } from '../../../log_stream_position_state/src/notifications';
+import {
+  LogStreamQueryContextWithTime,
+  ParsedQuery,
+  UpdateRefreshIntervalEvent,
+  UpdateTimeRangeEvent,
+} from '../../../log_stream_query_state';
+import { LogStreamQueryNotificationEvent } from '../../../log_stream_query_state/src/notifications';
+
+export interface ReceivedInitialQueryParametersEvent {
+  type: 'RECEIVED_INITIAL_QUERY_PARAMETERS';
+  validatedQuery: ParsedQuery;
+  timeRange: LogStreamPageContextWithTime['timeRange'];
+  refreshInterval: LogStreamPageContextWithTime['refreshInterval'];
+  timestamps: LogStreamPageContextWithTime['timestamps'];
+}
+
+export interface ReceivedInitialPositionParametersEvent {
+  type: 'RECEIVED_INITIAL_POSITION_PARAMETERS';
+  targetPosition: LogStreamPageContextWithPositions['targetPosition'];
+  latestPosition: LogStreamPageContextWithPositions['latestPosition'];
+  visiblePositions: LogStreamPageContextWithPositions['visiblePositions'];
+}
 
 export type LogStreamPageEvent =
   | LogViewNotificationEvent
-  | {
-      type: 'RECEIVED_ALL_PARAMETERS';
-    };
+  | LogStreamQueryNotificationEvent
+  | LogStreamPositionNotificationEvent
+  | ReceivedInitialQueryParametersEvent
+  | ReceivedInitialPositionParametersEvent
+  | JumpToTargetPositionEvent
+  | ReportVisiblePositionsEvent
+  | UpdateTimeRangeEvent
+  | UpdateRefreshIntervalEvent;
 
 export interface LogStreamPageContextWithLogView {
   logViewStatus: LogViewStatus;
@@ -26,6 +62,13 @@ export interface LogStreamPageContextWithLogView {
 export interface LogStreamPageContextWithLogViewError {
   logViewError: LogViewContextWithError['error'];
 }
+
+export interface LogStreamPageContextWithQuery {
+  parsedQuery: ParsedQuery;
+}
+
+export type LogStreamPageContextWithTime = LogStreamQueryContextWithTime;
+export type LogStreamPageContextWithPositions = LogStreamPositionContext;
 
 export type LogStreamPageTypestate =
   | {
@@ -45,9 +88,29 @@ export type LogStreamPageTypestate =
       context: LogStreamPageContextWithLogView;
     }
   | {
+      value: { hasLogViewIndices: 'uninitialized' };
+      context: LogStreamPageContextWithLogView;
+    }
+  | {
+      value: { hasLogViewIndices: 'initialized' };
+      context: LogStreamPageContextWithLogView &
+        LogStreamPageContextWithQuery &
+        LogStreamPageContextWithTime &
+        LogStreamPageContextWithPositions;
+    }
+  | {
       value: 'missingLogViewIndices';
       context: LogStreamPageContextWithLogView;
     };
 
 export type LogStreamPageStateValue = LogStreamPageTypestate['value'];
 export type LogStreamPageContext = LogStreamPageTypestate['context'];
+
+export interface LogStreamPageCallbacks {
+  updateTimeRange: (timeRange: Partial<TimeRange>) => void;
+  jumpToTargetPosition: (targetPosition: TimeKey | null) => void;
+  jumpToTargetPositionTime: (time: number) => void;
+  reportVisiblePositions: (visiblePositions: VisiblePositions) => void;
+  startLiveStreaming: () => void;
+  stopLiveStreaming: () => void;
+}

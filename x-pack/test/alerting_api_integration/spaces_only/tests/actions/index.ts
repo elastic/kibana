@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { buildUp, tearDown } from '..';
+import { buildUp, tearDown } from '../helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
@@ -24,6 +24,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./enqueue'));
     loadTestFile(require.resolve('./connector_types/stack/email'));
+    loadTestFile(require.resolve('./connector_types/stack/email_html'));
     loadTestFile(require.resolve('./connector_types/stack/es_index'));
     loadTestFile(require.resolve('./connector_types/stack/webhook'));
     loadTestFile(require.resolve('./connector_types/stack/preconfigured_alert_history_connector'));

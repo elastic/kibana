@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = (_, options = {}) => ({
+module.exports = () => ({
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
@@ -46,8 +46,6 @@ module.exports = (_, options = {}) => ({
             version: '^7.12.5',
           },
         ],
-
-        [require.resolve('@kbn/babel-plugin-synthetic-packages'), options],
       ],
     },
 

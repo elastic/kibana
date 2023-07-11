@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { CSSObject, css } from '@emotion/react';
 import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
-import { Teletype } from '../../../common/types/process_tree';
+import type { Teletype } from '../../../common';
 
 export const useStyles = (tty?: Teletype, show?: boolean) => {
   const { euiTheme, euiVars } = useEuiTheme();
@@ -26,12 +26,6 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       height: '100%',
       overflow: 'hidden',
       zIndex: 10,
-      '.euiRangeLevel--warning': {
-        backgroundColor: transparentize(colors.warning, 0.8),
-      },
-      '.euiRangeLevel--danger': {
-        backgroundColor: transparentize(colors.danger, 0.8),
-      },
       '.euiRangeTick,.euiRangeLevel': {
         transition: 'left 500ms',
       },

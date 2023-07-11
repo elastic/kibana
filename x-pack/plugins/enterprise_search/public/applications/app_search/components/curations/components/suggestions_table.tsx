@@ -44,7 +44,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
         {query}
         {curation.override_manual_curation && (
           <>
-            <EuiBadge iconType="alert" color="warning" className="suggestionsTableBadge">
+            <EuiBadge iconType="warning" color="warning" className="suggestionsTableBadge">
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.curations.suggestionsTable.overridesLabel',
                 { defaultMessage: 'Overrides' }

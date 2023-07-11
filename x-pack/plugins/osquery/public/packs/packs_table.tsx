@@ -14,7 +14,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -42,8 +42,8 @@ const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string })
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
 
-const renderName = (_: unknown, item: { id: string; attributes: { name: string } }) => (
-  <ScheduledQueryName id={item.id} name={item.attributes.name} />
+const renderName = (_: unknown, item: PackSavedObject) => (
+  <ScheduledQueryName id={item.saved_object_id} name={item.name} />
 );
 
 export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?: string[] }) => {
@@ -101,10 +101,7 @@ const PacksTableComponent = () => {
   const renderUpdatedAt = useCallback((updatedAt, item) => {
     if (!updatedAt) return '-';
 
-    const updatedBy =
-      item.attributes.updated_by !== item.attributes.created_by
-        ? ` @ ${item.attributes.updated_by}`
-        : '';
+    const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
@@ -119,7 +116,7 @@ const PacksTableComponent = () => {
     (item) => () =>
       push('/live_queries/new', {
         form: {
-          packId: item.id,
+          packId: item.saved_object_id,
         },
       }),
     [push]
@@ -130,7 +127,7 @@ const PacksTableComponent = () => {
       const playText = i18n.translate('xpack.osquery.packs.table.runActionAriaLabel', {
         defaultMessage: 'Run {packName}',
         values: {
-          packName: item.attributes.name,
+          packName: item.name,
         },
       });
 
@@ -146,11 +143,11 @@ const PacksTableComponent = () => {
   const columns: Array<EuiBasicTableColumn<PackSavedObject>> = useMemo(
     () => [
       {
-        field: 'attributes.name',
+        field: 'name',
         name: i18n.translate('xpack.osquery.packs.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        sortable: (item) => item.attributes.name.toLowerCase(),
+        sortable: (item) => item.name.toLowerCase(),
         render: renderName,
       },
       {
@@ -162,7 +159,7 @@ const PacksTableComponent = () => {
         render: renderAgentPolicy,
       },
       {
-        field: 'attributes.queries',
+        field: 'queries',
         name: i18n.translate('xpack.osquery.packs.table.numberOfQueriesColumnTitle', {
           defaultMessage: 'Number of queries',
         }),
@@ -170,7 +167,7 @@ const PacksTableComponent = () => {
         width: '150px',
       },
       {
-        field: 'attributes.created_by',
+        field: 'created_by',
         name: i18n.translate('xpack.osquery.packs.table.createdByColumnTitle', {
           defaultMessage: 'Created by',
         }),
@@ -178,14 +175,14 @@ const PacksTableComponent = () => {
         truncateText: true,
       },
       {
-        field: 'attributes.updated_at',
+        field: 'updated_at',
         name: 'Last updated',
         sortable: (item) => (item.updated_at ? Date.parse(item.updated_at) : 0),
         truncateText: true,
         render: renderUpdatedAt,
       },
       {
-        field: 'attributes.enabled',
+        field: 'enabled',
         name: i18n.translate('xpack.osquery.packs.table.activeColumnTitle', {
           defaultMessage: 'Active',
         }),
@@ -221,7 +218,7 @@ const PacksTableComponent = () => {
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'attributes.name',
+        field: 'name',
         direction: 'asc' as const,
       },
     }),
@@ -229,7 +226,7 @@ const PacksTableComponent = () => {
   );
 
   if (isLoading) {
-    return <EuiLoadingContent lines={10} />;
+    return <EuiSkeletonText lines={10} />;
   }
 
   return (

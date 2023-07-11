@@ -35,21 +35,21 @@ const moduleDescription = i18n.translate(
   }
 );
 
-const getJobIds = (spaceId: string, sourceId: string) =>
+const getJobIds = (spaceId: string, logViewId: string) =>
   logEntryRateJobTypes.reduce(
     (accumulatedJobIds, jobType) => ({
       ...accumulatedJobIds,
-      [jobType]: getJobId(spaceId, sourceId, jobType),
+      [jobType]: getJobId(spaceId, logViewId, jobType),
     }),
     {} as Record<LogEntryRateJobType, string>
   );
 
-const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
+const getJobSummary = async (spaceId: string, logViewId: string, fetch: HttpHandler) => {
   const response = await callJobsSummaryAPI(
-    { spaceId, sourceId, jobTypes: logEntryRateJobTypes },
+    { spaceId, logViewId, jobTypes: logEntryRateJobTypes },
     fetch
   );
-  const jobIds = Object.values(getJobIds(spaceId, sourceId));
+  const jobIds = Object.values(getJobIds(spaceId, logViewId));
 
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
@@ -122,8 +122,8 @@ const setUpModule = async (
   );
 };
 
-const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryRateJobTypes, fetch);
+const cleanUpModule = async (spaceId: string, logViewId: string, fetch: HttpHandler) => {
+  return await cleanUpJobsAndDatafeeds(spaceId, logViewId, logEntryRateJobTypes, fetch);
 };
 
 const validateSetupIndices = async (

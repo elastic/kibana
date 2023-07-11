@@ -17,12 +17,19 @@ export interface GetMlModelsStatsResponse {
 }
 
 export const getMLModelsStats = async () => {
-  return await HttpLogic.values.http.get<GetMlModelsStatsResponse>('/api/ml/trained_models/_stats');
+  return await HttpLogic.values.http.get<GetMlModelsStatsResponse>(
+    '/internal/ml/trained_models/_stats',
+    { version: '1' }
+  );
 };
 
 export const MLModelsStatsApiLogic = createApiLogic(
   ['ml_models_stats_api_logic'],
-  getMLModelsStats
+  getMLModelsStats,
+  {
+    clearFlashMessagesOnMakeRequest: false,
+    showErrorFlash: false,
+  }
 );
 
 export type MLModelsStatsApiLogicActions = Actions<GetMlModelsStatsArgs, GetMlModelsStatsResponse>;

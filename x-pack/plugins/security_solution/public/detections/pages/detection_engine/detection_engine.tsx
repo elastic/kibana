@@ -8,29 +8,33 @@
 // No bueno, I know! Encountered when reverting RBAC work post initial BCs
 // Don't want to include large amounts of refactor in this temporary workaround
 // TODO: Refactor code - component can be broken apart
-/* eslint-disable complexity */
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiWindowEvent,
   EuiHorizontalRule,
+  EuiFlexItem,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-
 import { isTab } from '@kbn/timelines-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
-import { FILTER_OPEN, TableId } from '../../../../common/types';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
-import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
+import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -41,7 +45,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
 import { useUserData } from '../../components/user_info';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
@@ -71,11 +74,16 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
-import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-
+import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
+import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
+import { AlertsTableComponent } from '../../components/alerts_table';
+import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -88,8 +96,8 @@ const StyledFullHeightContainer = styled.div`
 type DetectionEngineComponentProps = PropsFromRedux;
 
 const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
-  clearEventsDeleted,
   clearEventsLoading,
+  clearEventsDeleted,
 }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -97,12 +105,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
   );
-  const updatedAt = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
-  );
-  const isAlertsLoading = useShallowEqualSelector(
+
+  const isTableLoading = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
   );
+
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -119,14 +126,29 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
-      hasIndexWrite = false,
-      hasIndexMaintenance = false,
       canUserREAD,
       hasIndexRead,
+      hasIndexWrite,
+      hasIndexMaintenance,
     },
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+
+  const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
+
+  // when arePageFiltersEnabled === false
+  const [statusFilter, setStatusFilter] = useState<Status[]>([]);
+
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
+  );
+
+  // when arePageFiltersEnabled === true
+  const [detectionPageFilters, setDetectionPageFilters] = useState<Filter[]>();
+  const [detectionPageFilterHandler, setDetectionPageFilterHandler] = useState<
+    FilterGroupHandler | undefined
+  >();
 
   const {
     indexPattern,
@@ -135,35 +157,59 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
-  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
+
+  const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+    TableId.alertsOnAlertsPage
+  );
+
   const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
     data,
   } = useKibana().services;
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   const { filterManager } = data.query;
 
+  const topLevelFilters = useMemo(() => {
+    return [
+      ...filters,
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+    ];
+  }, [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
+
+  const alertPageFilters = useMemo(() => {
+    if (arePageFiltersEnabled) {
+      return detectionPageFilters;
+    }
+    return buildAlertStatusFilter(statusFilter[0] ?? 'open');
+  }, [statusFilter, detectionPageFilters, arePageFiltersEnabled]);
+
+  useEffect(() => {
+    if (!detectionPageFilterHandler) return;
+    // if Alert is reloaded because of action by the user.
+    // We want reload the values in the detection Page filters
+    if (!isTableLoading) detectionPageFilterHandler.reload();
+  }, [isTableLoading, detectionPageFilterHandler]);
+
   const addFilter = useCallback(
-    ({ field, value }: { field: string; value: string | number }) => {
+    ({ field, value, negate }: AddFilterProps) => {
       filterManager.addFilters([
         {
           meta: {
             alias: null,
             disabled: false,
-            negate: false,
+            negate: negate ?? false,
           },
-          query: { match_phrase: { [field]: value } },
+          ...(value != null
+            ? { query: { match_phrase: { [field]: value } } }
+            : { exists: { field } }),
         },
       ]);
     },
     [filterManager]
   );
-
-  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -190,25 +236,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [formatUrl, navigateToUrl]
   );
 
-  // Callback for when open/closed filter changes
-  const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: Status) => {
-      const timelineId = TableId.alertsOnAlertsPage;
-      clearEventsLoading({ id: timelineId });
-      clearEventsDeleted({ id: timelineId });
-      setFilterGroup(newFilterGroup);
-    },
-    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
-  );
-
-  const alertsHistogramDefaultFilters = useMemo(
-    () => [
-      ...filters,
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildAlertStatusFilter(filterGroup),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-    ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+  const alertsDefaultFilters = useMemo(
+    () => [...topLevelFilters, ...(alertPageFilters ?? [])],
+    [topLevelFilters, alertPageFilters]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -216,22 +246,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     () => [
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...(alertPageFilters ?? []),
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
-  );
-
-  const onShowBuildingBlockAlertsChangedCallback = useCallback(
-    (newShowBuildingBlockAlerts: boolean) => {
-      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
-    },
-    [setShowBuildingBlockAlerts]
-  );
-
-  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
-    (newShowOnlyThreatIndicatorAlerts: boolean) => {
-      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
-    },
-    [setShowOnlyThreatIndicatorAlerts]
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
   );
 
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
@@ -256,6 +273,123 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       }
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
+  const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
+    setDetectionPageFilters(newFilters);
+    if (newFilters.length) {
+      const newStatusFilter = newFilters.find(
+        (filter) => filter.meta.key === 'kibana.alert.workflow_status'
+      );
+      if (newStatusFilter) {
+        const status: Status[] = newStatusFilter.meta.params
+          ? (newStatusFilter.meta.params as Status[])
+          : [newStatusFilter.query?.match_phrase['kibana.alert.workflow_status']];
+        setStatusFilter(status);
+      } else {
+        setStatusFilter([]);
+      }
+    }
+  }, []);
+
+  // Callback for when open/closed filter changes
+  const onFilterGroupChangedCallback = useCallback(
+    (newFilterGroup: Status) => {
+      const timelineId = TableId.alertsOnAlertsPage;
+      clearEventsLoading({ id: timelineId });
+      clearEventsDeleted({ id: timelineId });
+      setStatusFilter([newFilterGroup]);
+    },
+    [clearEventsLoading, clearEventsDeleted, setStatusFilter]
+  );
+
+  const areDetectionPageFiltersLoading = useMemo(() => {
+    if (arePageFiltersEnabled) {
+      return !Array.isArray(detectionPageFilters);
+    }
+    return false;
+  }, [detectionPageFilters, arePageFiltersEnabled]);
+
+  const isAlertTableLoading = useMemo(
+    () => loading || areDetectionPageFiltersLoading,
+    [loading, areDetectionPageFiltersLoading]
+  );
+
+  const isChartPanelLoading = useMemo(
+    () => isLoadingIndexPattern || areDetectionPageFiltersLoading,
+    [isLoadingIndexPattern, areDetectionPageFiltersLoading]
+  );
+
+  const showUpdating = useMemo(
+    () => isAlertTableLoading || loading,
+    [isAlertTableLoading, loading]
+  );
+
+  const AlertPageFilters = useMemo(
+    () =>
+      !arePageFiltersEnabled ? (
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <AlertsTableFilterGroup
+              status={statusFilter[0] ?? 'open'}
+              onFilterGroupChanged={onFilterGroupChangedCallback}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                {updatedAt &&
+                  timelinesUi.getLastUpdated({
+                    updatedAt: updatedAt || Date.now(),
+                    showUpdating,
+                  })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <DetectionPageFilterSet
+          onFilterChange={pageFiltersUpdateHandler}
+          filters={topLevelFilters}
+          query={query}
+          timeRange={{
+            from,
+            to,
+            mode: 'absolute',
+          }}
+          chainingSystem={'HIERARCHICAL'}
+          onInit={setDetectionPageFilterHandler}
+        />
+      ),
+    [
+      topLevelFilters,
+      arePageFiltersEnabled,
+      statusFilter,
+      onFilterGroupChangedCallback,
+      pageFiltersUpdateHandler,
+      showUpdating,
+      from,
+      query,
+      timelinesUi,
+      to,
+      updatedAt,
+    ]
+  );
+
+  const renderAlertTable = useCallback(
+    (groupingFilters: Filter[]) => {
+      return (
+        <AlertsTableComponent
+          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
+          flyoutSize="m"
+          inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
+          tableId={TableId.alertsOnAlertsPage}
+          isLoading={isAlertTableLoading}
+        />
+      );
+    },
+    [alertsTableDefaultFilters, isAlertTableLoading]
   );
 
   if (loading) {
@@ -324,54 +458,35 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   {i18n.BUTTON_MANAGE_RULES}
                 </SecuritySolutionLinkButton>
               </HeaderPage>
-              <EuiHorizontalRule margin="m" />
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <AlertsTableFilterGroup
-                    status={filterGroup}
-                    onFilterGroupChanged={onFilterGroupChangedCallback}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="none">
-                    <EuiFlexItem grow={false}>
-                      {updatedAt &&
-                        timelinesUi.getLastUpdated({
-                          updatedAt: updatedAt || Date.now(),
-                          showUpdating,
-                        })}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="l" />
+              {AlertPageFilters}
+              <EuiSpacer size="l" />
               <ChartPanels
                 addFilter={addFilter}
-                alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
-                isLoadingIndexPattern={isLoadingIndexPattern}
+                alertsDefaultFilters={alertsDefaultFilters}
+                isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
                 runtimeMappings={runtimeMappings}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
-
               <EuiSpacer size="l" />
             </Display>
-            <AlertsTable
-              tableId={TableId.alertsOnAlertsPage}
-              loading={loading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              from={from}
+            <GroupedAlertsTable
+              currentAlertStatusFilterValue={statusFilter}
               defaultFilters={alertsTableDefaultFilters}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
+              from={from}
+              globalFilters={filters}
+              globalQuery={query}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
+              hasIndexWrite={hasIndexWrite ?? false}
+              loading={isAlertTableLoading}
+              renderChildComponent={renderAlertTable}
+              runtimeMappings={runtimeMappings}
+              signalIndexName={signalIndexName}
+              tableId={TableId.alertsOnAlertsPage}
               to={to}
-              filterGroup={filterGroup}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

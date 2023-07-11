@@ -76,6 +76,7 @@ export const NotificationsIndicator: FC = () => {
             <EuiHealth
               css={{ display: 'block' }}
               color="primary"
+              role="img"
               aria-label={i18n.translate('xpack.ml.notificationsIndicator.unreadIcon', {
                 defaultMessage: 'Unread notifications indicator.',
               })}

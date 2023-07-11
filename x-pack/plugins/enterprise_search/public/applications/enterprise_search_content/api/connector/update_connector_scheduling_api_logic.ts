@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import { ConnectorScheduling } from '../../../../../common/types/connectors';
+import { i18n } from '@kbn/i18n';
+
+import { SchedulingConfiguraton } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface UpdateConnectorSchedulingArgs {
   connectorId: string;
-  scheduling: ConnectorScheduling;
+  scheduling: SchedulingConfiguraton;
 }
 
 export const updateConnectorScheduling = async ({
   connectorId,
-  scheduling: { enabled, interval },
+  scheduling,
 }: UpdateConnectorSchedulingArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/scheduling`;
 
   await HttpLogic.values.http.post<undefined>(route, {
-    body: JSON.stringify({ enabled, interval }),
+    body: JSON.stringify(scheduling),
   });
-  return { enabled, interval };
+  return scheduling;
 };
 
 export const UpdateConnectorSchedulingApiLogic = createApiLogic(
   ['content', 'update_connector_scheduling_api_logic'],
-  updateConnectorScheduling
+  updateConnectorScheduling,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.scheduling.successToast.title',
+        { defaultMessage: 'Scheduling successfully updated' }
+      ),
+  }
 );

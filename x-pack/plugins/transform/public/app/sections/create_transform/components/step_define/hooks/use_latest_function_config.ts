@@ -8,7 +8,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { AggConfigs, FieldParamType } from '@kbn/data-plugin/common';
+import type { AggConfigs, FieldParamType } from '@kbn/data-plugin/common';
+import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
 import { StepDefineFormProps } from '../step_define_form';
 import { StepDefineExposedState } from '../common';
@@ -51,14 +52,25 @@ function getOptions(
   const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
 
   const runtimeFieldsOptions = runtimeMappings
-    ? Object.keys(runtimeMappings).map((k) => ({ label: k, value: k }))
+    ? Object.entries(runtimeMappings).map(([fieldName, fieldMapping]) => ({
+        label: fieldName,
+        value: fieldName,
+        field: {
+          id: fieldName,
+          type: fieldMapping.type,
+        },
+      }))
     : [];
 
   const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredDataViewFields
-    .filter((v) => !ignoreFieldNames.has(v.name))
+    .filter((v) => !ignoreFieldNames.has(v.name) && !isCounterTimeSeriesMetric(v))
     .map((v) => ({
       label: v.displayName,
       value: v.name,
+      field: {
+        id: v.name,
+        type: Array.isArray(v.esTypes) && v.esTypes?.length > 0 ? v.esTypes[0] : 'keyword',
+      },
     }));
 
   const runtimeFieldsSortOptions: Array<EuiComboBoxOptionOption<string>> = runtimeMappings
@@ -67,6 +79,10 @@ function getOptions(
         .map(([fieldName, fieldMapping]) => ({
           label: fieldName,
           value: fieldName,
+          field: {
+            id: fieldName,
+            type: fieldMapping.type,
+          },
         }))
     : [];
 
@@ -76,6 +92,10 @@ function getOptions(
     .map((v) => ({
       label: v.displayName,
       value: v.name,
+      field: {
+        id: v.name,
+        type: Array.isArray(v.esTypes) && v.esTypes?.length > 0 ? v.esTypes[0] : 'keyword',
+      },
     }));
 
   const sortByLabel = (a: EuiComboBoxOptionOption<string>, b: EuiComboBoxOptionOption<string>) =>

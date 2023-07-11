@@ -12,33 +12,17 @@ import {
   ALERTS_AS_DATA_FIND_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getSignalStatus, createSignalsIndex, deleteSignalsIndex } from '../../utils';
+import { getSignalStatus, createSignalsIndex, deleteAllAlerts } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
-      it('should not give errors when querying and the signals index does not exist yet', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSignalStatus())
-          .expect(200);
-
-        // remove any server generated items that are indeterministic
-        delete body.took;
-
-        expect(body).to.eql({
-          timed_out: false,
-          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
-        });
-      });
-
       // This fails and should be investigated or removed if it no longer applies
       it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
         await createSignalsIndex(supertest, log);
@@ -60,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
 
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
       });
     });
 
@@ -71,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
       });
 
       it('should be able to filter old signals on host.os.name.caseless using runtime field', async () => {
@@ -114,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
       });
 
       it('should be able to filter using a runtime field defined in the request', async () => {
@@ -144,23 +128,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('find_alerts_route', () => {
       describe('validation checks', () => {
-        it('should not give errors when querying and the signals index does not exist yet', async () => {
-          const { body } = await supertest
-            .post(ALERTS_AS_DATA_FIND_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ...getSignalStatus(), index: '.siem-signals-default' })
-            .expect(200);
-
-          // remove any server generated items that are indeterministic
-          delete body.took;
-
-          expect(body).to.eql({
-            timed_out: false,
-            _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-            hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
-          });
-        });
-
         // This fails and should be investigated or removed if it no longer applies
         it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
           await createSignalsIndex(supertest, log);
@@ -182,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
 
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
         });
 
         it('should not give errors when executing security solution histogram aggs', async () => {
@@ -247,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
         });
       });
     });

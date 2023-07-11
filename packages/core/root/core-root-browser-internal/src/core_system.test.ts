@@ -42,6 +42,8 @@ import {
   MockLoggingSystem,
   LoggingSystemConstructor,
   MockSettingsService,
+  MockCustomBrandingService,
+  CustomBrandingServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -142,6 +144,7 @@ describe('constructor', () => {
     expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
     expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
+    expect(CustomBrandingServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -274,6 +277,11 @@ describe('#setup()', () => {
     expect(MockSettingsService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls customBranding#setup()', async () => {
+    await setupCore();
+    expect(MockCustomBrandingService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls fatalErrors#setup()', async () => {
     await setupCore();
     expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
@@ -302,6 +310,11 @@ describe('#setup()', () => {
   it('calls theme#setup()', async () => {
     await setupCore();
     expect(MockThemeService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls chrome#setup()', async () => {
+    await setupCore();
+    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -422,6 +435,11 @@ describe('#start()', () => {
   it('calls settings#start()', async () => {
     await startCore();
     expect(MockSettingsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls customBranding#start()', async () => {
+    await startCore();
+    expect(MockCustomBrandingService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls i18n#start()', async () => {

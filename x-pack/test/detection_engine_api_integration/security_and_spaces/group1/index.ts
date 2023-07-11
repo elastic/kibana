@@ -17,7 +17,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./aliases'));
     loadTestFile(require.resolve('./add_actions'));
     loadTestFile(require.resolve('./update_actions'));
-    loadTestFile(require.resolve('./add_prepackaged_rules'));
     loadTestFile(require.resolve('./check_privileges'));
     loadTestFile(require.resolve('./create_index'));
     loadTestFile(require.resolve('./create_rules'));
@@ -30,6 +29,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./find_rules'));
     loadTestFile(require.resolve('./find_rule_exception_references'));
-    loadTestFile(require.resolve('./get_prepackaged_rules_status'));
+    loadTestFile(require.resolve('./get_rule_management_filters'));
   });
 };

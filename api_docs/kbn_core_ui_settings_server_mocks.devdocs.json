@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-ui-settings-server-mocks",
-        "id": "def-server.uiSettingsServiceMock",
+        "id": "def-common.uiSettingsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "uiSettingsServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-server-mocks",
-            "id": "def-server.uiSettingsServiceMock.createPrebootContract",
+            "id": "def-common.uiSettingsServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -46,7 +54,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-mocks",
-            "id": "def-server.uiSettingsServiceMock.createSetupContract",
+            "id": "def-common.uiSettingsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -55,9 +63,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceSetup",
+                "section": "def-common.UiSettingsServiceSetup",
                 "text": "UiSettingsServiceSetup"
               },
               ">"
@@ -70,7 +78,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-mocks",
-            "id": "def-server.uiSettingsServiceMock.createStartContract",
+            "id": "def-common.uiSettingsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -79,9 +87,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceStart",
+                "section": "def-common.UiSettingsServiceStart",
                 "text": "UiSettingsServiceStart"
               },
               ">"
@@ -94,7 +102,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-mocks",
-            "id": "def-server.uiSettingsServiceMock.createClient",
+            "id": "def-common.uiSettingsServiceMock.createClient",
             "type": "Function",
             "tags": [],
             "label": "createClient",
@@ -103,9 +111,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
+                "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">"
@@ -118,7 +126,7 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-server-mocks",
-            "id": "def-server.uiSettingsServiceMock.create",
+            "id": "def-common.uiSettingsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -136,13 +144,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

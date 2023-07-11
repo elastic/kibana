@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useRef, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
@@ -16,7 +17,8 @@ import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validat
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { useDataSource } from '../../../../../contexts/ml';
+import { DetailsStepTimeField } from './details_step_time_field';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 
@@ -36,6 +38,9 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks, notifications },
   } = useMlKibana();
+
+  const { selectedDataView } = useDataSource();
+
   const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;
   const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
@@ -51,6 +56,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdInvalidMaxLength,
     jobIdValid,
     resultsField,
+    timeFieldName,
   } = form;
 
   const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
@@ -60,6 +66,41 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     (cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined) ||
       (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
   );
+  const [dataViewAvailableTimeFields, setDataViewAvailableTimeFields] = useState<string[]>([]);
+
+  const onTimeFieldChanged = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value;
+      // If the value is an empty string, it's not a valid selection
+      if (value === '') {
+        return;
+      }
+      // Find the time field based on the selected value
+      // this is to account for undefined when user chooses not to use a date field
+      const timeField = dataViewAvailableTimeFields.find((col) => col === value);
+
+      setFormState({ timeFieldName: timeField });
+    },
+    [dataViewAvailableTimeFields, setFormState]
+  );
+
+  useEffect(() => {
+    // Default timeFieldName to the source data view's time field if it exists
+    if (selectedDataView !== undefined) {
+      setFormState({ timeFieldName: selectedDataView.timeFieldName });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Get possible timefields for the results data view
+    if (selectedDataView !== undefined) {
+      const timefields = selectedDataView.fields
+        .filter((f) => f.type === 'date')
+        .map((f) => f.name);
+      setDataViewAvailableTimeFields(timefields);
+    }
+  }, [selectedDataView, setFormState]);
 
   const forceInput = useRef<HTMLInputElement | null>(null);
 
@@ -297,7 +338,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           disabled={isJobCreated}
           name="mlDataFrameAnalyticsUseResultsFieldDefault"
           label={i18n.translate('xpack.ml.dataframe.analytics.create.UseResultsFieldDefaultLabel', {
-            defaultMessage: 'Use results field default value "{defaultValue}"',
+            defaultMessage: 'Use results field default value: "{defaultValue}"',
             values: { defaultValue: DEFAULT_RESULTS_FIELD },
           })}
           checked={useResultsFieldDefault === true}
@@ -318,12 +359,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldHelpText', {
             defaultMessage:
-              'Defines the name of the field in which to store the results of the analysis. Defaults to ml.',
+              'Define the name of the field in which to store the results of the analysis. Defaults to ml.',
           })}
         >
           <EuiFieldText
             disabled={isJobCreated}
-            placeholder="results field"
+            placeholder="Results field"
             value={resultsField}
             onChange={(e) => setFormState({ resultsField: e.target.value })}
             aria-label={i18n.translate(
@@ -337,6 +378,13 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       )}
+      {destinationIndexNameValid && dataViewAvailableTimeFields.length > 0 ? (
+        <DetailsStepTimeField
+          dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+          dataViewTimeField={timeFieldName}
+          onTimeFieldChanged={onTimeFieldChanged}
+        />
+      ) : null}
       <EuiSpacer />
       <ContinueButton
         isDisabled={isStepInvalid}

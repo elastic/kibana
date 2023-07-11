@@ -52,15 +52,12 @@ describe('addConnector lib function', () => {
           ],
         },
       },
-      refresh: true,
       script: {
         lang: 'painless',
-        source: `
-      ctx._source['status'] = '${SyncStatus.CANCELED}';
-      ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
-      ctx._source['canceled_at'] = '${new Date(Date.now()).toISOString()}';
-      ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';
-`,
+        source: `ctx._source['status'] = '${SyncStatus.CANCELED}';
+ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
+ctx._source['canceled_at'] = '${new Date(Date.now()).toISOString()}';
+ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';`,
       },
     });
     expect(mockClient.asCurrentUser.updateByQuery).toHaveBeenCalledWith({
@@ -81,20 +78,16 @@ describe('addConnector lib function', () => {
           ],
         },
       },
-      refresh: true,
       script: {
         lang: 'painless',
-        source: `
-        ctx._source['status'] = '${SyncStatus.CANCELING}'
-        ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
-`,
+        source: `ctx._source['status'] = '${SyncStatus.CANCELING}';
+ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';`,
       },
     });
     await expect(mockClient.asCurrentUser.update).toHaveBeenCalledWith({
       doc: { last_sync_status: SyncStatus.CANCELED, sync_now: false },
       id: 'connectorId',
       index: CONNECTORS_INDEX,
-      refresh: true,
     });
   });
 });

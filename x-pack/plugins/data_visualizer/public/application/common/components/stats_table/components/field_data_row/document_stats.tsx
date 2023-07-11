@@ -9,10 +9,10 @@ import { EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { isIndexBasedFieldVisConfig } from '../../../../../../../common/types/field_vis_config';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { roundToDecimalPlace } from '../../../utils';
 
 interface Props extends FieldDataRowProps {
   showIcon?: boolean;

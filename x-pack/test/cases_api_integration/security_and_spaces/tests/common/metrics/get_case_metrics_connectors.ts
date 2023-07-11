@@ -16,7 +16,7 @@ import {
   deleteAllCaseItems,
   getCaseMetrics,
   updateCase,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -125,7 +125,10 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: theCase.id,
                 version: patchedCases[0].version,
-                connector: { ...jiraConnector, fields: { ...jiraConnector.fields, urgency: '1' } },
+                connector: {
+                  ...jiraConnector,
+                  fields: { ...jiraConnector.fields, issueType: 'Bug' },
+                },
               },
             ],
           },

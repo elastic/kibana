@@ -4,32 +4,80 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CreateMlInferencePipelineParameters } from '../../../../../common/types/pipelines';
+import { FieldMapping } from '../../../../../common/ml_inference_pipeline';
+
+import {
+  CreateMlInferencePipelineParameters,
+  CreateMLInferencePipelineDefinition,
+  MlInferencePipeline,
+  InferencePipelineInferenceConfig,
+} from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export interface CreateMlInferencePipelineApiLogicArgs {
+interface CreateMlInferencePipelineApiLogicArgsWithPipelineParameters {
   destinationField?: string;
   indexName: string;
+  inferenceConfig?: InferencePipelineInferenceConfig;
   modelId: string;
   pipelineName: string;
   sourceField: string;
 }
 
+interface CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition {
+  fieldMappings: FieldMapping[];
+  indexName: string;
+  pipelineDefinition: MlInferencePipeline;
+  pipelineName: string;
+}
+
+export type CreateMlInferencePipelineApiLogicArgs =
+  | CreateMlInferencePipelineApiLogicArgsWithPipelineParameters
+  | CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition;
+
 export interface CreateMlInferencePipelineResponse {
   created: string;
 }
+
+const isArgsWithPipelineParameters = (
+  args: CreateMlInferencePipelineApiLogicArgs
+): args is CreateMlInferencePipelineApiLogicArgsWithPipelineParameters => {
+  return (
+    typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineParameters).modelId ===
+    'string'
+  );
+};
+
+const isArgsWithPipelineDefinition = (
+  args: CreateMlInferencePipelineApiLogicArgs
+): args is CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition => {
+  return (
+    typeof (args as CreateMlInferencePipelineApiLogicArgsWithPipelineDefinition)
+      .pipelineDefinition === 'object'
+  );
+};
 
 export const createMlInferencePipeline = async (
   args: CreateMlInferencePipelineApiLogicArgs
 ): Promise<CreateMlInferencePipelineResponse> => {
   const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors`;
-  const params: CreateMlInferencePipelineParameters = {
-    destination_field: args.destinationField,
-    model_id: args.modelId,
-    pipeline_name: args.pipelineName,
-    source_field: args.sourceField,
-  };
+  let params: CreateMlInferencePipelineParameters | CreateMLInferencePipelineDefinition | undefined;
+  if (isArgsWithPipelineParameters(args)) {
+    params = {
+      destination_field: args.destinationField,
+      inference_config: args.inferenceConfig,
+      model_id: args.modelId,
+      pipeline_definition: undefined,
+      pipeline_name: args.pipelineName,
+      source_field: args.sourceField,
+    };
+  } else if (isArgsWithPipelineDefinition(args)) {
+    params = {
+      field_mappings: args.fieldMappings,
+      pipeline_definition: args.pipelineDefinition,
+      pipeline_name: args.pipelineName,
+    };
+  }
   return await HttpLogic.values.http.post<CreateMlInferencePipelineResponse>(route, {
     body: JSON.stringify(params),
   });

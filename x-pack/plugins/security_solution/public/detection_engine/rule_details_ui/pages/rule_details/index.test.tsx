@@ -64,6 +64,9 @@ jest.mock('../../../../common/containers/sourcerer', () => {
       .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
   };
 });
+
+jest.mock('../../../../common/hooks/use_data_table_filters');
+
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -83,6 +86,11 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+// RuleDetailsSnoozeSettings is an isolated component and not essential for existing tests
+jest.mock('../../../rule_management/components/rule_snooze_badge', () => ({
+  RuleSnoozeBadge: () => <></>,
+}));
+
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -91,6 +99,7 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: () => ({
       services: {
+        ...originalModule.useKibana().services,
         storage: {
           get: jest.fn().mockReturnValue(true),
         },
@@ -108,7 +117,102 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         data: {
           dataViews: {
-            getIdsWithTitle: () => [],
+            getIdsWithTitle: async () =>
+              Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
+            create: async ({ title }: { title: string }) =>
+              Promise.resolve({
+                id: 'myfakeid',
+                matchedIndices: ['hello', 'world', 'refreshed'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => title,
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
+              }),
+            get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+              Promise.resolve({
+                id: dataViewId,
+                matchedIndices: refreshFields
+                  ? ['hello', 'world', 'refreshed']
+                  : ['hello', 'world'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => 'hello*,world*,refreshed*',
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
+              }),
           },
           search: {
             search: () => ({
@@ -181,14 +285,12 @@ describe('RuleDetailsPageComponent', () => {
     (fillEmptySeverityMappings as jest.Mock).mockReturnValue([]);
   });
 
-  async function setup() {
+  beforeEach(() => {
     mockRedirectLegacyUrl.mockReset();
     mockGetLegacyUrlConflict.mockReset();
-  }
+  });
 
   it('renders correctly with no outcome property on rule', async () => {
-    await setup();
-
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
@@ -204,7 +306,6 @@ describe('RuleDetailsPageComponent', () => {
   });
 
   it('renders correctly with outcome === "exactMatch"', async () => {
-    await setup();
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,
@@ -228,7 +329,6 @@ describe('RuleDetailsPageComponent', () => {
   });
 
   it('renders correctly with outcome === "aliasMatch"', async () => {
-    await setup();
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,
@@ -255,7 +355,6 @@ describe('RuleDetailsPageComponent', () => {
   });
 
   it('renders correctly when outcome = conflict', async () => {
-    await setup();
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,
@@ -288,7 +387,6 @@ describe('RuleDetailsPageComponent', () => {
   });
 
   it('renders exceptions tab', async () => {
-    await setup();
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,
@@ -316,8 +414,7 @@ describe('RuleDetailsPageComponent', () => {
     });
   });
 
-  it('renders endpoint exeptions tab when rule includes endpoint list', async () => {
-    await setup();
+  it('renders endpoint exceptions tab when rule includes endpoint list', async () => {
     (useRuleWithFallback as jest.Mock).mockReturnValue({
       error: null,
       loading: false,

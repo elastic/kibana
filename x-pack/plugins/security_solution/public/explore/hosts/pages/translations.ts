@@ -73,10 +73,3 @@ export const VIEW_DASHBOARD_BUTTON = i18n.translate(
     defaultMessage: 'View source dashboard',
   }
 );
-
-export const HOST_RISK_SCORE_OVER_TIME = i18n.translate(
-  'xpack.securitySolution.hosts.navigaton.hostScoreOverTimeTitle',
-  {
-    defaultMessage: 'Host risk score over time',
-  }
-);

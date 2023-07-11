@@ -29,7 +29,7 @@ import {
 } from './formatters';
 import {
   formatTrainedModelsManagementUrl,
-  formatTrainedModelsNodesManagementUrl,
+  formatMemoryUsageUrl,
 } from './formatters/trained_models';
 
 export type { MlLocatorParams, MlLocator };
@@ -74,13 +74,14 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.TRAINED_MODELS_MANAGE:
         path = formatTrainedModelsManagementUrl('', params.pageState);
         break;
-      case ML_PAGES.TRAINED_MODELS_NODES:
-        path = formatTrainedModelsNodesManagementUrl('', params.pageState);
+      case ML_PAGES.MEMORY_USAGE:
+        path = formatMemoryUsageUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED:
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS:
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
@@ -98,7 +99,6 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
       case ML_PAGES.CALENDARS_NEW:
-      case ML_PAGES.ACCESS_DENIED:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;
       case ML_PAGES.FILTER_LISTS_EDIT:

@@ -9,11 +9,15 @@
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import {
+  withSuspense,
+  LazyLabsFlyout,
+  getContextProvider as getPresentationUtilContextProvider,
+} from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { withSuspense, LazyLabsFlyout } from '@kbn/presentation-util-plugin/public';
 
+import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -21,14 +25,16 @@ import {
   unsavedChangesBadgeStrings,
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
+import { useDashboardAPI } from '../dashboard_app';
+import { DashboardEmbedSettings } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../types';
+import { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
 
+import './_dashboard_top_nav.scss';
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
@@ -64,35 +70,27 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
-  /**
-   * Unpack dashboard state from redux
-   */
-  const {
-    useEmbeddableDispatch,
-    actions: { setSavedQueryId },
-    useEmbeddableSelector: select,
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+  const dashboard = useDashboardAPI();
+  const PresentationUtilContextProvider = getPresentationUtilContextProvider();
 
-  const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
-  const fullScreenMode = select((state) => state.componentState.fullScreenMode);
-  const savedQueryId = select((state) => state.componentState.savedQueryId);
-  const lastSavedId = select((state) => state.componentState.lastSavedId);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const query = select((state) => state.explicitInput.query);
-  const title = select((state) => state.explicitInput.title);
+  const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
+  const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
+  const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
+  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const query = dashboard.select((state) => state.explicitInput.query);
+  const title = dashboard.select((state) => state.explicitInput.title);
 
   // store data views in state & subscribe to dashboard data view changes.
-  const [allDataViews, setAllDataViews] = useState<DataView[]>(
-    dashboardContainer.getAllDataViews()
-  );
+  const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
   useEffect(() => {
-    const subscription = dashboardContainer.onDataViewsUpdate$.subscribe((dataViews) =>
+    setAllDataViews(dashboard.getAllDataViews());
+    const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
       setAllDataViews(dataViews)
     );
     return () => subscription.unsubscribe();
-  }, [dashboardContainer]);
+  }, [dashboard]);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -147,10 +145,23 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         },
       },
       {
-        text: dashboardTitle,
+        text:
+          viewMode === ViewMode.EDIT ? (
+            <>
+              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+            </>
+          ) : (
+            dashboardTitle
+          ),
+        onClick:
+          viewMode === ViewMode.EDIT
+            ? () => {
+                dashboard.showSettings();
+              }
+            : undefined,
       },
     ]);
-  }, [setBreadcrumbs, redirectTo, dashboardTitle]);
+  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
@@ -181,10 +192,9 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     setIsLabsShown,
   });
 
-  const getNavBarProps = (): TopNavMenuProps => {
+  const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
       (forceShow || isChromeVisible) && !fullScreenMode;
-
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide && (filterManager.getFilters().length > 0 || !fullScreenMode);
 
@@ -196,64 +206,79 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
-    const topNavConfig = viewMode === ViewMode.EDIT ? editModeTopNavConfig : viewModeTopNavConfig;
-
-    const badges =
-      hasUnsavedChanges && viewMode === ViewMode.EDIT
-        ? [
-            {
-              'data-test-subj': 'dashboardUnsavedChangesBadge',
-              badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
-              color: 'success',
-            },
-          ]
-        : undefined;
 
     return {
-      query,
-      badges,
-      savedQueryId,
+      showTopNavMenu,
       showSearchBar,
       showFilterBar,
-      showSaveQuery,
       showQueryInput,
       showDatePicker,
-      screenTitle: title,
-      useDefaultBehaviors: true,
-      appName: LEGACY_DASHBOARD_APP_ID,
-      visible: viewMode !== ViewMode.PRINT,
-      indexPatterns: allDataViews,
-      config: showTopNavMenu ? topNavConfig : undefined,
-      setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
-      className: fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
-      onQuerySubmit: (_payload, isUpdate) => {
-        if (isUpdate === false) {
-          dashboardContainer.forceRefresh();
-        }
-      },
-      onSavedQueryIdChange: (newId: string | undefined) => {
-        dispatch(setSavedQueryId(newId));
-      },
     };
-  };
+  }, [embedSettings, filterManager, fullScreenMode, isChromeVisible, viewMode]);
 
   UseUnmount(() => {
-    dashboardContainer.clearOverlays();
+    dashboard.clearOverlays();
   });
 
   return (
-    <>
+    <div className="dashboardTopNav">
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
         ref={dashboardTitleRef}
         tabIndex={-1}
       >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
-      <TopNavMenu {...getNavBarProps()} />
+      <TopNavMenu
+        {...visibilityProps}
+        query={query}
+        screenTitle={title}
+        useDefaultBehaviors={true}
+        indexPatterns={allDataViews}
+        savedQueryId={savedQueryId}
+        showSaveQuery={showSaveQuery}
+        appName={LEGACY_DASHBOARD_APP_ID}
+        visible={viewMode !== ViewMode.PRINT}
+        setMenuMountPoint={embedSettings || fullScreenMode ? undefined : setHeaderActionMenu}
+        className={fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined}
+        config={
+          visibilityProps.showTopNavMenu
+            ? viewMode === ViewMode.EDIT
+              ? editModeTopNavConfig
+              : viewModeTopNavConfig
+            : undefined
+        }
+        badges={
+          hasUnsavedChanges && viewMode === ViewMode.EDIT
+            ? [
+                {
+                  'data-test-subj': 'dashboardUnsavedChangesBadge',
+                  badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
+                  title: '',
+                  color: 'warning',
+                  toolTipProps: {
+                    content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
+                    position: 'bottom',
+                  } as EuiToolTipProps,
+                },
+              ]
+            : undefined
+        }
+        onQuerySubmit={(_payload, isUpdate) => {
+          if (isUpdate === false) {
+            dashboard.forceRefresh();
+          }
+        }}
+        onSavedQueryIdChange={(newId: string | undefined) =>
+          dashboard.dispatch.setSavedQueryId(newId)
+        }
+      />
       {viewMode !== ViewMode.PRINT && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        <PresentationUtilContextProvider>
+          <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
-    </>
+      <EuiHorizontalRule margin="none" />
+    </div>
   );
 }

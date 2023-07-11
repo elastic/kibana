@@ -7,8 +7,7 @@
       "exclude_interim": "__flag__",
       "start": "",
       "end": "",
-      "allow_no_match": "__flag__",
-      "allow_no_jobs": "__flag__"
+      "allow_no_match": "__flag__"
     },
     "methods": [
       "GET",

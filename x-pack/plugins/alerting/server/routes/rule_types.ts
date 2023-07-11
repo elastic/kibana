@@ -25,6 +25,8 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorizedConsumers,
       defaultScheduleInterval,
       doesSetRecoveryContext,
+      hasGetSummarizedAlerts,
+      hasFieldsForAAD,
       ...rest
     }) => ({
       ...rest,
@@ -39,6 +41,8 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       authorized_consumers: authorizedConsumers,
       default_schedule_interval: defaultScheduleInterval,
       does_set_recovery_context: doesSetRecoveryContext,
+      has_get_summarized_alerts: !!hasGetSummarizedAlerts,
+      has_fields_for_a_a_d: !!hasFieldsForAAD,
     })
   );
 };
@@ -55,7 +59,7 @@ export const ruleTypesRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const ruleTypes = Array.from(await rulesClient.listAlertTypes());
+        const ruleTypes = Array.from(await rulesClient.listRuleTypes());
         return res.ok({
           body: rewriteBodyRes(ruleTypes),
         });

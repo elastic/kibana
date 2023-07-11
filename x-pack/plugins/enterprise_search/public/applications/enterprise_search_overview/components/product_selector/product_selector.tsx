@@ -30,7 +30,7 @@ import {
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
-import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
@@ -56,12 +56,14 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
   const { config } = useValues(KibanaLogic);
 
   // If Enterprise Search hasn't been set up yet, show all products. Otherwise, only show products the user has access to
-  const shouldShowAppSearchCard = !config.host || hasAppSearchAccess;
-  const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
+  const shouldShowAppSearchCard = (!config.host && config.canDeployEntSearch) || hasAppSearchAccess;
+  const shouldShowWorkplaceSearchCard =
+    (!config.host && config.canDeployEntSearch) || hasWorkplaceSearchAccess;
 
   // If Enterprise Search has been set up and the user does not have access to either product, show a message saying they
   // need to contact an administrator to get access to one of the products.
-  const shouldShowEnterpriseSearchCards = shouldShowAppSearchCard || shouldShowWorkplaceSearchCard;
+  const shouldShowEnterpriseSearchCards =
+    shouldShowAppSearchCard || shouldShowWorkplaceSearchCard || !config.canDeployEntSearch;
 
   const WORKPLACE_SEARCH_URL = isWorkplaceSearchAdmin
     ? WORKPLACE_SEARCH_PLUGIN.URL
@@ -297,8 +299,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             />
           </EuiFlexItem>
         )}
+        {!config.host && config.canDeployEntSearch && (
+          <EuiFlexItem>
+            <SetupGuideCta />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-      {!config.host && <SetupGuideCta />}
     </>
   );
 

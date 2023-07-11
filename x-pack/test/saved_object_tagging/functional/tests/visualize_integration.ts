@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { TAGFILTER_DROPDOWN_SELECTOR } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -15,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
     'visualize',
@@ -24,26 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'header',
   ]);
-
-  /**
-   * Select tags in the searchbar's tag filter.
-   */
-  const selectFilterTags = async (...tagNames: string[]) => {
-    // open the filter dropdown
-    const filterButton = await find.byCssSelector(TAGFILTER_DROPDOWN_SELECTOR);
-    await filterButton.click();
-    // select the tags
-    for (const tagName of tagNames) {
-      await testSubjects.click(
-        `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(tagName)}`
-      );
-    }
-    // click elsewhere to close the filter dropdown
-    const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
-    await searchFilter.click();
-    // wait until the table refreshes
-    await listingTable.waitUntilTableIsLoaded();
-  };
 
   const selectSavedObjectTags = async (...tagNames: string[]) => {
     await testSubjects.click('savedObjectTagSelector');
@@ -83,7 +61,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('visualize integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/88639
+  describe.skip('visualize integration', () => {
     before(async () => {
       // clean up any left-over visualizations and tags from tests that didn't clean up after themselves
       await kibanaServer.savedObjects.clean({ types: ['tag', 'visualization'] });
@@ -116,23 +95,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await listingTable.searchForItemWithName('tag:(tag-1)', { escape: false });
         await listingTable.expectItemsCount('visualize', 2);
         const itemNames = await listingTable.getAllSelectableItemsNames();
-        expect(itemNames).to.eql(['Visualization 1 (tag-1)', 'Visualization 3 (tag-1 + tag-3)']);
+        expect(itemNames.sort()).to.eql([
+          'Visualization 1 (tag-1)',
+          'Visualization 3 (tag-1 + tag-3)',
+        ]);
       });
 
       it('allows to filter by selecting a tag in the filter menu', async () => {
-        await selectFilterTags('tag-1');
+        await listingTable.selectFilterTags('tag-1');
 
         await listingTable.expectItemsCount('visualize', 2);
         const itemNames = await listingTable.getAllSelectableItemsNames();
-        expect(itemNames).to.eql(['Visualization 1 (tag-1)', 'Visualization 3 (tag-1 + tag-3)']);
+        expect(itemNames.sort()).to.eql([
+          'Visualization 1 (tag-1)',
+          'Visualization 3 (tag-1 + tag-3)',
+        ]);
       });
 
       it('allows to filter by multiple tags', async () => {
-        await selectFilterTags('tag-2', 'tag-3');
+        await listingTable.selectFilterTags('tag-2', 'tag-3');
 
         await listingTable.expectItemsCount('visualize', 2);
         const itemNames = await listingTable.getAllSelectableItemsNames();
-        expect(itemNames).to.eql(['Visualization 2 (tag-2)', 'Visualization 3 (tag-1 + tag-3)']);
+        expect(itemNames.sort()).to.eql([
+          'Visualization 2 (tag-2)',
+          'Visualization 3 (tag-1 + tag-3)',
+        ]);
       });
     });
 
@@ -153,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('myextratag');
+        await listingTable.selectFilterTags('myextratag');
         const itemNames = await listingTable.getAllSelectableItemsNames();
         expect(itemNames).to.contain('My new markdown viz');
       });
@@ -197,7 +185,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('my-new-tag');
+        await listingTable.selectFilterTags('my-new-tag');
         const itemNames = await listingTable.getAllSelectableItemsNames();
         expect(itemNames).to.contain('vis-with-new-tag');
       });
@@ -232,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('myextratag');
+        await listingTable.selectFilterTags('myextratag');
         const itemNames = await listingTable.getAllSelectableItemsNames();
         expect(itemNames).to.contain('MarkdownViz');
       });

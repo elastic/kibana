@@ -1,0 +1,166 @@
+{
+  "id": "@kbn/alerts-ui-shared",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.AlertLifecycleStatusBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertLifecycleStatusBadge",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "common",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-common.AlertLifecycleStatusBadgeProps",
+            "text": "AlertLifecycleStatusBadgeProps"
+          },
+          "> & { readonly type: (props: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "common",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-common.AlertLifecycleStatusBadgeProps",
+            "text": "AlertLifecycleStatusBadgeProps"
+          },
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.AlertLifecycleStatusBadge.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.MaintenanceWindowCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "MaintenanceWindowCallout",
+        "description": [],
+        "signature": [
+          "({\n  kibanaServices,\n}: { kibanaServices: ",
+          "KibanaServices",
+          "; }) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.MaintenanceWindowCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  kibanaServices,\n}",
+            "description": [],
+            "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-common.MaintenanceWindowCallout.$1.kibanaServices",
+                "type": "Object",
+                "tags": [],
+                "label": "kibanaServices",
+                "description": [],
+                "signature": [
+                  "KibanaServices"
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.AlertLifecycleStatusBadgeProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertLifecycleStatusBadgeProps",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.AlertLifecycleStatusBadgeProps.alertStatus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertStatus",
+            "description": [],
+            "signature": [
+              "\"recovered\" | \"active\""
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.AlertLifecycleStatusBadgeProps.flapping",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flapping",
+            "description": [],
+            "signature": [
+              "string | boolean | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

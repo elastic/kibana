@@ -32,6 +32,10 @@ properties:
             properties:
               verification_mode:
                 type: string
+              certificate:
+                type: string
+              key:
+                type: string
               certificate_authorities:
                 type: array
                 items:
@@ -58,9 +62,13 @@ properties:
   agent:
     type: string
     nullable: true
-  download_source_id:
-    type: string
-    nullable: true
+  secret_references:
+    type: array
+    items: 
+      type: object
+      properties:
+        id: 
+          type: string
 required:
   - id
   - outputs

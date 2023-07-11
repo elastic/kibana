@@ -13,16 +13,21 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { NavigationSection } from '@kbn/observability-plugin/public';
-import { Location } from 'history';
+import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
+import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
+import { FlamegraphLocatorDefinition } from './locators/flamegraph_locator';
+import { StacktracesLocatorDefinition } from './locators/stacktraces_locator';
+import { TopNFunctionsLocatorDefinition } from './locators/topn_functions_locator';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
+
+export type ProfilingPluginSetup = ReturnType<ProfilingPlugin['setup']>;
+export type ProfilingPluginStart = void;
 
 export class ProfilingPlugin implements Plugin {
   public setup(coreSetup: CoreSetup, pluginsSetup: ProfilingPluginPublicSetupDeps) {
     // Register an application into the side navigation menu
-
     const links = [
       {
         id: 'stacktraces',
@@ -50,31 +55,34 @@ export class ProfilingPlugin implements Plugin {
     const kuerySubject = new BehaviorSubject<string>('');
 
     const section$ = combineLatest([from(coreSetup.getStartServices()), kuerySubject]).pipe(
-      map(([_, kuery]) => {
-        const sections: NavigationSection[] = [
-          {
-            // TODO: add beta badge to section label, needs support in Observability plugin
-            label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
-              defaultMessage: 'Universal Profiling',
-            }),
-            entries: links.map((link) => {
-              return {
-                app: 'profiling',
-                label: link.title,
-                path: `${link.path}?kuery=${kuery ?? ''}`,
-                matchPath: (path) => {
-                  return path.startsWith(link.path);
-                },
-              };
-            }),
-            sortKey: 700,
-          },
-        ];
-        return sections;
+      map(([[coreStart], kuery]) => {
+        if (coreStart.application.capabilities.profiling.show) {
+          const sections: NavigationSection[] = [
+            {
+              label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
+                defaultMessage: 'Universal Profiling',
+              }),
+              isBetaFeature: true,
+              entries: links.map((link) => {
+                return {
+                  app: 'profiling',
+                  label: link.title,
+                  path: `${link.path}?kuery=${kuery ?? ''}`,
+                  matchPath: (path) => {
+                    return path.startsWith(link.path);
+                  },
+                };
+              }),
+              sortKey: 700,
+            },
+          ];
+          return sections;
+        }
+        return [];
       })
     );
 
-    pluginsSetup.observability.navigation.registerSections(section$);
+    pluginsSetup.observabilityShared.navigation.registerSections(section$);
 
     coreSetup.application.register({
       id: 'profiling',
@@ -83,7 +91,7 @@ export class ProfilingPlugin implements Plugin {
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
-      async mount({ element, history, theme$ }: AppMountParameters) {
+      async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
@@ -111,6 +119,7 @@ export class ProfilingPlugin implements Plugin {
             pluginsSetup,
             history,
             theme$,
+            setHeaderActionMenu,
           },
           element
         );
@@ -121,6 +130,27 @@ export class ProfilingPlugin implements Plugin {
         };
       },
     });
+
+    return {
+      locators: {
+        flamegraphLocator: pluginsSetup.share.url.locators.create(
+          new FlamegraphLocatorDefinition()
+        ),
+        topNFunctionsLocator: pluginsSetup.share.url.locators.create(
+          new TopNFunctionsLocatorDefinition()
+        ),
+        stacktracesLocator: pluginsSetup.share.url.locators.create(
+          new StacktracesLocatorDefinition()
+        ),
+      },
+      hasSetup: async () => {
+        const response = (await coreSetup.http.get('/internal/profiling/setup/es_resources')) as {
+          has_setup: boolean;
+          has_data: boolean;
+        };
+        return response.has_setup;
+      },
+    };
   }
 
   public start(core: CoreStart) {

@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'context',
     'dashboard',
+    'unifiedFieldList',
   ]);
   const find = getService('find');
   const security = getService('security');
@@ -64,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit(doc["bytes"].value.toString())`
       );
-      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
 
       const second = await PageObjects.discover.getCurrentDataViewId();
       expect(first).not.to.equal(second);
@@ -93,7 +94,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should support query and filtering', async () => {
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be('1');
@@ -130,18 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(prevDataViewId).not.to.equal(newDataViewId);
     });
 
-    it('should update data view id when saving data view from hoc one', async () => {
-      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
-
-      await testSubjects.click('shareTopNavButton');
-      await testSubjects.click('confirmModalConfirmButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
-
-      expect(prevDataViewId).not.to.equal(newDataViewId);
-    });
-
     it('search results should be different after data view update', async () => {
       await PageObjects.discover.createAdHocDataView('logst', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -152,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit(doc["bytes"].value.toString())`
       );
-      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
 
@@ -161,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // remove field and create with the same name, but different value
-      await PageObjects.discover.clickFieldListItemRemove('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
       await PageObjects.discover.removeField('_bytes-runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -170,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '_bytes-runtimefield',
         `emit((doc["bytes"].value * 2).toString())`
       );
-      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
 
       // save second search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield-updated', true);
@@ -241,10 +234,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.createAdHocDataView('logstas', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter('extension', 'is', 'jpg');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const first = await PageObjects.discover.getCurrentDataViewId();
@@ -264,12 +261,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const [firstToast, secondToast] = await toasts.getAllToastElements();
-      expect(await firstToast.getVisibleText()).to.equal(
-        `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`
-      );
 
-      expect(await secondToast.getVisibleText()).to.equal(
-        `Different index references\nData view id references in some of the applied filters differ from the current data view.`
+      expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(
+        [
+          `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`,
+          `Different index references\nData view id references in some of the applied filters differ from the current data view.`,
+        ].sort()
       );
     });
   });

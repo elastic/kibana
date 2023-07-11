@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
@@ -23,7 +23,6 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
   MapExtent,
@@ -53,7 +52,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      id: uuid(),
+      id: uuidv4(),
       urlTemplate: urlTemplate ? urlTemplate : '',
       layerName: layerName ? layerName : '',
       minSourceZoom:
@@ -91,12 +90,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return (
       <UpdateSourceEditor onChange={onChange} tooltipFields={this._tooltipFields} source={this} />
     );
-  }
-
-  getFieldNames(): string[] {
-    return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
-      return field.name;
-    });
   }
 
   addFeature(geometry: Geometry | Position[]): Promise<void> {
@@ -192,8 +185,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return null;
   }
 
-  getSyncMeta(): null {
-    return null;
+  getSyncMeta() {
+    return {
+      mvtFields: this._descriptor.fields.map((field: MVTFieldDescriptor) => {
+        return field.name;
+      }),
+    };
   }
 
   isBoundsAware() {
@@ -208,10 +205,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return [];
   }
 
-  async getTooltipProperties(
-    properties: GeoJsonProperties,
-    featureId?: string | number
-  ): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltips = [];
     for (const key in properties) {
       if (properties.hasOwnProperty(key)) {
@@ -236,16 +230,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return false;
   }
 
-  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
-    return {};
-  }
-
-  showJoinEditor(): boolean {
+  supportsJoins(): boolean {
     return false;
-  }
-
-  getJoinsDisabledReason(): string | null {
-    return null;
   }
 
   getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
@@ -253,8 +239,3 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return [];
   }
 }
-
-registerSource({
-  ConstructorFunction: MVTSingleLayerVectorSource,
-  type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-});

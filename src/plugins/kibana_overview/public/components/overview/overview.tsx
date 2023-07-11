@@ -62,8 +62,17 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
-  const { http, docLinks, dataViews, share, uiSettings, application, chrome, dataViewEditor } =
-    services;
+  const {
+    http,
+    docLinks,
+    dataViews,
+    share,
+    uiSettings,
+    application,
+    chrome,
+    dataViewEditor,
+    customBranding,
+  } = services;
   const addBasePath = http.basePath.prepend;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
@@ -177,6 +186,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         chrome,
         docLinks,
         http,
+        customBranding,
       },
       dataViews: {
         ...dataViews,

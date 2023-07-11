@@ -12,6 +12,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -24,12 +25,13 @@ import {
   ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  PreConfiguredAction,
+  InMemoryConnector,
   RawAction,
   ValidatorServices,
+  ActionTypeSecrets,
+  ActionTypeConfig,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
@@ -41,29 +43,29 @@ const Millis2Nanos = 1000 * 1000;
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
+  security?: SecurityPluginStart;
   getServices: GetServicesFunction;
-  getActionsClientWithRequest: (
-    request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export interface TaskInfo {
   scheduled: Date;
   attempts: number;
+  numSkippedRuns?: number;
 }
 
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
+  actionExecutionId: string;
   isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  actionInfo?: ActionInfo;
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
@@ -97,14 +99,15 @@ export class ActionExecutor {
     source,
     isEphemeral,
     taskInfo,
+    actionInfo: actionInfoFromTaskRunner,
     executionId,
     consumer,
     relatedSavedObjects,
+    actionExecutionId,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
-
     return withSpan(
       {
         name: `execute_action`,
@@ -114,39 +117,54 @@ export class ActionExecutor {
         },
       },
       async (span) => {
-        const {
-          spaces,
-          getServices,
-          encryptedSavedObjectsClient,
-          actionTypeRegistry,
-          eventLogger,
-          preconfiguredActions,
-          getActionsClientWithRequest,
-        } = this.actionExecutorContext!;
+        const { spaces, getServices, actionTypeRegistry, eventLogger, security } =
+          this.actionExecutorContext!;
 
         const services = getServices(request);
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const actionInfo = await getActionInfoInternal(
-          getActionsClientWithRequest,
-          request,
-          this.isESOCanEncrypt,
-          encryptedSavedObjectsClient,
-          preconfiguredActions,
-          actionId,
-          namespace.namespace,
-          source
-        );
+        const actionInfo =
+          actionInfoFromTaskRunner ||
+          (await this.getActionInfoInternal(actionId, request, namespace.namespace));
 
         const { actionTypeId, name, config, secrets } = actionInfo;
-        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
-        let { logger } = this.actionExecutorContext!;
-        logger = logger.get(loggerId);
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
         }
+
+        if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
+          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+        }
+        const actionType = actionTypeRegistry.get(actionTypeId);
+        const configurationUtilities = actionTypeRegistry.getUtils();
+
+        let validatedParams;
+        let validatedConfig;
+        let validatedSecrets;
+        try {
+          const validationResult = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+              taskInfo,
+            },
+            { configurationUtilities }
+          );
+          validatedParams = validationResult.validatedParams;
+          validatedConfig = validationResult.validatedConfig;
+          validatedSecrets = validationResult.validatedSecrets;
+        } catch (err) {
+          return err.result;
+        }
+
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        let { logger } = this.actionExecutorContext!;
+        logger = logger.get(loggerId);
 
         if (span) {
           span.name = `execute_action ${actionTypeId}`;
@@ -154,11 +172,6 @@ export class ActionExecutor {
             actions_connector_type_id: actionTypeId,
           });
         }
-
-        if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
-          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-        }
-        const actionType = actionTypeRegistry.get(actionTypeId);
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
@@ -189,6 +202,10 @@ export class ActionExecutor {
             },
           ],
           relatedSavedObjects,
+          name,
+          actionExecutionId,
+          isInMemory: this.actionInfo.isInMemory,
+          ...(source ? { source } : {}),
         });
 
         eventLogger.startTiming(event);
@@ -206,18 +223,6 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
-          const configurationUtilities = actionTypeRegistry.getUtils();
-          const { validatedParams, validatedConfig, validatedSecrets } = validateAction(
-            {
-              actionId,
-              actionType,
-              params,
-              config,
-              secrets,
-            },
-            { configurationUtilities }
-          );
-
           rawResult = await actionType.executor({
             actionId,
             services,
@@ -228,6 +233,7 @@ export class ActionExecutor {
             taskInfo,
             configurationUtilities,
             logger,
+            source,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
@@ -253,6 +259,39 @@ export class ActionExecutor {
         };
 
         event.event = event.event || {};
+
+        // start gen_ai extension
+        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
+        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
+          const data = result.data as unknown as {
+            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+          };
+          event.kibana = event.kibana || {};
+          event.kibana.action = event.kibana.action || {};
+          event.kibana = {
+            ...event.kibana,
+            action: {
+              ...event.kibana.action,
+              execution: {
+                ...event.kibana.action.execution,
+                gen_ai: {
+                  usage: {
+                    total_tokens: data.usage?.total_tokens,
+                    prompt_tokens: data.usage?.prompt_tokens,
+                    completion_tokens: data.usage?.completion_tokens,
+                  },
+                },
+              },
+            },
+          };
+        }
+        // end gen_ai extension
+
+        const currentUser = security?.authc.getCurrentUser(request);
+
+        event.user = event.user || {};
+        event.user.name = currentUser?.username;
+        event.user.id = currentUser?.profile_uid;
 
         if (result.status === 'ok') {
           span?.setOutcome('success');
@@ -297,8 +336,10 @@ export class ActionExecutor {
     executionId,
     taskInfo,
     consumer,
+    actionExecutionId,
   }: {
     actionId: string;
+    actionExecutionId: string;
     request: KibanaRequest;
     taskInfo?: TaskInfo;
     executionId?: string;
@@ -306,27 +347,12 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const {
-      spaces,
-      encryptedSavedObjectsClient,
-      preconfiguredActions,
-      eventLogger,
-      getActionsClientWithRequest,
-    } = this.actionExecutorContext!;
+    const { spaces, eventLogger } = this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
-      this.actionInfo = await getActionInfoInternal(
-        getActionsClientWithRequest,
-        request,
-        this.isESOCanEncrypt,
-        encryptedSavedObjectsClient,
-        preconfiguredActions,
-        actionId,
-        namespace.namespace,
-        source
-      );
+      this.actionInfo = await this.getActionInfoInternal(actionId, request, namespace.namespace);
     }
     const task = taskInfo
       ? {
@@ -357,72 +383,74 @@ export class ActionExecutor {
         },
       ],
       relatedSavedObjects,
+      actionExecutionId,
+      isInMemory: this.actionInfo.isInMemory,
+      ...(source ? { source } : {}),
     });
 
     eventLogger.logEvent(event);
   }
-}
 
-interface ActionInfo {
-  actionTypeId: string;
-  name: string;
-  config: unknown;
-  secrets: unknown;
-  actionId: string;
-}
-
-async function getActionInfoInternal<Source = unknown>(
-  getActionsClientWithRequest: (
+  public async getActionInfoInternal(
+    actionId: string,
     request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>,
-  request: KibanaRequest,
-  isESOCanEncrypt: boolean,
-  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  preconfiguredActions: PreConfiguredAction[],
-  actionId: string,
-  namespace: string | undefined,
-  source?: ActionExecutionSource<Source>
-): Promise<ActionInfo> {
-  // check to see if it's a pre-configured action first
-  const pcAction = preconfiguredActions.find(
-    (preconfiguredAction) => preconfiguredAction.id === actionId
-  );
-  if (pcAction) {
-    return {
-      actionTypeId: pcAction.actionTypeId,
-      name: pcAction.name,
-      config: pcAction.config,
-      secrets: pcAction.secrets,
+    namespace: string | undefined
+  ): Promise<ActionInfo> {
+    const { encryptedSavedObjectsClient, inMemoryConnectors } = this.actionExecutorContext!;
+
+    // check to see if it's in memory action first
+    const inMemoryAction = inMemoryConnectors.find(
+      (inMemoryConnector) => inMemoryConnector.id === actionId
+    );
+    if (inMemoryAction) {
+      return {
+        actionTypeId: inMemoryAction.actionTypeId,
+        name: inMemoryAction.name,
+        config: inMemoryAction.config,
+        secrets: inMemoryAction.secrets,
+        actionId,
+        isInMemory: true,
+        rawAction: { ...inMemoryAction, isMissingSecrets: false },
+      };
+    }
+
+    if (!this.isESOCanEncrypt) {
+      throw new Error(
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      );
+    }
+
+    const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+      'action',
       actionId,
+      {
+        namespace: namespace === 'default' ? undefined : namespace,
+      }
+    );
+
+    const {
+      attributes: { secrets, actionTypeId, config, name },
+    } = rawAction;
+
+    return {
+      actionTypeId,
+      name,
+      config,
+      secrets,
+      actionId,
+      rawAction: rawAction.attributes,
     };
   }
+}
 
-  if (!isESOCanEncrypt) {
-    throw new Error(
-      `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-    );
-  }
-
-  const actionsClient = await getActionsClientWithRequest(request, source);
-
-  // if not pre-configured action, should be a saved object
-  // ensure user can read the action before processing
-  const { actionTypeId, config, name } = await actionsClient.get({ id: actionId });
-
-  const {
-    attributes: { secrets },
-  } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
-    namespace: namespace === 'default' ? undefined : namespace,
-  });
-
-  return {
-    actionTypeId,
-    name,
-    config,
-    secrets,
-    actionId,
-  };
+export interface ActionInfo {
+  actionTypeId: string;
+  name: string;
+  config: ActionTypeConfig;
+  secrets: ActionTypeSecrets;
+  actionId: string;
+  isInMemory?: boolean;
+  rawAction: RawAction;
 }
 
 function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
@@ -445,12 +473,13 @@ interface ValidateActionOpts {
   actionId: string;
   actionType: ActionType;
   params: Record<string, unknown>;
-  config: unknown;
-  secrets: unknown;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
+  taskInfo?: TaskInfo;
 }
 
 function validateAction(
-  { actionId, actionType, params, config, secrets }: ValidateActionOpts,
+  { actionId, actionType, params, config, secrets, taskInfo }: ValidateActionOpts,
   validatorServices: ValidatorServices
 ) {
   let validatedParams: Record<string, unknown>;
@@ -474,7 +503,7 @@ function validateAction(
       actionId,
       status: 'error',
       message: err.message,
-      retry: false,
+      retry: !!taskInfo,
     });
   }
 }

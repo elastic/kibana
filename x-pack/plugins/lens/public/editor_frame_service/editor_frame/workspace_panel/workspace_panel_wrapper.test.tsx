@@ -41,6 +41,7 @@ describe('workspace_panel_wrapper', () => {
         datasourceStates={{}}
         isFullscreen={false}
         lensInspector={{} as unknown as LensInspector}
+        getUserMessages={() => []}
       >
         <MyChild />
       </WorkspacePanelWrapper>
@@ -50,7 +51,7 @@ describe('workspace_panel_wrapper', () => {
   });
 
   it('should call the toolbar renderer if provided', async () => {
-    const renderToolbarMock = jest.fn();
+    const ToolbarComponentMock = jest.fn(() => null);
     const visState = { internalState: 123 };
     await mountWithProvider(
       <WorkspacePanelWrapper
@@ -58,15 +59,24 @@ describe('workspace_panel_wrapper', () => {
         visualizationState={visState}
         children={<span />}
         visualizationId="myVis"
-        visualizationMap={{ myVis: { ...mockVisualization, renderToolbar: renderToolbarMock } }}
+        visualizationMap={{
+          myVis: { ...mockVisualization, ToolbarComponent: ToolbarComponentMock },
+        }}
         datasourceMap={{}}
         datasourceStates={{}}
         isFullscreen={false}
         lensInspector={{} as unknown as LensInspector}
-      />
+        getUserMessages={() => []}
+      />,
+      {
+        preloadedState: {
+          visualization: { activeId: 'myVis', state: visState },
+          datasourceStates: {},
+        },
+      }
     );
 
-    expect(renderToolbarMock).toHaveBeenCalledWith(expect.any(Element), {
+    expect(ToolbarComponentMock).toHaveBeenCalledWith({
       state: visState,
       frame: mockFrameAPI,
       setState: expect.anything(),
@@ -118,6 +128,7 @@ describe('workspace_panel_wrapper', () => {
           datasourceStates={{}}
           isFullscreen={false}
           lensInspector={{} as unknown as LensInspector}
+          getUserMessages={() => []}
         >
           <div />
         </WorkspacePanelWrapper>

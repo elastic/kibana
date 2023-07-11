@@ -8,13 +8,14 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import {
-  getExecutionContext,
+  getExecutionContextService,
   getHttp,
   getIndexPatternService,
   getSearchService,
 } from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
+  APP_ID,
   ES_GEO_FIELD_TYPE,
   GRID_RESOLUTION,
   RENDER_AS,
@@ -29,7 +30,7 @@ export class MockSearchSource {
   setField = jest.fn();
   setParent() {}
   getSearchRequestBody() {
-    return { foobar: 'ES_DSL_PLACEHOLDER', params: this.setField.mock.calls };
+    return { scripted_fields: 'shouldNotGetAddedToTileUrl', fields: this.setField.mock.calls };
   }
 }
 
@@ -41,6 +42,7 @@ describe('ESGeoGridSource', () => {
     get() {
       return {
         getIndexPattern: () => 'foo-*',
+        getName: () => 'foo-*',
         fields: {
           getByName() {
             return {
@@ -139,7 +141,7 @@ describe('ESGeoGridSource', () => {
       name: 'some-app',
     });
     // @ts-expect-error
-    getExecutionContext.mockReturnValue(coreStartMock.executionContext);
+    getExecutionContextService.mockReturnValue(coreStartMock.executionContext);
   });
 
   afterEach(() => {
@@ -156,7 +158,6 @@ describe('ESGeoGridSource', () => {
 
   const vectorSourceRequestMeta: VectorSourceRequestMeta = {
     isReadOnly: false,
-    geogridPrecision: 4,
     filters: [],
     timeFilters: {
       from: 'now',
@@ -174,9 +175,10 @@ describe('ESGeoGridSource', () => {
       language: 'KQL',
     },
     sourceMeta: null,
-    zoom: 0,
+    zoom: 2, // returns 4 precision
     isForceRefresh: false,
     isFeatureEditorOpenForLayer: false,
+    executionContext: { name: APP_ID },
   };
 
   describe('getGeoJsonWithMeta', () => {
@@ -223,7 +225,7 @@ describe('ESGeoGridSource', () => {
           meta: {
             alias: null,
             disabled: false,
-            key: 'bar',
+            isMultiIndex: true,
             negate: false,
             type: 'spatial_filter',
           },
@@ -288,7 +290,7 @@ describe('ESGeoGridSource', () => {
         type: SOURCE_TYPES.ES_GEO_GRID,
         requestType: RENDER_AS.HEATMAP,
       });
-      expect(superFineSource.getGeoGridPrecision(10)).toBe(NaN);
+      expect(superFineSource.getGeoGridPrecision(10)).toBe(0);
     });
   });
 
@@ -308,11 +310,38 @@ describe('ESGeoGridSource', () => {
     });
 
     it('getTileUrl', async () => {
-      const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234', false);
+      const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234', false, 5);
 
-      expect(tileUrl).toEqual(
-        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foo-*&gridPrecision=8&hasLabels=false&requestBody=(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))&renderAs=heatmap&token=1234"
+      const urlParts = tileUrl.split('?');
+      expect(urlParts[0]).toEqual('rootdir/internal/maps/mvt/getGridTile/{z}/{x}/{y}.pbf');
+
+      const params = new URLSearchParams(urlParts[1]);
+      expect(Object.fromEntries(params)).toEqual({
+        buffer: '5',
+        geometryFieldName: 'bar',
+        gridPrecision: '8',
+        hasLabels: 'false',
+        index: 'foo-*',
+        renderAs: 'heatmap',
+        requestBody:
+          "(fields:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))",
+        token: '1234',
+      });
+    });
+
+    it('getTileUrl should include executionContextId when provided', async () => {
+      const tileUrl = await mvtGeogridSource.getTileUrl(
+        {
+          ...vectorSourceRequestMeta,
+          executionContext: { name: APP_ID, id: 'map1234' },
+        },
+        '1234',
+        false,
+        5
       );
+      const urlParts = tileUrl.split('?');
+      const params = new URLSearchParams(urlParts[1]);
+      expect(Object.fromEntries(params).executionContextId).toEqual('map1234');
     });
   });
 

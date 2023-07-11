@@ -29,6 +29,11 @@ export interface SubFeatureConfig {
 
   /** Collection of privilege groups */
   privilegeGroups: readonly SubFeaturePrivilegeGroupConfig[];
+
+  /**
+   * An optional description that will appear as subtext underneath the sub-feature name
+   */
+  description?: string;
 }
 
 /**
@@ -103,6 +108,10 @@ export class SubFeature {
 
   public get requireAllSpaces() {
     return this.config.requireAllSpaces ?? false;
+  }
+
+  public get description() {
+    return this.config.description || '';
   }
 
   public toRaw() {

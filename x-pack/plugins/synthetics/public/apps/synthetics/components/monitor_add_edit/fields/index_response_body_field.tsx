@@ -12,13 +12,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { ResponseBodyIndexPolicy } from '../types';
 
-interface Props {
+export interface ResponseBodyIndexFieldProps {
   defaultValue: ResponseBodyIndexPolicy;
   onChange: (responseBodyIndexPolicy: ResponseBodyIndexPolicy) => void;
   onBlur?: () => void;
+  readOnly?: boolean;
 }
 
-export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props) => {
+export const ResponseBodyIndexField = ({
+  defaultValue,
+  onChange,
+  onBlur,
+  readOnly,
+}: ResponseBodyIndexFieldProps) => {
   const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(
     defaultValue !== ResponseBodyIndexPolicy.NEVER ? defaultValue : ResponseBodyIndexPolicy.ON_ERROR
   );
@@ -45,7 +51,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props
           checked={checked}
           label={
             <FormattedMessage
-              id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseBody"
+              id="xpack.synthetics.monitorConfig.indexResponseBody.label"
               defaultMessage="Index response body"
             />
           }
@@ -54,13 +60,14 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props
             setChecked(checkedEvent);
           }}
           onBlur={() => onBlur?.()}
+          disabled={readOnly}
         />
       </EuiFlexItem>
       {checked && (
         <EuiFlexItem>
           <EuiSelect
             aria-label={i18n.translate(
-              'xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.responseBodyIndexPolicy',
+              'xpack.synthetics.monitorConfig.indexResponseBodyPolicy.label',
               {
                 defaultMessage: 'Response body index policy',
               }
@@ -72,6 +79,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props
               setPolicy(event.target.value as ResponseBodyIndexPolicy);
             }}
             onBlur={() => onBlur?.()}
+            disabled={readOnly}
           />
         </EuiFlexItem>
       )}

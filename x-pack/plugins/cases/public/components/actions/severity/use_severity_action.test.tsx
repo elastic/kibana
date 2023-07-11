@@ -103,10 +103,9 @@ describe('useSeverityAction', () => {
       await waitFor(() => {
         expect(onAction).toHaveBeenCalled();
         expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith(
-          [{ severity, id: basicCase.id, version: basicCase.version }],
-          expect.anything()
-        );
+        expect(updateSpy).toHaveBeenCalledWith({
+          cases: [{ severity, id: basicCase.id, version: basicCase.version }],
+        });
       });
     }
   });
@@ -136,9 +135,10 @@ describe('useSeverityAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          expectedMessage
-        );
+        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: expectedMessage,
+          className: 'eui-textBreakWord',
+        });
       });
     }
   );
@@ -168,9 +168,10 @@ describe('useSeverityAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          expectedMessage
-        );
+        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: expectedMessage,
+          className: 'eui-textBreakWord',
+        });
       });
     }
   );

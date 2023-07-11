@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/crypto",
-  "owner": "@elastic/kibana-security",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-security"
 }

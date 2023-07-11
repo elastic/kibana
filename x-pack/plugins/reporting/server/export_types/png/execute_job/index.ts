@@ -5,19 +5,18 @@
  * 2.0.
  */
 
+import { TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
-import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
 import { decryptJobHeaders, generatePngObservable, getFullUrls } from '../../common';
 import { TaskPayloadPNG } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
   function executeJobFactoryFn(reporting, parentLogger) {
-    const config = reporting.getConfig();
-    const encryptionKey = config.get('encryptionKey');
+    const { encryptionKey } = reporting.getConfig();
 
     return function runTask(jobId, job, cancellationToken, stream) {
       const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
@@ -28,12 +27,21 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap((headers) => {
-          const [url] = getFullUrls(config, job);
+          const [url] = getFullUrls(reporting.getServerInfo(), reporting.getConfig(), job);
 
           apmGetAssets?.end();
           apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
-
-          return generatePngObservable(reporting, jobLogger, {
+          const screenshotFn = () =>
+            reporting.getScreenshots({
+              headers,
+              urls: [url],
+              browserTimezone: job.browserTimezone,
+              layout: {
+                ...job.layout,
+                id: 'preserve_layout',
+              },
+            });
+          return generatePngObservable(screenshotFn, jobLogger, {
             headers,
             urls: [url],
             browserTimezone: job.browserTimezone,

@@ -46,7 +46,7 @@ describe('KeyValueFilterList', () => {
     const component = renderWithTheme(
       <KeyValueFilterList
         title="title"
-        icon="alert"
+        icon="warning"
         keyValueList={[
           { key: 'foo', value: 'foo value', isFilterable: true },
           { key: 'bar', value: 'bar value', isFilterable: true },

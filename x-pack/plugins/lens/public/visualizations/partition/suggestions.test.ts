@@ -8,14 +8,13 @@
 import type { PaletteOutput } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../../types';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-} from '../../../common';
+} from '../../../common/constants';
 import { layerTypes } from '../../../common/layer_types';
 
 describe('suggestions', () => {
@@ -456,6 +455,7 @@ describe('suggestions', () => {
       });
       expect(currentSuggestions).toHaveLength(5);
       expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
+      expect(currentSuggestions.every((s) => s.incomplete)).toEqual(true);
     });
 
     it('should suggest a donut chart as initial state when only one bucket', () => {
@@ -768,51 +768,63 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('should accept multiple metrics if active visualization', () => {
+    it('should accept multiple metrics if active visualization and allows multiple metrics', () => {
+      const props = {
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'c',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'd',
+              operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
+            },
+            {
+              columnId: 'e',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: {
+          shape: PieChartTypes.TREEMAP,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              primaryGroups: ['a', 'b'],
+              metrics: ['e'],
+              numberDisplay: NumberDisplay.PERCENT,
+              categoryDisplay: CategoryDisplay.DEFAULT,
+              legendDisplay: LegendDisplay.DEFAULT,
+            },
+          ],
+        },
+        keptLayerIds: ['first'],
+      } as SuggestionRequest<PieVisualizationState>;
+
+      // no suggestions if multiple metrics are not allowed
+      expect(suggestions(props)).toHaveLength(0);
+
+      // accepts suggestions if multiple metrics are allowed
       expect(
         suggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [
-              {
-                columnId: 'a',
-                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
-              },
-              {
-                columnId: 'b',
-                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
-              },
-              {
-                columnId: 'c',
-                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
-              },
-              {
-                columnId: 'd',
-                operation: { label: 'Avg', dataType: 'number' as DataType, isBucketed: false },
-              },
-              {
-                columnId: 'e',
-                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
-              },
-            ],
-            changeType: 'initial',
-          },
+          ...props,
           state: {
-            shape: PieChartTypes.TREEMAP,
-            layers: [
-              {
-                layerId: 'first',
-                layerType: layerTypes.DATA,
-                primaryGroups: ['a', 'b'],
-                metrics: ['e'],
-                numberDisplay: NumberDisplay.PERCENT,
-                categoryDisplay: CategoryDisplay.DEFAULT,
-                legendDisplay: LegendDisplay.DEFAULT,
-              },
-            ],
-          },
-          keptLayerIds: ['first'],
+            ...props.state,
+            layers: [{ ...props.state!.layers[0], allowMultipleMetrics: true }],
+          } as PieVisualizationState,
         })
       ).toHaveLength(2);
     });
@@ -992,7 +1004,7 @@ describe('suggestions', () => {
       expect(suggs[0].state.layers[0].allowMultipleMetrics).toBeFalsy();
     });
 
-    it('mosaic type should be hidden from the suggestion list', () => {
+    it('mosaic type should be shown in the suggestion list', () => {
       expect(
         suggestions({
           table: {
@@ -1012,6 +1024,7 @@ describe('suggestions', () => {
                 operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
               },
             ],
+
             changeType: 'unchanged',
           },
           state: {
@@ -1035,7 +1048,44 @@ describe('suggestions', () => {
           },
           keptLayerIds: ['first'],
         }).filter(({ hide, state }) => !hide && state.shape === 'mosaic')
-      ).toMatchInlineSnapshot(`Array []`);
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "hide": false,
+            "incomplete": false,
+            "previewIcon": [Function],
+            "score": 0.61,
+            "state": Object {
+              "layers": Array [
+                Object {
+                  "allowMultipleMetrics": false,
+                  "categoryDisplay": "default",
+                  "layerId": "first",
+                  "layerType": "data",
+                  "legendDisplay": "show",
+                  "legendMaxLines": 1,
+                  "metrics": Array [
+                    "c",
+                  ],
+                  "nestedLegend": true,
+                  "numberDisplay": "hidden",
+                  "percentDecimals": 0,
+                  "primaryGroups": Array [
+                    "a",
+                  ],
+                  "secondaryGroups": Array [
+                    "b",
+                  ],
+                  "truncateLegend": true,
+                },
+              ],
+              "palette": undefined,
+              "shape": "mosaic",
+            },
+            "title": "Mosaic",
+          },
+        ]
+      `);
     });
   });
 
@@ -1069,7 +1119,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('waffle type should be hidden from the suggestion list', () => {
+    it('waffle type should be shown in the suggestion list', () => {
       expect(
         suggestions({
           table: {
@@ -1085,6 +1135,7 @@ describe('suggestions', () => {
                 operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
               },
             ],
+
             changeType: 'unchanged',
           },
           state: {
@@ -1107,7 +1158,41 @@ describe('suggestions', () => {
           },
           keptLayerIds: ['first'],
         }).filter(({ hide, state }) => !hide && state.shape === 'waffle')
-      ).toMatchInlineSnapshot(`Array []`);
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "hide": false,
+            "incomplete": false,
+            "previewIcon": [Function],
+            "score": 0.46,
+            "state": Object {
+              "layers": Array [
+                Object {
+                  "categoryDisplay": "default",
+                  "layerId": "first",
+                  "layerType": "data",
+                  "legendDisplay": "show",
+                  "legendMaxLines": 1,
+                  "metrics": Array [
+                    "b",
+                  ],
+                  "nestedLegend": true,
+                  "numberDisplay": "hidden",
+                  "percentDecimals": 0,
+                  "primaryGroups": Array [
+                    "a",
+                  ],
+                  "secondaryGroups": Array [],
+                  "truncateLegend": true,
+                },
+              ],
+              "palette": undefined,
+              "shape": "waffle",
+            },
+            "title": "Waffle",
+          },
+        ]
+      `);
     });
   });
 });

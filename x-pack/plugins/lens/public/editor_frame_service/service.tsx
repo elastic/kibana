@@ -24,6 +24,7 @@ import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -50,6 +51,7 @@ export interface EditorFrameStartPlugins {
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 export interface EditorFramePlugins {
@@ -57,9 +59,11 @@ export interface EditorFramePlugins {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   timefilter: TimefilterContract;
+  nowProvider: DataPublicPluginStart['nowProvider'];
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
-async function collectAsyncDefinitions<T extends { id: string }>(
+async function collectAsyncDefinitions<T extends { id: string; alias?: string[] }>(
   definitions: Array<T | (() => Promise<T>)>
 ) {
   const resolvedDefinitions = await Promise.all(
@@ -68,6 +72,11 @@ async function collectAsyncDefinitions<T extends { id: string }>(
   const definitionMap: Record<string, T> = {};
   resolvedDefinitions.forEach((definition) => {
     definitionMap[definition.id] = definition;
+    if (definition.alias) {
+      for (const aliasId of definition.alias) {
+        definitionMap[aliasId] = definition;
+      }
+    }
   });
 
   return definitionMap;
@@ -118,7 +127,13 @@ export class EditorFrameService {
       const { EditorFrame } = await import('../async_services');
 
       return {
-        EditorFrameContainer: ({ showNoDataPopover, lensInspector, indexPatternService }) => {
+        EditorFrameContainer: ({
+          showNoDataPopover,
+          lensInspector,
+          indexPatternService,
+          getUserMessages,
+          addUserMessages,
+        }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
@@ -127,6 +142,8 @@ export class EditorFrameService {
                 plugins={plugins}
                 lensInspector={lensInspector}
                 showNoDataPopover={showNoDataPopover}
+                getUserMessages={getUserMessages}
+                addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}

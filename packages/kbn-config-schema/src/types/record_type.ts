@@ -9,15 +9,30 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 
 export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>>;
 
 export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
+  private readonly keyType: Type<K>;
+  private readonly valueType: Type<V>;
+  private readonly options: RecordOfOptions<K, V>;
+
   constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
     const schema = internals.record().entries(keyType.getSchema(), valueType.getSchema());
 
     super(schema, options);
+    this.keyType = keyType;
+    this.valueType = valueType;
+    this.options = options;
+  }
+
+  public extendsDeep(options: ExtendsDeepOptions) {
+    return new RecordOfType(
+      this.keyType.extendsDeep(options),
+      this.valueType.extendsDeep(options),
+      this.options
+    );
   }
 
   protected handleError(

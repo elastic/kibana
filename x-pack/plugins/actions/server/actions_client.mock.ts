@@ -27,6 +27,9 @@ const createActionsClientMock = () => {
     listTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     isPreconfigured: jest.fn(),
+    isSystemAction: jest.fn(),
+    getGlobalExecutionKpiWithAuth: jest.fn(),
+    getGlobalExecutionLogWithAuth: jest.fn(),
   };
   return mocked;
 };

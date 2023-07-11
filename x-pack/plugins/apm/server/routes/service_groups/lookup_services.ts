@@ -15,6 +15,12 @@ import {
 } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type LookupServicesResponse = Array<{
+  serviceName: string;
+  environments: string[];
+  agentName: AgentName;
+}>;
+
 export async function lookupServices({
   apmEventClient,
   kuery,
@@ -27,7 +33,7 @@ export async function lookupServices({
   start: number;
   end: number;
   maxNumberOfServices: number;
-}) {
+}): Promise<LookupServicesResponse> {
   const response = await apmEventClient.search('lookup_services', {
     apm: {
       events: [

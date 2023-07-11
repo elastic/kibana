@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -23,7 +24,14 @@ import {
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
-import { ActionType } from '../common';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { KueryNode } from '@kbn/es-query';
+import {
+  ActionType,
+  GetGlobalExecutionKPIParams,
+  GetGlobalExecutionLogParams,
+  IExecutionLogResult,
+} from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
   validateConfig,
@@ -31,12 +39,13 @@ import {
   ActionExecutorContract,
   validateConnector,
   ActionExecutionSource,
+  parseDate,
 } from './lib';
 import {
   ActionResult,
   FindActionResult,
   RawAction,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
 } from './types';
@@ -72,6 +81,13 @@ import {
   GetOAuthClientCredentialsConfig,
   GetOAuthClientCredentialsSecrets,
 } from './lib/get_oauth_client_credentials_access_token';
+import {
+  ACTION_FILTER,
+  formatExecutionKPIResult,
+  formatExecutionLogResult,
+  getExecutionKPIAggregation,
+  getExecutionLogAggregation,
+} from './lib/get_execution_log_aggregation';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -90,15 +106,16 @@ interface Action extends ActionUpdate {
 
 export interface CreateOptions {
   action: Action;
+  options?: { id?: string };
 }
 
 interface ConstructorOptions {
   logger: Logger;
-  defaultKibanaIndex: string;
+  kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
@@ -108,6 +125,7 @@ interface ConstructorOptions {
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
+  getEventLogClient: () => Promise<IEventLogClient>;
 }
 
 export interface UpdateOptions {
@@ -117,11 +135,11 @@ export interface UpdateOptions {
 
 export class ActionsClient {
   private readonly logger: Logger;
-  private readonly defaultKibanaIndex: string;
+  private readonly kibanaIndices: string[];
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
-  private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
@@ -131,14 +149,15 @@ export class ActionsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
   private readonly connectorTokenClient: ConnectorTokenClientContract;
+  private readonly getEventLogClient: () => Promise<IEventLogClient>;
 
   constructor({
     logger,
     actionTypeRegistry,
-    defaultKibanaIndex,
+    kibanaIndices,
     scopedClusterClient,
     unsecuredSavedObjectsClient,
-    preconfiguredActions,
+    inMemoryConnectors,
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
@@ -148,13 +167,14 @@ export class ActionsClient {
     auditLogger,
     usageCounter,
     connectorTokenClient,
+    getEventLogClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
-    this.defaultKibanaIndex = defaultKibanaIndex;
-    this.preconfiguredActions = preconfiguredActions;
+    this.kibanaIndices = kibanaIndices;
+    this.inMemoryConnectors = inMemoryConnectors;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
     this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
@@ -164,6 +184,7 @@ export class ActionsClient {
     this.auditLogger = auditLogger;
     this.usageCounter = usageCounter;
     this.connectorTokenClient = connectorTokenClient;
+    this.getEventLogClient = getEventLogClient;
   }
 
   /**
@@ -171,8 +192,9 @@ export class ActionsClient {
    */
   public async create({
     action: { actionTypeId, name, config, secrets },
+    options,
   }: CreateOptions): Promise<ActionResult> {
-    const id = SavedObjectsUtils.generateId();
+    const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
       await this.authorization.ensureAuthorized('create', actionTypeId);
@@ -185,6 +207,33 @@ export class ActionsClient {
         })
       );
       throw error;
+    }
+
+    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+
+    if (
+      this.actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      foundInMemoryConnector?.isSystemAction
+    ) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
+          defaultMessage: 'System action creation is forbidden. Action type: {actionTypeId}.',
+          values: {
+            actionTypeId,
+          },
+        })
+      );
+    }
+
+    if (foundInMemoryConnector?.isPreconfigured) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
+          defaultMessage: 'This {id} already exists in a preconfigured action.',
+          values: {
+            id,
+          },
+        })
+      );
     }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -227,6 +276,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
@@ -238,13 +288,25 @@ export class ActionsClient {
     try {
       await this.authorization.ensureAuthorized('update');
 
-      if (
-        this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
-        undefined
-      ) {
+      const foundInMemoryConnector = this.inMemoryConnectors.find(
+        (connector) => connector.id === id
+      );
+
+      if (foundInMemoryConnector?.isSystemAction) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.actions.serverSideErrors.systemActionUpdateForbidden', {
+            defaultMessage: 'System action {id} can not be updated.',
+            values: {
+              id,
+            },
+          })
+        );
+      }
+
+      if (foundInMemoryConnector?.isPreconfigured) {
         throw new PreconfiguredActionDisabledModificationError(
           i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
-            defaultMessage: 'Preconfigured action {id} is not allowed to update.',
+            defaultMessage: 'Preconfigured action {id} can not be updated.',
             values: {
               id,
             },
@@ -324,6 +386,7 @@ export class ActionsClient {
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
@@ -345,10 +408,9 @@ export class ActionsClient {
       throw error;
     }
 
-    const preconfiguredActionsList = this.preconfiguredActions.find(
-      (preconfiguredAction) => preconfiguredAction.id === id
-    );
-    if (preconfiguredActionsList !== undefined) {
+    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+
+    if (foundInMemoryConnector !== undefined) {
       this.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET,
@@ -358,10 +420,11 @@ export class ActionsClient {
 
       return {
         id,
-        actionTypeId: preconfiguredActionsList.actionTypeId,
-        name: preconfiguredActionsList.name,
-        isPreconfigured: true,
-        isDeprecated: isConnectorDeprecated(preconfiguredActionsList),
+        actionTypeId: foundInMemoryConnector.actionTypeId,
+        name: foundInMemoryConnector.name,
+        isPreconfigured: foundInMemoryConnector.isPreconfigured,
+        isSystemAction: foundInMemoryConnector.isSystemAction,
+        isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
       };
     }
 
@@ -381,12 +444,13 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
 
   /**
-   * Get all actions with preconfigured list
+   * Get all actions with in-memory connectors
    */
   public async getAll(): Promise<FindActionResult[]> {
     try {
@@ -421,23 +485,20 @@ export class ActionsClient {
 
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.preconfiguredActions.map((preconfiguredAction) => ({
-        id: preconfiguredAction.id,
-        actionTypeId: preconfiguredAction.actionTypeId,
-        name: preconfiguredAction.name,
-        isPreconfigured: true,
-        isDeprecated: isConnectorDeprecated(preconfiguredAction),
+      ...this.inMemoryConnectors.map((inMemoryConnector) => ({
+        id: inMemoryConnector.id,
+        actionTypeId: inMemoryConnector.actionTypeId,
+        name: inMemoryConnector.name,
+        isPreconfigured: inMemoryConnector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(inMemoryConnector),
+        isSystemAction: inMemoryConnector.isSystemAction,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
-    return await injectExtraFindData(
-      this.defaultKibanaIndex,
-      this.scopedClusterClient,
-      mergedResult
-    );
+    return await injectExtraFindData(this.kibanaIndices, this.scopedClusterClient, mergedResult);
   }
 
   /**
-   * Get bulk actions with preconfigured list
+   * Get bulk actions with in-memory list
    */
   public async getBulk(ids: string[]): Promise<ActionResult[]> {
     try {
@@ -456,17 +517,19 @@ export class ActionsClient {
     }
 
     const actionResults = new Array<ActionResult>();
+
     for (const actionId of ids) {
-      const action = this.preconfiguredActions.find(
-        (preconfiguredAction) => preconfiguredAction.id === actionId
+      const action = this.inMemoryConnectors.find(
+        (inMemoryConnector) => inMemoryConnector.id === actionId
       );
+
       if (action !== undefined) {
         actionResults.push(action);
       }
     }
 
     // Fetch action objects in bulk
-    // Excluding preconfigured actions to avoid an not found error, which is already added
+    // Excluding in-memory actions to avoid an not found error, which is already added
     const actionSavedObjectsIds = [
       ...new Set(
         ids.filter(
@@ -497,6 +560,7 @@ export class ActionsClient {
       }
       actionResults.push(actionFromSavedObject(action, isConnectorDeprecated(action.attributes)));
     }
+
     return actionResults;
   }
 
@@ -598,10 +662,22 @@ export class ActionsClient {
     try {
       await this.authorization.ensureAuthorized('delete');
 
-      if (
-        this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
-        undefined
-      ) {
+      const foundInMemoryConnector = this.inMemoryConnectors.find(
+        (connector) => connector.id === id
+      );
+
+      if (foundInMemoryConnector?.isSystemAction) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.actions.serverSideErrors.systemActionDeletionForbidden', {
+            defaultMessage: 'System action {id} is not allowed to delete.',
+            values: {
+              id,
+            },
+          })
+        );
+      }
+
+      if (foundInMemoryConnector?.isPreconfigured) {
         throw new PreconfiguredActionDisabledModificationError(
           i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
             defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
@@ -647,7 +723,9 @@ export class ActionsClient {
     params,
     source,
     relatedSavedObjects,
-  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
+  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
+    ActionTypeExecutorResult<unknown>
+  > {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
@@ -656,12 +734,14 @@ export class ActionsClient {
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
+
     return this.actionExecutor.execute({
       actionId,
       params,
       source,
       request: this.request,
       relatedSavedObjects,
+      actionExecutionId: uuidv4(),
     });
   }
 
@@ -727,7 +807,135 @@ export class ActionsClient {
   }
 
   public isPreconfigured(connectorId: string): boolean {
-    return !!this.preconfiguredActions.find((preconfigured) => preconfigured.id === connectorId);
+    return !!this.inMemoryConnectors.find(
+      (connector) => connector.isPreconfigured && connector.id === connectorId
+    );
+  }
+
+  public isSystemAction(connectorId: string): boolean {
+    return !!this.inMemoryConnectors.find(
+      (connector) => connector.isSystemAction && connector.id === connectorId
+    );
+  }
+
+  public async getGlobalExecutionLogWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+    namespaces,
+  }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    const authorizationTuple = {} as KueryNode;
+    try {
+      await this.authorization.ensureAuthorized('get');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'action',
+        authorizationTuple,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter: filter ? `${filter} AND (${ACTION_FILTER})` : ACTION_FILTER,
+            page,
+            perPage,
+            sort,
+          }),
+        },
+        namespaces,
+        true
+      );
+
+      return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `actionsClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getGlobalExecutionKpiWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    namespaces,
+  }: GetGlobalExecutionKPIParams) {
+    this.logger.debug(`getGlobalExecutionKpiWithAuth(): getting global execution KPI`);
+
+    const authorizationTuple = {} as KueryNode;
+    try {
+      await this.authorization.ensureAuthorized('get');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'action',
+        authorizationTuple,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(
+            filter ? `${filter} AND (${ACTION_FILTER})` : ACTION_FILTER
+          ),
+        },
+        namespaces,
+        true
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `actionsClient.getGlobalExecutionKpiWithAuth(): error searching global execution KPI: ${err.message}`
+      );
+      throw err;
+    }
   }
 }
 
@@ -740,11 +948,12 @@ function actionFromSavedObject(
     ...savedObject.attributes,
     isPreconfigured: false,
     isDeprecated,
+    isSystemAction: false,
   };
 }
 
 async function injectExtraFindData(
-  defaultKibanaIndex: string,
+  kibanaIndices: string[],
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
@@ -783,7 +992,7 @@ async function injectExtraFindData(
     };
   }
   const aggregationResult = await scopedClusterClient.asInternalUser.search({
-    index: defaultKibanaIndex,
+    index: kibanaIndices,
     body: {
       aggs,
       size: 0,

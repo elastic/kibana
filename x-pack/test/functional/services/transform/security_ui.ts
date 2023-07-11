@@ -12,15 +12,15 @@ export function TransformSecurityUIProvider(
   { getPageObjects }: FtrProviderContext,
   transformSecurityCommon: TransformSecurityCommon
 ) {
-  const PageObjects = getPageObjects(['security']);
+  const pageObjects = getPageObjects(['security']);
 
   return {
     async loginAs(user: USER) {
       const password = transformSecurityCommon.getPasswordForUser(user);
 
-      await PageObjects.security.forceLogout();
+      await pageObjects.security.forceLogout();
 
-      await PageObjects.security.login(user, password, {
+      await pageObjects.security.login(user, password, {
         expectSuccess: true,
       });
     },
@@ -34,7 +34,7 @@ export function TransformSecurityUIProvider(
     },
 
     async logout() {
-      await PageObjects.security.forceLogout();
+      await pageObjects.security.forceLogout();
     },
   };
 }

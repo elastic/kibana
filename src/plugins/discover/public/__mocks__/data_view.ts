@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
-const fields = [
+export const shallowMockedFields = [
   {
     name: '_source',
     type: '_source',
@@ -63,7 +63,19 @@ const fields = [
     filterable: true,
     aggregatable: true,
   },
+  {
+    name: '@timestamp',
+    type: 'date',
+    displayName: '@timestamp',
+    scripted: false,
+    filterable: true,
+    aggregatable: true,
+  },
 ] as DataView['fields'];
+
+export const deepMockedFields = shallowMockedFields.map(
+  (field) => new DataViewField(field)
+) as DataView['fields'];
 
 export const buildDataViewMock = ({
   name,
@@ -90,6 +102,7 @@ export const buildDataViewMock = ({
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
+    type: 'default',
     getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
     getSourceFiltering: () => ({}),
@@ -100,6 +113,10 @@ export const buildDataViewMock = ({
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
     isTimeNanosBased: () => false,
     isPersisted: () => true,
+    toSpec: () => ({}),
+    getTimeField: () => {
+      return dataViewFields.find((field) => field.name === timeFieldName);
+    },
   } as unknown as DataView;
 
   dataView.isTimeBased = () => !!timeFieldName;
@@ -107,4 +124,7 @@ export const buildDataViewMock = ({
   return dataView;
 };
 
-export const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields });
+export const dataViewMock = buildDataViewMock({
+  name: 'the-data-view',
+  fields: shallowMockedFields,
+});

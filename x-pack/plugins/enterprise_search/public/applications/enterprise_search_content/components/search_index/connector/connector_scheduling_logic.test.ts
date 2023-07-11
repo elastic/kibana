@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
-import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
+import { SyncJobType } from '../../../../../../common/types/connectors';
 
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
 describe('ConnectorSchedulingLogic', () => {
   const { mount } = new LogicMounter(ConnectorSchedulingLogic);
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const DEFAULT_VALUES = {
+    hasAccessSyncChanges: false,
     hasChanges: false,
+    hasFullSyncChanges: false,
+    hasIncrementalSyncChanges: false,
+    makeRequestType: null,
   };
 
   beforeEach(() => {
@@ -27,51 +30,41 @@ describe('ConnectorSchedulingLogic', () => {
   });
 
   describe('reducers', () => {
-    describe('hasChanges', () => {
-      it('should set false on apiSuccess', () => {
-        ConnectorSchedulingLogic.actions.setHasChanges(true);
-        UpdateConnectorSchedulingApiLogic.actions.apiSuccess({
-          enabled: false,
-          interval: '',
-        });
-        expect(ConnectorSchedulingLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          hasChanges: false,
-        });
-      });
-      it('should set hasChanges on setHasChanges', () => {
-        ConnectorSchedulingLogic.actions.setHasChanges(true);
-        expect(ConnectorSchedulingLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          hasChanges: true,
-        });
-      });
-    });
-  });
+    describe('hasFullSyncChanges', () => {
+      const expectedChanges = {
+        [SyncJobType.FULL]: {
+          hasFullSyncChanges: true,
+        },
 
-  describe('actions', () => {
-    describe('makeRequest', () => {
-      it('should call clearFlashMessages', () => {
-        ConnectorSchedulingLogic.actions.makeRequest({
-          connectorId: 'id',
-          scheduling: {
-            enabled: true,
-            interval: 'interval',
-          },
+        [SyncJobType.INCREMENTAL]: {
+          hasIncrementalSyncChanges: true,
+        },
+
+        [SyncJobType.ACCESS_CONTROL]: {
+          hasAccessSyncChanges: true,
+        },
+      };
+      [SyncJobType.FULL, SyncJobType.INCREMENTAL, SyncJobType.ACCESS_CONTROL].forEach((type) => {
+        it(`sets related flag when setHasChanges called with ${type} `, () => {
+          ConnectorSchedulingLogic.actions.setHasChanges(type);
+          expect(ConnectorSchedulingLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            hasChanges: true,
+            ...expectedChanges[type],
+          });
         });
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-    describe('apiError', () => {
-      it('should call flashAPIError', () => {
-        ConnectorSchedulingLogic.actions.apiError('error' as any);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
-      });
-    });
-    describe('apiSuccess', () => {
-      it('should call flashAPIError', () => {
-        ConnectorSchedulingLogic.actions.apiSuccess('success' as any);
-        expect(flashSuccessToast).toHaveBeenCalledWith('Scheduling successfully updated');
+        it(`sets related flag false when clearHasChanges called with ${type}`, () => {
+          ConnectorSchedulingLogic.actions.setHasChanges(type);
+          expect(ConnectorSchedulingLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            hasChanges: true,
+            ...expectedChanges[type],
+          });
+          ConnectorSchedulingLogic.actions.clearHasChanges(type);
+          expect(ConnectorSchedulingLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+          });
+        });
       });
     });
   });

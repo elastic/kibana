@@ -13,7 +13,7 @@ import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
@@ -96,12 +96,12 @@ export const DependenciesOperationsTitle = i18n.translate(
   }
 );
 
-export const home = {
+export const homeRoute = {
   '/': {
     element: (
-      <TimeRangeMetadataContextProvider>
+      <ApmTimeRangeMetadataContextProvider>
         <Outlet />
-      </TimeRangeMetadataContextProvider>
+      </ApmTimeRangeMetadataContextProvider>
     ),
     params: t.type({
       query: t.intersection([
@@ -159,16 +159,21 @@ export const home = {
               '/traces/explorer/waterfall': {
                 element: <TraceExplorerWaterfall />,
                 params: t.type({
-                  query: t.type({
-                    traceId: t.string,
-                    transactionId: t.string,
-                    waterfallItemId: t.string,
-                    detailTab: t.union([
-                      t.literal(TransactionTab.timeline),
-                      t.literal(TransactionTab.metadata),
-                      t.literal(TransactionTab.logs),
-                    ]),
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      traceId: t.string,
+                      transactionId: t.string,
+                      waterfallItemId: t.string,
+                      detailTab: t.union([
+                        t.literal(TransactionTab.timeline),
+                        t.literal(TransactionTab.metadata),
+                        t.literal(TransactionTab.logs),
+                      ]),
+                    }),
+                    t.partial({
+                      flyoutDetailTab: t.string,
+                    }),
+                  ]),
                 }),
                 defaults: {
                   query: {
@@ -209,6 +214,7 @@ export const home = {
           },
         },
       },
+
       ...dependencies,
       ...legacyBackends,
       ...storageExplorer,

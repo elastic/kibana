@@ -14,7 +14,7 @@ import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { TableId } from '../../../../common/types';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
@@ -22,7 +22,7 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -54,10 +54,8 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { dataTableSelectors } from '../../../common/store/data_table';
+import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -97,6 +95,7 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
+    const hostNameExistsFilter = fieldNameExistsFilter(SecurityPageName.hosts);
     if (tabName === HostsTableType.events) {
       return [...globalFilters, ...hostNameExistsFilter];
     }
@@ -213,7 +212,7 @@ const HostsComponent = () => {
 
               <EuiSpacer />
 
-              <SecuritySolutionTabNavigation
+              <TabNavigation
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,

@@ -9,13 +9,21 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 
-type Props = SpanLinksCount & { id: string };
+type Props = SpanLinksCount & {
+  id: string;
+  onClick: (flyoutDetailTab: string) => unknown;
+};
 
-export function SpanLinksBadge({ linkedParents, linkedChildren, id }: Props) {
+export function SpanLinksBadge({
+  linkedParents,
+  linkedChildren,
+  id,
+  onClick,
+}: Props) {
   if (!linkedParents && !linkedChildren) {
     return null;
   }
-
+  const spanLinksFlyoutTab = 'span_links';
   const total = linkedParents + linkedChildren;
   return (
     <EuiToolTip
@@ -47,7 +55,19 @@ export function SpanLinksBadge({ linkedParents, linkedChildren, id }: Props) {
         </EuiFlexGroup>
       }
     >
-      <EuiBadge data-test-subj={`spanLinksBadge_${id}`}>
+      <EuiBadge
+        data-test-subj={`spanLinksBadge_${id}`}
+        onClick={(e: any) => {
+          e.stopPropagation();
+          onClick(spanLinksFlyoutTab);
+        }}
+        onClickAriaLabel={i18n.translate(
+          'xpack.apm.waterfall.spanLinks.badgeAriaLabel',
+          {
+            defaultMessage: 'Open span links details',
+          }
+        )}
+      >
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
           defaultMessage:
             '{total} {total, plural, one {Span link} other {Span links}}',

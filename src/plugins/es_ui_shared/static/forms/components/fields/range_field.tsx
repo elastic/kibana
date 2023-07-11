@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -22,11 +22,9 @@ export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { onChange: onFieldChange } = field;
 
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
-      const event = { ...e, value: `${e.currentTarget.value}` } as unknown as React.ChangeEvent<{
-        value: string;
-      }>;
+  const onChange: EuiRangeProps['onChange'] = useCallback(
+    (e) => {
+      const event = { ...e, value: `${e.currentTarget.value}` };
       onFieldChange(event);
     },
     [onFieldChange]

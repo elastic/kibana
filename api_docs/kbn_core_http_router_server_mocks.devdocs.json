@@ -13,10 +13,364 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-common.createVersionedRouterMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createVersionedRouterMock",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/core-http-router-server-mocks",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
+            "section": "def-common.MockedVersionedRouter",
+            "text": "MockedVersionedRouter"
+          }
+        ],
+        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-common.RegisteredVersionedRoute",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegisteredVersionedRoute",
+        "description": [],
+        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-mocks",
+            "id": "def-common.RegisteredVersionedRoute.config",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteConfig",
+                "text": "RouteConfig"
+              },
+              "<unknown, unknown, unknown, any>, \"options\" | \"validate\"> & { options?: Omit<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteConfigOptions",
+                "text": "RouteConfigOptions"
+              },
+              "<any>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+            ],
+            "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-mocks",
+            "id": "def-common.RegisteredVersionedRoute.versions",
+            "type": "Object",
+            "tags": [],
+            "label": "versions",
+            "description": [],
+            "signature": [
+              "{ [version: string]: { config: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.AddVersionOpts",
+                "text": "AddVersionOpts"
+              },
+              "<any, any, any>; handler: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RequestHandler",
+                "text": "RequestHandler"
+              },
+              "<any, any, any, any, any, ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
+              ">; }; }"
+            ],
+            "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-router-server-mocks",
-        "id": "def-server.RouterMock",
+        "id": "def-common.MockedVersionedRoute",
+        "type": "Type",
+        "tags": [],
+        "label": "MockedVersionedRoute",
+        "description": [],
+        "signature": [
+          "{ addVersion: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteMethod",
+            "text": "RouteMethod"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ">, [options: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.AddVersionOpts",
+            "text": "AddVersionOpts"
+          },
+          "<unknown, unknown, unknown>, handler: (context: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ", request: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>, response: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<any>>]>; } & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteMethod",
+            "text": "RouteMethod"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ">"
+        ],
+        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-common.MockedVersionedRouter",
+        "type": "Type",
+        "tags": [],
+        "label": "MockedVersionedRouter",
+        "description": [],
+        "signature": [
+          "{ get: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "<\"get\", any>, [config: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouteConfig",
+            "text": "VersionedRouteConfig"
+          },
+          "<\"get\">]>; put: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "<\"put\", any>, [config: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouteConfig",
+            "text": "VersionedRouteConfig"
+          },
+          "<\"put\">]>; post: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "<\"post\", any>, [config: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouteConfig",
+            "text": "VersionedRouteConfig"
+          },
+          "<\"post\">]>; patch: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "<\"patch\", any>, [config: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouteConfig",
+            "text": "VersionedRouteConfig"
+          },
+          "<\"patch\">]>; delete: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRoute",
+            "text": "VersionedRoute"
+          },
+          "<\"delete\", any>, [config: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouteConfig",
+            "text": "VersionedRouteConfig"
+          },
+          "<\"delete\">]>; } & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<any> & { getRoute: (method: keyof ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ">, path: string) => ",
+          {
+            "pluginId": "@kbn/core-http-router-server-mocks",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
+            "section": "def-common.RegisteredVersionedRoute",
+            "text": "RegisteredVersionedRoute"
+          },
+          "; }"
+        ],
+        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-common.RouterMock",
         "type": "Type",
         "tags": [],
         "label": "RouterMock",
@@ -25,204 +379,220 @@
           "{ routerPath: string; get: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteConfig",
+            "section": "def-common.RouteConfig",
             "text": "RouteConfig"
           },
           "<unknown, unknown, unknown, \"get\">, handler: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, any, \"get\", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">]>; post: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteConfig",
+            "section": "def-common.RouteConfig",
             "text": "RouteConfig"
           },
           "<unknown, unknown, unknown, \"post\">, handler: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, any, \"post\", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">]>; put: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteConfig",
+            "section": "def-common.RouteConfig",
             "text": "RouteConfig"
           },
           "<unknown, unknown, unknown, \"put\">, handler: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, any, \"put\", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">]>; patch: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteConfig",
+            "section": "def-common.RouteConfig",
             "text": "RouteConfig"
           },
           "<unknown, unknown, unknown, \"patch\">, handler: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, any, \"patch\", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">]>; delete: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteConfig",
+            "section": "def-common.RouteConfig",
             "text": "RouteConfig"
           },
           "<unknown, unknown, unknown, \"delete\">, handler: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, any, \"delete\", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">]>; handleLegacyErrors: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
+            "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
           ", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteMethod",
+            "section": "def-common.RouteMethod",
             "text": "RouteMethod"
           },
           ", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">, [handler: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
+            "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
           ", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteMethod",
+            "section": "def-common.RouteMethod",
             "text": "RouteMethod"
           },
           ", ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">]>; getRoutes: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouterRoute",
+            "section": "def-common.RouterRoute",
             "text": "RouterRoute"
           },
-          "[], []>; } & ",
+          "[], []>; versioned: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IRouter",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<any>; } & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IRouter",
             "text": "IRouter"
           },
-          "<any>"
+          "<any> & { versioned: ",
+          {
+            "pluginId": "@kbn/core-http-router-server-mocks",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
+            "section": "def-common.MockedVersionedRouter",
+            "text": "MockedVersionedRouter"
+          },
+          "; }"
         ],
         "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
         "deprecated": false,
@@ -233,7 +603,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-http-router-server-mocks",
-        "id": "def-server.mockRouter",
+        "id": "def-common.mockRouter",
         "type": "Object",
         "tags": [],
         "label": "mockRouter",
@@ -244,7 +614,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-router-server-mocks",
-            "id": "def-server.mockRouter.create",
+            "id": "def-common.mockRouter.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -253,9 +623,9 @@
               "({ routerPath }?: { routerPath?: string | undefined; }) => ",
               {
                 "pluginId": "@kbn/core-http-router-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-                "section": "def-server.RouterMock",
+                "section": "def-common.RouterMock",
                 "text": "RouterMock"
               }
             ],
@@ -266,7 +636,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-router-server-mocks",
-                "id": "def-server.mockRouter.create.$1",
+                "id": "def-common.mockRouter.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -282,7 +652,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-router-server-mocks",
-            "id": "def-server.mockRouter.createKibanaRequest",
+            "id": "def-common.mockRouter.createKibanaRequest",
             "type": "Function",
             "tags": [],
             "label": "createKibanaRequest",
@@ -293,9 +663,9 @@
               "<P, Q, B>) => ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
+                "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<P, Q, B, any>"
@@ -307,7 +677,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-router-server-mocks",
-                "id": "def-server.mockRouter.createKibanaRequest.$1",
+                "id": "def-common.mockRouter.createKibanaRequest.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -324,7 +694,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-router-server-mocks",
-            "id": "def-server.mockRouter.createResponseFactory",
+            "id": "def-common.mockRouter.createResponseFactory",
             "type": "Function",
             "tags": [],
             "label": "createResponseFactory",
@@ -333,9 +703,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaResponseFactory",
+                "section": "def-common.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               },
               ">"
@@ -350,13 +720,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

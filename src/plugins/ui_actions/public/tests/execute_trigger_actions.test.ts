@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Action, createAction } from '../actions';
+import { ActionDefinition } from '../actions';
 import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
-import { Trigger } from '../triggers';
+import type { Trigger } from '@kbn/ui-actions-browser';
 import { waitFor } from '@testing-library/dom';
 
 jest.mock('../context_menu');
@@ -23,14 +23,14 @@ function createTestAction<C extends object>(
   type: string,
   checkCompatibility: (context: C) => boolean,
   autoExecutable = false
-): Action<object> {
-  return createAction({
+): ActionDefinition {
+  return {
     type,
     id: type,
     isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
     execute: (context) => executeFn(context),
     shouldAutoExecute: () => Promise.resolve(autoExecutable),
-  });
+  };
 }
 
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;

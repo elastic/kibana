@@ -221,6 +221,7 @@
                 "label": "field",
                 "description": [],
                 "signature": [
+                  "\"file.path.text\" | ",
                   {
                     "pluginId": "@kbn/securitysolution-utils",
                     "scope": "common",
@@ -235,8 +236,7 @@
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
                     "section": "def-common.BlocklistConditionEntryField",
                     "text": "BlocklistConditionEntryField"
-                  },
-                  " | \"file.path.text\""
+                  }
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -465,6 +465,7 @@
         "label": "AllConditionEntryFields",
         "description": [],
         "signature": [
+          "\"file.path.text\" | ",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "common",
@@ -479,8 +480,7 @@
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
             "section": "def-common.BlocklistConditionEntryField",
             "text": "BlocklistConditionEntryField"
-          },
-          " | \"file.path.text\""
+          }
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,

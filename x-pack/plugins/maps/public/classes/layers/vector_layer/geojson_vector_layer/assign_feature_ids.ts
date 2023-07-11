@@ -6,9 +6,8 @@
  */
 
 import _ from 'lodash';
-import { FeatureCollection, Feature } from 'geojson';
-
-export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
+import type { FeatureCollection, Feature } from 'geojson';
+import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '../../../../../common/constants';
 
 let idCounter = 0;
 

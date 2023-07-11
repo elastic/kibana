@@ -10,7 +10,8 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 
-import { TimelineId, TimelineType } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common/types/timeline';
+import { TimelineType } from '../../../common/types/timeline/api';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
@@ -47,9 +48,9 @@ export const TimelinesPageComponent: React.FC = () => {
         <>
           <SecuritySolutionPageWrapper>
             <HeaderPage title={i18n.PAGE_TITLE}>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem>
-                  {capabilitiesCanUserCRUD && (
+              {capabilitiesCanUserCRUD && (
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem>
                     <EuiButton
                       iconType="indexOpen"
                       onClick={onImportTimelineBtnClick}
@@ -57,26 +58,26 @@ export const TimelinesPageComponent: React.FC = () => {
                     >
                       {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
                     </EuiButton>
+                  </EuiFlexItem>
+                  {tabName === TimelineType.default ? (
+                    <EuiFlexItem>
+                      <NewTimeline
+                        timelineId={TimelineId.active}
+                        outline={true}
+                        data-test-subj="create-default-btn"
+                      />
+                    </EuiFlexItem>
+                  ) : (
+                    <EuiFlexItem>
+                      <NewTemplateTimeline
+                        outline={true}
+                        title={NEW_TEMPLATE_TIMELINE}
+                        data-test-subj="create-template-btn"
+                      />
+                    </EuiFlexItem>
                   )}
-                </EuiFlexItem>
-                {tabName === TimelineType.default ? (
-                  <EuiFlexItem>
-                    <NewTimeline
-                      timelineId={TimelineId.active}
-                      outline={true}
-                      data-test-subj="create-default-btn"
-                    />
-                  </EuiFlexItem>
-                ) : (
-                  <EuiFlexItem>
-                    <NewTemplateTimeline
-                      outline={true}
-                      title={NEW_TEMPLATE_TIMELINE}
-                      data-test-subj="create-template-btn"
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+                </EuiFlexGroup>
+              )}
             </HeaderPage>
 
             <TimelinesContainer data-test-subj="timelines-container">

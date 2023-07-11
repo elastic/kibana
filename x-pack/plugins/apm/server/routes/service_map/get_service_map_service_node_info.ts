@@ -9,18 +9,12 @@ import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
-  METRIC_SYSTEM_FREE_MEMORY,
-  METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { NodeStats } from '../../../common/service_map';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
@@ -31,11 +25,10 @@ import {
 } from '../../lib/helpers/transactions';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
-import {
-  percentCgroupMemoryUsedScript,
-  percentSystemMemoryUsedScript,
-} from '../metrics/by_agent/shared/memory';
+import { systemMemory, cgroupMemory } from '../metrics/by_agent/shared/memory';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -62,7 +55,7 @@ interface TaskParameters {
   offsetInMs: number;
 }
 
-export function getServiceMapServiceNodeInfo({
+function getServiceMapServiceNodeInfoForTimeRange({
   environment,
   serviceName,
   apmEventClient,
@@ -139,12 +132,25 @@ async function getFailedTransactionsRateStats({
       environment,
       apmEventClient,
       serviceName,
-      searchAggregatedTransactions,
       start,
       end,
       kuery: '',
-      numBuckets,
-      transactionTypes: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
+      transactionTypes: defaultTransactionTypes,
+      bucketSizeInSeconds: getBucketSizeForAggregatedTransactions({
+        start,
+        end,
+        numBuckets,
+        searchAggregatedTransactions,
+      }).bucketSize,
+      ...(searchAggregatedTransactions
+        ? {
+            documentType: ApmDocumentType.TransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
+          }
+        : {
+            documentType: ApmDocumentType.TransactionEvent,
+            rollupInterval: RollupInterval.None,
+          }),
     });
     return {
       value: average,
@@ -183,10 +189,7 @@ async function getTransactionStats({
             ),
             {
               terms: {
-                [TRANSACTION_TYPE]: [
-                  TRANSACTION_REQUEST,
-                  TRANSACTION_PAGE_LOAD,
-                ],
+                [TRANSACTION_TYPE]: defaultTransactionTypes,
               },
             },
           ],
@@ -304,9 +307,7 @@ function getMemoryStats({
       script,
     }: {
       additionalFilters: ESFilter[];
-      script:
-        | typeof percentCgroupMemoryUsedScript
-        | typeof percentSystemMemoryUsedScript;
+      script: typeof cgroupMemory.script | typeof systemMemory.script;
     }): Promise<NodeStats['memoryUsage']> => {
       const response = await apmEventClient.search(
         'get_avg_memory_for_service_map_node',
@@ -349,22 +350,50 @@ function getMemoryStats({
     };
 
     let memoryUsage = await getMemoryUsage({
-      additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-      ],
-      script: percentCgroupMemoryUsedScript,
+      script: cgroupMemory.script,
+      additionalFilters: [cgroupMemory.filter],
     });
 
     if (!memoryUsage) {
       memoryUsage = await getMemoryUsage({
-        additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-        ],
-        script: percentSystemMemoryUsedScript,
+        script: systemMemory.script,
+        additionalFilters: [systemMemory.filter],
       });
     }
 
     return memoryUsage;
   });
+}
+
+export interface ServiceMapServiceNodeInfoResponse {
+  currentPeriod: NodeStats;
+  previousPeriod: NodeStats | undefined;
+}
+
+export async function getServiceMapServiceNodeInfo({
+  environment,
+  apmEventClient,
+  serviceName,
+  searchAggregatedTransactions,
+  start,
+  end,
+  offset,
+}: Options): Promise<ServiceMapServiceNodeInfoResponse> {
+  const commonProps = {
+    environment,
+    apmEventClient,
+    serviceName,
+    searchAggregatedTransactions,
+    start,
+    end,
+  };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    getServiceMapServiceNodeInfoForTimeRange(commonProps),
+    offset
+      ? getServiceMapServiceNodeInfoForTimeRange({ ...commonProps, offset })
+      : undefined,
+  ]);
+
+  return { currentPeriod, previousPeriod };
 }

@@ -10,10 +10,13 @@ import { waitFor } from '@testing-library/react';
 
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions } from '../../../../store/timeline';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
+
+const mockedTelemetry = createTelemetryServiceMock();
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -25,12 +28,13 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
   return {
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: () => ({
       services: {
         application: {
           getUrlForApp: jest.fn(),
           navigateToApp: jest.fn(),
         },
+        telemetry: mockedTelemetry,
       },
     }),
   };

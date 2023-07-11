@@ -6,39 +6,33 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { CaseResponse, CasePostRequest } from '../../../common/api';
+import type { Case, CasePostRequest } from '../../../common/api';
 import {
-  throwErrors,
-  CaseResponseRt,
+  CaseRt,
   ActionTypes,
   CasePostRequestRt,
-  excess,
   CaseSeverity,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Creates a new case.
  *
  * @ignore
  */
-export const create = async (
-  data: CasePostRequest,
-  clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
     user,
@@ -46,24 +40,9 @@ export const create = async (
     authorization: auth,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasePostRequestRt).decode({
-      ...data,
-    }),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
-  if (query.title.length > MAX_TITLE_LENGTH) {
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
-    );
-  }
-
-  if (query.tags.some(isInvalidTag)) {
-    throw Boom.badRequest('A tag must contain at least one non-space character');
-  }
-
   try {
+    const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+
     const savedObjectID = SavedObjectsUtils.generateId();
 
     await auth.ensureAuthorized({
@@ -102,7 +81,7 @@ export const create = async (
       refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.create_case,
       caseId: newCase.id,
       user,
@@ -110,12 +89,9 @@ export const create = async (
         ...query,
         severity: query.severity ?? CaseSeverity.LOW,
         assignees: query.assignees ?? [],
+        category: query.category ?? null,
       },
       owner: newCase.attributes.owner,
-    });
-
-    const flattenedCase = flattenCaseSavedObject({
-      savedObject: newCase,
     });
 
     if (query.assignees && query.assignees.length !== 0) {
@@ -129,7 +105,11 @@ export const create = async (
       });
     }
 
-    return CaseResponseRt.encode(flattenedCase);
+    const res = flattenCaseSavedObject({
+      savedObject: newCase,
+    });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

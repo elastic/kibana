@@ -155,7 +155,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
       <EuiSpacer size="m" />
 
-      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="alert" color="warning">
+      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="warning" color="warning">
         <p>{strings.getWarning()}</p>
       </EuiCallOut>
     </div>

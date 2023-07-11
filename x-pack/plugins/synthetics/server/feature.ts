@@ -6,13 +6,13 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { syntheticsParamType } from '../common/types/saved_objects';
+import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
+import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
-import { UPTIME_RULE_TYPES } from '../common/constants/alerts';
-import { umDynamicSettings } from './legacy_uptime/lib/saved_objects/uptime_settings';
-import { syntheticsMonitorType } from './legacy_uptime/lib/saved_objects/synthetics_monitor';
-import { syntheticsApiKeyObjectType } from './legacy_uptime/lib/saved_objects/service_api_key';
+import { UPTIME_RULE_TYPES } from '../common/constants/uptime_alerts';
+import { settingsObjectType } from './saved_objects/uptime_settings';
+import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const uptimeFeature = {
   id: PLUGIN.ID,
@@ -24,15 +24,15 @@ export const uptimeFeature = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: UPTIME_RULE_TYPES,
+  alerting: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
   privileges: {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'uptime-write', 'lists-all'],
+      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
       savedObject: {
         all: [
-          umDynamicSettings.name,
+          settingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,
@@ -42,10 +42,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          all: UPTIME_RULE_TYPES,
+          all: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
         },
         alert: {
-          all: UPTIME_RULE_TYPES,
+          all: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
         },
       },
       management: {
@@ -56,12 +56,12 @@ export const uptimeFeature = {
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'lists-read'],
+      api: ['uptime-read', 'lists-read', 'rac'],
       savedObject: {
         all: [],
         read: [
           syntheticsParamType,
-          umDynamicSettings.name,
+          settingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,
@@ -69,10 +69,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          read: UPTIME_RULE_TYPES,
+          read: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
         },
         alert: {
-          read: UPTIME_RULE_TYPES,
+          read: [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES],
         },
       },
       management: {

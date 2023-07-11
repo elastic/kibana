@@ -44,7 +44,7 @@ export const ErrorStatePrompt: React.FC = () => {
 
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       iconColor="danger"
       title={
         <h2>

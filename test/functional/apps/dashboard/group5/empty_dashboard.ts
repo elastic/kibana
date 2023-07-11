@@ -55,7 +55,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         name: 'Dashboard Test Markdown',
         markdown: 'Markdown text',
       });
-      await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Markdown text']);
     });
 

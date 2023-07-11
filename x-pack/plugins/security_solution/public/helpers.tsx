@@ -13,6 +13,8 @@ import { matchPath, Redirect } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -24,7 +26,6 @@ import {
   SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
-import type { Ecs } from '../common/ecs';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -32,11 +33,11 @@ import type {
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
 import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
-import type { InspectResponse, StartedSubPlugins } from './types';
+import type { InspectResponse, StartedSubPlugins, StartServices } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store/timeline';
-import { dataTableActions } from './common/store/data_table';
-import { TableId, TimelineId } from '../common/types';
+import { TimelineId } from '../common/types';
+import { SourcererScopeName } from './common/store/sourcerer/model';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -194,7 +195,8 @@ export const isThreatIntelligencePath = (pathname: string): boolean => {
 
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
-  capabilities: Capabilities
+  capabilities: Capabilities,
+  services: StartServices
 ): RouteProps[] => {
   return [
     ...Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
@@ -207,7 +209,13 @@ export const getSubPluginRoutesByCapabilities = (
         ...acc,
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
-          component: () => <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />,
+          component: () => {
+            const Upsell = services.upselling.getPageUpselling(key as SecurityPageName);
+            if (Upsell) {
+              return <Upsell />;
+            }
+            return <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />;
+          },
         })),
       ];
     }, []),
@@ -301,6 +309,11 @@ export const isTimelineScope = (scopeId: string) =>
 export const isInTableScope = (scopeId: string) =>
   Object.values(TableId).includes(scopeId as unknown as TableId);
 
+export const isAlertsPageScope = (scopeId: string) =>
+  [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage, TableId.alertsOnCasePage].includes(
+    scopeId as TableId
+  );
+
 export const getScopedActions = (scopeId: string) => {
   if (isTimelineScope(scopeId)) {
     return timelineActions;
@@ -318,3 +331,13 @@ export const getScopedSelectors = (scopeId: string) => {
 };
 
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
+
+export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
+  if (isTimelineScope(scopeId)) {
+    return SourcererScopeName.timeline;
+  } else if (isAlertsPageScope(scopeId)) {
+    return SourcererScopeName.detections;
+  } else {
+    return SourcererScopeName.default;
+  }
+};

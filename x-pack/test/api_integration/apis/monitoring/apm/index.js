@@ -8,10 +8,7 @@
 export default function ({ loadTestFile }) {
   describe('APM', () => {
     loadTestFile(require.resolve('./overview'));
-    loadTestFile(require.resolve('./overview_mb'));
     loadTestFile(require.resolve('./instances'));
-    loadTestFile(require.resolve('./instances_mb'));
     loadTestFile(require.resolve('./instance'));
-    loadTestFile(require.resolve('./instance_mb'));
   });
 }

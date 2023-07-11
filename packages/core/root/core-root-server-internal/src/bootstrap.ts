@@ -7,9 +7,11 @@
  */
 
 import chalk from 'chalk';
+import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 interface BootstrapArgs {
   configs: string[];
@@ -34,17 +36,21 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
   // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { REPO_ROOT } = require('@kbn/utils');
+  const { REPO_ROOT } = require('@kbn/repo-info');
 
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
+    repoPackages: getPackages(REPO_ROOT),
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
   const root = new Root(rawConfigService, env, onRootShutdown);
+  const cliLogger = root.logger.get('cli');
+
+  cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
   process.on('SIGHUP', () => reloadConfiguration());
 
@@ -60,7 +66,6 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   });
 
   function reloadConfiguration(reason = 'SIGHUP signal received') {
-    const cliLogger = root.logger.get('cli');
     cliLogger.info(`Reloading Kibana configuration (reason: ${reason}).`, { tags: ['config'] });
 
     try {
@@ -112,11 +117,13 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
 function onRootShutdown(reason?: any) {
   if (reason !== undefined) {
-    // There is a chance that logger wasn't configured properly and error that
-    // that forced root to shut down could go unnoticed. To prevent this we always
-    // mirror such fatal errors in standard output with `console.error`.
-    // eslint-disable-next-line no-console
-    console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    if (reason.code !== MIGRATION_EXCEPTION_CODE) {
+      // There is a chance that logger wasn't configured properly and error that
+      // that forced root to shut down could go unnoticed. To prevent this we always
+      // mirror such fatal errors in standard output with `console.error`.
+      // eslint-disable-next-line no-console
+      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    }
 
     process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }

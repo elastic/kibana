@@ -8,26 +8,25 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import type { Action } from 'typescript-fsa';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
-  ColumnHeaderOptions,
   TimelineResult,
   SingleTimelineResolveResponse,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   DataProviderType,
-  TimelineId,
   TimelineStatus,
   TimelineType,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 
 import {
   addNotes as dispatchAddNotes,
@@ -70,8 +69,8 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import type { NoteResult } from '../../../../common/types/timeline/note';
+import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event/api';
+import type { Note } from '../../../../common/types/timeline/note/api';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -148,10 +147,7 @@ const setTimelineFilters = (filter: FilterTimelineResult) => ({
   ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
 });
 
-const setEventIdToNoteIds = (
-  duplicate: boolean,
-  eventIdToNoteIds: NoteResult[] | null | undefined
-) =>
+const setEventIdToNoteIds = (duplicate: boolean, eventIdToNoteIds: Note[] | null | undefined) =>
   duplicate
     ? {}
     : eventIdToNoteIds != null
@@ -201,7 +197,7 @@ const getTemplateTimelineId = (
 
   return duplicate && timeline.timelineType === TimelineType.template
     ? // TODO: MOVE TO THE BACKEND
-      uuid.v4()
+      uuidv4()
     : timeline.templateTimelineId;
 };
 
@@ -310,7 +306,7 @@ export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
   timelineType?: TimelineType
-): { notes: NoteResult[] | null | undefined; timeline: TimelineModel } => {
+): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
@@ -413,6 +409,7 @@ export const dispatchUpdateTimeline =
     timeline,
     to,
     ruleNote,
+    ruleAuthor,
   }: UpdateTimeline): (() => void) =>
   () => {
     if (!isEmpty(timeline.indexNames)) {
@@ -464,7 +461,7 @@ export const dispatchUpdateTimeline =
     }
 
     if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-      const newNote = createNote({ newNote: ruleNote });
+      const newNote = createNote({ newNote: ruleNote, user: ruleAuthor || 'elastic' });
       dispatch(dispatchUpdateNote({ note: newNote }));
       dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
     }
@@ -474,7 +471,7 @@ export const dispatchUpdateTimeline =
         dispatchAddNotes({
           notes:
             notes != null
-              ? notes.map((note: NoteResult) => ({
+              ? notes.map((note: Note) => ({
                   created: note.created != null ? new Date(note.created) : new Date(),
                   id: note.noteId,
                   lastEdit: note.updated != null ? new Date(note.updated) : new Date(),

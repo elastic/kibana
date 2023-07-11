@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import '../../_index.scss';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
@@ -21,7 +22,7 @@ import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { isScreenshotMode } from '../../kibana_services';
-import { RawValue } from '../../../common/constants';
+import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
@@ -35,7 +36,7 @@ export interface Props {
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
-  areLayersLoaded: boolean;
+  isMapLoading: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
@@ -70,7 +71,7 @@ export class MapContainer extends Component<Props, State> {
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
-    domId: uuid(),
+    domId: uuidv4(),
     showFitToBoundsButton: false,
     showTimesliderButton: false,
   };
@@ -86,7 +87,7 @@ export class MapContainer extends Component<Props, State> {
     this._loadShowTimesliderButton();
     if (
       this.props.isSharable &&
-      this.props.areLayersLoaded &&
+      !this.props.isMapLoading &&
       !this._isInitalLoadRenderTimerStarted
     ) {
       this._isInitalLoadRenderTimerStarted = true;
@@ -143,15 +144,13 @@ export class MapContainer extends Component<Props, State> {
     }
   }
 
-  // Mapbox does not provide any feedback when rendering is complete.
-  // Temporary solution is just to wait set period of time after data has loaded.
   _startInitialLoadRenderTimer = () => {
     window.setTimeout(() => {
       if (this._isMounted) {
         this.setState({ isInitialLoadRenderTimeoutComplete: true });
         this._onInitialLoadRenderComplete();
       }
-    }, 5000);
+    }, RENDER_TIMEOUT);
   };
 
   render() {

@@ -43,7 +43,7 @@ IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecate
 
 . Select *Use only {kib} {data-sources}*.
 
-. From the *Data view* drodpown, select the {data-source}, then select the *Time field* and *Interval*.
+. From the *Data view* dropdown, select the {data-source}, then select the *Time field* and *Interval*.
 
 . Select a *Drop last bucket* option. 
 +
@@ -184,9 +184,9 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 [float]
 [[tsvb-faq]]

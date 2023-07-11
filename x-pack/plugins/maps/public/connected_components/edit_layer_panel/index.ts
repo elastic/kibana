@@ -21,7 +21,7 @@ function mapStateToProps(state: MapStoreState) {
   let key = 'none';
   if (selectedLayer) {
     key = isVectorLayer(selectedLayer)
-      ? `${selectedLayer.getId()}${(selectedLayer as IVectorLayer).showJoinEditor()}`
+      ? `${selectedLayer.getId()}${(selectedLayer as IVectorLayer).getSource().supportsJoins()}`
       : selectedLayer.getId();
   }
   return {

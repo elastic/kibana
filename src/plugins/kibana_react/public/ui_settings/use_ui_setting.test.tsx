@@ -9,7 +9,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
-import { useUiSetting$ } from './use_ui_setting';
+import { useGlobalUiSetting$, useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
 import { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
@@ -22,8 +22,8 @@ useObservableSpy.mockImplementation((observable, def) => def);
 
 const mock = (): [KibanaServices, Subject<any>] => {
   const core = coreMock.createStart();
-  const get = core.uiSettings.get;
-  const get$ = core.uiSettings.get$;
+  const get = core.settings.client.get;
+  const get$ = core.settings.client.get$;
   const subject = new Subject();
 
   get.mockImplementation(() => 'bar');
@@ -73,8 +73,8 @@ describe('useUiSetting', () => {
 
     const strong = container!.querySelector('strong');
     expect(strong!.textContent).toBe('bar');
-    expect(core.uiSettings!.get).toHaveBeenCalledTimes(1);
-    expect((core.uiSettings!.get as any).mock.calls[0][0]).toBe('foo');
+    expect(core.settings!.client.get).toHaveBeenCalledTimes(1);
+    expect((core.settings!.client.get as any).mock.calls[0][0]).toBe('foo');
   });
 
   test('calls uiSettings.get() method with correct key and default value', async () => {
@@ -88,9 +88,71 @@ describe('useUiSetting', () => {
       container
     );
 
-    expect(core.uiSettings!.get).toHaveBeenCalledTimes(1);
-    expect((core.uiSettings!.get as any).mock.calls[0][0]).toBe('foo');
-    expect((core.uiSettings!.get as any).mock.calls[0][1]).toBe('DEFAULT');
+    expect(core.uiSettings!.get).toHaveBeenCalledTimes(0);
+    expect(core.settings!.client.get).toHaveBeenCalledTimes(1);
+    expect((core.settings!.client.get as any).mock.calls[0][0]).toBe('foo');
+    expect((core.settings!.client.get as any).mock.calls[0][1]).toBe('DEFAULT');
+  });
+});
+
+describe('useGlobalUiSetting', () => {
+  const mockGlobal = (): [KibanaServices, Subject<any>] => {
+    const core = coreMock.createStart();
+    const get = core.settings.globalClient.get;
+    const get$ = core.settings.globalClient.get$;
+    const subject = new Subject();
+
+    get.mockImplementation(() => 'baz');
+    get$.mockImplementation(() => subject);
+
+    return [core, subject];
+  };
+
+  const TestConsumer: React.FC<{
+    setting: string;
+    newValue?: string;
+  }> = ({ setting, newValue = '' }) => {
+    const [value, set] = useGlobalUiSetting$(setting, 'default');
+
+    return (
+      <div>
+        {setting}: <strong>{value}</strong>
+        <button onClick={() => set(newValue)}>Set new value!</button>
+      </div>
+    );
+  };
+
+  test('returns setting value', async () => {
+    const [core] = mockGlobal();
+    const { Provider } = createKibanaReactContext(core);
+
+    ReactDOM.render(
+      <Provider>
+        <TestConsumer setting="foo" />
+      </Provider>,
+      container
+    );
+
+    const strong = container!.querySelector('strong');
+    expect(strong!.textContent).toBe('baz');
+    expect(core.settings!.globalClient.get).toHaveBeenCalledTimes(1);
+    expect((core.settings!.globalClient.get as any).mock.calls[0][0]).toBe('foo');
+  });
+
+  test('calls uiSettings.get() method with correct key and default value', async () => {
+    const [core] = mockGlobal();
+    const { Provider } = createKibanaReactContext(core);
+
+    ReactDOM.render(
+      <Provider>
+        <TestConsumer setting="fooBar" />
+      </Provider>,
+      container
+    );
+
+    expect(core.settings!.globalClient.get).toHaveBeenCalledTimes(1);
+    expect((core.settings!.globalClient.get as any).mock.calls[0][0]).toBe('fooBar');
+    expect((core.settings!.globalClient.get as any).mock.calls[0][1]).toBe('default');
   });
 });
 
@@ -122,8 +184,8 @@ describe('useUiSetting$', () => {
 
     const strong = container!.querySelector('strong');
     expect(strong!.textContent).toBe('bar');
-    expect(core.uiSettings!.get).toHaveBeenCalledTimes(1);
-    expect((core.uiSettings!.get as any).mock.calls[0][0]).toBe('foo');
+    expect(core.settings!.client.get).toHaveBeenCalledTimes(1);
+    expect((core.settings!.client.get as any).mock.calls[0][0]).toBe('foo');
   });
 
   test('calls Core with correct arguments', async () => {
@@ -137,7 +199,7 @@ describe('useUiSetting$', () => {
       container
     );
 
-    expect(core.uiSettings!.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
+    expect(core.settings!.client.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
   });
 
   test('subscribes to observable using useObservable', async () => {
@@ -174,7 +236,7 @@ describe('useUiSetting$', () => {
       Simulate.click(container!.querySelector('button')!, {});
     });
 
-    expect(core.uiSettings!.set).toHaveBeenCalledTimes(1);
-    expect(core.uiSettings!.set).toHaveBeenCalledWith('a', 'c');
+    expect(core.settings!.client.set).toHaveBeenCalledTimes(1);
+    expect(core.settings!.client.set).toHaveBeenCalledWith('a', 'c');
   });
 });

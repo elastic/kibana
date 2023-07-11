@@ -6,17 +6,16 @@
  */
 
 import type {
-  KibanaRequest,
-  RequestHandlerContext,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   PackagePolicy,
   NewPackagePolicy,
 } from '@kbn/fleet-plugin/common';
@@ -24,6 +23,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import type {
   CspServerPluginSetup,
@@ -37,10 +37,8 @@ import { setupSavedObjects } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
-  isCspPackage,
-  isCspPackageInstalled,
+  isCspPackagePolicyInstalled,
   onPackagePolicyPostCreateCallback,
-  removeCspRulesInstancesCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
@@ -87,7 +85,7 @@ export class CspPlugin
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
-    registerCspmUsageCollector(this.logger, plugins.usageCollection);
+    registerCspmUsageCollector(this.logger, coreStartServices, plugins.usageCollection);
 
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;
 
@@ -108,17 +106,17 @@ export class CspPlugin
 
       plugins.fleet.registerExternalCallback(
         'packagePolicyCreate',
-        async (
-          packagePolicy: NewPackagePolicy,
-          _context: RequestHandlerContext,
-          _request: KibanaRequest
-        ): Promise<NewPackagePolicy> => {
+        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
           const license = await plugins.licensing.refresh();
           if (isCspPackage(packagePolicy.package?.name)) {
             if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
               throw new Error(
                 'To use this feature you must upgrade your subscription or start a trial'
               );
+            }
+
+            if (!isSingleEnabledInput(packagePolicy.inputs)) {
+              throw new Error('Only one enabled input is allowed per policy');
             }
           }
 
@@ -130,13 +128,10 @@ export class CspPlugin
         'packagePolicyPostCreate',
         async (
           packagePolicy: PackagePolicy,
-          context: RequestHandlerContext,
-          _: KibanaRequest
+          soClient: SavedObjectsClientContract
         ): Promise<PackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
             await this.initialize(core, plugins.taskManager);
-
-            const soClient = (await context.core).savedObjects.client;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
             return packagePolicy;
@@ -147,16 +142,18 @@ export class CspPlugin
       );
 
       plugins.fleet.registerExternalCallback(
-        'postPackagePolicyDelete',
-        async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
+        'packagePolicyPostDelete',
+        async (deletedPackagePolicies: DeepReadonly<PostDeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
               const soClient = core.savedObjects.createInternalRepository();
-              await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
-
-              const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
-
-              if (isPackageExists) {
+              const packagePolicyService = plugins.fleet.packagePolicyService;
+              const isPackageExists = await isCspPackagePolicyInstalled(
+                packagePolicyService,
+                soClient,
+                this.logger
+              );
+              if (!isPackageExists) {
                 await this.uninstallResources(plugins.taskManager, this.logger);
               }
             }
@@ -194,3 +191,6 @@ export class CspPlugin
     setupFindingsStatsTask(taskManager, coreStartServices, logger);
   }
 }
+
+const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
+  inputs.filter((i) => i.enabled).length === 1;

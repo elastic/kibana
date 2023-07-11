@@ -10,7 +10,7 @@ import { getConfigPath, getDataPath } from '@kbn/utils';
 import inquirer from 'inquirer';
 import { duration } from 'moment';
 import { merge } from 'lodash';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { Logger } from '@kbn/core/server';
 import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
@@ -49,7 +49,7 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
         logger,
         type,
         // we use an independent AgentManager for cli_setup, no need to track performance of this one
-        agentFactoryProvider: new AgentManager(),
+        agentFactoryProvider: new AgentManager(logger.get('agent-manager')),
         kibanaVersion: kibanaPackageJson.version,
       });
     },

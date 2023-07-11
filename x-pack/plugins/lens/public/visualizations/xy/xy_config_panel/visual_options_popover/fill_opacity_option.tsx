@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
-import { useDebouncedValue } from '../../../../shared_components';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 
 export interface FillOpacityOptionProps {
   /**

@@ -11,7 +11,7 @@ export const alertFormI18n = {
   inputPlaceHolder: i18n.translate(
     'xpack.synthetics.sourceConfiguration.alertDefaultForm.selectConnector',
     {
-      defaultMessage: 'Please select one or more connectors',
+      defaultMessage: 'Select one or more connectors',
     }
   ),
   emailPlaceHolder: i18n.translate(

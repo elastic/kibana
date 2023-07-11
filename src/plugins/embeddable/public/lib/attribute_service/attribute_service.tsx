@@ -9,8 +9,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import { I18nStart, NotificationsStart } from '@kbn/core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
+import { NotificationsStart } from '@kbn/core/public';
+import {
+  SavedObjectSaveModal,
+  OnSaveProps,
+  SaveResult,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
@@ -61,11 +66,6 @@ export class AttributeService<
 > {
   constructor(
     private type: string,
-    private showSaveModal: (
-      saveModal: React.ReactElement,
-      I18nContext: I18nStart['Context']
-    ) => void,
-    private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
     private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>,
     getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory
@@ -137,14 +137,12 @@ export class AttributeService<
       return input as ValType;
     }
     const { attributes } = await this.unwrapAttributes(input);
-    const libraryTitle = attributes.title;
     const { savedObjectId, ...originalInputToPropagate } = input;
 
     return {
       ...originalInputToPropagate,
       // by value visualizations should not have default titles and/or descriptions
       ...{ attributes: omit(attributes, ['title', 'description']) },
-      title: libraryTitle,
     } as unknown as ValType;
   };
 
@@ -178,7 +176,7 @@ export class AttributeService<
         }
       };
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
-        this.showSaveModal(
+        showSaveModal(
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => {}}
@@ -190,8 +188,7 @@ export class AttributeService<
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}
-          />,
-          this.i18nContext
+          />
         );
       }
     });

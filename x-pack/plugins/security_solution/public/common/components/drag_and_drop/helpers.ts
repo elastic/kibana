@@ -10,10 +10,10 @@ import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
 
 import { getFieldIdFromDraggable, getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getScopedActions } from '../../../helpers';
 import type { ColumnHeaderOptions } from '../../../../common/types';
-import { TableId } from '../../../../common/types';
 import type { BrowserField, BrowserFields } from '../../../../common/search_strategy';
 import { dragAndDropActions } from '../../store/actions';
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';

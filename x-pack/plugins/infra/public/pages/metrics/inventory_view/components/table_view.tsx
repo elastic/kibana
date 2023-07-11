@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } fro
 import { i18n } from '@kbn/i18n';
 
 import { last, first } from 'lodash';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
@@ -17,7 +17,6 @@ import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
-import { CONTAINER_CLASSNAME } from '../../../../apps/common_styles';
 
 interface Props {
   nodes: SnapshotNode[];
@@ -27,6 +26,13 @@ interface Props {
   formatter: (subject: string | number) => string;
   onFilter: (filter: string) => void;
 }
+
+const initialSorting = {
+  sort: {
+    field: 'value',
+    direction: 'desc',
+  },
+} as const;
 
 const getGroupPaths = (path: SnapshotNodePath[]) => {
   switch (path.length) {
@@ -41,33 +47,10 @@ const getGroupPaths = (path: SnapshotNodePath[]) => {
 
 export const TableView = (props: Props) => {
   const { nodes, options, formatter, currentTime, nodeType } = props;
-  const [openPopovers, setOpenPopovers] = useState<string[]>([]);
-  const openPopoverFor = useCallback(
-    (id: string) => () => {
-      setOpenPopovers([...openPopovers, id]);
-    },
-    [openPopovers]
-  );
 
-  const closePopoverFor = useCallback(
-    (id: string) => () => {
-      if (openPopovers.includes(id)) {
-        setOpenPopovers(openPopovers.filter((subject) => subject !== id));
-      }
-    },
-    [openPopovers]
-  );
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const el = document.getElementsByClassName(CONTAINER_CLASSNAME)[0];
-    if (el instanceof HTMLElement) {
-      if (openPopovers.length > 0) {
-        el.style.overflowY = 'hidden';
-      } else {
-        el.style.overflowY = 'auto';
-      }
-    }
-  }, [openPopovers]);
+  const closePopover = () => setOpenPopoverId(null);
 
   const columns: Array<EuiBasicTableColumn<typeof items[number]>> = [
     {
@@ -84,15 +67,20 @@ export const TableView = (props: Props) => {
         const uniqueID = [...item.node.path.map((p) => p.value), item.node.name].join(':');
         const button = (
           <EuiToolTip content={tooltipText}>
-            <EuiButtonEmpty onClick={openPopoverFor(uniqueID)}>{value}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              data-test-subj="infraColumnsButton"
+              onClick={() => setOpenPopoverId(uniqueID)}
+            >
+              {value}
+            </EuiButtonEmpty>
           </EuiToolTip>
         );
 
         return (
           <EuiPopover
             button={button}
-            isOpen={openPopovers.includes(uniqueID)}
-            closePopover={closePopoverFor(uniqueID)}
+            isOpen={openPopoverId === uniqueID}
+            closePopover={closePopover}
             anchorPosition="rightCenter"
           >
             <NodeContextMenu
@@ -115,7 +103,9 @@ export const TableView = (props: Props) => {
         const handleClick = () => props.onFilter(`${grouping.field}:"${value}"`);
         return (
           <EuiToolTip content="Set Filter">
-            <EuiButtonEmpty onClick={handleClick}>{value}</EuiButtonEmpty>
+            <EuiButtonEmpty data-test-subj="infraColumnsButton" onClick={handleClick}>
+              {value}
+            </EuiButtonEmpty>
           </EuiToolTip>
         );
       },
@@ -148,30 +138,28 @@ export const TableView = (props: Props) => {
     },
   ];
 
-  const items = nodes.map((node) => {
-    const name = last(node.path);
-    const metric = first(node.metrics);
-    return {
-      name: (name && name.label) || 'unknown',
-      ...getGroupPaths(node.path).reduce(
-        (acc, path, index) => ({
-          ...acc,
-          [`group_${index}`]: path.label,
-        }),
-        {}
-      ),
-      value: (metric && metric.value) || 0,
-      avg: (metric && metric.avg) || 0,
-      max: (metric && metric.max) || 0,
-      node: createWaffleMapNode(node),
-    };
-  });
-  const initialSorting = {
-    sort: {
-      field: 'value',
-      direction: 'desc',
-    },
-  } as const;
+  const items = useMemo(
+    () =>
+      nodes.map((node) => {
+        const name = last(node.path);
+        const metric = first(node.metrics);
+        return {
+          name: (name && name.label) || 'unknown',
+          ...getGroupPaths(node.path).reduce(
+            (acc, path, index) => ({
+              ...acc,
+              [`group_${index}`]: path.label,
+            }),
+            {}
+          ),
+          value: (metric && metric.value) || 0,
+          avg: (metric && metric.avg) || 0,
+          max: (metric && metric.max) || 0,
+          node: createWaffleMapNode(node),
+        };
+      }),
+    [nodes]
+  );
 
   return (
     <EuiInMemoryTable pagination={true} sorting={initialSorting} items={items} columns={columns} />

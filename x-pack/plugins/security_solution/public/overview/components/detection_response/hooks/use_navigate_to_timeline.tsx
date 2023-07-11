@@ -7,14 +7,18 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { sourcererActions } from '../../../../common/store/sourcerer';
-import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+import {
+  getDataProvider,
+  getDataProviderAnd,
+} from '../../../../common/components/event_details/table/use_action_cell_data_provider';
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererSelectors } from '../../../../common/store';
@@ -83,19 +87,20 @@ export const useNavigateToTimeline = () => {
         if (mainFilter) {
           const dataProvider = getDataProvider(
             mainFilter.field,
-            uuid(),
+            uuidv4(),
             mainFilter.value,
             mainFilter.operator
           );
 
           for (const filter of orFilterGroup.slice(1)) {
             dataProvider.and.push(
-              getDataProvider(filter.field, uuid(), filter.value, filter.operator)
+              getDataProviderAnd(filter.field, uuidv4(), filter.value, filter.operator)
             );
           }
           dataProviders.push(dataProvider);
         }
       }
+
       navigateToTimeline(dataProviders, timeRange);
     },
     [navigateToTimeline]

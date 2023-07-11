@@ -7,10 +7,16 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types';
+import type {
+  DataTableState,
+  DataTableModel,
+  TableIdLiteral,
+} from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
+import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { DataTableModel } from '../../../common/store/data_table/model';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
 const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';
@@ -54,6 +60,11 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         deletedEventIds: timelineModel.deletedEventIds,
         expandedDetail: timelineModel.expandedDetail,
         totalCount: timelineModel.totalCount || 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
         ...(Array.isArray(timelineModel.columns)
           ? {
               columns: timelineModel.columns
@@ -64,6 +75,42 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
       },
     };
   }, {} as { [K in TableIdLiteral]: DataTableModel });
+};
+
+export const migrateAlertTableStateToTriggerActionsState = (
+  storage: Storage,
+  legacyDataTableState: DataTableState['dataTable']['tableById']
+) => {
+  const triggerActionsStateKey: Record<string, string> = {
+    [TableId.alertsOnAlertsPage]: `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}-gridView`,
+    [TableId.alertsOnRuleDetailsPage]: `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}-gridView`,
+  };
+
+  const triggersActionsState = Object.keys(legacyDataTableState)
+    .filter((tableKey) => {
+      return tableKey in triggerActionsStateKey && !storage.get(triggerActionsStateKey[tableKey]);
+    })
+    .map((tableKey) => {
+      const newKey = triggerActionsStateKey[
+        tableKey as keyof typeof triggerActionsStateKey
+      ] as string;
+      return {
+        [newKey]: {
+          columns: legacyDataTableState[tableKey].columns,
+          sort: legacyDataTableState[tableKey].sort.map((sortCandidate) => ({
+            [sortCandidate.columnId]: { order: sortCandidate.sortDirection },
+          })),
+          visibleColumns: legacyDataTableState[tableKey].columns.map((c) => c.id),
+        },
+      };
+    });
+
+  triggersActionsState.forEach((stateObj) =>
+    Object.keys(stateObj).forEach((key) => {
+      storage.set(key, stateObj[key]);
+    })
+  );
+  return Object.assign(legacyDataTableState, triggersActionsState);
 };
 
 /**
@@ -107,6 +154,8 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
       return EMPTY_TABLE;
     }
   }
+
+  allDataTables = migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import {
   FormulaParams,
@@ -46,7 +46,7 @@ export const createFormulaColumn = (
 export const createFormulaColumnWithoutMeta = (formula: string): BaseFormulaColumn => {
   const params = convertToFormulaParams(formula);
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'formula',
     references: [],
     dataType: 'string',
@@ -139,6 +139,11 @@ export const convertMathToFormulaColumn = (
 
   if (script === null) {
     return null;
+  }
+
+  // now replace the _interval with the new interval() formula
+  if (script.includes('params._interval')) {
+    script = script.replaceAll('params._interval', 'interval()');
   }
 
   const scripthasNoStaticNumber = isNaN(Number(script));

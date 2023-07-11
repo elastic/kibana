@@ -6,20 +6,20 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { Switch, useParams } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { useParams } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { useGetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getAlertDetailsTabUrl } from '../../../common/components/link_to';
 import { AlertDetailRouteType } from './types';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { getAlertDetailsNavTabs } from './utils/navigation';
 import { SecurityPageName } from '../../../../common/constants';
 import { eventID } from '../../../../common/endpoint/models/event';
@@ -73,9 +73,9 @@ export const AlertDetailsPage = memo(() => {
       {hasData && (
         <>
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
-          <SecuritySolutionTabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
+          <TabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
-          <Switch>
+          <Routes>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
               <DetailsSummaryTab
                 eventId={eventId}
@@ -85,7 +85,7 @@ export const AlertDetailsPage = memo(() => {
                 sourcererDataView={sourcererDataView}
               />
             </Route>
-          </Switch>
+          </Routes>
         </>
       )}
       <SpyRoute pageName={SecurityPageName.alerts} state={{ ruleName }} />

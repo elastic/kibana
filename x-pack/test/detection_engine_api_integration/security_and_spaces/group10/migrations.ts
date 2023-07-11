@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -32,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
           references: [{}];
         }>(
           {
-            index: '.kibana',
+            index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
             id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
           },
           {
@@ -79,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
           };
         }>(
           {
-            index: '.kibana',
+            index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
             id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
           },
           {

@@ -5,35 +5,62 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { ErrorsLink } from '../../../../common/links/view_errors';
-import { MonitorErrorSparklines } from '../../../../monitor_details/monitor_summary/monitor_error_sparklines';
-import { MonitorErrorsCount } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
-import { selectOverviewStatus } from '../../../../../state';
+import { useMonitorQueryIds } from '../overview_alerts';
+import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { OverviewErrorsSparklines } from './overview_errors_sparklines';
+import { useRefreshedRange, useGetUrlParams } from '../../../../../hooks';
+import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
   const { status } = useSelector(selectOverviewStatus);
 
+  const loading = !status?.allIds || status?.allIds.length === 0;
+
+  const { from, to } = useRefreshedRange(6, 'hours');
+
+  const { locations } = useGetUrlParams();
+
+  const monitorIds = useMonitorQueryIds();
+
   return (
-    <EuiPanel style={{ width: 500 }} hasShadow={false} hasBorder>
+    <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
         <h3>{headingText}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={false}>
-          <MonitorErrorsCount from="now-6h/h" to="now" monitorId={status?.enabledIds ?? []} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <MonitorErrorSparklines from="now-6h/h" to="now" monitorId={status?.enabledIds ?? []} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
-          <ErrorsLink disabled={true} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {loading ? (
+        <EuiSkeletonText lines={3} />
+      ) : (
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <OverviewErrorsCount
+              from={from}
+              to={to}
+              monitorIds={monitorIds}
+              locations={locations}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <OverviewErrorsSparklines
+              from={from}
+              to={to}
+              monitorIds={monitorIds}
+              locations={locations}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiPanel>
   );
 }

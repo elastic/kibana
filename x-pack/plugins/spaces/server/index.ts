@@ -27,16 +27,15 @@ export type {
   SpacesClientWrapper,
 } from './spaces_client';
 
-export type {
-  Space,
-  GetAllSpacesOptions,
-  GetAllSpacesPurpose,
-  GetSpaceResult,
-  LegacyUrlAliasTarget,
-} from '../common';
+export type { Space, GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
+  exposeToBrowser: {
+    maxSpaces: true,
+    allowFeatureVisibility: true,
+  },
 };
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SpacesPlugin(initializerContext);

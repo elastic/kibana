@@ -22,10 +22,15 @@ const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
+const DASHBOARD_TOP_OFFSET = 96 + 105; // 96 for Kibana navigation bar + 105 for dashboard top nav bar (in edit mode)
+
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
-  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
   private readonly inspector = this.ctx.getService('inspector');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
@@ -42,19 +47,24 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async toggleContextMenu(parent?: WebElementWrapper) {
-    this.log.debug('toggleContextMenu');
-    await (parent ? parent.moveMouseTo() : this.testSubjects.moveMouseTo('dashboardPanelTitle'));
+    this.log.debug(`toggleContextMenu(${parent})`);
+    if (parent) {
+      await parent.scrollIntoViewIfNecessary(DASHBOARD_TOP_OFFSET);
+      await this.browser.getActions().move({ x: 0, y: 0, origin: parent._webElement }).perform();
+    } else {
+      await this.testSubjects.moveMouseTo('dashboardPanelTitle');
+    }
     const toggleMenuItem = await this.findContextMenu(parent);
-    await toggleMenuItem.click();
+    await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
   }
 
   async expectContextMenuToBeOpen() {
+    this.log.debug('expectContextMenuToBeOpen');
     await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen');
   }
 
   async openContextMenu(parent?: WebElementWrapper) {
     this.log.debug(`openContextMenu(${parent}`);
-    if (await this.testSubjects.exists('embeddablePanelContextMenuOpen')) return;
     await this.toggleContextMenu(parent);
     await this.expectContextMenuToBeOpen();
   }
@@ -64,7 +74,9 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async clickContextMenuMoreItem() {
-    const hasMoreSubPanel = await this.testSubjects.exists('embeddablePanelMore-mainMenu');
+    this.log.debug('clickContextMenuMoreItem');
+    await this.expectContextMenuToBeOpen();
+    const hasMoreSubPanel = await this.hasContextMenuMoreItem();
     if (hasMoreSubPanel) {
       await this.testSubjects.click('embeddablePanelMore-mainMenu');
     }
@@ -77,7 +89,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickEdit() {
     this.log.debug('clickEdit');
-    await this.openContextMenu();
+    await this.expectContextMenuToBeOpen();
     const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
@@ -98,7 +110,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickExpandPanelToggle() {
     this.log.debug(`clickExpandPanelToggle`);
-    await this.openContextMenu();
+    await this.expectContextMenuToBeOpen();
     const isActionVisible = await this.testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
@@ -210,6 +222,9 @@ export class DashboardPanelActionsService extends FtrService {
       await this.clickContextMenuMoreItem();
     }
     await this.testSubjects.click(UNLINK_FROM_LIBRARY_TEST_SUBJ);
+    await this.testSubjects.waitForDeleted(
+      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+    );
   }
 
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
@@ -224,6 +239,11 @@ export class DashboardPanelActionsService extends FtrService {
       clearWithKeyboard: true,
     });
     await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+      );
+    });
   }
 
   async expectExistsPanelAction(testSubject: string, title?: string) {
@@ -299,50 +319,6 @@ export class DashboardPanelActionsService extends FtrService {
 
   async getPanelHeading(title: string) {
     return await this.testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
-  }
-
-  async clickHidePanelTitleToggle() {
-    await this.testSubjects.click('customizePanelHideTitle');
-  }
-
-  async toggleHidePanelTitle(originalTitle?: string) {
-    this.log.debug(`hidePanelTitle(${originalTitle})`);
-    if (originalTitle) {
-      const panelOptions = await this.getPanelHeading(originalTitle);
-      await this.customizePanel(panelOptions);
-    } else {
-      await this.customizePanel();
-    }
-    await this.clickHidePanelTitleToggle();
-    await this.testSubjects.click('saveNewTitleButton');
-  }
-
-  /**
-   *
-   * @param customTitle
-   * @param originalTitle - optional to specify which panel to change the title on.
-   * @return {Promise<void>}
-   */
-  async setCustomPanelTitle(customTitle: string, originalTitle?: string) {
-    this.log.debug(`setCustomPanelTitle(${customTitle}, ${originalTitle})`);
-    if (originalTitle) {
-      const panelOptions = await this.getPanelHeading(originalTitle);
-      await this.customizePanel(panelOptions);
-    } else {
-      await this.customizePanel();
-    }
-    await this.testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle, {
-      clearWithKeyboard: customTitle === '', // if clearing the title using the empty string as the new value, 'clearWithKeyboard' must be true; otherwise, false
-    });
-    await this.testSubjects.click('saveNewTitleButton');
-  }
-
-  async resetCustomPanelTitle(panel?: WebElementWrapper) {
-    this.log.debug('resetCustomPanelTitle');
-    await this.customizePanel(panel);
-    await this.testSubjects.click('resetCustomEmbeddablePanelTitle');
-    await this.testSubjects.click('saveNewTitleButton');
-    await this.toggleContextMenu(panel);
   }
 
   async getActionWebElementByText(text: string): Promise<WebElementWrapper> {

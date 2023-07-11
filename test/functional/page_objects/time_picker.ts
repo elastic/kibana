@@ -47,6 +47,10 @@ export class TimePickerPageObject extends FtrService {
     await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
   }
 
+  async waitForNoDataPopover() {
+    await this.testSubjects.find('noDataPopoverDismissButton');
+  }
+
   async ensureHiddenNoDataPopover() {
     const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton', {
       timeout: 100,
@@ -140,12 +144,10 @@ export class TimePickerPageObject extends FtrService {
     }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
-    let panel!: WebElementWrapper;
 
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
-      panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
@@ -160,8 +162,6 @@ export class TimePickerPageObject extends FtrService {
     // set from time
     await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
       await this.testSubjects.click('superDatePickerstartDatePopoverButton');
-      await this.waitPanelIsGone(panel);
-      panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
@@ -192,7 +192,6 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('querySubmitButton');
     }
 
-    await this.waitPanelIsGone(panel);
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 

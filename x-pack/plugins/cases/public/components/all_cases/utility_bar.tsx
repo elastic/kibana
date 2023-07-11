@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import type { Case } from '../../../common/ui/types';
+import type { CasesUI } from '../../../common/ui/types';
 import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -25,7 +25,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 interface Props {
   isSelectorView?: boolean;
   totalCases: number;
-  selectedCases: Case[];
+  selectedCases: CasesUI;
   deselectCases: () => void;
 }
 
@@ -43,7 +43,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
       refreshCases();
     }, [deselectCases, refreshCases]);
 
-    const { panels, modals } = useBulkActions({
+    const { panels, modals, flyouts } = useBulkActions({
       selectedCases,
       onAction: closePopover,
       onActionSuccess: onRefresh,
@@ -135,6 +135,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         {modals}
+        {flyouts}
       </>
     );
   }

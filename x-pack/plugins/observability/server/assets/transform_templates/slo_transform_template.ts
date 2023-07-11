@@ -21,6 +21,7 @@ export interface TransformSettings {
 
 export const getSLOTransformTemplate = (
   transformId: string,
+  description: string,
   source: TransformSource,
   destination: TransformDestination,
   groupBy: TransformPivot['group_by'] = {},
@@ -28,6 +29,7 @@ export const getSLOTransformTemplate = (
   settings: TransformSettings
 ): TransformPutTransformRequest => ({
   transform_id: transformId,
+  description,
   source,
   frequency: settings.frequency,
   dest: destination,
@@ -46,5 +48,7 @@ export const getSLOTransformTemplate = (
   },
   _meta: {
     version: 1,
+    managed: true,
+    managed_by: 'observability',
   },
 });

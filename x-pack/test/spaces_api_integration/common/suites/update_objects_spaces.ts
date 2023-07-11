@@ -14,6 +14,7 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateObjectsSpacesResponse,
 } from '@kbn/core/server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { SPACES } from '../lib/spaces';
 import {
   expectResponses,
@@ -98,11 +99,11 @@ export function updateObjectsSpacesTestSuiteFactory(
             if (expectAliasDifference !== undefined) {
               // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
               if (!hasRefreshed) {
-                await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+                await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
                 hasRefreshed = true;
               }
               const searchResponse = await es.search({
-                index: '.kibana',
+                index: ALL_SAVED_OBJECT_INDICES,
                 body: {
                   size: 0,
                   query: { terms: { type: ['legacy-url-alias'] } },

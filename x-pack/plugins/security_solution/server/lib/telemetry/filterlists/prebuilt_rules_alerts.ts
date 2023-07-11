@@ -10,6 +10,7 @@ import type { AllowlistFields } from './types';
 export const prebuiltRuleAllowlistFields: AllowlistFields = {
   _id: true,
   id: true,
+  package_version: true,
   '@timestamp': true,
   // Base alert fields
   'kibana.alert.ancestors': true,
@@ -66,6 +67,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'event.dataset': true,
   'event.outcome': true,
   'event.module': true,
+  'powershell.file.script_block_text': true,
   job_id: true,
   causes: true,
   typical: true,
@@ -76,20 +78,42 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   agent: {
     id: true,
   },
-  destination: {
-    port: true,
+  cloud: {
+    availability_zone: true,
+    provider: true,
+    region: true,
   },
+  cloud_defend: true,
+  container: {
+    id: true,
+    image: {
+      name: true,
+      tag: true,
+      hash: true,
+    },
+  },
+  destination: true,
   dll: {
+    Ext: {
+      relative_file_creation_time: true,
+      relative_file_name_modify_time: true,
+    },
     code_signature: {
       status: true,
       subject_name: true,
+      trusted: true,
+    },
+    name: true,
+    path: true,
+    pe: {
+      original_file_name: true,
+      imphash: true,
+    },
+    hash: {
+      sha256: true,
     },
   },
-  dns: {
-    question: {
-      name: true,
-    },
-  },
+  dns: true,
   event: true,
   group: {
     name: true,
@@ -109,12 +133,15 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   message: true,
-  network: {
-    bytes: true,
-    direction: true,
-    protocol: true,
-    transport: true,
-    type: true,
+  network: true,
+  orchestrator: {
+    namespace: true,
+    resource: {
+      parent: {
+        type: true,
+      },
+      type: true,
+    },
   },
   process: {
     args: true,
@@ -124,17 +151,29 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       trusted: true,
     },
     command_line: true,
+    end: true,
     entity_id: true,
+    entry_leader: true,
     executable: true,
+    exit_code: true,
     Ext: {
+      api: {
+        name: true,
+      },
+      effective_parent: {
+        executable: true,
+        name: true,
+      },
       token: {
         integrity_level_name: true,
       },
     },
+    group: true,
+    interactive: true,
     name: true,
     parent: {
       args: true,
-      commmand_line: true,
+      command_line: true,
       entity_id: true,
       executable: true,
       Ext: {
@@ -144,14 +183,20 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
       name: true,
       pid: true,
-      original_file_name: true,
+      pe: {
+        original_file_name: true,
+      },
     },
     pid: true,
+    session_leader: true,
+    start: true,
+    user: true,
+    tty: true,
     working_directory: true,
   },
   registry: {
     data: {
-      string: true,
+      strings: true,
     },
     path: true,
     value: true,
@@ -159,20 +204,14 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   rule: {
     name: true,
   },
-  source: {
-    port: true,
-  },
+  source: true,
   tls: {
     server: {
       hash: true,
     },
   },
   type: true,
-  url: {
-    extension: true,
-    full: true,
-    path: true,
-  },
+  url: true,
   user_agent: {
     original: true,
   },
@@ -211,6 +250,9 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         target_resources: true,
       },
     },
+    properties: {
+      category: true,
+    },
     signinlogs: {
       properties: {
         app_display_name: true,
@@ -228,7 +270,13 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   file: {
+    directory: true,
     Ext: {
+      entropy: true,
+      header_bytes: true,
+      original: {
+        name: true,
+      },
       windows: {
         zone_identifier: true,
       },
@@ -249,6 +297,85 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       setting: {
         name: true,
       },
+      application: {
+        name: true,
+      },
+      old_value: true,
+      role: {
+        name: true,
+      },
+    },
+    event: {
+      type: true,
+    },
+  },
+  // kubernetes
+  kubernetes: {
+    audit: {
+      annotations: true,
+      verb: true,
+      user: {
+        groups: true,
+      },
+      impersonatedUser: {
+        groups: true,
+      },
+      objectRef: {
+        name: true,
+        namespace: true,
+        resource: true,
+        subresource: true,
+      },
+      requestObject: {
+        spec: {
+          containers: {
+            image: true,
+            securityContext: {
+              allowPrivilegeEscalation: true,
+              capabilities: {
+                add: true,
+              },
+              privileged: true,
+              procMount: true,
+              runAsGroup: true,
+              runAsUser: true,
+            },
+          },
+          hostIPC: true,
+          hostNetwork: true,
+          hostPID: true,
+          securityContext: {
+            runAsGroup: true,
+            runAsUser: true,
+          },
+          serviceAccountName: true,
+          type: true,
+          volumes: {
+            hostPath: {
+              path: true,
+            },
+          },
+        },
+      },
+      requestURI: true,
+      responseObject: {
+        roleRef: {
+          kind: true,
+          resourceName: true,
+        },
+        rules: true,
+        spec: {
+          containers: {
+            securityContext: {
+              allowPrivilegeEscalation: true,
+            },
+          },
+        },
+      },
+      responseStatus: {
+        code: true,
+      },
+      userAgent: true,
     },
   },
   // office 360
@@ -271,13 +398,13 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         Enabled: true,
         ForwardAsAttachmentTo: true,
         ForwardTo: true,
+        ModifiedProperties: {
+          Role_DisplayName: {
+            NewValue: true,
+          },
+        },
         RedirectTo: true,
       },
-    },
-  },
-  powershell: {
-    file: {
-      script_block_text: true,
     },
   },
   // winlog

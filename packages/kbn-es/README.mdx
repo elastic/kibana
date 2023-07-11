@@ -70,6 +70,16 @@ Type: `String`
 
 Location where snapshots are cached
 
+## Snapshot Updates
+
+Snapshots are built and tested daily.  If tests pass, the snapshot is promoted and will automatically be used when started from the CLI.
+
+CI pipelines supporting this can be found at:
+
+- https://buildkite.com/elastic/kibana-elasticsearch-snapshot-build
+- https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify
+- https://buildkite.com/elastic/kibana-elasticsearch-snapshot-promote
+
 ## Snapshot Pinning
 
 Sometimes we need to pin snapshots for a specific version. We'd really like to get this automated, but until that is completed here are the steps to take to build, upload, and switch to pinned snapshots for a branch.

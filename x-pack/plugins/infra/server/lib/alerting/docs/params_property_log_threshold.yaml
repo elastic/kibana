@@ -1,0 +1,163 @@
+# @kbn-doc-linker partial
+
+oneOf:
+  - title: Count
+    type: object
+    required:
+      - count
+      - timeSize
+      - timeUnit
+      - logView
+    properties:
+      criteria:
+        type: array
+        items:
+          type: object
+          properties:
+            field:
+              type: string
+              example: "my.field"
+            comparator:
+              type: string
+              enum:
+                - "more than"
+                - "more than or equals"
+                - "less than"
+                - "less than or equals"
+                - "equals"
+                - "does not equal"
+                - "matches"
+                - "does not match"
+                - "matches phrase"
+                - "does not match phrase"
+            value:
+              oneOf:
+                - type: number
+                  example: 42
+                - type: string
+                  example: "value"
+      count:
+        type: object
+        properties:
+          comparator: 
+            type: string
+            enum:
+              - "more than"
+              - "more than or equals"
+              - "less than"
+              - "less than or equals"
+              - "equals"
+              - "does not equal"
+              - "matches"
+              - "does not match"
+              - "matches phrase"
+              - "does not match phrase"
+          value:
+            type: number
+            example: 100
+      timeSize:
+        type: number
+        example: 6
+      timeUnit:
+        type: string
+        enum:
+          - s
+          - m
+          - h
+          - d
+      logView:
+        type: object
+        properties:
+          logViewId:
+            type: string
+          type:
+            type: string
+            enum: [log-view-reference]
+            example: "log-view-reference"
+      groupBy:
+        type: array
+        items:
+          type: string
+        
+      
+  - title: Ratio
+    type: object
+    required:
+      - count
+      - timeSize
+      - timeUnit
+      - logView
+    properties:
+      criteria:
+        type: array
+        items:
+          minItems: 2
+          maxItems: 2
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "my.field"
+              comparator:
+                type: string
+                enum:
+                  - "more than"
+                  - "more than or equals"
+                  - "less than"
+                  - "less than or equals"
+                  - "equals"
+                  - "does not equal"
+                  - "matches"
+                  - "does not match"
+                  - "matches phrase"
+                  - "does not match phrase"
+              value:
+                oneOf:
+                  - type: number
+                    example: 42
+                  - type: string
+                    example: "value"
+      count:
+        type: object
+        properties:
+          comparator: 
+            type: string
+            enum:
+              - "more than"
+              - "more than or equals"
+              - "less than"
+              - "less than or equals"
+              - "equals"
+              - "does not equal"
+              - "matches"
+              - "does not match"
+              - "matches phrase"
+              - "does not match phrase"
+          value:
+            type: number
+            example: 100
+      timeSize:
+        type: number
+        example: 6
+      timeUnit:
+        type: string
+        enum:
+          - s
+          - m
+          - h
+          - d
+      logView:
+        type: object
+        properties:
+          logViewId:
+            type: string
+          type:
+            type: string
+            enum: [log-view-reference]
+            example: "log-view-reference"
+      groupBy:
+        type: array
+        items:
+          type: string

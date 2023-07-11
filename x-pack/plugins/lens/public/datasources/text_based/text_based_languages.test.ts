@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
-import { DatasourcePublicAPI, Datasource } from '../../types';
+import { DatasourcePublicAPI, Datasource, FrameDatasourceAPI } from '../../types';
 
 jest.mock('../../id_generator');
 
@@ -133,29 +133,32 @@ describe('Textbased Data Source', () => {
 
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
-      const map = TextBasedDatasource.uniqueLabels({
-        layers: {
-          a: {
-            columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Foo',
-                meta: {
-                  type: 'number',
+                {
+                  columnId: 'b',
+                  fieldName: 'Foo',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-            ],
-            index: 'foo',
+              ],
+              index: 'foo',
+            },
           },
-        },
-      } as unknown as TextBasedPrivateState);
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -407,6 +410,22 @@ describe('Textbased Data Source', () => {
       );
       expect(suggestions[0].state).toEqual({
         ...state,
+        fieldList: [
+          {
+            id: 'newid',
+            meta: {
+              type: 'number',
+            },
+            name: 'bytes',
+          },
+          {
+            id: 'newid',
+            meta: {
+              type: 'string',
+            },
+            name: 'dest',
+          },
+        ],
         layers: {
           newid: {
             allColumns: [
@@ -441,7 +460,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            index: 'foo',
+            index: '1',
             query: {
               sql: 'SELECT * FROM "foo"',
             },
@@ -496,8 +515,8 @@ describe('Textbased Data Source', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
-    it('should use the results of getErrorMessages directly when single layer', () => {
+  describe('#getUserMessages', () => {
+    it('should use the results of getUserMessages directly when single layer', () => {
       const state = {
         layers: {
           a: {
@@ -539,10 +558,43 @@ describe('Textbased Data Source', () => {
           },
         },
       } as unknown as TextBasedPrivateState;
-      expect(TextBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'error 1', shortMessage: 'error 1' },
-        { longMessage: 'error 2', shortMessage: 'error 2' },
-      ]);
+      expect(
+        TextBasedDatasource.getUserMessages(state, {
+          frame: { dataViews: indexPatterns } as unknown as FrameDatasourceAPI,
+          setState: () => {},
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "visualization",
+              },
+              Object {
+                "id": "textBasedLanguagesQueryInput",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 1",
+            "severity": "error",
+            "shortMessage": "error 1",
+          },
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "visualization",
+              },
+              Object {
+                "id": "textBasedLanguagesQueryInput",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 2",
+            "severity": "error",
+            "shortMessage": "error 2",
+          },
+        ]
+      `);
     });
   });
 
@@ -647,9 +699,9 @@ describe('Textbased Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
-      expect(TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange)).toEqual(
-        null
-      );
+      expect(
+        TextBasedDatasource.toExpression(state, 'first', indexPatterns, dateRange, new Date())
+      ).toEqual(null);
     });
 
     it('should generate an expression for an SQL query', async () => {
@@ -699,8 +751,9 @@ describe('Textbased Data Source', () => {
         ],
       } as unknown as TextBasedPrivateState;
 
-      expect(TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange))
-        .toMatchInlineSnapshot(`
+      expect(
+        TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange, new Date())
+      ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

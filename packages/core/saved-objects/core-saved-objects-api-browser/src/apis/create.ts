@@ -15,6 +15,7 @@ import type {
  * Options for creating a saved object.
  *
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsCreateOptions {
   /**
@@ -23,10 +24,23 @@ export interface SavedObjectsCreateOptions {
   id?: string;
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
+  /**
+   * {@inheritDoc SavedObjectsMigrationVersion}
+   * @deprecated
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
   /** A semver value that is used when upgrading objects between Kibana versions. */
   coreMigrationVersion?: string;
+  /** A semver value that is used when migrating documents between Kibana versions. */
+  typeMigrationVersion?: string;
   /** Array of referenced saved objects. */
   references?: SavedObjectReference[];
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false)
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }

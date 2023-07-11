@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { SecuritySolutionTabNavigationProps } from '../types';
-import type { SiemRouteType } from '../../../utils/route/types';
+import type { NavTab } from '../types';
 
-export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
-  pathName: string;
-  pageName: string;
-  tabName: SiemRouteType | undefined;
+export interface TabNavigationProps {
+  navTabs: Record<string, NavTab>;
 }
 
 export interface TabNavigationItemProps {

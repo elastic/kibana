@@ -13,8 +13,8 @@ import {
   createSplitStream,
   createReplaceStream,
   createMapStream,
-  kibanaPackageJson,
 } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { RECORD_SEPARATOR } from './constants';
 

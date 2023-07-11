@@ -7,10 +7,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-import type { CaseStatuses } from '@kbn/cases-plugin/common';
-import type { Cases } from '@kbn/cases-plugin/common/ui';
+import type { CaseStatuses, CasesFindResponseUI } from '@kbn/cases-plugin/common';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -46,7 +45,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<CaseItem[]>([]);
   // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `useCaseItems-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `useCaseItems-${uuidv4()}`, []);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -103,7 +102,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
   return { items, isLoading, updatedAt };
 };
 
-function parseCases(casesResponse: Cases): CaseItem[] {
+function parseCases(casesResponse: CasesFindResponseUI): CaseItem[] {
   const allCases = casesResponse.cases || [];
 
   return allCases.reduce<CaseItem[]>((accumulated, currentCase) => {

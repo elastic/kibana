@@ -18,6 +18,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import {
   getDisplayValueFromFilter,
@@ -25,8 +26,8 @@ import {
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { FilterLabel } from '../filter_bar';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FilterContent } from '../filter_badge';
 
 interface Props {
   filters: Filter[];
@@ -58,7 +59,7 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
   private getLabel = (filter: Filter) => {
     const valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const fieldLabel = getFieldDisplayValueFromFilter(filter, this.props.indexPatterns);
-    return <FilterLabel filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
+    return <FilterContent filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
   };
 
   public render() {
@@ -77,6 +78,9 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
               label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
+              css={css`
+                word-break: break-word;
+              `}
             />
           </EuiFormRow>
         ))}
@@ -87,12 +91,10 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
       <React.Fragment>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>
-              <FormattedMessage
-                id="unifiedSearch.filter.applyFilters.popupHeader"
-                defaultMessage="Select filters to apply"
-              />
-            </h1>
+            <FormattedMessage
+              id="unifiedSearch.filter.applyFilters.popupHeader"
+              defaultMessage="Select filters to apply"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 

@@ -29,11 +29,10 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -42,45 +41,51 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+
 import {
   createRegionMapFn,
+  GEOHASH_GRID,
+  getGeoHashBucketAgg,
   regionMapRenderer,
   regionMapVisType,
   createTileMapFn,
   tileMapRenderer,
   tileMapVisType,
 } from './legacy_visualizations';
-import {
-  MapsAppLocatorDefinition,
-  MapsAppRegionMapLocatorDefinition,
-  MapsAppTileMapLocatorDefinition,
-} from './locators';
+import { MapsAppLocatorDefinition } from './locators/map_locator/locator_definition';
+import { MapsAppTileMapLocatorDefinition } from './locators/tile_map_locator/locator_definition';
+import { MapsAppRegionMapLocatorDefinition } from './locators/region_map_locator/locator_definition';
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import { registerSource } from './classes/sources/source_registry';
-import { registerLayerWizardExternal } from './classes/layers';
+import { registerLayerWizardExternal } from './classes/layers/wizards/layer_wizard_registry';
 import {
   createLayerDescriptors,
   MapsSetupApi,
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
-import { lazyLoadMapModules } from './lazy_load_bundle';
-import { getAppTitle } from '../common/i18n_getters';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
-import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
-import { synchronizeMovementAction } from './trigger_actions/synchronize_movement_action';
+import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/action';
+import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
-import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_NAME, APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
-import { MapInspectorView, VectorTileInspectorView } from './inspector';
+import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
+import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
 import { setupLensChoroplethChart } from './lens';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
+  data: DataPublicPluginSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
@@ -91,6 +96,7 @@ export interface MapsPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   screenshotMode?: ScreenshotModePluginSetup;
+  contentManagement: ContentManagementPublicSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -106,13 +112,13 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
-  savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  contentManagement: ContentManagementPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -179,12 +185,12 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(getMapsVisTypeAlias(plugins.visualizations));
+    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
     plugins.embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
     core.application.register({
       id: APP_ID,
-      title: getAppTitle(),
+      title: APP_NAME,
       order: 4000,
       icon: `plugins/${APP_ID}/icon.svg`,
       euiIconType: APP_ICON_SOLUTION,
@@ -193,14 +199,23 @@ export class MapsPlugin
         const [coreStart, { savedObjectsTagging }] = await core.getStartServices();
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-        const { renderApp } = await lazyLoadMapModules();
+        const { renderApp } = await import('./render_app');
         return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
+    });
+
+    plugins.contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: APP_NAME,
     });
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
+    plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
     plugins.visualizations.createBaseVisualization(regionMapVisType);

@@ -7,16 +7,12 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  getFileKindsRegistry,
-  setFileKindsRegistry,
-  FileKindsRegistryImpl,
-} from '../common/file_kinds_registry';
 import type { FilesClient, FilesClientFactory } from './types';
+import { FileKindsRegistryImpl } from '../common/file_kinds_registry';
 import { createFilesClient } from './files_client';
-import { FileKind } from '../common';
-import { registerDefaultFileKinds } from '../common/register_default_file_kinds';
+import { FileKindBrowser } from '../common';
 import { ScopedFilesClient } from '.';
+import * as DefaultImageFileKind from '../common/default_image_file_kind';
 
 /**
  * Public setup-phase contract
@@ -24,7 +20,7 @@ import { ScopedFilesClient } from '.';
 export interface FilesSetup {
   /**
    * A factory for creating an {@link FilesClient} instance. This requires a
-   * registered {@link FileKind}.
+   * registered {@link FileKindBrowser}.
    *
    * @track-adoption
    */
@@ -36,35 +32,47 @@ export interface FilesSetup {
    *
    * @param {FileKind} fileKind - the file kind to register
    */
-  registerFileKind(fileKind: FileKind): void;
+  registerFileKind(fileKind: FileKindBrowser): void;
 }
 
-export type FilesStart = Pick<FilesSetup, 'filesClientFactory'>;
+export type FilesStart = Pick<FilesSetup, 'filesClientFactory'> & {
+  getFileKindDefinition: (id: string) => FileKindBrowser;
+  getAllFindKindDefinitions: () => FileKindBrowser[];
+};
 
 /**
  * Bringing files to Kibana
  */
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
-  private filesClientFactory: undefined | FilesClientFactory;
-
-  constructor() {
-    setFileKindsRegistry(new FileKindsRegistryImpl());
-  }
+  private registry = new FileKindsRegistryImpl<FileKindBrowser>();
+  private filesClientFactory?: FilesClientFactory;
 
   setup(core: CoreSetup): FilesSetup {
+    this.registry.register({
+      ...DefaultImageFileKind.kind,
+      maxSizeBytes: DefaultImageFileKind.maxSize,
+    });
+
     this.filesClientFactory = {
-      asScoped<M = unknown>(fileKind: string) {
-        return createFilesClient({ fileKind, http: core.http }) as ScopedFilesClient<M>;
+      asScoped: <M = unknown>(fileKind: string) => {
+        return createFilesClient({
+          registry: this.registry,
+          fileKind,
+          http: core.http,
+        }) as ScopedFilesClient<M>;
       },
-      asUnscoped<M>() {
-        return createFilesClient({ http: core.http }) as FilesClient<M>;
+      asUnscoped: <M>() => {
+        return createFilesClient({
+          registry: this.registry,
+          http: core.http,
+        }) as FilesClient<M>;
       },
     };
-    registerDefaultFileKinds();
+
     return {
       filesClientFactory: this.filesClientFactory,
-      registerFileKind: (fileKind: FileKind) => {
-        getFileKindsRegistry().register(fileKind);
+      registerFileKind: (fileKind: FileKindBrowser) => {
+        this.registry.register(fileKind);
       },
     };
   }
@@ -72,6 +80,12 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
   start(core: CoreStart): FilesStart {
     return {
       filesClientFactory: this.filesClientFactory!,
+      getFileKindDefinition: (id: string): FileKindBrowser => {
+        return this.registry.get(id);
+      },
+      getAllFindKindDefinitions: (): FileKindBrowser[] => {
+        return this.registry.getAll();
+      },
     };
   }
 }

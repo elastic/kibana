@@ -35,6 +35,10 @@ interface OptionalFilterParams {
   userIds?: string[];
   /** Will filter out the action requests so that only those show `expiration` date is greater than now */
   unExpiredOnly?: boolean;
+  /** list of action Ids that should have outputs */
+  withOutputs?: string[];
+  /** Include automated response actions */
+  types?: string[];
 }
 
 /**
@@ -55,6 +59,8 @@ export const getActionListByStatus = async ({
   statuses,
   userIds,
   unExpiredOnly = false,
+  types,
+  withOutputs,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
   esClient: ElasticsearchClient;
@@ -76,6 +82,8 @@ export const getActionListByStatus = async ({
     startDate,
     userIds,
     unExpiredOnly,
+    types,
+    withOutputs,
   });
 
   // filter out search results based on status filter options
@@ -113,6 +121,8 @@ export const getActionList = async ({
   startDate,
   userIds,
   unExpiredOnly = false,
+  withOutputs,
+  types,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -135,6 +145,8 @@ export const getActionList = async ({
     startDate,
     userIds,
     unExpiredOnly,
+    withOutputs,
+    types,
   });
 
   return {
@@ -169,6 +181,8 @@ const getActionDetailsList = async ({
   startDate,
   userIds,
   unExpiredOnly,
+  withOutputs,
+  types,
 }: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
@@ -190,6 +204,7 @@ const getActionDetailsList = async ({
       size,
       userIds,
       unExpiredOnly,
+      types,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
@@ -260,10 +275,8 @@ const getActionDetailsList = async ({
     );
 
     // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors, agentState } = getActionCompletionInfo(
-      action.agents,
-      matchedResponses
-    );
+    const { isCompleted, completedAt, wasSuccessful, errors, agentState, outputs } =
+      getActionCompletionInfo(action, matchedResponses);
 
     const { isExpired, status } = getActionStatus({
       expirationDate: action.expiration,
@@ -271,9 +284,6 @@ const getActionDetailsList = async ({
       wasSuccessful,
     });
 
-    // NOTE: `outputs` is not returned in this service because including it on a list of data
-    // could result in a very large response unnecessarily. In the future, we might include
-    // an option to optionally include it.
     const actionRecord: ActionListApiResponse['data'][number] = {
       id: action.id,
       agents: action.agents,
@@ -286,13 +296,18 @@ const getActionDetailsList = async ({
       isCompleted,
       completedAt,
       wasSuccessful,
-      errors,
+      errors: action.error?.message ? [action.error.message] : errors,
       agentState,
       isExpired,
       status,
+      // 8.8 onwards, show outputs only for actions with matching requested action ids
+      outputs: withOutputs && withOutputs.includes(action.id) ? outputs : undefined,
       createdBy: action.createdBy,
       comment: action.comment,
       parameters: action.parameters,
+      alertIds: action.alertIds,
+      ruleId: action.ruleId,
+      ruleName: action.ruleName,
     };
 
     return actionRecord;

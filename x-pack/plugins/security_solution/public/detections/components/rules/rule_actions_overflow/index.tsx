@@ -96,7 +96,13 @@ const RuleActionsOverflowComponent = ({
                   ids: [rule.id],
                   duplicatePayload: {
                     include_exceptions:
-                      modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
+                      modalDuplicationConfirmationResult === DuplicateOptions.withExceptions ||
+                      modalDuplicationConfirmationResult ===
+                        DuplicateOptions.withExceptionsExcludeExpiredExceptions,
+                    include_expired_exceptions: !(
+                      modalDuplicationConfirmationResult ===
+                      DuplicateOptions.withExceptionsExcludeExpiredExceptions
+                    ),
                   },
                 });
 

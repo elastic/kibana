@@ -5,21 +5,32 @@
  * 2.0.
  */
 import React from 'react';
-import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { type CriteriaWithPagination } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { isAgentUpgradeable } from '../../../../services';
+import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useLink, useKibanaVersion } from '../../../../hooks';
+import { useLink, useKibanaVersion, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
+import { Tags } from '../../components/tags';
+import type { AgentMetrics } from '../../../../../../../common/types';
+import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
-import { Tags } from './tags';
+import { EmptyPrompt } from './empty_prompt';
 
 const VERSION_FIELD = 'local_metadata.elastic.agent.version';
 const HOSTNAME_FIELD = 'local_metadata.host.hostname';
@@ -41,10 +52,18 @@ interface Props {
   tableRef?: React.Ref<any>;
   showUpgradeable: boolean;
   totalAgents?: number;
-  noItemsMessage: JSX.Element;
   pagination: Pagination;
   onTableChange: (criteria: CriteriaWithPagination<Agent>) => void;
   pageSizeOptions: number[];
+  isUsingFilter: boolean;
+  setEnrollmentFlyoutState: (
+    value: React.SetStateAction<{
+      isOpen: boolean;
+      selectedPolicyId?: string | undefined;
+    }>
+  ) => void;
+  clearFilters: () => void;
+  isCurrentRequestIncremented: boolean;
 }
 
 export const AgentListTable: React.FC<Props> = (props: Props) => {
@@ -56,14 +75,21 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     sortField,
     sortOrder,
     tableRef,
-    noItemsMessage,
     onTableChange,
     onSelectionChange,
     totalAgents = 0,
     showUpgradeable,
     pagination,
     pageSizeOptions,
+    isUsingFilter,
+    setEnrollmentFlyoutState,
+    clearFilters,
+    isCurrentRequestIncremented,
   } = props;
+
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
+
   const { getHref } = useLink();
   const kibanaVersion = useKibanaVersion();
 
@@ -76,6 +102,34 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     return !isHosted;
   };
 
+  const noItemsMessage =
+    isLoading && isCurrentRequestIncremented ? (
+      <FormattedMessage
+        id="xpack.fleet.agentList.loadingAgentsMessage"
+        defaultMessage="Loading agents…"
+      />
+    ) : isUsingFilter ? (
+      <FormattedMessage
+        id="xpack.fleet.agentList.noFilteredAgentsPrompt"
+        defaultMessage="No agents found. {clearFiltersLink}"
+        values={{
+          clearFiltersLink: (
+            <EuiLink onClick={() => clearFilters()}>
+              <FormattedMessage
+                id="xpack.fleet.agentList.clearFiltersLinkText"
+                defaultMessage="Clear filters"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ) : (
+      <EmptyPrompt
+        hasFleetAllPrivileges={hasFleetAllPrivileges}
+        setEnrollmentFlyoutState={setEnrollmentFlyoutState}
+      />
+    );
+
   const sorting = {
     sort: {
       field: sortField,
@@ -84,19 +138,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   };
 
   const columns = [
-    {
-      field: HOSTNAME_FIELD,
-      sortable: true,
-      name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
-        defaultMessage: 'Host',
-      }),
-      width: '185px',
-      render: (host: string, agent: Agent) => (
-        <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
-          {safeMetadata(host)}
-        </EuiLink>
-      ),
-    },
     {
       field: 'active',
       sortable: false,
@@ -107,17 +148,29 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
-      field: 'tags',
-      sortable: false,
-      width: '210px',
-      name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
-        defaultMessage: 'Tags',
+      field: HOSTNAME_FIELD,
+      sortable: true,
+      name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
+        defaultMessage: 'Host',
       }),
-      render: (tags: string[] = [], agent: any) => <Tags tags={tags} />,
+      width: '185px',
+      render: (host: string, agent: Agent) => (
+        <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
+              {safeMetadata(host)}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <Tags tags={agent.tags ?? []} color="subdued" size="xs" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
     },
     {
       field: 'policy_id',
       sortable: true,
+      truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
@@ -128,11 +181,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
         return (
           <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-            {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />}
+            {agentPolicy && (
+              <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+            )}
             {showWarning && (
               <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="alert" color="warning" />
+                  <EuiIcon size="m" type="warning" color="warning" />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.agentList.outOfDateLabel"
@@ -145,10 +200,80 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         );
       },
     },
+    ...(displayAgentMetrics
+      ? [
+          {
+            field: 'metrics',
+            sortable: false,
+            name: (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.cpuTooltip"
+                    defaultMessage="Average CPU usage in the last 5 minutes"
+                  />
+                }
+              >
+                <span>
+                  <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
+                  &nbsp;
+                  <EuiIcon type="iInCircle" />
+                </span>
+              </EuiToolTip>
+            ),
+            width: '75px',
+            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+              formatAgentCPU(
+                agent.metrics,
+                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+              ),
+          },
+          {
+            field: 'metrics',
+            sortable: false,
+            name: (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.memoryTooltip"
+                    defaultMessage="Average memory usage in the last 5 minutes"
+                  />
+                }
+              >
+                <span>
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.memoryTitle"
+                    defaultMessage="Memory"
+                  />
+                  &nbsp;
+                  <EuiIcon type="iInCircle" />
+                </span>
+              </EuiToolTip>
+            ),
+            width: '90px',
+            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+              formatAgentMemory(
+                agent.metrics,
+                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+              ),
+          },
+        ]
+      : []),
+
+    {
+      field: 'last_checkin',
+      sortable: true,
+      name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
+        defaultMessage: 'Last activity',
+      }),
+      width: '180px',
+      render: (lastCheckin: string, agent: any) =>
+        lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
+    },
     {
       field: VERSION_FIELD,
       sortable: true,
-      width: '135px',
+      width: '70px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
@@ -160,7 +285,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                <EuiIcon size="m" type="alert" color="warning" />
+                <EuiIcon size="m" type="warning" color="warning" />
                 &nbsp;
                 <FormattedMessage
                   id="xpack.fleet.agentList.agentUpgradeLabel"
@@ -171,16 +296,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           ) : null}
         </EuiFlexGroup>
       ),
-    },
-    {
-      field: 'last_checkin',
-      sortable: true,
-      name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
-        defaultMessage: 'Last activity',
-      }),
-      width: '180px',
-      render: (lastCheckin: string, agent: any) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
     },
     {
       name: i18n.translate('xpack.fleet.agentList.actionsColumnTitle', {

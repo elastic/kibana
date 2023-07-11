@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
@@ -37,7 +37,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
   const dataViews = getDataViewsStart();
   try {
     const extendedLayers: Record<number, ExtendedLayer> = {};
-    const seriesNum = model.series.filter((series) => !series.hidden).length;
+    const visibleSeries = model.series.filter((series) => !series.hidden);
+    const seriesNum = visibleSeries.length;
 
     // handle multiple layers/series
     for (const [layerIdx, series] of model.series.entries()) {
@@ -83,8 +84,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         throw invalidModelError();
       }
 
-      const layerId = uuid();
+      const layerId = uuidv4();
       extendedLayers[layerIdx] = {
+        ignoreGlobalFilters: Boolean(
+          model.ignore_global_filter ||
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            visibleSeries.some(({ ignore_global_filter }) => ignore_global_filter)
+        ),
         indexPatternId,
         layerId,
         columns: [...metricsColumns, ...bucketsColumns],

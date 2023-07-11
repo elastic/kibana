@@ -35,7 +35,6 @@ export class ProfilingPlugin
   }
 
   public setup(core: CoreSetup<ProfilingPluginStartDeps>, deps: ProfilingPluginSetupDeps) {
-    this.logger.debug('profiling: Setup');
     const router = core.http.createRouter<ProfilingRequestHandlerContext>();
 
     deps.features.registerKibanaFeature(PROFILING_FEATURE);
@@ -57,12 +56,18 @@ export class ProfilingPlugin
         dependencies: {
           start: depsStart,
           setup: deps,
+          config,
         },
         services: {
-          createProfilingEsClient: ({ request, esClient: defaultEsClient }) => {
-            const esClient = profilingSpecificEsClient
-              ? profilingSpecificEsClient.asScoped(request).asInternalUser
-              : defaultEsClient;
+          createProfilingEsClient: ({
+            request,
+            esClient: defaultEsClient,
+            useDefaultAuth = false,
+          }) => {
+            const esClient =
+              profilingSpecificEsClient && !useDefaultAuth
+                ? profilingSpecificEsClient.asScoped(request).asInternalUser
+                : defaultEsClient;
 
             return createProfilingEsClient({ request, esClient });
           },
@@ -74,7 +79,6 @@ export class ProfilingPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('profiling: Started');
     return {};
   }
 

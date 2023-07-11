@@ -28,9 +28,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -79,9 +79,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -96,6 +96,22 @@
           },
           {
             "parentPluginId": "taskManager",
+            "id": "def-server.TaskManagerPlugin.isNodeBackgroundTasksOnly",
+            "type": "Function",
+            "tags": [],
+            "label": "isNodeBackgroundTasksOnly",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskManagerPlugin.setup",
             "type": "Function",
             "tags": [],
@@ -105,9 +121,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, plugins: { usageCollection?: ",
@@ -141,9 +157,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -198,12 +214,12 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, }: ",
+              "({ savedObjects, elasticsearch, executionContext, docLinks, }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ") => ",
@@ -224,14 +240,14 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n  }",
+                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n    docLinks,\n  }",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -473,15 +489,15 @@
               "\nlist of failed tasks and errors caused failure"
             ],
             "signature": [
-              "{ task: ",
+              "{ type: string; id: string; error: ",
               {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.ConcreteTaskInstance",
-                "text": "ConcreteTaskInstance"
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
               },
-              "; error: Error; }[]"
+              "; }[]"
             ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
             "deprecated": false,
@@ -702,6 +718,33 @@
       },
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.IntervalSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntervalSchedule",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.IntervalSchedule.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nAn interval in minutes (e.g. '5m'). If specified, this is a recurring task."
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.RunContext",
         "type": "Interface",
         "tags": [],
@@ -891,7 +934,13 @@
               "\nA TaskSchedule string, which specifies this as a recurring task.\n\nCurrently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s')."
             ],
             "signature": [
-              "IntervalSchedule",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.IntervalSchedule",
+                "text": "IntervalSchedule"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
@@ -925,6 +974,20 @@
             ],
             "signature": [
               "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.stateVersion",
+            "type": "number",
+            "tags": [],
+            "label": "stateVersion",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
@@ -1076,55 +1139,6 @@
           },
           {
             "parentPluginId": "taskManager",
-            "id": "def-server.TaskRegisterDefinition.getRetry",
-            "type": "Function",
-            "tags": [],
-            "label": "getRetry",
-            "description": [
-              "\nFunction that customizes how the task should behave when the task fails. This\nfunction can return `true`, `false` or a Date. True will tell task manager\nto retry using default delay logic. False will tell task manager to stop retrying\nthis task. Date will suggest when to the task manager the task should retry.\nThis function isn't used for recurring tasks, those retry as per their configured recurring schedule."
-            ],
-            "signature": [
-              "((attempts: number, error: object) => boolean | Date) | undefined"
-            ],
-            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "taskManager",
-                "id": "def-server.TaskRegisterDefinition.getRetry.$1",
-                "type": "number",
-                "tags": [],
-                "label": "attempts",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "taskManager",
-                "id": "def-server.TaskRegisterDefinition.getRetry.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "object"
-                ],
-                "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "taskManager",
             "id": "def-server.TaskRegisterDefinition.createTaskRunner",
             "type": "Function",
             "tags": [],
@@ -1198,6 +1212,28 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.stateSchemaByVersion",
+            "type": "Object",
+            "tags": [],
+            "label": "stateSchemaByVersion",
+            "description": [],
+            "signature": [
+              "Record<number, { schema: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<any>; up: (state: Record<string, unknown>) => Record<string, unknown>; }> | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
@@ -1425,10 +1461,6 @@
               "path": "x-pack/plugins/actions/server/plugin.ts"
             },
             {
-              "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/plugin.ts"
-            },
-            {
               "plugin": "alerting",
               "path": "x-pack/plugins/alerting/server/usage/task.ts"
             }
@@ -1534,15 +1566,7 @@
         "TaskScheduling",
         ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkEnable\" | \"bulkDisable\" | \"bulkSchedule\"> & Pick<",
         "TaskStore",
-        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { bulkRemoveIfExist: (ids: string[]) => Promise<",
-        {
-          "pluginId": "@kbn/core-saved-objects-api-server",
-          "scope": "server",
-          "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-          "section": "def-server.SavedObjectsBulkDeleteResponse",
-          "text": "SavedObjectsBulkDeleteResponse"
-        },
-        " | undefined>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
+        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,

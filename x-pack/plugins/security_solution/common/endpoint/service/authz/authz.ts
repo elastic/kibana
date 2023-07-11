@@ -6,18 +6,10 @@
  */
 
 import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
-import type { Capabilities } from '@kbn/core-capabilities-common';
 
 import type { LicenseService } from '../../../license';
-import type { EndpointPermissions, EndpointAuthz } from '../../types/authz';
+import type { EndpointAuthz } from '../../types/authz';
 import type { MaybeImmutable } from '../../types';
-
-export function defaultEndpointPermissions(): EndpointPermissions {
-  return {
-    canWriteSecuritySolution: false,
-    canReadSecuritySolution: false,
-  };
-}
 
 /**
  * Checks to see if a given Kibana privilege was granted.
@@ -27,27 +19,12 @@ export function defaultEndpointPermissions(): EndpointPermissions {
  * level, use `calculateEndpointAuthz()`
  *
  * @param fleetAuthz
- * @param isEndpointRbacEnabled
- * @param isSuperuser
  * @param privilege
  */
 export function hasKibanaPrivilege(
   fleetAuthz: FleetAuthz,
-  isEndpointRbacEnabled: boolean,
-  isSuperuser: boolean,
-  privilege: typeof ENDPOINT_PRIVILEGES[number]
+  privilege: keyof typeof ENDPOINT_PRIVILEGES
 ): boolean {
-  // user is superuser, always return true
-  if (isSuperuser) {
-    return true;
-  }
-
-  // not superuser and FF not enabled, no access
-  if (!isEndpointRbacEnabled) {
-    return false;
-  }
-
-  // FF enabled, access based on privileges
   return fleetAuthz.packagePrivileges?.endpoint?.actions[privilege].executePackageAction ?? false;
 }
 
@@ -58,167 +35,59 @@ export function hasKibanaPrivilege(
  * @param licenseService
  * @param fleetAuthz
  * @param userRoles
- * @param isEndpointRbacEnabled
- * @param permissions
- * @param hasHostIsolationExceptionsItems if set to `true`, then Host Isolation Exceptions related authz properties
- * may be adjusted to account for a license downgrade scenario
  */
-
-// eslint-disable-next-line complexity
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
-  userRoles: MaybeImmutable<string[]>,
-  isEndpointRbacEnabled: boolean = false,
-  permissions: Partial<EndpointPermissions> = defaultEndpointPermissions(),
-  hasHostIsolationExceptionsItems: boolean = false
+  userRoles: MaybeImmutable<string[]> = []
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
-  const { canWriteSecuritySolution = false, canReadSecuritySolution = false } = permissions;
-  const canWriteEndpointList = hasKibanaPrivilege(
-    fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeEndpointList'
-  );
-  const canReadEndpointList =
-    canWriteEndpointList ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readEndpointList'
-    );
-  const canWritePolicyManagement = hasKibanaPrivilege(
-    fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writePolicyManagement'
-  );
-  const canReadPolicyManagement =
-    canWritePolicyManagement ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readPolicyManagement'
-    );
-  const canWriteActionsLogManagement = hasKibanaPrivilege(
-    fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeActionsLogManagement'
-  );
-  const canReadActionsLogManagement =
-    canWriteActionsLogManagement ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readActionsLogManagement'
-    );
-  const canIsolateHost = hasKibanaPrivilege(
-    fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeHostIsolation'
-  );
-  const canWriteProcessOperations = hasKibanaPrivilege(
-    fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeProcessOperations'
-  );
-  const canWriteTrustedApplications = hasKibanaPrivilege(
-    fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeTrustedApplications'
-  );
-  const canReadTrustedApplications =
-    canWriteTrustedApplications ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readTrustedApplications'
-    );
 
-  const hasWriteHostIsolationExceptionsPermission = hasKibanaPrivilege(
+  const canWriteSecuritySolution = hasKibanaPrivilege(fleetAuthz, 'writeSecuritySolution');
+  const canReadSecuritySolution = hasKibanaPrivilege(fleetAuthz, 'readSecuritySolution');
+  const canWriteEndpointList = hasKibanaPrivilege(fleetAuthz, 'writeEndpointList');
+  const canReadEndpointList = hasKibanaPrivilege(fleetAuthz, 'readEndpointList');
+  const canWritePolicyManagement = hasKibanaPrivilege(fleetAuthz, 'writePolicyManagement');
+  const canReadPolicyManagement = hasKibanaPrivilege(fleetAuthz, 'readPolicyManagement');
+  const canWriteActionsLogManagement = hasKibanaPrivilege(fleetAuthz, 'writeActionsLogManagement');
+  const canReadActionsLogManagement = hasKibanaPrivilege(fleetAuthz, 'readActionsLogManagement');
+  const canIsolateHost = hasKibanaPrivilege(fleetAuthz, 'writeHostIsolation');
+  const canUnIsolateHost = hasKibanaPrivilege(fleetAuthz, 'writeHostIsolationRelease');
+  const canWriteProcessOperations = hasKibanaPrivilege(fleetAuthz, 'writeProcessOperations');
+  const canWriteTrustedApplications = hasKibanaPrivilege(fleetAuthz, 'writeTrustedApplications');
+  const canReadTrustedApplications = hasKibanaPrivilege(fleetAuthz, 'readTrustedApplications');
+  const canWriteHostIsolationExceptions = hasKibanaPrivilege(
     fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
     'writeHostIsolationExceptions'
   );
-  const canWriteHostIsolationExceptions =
-    hasWriteHostIsolationExceptionsPermission && isPlatinumPlusLicense;
-
-  const hasReadHostIsolationExceptionsPermission =
-    hasWriteHostIsolationExceptionsPermission ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readHostIsolationExceptions'
-    );
-  // Calculate the Host Isolation Exceptions Authz. Some of these authz properties could be
-  // set to `true` in cases where license was downgraded, but entries still exist.
-  const canReadHostIsolationExceptions =
-    canWriteHostIsolationExceptions ||
-    (hasReadHostIsolationExceptionsPermission &&
-      // We still allow `read` if not Platinum license, but entries exists for HIE
-      (isPlatinumPlusLicense || hasHostIsolationExceptionsItems));
-
-  const canDeleteHostIsolationExceptions =
-    canWriteHostIsolationExceptions ||
-    // Should be able to delete if host isolation exceptions exists and license is not platinum+
-    (hasWriteHostIsolationExceptionsPermission &&
-      !isPlatinumPlusLicense &&
-      hasHostIsolationExceptionsItems);
-
-  const canWriteBlocklist = hasKibanaPrivilege(
+  const canReadHostIsolationExceptions = hasKibanaPrivilege(
     fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeBlocklist'
+    'readHostIsolationExceptions'
   );
-  const canReadBlocklist =
-    canWriteBlocklist ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readBlocklist'
-    );
-  const canWriteEventFilters = hasKibanaPrivilege(
+  const canAccessHostIsolationExceptions = hasKibanaPrivilege(
     fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeEventFilters'
+    'accessHostIsolationExceptions'
   );
-  const canReadEventFilters =
-    canWriteEventFilters ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readEventFilters'
-    );
-  const canWriteFileOperations = hasKibanaPrivilege(
+  const canDeleteHostIsolationExceptions = hasKibanaPrivilege(
     fleetAuthz,
-    isEndpointRbacEnabled,
-    hasEndpointManagementAccess,
-    'writeFileOperations'
+    'deleteHostIsolationExceptions'
   );
+  const canWriteBlocklist = hasKibanaPrivilege(fleetAuthz, 'writeBlocklist');
+  const canReadBlocklist = hasKibanaPrivilege(fleetAuthz, 'readBlocklist');
+  const canWriteEventFilters = hasKibanaPrivilege(fleetAuthz, 'writeEventFilters');
+  const canReadEventFilters = hasKibanaPrivilege(fleetAuthz, 'readEventFilters');
+  const canWriteFileOperations = hasKibanaPrivilege(fleetAuthz, 'writeFileOperations');
+
+  const canWriteExecuteOperations = hasKibanaPrivilege(fleetAuthz, 'writeExecuteOperations');
 
   return {
     canWriteSecuritySolution,
     canReadSecuritySolution,
-    canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
-    canAccessEndpointManagement: hasEndpointManagementAccess,
-    canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canAccessFleet: fleetAuthz?.fleet.all ?? false,
+    canAccessEndpointManagement: hasEndpointManagementAccess, // TODO: is this one deprecated? it is the only place we need to check for superuser.
+    canCreateArtifactsByPolicy: isPlatinumPlusLicense,
     canWriteEndpointList,
     canReadEndpointList,
     canWritePolicyManagement,
@@ -228,18 +97,24 @@ export const calculateEndpointAuthz = (
     canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
     // Response Actions
     canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
-    canUnIsolateHost: canIsolateHost,
+    canUnIsolateHost,
     canKillProcess: canWriteProcessOperations && isEnterpriseLicense,
     canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
     canAccessResponseConsole:
       isEnterpriseLicense &&
-      (canIsolateHost || canWriteProcessOperations || canWriteFileOperations),
+      (canIsolateHost ||
+        canUnIsolateHost ||
+        canWriteProcessOperations ||
+        canWriteFileOperations ||
+        canWriteExecuteOperations),
+    canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     // artifacts
     canWriteTrustedApplications,
     canReadTrustedApplications,
-    canWriteHostIsolationExceptions,
+    canWriteHostIsolationExceptions: canWriteHostIsolationExceptions && isPlatinumPlusLicense,
+    canAccessHostIsolationExceptions: canAccessHostIsolationExceptions && isPlatinumPlusLicense,
     canReadHostIsolationExceptions,
     canDeleteHostIsolationExceptions,
     canWriteBlocklist,
@@ -251,7 +126,8 @@ export const calculateEndpointAuthz = (
 
 export const getEndpointAuthzInitialState = (): EndpointAuthz => {
   return {
-    ...defaultEndpointPermissions(),
+    canWriteSecuritySolution: false,
+    canReadSecuritySolution: false,
     canAccessFleet: false,
     canAccessEndpointActionsLogManagement: false,
     canAccessEndpointManagement: false,
@@ -263,15 +139,17 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteActionsLogManagement: false,
     canReadActionsLogManagement: false,
     canIsolateHost: false,
-    canUnIsolateHost: true,
+    canUnIsolateHost: false,
     canKillProcess: false,
     canSuspendProcess: false,
     canGetRunningProcesses: false,
     canAccessResponseConsole: false,
     canWriteFileOperations: false,
+    canWriteExecuteOperations: false,
     canWriteTrustedApplications: false,
     canReadTrustedApplications: false,
     canWriteHostIsolationExceptions: false,
+    canAccessHostIsolationExceptions: false,
     canReadHostIsolationExceptions: false,
     canDeleteHostIsolationExceptions: false,
     canWriteBlocklist: false,
@@ -280,66 +158,3 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
   };
 };
-
-const SIEM_PERMISSIONS = [
-  { permission: 'canWriteSecuritySolution', privilege: 'crud' },
-  { permission: 'canReadSecuritySolution', privilege: 'show' },
-] as const;
-
-function hasPrivilege(
-  kibanaPrivileges: Array<{
-    resource?: string;
-    privilege: string;
-    authorized: boolean;
-  }>,
-  prefix: string,
-  searchPrivilege: string
-): boolean {
-  const privilege = kibanaPrivileges.find((p) =>
-    p.privilege.endsWith(`${prefix}${searchPrivilege}`)
-  );
-  return privilege?.authorized || false;
-}
-
-export function calculatePermissionsFromPrivileges(
-  kibanaPrivileges:
-    | Array<{
-        resource?: string;
-        privilege: string;
-        authorized: boolean;
-      }>
-    | undefined
-): EndpointPermissions {
-  if (!kibanaPrivileges || !kibanaPrivileges.length) {
-    return defaultEndpointPermissions();
-  }
-
-  const siemPermissions: EndpointPermissions = SIEM_PERMISSIONS.reduce(
-    (acc, { permission, privilege }) => {
-      return {
-        ...acc,
-        [permission]: hasPrivilege(kibanaPrivileges, 'siem/', privilege),
-      };
-    },
-    {} as EndpointPermissions
-  );
-
-  return {
-    ...siemPermissions,
-  };
-}
-
-export function calculatePermissionsFromCapabilities(
-  capabilities: Capabilities | undefined
-): EndpointPermissions {
-  if (!capabilities || !capabilities.siem) {
-    return defaultEndpointPermissions();
-  }
-
-  return SIEM_PERMISSIONS.reduce((acc, { permission, privilege }) => {
-    return {
-      ...acc,
-      [permission]: capabilities.siem[privilege] || false,
-    };
-  }, {} as EndpointPermissions);
-}

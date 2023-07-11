@@ -31,9 +31,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_field_data'));
     loadTestFile(require.resolve('./_field_data_with_fields_api'));
     loadTestFile(require.resolve('./_shared_links'));
-    loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
+    loadTestFile(require.resolve('./_greeting_screen'));
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_date_nanos'));
     loadTestFile(require.resolve('./_date_nanos_mixed'));

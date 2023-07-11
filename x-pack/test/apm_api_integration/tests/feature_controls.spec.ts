@@ -36,6 +36,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       url: string;
       method?: 'get' | 'post' | 'delete' | 'put';
       body?: any;
+      headers?: Record<string, string>;
     };
     expectForbidden: (result: any) => void;
     expectResponse: (result: any) => void;
@@ -43,10 +44,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   function createAgent(
-    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration'>['params']['body']
+    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.writeUser({
-      endpoint: 'PUT /api/apm/settings/agent-configuration',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: {
         body,
       },
@@ -54,10 +55,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   function deleteAgent(
-    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration'>['params']['body']
+    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: {
         body,
       },
@@ -75,7 +76,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services/foo/errors/bar?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
+        url: `/internal/apm/services/foo/errors/bar/samples?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -103,7 +104,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1`,
+        url: `/internal/apm/services?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=&probability=1&documentType=transactionMetric&rollupInterval=1m`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -136,14 +137,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=`,
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&kuery=&documentType=transactionMetric&rollupInterval=1m&bucketSizeInSeconds=60`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
     {
       req: {
-        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=`,
+        url: `/internal/apm/services/foo/transactions/charts/latency?environment=testing&start=${start}&end=${end}&transactionType=bar&latencyAggregationType=avg&transactionName=baz&kuery=&documentType=transactionMetric&rollupInterval=1m&bucketSizeInSeconds=60`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -160,6 +161,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         method: 'post',
         url: `/api/apm/settings/agent-configuration/search`,
         body: { service: { name: 'test-service' }, etag: 'abc' },
+        headers: {
+          'elastic-api-version': '2023-10-31',
+        },
       },
       expectForbidden: expect403,
       expectResponse: expect200,
@@ -203,7 +207,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   };
 
   async function executeAsUser(
-    { method = 'get', url, body }: Endpoint['req'],
+    { method = 'get', url, body, headers }: Endpoint['req'],
     username: string,
     password: string,
     spaceId?: string
@@ -220,6 +224,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     return await request
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
+      .set(headers ?? {})
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }

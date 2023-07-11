@@ -1,9 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,19 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-saved-objects-server",
+    "@kbn/dev-utils",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/utils",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/jest-serializers",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

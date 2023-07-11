@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ShapeTreeNode } from '@elastic/charts';
+import { ArrayNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { lightenColor } from '@kbn/charts-plugin/public';
-import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
-import { DistinctSeries, getDistinctSeries } from '../get_distinct_series';
+import { DistinctSeries } from '../get_distinct_series';
 import { getNodeLabel } from './get_node_labels';
 
 const isTreemapOrMosaicChart = (shape: ChartTypes) =>
@@ -59,39 +59,34 @@ export const byDataColorPaletteMap = (
 };
 
 const getDistinctColor = (
-  d: ShapeTreeNode,
+  categoricalKey: string,
   isSplitChart: boolean,
   overwriteColors: { [key: string]: string } = {},
   visParams: PartitionVisParams,
   palettes: PaletteRegistry | null,
   syncColors: boolean,
   { parentSeries, allSeries }: DistinctSeries,
-  name: string
+  formattedCategoricalKey: string
 ) => {
-  let overwriteColor;
+  // TODO move away from Record to a Map to avoid issues with reserved JS keywords
+  if (overwriteColors.hasOwnProperty(categoricalKey)) {
+    return overwriteColors[categoricalKey];
+  }
   // this is for supporting old visualizations (created by vislib plugin)
   // it seems that there for some aggs, the uiState saved from vislib is
-  // different than the es-charts handle it
-  if (overwriteColors.hasOwnProperty(name)) {
-    overwriteColor = overwriteColors[name];
+  // different from how es-charts handles it
+  if (overwriteColors.hasOwnProperty(formattedCategoricalKey)) {
+    return overwriteColors[formattedCategoricalKey];
   }
 
-  if (Object.keys(overwriteColors).includes(d.dataName.toString())) {
-    overwriteColor = overwriteColors[d.dataName];
-  }
-
-  if (overwriteColor) {
-    return overwriteColor;
-  }
-
-  const index = allSeries.findIndex((dataName) => isEqual(dataName, d.dataName));
-  const isSplitParentLayer = isSplitChart && parentSeries.includes(d.dataName);
+  const index = allSeries.findIndex((d) => isEqual(d, categoricalKey));
+  const isSplitParentLayer = isSplitChart && parentSeries.includes(categoricalKey);
   return palettes?.get(visParams.palette.name).getCategoricalColor(
     [
       {
-        name: d.dataName,
+        name: categoricalKey,
         rankAtDepth: isSplitParentLayer
-          ? parentSeries.findIndex((dataName) => dataName === d.dataName)
+          ? parentSeries.findIndex((d) => d === categoricalKey)
           : index > -1
           ? index
           : 0,
@@ -108,29 +103,57 @@ const getDistinctColor = (
   );
 };
 
+/**
+ * This interface is introduced to simplify the used logic on testing an ArrayNode outside elastic-charts.
+ * The SimplifiedArrayNode structure resembles the hierarchical configuration of an ArrayNode,
+ * by presenting only the necessary fields used by the functions in this file.
+ * The main difference is in the parent node, that to simplify this infinite tree structure we configured it as optional
+ * so that in test I don't need to add a type assertion on an undefined parent as in elastic-charts.
+ * The children are slight different in implementation and they accept `unknown` as key
+ * due to the situation described in https://github.com/elastic/kibana/issues/153437
+ */
+export interface SimplifiedArrayNode {
+  depth: ArrayNode['depth'];
+  sortIndex: ArrayNode['depth'];
+  parent?: SimplifiedArrayNode;
+  children: Array<[unknown, SimplifiedArrayNode | undefined]>;
+}
+
+/**
+ * This method returns the path of each hierarchical layer encountered from the given node
+ * (a node of a hierarchical tree, currently a partition tree) up to the root of the hierarchy tree.
+ * The resulting array only shows, for each parent, the name of the node, its child index within the parent branch
+ * (called rankInDepth) and the total number of children of the parent.
+ *
+ */
 const createSeriesLayers = (
-  d: ShapeTreeNode,
+  arrayNode: SimplifiedArrayNode,
   parentSeries: DistinctSeries['parentSeries'],
   isSplitChart: boolean,
   formatters: Record<string, FieldFormat | undefined>,
   formatter: FieldFormatsStart,
   column: Partial<BucketColumns>
-) => {
+): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
-  let tempParent: typeof d | typeof d['parent'] = d;
+  let tempParent: typeof arrayNode | typeof arrayNode['parent'] = arrayNode;
   while (tempParent.parent && tempParent.depth > 0) {
-    const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
+    const nodeKey = tempParent.parent.children[tempParent.sortIndex][0];
+    const seriesName = String(nodeKey);
+    /**
+     * FIXME this is a bad implementation: The `parentSeries` is an array of both `string` and `RangeKey` even if its type
+     * is marked as `string[]` in `DistinctSeries`. Here instead we are checking if a stringified `RangeKey` is included into this array that
+     * is conceptually wrong.
+     * see https://github.com/elastic/kibana/issues/153437
+     */
     const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
-    const formattedName = getNodeLabel(
-      tempParent.parent.children[tempParent.sortIndex][0],
-      column,
-      formatters,
-      formatter.deserialize
-    );
+    const formattedName = getNodeLabel(nodeKey, column, formatters, formatter.deserialize);
     seriesLayers.unshift({
+      // by construction and types `formattedName` should be always be a string, but I leave this Nullish Coalescing
+      // because I don't trust much our formatting functions
       name: formattedName ?? seriesName,
       rankAtDepth: isSplitParentLayer
-        ? parentSeries.findIndex((name) => name === seriesName)
+        ? // FIXME as described above this will not work correctly if the `nodeKey` is a `RangeKey`
+          parentSeries.findIndex((name) => name === seriesName)
         : tempParent.sortIndex,
       totalSeriesAtDepth: isSplitParentLayer
         ? parentSeries.length
@@ -163,12 +186,14 @@ const overrideColors = (
 
 export const getColor = (
   chartType: ChartTypes,
-  d: ShapeTreeNode,
+  // FIXME this could be both a string or a RangeKey see https://github.com/elastic/kibana/issues/153437
+  categoricalKey: string, // could be RangeKey
+  arrayNode: SimplifiedArrayNode,
   layerIndex: number,
   isSplitChart: boolean,
   overwriteColors: { [key: string]: string } = {},
-  columns: Array<Partial<BucketColumns>>,
-  rows: DatatableRow[],
+  distinctSeries: DistinctSeries,
+  { columnsLength, rowsLength }: { columnsLength: number; rowsLength: number },
   visParams: PartitionVisParams,
   palettes: PaletteRegistry | null,
   byDataPalette: ReturnType<typeof byDataColorPaletteMap> | undefined,
@@ -178,23 +203,18 @@ export const getColor = (
   column: Partial<BucketColumns>,
   formatters: Record<string, FieldFormat | undefined>
 ) => {
-  const distinctSeries = getDistinctSeries(rows, columns);
-  const { parentSeries } = distinctSeries;
-  const dataName = d.dataName;
-
   // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
-  // therefore change it for dask mode
+  // therefore change it for dark mode
   const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
 
-  let name = '';
-  if (column.format) {
-    name = formatter.deserialize(column.format).convert(dataName) ?? '';
-  }
+  const name = column.format
+    ? formatter.deserialize(column.format).convert(categoricalKey) ?? ''
+    : '';
 
   if (visParams.distinctColors) {
     return (
       getDistinctColor(
-        d,
+        categoricalKey,
         isSplitChart,
         overwriteColors,
         visParams,
@@ -207,8 +227,8 @@ export const getColor = (
   }
 
   const seriesLayers = createSeriesLayers(
-    d,
-    parentSeries,
+    arrayNode,
+    distinctSeries.parentSeries,
     isSplitChart,
     formatters,
     formatter,
@@ -218,7 +238,7 @@ export const getColor = (
   const overriddenColor = overrideColors(seriesLayers, overwriteColors, name);
   if (overriddenColor) {
     // this is necessary for supporting some old visualizations that defined their own colors (created by vislib plugin)
-    return lightenColor(overriddenColor, seriesLayers.length, columns.length);
+    return lightenColor(overriddenColor, seriesLayers.length, columnsLength);
   }
 
   if (chartType === ChartTypes.MOSAIC && byDataPalette && seriesLayers[1]) {
@@ -226,7 +246,7 @@ export const getColor = (
   }
 
   if (isTreemapOrMosaicChart(chartType)) {
-    if (layerIndex < columns.length - 1) {
+    if (layerIndex < columnsLength - 1) {
       return defaultColor;
     }
     // for treemap use the top layer for coloring, for mosaic use the second layer
@@ -243,8 +263,8 @@ export const getColor = (
     seriesLayers,
     {
       behindText: visParams.labels.show || isTreemapOrMosaicChart(chartType),
-      maxDepth: columns.length,
-      totalSeries: rows.length,
+      maxDepth: columnsLength,
+      totalSeries: rowsLength,
       syncColors,
     },
     visParams.palette?.params ?? { colors: [] }

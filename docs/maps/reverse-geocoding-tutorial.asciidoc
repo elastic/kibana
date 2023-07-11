@@ -60,7 +60,7 @@ To get the CSA boundary data:
 .. Click *+ Add* to open the field select.
 .. Select *NAME*, *GEOID*, and *AFFGEOID*.
 .. Click *Add*.
-. Click *Save & close*.
+. Click *Keep changes*.
 
 Looking at the map, you get a sense of what constitutes a metro area in the eyes of the Census Bureau.
 
@@ -169,9 +169,9 @@ Now that our web traffic contains CSA region identifiers, you'll visualize CSA r
 . For *Statistics source*:
 .. Set *Data view* to *Kibana Sample Data Logs*.
 .. Set *Join field* to *csa.GEOID.keyword*.
-. Click *Add layer*.
+. Click *Add and continue*.
 . Scroll to *Layer Style* and Set *Label* to *Fixed*.
-. Click *Save & close*.
+. Click *Keep changes*.
 . *Save* the map.
 .. Give the map a title.
 .. Under *Add to dashboard*, select *None*.

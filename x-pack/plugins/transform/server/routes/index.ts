@@ -11,14 +11,8 @@ import { registerFieldHistogramsRoutes } from './api/field_histograms';
 import { registerPrivilegesRoute } from './api/privileges';
 import { registerTransformsRoutes } from './api/transforms';
 
-import { API_BASE_PATH } from '../../common/constants';
-
-export const addBasePath = (uri: string): string => `${API_BASE_PATH}${uri}`;
-
-export class ApiRoutes {
-  setup(dependencies: RouteDependencies) {
-    registerFieldHistogramsRoutes(dependencies);
-    registerPrivilegesRoute(dependencies);
-    registerTransformsRoutes(dependencies);
-  }
+export function registerRoutes(dependencies: RouteDependencies) {
+  registerFieldHistogramsRoutes(dependencies);
+  registerPrivilegesRoute(dependencies);
+  registerTransformsRoutes(dependencies);
 }

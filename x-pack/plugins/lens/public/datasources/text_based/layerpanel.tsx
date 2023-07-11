@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../../types';
 import { TextBasedPrivateState } from './types';
@@ -18,26 +17,25 @@ export interface TextBasedLayerPanelProps extends DatasourceLayerPanelProps<Text
 
 export function LayerPanel({ state, layerId, dataViews }: TextBasedLayerPanelProps) {
   const layer = state.layers[layerId];
-  const dataView = dataViews.indexPatternRefs.find((ref) => ref.id === layer.index);
+  const dataView = state.indexPatternRefs.find((ref) => ref.id === layer.index);
+
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });
   return (
-    <I18nProvider>
-      <ChangeIndexPattern
-        data-test-subj="textBasedLanguages-switcher"
-        trigger={{
-          label: dataView?.name || dataView?.title || notFoundTitleLabel,
-          title: dataView?.title || notFoundTitleLabel,
-          size: 's',
-          fontWeight: 'normal',
-          isDisabled: true,
-        }}
-        indexPatternId={layer.index}
-        indexPatternRefs={dataViews.indexPatternRefs}
-        isMissingCurrent={!dataView}
-        onChangeIndexPattern={() => {}}
-      />
-    </I18nProvider>
+    <ChangeIndexPattern
+      data-test-subj="textBasedLanguages-switcher"
+      trigger={{
+        label: dataView?.name || dataView?.title || notFoundTitleLabel,
+        title: dataView?.title || notFoundTitleLabel,
+        size: 's',
+        fontWeight: 'normal',
+        isDisabled: true,
+      }}
+      indexPatternId={layer.index}
+      indexPatternRefs={dataViews.indexPatternRefs}
+      isMissingCurrent={!dataView}
+      onChangeIndexPattern={() => {}}
+    />
   );
 }

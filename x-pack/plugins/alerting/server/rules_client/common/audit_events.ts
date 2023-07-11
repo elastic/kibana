@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { EcsEvent } from '@kbn/core/server';
 import { AuditEvent } from '@kbn/security-plugin/server';
+import { ArrayElement } from '@kbn/utility-types';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',
@@ -82,7 +83,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   ],
 };
 
-const eventTypes: Record<RuleAuditAction, EcsEventType> = {
+const eventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
   rule_create: 'creation',
   rule_get: 'access',
   rule_resolve: 'access',
@@ -110,7 +111,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
 
 export interface RuleAuditEventParams {
   action: RuleAuditAction;
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }

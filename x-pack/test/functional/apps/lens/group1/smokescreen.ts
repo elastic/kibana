@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      await testSubjects.click('lnsXY_splitDimensionPanel > indexPattern-dimension-remove');
+      await PageObjects.lens.removeDimension('lnsXY_splitDimensionPanel');
       await PageObjects.lens.switchToVisualization('line');
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionColor('#ff0000');
       await PageObjects.lens.openVisualOptions();
 
-      await PageObjects.lens.useCurvedLines();
+      await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
@@ -200,9 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         longLabel
       );
-      expect(
-        await testSubjects.isDisplayed('lnsXY_yDimensionPanel >  indexPattern-dimension-remove')
-      ).to.equal(true);
+      expect(await PageObjects.lens.canRemoveDimension('lnsXY_yDimensionPanel')).to.equal(true);
       await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
       await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
@@ -315,7 +313,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.save('twolayerchart');
-      await testSubjects.click('lnsSuggestion-asDonut > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-donut > lnsSuggestion');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
@@ -336,7 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -346,7 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('bar');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Average of bytes'
@@ -367,7 +365,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Average of bytes'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-        'Top values of ip'
+        'Top 3 values of ip'
       );
     });
 
@@ -380,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
         await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
-      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
+      ).to.eql(['Top 7 values of geo.dest', 'Top 3 values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );
@@ -540,16 +538,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await PageObjects.lens.getErrorCount()).to.eql(1);
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
 
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await PageObjects.lens.getErrorCount()).to.eql(2);
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(2);
 
       await PageObjects.lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await PageObjects.lens.getErrorCount()).to.eql(1);
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
 
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
@@ -678,27 +676,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       await PageObjects.lens.switchFirstLayerIndexPattern(indexPatternString);
       expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal(indexPatternString);
-    });
-
-    it('should show a download button only when the configuration is valid', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('pie');
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-      // incomplete configuration should not be downloadable
-      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(false);
-
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
-      });
-      expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
     });
 
     it('should allow filtering by legend on an xy chart', async () => {

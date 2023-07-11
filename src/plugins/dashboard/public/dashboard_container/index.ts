@@ -11,5 +11,9 @@ export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 export type { DashboardContainer } from './embeddable/dashboard_container';
 export {
   type DashboardContainerFactory,
+  type DashboardCreationOptions,
   DashboardContainerFactoryDefinition,
 } from './embeddable/dashboard_container_factory';
+
+export { DashboardRenderer } from './external_api/dashboard_renderer';
+export type { DashboardAPI, AwaitingDashboardAPI } from './external_api/dashboard_api';

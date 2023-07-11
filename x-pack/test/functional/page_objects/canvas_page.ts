@@ -76,12 +76,30 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       expect(disabledAttr).to.be('true');
     },
 
+    async openAddElementMenu() {
+      log.debug('openAddElementsMenu');
+      await testSubjects.click('add-element-button');
+    },
+
+    async openAddChartMenu() {
+      log.debug('openAddChartMenu');
+      await this.openAddElementMenu();
+      await testSubjects.click('canvasAddElementMenu__Chart');
+    },
+
+    async createNewDatatableElement() {
+      log.debug('createNewDatatableElement');
+      await this.openAddChartMenu();
+      await testSubjects.click('canvasAddElementMenu__table');
+    },
+
     async openSavedElementsModal() {
       await testSubjects.click('add-element-button');
       await testSubjects.click('saved-elements-menu-option');
 
       await PageObjects.common.sleep(1000); // give time for modal animation to complete
     },
+
     async closeSavedElementsModal() {
       await testSubjects.click('saved-elements-modal-close-button');
     },
@@ -156,6 +174,22 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       log.debug('CanvasPage.deleteSelectedElement');
       await testSubjects.click('canvasWorkpadEditMenuButton');
       await testSubjects.click('canvasEditMenuDeleteButton');
+    },
+
+    async openDatasourceTab() {
+      log.debug('CanvasPage.openDataTab');
+      await testSubjects.click('canvasSidebarDataTab');
+    },
+
+    async changeDatasourceTo(datasourceName: string) {
+      log.debug('CanvasPage.changeDatasourceTo');
+      await testSubjects.click('canvasChangeDatasourceButton');
+      await testSubjects.click(`canvasDatasourceCard__${datasourceName}`);
+    },
+
+    async saveDatasourceChanges() {
+      log.debug('CanvasPage.saveDatasourceChanges');
+      await testSubjects.click('canvasSaveDatasourceButton');
     },
   };
 }

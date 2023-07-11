@@ -27,7 +27,7 @@ import {
   useUrlPagination,
   useGetPackageInstallStatus,
   AgentPolicyRefreshContext,
-  usePackageInstallations,
+  useIsPackagePolicyUpgradable,
   useAuthz,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
@@ -71,7 +71,7 @@ const IntegrationDetailsLink = memo<{
 
 const AgentPolicyNotFound = () => (
   <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-    <EuiIcon size="m" type="alert" color="warning" />
+    <EuiIcon size="m" type="warning" color="warning" />
     &nbsp;
     <FormattedMessage
       id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"
@@ -99,6 +99,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
+
   const {
     data,
     isLoading,
@@ -108,7 +109,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
-  const { updatableIntegrations } = usePackageInstallations();
+  const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
@@ -121,14 +122,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     }
 
     const newPolicies = data.items.map(({ agentPolicy, packagePolicy }) => {
-      const updatableIntegrationRecord = updatableIntegrations.get(
-        packagePolicy.package?.name ?? ''
-      );
-      const hasUpgrade =
-        !!updatableIntegrationRecord &&
-        updatableIntegrationRecord.policiesToUpgrade.some(
-          ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
-        );
+      const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
       return {
         agentPolicy,
@@ -140,7 +134,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     });
 
     return newPolicies;
-  }, [data?.items, updatableIntegrations]);
+  }, [data?.items, isPackagePolicyUpgradable]);
 
   const showAddAgentHelpForPackagePolicyId = packageAndAgentPolicies.find(
     ({ agentPolicy }) => agentPolicy?.id === showAddAgentHelpForPolicyId
@@ -328,7 +322,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
-  if (packageInstallStatus.status !== InstallStatus.installed) {
+  // Check flyoutOpenForPolicyId otherwise right after installing a new integration the flyout won't open
+  if (packageInstallStatus.status !== InstallStatus.installed && !flyoutOpenForPolicyId) {
     return (
       <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
     );

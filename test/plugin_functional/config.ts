@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import path from 'path';
-import fs from 'fs';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
-
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
-  );
 
   return {
     rootTags: ['runOutsideOfCiGroups'],
@@ -60,6 +53,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--corePluginDeprecations.noLongerUsed=still_using',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
+        // We want to test when the banner is shown
+        '--telemetry.banner=true',
         // explicitly enable the cloud integration plugins to validate the rendered config keys
         '--xpack.cloud_integrations.chat.enabled=true',
         '--xpack.cloud_integrations.chat.chatURL=a_string',
@@ -70,9 +65,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud_integrations.full_story.org_id=a_string',
         '--xpack.cloud_integrations.gain_sight.enabled=true',
         '--xpack.cloud_integrations.gain_sight.org_id=a_string',
-        ...plugins.map(
-          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
-        ),
+        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
   };

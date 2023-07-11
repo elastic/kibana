@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import {
   RECORDS_FIELD,
   createExploratoryViewUrl,
-  HeaderMenuPortal,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/exploratory-view-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
@@ -27,7 +27,7 @@ const ANALYZE_MESSAGE = i18n.translate(
   'xpack.ux.analyzeDataButtonLabel.message',
   {
     defaultMessage:
-      'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+      'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
   }
 );
 

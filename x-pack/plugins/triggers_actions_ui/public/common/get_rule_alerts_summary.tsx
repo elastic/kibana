@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { RuleAlertsSummary } from '../application/sections';
-import { RuleAlertsSummaryProps } from '../application/sections/rule_details/components/alert_summary';
+import React, { lazy, Suspense } from 'react';
+import { AlertSummaryWidgetLoader } from '../application/sections/alert_summary_widget/components';
+import { AlertSummaryWidgetProps } from '../application/sections/alert_summary_widget';
 
-export const getRuleAlertsSummaryLazy = (props: RuleAlertsSummaryProps) => {
-  return <RuleAlertsSummary {...props} />;
+const AlertSummaryWidgetLazy: React.FC<AlertSummaryWidgetProps> = lazy(
+  () => import('../application/sections/alert_summary_widget/alert_summary_widget')
+);
+
+export const getAlertSummaryWidgetLazy = (props: AlertSummaryWidgetProps) => {
+  return (
+    <Suspense fallback={<AlertSummaryWidgetLoader fullSize={props.fullSize} />}>
+      <AlertSummaryWidgetLazy {...props} />
+    </Suspense>
+  );
 };

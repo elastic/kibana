@@ -68,6 +68,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
             values={{
               versionLink: (
                 <EuiLink
+                  data-test-subj="apmJavaAgentVersionInputVersionLink"
                   href={`${services.docLinks?.ELASTIC_WEBSITE_URL}/guide/en/apm/agent/java/current/release-notes.html`}
                   target="_blank"
                 >

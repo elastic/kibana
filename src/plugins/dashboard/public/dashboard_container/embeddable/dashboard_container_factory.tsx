@@ -21,16 +21,11 @@ import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
-import {
-  createInject,
-  createExtract,
-  DashboardContainerInput,
-  DashboardContainerByValueInput,
-} from '../../../common';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
-import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
+import { createInject, createExtract, DashboardContainerInput } from '../../../common';
+import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -39,10 +34,9 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  initialInput?: Partial<DashboardContainerInput>;
-  overrideInput?: Partial<DashboardContainerByValueInput>;
+  getInitialInput?: () => Partial<DashboardContainerInput>;
 
-  incomingEmbeddable?: EmbeddablePackageState;
+  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -61,7 +55,9 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: LoadDashboardFromSavedObjectReturn) => boolean;
+  validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
+
+  isEmbeddedExternally?: boolean;
 }
 
 export class DashboardContainerFactoryDefinition
@@ -97,11 +93,20 @@ export class DashboardContainerFactoryDefinition
   public create = async (
     initialInput: DashboardContainerInput,
     parent?: Container,
-    creationOptions?: DashboardCreationOptions
-  ): Promise<DashboardContainer | ErrorEmbeddable> => {
-    const { DashboardContainer: DashboardContainerEmbeddable } = await import(
-      './dashboard_container'
-    );
-    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, creationOptions));
+    creationOptions?: DashboardCreationOptions,
+    savedObjectId?: string
+  ): Promise<DashboardContainer | ErrorEmbeddable | undefined> => {
+    const dashboardCreationStartTime = performance.now();
+    const { createDashboard } = await import('./create/create_dashboard');
+    try {
+      const dashboard = await createDashboard(
+        creationOptions,
+        dashboardCreationStartTime,
+        savedObjectId
+      );
+      return dashboard;
+    } catch (e) {
+      return new ErrorEmbeddable(e, { id: e.id });
+    }
   };
 }

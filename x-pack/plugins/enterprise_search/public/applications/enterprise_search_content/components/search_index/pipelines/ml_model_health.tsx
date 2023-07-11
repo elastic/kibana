@@ -61,14 +61,14 @@ const modelDeploymentFailedText = i18n.translate(
 const modelNotDeployedText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed',
   {
-    defaultMessage: 'Not deployed',
+    defaultMessage: 'Not started',
   }
 );
 const modelNotDeployedTooltip = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.tooltip',
   {
     defaultMessage:
-      'This trained model is not currently deployed. Visit the trained models page to make changes',
+      'This trained model is not currently started. Visit the trained models page to make changes',
   }
 );
 

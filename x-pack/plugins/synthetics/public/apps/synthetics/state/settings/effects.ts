@@ -8,17 +8,24 @@
 import { takeLeading, put, call, takeLatest } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
+import { updateDefaultAlertingAction } from '../alert_rules';
 import { DynamicSettings } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { getConnectorsAction, setDynamicSettingsAction, getDynamicSettingsAction } from './actions';
+import {
+  getConnectorsAction,
+  setDynamicSettingsAction,
+  getDynamicSettingsAction,
+  syncGlobalParamsAction,
+  getLocationMonitorsAction,
+} from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchConnectors,
   setDynamicSettings,
   syncGlobalParamsAPI,
   getDynamicSettings,
+  fetchLocationMonitors,
 } from './api';
-import { syncGlobalParamsAction } from './actions';
 
 export function* syncGlobalParamsEffect() {
   yield takeLeading(
@@ -29,6 +36,17 @@ export function* syncGlobalParamsEffect() {
       syncGlobalParamsAction.fail,
       successMessage,
       failureMessage
+    )
+  );
+}
+
+export function* fetchLocationMonitorsEffect() {
+  yield takeLeading(
+    String(getLocationMonitorsAction.get),
+    fetchEffectFactory(
+      fetchLocationMonitors,
+      getLocationMonitorsAction.success,
+      getLocationMonitorsAction.fail
     )
   );
 }
@@ -61,6 +79,7 @@ export function* setDynamicSettingsEffect() {
     function* (action: Action<DynamicSettings>) {
       try {
         yield call(setDynamicSettings, { settings: action.payload });
+        yield put(updateDefaultAlertingAction.get());
         yield put(setDynamicSettingsAction.success(action.payload));
         kibanaService.core.notifications.toasts.addSuccess(
           i18n.translate('xpack.synthetics.settings.saveSuccess', {

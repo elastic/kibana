@@ -12,8 +12,9 @@ import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
+import { getPackages } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,
@@ -71,6 +72,7 @@ export function createRootWithSettings(
         dist: false,
         ...cliArgs,
       },
+      repoPackages: getPackages(REPO_ROOT),
     },
     pkg
   );
@@ -195,7 +197,7 @@ export interface TestKibanaUtils {
 
 export interface TestUtils {
   startES: () => Promise<TestElasticsearchUtils>;
-  startKibana: () => Promise<TestKibanaUtils>;
+  startKibana: (abortSignal?: AbortSignal) => Promise<TestKibanaUtils>;
 }
 
 /**
@@ -259,7 +261,7 @@ export function createTestServers({
   // Add time for KBN and adding users
   adjustTimeout(es.getStartTimeout() + 100000);
 
-  const kbnSettings = settings.kbn ?? {};
+  const { cliArgs = {}, customKibanaVersion, ...kbnSettings } = settings.kbn ?? {};
 
   return {
     startES: async () => {
@@ -282,8 +284,10 @@ export function createTestServers({
         password: kibanaServerTestUser.password,
       };
     },
-    startKibana: async () => {
-      const root = createRootWithCorePlugins(kbnSettings);
+    startKibana: async (abortSignal?: AbortSignal) => {
+      const root = createRootWithCorePlugins(kbnSettings, cliArgs, customKibanaVersion);
+
+      abortSignal?.addEventListener('abort', async () => await root.shutdown());
 
       await root.preboot();
       const coreSetup = await root.setup();

@@ -11,8 +11,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiButton } from '@elastic/eui';
+
 import { AddAnalyticsCollection } from './add_analytics_collection';
-import { AddAnalyticsCollectionForm } from './add_analytics_collection_form';
+import { AddAnalyticsCollectionModal } from './add_analytics_collection_modal';
 
 describe('AddAnalyticsCollection', () => {
   beforeEach(() => {
@@ -21,6 +23,15 @@ describe('AddAnalyticsCollection', () => {
 
   it('renders', () => {
     const wrapper = shallow(<AddAnalyticsCollection />);
-    expect(wrapper.find(AddAnalyticsCollectionForm)).toHaveLength(1);
+
+    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    expect(wrapper.find(AddAnalyticsCollectionModal)).toHaveLength(0);
+  });
+
+  it('show render modal after click on button', () => {
+    const wrapper = shallow(<AddAnalyticsCollection />);
+
+    (wrapper.find(EuiButton).prop('onClick') as Function)?.();
+    expect(wrapper.find(AddAnalyticsCollectionModal)).toHaveLength(1);
   });
 });

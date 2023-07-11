@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
+import * as i18n from './translations';
+
 /**
  * as const
  *
@@ -12,7 +16,6 @@
  * https://mariusschulz.com/blog/literal-type-widening-in-typescript
  * Please follow this convention when adding to this file
  */
-
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
@@ -40,6 +43,7 @@ export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
@@ -61,6 +65,8 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
 export const SECURITY_FEATURE_ID = 'Security' as const;
+export const SECURITY_TAG_NAME = 'Security Solution' as const;
+export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
 
@@ -90,7 +96,14 @@ export enum SecurityPageName {
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
-  dashboardsLanding = 'dashboards',
+  cloudSecurityPostureRules = 'cloud_security_posture-rules',
+  /*
+   * Warning: Computed values are not permitted in an enum with string valued members
+   * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
+   */
+  cloudDefendPolicies = 'cloud_defend-policies',
+  dashboards = 'dashboards',
+  dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
@@ -116,7 +129,9 @@ export enum SecurityPageName {
   policies = 'policy',
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
+  rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
+  rulesLanding = 'rules-landing',
   sessions = 'sessions',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -133,6 +148,8 @@ export enum SecurityPageName {
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
   entityAnalytics = 'entity-analytics',
+  entityAnalyticsManagement = 'entity-analytics-management',
+  coverageOverview = 'coverage-overview',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -142,10 +159,15 @@ export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const LANDING_PATH = '/get_started' as const;
+export const DATA_QUALITY_PATH = '/data_quality' as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
+export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const RULES_PATH = '/rules' as const;
+export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
+export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
+export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
@@ -154,6 +176,7 @@ export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
+export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
@@ -164,6 +187,7 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
+export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
@@ -189,6 +213,7 @@ export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
+export const APP_DATA_QUALITY_PATH = `${APP_PATH}${DATA_QUALITY_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -206,9 +231,6 @@ export const INCLUDE_INDEX_PATTERN = [
 ];
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events, and the exclude index pattern */
 export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELASTIC_CLOUD_INDICES];
-
-/** This Kibana Advanced Setting enables the grouped navigation in Security Solution */
-export const ENABLE_GROUPED_NAVIGATION = 'securitySolution:enableGroupedNav' as const;
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
@@ -294,10 +316,16 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
 export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
 export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
+
+export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
+export const INTERNAL_TAGS_URL = `/internal/tags`;
+
 export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
 export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
+export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
+
 /**
  * Internal detection engine routes
  */
@@ -342,6 +370,7 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/migration_status` as const;
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
+export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
@@ -363,8 +392,17 @@ export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
 export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID] as const;
 
+/**
+ * Rule Actions
+ */
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
 export const NOTIFICATION_THROTTLE_RULE = 'rule' as const;
+
+export const NOTIFICATION_DEFAULT_FREQUENCY = {
+  notifyWhen: RuleNotifyWhen.ACTIVE,
+  throttle: null,
+  summary: true,
+};
 
 export const showAllOthersBucket: string[] = [
   'destination.ip',
@@ -447,7 +485,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.6',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -467,7 +505,58 @@ export const RISKY_HOSTS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
 export const RISKY_USERS_DOC_LINK =
   'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
+export const DETECTION_ENTITY_DASHBOARD =
+  'https://www.elastic.co/guide/en/security/current/detection-entity-dashboard.html';
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
+
+export const DEFAULT_DETECTION_PAGE_FILTERS: Array<
+  Omit<AddOptionsListControlProps, 'dataViewId'> & { persist?: boolean }
+> = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    hideActionBar: true,
+    persist: true,
+    hideExists: true,
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+    hideActionBar: true,
+    hideExists: true,
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
+
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
+
+export const VIEW_SELECTION = {
+  gridView: 'gridView',
+  eventRenderedView: 'eventRenderedView',
+} as const;
+
+export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
+  ALERTS_PAGE: `${APP_ID}-alerts-page`,
+  RULE_DETAILS: `${APP_ID}-rule-details`,
+  CASE: `${APP_ID}-case`,
+} as const;
+
+export const DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
+export const DEFAULT_ALERT_TAGS_VALUE = [
+  i18n.DUPLICATE,
+  i18n.FALSE_POSITIVE,
+  i18n.FURTHER_INVESTIGATION_REQUIRED,
+] as const;

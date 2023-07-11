@@ -8,17 +8,23 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ForLastExpression,
   TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   getMaxY,
@@ -30,19 +36,34 @@ import {
   IsAboveField,
   ServiceField,
   TransactionTypeField,
+  TransactionNameField,
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { PopoverExpression } from '../../ui_components/popover_expression';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
 
 export interface RuleParams {
   aggregationType: AggregationType;
   environment: string;
-  serviceName: string;
   threshold: number;
-  transactionType: string;
+  transactionType?: string;
+  transactionName?: string;
+  serviceName?: string;
   windowSize: number;
   windowUnit: string;
+  groupBy?: string[] | undefined;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
@@ -89,13 +110,13 @@ export function TransactionDurationRuleType(props: Props) {
     }
   );
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/transaction_duration/chart_preview',
           {
@@ -105,9 +126,11 @@ export function TransactionDurationRuleType(props: Props) {
                 environment: params.environment,
                 serviceName: params.serviceName,
                 transactionType: params.transactionType,
+                transactionName: params.transactionName,
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
               },
             },
           }
@@ -119,42 +142,82 @@ export function TransactionDurationRuleType(props: Props) {
       params.environment,
       params.serviceName,
       params.transactionType,
+      params.transactionName,
       params.windowSize,
       params.windowUnit,
+      params.groupBy,
     ]
   );
 
-  const latencyChartPreview = data?.latencyChartPreview ?? [];
+  const latencyChartPreview = data?.latencyChartPreview;
+  const series = latencyChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const totalGroups = latencyChartPreview?.totalGroups ?? 0;
 
-  const maxY = getMaxY(latencyChartPreview);
+  const maxY = getMaxY(series);
   const formatter = getDurationFormatter(maxY);
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
   // The threshold from the form is in ms. Convert to µs.
   const thresholdMs = params.threshold * 1000;
 
-  const chartPreview = (
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={latencyChartPreview}
+      series={series}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
+      totalGroups={totalGroups}
     />
+  ) : (
+    <ErrorState />
+  );
+
+  const onGroupByChange = useCallback(
+    (group: string[] | null) => {
+      setRuleParams('groupBy', group ?? []);
+    },
+    [setRuleParams]
   );
 
   const fields = [
     <ServiceField
       allowAll={false}
       currentValue={params.serviceName}
-      onChange={(value) => setRuleParams('serviceName', value)}
+      onChange={(value) => {
+        if (value !== params.serviceName) {
+          setRuleParams('serviceName', value);
+          setRuleParams('transactionType', undefined);
+          setRuleParams('transactionName', undefined);
+          setRuleParams('environment', ENVIRONMENT_ALL.value);
+        }
+      }}
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
       onChange={(value) => setRuleParams('transactionType', value)}
+      serviceName={params.serviceName}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setRuleParams('environment', value)}
+      onChange={(value) =>
+        setRuleParams(
+          'environment',
+          value !== '' ? value : ENVIRONMENT_ALL.value
+        )
+      }
+      serviceName={params.serviceName}
+    />,
+    <TransactionNameField
+      currentValue={params.transactionName}
+      onChange={(value) => setRuleParams('transactionName', value)}
+      serviceName={params.serviceName}
     />,
     <PopoverExpression
       value={params.aggregationType}
@@ -163,6 +226,7 @@ export function TransactionDurationRuleType(props: Props) {
       })}
     >
       <EuiSelect
+        data-test-subj="apmTransactionDurationRuleTypeSelect"
         value={params.aggregationType}
         options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {
           return {
@@ -197,12 +261,47 @@ export function TransactionDurationRuleType(props: Props) {
     />,
   ];
 
+  const groupAlertsBy = (
+    <>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.apm.ruleFlyout.transactionDuration.createAlertPerText',
+          {
+            defaultMessage: 'Group alerts by',
+          }
+        )}
+        helpText={i18n.translate(
+          'xpack.apm.ruleFlyout.transactionDuration.createAlertPerHelpText',
+          {
+            defaultMessage:
+              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
+          }
+        )}
+        fullWidth
+        display="rowCompressed"
+      >
+        <APMRuleGroupBy
+          onChange={onGroupByChange}
+          options={{ groupBy: ruleParams.groupBy }}
+          fields={[TRANSACTION_NAME]}
+          preSelectedOptions={[
+            SERVICE_NAME,
+            SERVICE_ENVIRONMENT,
+            TRANSACTION_TYPE,
+          ]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
+  );
+
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       chartPreview={chartPreview}
       defaultParams={params}
       fields={fields}
+      groupAlertsBy={groupAlertsBy}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
     />

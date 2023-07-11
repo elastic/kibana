@@ -8,11 +8,17 @@
 import { SavedObjectAttribute } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
-import { RuleActionParam, IntervalSchedule } from '@kbn/alerting-plugin/common';
+import {
+  RuleActionParam,
+  IntervalSchedule,
+  RuleActionAlertsFilterProperty,
+} from '@kbn/alerting-plugin/common';
+import { isEmpty } from 'lodash/fp';
 import { Rule, RuleAction } from '../../../types';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
 
 interface CommandType<
   T extends
@@ -22,6 +28,8 @@ interface CommandType<
     | 'setRuleParams'
     | 'setRuleActionParams'
     | 'setRuleActionProperty'
+    | 'setRuleActionFrequency'
+    | 'setRuleActionAlertsFilter'
 > {
   type: T;
 }
@@ -77,7 +85,15 @@ export type RuleReducerAction =
     }
   | {
       command: CommandType<'setRuleActionProperty'>;
-      payload: RuleActionPayload<keyof RuleAction>;
+      payload: Payload<string, RuleActionParam>;
+    }
+  | {
+      command: CommandType<'setRuleActionFrequency'>;
+      payload: Payload<string, RuleActionParam>;
+    }
+  | {
+      command: CommandType<'setRuleActionAlertsFilter'>;
+      payload: Payload<string, RuleActionAlertsFilterProperty>;
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
@@ -168,6 +184,72 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
             ...oldAction.params,
             [key]: value,
           },
+        };
+        rule.actions.splice(index, 0, updatedAction);
+        return {
+          ...state,
+          rule: {
+            ...rule,
+            actions: [...rule.actions],
+          },
+        };
+      }
+    }
+    case 'setRuleActionFrequency': {
+      const { key, value, index } = action.payload as Payload<
+        keyof RuleAction,
+        SavedObjectAttribute
+      >;
+      if (
+        index === undefined ||
+        rule.actions[index] == null ||
+        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
+      ) {
+        return state;
+      } else {
+        const oldAction = rule.actions.splice(index, 1)[0];
+        const updatedAction = {
+          ...oldAction,
+          frequency: {
+            ...(oldAction.frequency ?? DEFAULT_FREQUENCY),
+            [key]: value,
+          },
+        };
+        rule.actions.splice(index, 0, updatedAction);
+        return {
+          ...state,
+          rule: {
+            ...rule,
+            actions: [...rule.actions],
+          },
+        };
+      }
+    }
+    case 'setRuleActionAlertsFilter': {
+      const { key, value, index } = action.payload as Payload<
+        keyof RuleAction,
+        SavedObjectAttribute
+      >;
+      if (
+        index === undefined ||
+        rule.actions[index] == null ||
+        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
+      ) {
+        return state;
+      } else {
+        const oldAction = rule.actions.splice(index, 1)[0];
+        const { alertsFilter, ...rest } = oldAction;
+        const updatedAlertsFilter = { ...alertsFilter };
+
+        if (value) {
+          updatedAlertsFilter[key] = value;
+        } else {
+          delete updatedAlertsFilter[key];
+        }
+
+        const updatedAction = {
+          ...rest,
+          ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
         };
         rule.actions.splice(index, 0, updatedAction);
         return {

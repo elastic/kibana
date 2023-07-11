@@ -76,7 +76,7 @@ export const StartActionName: FC<StartActionNameProps> = ({
       }
     );
     completedBatchTransformMessage = i18n.translate(
-      'xpack.transform.transformList.completeBatchTransformBulkActionToolTip',
+      'xpack.transform.transformList.cannotRestartCompleteBatchTransformBulkActionToolTip',
       {
         defaultMessage:
           'One or more transforms are completed batch transforms and cannot be restarted.',
@@ -91,7 +91,7 @@ export const StartActionName: FC<StartActionNameProps> = ({
       }
     );
     completedBatchTransformMessage = i18n.translate(
-      'xpack.transform.transformList.completeBatchTransformToolTip',
+      'xpack.transform.transformList.cannotRestartCompleteBatchTransformToolTip',
       {
         defaultMessage: '{transformId} is a completed batch transform and cannot be restarted.',
         values: { transformId: items[0] && items[0].config.id },

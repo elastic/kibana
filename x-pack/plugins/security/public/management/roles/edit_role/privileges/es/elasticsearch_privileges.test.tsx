@@ -8,14 +8,12 @@
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { licenseMock } from '../../../../../../common/licensing/index.mock';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
-import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
-import { IndexPrivileges } from './index_privileges';
 
 function getProps() {
   const license = licenseMock.create();
@@ -56,20 +54,30 @@ test('it renders without crashing', () => {
 });
 
 test('it renders ClusterPrivileges', () => {
-  expect(
-    mountWithIntl(<ElasticsearchPrivileges {...getProps()} />).find(ClusterPrivileges)
-  ).toHaveLength(1);
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
+  expect(wrapper.find('ClusterPrivileges')).toHaveLength(1);
 });
 
-test('it renders IndexPrivileges', () => {
-  expect(
-    mountWithIntl(<ElasticsearchPrivileges {...getProps()} />).find(IndexPrivileges)
-  ).toHaveLength(1);
+test('it renders index privileges section', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
+  expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+});
+
+test('it does not render remote index privileges section by default', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
+  expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
+});
+
+test('it renders remote index privileges section when `canUseRemoteIndices` is enabled', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} canUseRemoteIndices />);
+  expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
 });
 
 test('it renders fields as disabled when not editable', () => {
   const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} editable={false} />);
   expect(wrapper.find('EuiComboBox').prop('isDisabled')).toBe(true);
   expect(wrapper.find('ClusterPrivileges').prop('editable')).toBe(false);
-  expect(wrapper.find('IndexPrivileges').prop('editable')).toBe(false);
+  expect(
+    wrapper.find('IndexPrivileges').everyWhere((component) => component.prop('editable'))
+  ).toBe(false);
 });

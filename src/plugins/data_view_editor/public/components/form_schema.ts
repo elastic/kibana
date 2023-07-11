@@ -28,10 +28,6 @@ export const schema = {
       defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
-    helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
-      defaultMessage:
-        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
-    }),
     validations: [
       {
         validator: fieldValidators.emptyField(
@@ -84,7 +80,7 @@ export const schema = {
   },
   isAdHoc: {
     label: i18n.translate('indexPatternEditor.editor.form.IsAdHocLabel', {
-      defaultMessage: 'Creeate AdHoc DataView',
+      defaultMessage: 'Create AdHoc DataView',
     }),
     defaultValue: false,
     type: 'hidden',

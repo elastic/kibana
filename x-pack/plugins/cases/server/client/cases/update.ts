@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type {
   SavedObject,
@@ -25,25 +22,23 @@ import type {
   CaseAssignees,
   CaseAttributes,
   CasePatchRequest,
-  CaseResponse,
+  Case,
   CasesPatchRequest,
-  CasesResponse,
+  Cases,
   CommentAttributes,
   User,
 } from '../../../common/api';
 import {
   CasesPatchRequestRt,
-  CasesResponseRt,
+  CasesRt,
   CaseStatuses,
   CommentType,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ASSIGNEES_PER_CASE,
-  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
 import { arraysDifference, getCaseToUpdate } from '../utils';
@@ -51,18 +46,19 @@ import { arraysDifference, getCaseToUpdate } from '../utils';
 import type { AlertService, CasesService } from '../../services';
 import { createCaseError } from '../../common/error';
 import {
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import type { UpdateAlertRequest } from '../alerts/types';
+import type { UpdateAlertStatusRequest } from '../alerts/types';
 import type { CasesClientArgs } from '..';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -73,24 +69,6 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
-  }
-}
-
-/**
- * Throws an error if any of the requests updates a title and the length is over MAX_TITLE_LENGTH.
- */
-function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidTitle = requests.filter(
-    ({ updateReq }) => updateReq.title !== undefined && updateReq.title.length > MAX_TITLE_LENGTH
-  );
-
-  if (requestsInvalidTitle.length > 0) {
-    const ids = requestsInvalidTitle.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}, ids: [${ids.join(
-        ', '
-      )}]`
-    );
   }
 }
 
@@ -238,14 +216,14 @@ async function updateAlerts({
 
   // create an array of requests that indicate the id, index, and status to update an alert
   const alertsToUpdate = totalAlerts.saved_objects.reduce(
-    (acc: UpdateAlertRequest[], alertComment) => {
+    (acc: UpdateAlertStatusRequest[], alertComment) => {
       if (isCommentRequestTypeAlert(alertComment.attributes)) {
         const status = getSyncStatusForComment({
           alertComment,
           casesToSyncToStatus,
         });
 
-        acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
+        acc.push(...createAlertUpdateStatusRequest({ comment: alertComment.attributes, status }));
       }
 
       return acc;
@@ -257,7 +235,7 @@ async function updateAlerts({
 }
 
 function partitionPatchRequest(
-  casesMap: Map<string, CaseSavedObject>,
+  casesMap: Map<string, CaseSavedObjectTransformed>,
   patchReqCases: CasePatchRequest[]
 ): {
   nonExistingCases: CasePatchRequest[];
@@ -292,7 +270,7 @@ function partitionPatchRequest(
 
 interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
-  originalCase: CaseSavedObject;
+  originalCase: CaseSavedObjectTransformed;
 }
 
 /**
@@ -303,7 +281,7 @@ interface UpdateRequestWithOriginalCase {
 export const update = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs
-): Promise<CasesResponse> => {
+): Promise<Cases> => {
   const {
     services: {
       caseService,
@@ -317,12 +295,9 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasesPatchRequestRt).decode(cases),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
   try {
+    const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+
     const myCases = await caseService.getCases({
       caseIds: query.cases.map((q) => q.id),
     });
@@ -335,7 +310,7 @@ export const update = async (
     const casesMap = myCases.saved_objects.reduce((acc, so) => {
       acc.set(so.id, so);
       return acc;
-    }, new Map<string, CaseSavedObject>());
+    }, new Map<string, CaseSavedObjectTransformed>());
 
     const { nonExistingCases, conflictedCases, casesToAuthorize } = partitionPatchRequest(
       casesMap,
@@ -391,7 +366,6 @@ export const update = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
-    throwIfTitleIsInvalid(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(casesToUpdate);
 
@@ -436,15 +410,15 @@ export const update = async (
         return flattenCases;
       }
 
-      return [
-        ...flattenCases,
+      flattenCases.push(
         flattenCaseSavedObject({
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
-        }),
-      ];
-    }, [] as CaseResponse[]);
+        })
+      );
+      return flattenCases;
+    }, [] as Case[]);
 
-    await userActionService.bulkCreateUpdateCase({
+    await userActionService.creator.bulkCreateUpdateCase({
       originalCases: myCases.saved_objects,
       updatedCases: updatedCases.saved_objects,
       user,
@@ -458,7 +432,7 @@ export const update = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return CasesResponseRt.encode(returnUpdatedCase);
+    return decodeOrThrow(CasesRt)(returnUpdatedCase);
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,
@@ -521,11 +495,11 @@ const patchCases = async ({
 
 const getCasesAndAssigneesToNotifyForAssignment = (
   updatedCases: SavedObjectsBulkUpdateResponse<CaseAttributes>,
-  casesMap: Map<string, CaseSavedObject>,
+  casesMap: Map<string, CaseSavedObjectTransformed>,
   user: CasesClientArgs['user']
 ) => {
   return updatedCases.saved_objects.reduce<
-    Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>
+    Array<{ assignees: CaseAssignees; theCase: CaseSavedObjectTransformed }>
   >((acc, updatedCase) => {
     const originalCaseSO = casesMap.get(updatedCase.id);
 
@@ -554,9 +528,9 @@ const getCasesAndAssigneesToNotifyForAssignment = (
 };
 
 const mergeOriginalSOWithUpdatedSO = (
-  originalSO: CaseSavedObject,
+  originalSO: CaseSavedObjectTransformed,
   updatedSO: SavedObjectsUpdateResponse<CaseAttributes>
-): CaseSavedObject => {
+): CaseSavedObjectTransformed => {
   return {
     ...originalSO,
     ...updatedSO,

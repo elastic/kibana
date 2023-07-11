@@ -63,6 +63,8 @@ describe('fetchEsQuery', () => {
       params,
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
+      spacePrefix: '',
+      publicBaseUrl: '',
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -128,6 +130,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },
@@ -151,6 +154,8 @@ describe('fetchEsQuery', () => {
       params,
       timestamp: undefined,
       services,
+      spacePrefix: '',
+      publicBaseUrl: '',
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -190,6 +195,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },
@@ -213,6 +219,8 @@ describe('fetchEsQuery', () => {
       params,
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
+      spacePrefix: '',
+      publicBaseUrl: '',
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -252,6 +260,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },
@@ -275,6 +284,8 @@ describe('fetchEsQuery', () => {
       params,
       timestamp: undefined,
       services,
+      spacePrefix: '',
+      publicBaseUrl: '',
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
@@ -341,6 +352,7 @@ describe('fetchEsQuery', () => {
           sort: [
             {
               '@timestamp': {
+                format: 'strict_date_optional_time||epoch_millis',
                 order: 'desc',
               },
             },

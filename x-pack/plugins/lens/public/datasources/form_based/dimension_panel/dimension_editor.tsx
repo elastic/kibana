@@ -27,6 +27,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
+import { NameInput } from '@kbn/visualization-ui-components/public';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
@@ -44,7 +45,7 @@ import {
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
-import { fieldIsInvalid } from '../utils';
+import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
 import { FormatSelector } from './format_selector';
@@ -54,8 +55,8 @@ import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
-import type { LayerType } from '../../../../common';
-import { DOCUMENT_FIELD_NAME } from '../../../../common';
+import type { LayerType } from '../../../../common/types';
+import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
 import {
   quickFunctionsName,
   staticValueOperationName,
@@ -68,7 +69,6 @@ import {
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
-import { NameInput } from '../../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
@@ -105,7 +105,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     isFullscreen,
     supportStaticValue,
     enableFormatSelector = true,
-    formatSelectorOptions,
     layerType,
     paramEditorCustomProps,
   } = props;
@@ -113,7 +112,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     data: props.data,
     fieldFormats: props.fieldFormats,
     uiSettings: props.uiSettings,
-    savedObjectsClient: props.savedObjectsClient,
     http: props.http,
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
@@ -126,6 +124,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  // If a layer has sampling disabled, assume the toast has already fired in the past
+  const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
+    !isSamplingValueEnabled(state.layers[layerId])
+  );
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -137,6 +139,28 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const updateLayer = useCallback(
     (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
+  );
+
+  const fireOrResetRandomSamplingToast = useCallback(
+    (newLayer: FormBasedLayer) => {
+      // if prev and current sampling state is different, show a toast to the user
+      if (isSamplingValueEnabled(state.layers[layerId]) && !isSamplingValueEnabled(newLayer)) {
+        if (newLayer.sampling != null && newLayer.sampling < 1) {
+          props.notifications.toasts.add({
+            title: i18n.translate('xpack.lens.uiInfo.samplingDisabledTitle', {
+              defaultMessage: 'Layer sampling changed to 100%',
+            }),
+            text: i18n.translate('xpack.lens.uiInfo.samplingDisabledMessage', {
+              defaultMessage:
+                'The use of a maximum or minimum function on a layer requires all documents to be sampled in order to function properly.',
+            }),
+          });
+        }
+      }
+      // reset the flag if the user switches to another supported operation
+      setSamplingToastAsFired(!hasRandomSamplingToastFired);
+    },
+    [hasRandomSamplingToastFired, layerId, props.notifications.toasts, state.layers]
   );
 
   const setStateWrapper = useCallback(
@@ -177,10 +201,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
           } else {
             outputLayer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
           }
+          const newLayer = adjustColumnReferencesForChangedColumn(outputLayer, columnId);
+          // Fire an info toast (eventually) on layer update
+          fireOrResetRandomSamplingToast(newLayer);
+
           return mergeLayer({
             state: prevState,
             layerId,
-            newLayer: adjustColumnReferencesForChangedColumn(outputLayer, columnId),
+            newLayer,
           });
         },
         {
@@ -189,7 +217,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }
       );
     },
-    [columnId, layerId, setState, state.layers]
+    [columnId, fireOrResetRandomSamplingToast, layerId, setState, state.layers]
   );
 
   const setIsCloseable = (isCloseable: boolean) => {
@@ -288,7 +316,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           !('selectionStyle' in operationDefinition) ||
           operationDefinition.selectionStyle !== 'hidden'
       )
-      .filter(({ type }) => fieldByOperation[type]?.size || operationWithoutField.has(type))
+      .filter(({ type }) => fieldByOperation.get(type)?.size || operationWithoutField.has(type))
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -337,12 +365,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
           state.layers[layerId],
           layerType
         ),
+      compatibleWithSampling:
+        getSamplingValue(state.layers[layerId]) === 1 ||
+        (definition.getUnsupportedSettings?.()?.sampling ?? true),
     };
   });
 
   const currentFieldIsInvalid = useMemo(
-    () => fieldIsInvalid(selectedColumn, currentIndexPattern),
-    [selectedColumn, currentIndexPattern]
+    () => fieldIsInvalid(state.layers[layerId], columnId, currentIndexPattern),
+    [state.layers, layerId, columnId, currentIndexPattern]
   );
 
   const shouldDisplayDots =
@@ -350,7 +381,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
-    ({ operationType, compatibleWithCurrentField, disabledStatus }) => {
+    ({ operationType, compatibleWithCurrentField, disabledStatus, compatibleWithSampling }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
@@ -397,9 +428,17 @@ export function DimensionEditor(props: DimensionEditorProps) {
         );
       } else if (!compatibleWithCurrentField) {
         label = (
-          <EuiFlexGroup gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
-              {label}
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+              <span
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {label}
+              </span>
             </EuiFlexItem>
             {shouldDisplayDots && (
               <EuiFlexItem grow={false}>
@@ -409,6 +448,26 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       'This function is not compatible with the current selected field',
                   })}
                   position="left"
+                  size="s"
+                  type="dot"
+                  color="warning"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      } else if (!compatibleWithSampling) {
+        label = (
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
+              {label}
+            </EuiFlexItem>
+            {shouldDisplayDots && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate('xpack.lens.indexPattern.settingsSamplingUnsupported', {
+                    defaultMessage: `Selecting this function will change this layer's sampling to 100% in order to function properly.`,
+                  })}
                   size="s"
                   type="dot"
                   color="warning"
@@ -451,6 +510,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                           helpPopoverContainer.current = null;
                         }
                       }}
+                      theme={props.core.theme}
                     >
                       <HelpComponent />
                     </WrappingHelpPopover>
@@ -500,7 +560,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             setStateWrapper(newLayer);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
-            const possibleFields = fieldByOperation[operationType] || new Set();
+            const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
 
             let newLayer: FormBasedLayer;
             if (possibleFields.size === 1) {
@@ -652,7 +712,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <>
       <EuiFormRow
         label={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
                 defaultMessage: 'Functions',
@@ -665,10 +725,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 isOpen={isHelpOpen}
                 display="inlineBlock"
                 panelPaddingSize="none"
-                className="dscFieldTypesHelp__popover"
-                panelClassName="dscFieldTypesHelp__panel"
                 closePopover={closeHelp}
-                initialFocus="#dscFieldTypesHelpBasicTableId"
+                initialFocus="#functionsHelpBasicTableId"
               >
                 <EuiPopoverTitle paddingSize="s">
                   {i18n.translate('xpack.lens.indexPattern.quickFunctions.popoverTitle', {
@@ -682,7 +740,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   paddingSize="s"
                 >
                   <EuiBasicTable
-                    id="dscFieldTypesHelpBasicTableId"
+                    id="functionsHelpBasicTableId"
                     style={{ width: 350 }}
                     tableCaption={i18n.translate(
                       'xpack.lens.indexPattern.quickFunctions.tableTitle',
@@ -733,6 +791,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 incompleteColumn={
                   layer.incompleteColumns ? layer.incompleteColumns[referenceId] : undefined
                 }
+                onResetIncomplete={() => {
+                  updateLayer({
+                    ...layer,
+                    // clean up the incomplete column data for the referenced id
+                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: null },
+                  });
+                }}
                 onDeleteColumn={() => {
                   updateLayer(
                     deleteColumn({
@@ -743,16 +808,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   );
                 }}
                 onChooseFunction={(operationType: string, field?: IndexPatternField) => {
-                  updateLayer(
-                    insertOrReplaceColumn({
-                      layer,
-                      columnId: referenceId,
-                      op: operationType,
-                      indexPattern: currentIndexPattern,
-                      field,
-                      visualizationGroups: dimensionGroups,
-                    })
-                  );
+                  const newLayer = insertOrReplaceColumn({
+                    layer,
+                    columnId: referenceId,
+                    op: operationType,
+                    indexPattern: currentIndexPattern,
+                    field,
+                    visualizationGroups: dimensionGroups,
+                  });
+                  fireOrResetRandomSamplingToast(newLayer);
+                  updateLayer(newLayer);
                 }}
                 onChooseField={(choice: FieldChoiceWithOperationType) => {
                   updateLayer(
@@ -786,6 +851,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else {
                     newLayer = setter;
                   }
+                  fireOrResetRandomSamplingToast(newLayer);
                   return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, referenceId));
                 }}
                 validation={validation}
@@ -1165,11 +1231,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             !isFullscreen &&
             selectedColumn &&
             (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
-              <FormatSelector
-                selectedColumn={selectedColumn}
-                onChange={onFormatChange}
-                options={formatSelectorOptions}
-              />
+              <FormatSelector selectedColumn={selectedColumn} onChange={onFormatChange} />
             ) : null}
           </>
         </div>

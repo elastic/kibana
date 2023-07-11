@@ -12,6 +12,8 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   tags: [],
   showCustomRules: false,
   showElasticRules: false,
+  enabled: undefined,
+  ruleExecutionStatus: undefined,
 };
 export const DEFAULT_SORTING_OPTIONS: SortingOptions = {
   field: 'enabled',

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { sloList } from '../../../../common/data/slo';
+import { sloList } from '../../../data/slo/slo';
 import { UseFetchSloListResponse } from '../use_fetch_slo_list';
 
-export const useFetchSloList = (name?: string): UseFetchSloListResponse => {
+export const useFetchSloList = (): UseFetchSloListResponse => {
   return {
-    loading: false,
+    isInitialLoading: false,
+    isLoading: false,
+    isRefetching: false,
+    isError: false,
+    isSuccess: true,
     sloList,
+    refetch: function () {} as UseFetchSloListResponse['refetch'],
   };
 };

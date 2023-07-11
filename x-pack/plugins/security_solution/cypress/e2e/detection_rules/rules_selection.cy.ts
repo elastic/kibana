@@ -4,31 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
   SELECT_ALL_RULES_BTN,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 import {
-  loadPrebuiltDetectionRules,
   selectNumberOfRules,
   unselectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  getAvailablePrebuiltRulesCount,
+  createAndInstallMockedPrebuiltRules,
+} from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
+const RULE_1 = createRuleAssetSavedObject({
+  name: 'Test rule 1',
+  rule_id: 'rule_1',
+});
+const RULE_2 = createRuleAssetSavedObject({
+  name: 'Test rule 2',
+  rule_id: 'rule_2',
+});
+
 describe('Rules selection', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
+    /* Create and install two mock rules */
+    createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    waitForPrebuiltDetectionRulesToBeLoaded();
   });
 
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
-    loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     selectNumberOfRules(2);
@@ -41,7 +58,6 @@ describe('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then bulk un-selected', () => {
-    loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();
@@ -50,10 +66,8 @@ describe('Rules selection', () => {
       cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
     });
 
-    const bulkSelectButton = cy.get(SELECT_ALL_RULES_BTN);
-
     // Un-select all rules via the Bulk Selection button from the Utility bar
-    bulkSelectButton.click();
+    cy.get(SELECT_ALL_RULES_BTN).click();
 
     // Current selection should be 0 rules
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
@@ -64,7 +78,6 @@ describe('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then unselected via the table select all checkbox', () => {
-    loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();

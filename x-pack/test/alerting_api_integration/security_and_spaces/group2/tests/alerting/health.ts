@@ -6,16 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  AlertUtils,
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-} from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, AlertUtils } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createFindTests({ getService }: FtrProviderContext) {
@@ -92,10 +86,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(health.alerting_framework_health.decryption_health.status).to.eql('ok');
               expect(health.alerting_framework_health.execution_health.status).to.eql('ok');
               expect(health.alerting_framework_health.read_health.status).to.eql('ok');
-              // Legacy: pre-v8.0 typo
-              expect(health.alerting_framework_heath.decryption_health.status).to.eql('ok');
-              expect(health.alerting_framework_heath.execution_health.status).to.eql('ok');
-              expect(health.alerting_framework_heath.read_health.status).to.eql('ok');
           }
         });
 
@@ -144,11 +134,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               default:
                 expect(health.alerting_framework_health.execution_health.status).to.eql('warn');
                 expect(health.alerting_framework_health.execution_health.timestamp).to.eql(
-                  ruleInErrorStatus.execution_status.last_execution_date
-                );
-                // Legacy: pre-v8.0 typo
-                expect(health.alerting_framework_heath.execution_health.status).to.eql('warn');
-                expect(health.alerting_framework_heath.execution_health.timestamp).to.eql(
                   ruleInErrorStatus.execution_status.last_execution_date
                 );
             }

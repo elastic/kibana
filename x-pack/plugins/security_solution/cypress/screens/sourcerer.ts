@@ -29,4 +29,5 @@ export const SOURCERER = {
   wrapperTimeline: '[data-test-subj="timeline-sourcerer-popover"]',
 };
 
-export const HOSTS_STAT = '[data-test-subj="stat-hosts"] [data-test-subj="stat-title"]';
+export const HOSTS_STAT =
+  '[data-test-subj="stat-hosts"] [data-test-subj="stat-title"] [data-test-subj="metric_value"]';

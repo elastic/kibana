@@ -23,6 +23,10 @@ const StyledEuiCard = styled(EuiCard)`
     font-size: 1rem;
   }
 
+  .euiSpacer {
+    display: none;
+  }
+
   .euiText {
     margin-top: 0;
     margin-left: 25px;

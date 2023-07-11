@@ -26,8 +26,6 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
 
-const MAX_TRACES_TO_INSPECT = 1000;
-
 export async function getTraceSampleIds({
   serviceName,
   environment,
@@ -36,6 +34,7 @@ export async function getTraceSampleIds({
   start,
   end,
   serviceGroupKuery,
+  kuery,
 }: {
   serviceName?: string;
   environment: string;
@@ -44,6 +43,7 @@ export async function getTraceSampleIds({
   start: number;
   end: number;
   serviceGroupKuery?: string;
+  kuery?: string;
 }) {
   const query = {
     bool: {
@@ -51,27 +51,29 @@ export async function getTraceSampleIds({
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...kqlQuery(serviceGroupKuery),
+        ...kqlQuery(kuery),
         ...termQuery(SERVICE_NAME, serviceName),
       ],
     },
   };
 
-  const isGlobalServiceMap = !serviceName && !serviceGroupKuery;
+  const isUnfilteredGlobalServiceMap =
+    !serviceName && !serviceGroupKuery && !kuery;
   let events = [ProcessorEvent.span, ProcessorEvent.transaction];
 
   // perf optimization that is only possible on the global service map with no filters
-  if (isGlobalServiceMap) {
+  if (isUnfilteredGlobalServiceMap) {
     events = [ProcessorEvent.span];
     query.bool.filter.push({
       exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
     });
   }
 
-  const fingerprintBucketSize = isGlobalServiceMap
+  const fingerprintBucketSize = isUnfilteredGlobalServiceMap
     ? config.serviceMapFingerprintGlobalBucketSize
     : config.serviceMapFingerprintBucketSize;
 
-  const traceIdBucketSize = isGlobalServiceMap
+  const traceIdBucketSize = isUnfilteredGlobalServiceMap
     ? config.serviceMapTraceIdGlobalBucketSize
     : config.serviceMapTraceIdBucketSize;
 
@@ -159,7 +161,7 @@ export async function getTraceSampleIds({
       uniq(
         sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId)
       ),
-      MAX_TRACES_TO_INSPECT
+      config.serviceMapMaxTraces
     );
 
     return { traceIds };

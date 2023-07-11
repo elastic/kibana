@@ -22,14 +22,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
-  describe('dashboard app - group 1', function () {
+  describe('dashboard app - group 5', function () {
     before(loadCurrentData);
     after(unloadCurrentData);
 
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
     loadTestFile(require.resolve('./empty_dashboard'));
-    loadTestFile(require.resolve('./dashboard_options'));
+    loadTestFile(require.resolve('./dashboard_settings'));
     loadTestFile(require.resolve('./data_shared_attributes'));
     loadTestFile(require.resolve('./share'));
     loadTestFile(require.resolve('./embed_mode'));

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 
@@ -416,6 +416,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
 
             expect(javaStats).to.be(undefined);
+          });
+
+          it('does not return metrics', () => {
+            const goAStats = body.currentPeriod.find(
+              (stat) => stat.serviceNodeName === 'go-instance-a'
+            );
+
+            expect(goAStats).to.not.be(undefined);
+            expect(goAStats?.memoryUsage).to.be(undefined);
+            expect(goAStats?.cpuUsage).to.be(undefined);
           });
 
           it('does not return data for missing service node name', () => {

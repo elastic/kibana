@@ -335,7 +335,7 @@ describe('math completion', () => {
           triggerCharacter: '(',
         })
       );
-      expect(results.list).toEqual(['bytes', 'memory']);
+      expect(results.list).toEqual(['bytes', 'memory', 'runtime-number']);
     });
 
     it('should autocomplete only operations that provide numeric or date output', async () => {
@@ -346,7 +346,13 @@ describe('math completion', () => {
           triggerCharacter: '(',
         })
       );
-      expect(results.list).toEqual(['bytes', 'memory', 'timestamp', 'start_date']);
+      expect(results.list).toEqual([
+        'bytes',
+        'memory',
+        'runtime-number',
+        'timestamp',
+        'start_date',
+      ]);
     });
 
     it('should autocomplete shift parameter with relative suggestions and a couple of abs ones', async () => {

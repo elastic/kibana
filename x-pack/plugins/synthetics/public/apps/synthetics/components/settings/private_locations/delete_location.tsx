@@ -30,6 +30,15 @@ export const DeleteLocation = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const deleteDisabledReason = i18n.translate(
+    'xpack.synthetics.monitorManagement.cannotDelete.description',
+    {
+      defaultMessage: `You can't delete this location because it is used in {monCount, number} {monCount, plural,one {monitor} other {monitors}}.
+                Remove this location from all monitors first.`,
+      values: { monCount },
+    }
+  );
+
   const deleteModal = (
     <EuiConfirmModal
       title={i18n.translate('xpack.synthetics.monitorManagement.deleteLocationName', {
@@ -51,17 +60,7 @@ export const DeleteLocation = ({
   return (
     <>
       {isModalOpen && deleteModal}
-      <EuiToolTip
-        content={
-          canDelete
-            ? DELETE_LABEL
-            : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete.description', {
-                defaultMessage: `This location cannot be deleted, because it has {monCount, number} {monCount, plural,one {monitor} other {monitors}} running.
-                Please remove this location from your monitors before deleting this location.`,
-                values: { monCount },
-              })
-        }
-      >
+      <EuiToolTip content={canDelete ? DELETE_LABEL : deleteDisabledReason}>
         <EuiButtonIcon
           data-test-subj={`deleteLocation-${id}`}
           isLoading={loading}

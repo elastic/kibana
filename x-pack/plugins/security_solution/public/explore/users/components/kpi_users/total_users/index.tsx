@@ -68,7 +68,7 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
       abort: querySkip || isChartEmbeddablesEnabled,
     });
 
-  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
     inputId: InputsModelId.global,
     queryId: QUERY_ID,
   });
@@ -100,7 +100,7 @@ const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
       refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
+      session={isChartEmbeddablesEnabled ? session : undefined}
     />
   );
 };

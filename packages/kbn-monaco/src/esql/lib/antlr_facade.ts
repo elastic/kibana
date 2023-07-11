@@ -10,16 +10,27 @@ import { CommonTokenStream, CodePointCharStream } from 'antlr4ts';
 
 import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 import { esql_parser as ESQLParser } from '../antlr/esql_parser';
+import type { esql_parserListener as ESQLParserListener } from '../antlr/esql_parser_listener';
 
 import type { ANTLREErrorListener } from '../../common/error_listener';
 
-export const getParser = (inputStream: CodePointCharStream, errorListener: ANTLREErrorListener) => {
+export const ROOT_STATEMENT = 'singleStatement';
+
+export const getParser = (
+  inputStream: CodePointCharStream,
+  errorListener: ANTLREErrorListener,
+  parseListener?: ESQLParserListener
+) => {
   const lexer = getLexer(inputStream, errorListener);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new ESQLParser(tokenStream);
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
+
+  if (parseListener) {
+    parser.addParseListener(parseListener);
+  }
 
   return parser;
 };

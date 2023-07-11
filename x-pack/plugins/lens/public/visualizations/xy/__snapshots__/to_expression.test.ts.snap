@@ -131,7 +131,6 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "extent": Array [],
                   "id": Array [
                     "x",
                   ],
@@ -166,6 +165,27 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
+                  "extent": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "lowerBound": Array [],
+                            "mode": Array [
+                              "full",
+                            ],
+                            "niceValues": Array [
+                              true,
+                            ],
+                            "upperBound": Array [],
+                          },
+                          "function": "axisExtentConfig",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
                   "labelsOrientation": Array [
                     -90,
                   ],
@@ -208,6 +228,9 @@ Object {
                             ],
                             "mode": Array [
                               "custom",
+                            ],
+                            "niceValues": Array [
+                              true,
                             ],
                             "upperBound": Array [
                               456,

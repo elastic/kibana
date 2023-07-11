@@ -54,7 +54,7 @@ A CORS rule is required for communication between Elastic and {sn}. To create a 
 . Configure the rule as follows:
 * *Name*: Name the rule.
 * *REST API*: Set the rule to use the Elastic ITSM API by choosing `Elastic ITSM API [x_elas2_inc_int/elastic_api]`.
-* *Domain*: Enter the Kibana URL.
+* *Domain*: Enter the Kibana URL, including the port number.
 . Go to the *HTTP methods* tab and select *GET*.
 . Click *Submit* to create the rule.
 
@@ -176,10 +176,23 @@ To update a deprecated connector:
 . Click *Update*.
 
 [float]
-[[servicenow-connector-configuration]]
-=== Connector configuration
+[[define-servicenow-ui]]
+=== Create connectors in {kib}
 
-{sn-itsm} connectors have the following configuration properties.
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. You must choose whether to use OAuth for authentication.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-connector-basic.png[ServiceNow connector using basic auth]
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-connector-oauth.png[ServiceNow connector using OAuth]
+
+[float]
+[[servicenow-connector-configuration]]
+==== Connector configuration
+
+{sn-itsm} connectors have the following configuration properties:
 
 Name::      The name of the connector.
 Is OAuth::  The type of authentication to use.
@@ -194,45 +207,45 @@ Private Key:: The RSA private key generated during setup.
 Private Key Password:: The password for the RSA private key generated during setup, if set.
 
 [float]
-[[servicenow-connector-networking-configuration]]
-=== Connector networking configuration
+[[preconfigured-servicenow-configuration]]
+=== Create preconfigured connectors
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[Preconfigured-servicenow-configuration]]
-=== Preconfigured connector type
+If you are running {kib} on-prem, you can define connectors by
+adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
+For example:
 
 Connector using Basic Authentication
 [source,text]
 --
- my-servicenow:
-   name: preconfigured-servicenow-connector-type
-   actionTypeId: .servicenow
-   config:
-     apiUrl: https://example.service-now.com/
-     usesTableApi: false
-   secrets:
-     username: testuser
-     password: passwordkeystorevalue
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+    secrets:
+      username: testuser
+      password: passwordkeystorevalue
 --
 
 Connector using OAuth
 [source,text]
 --
- my-servicenow:
-   name: preconfigured-oauth-servicenow-connector-type
-   actionTypeId: .servicenow
-   config:
-     apiUrl: https://example.service-now.com/
-     usesTableApi: false
-     isOAuth: true
-     userIdentifierValue: testuser@email.com
-     clientId: abcdefghijklmnopqrstuvwxyzabcdef
-     jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba
-   secrets:
-     clientSecret: secretsecret
-     privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY-----
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false
+      isOAuth: true
+      userIdentifierValue: testuser@email.com
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba
+    secrets:
+      clientSecret: secretsecret
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY-----
 --
 
 Config defines information for the connector type.
@@ -256,25 +269,15 @@ Secrets defines sensitive information for the connector type.
 `privateKeyPassword`:: A string that corresponds to *Private Key Password*.
 
 [float]
-[[define-servicenow-ui]]
-=== Define connector in {stack-manage-app}
+[[servicenow-action-configuration]]
+=== Test connectors
 
-Define {sn-itsm} connector properties. Choose whether to use OAuth for authentication.
-
-[role="screenshot"]
-image::management/connectors/images/servicenow-connector-basic.png[ServiceNow connector using basic auth]
-
-[role="screenshot"]
-image::management/connectors/images/servicenow-connector-oauth.png[ServiceNow connector using OAuth]
-
-Test {sn-itsm} action parameters.
+You can test connectors with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-params-test.png[ServiceNow params test]
 
-[float]
-[[servicenow-action-configuration]]
-=== Action configuration
 
 {sn-itsm} actions have the following configuration properties.
 
@@ -291,6 +294,12 @@ Correlation Display::  A descriptive label of the alert for correlation purposes
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+
+[float]
+[[servicenow-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
 [[configuring-servicenow]]

@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
+import { APP_ID as CASES_APP_ID, MAX_SUGGESTED_PROFILES } from '@kbn/cases-plugin/common/constants';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/utils';
-import { suggestUserProfiles } from '../../../cases_api_integration/common/lib/user_profiles';
+import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/api';
+import { suggestUserProfiles } from '../../../cases_api_integration/common/lib/api/user_profiles';
 import {
   casesAllUser,
   casesOnlyDeleteUser,
@@ -76,5 +76,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     }
+
+    describe('errors', () => {
+      it('400s when size parameter is not valid', async () => {
+        await suggestUserProfiles({
+          supertest: supertestWithoutAuth,
+          req: {
+            name: casesAllUser.username,
+            owners: [CASES_APP_ID],
+            size: MAX_SUGGESTED_PROFILES + 1,
+          },
+          auth: { user: casesAllUser, space: null },
+          expectedHttpCode: 400,
+        });
+      });
+    });
   });
 };

@@ -17,7 +17,7 @@ import { Environment } from '../../../common/environment_rt';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 /**
- * This is used for getting the list of environments for the environments selector,
+ * This is used for getting the list of environments for the environment selector,
  * filtered by range.
  */
 export async function getEnvironments({
@@ -34,7 +34,7 @@ export async function getEnvironments({
   size: number;
   start: number;
   end: number;
-}) {
+}): Promise<Environment[]> {
   const operationName = serviceName
     ? 'get_environments_for_service'
     : 'get_environments';

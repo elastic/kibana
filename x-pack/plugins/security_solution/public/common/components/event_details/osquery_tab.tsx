@@ -5,154 +5,99 @@
  * 2.0.
  */
 
-import {
-  EuiCode,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { Ecs } from '../../../../common/ecs';
-import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
+import type { Ecs } from '@kbn/cases-plugin/common';
+import type { SearchHit } from '../../../../common/search_strategy';
+import type {
+  ExpandedEventFieldsObject,
+  RawEventData,
+} from '../../../../common/types/response_actions';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
 `;
-type RuleParameters = Array<{
-  response_actions: Array<{
-    action_type_id: string;
-    params: Record<string, unknown>;
-  }>;
-}>;
-
-export interface AlertRawEventData {
-  _id: string;
-  fields: {
-    ['agent.id']?: string[];
-    ['kibana.alert.rule.parameters']: RuleParameters;
-    ['kibana.alert.rule.name']: string[];
-  };
-
-  [key: string]: unknown;
-}
-
-interface ExpandedEventFieldsObject {
-  agent?: {
-    id: string[];
-  };
-  kibana: {
-    alert?: {
-      rule?: {
-        parameters: RuleParameters;
-        name: string[];
-      };
-    };
-  };
-}
 
 export const useOsqueryTab = ({
   rawEventData,
   ecsData,
 }: {
-  rawEventData?: AlertRawEventData;
-  ecsData?: Ecs;
-}) => {
+  rawEventData?: SearchHit | undefined;
+  ecsData?: Ecs | null;
+}): EuiTabbedContentTab | undefined => {
   const {
-    services: { osquery, application },
+    services: { osquery },
   } = useKibana();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
-
-  const emptyPrompt = useMemo(
-    () => (
-      <EuiEmptyPrompt
-        iconType="logoOsquery"
-        title={<h2>{PERMISSION_DENIED}</h2>}
-        titleSize="xs"
-        body={
-          <FormattedMessage
-            id="xpack.securitySolution.osquery.results.missingPrivileges"
-            defaultMessage="To access these results, ask your administrator for {osquery} Kibana
-              privileges."
-            values={{
-              // eslint-disable-next-line react/jsx-no-literals
-              osquery: <EuiCode>osquery</EuiCode>,
-            }}
-          />
-        }
-      />
-    ),
-    []
+  const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
+    'endpointResponseActionsEnabled'
   );
 
-  if (!osquery || !rawEventData || !responseActionsEnabled || !ecsData) {
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
+    : undefined;
+
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+
+  const shouldEarlyReturn =
+    !rawEventData ||
+    !responseActionsEnabled ||
+    endpointResponseActionsEnabled ||
+    !ecsData ||
+    !responseActions?.length;
+
+  const alertId = rawEventData?._id ?? '';
+
+  const { OsqueryResults, fetchAllLiveQueries } = osquery;
+
+  const { data: actionsData } = fetchAllLiveQueries({
+    filterQuery: { term: { alert_ids: alertId } },
+    alertId,
+    skip: shouldEarlyReturn,
+  });
+
+  if (shouldEarlyReturn) {
     return;
   }
 
-  const { OsqueryResults } = osquery;
-  const expandedEventFieldsObject = expandDottedObject(
-    rawEventData.fields
-  ) as ExpandedEventFieldsObject;
+  const osqueryResponseActions = responseActions.filter(
+    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+  );
 
-  const parameters = expandedEventFieldsObject.kibana?.alert?.rule?.parameters;
-  const responseActions = parameters?.[0].response_actions;
-
-  const osqueryActionsLength = responseActions?.filter(
-    (action: { action_type_id: string }) => action.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
-  )?.length;
-
-  if (!osqueryActionsLength) {
+  if (!osqueryResponseActions?.length) {
     return;
   }
-  const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
-  const agentIds = expandedEventFieldsObject.agent?.id;
 
-  const alertId = rawEventData._id;
+  const actionItems = actionsData?.data.items || [];
+
+  const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name?.[0];
+
+  const content = (
+    <TabContentWrapper data-test-subj="osqueryViewWrapper">
+      <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
+      <EuiSpacer size="s" />
+    </TabContentWrapper>
+  );
 
   return {
     id: EventsViewType.osqueryView,
     'data-test-subj': 'osqueryViewTab',
-    name: (
-      <EuiFlexGroup
-        direction="row"
-        alignItems={'center'}
-        justifyContent={'spaceAround'}
-        gutterSize="xs"
-      >
-        <EuiFlexItem>
-          <span>{i18n.OSQUERY_VIEW}</span>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-            {osqueryActionsLength}
-          </EuiNotificationBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    name: i18n.OSQUERY_VIEW,
+    append: (
+      <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+        {actionItems.length}
+      </EuiNotificationBadge>
     ),
-    content: (
-      <>
-        <TabContentWrapper data-test-subj="osqueryViewWrapper">
-          {!application?.capabilities?.osquery?.read ? (
-            emptyPrompt
-          ) : (
-            <OsqueryResults
-              agentIds={agentIds}
-              ruleName={ruleName}
-              alertId={alertId}
-              ecsData={ecsData}
-            />
-          )}
-        </TabContentWrapper>
-      </>
-    ),
+    content,
   };
 };

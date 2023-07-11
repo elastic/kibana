@@ -40,8 +40,12 @@ interface AggregatedValue {
 }
 interface Aggs {
   currentPeriod: {
-    doc_count: number;
-    aggregatedValue?: AggregatedValue;
+    buckets: {
+      all: {
+        doc_count: number;
+        aggregatedValue?: AggregatedValue;
+      };
+    };
   };
   aggregatedValue?: AggregatedValue;
   shouldWarn?: {
@@ -140,11 +144,13 @@ export const getData = async (
           shouldWarn,
           shouldTrigger,
           missingGroup,
-          currentPeriod: { aggregatedValue, doc_count: docCount },
+          currentPeriod,
           aggregatedValue: aggregatedValueForRate,
           additionalContext,
           containerContext,
         } = bucket;
+
+        const { aggregatedValue, doc_count: docCount } = currentPeriod.buckets.all;
 
         const containerList = containerContext ? createContainerList(containerContext) : undefined;
 
@@ -199,11 +205,13 @@ export const getData = async (
     }
     if (aggs.all?.buckets.all) {
       const {
-        currentPeriod: { aggregatedValue, doc_count: docCount },
+        currentPeriod,
         aggregatedValue: aggregatedValueForRate,
         shouldWarn,
         shouldTrigger,
       } = aggs.all.buckets.all;
+
+      const { aggregatedValue, doc_count: docCount } = currentPeriod.buckets.all;
 
       const value =
         params.aggType === Aggregators.COUNT

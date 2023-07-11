@@ -136,10 +136,11 @@ const convertPayload = (
   const unsafeDecodedValue = decodeValue(value);
 
   return fields.reduce(
-    (payload, field) => ({
-      ...payload,
-      ...getSingleFieldPayload(field, unsafeDecodedValue[field] ?? unsafeDecodedValue, owner),
-    }),
+    (payload, field) =>
+      Object.assign(
+        payload,
+        getSingleFieldPayload(field, unsafeDecodedValue[field] ?? unsafeDecodedValue, owner)
+      ),
     {}
   );
 };

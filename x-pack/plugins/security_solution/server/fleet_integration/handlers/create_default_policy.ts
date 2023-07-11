@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -16,6 +17,7 @@ import {
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
 import { disableProtections } from '../../../common/endpoint/models/policy_config_helpers';
 
@@ -24,9 +26,14 @@ import { disableProtections } from '../../../common/endpoint/models/policy_confi
  */
 export const createDefaultPolicy = (
   licenseService: LicenseService,
-  config: AnyPolicyCreateConfig | undefined
+  config: AnyPolicyCreateConfig | undefined,
+  cloud: CloudSetup
 ): PolicyConfig => {
   const factoryPolicy = policyConfigFactory();
+
+  // Add license and cloud information after policy creation
+  factoryPolicy.meta.license = licenseService.getLicenseType();
+  factoryPolicy.meta.cloud = cloud?.isCloudEnabled;
 
   const defaultPolicyPerType =
     config?.type === 'cloud'
@@ -42,18 +49,21 @@ export const createDefaultPolicy = (
 /**
  * Create a copy of an object with all keys set to false
  */
-const falsyObjectKeys = <T extends Record<string, boolean>>(obj: T): T => {
+const falsyObjectKeys = <T extends Record<string, unknown>>(obj: T): Record<keyof T, boolean> => {
   return Object.keys(obj).reduce((accumulator, key) => {
-    return { ...accumulator, [key]: false };
-  }, {} as T);
+    accumulator[key as keyof T] = false;
+    return accumulator;
+  }, {} as Record<keyof T, boolean>);
 };
 
 const getEndpointPolicyConfigPreset = (config: PolicyCreateEndpointConfig | undefined) => {
   const isNGAV = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_NGAV;
   const isEDREssential = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL;
   const isEDRComplete = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_COMPLETE;
+  const isDataCollection =
+    config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_DATA_COLLECTION;
 
-  return { isNGAV, isEDREssential, isEDRComplete };
+  return { isNGAV, isEDREssential, isEDRComplete, isDataCollection };
 };
 
 /**
@@ -63,7 +73,8 @@ const getEndpointPolicyWithIntegrationConfig = (
   policy: PolicyConfig,
   config: PolicyCreateEndpointConfig | undefined
 ): PolicyConfig => {
-  const { isNGAV, isEDREssential, isEDRComplete } = getEndpointPolicyConfigPreset(config);
+  const { isNGAV, isEDREssential, isEDRComplete, isDataCollection } =
+    getEndpointPolicyConfigPreset(config);
 
   if (isEDRComplete) {
     return policy;
@@ -98,6 +109,8 @@ const getEndpointPolicyWithIntegrationConfig = (
         },
       },
     };
+  } else if (isDataCollection) {
+    return disableProtections(policy);
   }
 
   // data collection by default

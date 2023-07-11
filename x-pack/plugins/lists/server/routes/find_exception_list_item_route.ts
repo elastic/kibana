@@ -52,6 +52,11 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             body: `list_id and namespace_id need to have the same comma separated number of values. Expected list_id length: ${listId.length} to equal namespace_type length: ${namespaceType.length}`,
             statusCode: 400,
           });
+        } else if (listId.length !== filter.length && filter.length !== 0) {
+          return siemResponse.error({
+            body: `list_id and filter need to have the same comma separated number of values. Expected list_id length: ${listId.length} to equal filter length: ${filter.length}`,
+            statusCode: 400,
+          });
         } else {
           const exceptionListItems = await exceptionLists.findExceptionListsItem({
             filter,

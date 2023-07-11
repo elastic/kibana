@@ -16,7 +16,7 @@ import type {
   TimelineActionsOverflowColumns,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */
@@ -27,6 +27,8 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal,
   onOpenTimeline,
   onCreateRule,
+  onCreateRuleFromEql,
+  hasCrudAccess,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
@@ -34,6 +36,8 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onCreateRule?: OnCreateRuleFromTimeline;
+  onCreateRuleFromEql?: OnCreateRuleFromTimeline;
+  hasCrudAccess: boolean;
 }): [TimelineActionsOverflowColumns] => {
   const createTimelineFromTemplate = {
     name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
@@ -147,12 +151,35 @@ export const getActionsColumns = ({
       timeline.status !== TimelineStatus.immutable,
     description: i18n.CREATE_RULE_FROM_TIMELINE,
     'data-test-subj': 'create-rule-from-timeline',
-    available: () => actionTimelineToShow.includes('createRule') && onCreateRule != null,
+    available: ({ queryType }: OpenTimelineResult) =>
+      actionTimelineToShow.includes('createRule') &&
+      onCreateRule != null &&
+      queryType != null &&
+      queryType.hasQuery,
   };
 
+  const createRuleFromTimelineCorrelation = {
+    name: i18n.CREATE_RULE_FROM_TIMELINE_CORRELATION,
+    icon: 'indexEdit',
+    onClick: (selectedTimeline: OpenTimelineResult) => {
+      if (onCreateRuleFromEql != null && selectedTimeline.savedObjectId)
+        onCreateRuleFromEql(selectedTimeline.savedObjectId);
+    },
+    enabled: (timeline: OpenTimelineResult) =>
+      onCreateRuleFromEql != null &&
+      timeline.savedObjectId != null &&
+      timeline.status !== TimelineStatus.immutable,
+    description: i18n.CREATE_RULE_FROM_TIMELINE,
+    'data-test-subj': 'create-rule-from-eql',
+    available: ({ queryType }: OpenTimelineResult) =>
+      actionTimelineToShow.includes('createRuleFromEql') &&
+      onCreateRuleFromEql != null &&
+      queryType != null &&
+      queryType.hasEql,
+  };
   return [
     {
-      width: '80px',
+      width: hasCrudAccess ? '80px' : '150px',
       actions: [
         createTimelineFromTemplate,
         createTemplateFromTimeline,
@@ -161,6 +188,7 @@ export const getActionsColumns = ({
         exportTimelineAction,
         deleteTimelineColumn,
         createRuleFromTimeline,
+        createRuleFromTimelineCorrelation,
       ],
     },
   ];

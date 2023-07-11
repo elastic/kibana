@@ -22,16 +22,6 @@ import {
 
 import type { State } from '..';
 import { createStore } from '..';
-import {
-  removeColumn,
-  upsertColumn,
-  applyDeltaToColumnWidth,
-  updateColumnOrder,
-  updateColumns,
-  updateColumnWidth,
-  updateItemsPerPage,
-  updateSort,
-} from './actions';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import type { EventsViewerProps } from '../../components/events_viewer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -40,11 +30,21 @@ import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';
 import { StatefulEventsViewer } from '../../components/events_viewer';
 import { eventsDefaultModel } from '../../components/events_viewer/default_model';
-import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { SourcererScopeName } from '../sourcerer/model';
-import { TableId } from '../../../../common/types';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+
+const {
+  applyDeltaToColumnWidth,
+  removeColumn,
+  updateColumnOrder,
+  updateColumns,
+  updateColumnWidth,
+  updateItemsPerPage,
+  updateSort,
+  upsertColumn,
+} = dataTableActions;
 
 jest.mock('../../../timelines/containers/local_storage');
 
@@ -64,10 +64,9 @@ describe('epicLocalStorage', () => {
     const ACTION_BUTTON_COUNT = 4;
 
     testProps = {
-      defaultCellActions,
       defaultModel: eventsDefaultModel,
       end: to,
-      entityType: EntityType.ALERTS,
+      entityType: EntityType.EVENTS,
       tableId: TableId.test,
       leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
       renderCellValue: DefaultCellRenderer,

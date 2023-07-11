@@ -32,7 +32,7 @@ export function FormRow(props: FormRowProps) {
   const label = props.warningMsg ? (
     <>
       <EuiToolTip position="top" content={props.warningMsg}>
-        <EuiIcon type="alert" />
+        <EuiIcon type="warning" />
       </EuiToolTip>
       {props.label}
     </>

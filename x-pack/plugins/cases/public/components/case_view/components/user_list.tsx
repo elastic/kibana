@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
+import { sortBy } from 'lodash';
 
 import {
   EuiButtonIcon,
@@ -20,20 +21,19 @@ import {
 import styled, { css } from 'styled-components';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { ElasticUser } from '../../../containers/types';
+import { useCaseViewNavigation } from '../../../common/navigation';
+import type { CaseUI } from '../../../containers/types';
 import * as i18n from '../translations';
-import type { UserInfoWithAvatar } from '../../user_profiles/types';
+import type { CaseUserWithProfileInfo, UserInfoWithAvatar } from '../../user_profiles/types';
 import { HoverableUserWithAvatar } from '../../user_profiles/hoverable_user_with_avatar';
 import { convertToUserInfo } from '../../user_profiles/user_converter';
+import { getSortField } from '../../user_profiles/sort';
 
 interface UserListProps {
-  email: {
-    subject: string;
-    body: string;
-  };
+  theCase: CaseUI;
   headline: string;
   loading?: boolean;
-  users: ElasticUser[];
+  users: CaseUserWithProfileInfo[];
   userProfiles?: Map<string, UserProfileWithAvatar>;
   dataTestSubj?: string;
 }
@@ -67,8 +67,18 @@ const renderUsers = (
     </MyFlexGroup>
   ));
 
+const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: string }) => ({
+  subject: i18n.EMAIL_SUBJECT(caseTitle),
+  body: i18n.EMAIL_BODY(caseUrl),
+});
+
 export const UserList: React.FC<UserListProps> = React.memo(
-  ({ email, headline, loading, users, userProfiles, dataTestSubj }) => {
+  ({ theCase, userProfiles, headline, loading, users, dataTestSubj }) => {
+    const { getCaseViewUrl } = useCaseViewNavigation();
+
+    const caseUrl = getCaseViewUrl({ detailName: theCase.id });
+    const email = getEmailContent({ caseTitle: theCase.title, caseUrl });
+
     const handleSendEmail = useCallback(
       (emailAddress: string | undefined | null) => {
         if (emailAddress && emailAddress != null) {
@@ -82,8 +92,9 @@ export const UserList: React.FC<UserListProps> = React.memo(
     );
 
     const validUsers = getValidUsers(users, userProfiles ?? new Map());
+    const orderedUsers = sortBy(validUsers, getSortField);
 
-    if (validUsers.length === 0) {
+    if (orderedUsers.length === 0) {
       return null;
     }
 
@@ -99,7 +110,7 @@ export const UserList: React.FC<UserListProps> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {renderUsers(validUsers, handleSendEmail)}
+          {renderUsers(orderedUsers, handleSendEmail)}
         </EuiText>
       </EuiFlexItem>
     );
@@ -109,11 +120,19 @@ export const UserList: React.FC<UserListProps> = React.memo(
 UserList.displayName = 'UserList';
 
 const getValidUsers = (
-  users: ElasticUser[],
+  users: CaseUserWithProfileInfo[],
   userProfiles: Map<string, UserProfileWithAvatar>
 ): UserInfoWithAvatar[] => {
   const validUsers = users.reduce<Map<string, UserInfoWithAvatar>>((acc, user) => {
-    const convertedUser = convertToUserInfo(user, userProfiles);
+    const userCamelCase = {
+      email: user.user.email,
+      fullName: user.user.full_name,
+      username: user.user.username,
+      profileUid: user.uid,
+    };
+
+    const convertedUser = convertToUserInfo(userCamelCase, userProfiles);
+
     if (convertedUser != null) {
       acc.set(convertedUser.key, convertedUser.userInfo);
     }

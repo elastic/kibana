@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SortOrder } from '../../../../../../../common/detection_engine/schemas/common';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
   LogLevel,
   RuleExecutionEventType,
   RuleExecutionStatus,
-  RuleExecutionSummary,
   SortFieldOfRuleExecutionResult,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleObjectId } from '../../../../../../../common/detection_engine/rule_schema';
+import type { SortOrder } from '../../../../../../../common/detection_engine/schemas/common';
 
 /**
  * Used from route handlers to fetch and manage various information about the rule execution:
@@ -22,26 +22,6 @@ import type {
  *   - execution events such as recent failures and status changes
  */
 export interface IRuleExecutionLogForRoutes {
-  /**
-   * Fetches a list of current execution summaries of multiple rules.
-   * @param ruleIds A list of saved object ids of multiple rules (`rule.id`).
-   * @returns A dict with rule IDs as keys and execution summaries as values.
-   * @throws AggregateError if any of the rule status requests fail.
-   */
-  getExecutionSummariesBulk(ruleIds: string[]): Promise<RuleExecutionSummariesByRuleId>;
-
-  /**
-   * Fetches current execution summary of a given rule.
-   * @param ruleId Saved object id of the rule (`rule.id`).
-   */
-  getExecutionSummary(ruleId: string): Promise<RuleExecutionSummary | null>;
-
-  /**
-   * Deletes the current execution summary if it exists.
-   * @param ruleId Saved object id of the rule (`rule.id`).
-   */
-  clearExecutionSummary(ruleId: string): Promise<void>;
-
   /**
    * Fetches plain execution events of a given rule from Event Log. This includes debug, info, and
    * error messages that executor functions write during a rule execution to the log.
@@ -57,7 +37,7 @@ export interface IRuleExecutionLogForRoutes {
 
 export interface GetExecutionEventsArgs {
   /** Saved object id of the rule (`rule.id`). */
-  ruleId: string;
+  ruleId: RuleObjectId;
 
   /** Include events of the specified types. If empty, all types of events will be included. */
   eventTypes: RuleExecutionEventType[];
@@ -77,7 +57,7 @@ export interface GetExecutionEventsArgs {
 
 export interface GetExecutionResultsArgs {
   /** Saved object id of the rule (`rule.id`). */
-  ruleId: string;
+  ruleId: RuleObjectId;
 
   /** Start of daterange to filter to. */
   start: string;
@@ -103,5 +83,3 @@ export interface GetExecutionResultsArgs {
   /** Number of results to fetch per page. */
   perPage: number;
 }
-
-export type RuleExecutionSummariesByRuleId = Record<string, RuleExecutionSummary | null>;

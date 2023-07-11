@@ -9,19 +9,20 @@
 import { ReactElement } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { getSavedSearchUrl, SearchInput } from '..';
+import { SearchInput } from '..';
+import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../build_services';
-import { dataViewMock } from '../__mocks__/data_view';
 import { discoverServiceMock } from '../__mocks__/services';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { VIEW_MODE } from '../components/view_mode_toggle';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { VIEW_MODE } from '../../common/constants';
+import { buildDataViewMock, deepMockedFields } from '../__mocks__/data_view';
 
 let discoverComponent: ReactWrapper;
 
@@ -36,6 +37,18 @@ jest.mock('react-dom', () => {
 });
 
 const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+function getSearchResponse(nrOfHits: number) {
+  const hits = new Array(nrOfHits).map((idx) => ({ id: idx }));
+  return of({
+    rawResponse: {
+      hits: { hits, total: nrOfHits },
+    },
+    isPartial: false,
+    isRunning: false,
+  });
+}
+
+const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
 describe('saved search embeddable', () => {
   let mountpoint: HTMLDivElement;
@@ -46,11 +59,13 @@ describe('saved search embeddable', () => {
   let showFieldStatisticsMockValue: boolean = false;
   let viewModeMockValue: VIEW_MODE = VIEW_MODE.DOCUMENT_LEVEL;
 
-  const createEmbeddable = (searchMock?: jest.Mock) => {
+  const createEmbeddable = (searchMock?: jest.Mock, customTitle?: string) => {
+    const searchSource = createSearchSourceMock({ index: dataViewMock }, undefined, searchMock);
     const savedSearchMock = {
       id: 'mock-id',
+      title: 'saved search',
       sort: [['message', 'asc']] as Array<[string, string]>,
-      searchSource: createSearchSourceMock({ index: dataViewMock }, undefined, searchMock),
+      searchSource,
       viewMode: viewModeMockValue,
     };
 
@@ -73,6 +88,9 @@ describe('saved search embeddable', () => {
       rowHeight: 30,
       rowsPerPage: 50,
     };
+    if (customTitle) {
+      searchInput.title = customTitle;
+    }
 
     executeTriggerActions = jest.fn();
 
@@ -88,7 +106,7 @@ describe('saved search embeddable', () => {
       (input) => (input.lastReloadRequestTime = Date.now())
     );
 
-    return { embeddable, searchInput };
+    return { embeddable, searchInput, searchSource };
   };
 
   beforeEach(() => {
@@ -117,13 +135,16 @@ describe('saved search embeddable', () => {
     jest.spyOn(embeddable, 'updateOutput');
 
     embeddable.render(mountpoint);
+    expect(render).toHaveBeenCalledTimes(1);
     await waitOneTick();
+    expect(render).toHaveBeenCalledTimes(2);
 
     const searchProps = discoverComponent.find(SavedSearchEmbeddableComponent).prop('searchProps');
 
     searchProps.onAddColumn!('bytes');
     await waitOneTick();
     expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
+    expect(render).toHaveBeenCalledTimes(4); // twice per an update to show and then hide a loading indicator
 
     searchProps.onRemoveColumn!('bytes');
     await waitOneTick();
@@ -154,13 +175,7 @@ describe('saved search embeddable', () => {
 
   it('should render saved search embeddable when successfully loading data', async () => {
     // mock return data
-    const search = jest.fn().mockReturnValue(
-      of({
-        rawResponse: { hits: { hits: [{ id: 1 }], total: 1 } },
-        isPartial: false,
-        isRunning: false,
-      })
-    );
+    const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable(search);
     jest.spyOn(embeddable, 'updateOutput');
 
@@ -186,13 +201,7 @@ describe('saved search embeddable', () => {
 
   it('should render saved search embeddable when empty data is returned', async () => {
     // mock return data
-    const search = jest.fn().mockReturnValue(
-      of({
-        rawResponse: { hits: { hits: [], total: 0 } },
-        isPartial: false,
-        isRunning: false,
-      })
-    );
+    const search = jest.fn().mockReturnValue(getSearchResponse(0));
     const { embeddable } = createEmbeddable(search);
     jest.spyOn(embeddable, 'updateOutput');
 
@@ -262,14 +271,8 @@ describe('saved search embeddable', () => {
     expect(loadedOutput.error).not.toBe(undefined);
   });
 
-  it('a custom title should not start another search which would cause an Abort error', async () => {
-    const search = jest.fn().mockReturnValue(
-      of({
-        rawResponse: { hits: { hits: [], total: 0 } },
-        isPartial: false,
-        isRunning: false,
-      })
-    );
+  it('should not fetch data if only a new input title is set', async () => {
+    const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable, searchInput } = createEmbeddable(search);
 
     embeddable.render(mountpoint);
@@ -280,5 +283,71 @@ describe('saved search embeddable', () => {
     embeddable.updateInput(searchInput);
     await waitOneTick();
     expect(search).toHaveBeenCalledTimes(1);
+  });
+  it('should not reload when the input title doesnt change', async () => {
+    const search = jest.fn().mockReturnValue(getSearchResponse(1));
+    const { embeddable } = createEmbeddable(search, 'custom title');
+    embeddable.reload = jest.fn();
+    embeddable.render(mountpoint);
+    // wait for data fetching
+    await waitOneTick();
+    embeddable.updateOutput({ title: 'custom title' });
+    await waitOneTick();
+
+    expect(embeddable.reload).toHaveBeenCalledTimes(0);
+    expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reload when a different input title is set', async () => {
+    const search = jest.fn().mockReturnValue(getSearchResponse(1));
+    const { embeddable } = createEmbeddable(search, 'custom title');
+    embeddable.reload = jest.fn();
+    embeddable.render(mountpoint);
+
+    await waitOneTick();
+    embeddable.updateOutput({ title: 'custom title changed' });
+    await waitOneTick();
+
+    expect(embeddable.reload).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not reload and fetch when a input title matches the saved search title', async () => {
+    const search = jest.fn().mockReturnValue(getSearchResponse(1));
+    const { embeddable } = createEmbeddable(search);
+    embeddable.reload = jest.fn();
+    embeddable.render(mountpoint);
+    await waitOneTick();
+    embeddable.updateOutput({ title: 'saved search' });
+    await waitOneTick();
+
+    expect(embeddable.reload).toHaveBeenCalledTimes(0);
+    expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  it('should correctly handle aborted requests', async () => {
+    const { embeddable, searchSource } = createEmbeddable();
+    await waitOneTick();
+    const updateOutput = jest.spyOn(embeddable, 'updateOutput');
+    const abortSignals: AbortSignal[] = [];
+    jest.spyOn(searchSource, 'fetch$').mockImplementation(
+      (options) =>
+        new Observable(() => {
+          if (options?.abortSignal) {
+            abortSignals.push(options.abortSignal);
+          }
+          throw new Error('Search failed');
+        })
+    );
+    embeddable.reload();
+    embeddable.reload();
+    await waitOneTick();
+    expect(updateOutput).toHaveBeenCalledTimes(3);
+    expect(abortSignals[0].aborted).toBe(true);
+    expect(abortSignals[1].aborted).toBe(false);
+    embeddable.reload();
+    await waitOneTick();
+    expect(updateOutput).toHaveBeenCalledTimes(5);
+    expect(abortSignals[2].aborted).toBe(false);
   });
 });

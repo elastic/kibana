@@ -10,7 +10,6 @@ import React from 'react';
 import { take } from 'rxjs/operators';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +17,13 @@ import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { VisualizeEmbeddable } from '../embeddable';
 import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
-import { getUiActions, getApplication, getEmbeddable, getUsageCollection } from '../services';
+import {
+  getUiActions,
+  getApplication,
+  getEmbeddable,
+  getUsageCollection,
+  getCapabilities,
+} from '../services';
 
 export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
 
@@ -30,7 +35,7 @@ const displayName = i18n.translate('visualizations.actions.editInLens.displayNam
   defaultMessage: 'Convert to Lens',
 });
 
-const ReactMenuItem: React.FC = () => {
+const MenuItem: React.FC = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>{displayName}</EuiFlexItem>
@@ -44,8 +49,6 @@ const ReactMenuItem: React.FC = () => {
     </EuiFlexGroup>
   );
 };
-
-const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
 const isVisualizeEmbeddable = (embeddable: IEmbeddable): embeddable is VisualizeEmbeddable => {
   return 'getVis' in embeddable;
@@ -74,9 +77,12 @@ export class EditInLensAction implements Action<EditInLensContext> {
     if (isVisualizeEmbeddable(embeddable)) {
       const vis = embeddable.getVis();
       const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
+      // Filters and query set on the visualization level
+      const visFilters = vis.data.searchSource?.getField('filter');
+      const visQuery = vis.data.searchSource?.getField('query');
       const parentSearchSource = vis.data.searchSource?.getParent();
-      const searchFilters = parentSearchSource?.getField('filter');
-      const searchQuery = parentSearchSource?.getField('query');
+      const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
+      const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
       const title = vis.title || embeddable.getOutput().title;
       const updatedWithMeta = {
         ...navigateToLensConfig,
@@ -87,6 +93,8 @@ export class EditInLensAction implements Action<EditInLensContext> {
         searchFilters,
         searchQuery,
         isEmbeddable: true,
+        description: vis.description || embeddable.getOutput().description,
+        panelTimeRange: embeddable.getInput()?.timeRange,
       };
       if (navigateToLensConfig) {
         if (this.currentAppId) {
@@ -106,7 +114,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
     return displayName;
   }
 
-  MenuItem = UiMenuItem;
+  MenuItem = MenuItem;
 
   getIconType(context: ActionExecutionContext<EditInLensContext>): string | undefined {
     return 'merge';
@@ -114,7 +122,8 @@ export class EditInLensAction implements Action<EditInLensContext> {
 
   async isCompatible(context: ActionExecutionContext<EditInLensContext>) {
     const { embeddable } = context;
-    if (!isVisualizeEmbeddable(embeddable)) {
+    const { visualize } = getCapabilities();
+    if (!isVisualizeEmbeddable(embeddable) || !visualize.show) {
       return false;
     }
     const vis = embeddable.getVis();

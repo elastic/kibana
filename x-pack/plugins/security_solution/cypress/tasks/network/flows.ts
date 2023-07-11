@@ -15,6 +15,7 @@ import {
   EXPAND_OVERFLOW_ITEMS,
   OVERFLOW_ITEM,
 } from '../../screens/network/flows';
+import { EUI_ICON_IS_LOADING } from '../../screens/common/controls';
 
 export const waitForIpsTableToBeLoaded = () => {
   cy.get(IPS_TABLE_LOADED).should('exist');
@@ -25,7 +26,7 @@ export const openHoverActions = () => {
 };
 
 export const mouseoverOnToOverflowItem = () => {
-  cy.get(OVERFLOW_ITEM).first().trigger('mouseover');
+  cy.get(OVERFLOW_ITEM).first().realHover();
 };
 
 export const clickOnFilterIn = () => {
@@ -37,6 +38,7 @@ export const clickOnFilterOut = () => {
 };
 
 export const clickOnAddToTimeline = () => {
+  cy.get(`${ADD_TO_TIMELINE} ${EUI_ICON_IS_LOADING}`).should('not.exist');
   cy.get(ADD_TO_TIMELINE).first().click();
 };
 
@@ -45,5 +47,6 @@ export const clickOnShowTopN = () => {
 };
 
 export const clickOnCopyValue = () => {
-  cy.get(COPY).first().invoke('focus').click({ force: true });
+  cy.get(COPY).first().focus();
+  cy.focused().click({ force: true });
 };

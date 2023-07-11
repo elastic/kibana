@@ -10,6 +10,7 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 
 export interface Dependencies {
   home: HomePublicPluginSetup;
@@ -17,4 +18,5 @@ export interface Dependencies {
   licensing: LicensingPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }

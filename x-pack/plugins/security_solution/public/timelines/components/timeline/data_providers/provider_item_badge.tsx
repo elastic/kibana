@@ -9,13 +9,14 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import type { BrowserFields } from '../../../../common/containers/source';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 
 import type { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
@@ -44,7 +45,7 @@ interface ProviderItemBadgeProps {
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   displayValue?: string;
-  val: string | number | Array<string | number>;
+  val: PrimitiveOrArrayOfPrimitives;
   type?: DataProviderType;
   wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }

@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { Env, IConfigService } from '@kbn/config';
 import type { LoggerFactory } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
-import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { configServiceMock, createTestEnv } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 
 function create({
-  env = Env.createDefault(REPO_ROOT, getEnvOptions()),
+  env = createTestEnv(),
   logger = loggerMock.create(),
   configService = configServiceMock.create(),
 }: {
@@ -23,7 +22,7 @@ function create({
   logger?: jest.Mocked<LoggerFactory>;
   configService?: jest.Mocked<IConfigService>;
 } = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
+  return { coreId: Symbol(), env: env as DeeplyMockedKeys<typeof env>, logger, configService };
 }
 
 export const mockCoreContext = {

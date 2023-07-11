@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { omit, pickBy, mapValues } from 'lodash';
 import { buildRangeFilter, Filter } from '@kbn/es-query';
-import { Logger } from '@kbn/core/server';
 import {
+  DataView,
+  DataViewsContract,
   getTime,
   ISearchSource,
   ISearchStartSearchSource,
@@ -19,26 +22,34 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { Logger } from '@kbn/core/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
+  alertLimit: number | undefined;
   params: OnlySearchSourceRuleParams;
   latestTimestamp: string | undefined;
+  spacePrefix: string;
   services: {
-    searchSourceClient: ISearchStartSearchSource;
     logger: Logger;
+    searchSourceClient: ISearchStartSearchSource;
+    share: SharePluginStart;
+    dataViews: DataViewsContract;
   };
-  alertLimit?: number;
 }
 
 export async function fetchSearchSourceQuery({
   ruleId,
+  alertLimit,
   params,
   latestTimestamp,
+  spacePrefix,
   services,
-  alertLimit,
 }: FetchSearchSourceQueryOpts) {
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -46,8 +57,10 @@ export async function fetchSearchSourceQuery({
 
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
+  const index = initialSearchSource.getField('index') as DataView;
   const { searchSource, dateStart, dateEnd } = updateSearchSource(
     initialSearchSource,
+    index,
     params,
     latestTimestamp,
     alertLimit
@@ -61,7 +74,19 @@ export async function fetchSearchSourceQuery({
 
   const searchResult = await searchSource.fetch();
 
+  const link = await generateLink(
+    initialSearchSource,
+    services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
+    services.dataViews,
+    index,
+    dateStart,
+    dateEnd,
+    spacePrefix
+  );
   return {
+    link,
+    numMatches: Number(searchResult.hits.total),
+    searchResult,
     parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
     dateStart,
     dateEnd,
@@ -70,12 +95,12 @@ export async function fetchSearchSourceQuery({
 
 export function updateSearchSource(
   searchSource: ISearchSource,
+  index: DataView,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   alertLimit?: number
 ) {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const index = searchSource.getField('index')!;
   const timeFieldName = params.timeField || index.timeFieldName;
 
   if (!timeFieldName) {
@@ -84,10 +109,11 @@ export function updateSearchSource(
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
-  const timerangeFilter = getTime(index, {
+  const timeRange = {
     from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
     to: 'now',
-  });
+  };
+  const timerangeFilter = getTime(index, timeRange);
   const dateStart = timerangeFilter?.query.range[timeFieldName].gte;
   const dateEnd = timerangeFilter?.query.range[timeFieldName].lte;
   const filters = [timerangeFilter];
@@ -97,14 +123,25 @@ export function updateSearchSource(
       // add additional filter for documents with a timestamp greater then
       // the timestamp of the previous run, so that those documents are not counted twice
       const field = index.fields.find((f) => f.name === timeFieldName);
-      const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
+      const addTimeRangeField = buildRangeFilter(
+        field!,
+        { gt: latestTimestamp, format: 'strict_date_optional_time' },
+        index
+      );
       filters.push(addTimeRangeField);
     }
   }
 
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
-  searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);
+  searchSourceChild.setField('sort', [
+    {
+      [timeFieldName]: {
+        order: SortDirection.desc,
+        format: 'strict_date_optional_time||epoch_millis',
+      },
+    },
+  ]);
   searchSourceChild.setField(
     'aggs',
     buildAggregation({
@@ -128,4 +165,75 @@ export function updateSearchSource(
     dateStart,
     dateEnd,
   };
+}
+
+async function generateLink(
+  searchSource: ISearchSource,
+  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
+  dataViews: DataViewsContract,
+  dataViewToUpdate: DataView,
+  dateStart: string,
+  dateEnd: string,
+  spacePrefix: string
+) {
+  const prevFilters = searchSource.getField('filter') as Filter[];
+
+  // make new adhoc data view
+  const newDataView = await dataViews.create({
+    ...dataViewToUpdate.toSpec(false),
+    version: undefined,
+    id: undefined,
+  });
+  const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
+
+  const redirectUrlParams: DiscoverAppLocatorParams = {
+    dataViewSpec: getSmallerDataViewSpec(newDataView),
+    filters: updatedFilters,
+    query: searchSource.getField('query'),
+    timeRange: { from: dateStart, to: dateEnd },
+    isAlertResults: true,
+  };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
+  const [start, end] = redirectUrl.split('/app');
+
+  return start + spacePrefix + '/app' + end;
+}
+
+function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
+  return (filters || []).map((filter) => {
+    if (filter.meta.index === fromDataView) {
+      return {
+        ...filter,
+        meta: {
+          ...filter.meta,
+          index: toDataView,
+        },
+      };
+    } else {
+      return filter;
+    }
+  });
+}
+
+export function getSmallerDataViewSpec(
+  dataView: DataView
+): DiscoverAppLocatorParams['dataViewSpec'] {
+  const dataViewSpec = dataView.toSpec(false);
+
+  if (dataViewSpec.fieldAttrs) {
+    // remove `count` props
+    dataViewSpec.fieldAttrs = pickBy(
+      mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+      (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
+    );
+
+    if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
+      dataViewSpec.fieldAttrs = undefined;
+    }
+  }
+
+  return dataViewSpec;
 }

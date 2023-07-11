@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,6 +16,7 @@ import { Params } from './rule_type_params';
 import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -137,11 +138,11 @@ describe('ruleType', () => {
       threshold: [0],
     };
 
-    expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
+    expect(ruleType.validate.params.validate(params)).toBeTruthy();
   });
 
   it('validator fails with invalid params', async () => {
-    const paramsSchema = ruleType.validate?.params;
+    const paramsSchema = ruleType.validate.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
     const params: Partial<Writable<Params>> = {
@@ -183,25 +184,27 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -215,8 +218,11 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
@@ -246,25 +252,27 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -278,8 +286,11 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -309,25 +320,27 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -341,8 +354,11 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -371,25 +387,27 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -403,8 +421,11 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

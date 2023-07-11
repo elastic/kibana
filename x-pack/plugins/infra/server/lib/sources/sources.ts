@@ -22,8 +22,8 @@ import {
   InfraStaticSourceConfiguration,
   SourceConfigurationConfigFileProperties,
   sourceConfigurationConfigFilePropertiesRT,
-  SourceConfigurationSavedObjectRuntimeType,
 } from '../../../common/source_configuration/source_configuration';
+import { SourceConfigurationSavedObjectRT } from '.';
 import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
 import { AnomalyThresholdRangeError, NotFoundError } from './errors';
@@ -114,7 +114,7 @@ export class InfraSources {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
     const { anomalyThreshold } = source;
     if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
-      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
+      throw new AnomalyThresholdRangeError('Anomaly threshold must be 1-100');
 
     const newSourceConfiguration = mergeSourceConfiguration(
       staticDefaultSourceConfiguration,
@@ -154,7 +154,7 @@ export class InfraSources {
     const { anomalyThreshold } = sourceProperties;
 
     if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
-      throw new AnomalyThresholdRangeError('anomalyThreshold must be 1-100');
+      throw new AnomalyThresholdRangeError('Anomaly threshold must be 1-100');
 
     const { configuration, version } = await this.getSourceConfiguration(
       savedObjectsClient,
@@ -258,7 +258,7 @@ export const mergeSourceConfiguration = (
 
 export const convertSavedObjectToSavedSourceConfiguration = (savedObject: SavedObject<unknown>) =>
   pipe(
-    SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
+    SourceConfigurationSavedObjectRT.decode(savedObject),
     map((savedSourceConfiguration) => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,

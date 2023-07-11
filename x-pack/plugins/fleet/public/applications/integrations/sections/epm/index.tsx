@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
-import { EuiLoadingContent } from '@elastic/eui';
+import { Routes, Route } from '@kbn/shared-ux-router';
+
+import { EuiSkeletonText } from '@elastic/eui';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
 import { IntegrationsStateContextProvider, useBreadcrumbs } from '../../hooks';
@@ -21,7 +22,7 @@ export const EPMApp: React.FunctionComponent = () => {
   useBreadcrumbs('integrations');
 
   return (
-    <Switch>
+    <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />
       </Route>
@@ -32,7 +33,7 @@ export const EPMApp: React.FunctionComponent = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_language_clients}>
         <IntegrationsStateContextProvider>
-          <React.Suspense fallback={<EuiLoadingContent />}>
+          <React.Suspense fallback={<EuiSkeletonText />}>
             <CustomLanguagesOverview />
           </React.Suspense>
         </IntegrationsStateContextProvider>
@@ -40,6 +41,6 @@ export const EPMApp: React.FunctionComponent = () => {
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
         <EPMHomePage />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  PostLogstashPipelineRequestParams,
+  PostLogstashPipelineRequestPayload,
+} from '../../../common/http_api/logstash';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
@@ -55,7 +59,7 @@ function scalarCounterAggregation(
 }
 
 function createAggsObjectFromAggsList(aggsList: any) {
-  return aggsList.reduce((aggsSoFar: object, agg: object) => ({ ...aggsSoFar, ...agg }), {});
+  return aggsList.reduce((aggsSoFar: object, agg: object) => Object.assign(aggsSoFar, agg), {});
 }
 
 function createNestedVertexAgg(statsPath: string, vertexId: string, maxBucketSize: number) {
@@ -214,7 +218,11 @@ export function getPipelineVertexStatsAggregation({
   version,
   vertexId,
 }: {
-  req: LegacyRequest;
+  req: LegacyRequest<
+    PostLogstashPipelineRequestParams,
+    unknown,
+    PostLogstashPipelineRequestPayload
+  >;
   timeSeriesIntervalInSeconds: number;
   clusterUuid: string;
   pipelineId: string;
@@ -253,8 +261,8 @@ export function getPipelineVertexStatsAggregation({
     },
   ];
 
-  const start = version.firstSeen;
-  const end = version.lastSeen;
+  const start = req.payload.timeRange.min;
+  const end = req.payload.timeRange.max;
 
   const dataset = 'node_stats';
   const type = 'logstash_stats';

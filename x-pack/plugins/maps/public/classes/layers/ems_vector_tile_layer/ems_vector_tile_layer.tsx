@@ -71,8 +71,9 @@ export class EmsVectorTileLayer extends AbstractLayer {
     }
   }
 
-  isInitialDataLoadComplete(): boolean {
-    return !!this._descriptor.__areTilesLoaded;
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
   }
 
   getSource(): EMSTMSSource {

@@ -5,39 +5,30 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type seedrandom from 'seedrandom';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { indexAlerts } from '../../../../common/endpoint/data_loaders/index_alerts';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_services';
 import { indexEndpointHostDocs } from '../../../../common/endpoint/data_loaders/index_endpoint_hosts';
 import { setupFleetForEndpoint } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { enableFleetServerIfNecessary } from '../../../../common/endpoint/data_loaders/index_fleet_server';
-import { fetchEndpointPackageInfo } from '../../common/fleet_services';
 import { METADATA_DATASTREAM } from '../../../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { getEndpointPackageInfo } from '../../../../common/endpoint/utils/package';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from '../../common/constants';
 
 let WAS_FLEET_SETUP_DONE = false;
 
-const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
-  constructor(seedValue: string | seedrandom.prng) {
-    const MetadataGenerator = class extends EndpointMetadataGenerator {
-      protected randomVersion(): string {
-        return kibanaPackageJson.version;
-      }
-    };
-
-    super(seedValue, MetadataGenerator);
-  }
-};
+const CurrentKibanaVersionDocGenerator = EndpointDocGenerator.custom({
+  CustomMetadataGenerator: EndpointMetadataGenerator.custom({
+    version: kibanaPackageJson.version,
+  }),
+});
 
 export const loadEndpointsIfNoneExist = async (
   esClient: Client,
@@ -105,7 +96,7 @@ export const loadEndpoints = async ({
     WAS_FLEET_SETUP_DONE = true;
   }
 
-  const endpointPackage = await fetchEndpointPackageInfo(kbnClient);
+  const endpointPackage = await getEndpointPackageInfo(kbnClient);
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
   let progress: LoadEndpointsProgress = {

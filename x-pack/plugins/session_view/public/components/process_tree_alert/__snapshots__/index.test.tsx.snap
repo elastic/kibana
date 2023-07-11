@@ -18,7 +18,7 @@ Object {
           >
             <button
               aria-label="expand"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
               data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
               type="button"
             >
@@ -54,6 +54,7 @@ Object {
               >
                 cmd test alert
               </div>
+              
             </div>
           </div>
           <div
@@ -61,7 +62,6 @@ Object {
           >
             <span
               class="euiBadge emotion-EuiInnerText"
-              style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
               title="open"
             >
               <span
@@ -80,7 +80,6 @@ Object {
           >
             <span
               class="euiBadge emotion-EuiInnerText"
-              style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
               title="exec"
             >
               <span
@@ -94,6 +93,9 @@ Object {
               </span>
             </span>
           </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
         </div>
       </div>
     </div>
@@ -112,7 +114,7 @@ Object {
         >
           <button
             aria-label="expand"
-            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
             type="button"
           >
@@ -148,6 +150,7 @@ Object {
             >
               cmd test alert
             </div>
+            
           </div>
         </div>
         <div
@@ -155,7 +158,6 @@ Object {
         >
           <span
             class="euiBadge emotion-EuiInnerText"
-            style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
             title="open"
           >
             <span
@@ -174,7 +176,6 @@ Object {
         >
           <span
             class="euiBadge emotion-EuiInnerText"
-            style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="exec"
           >
             <span
@@ -188,6 +189,9 @@ Object {
             </span>
           </span>
         </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
       </div>
     </div>
   </div>,

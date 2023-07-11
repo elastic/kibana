@@ -57,6 +57,10 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('formFlyoutSubmitButton');
     },
 
+    async waitForSubmitButtonOnApiKeyFlyoutEnabled() {
+      return testSubjects.waitForEnabled('formFlyoutSubmitButton', 10000);
+    },
+
     async clickCancelButtonOnApiKeyFlyout() {
       return await testSubjects.click('formFlyoutCancelButton');
     },
@@ -103,7 +107,11 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async clickExistingApiKeyToOpenFlyout(apiKeyName: string) {
-      await testSubjects.click(`roleRowName-${apiKeyName}`);
+      await testSubjects.click(`apiKeyRowName-${apiKeyName}`);
+    },
+
+    async ensureApiKeyExists(apiKeyName: string) {
+      await testSubjects.existOrFail(`apiKeyRowName-${apiKeyName}`);
     },
 
     async getMetadataSwitch() {

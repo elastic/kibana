@@ -12,6 +12,7 @@ import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { LineStyle } from '@kbn/visualization-ui-components/common/types';
 import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
@@ -22,7 +23,6 @@ import {
   annotationColumns,
   AvailableAnnotationIcon,
   EventAnnotationOutput,
-  LineStyle,
   PointStyleProps,
 } from '../types';
 
@@ -179,10 +179,10 @@ export const postprocessAnnotations = (
 
         let extraFields: Record<string, string | number | string[] | number[]> = {};
         if (annotationConfig?.extraFields?.length) {
-          extraFields = annotationConfig.extraFields.reduce(
-            (acc, field) => ({ ...acc, [`field:${field}`]: row[fieldsColIdMap[field]] }),
-            {}
-          );
+          extraFields = annotationConfig.extraFields.reduce((acc, field) => {
+            acc[`field:${field}`] = row[fieldsColIdMap[field]];
+            return acc;
+          }, {} as typeof extraFields);
         }
         if (annotationConfig?.textField) {
           extraFields[`field:${annotationConfig.textField}`] =

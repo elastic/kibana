@@ -10,11 +10,19 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { Alert, AlertFactoryDoneUtils } from './alert';
-import { AlertInstanceContext, AlertInstanceState, PublicRuleMonitoringService } from './types';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  PublicRuleResultService,
+  PublicRuleMonitoringService,
+} from './types';
+import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 
 export { rulesClientMock };
 
@@ -23,13 +31,33 @@ const createSetupMock = () => {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
     getConfig: jest.fn(),
+    frameworkAlerts: {
+      enabled: jest.fn(),
+      getContextInitializationPromise: jest.fn(),
+    },
   };
   return mock;
+};
+
+const createShareStartMock = () => {
+  const startContract = {
+    url: {
+      locators: {
+        get: (id: string) => {
+          if (id === 'DISCOVER_APP_LOCATOR') {
+            return { getRedirectUrl: (params: unknown) => JSON.stringify(params) };
+          }
+        },
+      },
+    },
+  } as SharePluginStart;
+  return startContract;
 };
 
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
+    getType: jest.fn(),
     getAllTypes: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
@@ -43,7 +71,7 @@ export type AlertInstanceMock<
   Context extends AlertInstanceContext = AlertInstanceContext
 > = jest.Mocked<Alert<State, Context>>;
 
-const createAlertFactoryMock = {
+export const createAlertFactoryMock = {
   create: <
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -54,6 +82,7 @@ const createAlertFactoryMock = {
       getScheduledActionOptions: jest.fn(),
       unscheduleActions: jest.fn(),
       getState: jest.fn(),
+      getUuid: jest.fn(),
       scheduleActions: jest.fn(),
       replaceState: jest.fn(),
       updateLastScheduledActions: jest.fn(),
@@ -108,6 +137,18 @@ const createRuleMonitoringServiceMock = () => {
   return mock;
 };
 
+const createRuleLastRunServiceMock = () => {
+  const mock = {
+    getLastRunErrors: jest.fn(),
+    getLastRunWarnings: jest.fn(),
+    getLastRunOutcomeMessages: jest.fn(),
+    getLastRunResults: jest.fn(),
+    getLastRunSetters: jest.fn(),
+  } as unknown as jest.Mocked<PublicRuleResultService>;
+
+  return mock;
+};
+
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -123,6 +164,7 @@ const createRuleExecutorServicesMock = <
       },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
+    alertsClient: publicAlertsClientMock.create(),
     savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
@@ -131,6 +173,8 @@ const createRuleExecutorServicesMock = <
     search: createAbortableSearchServiceMock(),
     searchSourceClient: searchSourceCommonMock,
     ruleMonitoringService: createRuleMonitoringServiceMock(),
+    share: createShareStartMock(),
+    dataViews: dataViewPluginMocks.createStartContract(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
@@ -143,3 +187,5 @@ export const alertsMock = {
 };
 
 export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
+
+export const ruleLastRunServiceMock = { create: createRuleLastRunServiceMock };

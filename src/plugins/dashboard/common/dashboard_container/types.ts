@@ -17,7 +17,8 @@ import { RefreshInterval } from '@kbn/data-plugin/common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import { DashboardOptions, GridData } from '../types';
+import { DashboardOptions } from '../types';
+import { GridData } from '../content_management';
 
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;
@@ -30,13 +31,9 @@ export interface DashboardPanelState<
   panelRefName?: string;
 }
 
-export type DashboardContainerInput =
-  | DashboardContainerByReferenceInput
-  | DashboardContainerByValueInput;
+export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;
 
-export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput & { panels: never };
-
-export interface DashboardContainerByValueInput extends EmbeddableInput {
+export interface DashboardContainerInput extends EmbeddableInput {
   // filter context to be passed to children
   query: Query;
   filters: Filter[];

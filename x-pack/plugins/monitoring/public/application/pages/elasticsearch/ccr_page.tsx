@@ -96,7 +96,7 @@ export const ElasticsearchCcrPage: React.FC<ComponentProps> = ({ clusters }) => 
         render={({ flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <Ccr data={data.data} alerts={alerts} />
+            <Ccr data={data} alerts={alerts} />
             {bottomBarComponent}
           </SetupModeContext.Provider>
         )}

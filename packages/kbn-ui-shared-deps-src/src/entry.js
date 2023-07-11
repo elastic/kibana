@@ -21,6 +21,8 @@ export const EmotionCache = require('@emotion/cache');
 export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
+
+export const IoTs = require('io-ts');
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
@@ -29,6 +31,7 @@ export const ReactDomServer = require('react-dom/server');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
+export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 export const StyledComponents = require('styled-components');
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
@@ -53,6 +56,7 @@ export const Fflate = { unzlibSync, strFromU8 };
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
+export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnEsQuery = require('@kbn/es-query');
 export const KbnStd = require('@kbn/std');

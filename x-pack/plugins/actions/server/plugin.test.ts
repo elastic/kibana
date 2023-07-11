@@ -29,6 +29,31 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
+function getConfig(overrides = {}) {
+  return {
+    enabled: true,
+    enabledActionTypes: ['*'],
+    allowedHosts: ['*'],
+    preconfiguredAlertHistoryEsIndex: false,
+    preconfigured: {
+      preconfiguredServerLog: {
+        actionTypeId: '.server-log',
+        name: 'preconfigured-server-log',
+        config: {},
+        secrets: {},
+      },
+    },
+    proxyRejectUnauthorizedCertificates: true,
+    proxyBypassHosts: undefined,
+    proxyOnlyHosts: undefined,
+    rejectUnauthorized: true,
+    maxResponseContentLength: new ByteSizeValue(1000000),
+    responseTimeout: moment.duration('60s'),
+    enableFooterInEmail: true,
+    ...overrides,
+  };
+}
+
 describe('Actions Plugin', () => {
   describe('setup()', () => {
     let context: PluginInitializerContext;
@@ -46,12 +71,7 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
-        cleanupFailedExecutionsTask: {
-          enabled: true,
-          cleanupInterval: schema.duration().validate('5m'),
-          idleInterval: schema.duration().validate('1h'),
-          pageSize: 100,
-        },
+        enableFooterInEmail: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -141,6 +161,106 @@ describe('Actions Plugin', () => {
           `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
+
+      it('the actions client should have the correct in-memory connectors', async () => {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(getConfig());
+        const pluginWithPreconfiguredConnectors = new ActionsPlugin(context);
+
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+
+        /**
+         * 1. In the setup of the actions plugin
+         * the preconfigured connectors are being
+         * set up. Also, the action router handler context
+         * is registered
+         */
+        const pluginSetup = await pluginWithPreconfiguredConnectors.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            canEncrypt: true,
+          },
+        });
+
+        /**
+         * 2. We simulate the registration of
+         * a system action by another plugin
+         * in the setup
+         */
+        pluginSetup.registerType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          isSystemActionType: true,
+          executor,
+        });
+
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+
+        /**
+         * 3. On start the system actions are being
+         * created based on the system action types
+         * that got registered on step 2
+         */
+        await pluginWithPreconfiguredConnectors.start(coreStart, pluginsStart);
+
+        const actionsContextHandler = (await handler[1](
+          {
+            core: {
+              savedObjects: {
+                client: {},
+              },
+              elasticsearch: {
+                client: jest.fn(),
+              },
+            },
+          } as unknown as RequestHandlerContext,
+          httpServerMock.createKibanaRequest(),
+          httpServerMock.createResponseFactory()
+        )) as unknown as ActionsApiRequestHandlerContext;
+
+        /**
+         * 4. We verify that the actions client inside
+         * the router context has the correct system connectors
+         * that got set up on start (step 3).
+         */
+        // @ts-expect-error: inMemoryConnectors can be accessed
+        expect(actionsContextHandler.getActionsClient().inMemoryConnectors).toEqual([
+          {
+            id: 'preconfiguredServerLog',
+            actionTypeId: '.server-log',
+            name: 'preconfigured-server-log',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isPreconfigured: true,
+            isSystemAction: false,
+          },
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+            isMissingSecrets: false,
+          },
+        ]);
+      });
     });
 
     describe('registerType()', () => {
@@ -150,6 +270,11 @@ describe('Actions Plugin', () => {
         name: 'test',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         async executor(options) {
           return { status: 'ok', actionId: options.actionId };
         },
@@ -199,36 +324,6 @@ describe('Actions Plugin', () => {
     });
 
     describe('isPreconfiguredConnector', () => {
-      function getConfig(overrides = {}) {
-        return {
-          enabled: true,
-          enabledActionTypes: ['*'],
-          allowedHosts: ['*'],
-          preconfiguredAlertHistoryEsIndex: false,
-          preconfigured: {
-            preconfiguredServerLog: {
-              actionTypeId: '.server-log',
-              name: 'preconfigured-server-log',
-              config: {},
-              secrets: {},
-            },
-          },
-          proxyRejectUnauthorizedCertificates: true,
-          proxyBypassHosts: undefined,
-          proxyOnlyHosts: undefined,
-          rejectUnauthorized: true,
-          maxResponseContentLength: new ByteSizeValue(1000000),
-          responseTimeout: moment.duration('60s'),
-          cleanupFailedExecutionsTask: {
-            enabled: true,
-            cleanupInterval: schema.duration().validate('5m'),
-            idleInterval: schema.duration().validate('1h'),
-            pageSize: 100,
-          },
-          ...overrides,
-        };
-      }
-
       function setup(config: ActionsConfig) {
         context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
         plugin = new ActionsPlugin(context);
@@ -280,12 +375,7 @@ describe('Actions Plugin', () => {
         rejectUnauthorized: true,
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
-        cleanupFailedExecutionsTask: {
-          enabled: true,
-          cleanupInterval: schema.duration().validate('5m'),
-          idleInterval: schema.duration().validate('1h'),
-          pageSize: 100,
-        },
+        enableFooterInEmail: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -302,6 +392,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        eventLog: eventLogMock.createStart(),
       };
     });
 
@@ -332,37 +423,7 @@ describe('Actions Plugin', () => {
       });
     });
 
-    describe('Preconfigured connectors', () => {
-      function getConfig(overrides = {}) {
-        return {
-          enabled: true,
-          enabledActionTypes: ['*'],
-          allowedHosts: ['*'],
-          preconfiguredAlertHistoryEsIndex: false,
-          preconfigured: {
-            preconfiguredServerLog: {
-              actionTypeId: '.server-log',
-              name: 'preconfigured-server-log',
-              config: {},
-              secrets: {},
-            },
-          },
-          proxyRejectUnauthorizedCertificates: true,
-          proxyBypassHosts: undefined,
-          proxyOnlyHosts: undefined,
-          rejectUnauthorized: true,
-          maxResponseContentLength: new ByteSizeValue(1000000),
-          responseTimeout: moment.duration('60s'),
-          cleanupFailedExecutionsTask: {
-            enabled: true,
-            cleanupInterval: schema.duration().validate('5m'),
-            idleInterval: schema.duration().validate('1h'),
-            pageSize: 100,
-          },
-          ...overrides,
-        };
-      }
-
+    describe('inMemoryConnectors', () => {
       function setup(config: ActionsConfig) {
         context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
         plugin = new ActionsPlugin(context);
@@ -380,71 +441,138 @@ describe('Actions Plugin', () => {
           licensing: licensingMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
         };
       }
 
-      it('should handle preconfigured actions', async () => {
-        setup(getConfig());
-        // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
-        pluginSetup.registerType({
-          id: '.server-log',
-          name: 'Server log',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          executor,
-        });
-
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
-
-        expect(pluginStart.preconfiguredActions.length).toEqual(1);
-        expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
-      });
-
-      it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
-        setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
-        pluginSetup.registerType({
-          id: '.index',
-          name: 'ES Index',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          executor,
-        });
-
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
-
-        expect(pluginStart.preconfiguredActions.length).toEqual(2);
-        expect(
-          pluginStart.isActionExecutable('preconfigured-alert-history-es-index', '.index')
-        ).toBe(true);
-      });
-
-      it('should not allow preconfigured connector with same ID as AlertHistoryEsIndexConnectorId', async () => {
-        setup(
-          getConfig({
-            preconfigured: {
-              [AlertHistoryEsIndexConnectorId]: {
-                actionTypeId: '.index',
-                name: 'clashing preconfigured index connector',
-                config: {},
-                secrets: {},
-              },
+      describe('Preconfigured connectors', () => {
+        it('should handle preconfigured actions', async () => {
+          setup(getConfig());
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType({
+            id: '.server-log',
+            name: 'Server log',
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
             },
-          })
-        );
-        // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+            executor,
+          });
 
-        expect(pluginStart.preconfiguredActions.length).toEqual(0);
-        expect(context.logger.get().warn).toHaveBeenCalledWith(
-          `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
-        );
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(
+            true
+          );
+        });
+
+        it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
+          setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType({
+            id: '.index',
+            name: 'ES Index',
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
+            },
+            executor,
+          });
+
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(
+            pluginStart.isActionExecutable('preconfigured-alert-history-es-index', '.index')
+          ).toBe(true);
+        });
+
+        it('should not allow preconfigured connector with same ID as AlertHistoryEsIndexConnectorId', async () => {
+          setup(
+            getConfig({
+              preconfigured: {
+                [AlertHistoryEsIndexConnectorId]: {
+                  actionTypeId: '.index',
+                  name: 'clashing preconfigured index connector',
+                  config: {},
+                  secrets: {},
+                },
+              },
+            })
+          );
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await plugin.setup(coreSetup as any, pluginsSetup);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(0);
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
+          );
+        });
+      });
+
+      describe('System actions', () => {
+        it('should handle system actions', async () => {
+          setup(getConfig());
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+          pluginSetup.registerType({
+            id: '.cases',
+            name: 'Cases',
+            minimumLicenseRequired: 'platinum',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
+            },
+            isSystemActionType: true,
+            executor,
+          });
+
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          // inMemoryConnectors holds both preconfigure and system connectors
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(pluginStart.inMemoryConnectors).toEqual([
+            {
+              id: 'preconfiguredServerLog',
+              actionTypeId: '.server-log',
+              name: 'preconfigured-server-log',
+              config: {},
+              secrets: {},
+              isDeprecated: false,
+              isPreconfigured: true,
+              isSystemAction: false,
+            },
+            {
+              id: 'system-connector-.cases',
+              actionTypeId: '.cases',
+              name: 'System action: .cases',
+              config: {},
+              secrets: {},
+              isDeprecated: false,
+              isMissingSecrets: false,
+              isPreconfigured: false,
+              isSystemAction: true,
+            },
+          ]);
+          expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.cases')).toBe(true);
+        });
       });
     });
 
@@ -454,6 +582,11 @@ describe('Actions Plugin', () => {
         name: 'My action type',
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor: jest.fn(),
       };
 
@@ -477,6 +610,11 @@ describe('Actions Plugin', () => {
         name: 'My action type',
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
         executor: jest.fn(),
       };
 

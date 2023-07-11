@@ -51,6 +51,7 @@ export const indexFleetAgentForHost = async (
       local_metadata: {
         elastic: {
           agent: {
+            id: endpointHost.agent.id,
             version: kibanaVersion,
           },
         },

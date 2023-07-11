@@ -22,14 +22,17 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
+  ALERT_RULE_CREATED_BY,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import { lastValueFrom } from 'rxjs';
-import type { DataTableModel } from '../../../common/store/data_table/types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -38,9 +41,9 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import type { TimelineResult } from '../../../../common/types/timeline';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
-import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
+import type { TimelineResult } from '../../../../common/types/timeline/api';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
@@ -49,7 +52,6 @@ import type {
   GetExceptionFilter,
   CreateTimeline,
 } from './types';
-import type { Ecs } from '../../../../common/ecs';
 import type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,
@@ -80,20 +82,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-
-export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
-  return {
-    query: {
-      bool: {
-        filter: {
-          terms: {
-            _id: eventIds,
-          },
-        },
-      },
-    },
-  };
-};
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
 export const updateAlertStatusAction = async ({
   query,
@@ -107,8 +96,12 @@ export const updateAlertStatusAction = async ({
   try {
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
-    const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
-    const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
+    const response = await updateAlertStatus({
+      query: query && JSON.parse(query),
+      status: selectedStatus,
+      signalIds: alertIds,
+    });
+
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
 
@@ -154,10 +147,13 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   const elapsedTimeRule = moment.duration(
     moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-1d'))
   );
-  const from = moment(ecsData.timestamp ?? new Date())
-    .subtract(elapsedTimeRule)
-    .toISOString();
-  const to = moment(ecsData.timestamp ?? new Date()).toISOString();
+
+  const alertTimestampEcsValue = getField(ecsData, TIMESTAMP);
+  const alertTimestamp = Array.isArray(alertTimestampEcsValue)
+    ? alertTimestampEcsValue[0]
+    : alertTimestampEcsValue;
+  const to = moment(alertTimestamp ?? new Date()).toISOString();
+  const from = moment(to).subtract(elapsedTimeRule).toISOString();
 
   return { to, from };
 };
@@ -473,6 +469,7 @@ const createThresholdTimeline = async (
 
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
+    const ruleAuthor = getField(alertDoc, ALERT_RULE_CREATED_BY);
     const filters: Filter[] =
       (params as MightHaveFilters).filters ??
       (alertDoc.signal?.rule as MightHaveFilters)?.filters ??
@@ -521,6 +518,7 @@ const createThresholdTimeline = async (
       },
       to: thresholdTo,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -940,6 +938,7 @@ export const sendAlertToTimelineAction = async ({
 
   const ecsData: Ecs = Array.isArray(ecs) ? ecs[0] : ecs;
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const ruleAuthor = getField(ecsData, ALERT_RULE_CREATED_BY);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId = !isEmpty(ruleTimelineId)
@@ -1062,6 +1061,7 @@ export const sendAlertToTimelineAction = async ({
             },
             to,
             ruleNote: noteContent,
+            ruleAuthor,
             notes: notes ?? null,
           });
         }
@@ -1127,6 +1127,7 @@ export const sendAlertToTimelineAction = async ({
       },
       to,
       ruleNote: noteContent,
+      ruleAuthor,
     });
   }
 };

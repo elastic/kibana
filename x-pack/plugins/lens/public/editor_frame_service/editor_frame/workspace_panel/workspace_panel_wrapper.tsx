@@ -11,22 +11,25 @@ import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
+import {
+  DatasourceMap,
+  FramePublicAPI,
+  UserMessagesGetter,
+  VisualizationMap,
+  Visualization,
+} from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
-import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
-import { WarningsPopover } from './warnings_popover';
+import { MessageList } from './message_list';
 import {
   useLensDispatch,
   updateVisualizationState,
   DatasourceStates,
   VisualizationState,
-  updateDatasourceState,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
-  selectStagedRequestWarnings,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
@@ -43,26 +46,19 @@ export interface WorkspacePanelWrapperProps {
   datasourceStates: DatasourceStates;
   isFullscreen: boolean;
   lensInspector: LensInspector;
+  getUserMessages: UserMessagesGetter;
 }
 
-export function WorkspacePanelWrapper({
-  children,
-  framePublicAPI,
-  visualizationState,
-  visualizationId,
-  visualizationMap,
-  datasourceMap,
-  datasourceStates,
-  isFullscreen,
-  lensInspector,
-}: WorkspacePanelWrapperProps) {
+export function VisualizationToolbar(props: {
+  activeVisualization: Visualization | null;
+  framePublicAPI: FramePublicAPI;
+  onUpdateStateCb?: (datasourceState: unknown, visualizationState: unknown) => void;
+}) {
   const dispatchLens = useLensDispatch();
-
-  const changesApplied = useLensSelector(selectChangesApplied);
-  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
-  const requestWarnings = useLensSelector(selectStagedRequestWarnings);
-
-  const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
+  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
+    (state) => state.lens
+  );
+  const { activeVisualization, onUpdateStateCb } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -74,43 +70,49 @@ export function WorkspacePanelWrapper({
           newState,
         })
       );
+      if (activeDatasourceId && onUpdateStateCb) {
+        const dsState = datasourceStates[activeDatasourceId].state;
+        onUpdateStateCb?.(dsState, newState);
+      }
     },
-    [dispatchLens, activeVisualization]
-  );
-  const setDatasourceState = useCallback(
-    (updater: unknown, datasourceId: string) => {
-      dispatchLens(
-        updateDatasourceState({
-          updater,
-          datasourceId,
-        })
-      );
-    },
-    [dispatchLens]
+    [activeDatasourceId, datasourceStates, dispatchLens, activeVisualization, onUpdateStateCb]
   );
 
-  const warningMessages: React.ReactNode[] = [];
-  if (activeVisualization?.getWarningMessages) {
-    warningMessages.push(
-      ...(activeVisualization.getWarningMessages(visualizationState, framePublicAPI) || [])
-    );
-  }
-  Object.entries(datasourceStates).forEach(([datasourceId, datasourceState]) => {
-    const datasource = datasourceMap[datasourceId];
-    if (!datasourceState.isLoading && datasource.getWarningMessages) {
-      warningMessages.push(
-        ...(datasource.getWarningMessages(
-          datasourceState.state,
-          framePublicAPI,
-          lensInspector.adapters,
-          (updater) => setDatasourceState(updater, datasourceId)
-        ) || [])
-      );
-    }
-  });
-  if (requestWarnings) {
-    warningMessages.push(...requestWarnings);
-  }
+  const ToolbarComponent = props.activeVisualization?.ToolbarComponent;
+
+  return (
+    <>
+      {ToolbarComponent && (
+        <EuiFlexItem grow={false}>
+          {ToolbarComponent({
+            frame: props.framePublicAPI,
+            state: visualization.state,
+            setState: setVisualizationState,
+          })}
+        </EuiFlexItem>
+      )}
+    </>
+  );
+}
+
+export function WorkspacePanelWrapper({
+  children,
+  framePublicAPI,
+  visualizationState,
+  visualizationId,
+  visualizationMap,
+  datasourceMap,
+  isFullscreen,
+  getUserMessages,
+}: WorkspacePanelWrapperProps) {
+  const dispatchLens = useLensDispatch();
+
+  const changesApplied = useLensSelector(selectChangesApplied);
+  const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+
+  const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
+  const userMessages = getUserMessages('toolbar');
+
   return (
     <EuiPageTemplate
       direction="column"
@@ -119,8 +121,12 @@ export function WorkspacePanelWrapper({
       restrictWidth={false}
       mainProps={{ component: 'div' } as unknown as {}}
     >
-      {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
-        <EuiPageTemplate.Section paddingSize="none" color="transparent">
+      {!(isFullscreen && (autoApplyEnabled || userMessages?.length)) && (
+        <EuiPageTemplate.Section
+          paddingSize="none"
+          color="transparent"
+          className="hide-for-sharing"
+        >
           <EuiFlexGroup
             alignItems="flexEnd"
             gutterSize="s"
@@ -141,28 +147,19 @@ export function WorkspacePanelWrapper({
                       framePublicAPI={framePublicAPI}
                     />
                   </EuiFlexItem>
-
-                  {activeVisualization && activeVisualization.renderToolbar && (
-                    <EuiFlexItem grow={false}>
-                      <NativeRenderer
-                        render={activeVisualization.renderToolbar}
-                        nativeProps={{
-                          frame: framePublicAPI,
-                          state: visualizationState,
-                          setState: setVisualizationState,
-                        }}
-                      />
-                    </EuiFlexItem>
-                  )}
+                  <VisualizationToolbar
+                    activeVisualization={activeVisualization}
+                    framePublicAPI={framePublicAPI}
+                  />
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                {warningMessages?.length ? (
+                {userMessages?.length ? (
                   <EuiFlexItem grow={false}>
-                    <WarningsPopover>{warningMessages}</WarningsPopover>
+                    <MessageList messages={userMessages} />
                   </EuiFlexItem>
                 ) : null}
 
@@ -199,7 +196,7 @@ export function WorkspacePanelWrapper({
         contentProps={{
           className: 'lnsWorkspacePanelWrapper__content',
         }}
-        className={classNames('lnsWorkspacePanelWrapper', {
+        className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
         color="transparent"

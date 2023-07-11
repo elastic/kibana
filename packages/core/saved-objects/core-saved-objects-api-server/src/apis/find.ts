@@ -9,9 +9,9 @@
 import type {
   SortOrder,
   AggregationsAggregationContainer,
-  Id as EsId,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '../..';
 
 type KueryNode = any;
 
@@ -68,7 +68,7 @@ export interface SavedObjectsFindOptions {
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
-  searchAfter?: EsId[];
+  searchAfter?: SortResults;
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
@@ -136,6 +136,8 @@ export interface SavedObjectsFindOptions {
    * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
    */
   pit?: SavedObjectsPitParams;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 
 /**
@@ -176,7 +178,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * await savedObjectsClient.closePointInTime(page2.pit_id);
    * ```
    */
-  sort?: string[];
+  sort?: SortResults;
 }
 
 /**

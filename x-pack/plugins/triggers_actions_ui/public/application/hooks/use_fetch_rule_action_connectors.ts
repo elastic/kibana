@@ -7,7 +7,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector, loadAllActions } from '../..';
+import type { ActionConnector } from '../..';
+import { loadAllActions } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
 const ACTIONS_LOAD_ERROR = (errorMessage: string) =>

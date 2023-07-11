@@ -25,20 +25,31 @@ jest.mock('../kibana_services', () => ({
   getIsDarkMode() {
     return false;
   },
+  getEMSSettings() {
+    return {
+      isEMSUrlSet() {
+        return false;
+      },
+    };
+  },
 }));
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
 import {
-  areLayersLoaded,
+  isMapLoading,
   getDataFilters,
   getTimeFilters,
   getQueryableUniqueIndexPatternIds,
+  getSpatialFiltersLayer,
 } from './map_selectors';
 
 import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
+import { buildGeoShapeFilter } from '../../common/elasticsearch_util';
 import { ILayer } from '../classes/layers/layer';
 import { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
+import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
+import { getDefaultMapSettings } from '../reducers/map/default_map_settings';
 
 describe('getDataFilters', () => {
   const mapExtent = {
@@ -67,6 +78,7 @@ describe('getDataFilters', () => {
     minLon: -0.25,
   };
   const isReadOnly = false;
+  const executionContext = {};
 
   test('should set buffer as searchSessionMapBuffer when using searchSessionId', () => {
     const dataFilters = getDataFilters.resultFunc(
@@ -80,7 +92,8 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
-      isReadOnly
+      isReadOnly,
+      executionContext
     );
     expect(dataFilters.buffer).toEqual(searchSessionMapBuffer);
   });
@@ -97,7 +110,8 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       undefined,
-      isReadOnly
+      isReadOnly,
+      executionContext
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
   });
@@ -136,76 +150,60 @@ describe('getTimeFilters', () => {
   });
 });
 
-describe('areLayersLoaded', () => {
-  function createLayerMock({
-    hasErrors = false,
-    isInitialDataLoadComplete = false,
-    isVisible = true,
-    showAtZoomLevel = true,
-  }: {
-    hasErrors?: boolean;
-    isInitialDataLoadComplete?: boolean;
-    isVisible?: boolean;
-    showAtZoomLevel?: boolean;
-  }) {
-    return {
-      hasErrors: () => {
-        return hasErrors;
-      },
-      isInitialDataLoadComplete: () => {
-        return isInitialDataLoadComplete;
-      },
-      isVisible: () => {
-        return isVisible;
-      },
-      showAtZoomLevel: () => {
-        return showAtZoomLevel;
-      },
-    } as unknown as ILayer;
-  }
-
-  test('layers waiting for map to load should not be counted loaded', () => {
+describe('isMapLoading', () => {
+  test('should return true when there are layers waiting for map to load', () => {
     const layerList: ILayer[] = [];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [{} as unknown as LayerDescriptor];
     const zoom = 4;
-    expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(false);
+    expect(isMapLoading.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
   });
 
-  test('layer should not be counted as loaded if it has not loaded', () => {
-    const layerList = [createLayerMock({ isInitialDataLoadComplete: false })];
-    const waitingForMapReadyLayerList: LayerDescriptor[] = [];
-    const zoom = 4;
-    expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(false);
-  });
-
-  test('layer should be counted as loaded if its not visible', () => {
-    const layerList = [createLayerMock({ isVisible: false, isInitialDataLoadComplete: false })];
-    const waitingForMapReadyLayerList: LayerDescriptor[] = [];
-    const zoom = 4;
-    expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
-  });
-
-  test('layer should be counted as loaded if its not shown at zoom level', () => {
+  test('should return true when there are layers that are loading', () => {
     const layerList = [
-      createLayerMock({ showAtZoomLevel: false, isInitialDataLoadComplete: false }),
+      {
+        hasErrors: () => {
+          return false;
+        },
+        isLayerLoading: () => {
+          return true;
+        },
+      } as unknown as ILayer,
     ];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
-    expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
+    expect(isMapLoading.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
   });
 
-  test('layer should be counted as loaded if it has a loading error', () => {
-    const layerList = [createLayerMock({ hasErrors: true, isInitialDataLoadComplete: false })];
+  test('should return false when there are unloaded layers with errors', () => {
+    const layerList = [
+      {
+        hasErrors: () => {
+          return true;
+        },
+        isLayerLoading: () => {
+          return true;
+        },
+      } as unknown as ILayer,
+    ];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
-    expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
+    expect(isMapLoading.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(false);
   });
 
-  test('layer should be counted as loaded if its loaded', () => {
-    const layerList = [createLayerMock({ isInitialDataLoadComplete: true })];
+  test('should return false when all layers are loaded', () => {
+    const layerList = [
+      {
+        hasErrors: () => {
+          return false;
+        },
+        isLayerLoading: () => {
+          return false;
+        },
+      } as unknown as ILayer,
+    ];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
-    expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
+    expect(isMapLoading.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(false);
   });
 });
 
@@ -280,5 +278,64 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
     ).toEqual(['foo', 'fbr']);
+  });
+});
+
+describe('getSpatialFiltersLayer', () => {
+  test('should include filters and embeddable search filters', () => {
+    const embeddableSearchContext = {
+      filters: [
+        buildGeoShapeFilter({
+          geometry: {
+            coordinates: [
+              [
+                [1, 0],
+                [1, 1],
+                [0, 1],
+                [0, 0],
+                [1, 0],
+              ],
+            ],
+            type: 'Polygon',
+          },
+          geometryLabel: 'myShape',
+          geoFieldNames: ['geo.coordinates'],
+        }),
+      ],
+    };
+    const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc(
+      [
+        buildGeoShapeFilter({
+          geometry: {
+            coordinates: [
+              [
+                [-101.21639, 48.1413],
+                [-101.21639, 41.84905],
+                [-90.95149, 41.84905],
+                [-90.95149, 48.1413],
+                [-101.21639, 48.1413],
+              ],
+            ],
+            type: 'Polygon',
+          },
+          geometryLabel: 'myShape',
+          geoFieldNames: ['geo.coordinates'],
+        }),
+      ],
+      embeddableSearchContext,
+      getDefaultMapSettings()
+    );
+    expect(geoJsonVectorLayer.isVisible()).toBe(true);
+    expect(
+      (geoJsonVectorLayer.getSource() as GeoJsonFileSource).getFeatureCollection().features.length
+    ).toBe(2);
+  });
+
+  test('should not show layer when showSpatialFilters is false', () => {
+    const geoJsonVectorLayer = getSpatialFiltersLayer.resultFunc([], undefined, {
+      ...getDefaultMapSettings(),
+      showSpatialFilters: false,
+    });
+    expect(geoJsonVectorLayer.isVisible()).toBe(false);
   });
 });

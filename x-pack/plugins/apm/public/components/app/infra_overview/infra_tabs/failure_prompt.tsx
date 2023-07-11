@@ -22,7 +22,7 @@ export function FailurePrompt() {
     >
       <EuiEmptyPrompt
         color="danger"
-        iconType="alert"
+        iconType="warning"
         layout="vertical"
         title={
           <h2>

@@ -18,6 +18,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:alertTags': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -41,11 +45,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'banners:textContent': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  // non-sensitive
-  'visualize:enableLabs': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:heatmap:maxBuckets': {
     type: 'long',
@@ -164,10 +163,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'doc_table:hideTimeColumn': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'discover:showLegacyFieldTopValues': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -414,11 +409,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableInspectEsQueries': {
+  'observability:syntheticsThrottlingEnabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableNewSyntheticsView': {
+  'observability:enableInspectEsQueries': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -435,6 +430,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableServiceMetrics': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmEnableContinuousRollups': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -514,10 +513,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'lens:useFieldExistenceSampling': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'metrics:allowCheckingForFailedShards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -525,10 +520,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmDefaultServiceEnvironment': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  'observability:apmOperationsTab': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmLabsButton': {
     type: 'boolean',
@@ -574,7 +565,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'enterpriseSearch:enableEnginesSection': {
+  'observability:enableLegacyUptimeApp': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

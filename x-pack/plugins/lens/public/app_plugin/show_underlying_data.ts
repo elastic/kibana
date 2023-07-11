@@ -25,7 +25,10 @@ import { showMemoizedErrorNotification } from '../lens_ui_errors';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
 import { Visualization } from '..';
-import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
+
+function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
+  return visualization.getLayerType(layerId, state) || LayerTypes.DATA;
+}
 
 /**
  * Joins a series of queries.
@@ -99,8 +102,15 @@ export function getLayerMetaInfo(
   const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover?.show);
   // If Multiple tables, return
   // If there are time shifts, return
+  // If dataViews have not loaded yet, return
   const datatables = Object.values(activeData || {});
-  if (!datatables.length || !currentDatasource || !datasourceState || !activeVisualization) {
+  if (
+    !datatables.length ||
+    !currentDatasource ||
+    !datasourceState ||
+    !activeVisualization ||
+    !Object.keys(indexPatterns).length
+  ) {
     return {
       meta: undefined,
       error: i18n.translate('xpack.lens.app.showUnderlyingDataNoData', {

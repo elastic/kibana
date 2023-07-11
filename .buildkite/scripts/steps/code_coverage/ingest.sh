@@ -4,7 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/code_coverage/util.sh
-source .buildkite/scripts/steps/code_coverage/merge.sh
 
 export CODE_COVERAGE=1
 echo "--- Reading Kibana stats cluster creds from vault"
@@ -77,13 +76,7 @@ mergeAll() {
       replacePaths "$KIBANA_DIR/target/kibana-coverage/jest" "CC_REPLACEMENT_ANCHOR" "$KIBANA_DIR"
       yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js
     elif [ "$x" == "functional" ]; then
-      echo "---[$x] : Reset file paths prefix, merge coverage files, and generate the final combined report"
-      set +e
-      sed -ie "s|CC_REPLACEMENT_ANCHOR|${KIBANA_DIR}|g" target/kibana-coverage/functional/*.json
-      echo "--- Begin Split and Merge for Functional"
-      splitCoverage target/kibana-coverage/functional
-      splitMerge
-      set -e
+      echo "--- Code coverage for functional tests is not collected"
     fi
   done
 }

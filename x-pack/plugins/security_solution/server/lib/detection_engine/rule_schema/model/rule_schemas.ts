@@ -14,6 +14,7 @@ import {
   RiskScore,
   RiskScoreMapping,
   RuleActionArrayCamel,
+  RuleActionNotifyWhen,
   RuleActionThrottle,
   RuleIntervalFrom,
   RuleIntervalTo,
@@ -39,7 +40,7 @@ import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
-  AlertSuppressionGroupBy,
+  AlertSuppressionCamel,
   BuildingBlockType,
   DataViewId,
   EventCategoryOverride,
@@ -85,13 +86,6 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
-
-export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
-const AlertSuppressionCamel = t.exact(
-  t.type({
-    groupBy: AlertSuppressionGroupBy,
-  })
-);
 
 export const baseRuleParams = t.exact(
   t.type({
@@ -266,13 +260,6 @@ export interface CompleteRule<T extends RuleParams> {
   ruleConfig: SanitizedRuleConfig;
 }
 
-export const notifyWhen = t.union([
-  t.literal('onActionGroupChange'),
-  t.literal('onActiveAlert'),
-  t.literal('onThrottleInterval'),
-  t.null,
-]);
-
 export const allRuleTypes = t.union([
   t.literal(SIGNALS_ID),
   t.literal(EQL_RULE_TYPE_ID),
@@ -298,7 +285,7 @@ const internalRuleCreateRequired = t.type({
 });
 const internalRuleCreateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
-  notifyWhen,
+  notifyWhen: t.union([RuleActionNotifyWhen, t.null]),
 });
 export const internalRuleCreate = t.intersection([
   internalRuleCreateOptional,
@@ -317,7 +304,7 @@ const internalRuleUpdateRequired = t.type({
 });
 const internalRuleUpdateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
-  notifyWhen,
+  notifyWhen: t.union([RuleActionNotifyWhen, t.null]),
 });
 export const internalRuleUpdate = t.intersection([
   internalRuleUpdateOptional,

@@ -13,5 +13,7 @@ export const getSLOIndexTemplate = (name: string, indexPattern: string, composed
   _meta: {
     description: 'Template for SLO rollup data',
     version: 1,
+    managed: true,
+    managed_by: 'observability',
   },
 });

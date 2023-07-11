@@ -4,53 +4,108 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ToolingLog } from '@kbn/tooling-log';
-import expect from '@kbn/expect';
+import type { Client } from '@elastic/elasticsearch';
+import type {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import pRetry from 'p-retry';
 import type SuperTest from 'supertest';
-
-const WAIT_FOR_STATUS_INCREMENT = 500;
 
 export async function waitForRuleStatus({
   id,
   expectedStatus,
-  waitMillis = 10000,
   supertest,
-  log,
 }: {
+  id: string;
   expectedStatus: string;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  log: ToolingLog;
-  waitMillis?: number;
-  id?: string;
 }): Promise<Record<string, any>> {
-  if (waitMillis < 0 || !id) {
-    expect().fail(`waiting for alert ${id} status ${expectedStatus} timed out`);
-  }
-
-  const response = await supertest.get(`/api/alerting/rule/${id}`);
-  expect(response.status).to.eql(200);
-
-  const { execution_status: executionStatus } = response.body || {};
-  const { status } = executionStatus || {};
-
-  const message = `waitForStatus(${expectedStatus}): got ${JSON.stringify(executionStatus)}`;
-
-  if (status === expectedStatus) {
-    return executionStatus;
-  }
-
-  log.debug(`${message}, retrying`);
-
-  await delay(WAIT_FOR_STATUS_INCREMENT);
-  return await waitForRuleStatus({
-    id,
-    expectedStatus,
-    waitMillis: waitMillis - WAIT_FOR_STATUS_INCREMENT,
-    supertest,
-    log,
-  });
+  return pRetry(
+    async () => {
+      const response = await supertest.get(`/api/alerting/rule/${id}`);
+      const { execution_status: executionStatus } = response.body || {};
+      const { status } = executionStatus || {};
+      if (status !== expectedStatus) {
+        throw new Error(`waitForStatus(${expectedStatus}): got ${status}`);
+      }
+      return executionStatus;
+    },
+    { retries: 10 }
+  );
 }
 
-async function delay(millis: number): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, millis));
+export async function runRuleSoon({
+  ruleId,
+  supertest,
+}: {
+  ruleId: string;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+}): Promise<Record<string, any>> {
+  return pRetry(
+    async () => {
+      try {
+        const response = await supertest
+          .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        if (response.status !== 204) {
+          throw new Error(`runRuleSoon got ${response.status} status`);
+        }
+        return response;
+      } catch (error) {
+        throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
+      }
+    },
+    { retries: 10 }
+  );
+}
+
+export async function waitForDocumentInIndex<T>({
+  es,
+  indexName,
+}: {
+  es: Client;
+  indexName: string;
+}): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
+  return pRetry(
+    async () => {
+      const response = await es.search<T>({ index: indexName });
+      if (response.hits.hits.length === 0) {
+        throw new Error('No hits found');
+      }
+      return response;
+    },
+    { retries: 10 }
+  );
+}
+
+export async function waitForAlertInIndex<T>({
+  es,
+  indexName,
+  ruleId,
+}: {
+  es: Client;
+  indexName: string;
+  ruleId: string;
+}): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
+  return pRetry(
+    async () => {
+      const response = await es.search<T>({
+        index: indexName,
+        body: {
+          query: {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
+            },
+          },
+        },
+      });
+      if (response.hits.hits.length === 0) {
+        throw new Error('No hits found');
+      }
+      return response;
+    },
+    { retries: 10 }
+  );
 }

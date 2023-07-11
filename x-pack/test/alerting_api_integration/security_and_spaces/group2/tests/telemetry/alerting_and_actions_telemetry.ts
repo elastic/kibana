@@ -6,14 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces, Superuser } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getEventLog,
-  getTestRuleData,
-  ESTestIndexTool,
-  TaskManagerDoc,
-} from '../../../../common/lib';
+import { getUrlPrefix, getEventLog, getTestRuleData, TaskManagerDoc } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -25,7 +20,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('telemetry', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/140973
+  describe.skip('telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
 
     beforeEach(async () => {

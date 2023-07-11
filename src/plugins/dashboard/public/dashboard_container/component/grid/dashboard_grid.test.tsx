@@ -6,29 +6,39 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import sizeMe from 'react-sizeme';
 import React from 'react';
 
-import {
-  ContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
-import { pluginServices } from '../../../services/plugin_services';
-import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
-import { getSampleDashboardInput, mockDashboardReduxEmbeddableTools } from '../../../mocks';
+import { DashboardGrid } from './dashboard_grid';
+import { buildMockDashboard } from '../../../mocks';
+import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
+import { DashboardContainerContext } from '../../embeddable/dashboard_container';
 
-const DashboardServicesProvider = pluginServices.getContextProvider();
+jest.mock('./dashboard_grid_item', () => {
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    DashboardGridItem: require('react').forwardRef(
+      (props: DashboardGridItemProps, ref: HTMLDivElement) => {
+        const className =
+          props.expandedPanelId === undefined
+            ? 'regularPanel'
+            : props.expandedPanelId === props.id
+            ? 'expandedPanel'
+            : 'hiddenPanel';
+        return (
+          <div className={className} id={`mockDashboardGridItem_${props.id}`}>
+            mockDashboardGridItem
+          </div>
+        );
+      }
+    ),
+  };
+});
 
-async function prepare(props?: Partial<DashboardGridProps>) {
-  const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(embeddableFactory);
-
-  const initialInput = getSampleDashboardInput({
+const createAndMountDashboardGrid = () => {
+  const dashboardContainer = buildMockDashboard({
     panels: {
       '1': {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
@@ -42,102 +52,52 @@ async function prepare(props?: Partial<DashboardGridProps>) {
       },
     },
   });
-  const dashboardMock = await mockDashboardReduxEmbeddableTools({ explicitInput: initialInput });
-  const defaultTestProps: DashboardGridProps = {};
-
-  return {
-    tools: dashboardMock.tools,
-    dashboardContainer: dashboardMock.dashboardContainer,
-    props: Object.assign(defaultTestProps, props),
-  };
-}
-
-beforeAll(() => {
-  // sizeme detects the width to be 0 in our test environment. noPlaceholder will mean that the grid contents will
-  // get rendered even when width is 0, which will improve our tests.
-  sizeMe.noPlaceholders = true;
-});
-
-afterAll(() => {
-  sizeMe.noPlaceholders = false;
-});
-
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-test.skip('renders DashboardGrid', async () => {
-  const { props, tools } = await prepare();
-
   const component = mountWithIntl(
-    <DashboardServicesProvider>
-      <tools.Wrapper>
-        <DashboardGrid {...props} />
-      </tools.Wrapper>
-    </DashboardServicesProvider>
+    <DashboardContainerContext.Provider value={dashboardContainer}>
+      <DashboardGrid viewportWidth={1000} />
+    </DashboardContainerContext.Provider>
   );
-  const panelElements = component.find('EmbeddableChildPanel');
+  return { dashboardContainer, component };
+};
+
+test('renders DashboardGrid', async () => {
+  const { component } = createAndMountDashboardGrid();
+  const panelElements = component.find('GridItem');
   expect(panelElements.length).toBe(2);
 });
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-test.skip('renders DashboardGrid with no visualizations', async () => {
-  const { props, tools, dashboardContainer } = await prepare();
-  const component = mountWithIntl(
-    <DashboardServicesProvider>
-      <tools.Wrapper>
-        <DashboardGrid {...props} />
-      </tools.Wrapper>
-    </DashboardServicesProvider>
-  );
-
+test('renders DashboardGrid with no visualizations', async () => {
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
   dashboardContainer.updateInput({ panels: {} });
   component.update();
-  expect(component.find('EmbeddableChildPanel').length).toBe(0);
+  expect(component.find('GridItem').length).toBe(0);
 });
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-test.skip('DashboardGrid removes panel when removed from container', async () => {
-  const { props, tools, dashboardContainer } = await prepare();
-  const component = mountWithIntl(
-    <DashboardServicesProvider>
-      <tools.Wrapper>
-        <DashboardGrid {...props} />
-      </tools.Wrapper>
-    </DashboardServicesProvider>
-  );
-
+test('DashboardGrid removes panel when removed from container', async () => {
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
   const originalPanels = dashboardContainer.getInput().panels;
   const filteredPanels = { ...originalPanels };
   delete filteredPanels['1'];
   dashboardContainer.updateInput({ panels: filteredPanels });
   component.update();
-  const panelElements = component.find('EmbeddableChildPanel');
+  const panelElements = component.find('GridItem');
   expect(panelElements.length).toBe(1);
 });
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-test.skip('DashboardGrid renders expanded panel', async () => {
-  const { props, tools, dashboardContainer } = await prepare();
-  const component = mountWithIntl(
-    <DashboardServicesProvider>
-      <tools.Wrapper>
-        <DashboardGrid {...props} />
-      </tools.Wrapper>
-    </DashboardServicesProvider>
-  );
-
+test('DashboardGrid renders expanded panel', async () => {
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
   dashboardContainer.setExpandedPanelId('1');
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
-  expect(component.find('EmbeddableChildPanel').length).toBe(2);
+  expect(component.find('GridItem').length).toBe(2);
 
-  expect(
-    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
-  ).toBe('1');
+  expect(component.find('#mockDashboardGridItem_1').hasClass('expandedPanel')).toBe(true);
+  expect(component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel')).toBe(true);
 
   dashboardContainer.setExpandedPanelId();
   component.update();
-  expect(component.find('EmbeddableChildPanel').length).toBe(2);
+  expect(component.find('GridItem').length).toBe(2);
 
-  expect(
-    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
-  ).toBeUndefined();
+  expect(component.find('#mockDashboardGridItem_1').hasClass('regularPanel')).toBe(true);
+  expect(component.find('#mockDashboardGridItem_2').hasClass('regularPanel')).toBe(true);
 });

@@ -10,11 +10,7 @@ jest.mock('./mode/worker', () => {
   return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
 });
 
-// @ts-ignore
-window.Worker = function () {
-  this.postMessage = () => {};
-  (this as unknown as { terminate: () => void }).terminate = () => {};
-};
+import '@kbn/web-worker-stub';
 
 // @ts-ignore
 window.URL = {

@@ -7,24 +7,39 @@
  */
 
 import React from 'react';
-import { IndicesList } from '.';
+import { IndicesList, IndicesListProps, PER_PAGE_STORAGE_KEY } from './indices_list';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const indices = [
   { name: 'kibana', tags: [] },
   { name: 'es', tags: [] },
 ] as unknown as MatchedItem[];
 
+const similarIndices = [
+  { name: 'logstash', tags: [] },
+  { name: 'some_logs', tags: [] },
+] as unknown as MatchedItem[];
+
 describe('IndicesList', () => {
+  const commonProps: Omit<IndicesListProps, 'query'> = {
+    indices,
+    isExactMatch: jest.fn(() => false),
+  };
+
+  afterEach(() => {
+    new Storage(localStorage).remove(PER_PAGE_STORAGE_KEY);
+  });
+
   it('should render normally', () => {
-    const component = shallow(<IndicesList indices={indices} query="" />);
+    const component = shallow(<IndicesList {...commonProps} query="" />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should change pages', () => {
-    const component = shallow(<IndicesList indices={indices} query="" />);
+    const component = shallow(<IndicesList {...commonProps} query="" />);
 
     const instance = component.instance() as IndicesList;
 
@@ -36,7 +51,7 @@ describe('IndicesList', () => {
   });
 
   it('should change per page', () => {
-    const component = shallow(<IndicesList indices={indices} query="" />);
+    const component = shallow(<IndicesList {...commonProps} query="" />);
 
     const instance = component.instance() as IndicesList;
     instance.onChangePerPage(1);
@@ -46,14 +61,33 @@ describe('IndicesList', () => {
   });
 
   it('should highlight the query in the matches', () => {
-    const component = shallow(<IndicesList indices={indices} query="ki" />);
+    const component = shallow(
+      <IndicesList
+        {...commonProps}
+        query="es,ki"
+        isExactMatch={(indexName) => indexName === 'es'}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should highlight fully when an exact match', () => {
+    const component = shallow(
+      <IndicesList
+        {...commonProps}
+        indices={similarIndices}
+        query="logs*"
+        isExactMatch={(indexName) => indexName === 'some_logs'}
+      />
+    );
 
     expect(component).toMatchSnapshot();
   });
 
   describe('updating props', () => {
     it('should render all new indices', () => {
-      const component = shallow(<IndicesList indices={indices} query="" />);
+      const component = shallow(<IndicesList {...commonProps} query="" />);
 
       const moreIndices = [
         ...indices,

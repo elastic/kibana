@@ -26,8 +26,26 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
     cluster_id: {
       type: 'keyword',
     },
+    'cloud.account.id': {
+      type: 'keyword',
+    },
     'rule.benchmark.name': {
       type: 'keyword',
+    },
+    policy_template: {
+      type: 'keyword',
+    },
+    critical: {
+      type: 'long',
+    },
+    high: {
+      type: 'long',
+    },
+    medium: {
+      type: 'long',
+    },
+    low: {
+      type: 'long',
     },
   },
 };

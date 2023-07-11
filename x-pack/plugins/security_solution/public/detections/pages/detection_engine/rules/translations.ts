@@ -46,28 +46,6 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine
   defaultMessage: 'Rules',
 });
 
-export const EXPERIMENTAL_ON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOn',
-  {
-    defaultMessage: 'Advanced sorting',
-  }
-);
-
-export const EXPERIMENTAL_OFF = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalOff',
-  {
-    defaultMessage: 'Advanced sorting',
-  }
-);
-
-export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.experimentalDescription',
-  {
-    defaultMessage:
-      'Turn this on to enable sorting for all table columns. You can turn it off if you encounter table performance issues.',
-  }
-);
-
 export const ADD_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addPageTitle',
   {
@@ -561,13 +539,6 @@ export const COLUMN_LAST_RESPONSE = i18n.translate(
   }
 );
 
-export const COLUMN_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.versionTitle',
-  {
-    defaultMessage: 'Version',
-  }
-);
-
 export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
@@ -579,6 +550,13 @@ export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {
     defaultMessage: 'Enabled',
+  }
+);
+
+export const COLUMN_SNOOZE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.snoozeTitle',
+  {
+    defaultMessage: 'Notify',
   }
 );
 
@@ -638,6 +616,20 @@ export const MONITORING_TAB = i18n.translate(
   }
 );
 
+export const ENABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const DISABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.disabledRulesTitle',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
 export const CUSTOM_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
@@ -659,10 +651,31 @@ export const TAGS = i18n.translate(
   }
 );
 
+export const SEARCH_TAGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.searchTagsPlaceholder',
+  {
+    defaultMessage: 'Search tags',
+  }
+);
+
+export const RULES_TAG_SEARCH = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.rulesTagSearchText',
+  {
+    defaultMessage: 'Rules tag search',
+  }
+);
+
 export const NO_TAGS_AVAILABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noTagsAvailableDescription',
   {
     defaultMessage: 'No tags available',
+  }
+);
+
+export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
+  {
+    defaultMessage: 'Select rule execution status to filter by',
   }
 );
 
@@ -677,6 +690,33 @@ export const NO_RULES_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noRulesBodyTitle',
   {
     defaultMessage: "We weren't able to find any rules with the above filters.",
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules have been installed',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are no prebuilt detection rules available for installation',
+  }
+);
+export const NO_RULES_AVAILABLE_FOR_UPGRADE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules are up to date',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are currently no available updates to your installed Elastic rules.',
   }
 );
 
@@ -858,6 +898,13 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
   {
     defaultMessage: 'Refresh settings',
+  }
+);
+
+export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
+  {
+    defaultMessage: 'Clear filters',
   }
 );
 
@@ -1065,17 +1112,21 @@ export const RULES_BULK_EDIT_SUCCESS = i18n.translate(
   }
 );
 
-export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (rulesCount: number) =>
+export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (
+  succeededRulesCount: number,
+  skippedRulesCount: number
+) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastDescription',
     {
-      values: { rulesCount },
-      defaultMessage:
-        "You've successfully updated {rulesCount, plural, =1 {# rule} other {# rules}}",
+      values: { succeededRulesCount, skippedRulesCount },
+      defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully updated # rule. } other {You've successfully updated # rules. }}
+        {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}
+        `,
     }
   );
 
-export const RULES_BULK_EDIT_SUCCESS_INDEX_EDIT_DESCRIPTION = i18n.translate(
+export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
   {
     defaultMessage:
@@ -1090,29 +1141,18 @@ export const RULES_BULK_EDIT_FAILURE = i18n.translate(
   }
 );
 
-export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
+export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (
+  failedRulesCount: number,
+  skippedRulesCount: number
+) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.errorToastDescription',
     {
-      values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
+      values: { failedRulesCount, skippedRulesCount },
+      defaultMessage:
+        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to update. {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}',
     }
   );
-
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
-
-export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
-  {
-    defaultMessage:
-      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
-  }
-);
 
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
@@ -1125,5 +1165,63 @@ export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
   'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
   {
     defaultMessage: 'Failed to load the saved query',
+  }
+);
+
+// Prompt Context i18n
+export const RULE_MANAGEMENT_CONTEXT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextDescription',
+  {
+    defaultMessage: 'Selected Detection Rules',
+  }
+);
+
+export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails',
+  {
+    defaultMessage:
+      "Please explain the selected rules above. For each rule, highlight why they are relevant, the query as published on Elastic's detection rules repository and an in-depth explanation of it, and what they typically mean for an organization if detected.",
+  }
+);
+
+export const DETECTION_RULES_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.detectionRulesConversationId',
+  {
+    defaultMessage: 'Detection Rules',
+  }
+);
+
+export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
+  {
+    defaultMessage: 'Add this alert as context',
+  }
+);
+
+export const INSTALL_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.installRuleButton',
+  {
+    defaultMessage: 'Install rule',
+  }
+);
+
+export const UPDATE_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.upgradeRuleButton',
+  {
+    defaultMessage: 'Update rule',
+  }
+);
+
+export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.goBackToRulesTableButton',
+  {
+    defaultMessage: 'Go back to installed Elastic rules',
+  }
+);
+
+export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.securitySolution.ruleUpdates.documentationLink',
+  {
+    defaultMessage: "See what's new in Prebuilt Security Detection Rules",
   }
 );

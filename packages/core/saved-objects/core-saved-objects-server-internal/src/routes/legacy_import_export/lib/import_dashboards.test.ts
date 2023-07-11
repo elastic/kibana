@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { importDashboards } from './import_dashboards';
 
@@ -26,11 +26,17 @@ describe('importDashboards(req)', () => {
         references: [],
         version: 'foo',
       },
-      { id: 'panel-01', type: 'visualization', attributes: { visState: '{}' }, references: [] },
+      {
+        id: 'panel-01',
+        type: 'visualization',
+        attributes: { visState: '{}' },
+        references: [],
+        managed: true,
+      },
     ];
   });
 
-  test('should call bulkCreate with each asset, filtering out any version if present', async () => {
+  test('should call bulkCreate with each asset, filtering out any version and managed if present', async () => {
     await importDashboards(savedObjectClient, importedObjects, { overwrite: false, exclude: [] });
 
     expect(savedObjectClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -41,14 +47,14 @@ describe('importDashboards(req)', () => {
           type: 'dashboard',
           attributes: { panelJSON: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
         {
           id: 'panel-01',
           type: 'visualization',
           attributes: { visState: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
       ],
       { overwrite: false }
@@ -78,7 +84,7 @@ describe('importDashboards(req)', () => {
           type: 'dashboard',
           attributes: { panelJSON: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
       ],
       { overwrite: false }

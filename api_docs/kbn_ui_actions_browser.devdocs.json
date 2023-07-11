@@ -1,0 +1,768 @@
+{
+  "id": "@kbn/ui-actions-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.Presentable",
+        "type": "Interface",
+        "tags": [],
+        "label": "Presentable",
+        "description": [
+          "\nRepresents something that can be displayed to user in UI."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
+            "text": "Presentable"
+          },
+          "<Context>"
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nID that uniquely identifies this object."
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.MenuItem",
+            "type": "Function",
+            "tags": [],
+            "label": "MenuItem",
+            "description": [
+              "\nComponent to render when displaying this entity as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
+            ],
+            "signature": [
+              "React.FC<{ context: Context; }> | undefined"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [
+              "\nOptional EUI icon type that can be displayed along with the title."
+            ],
+            "signature": [
+              "(context: Context) => string | undefined"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ui-actions-browser",
+                "id": "def-common.Presentable.getIconType.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [
+              "\nReturns a title to be displayed to the user."
+            ],
+            "signature": [
+              "(context: Context) => string"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ui-actions-browser",
+                "id": "def-common.Presentable.getDisplayName.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.getDisplayNameTooltip",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayNameTooltip",
+            "description": [
+              "\nReturns tooltip text which should be displayed when user hovers this object.\nShould return empty string if tooltip should not be displayed."
+            ],
+            "signature": [
+              "((context: Context) => string) | undefined"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ui-actions-browser",
+                "id": "def-common.Presentable.getDisplayNameTooltip.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.getHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getHref",
+            "description": [
+              "\nThis method should return a link if this item can be clicked on. The link\nis used to navigate user if user middle-clicks it or Ctrl + clicks or\nright-clicks and selects \"Open in new tab\"."
+            ],
+            "signature": [
+              "((context: Context) => Promise<string | undefined>) | undefined"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ui-actions-browser",
+                "id": "def-common.Presentable.getHref.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.isCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "isCompatible",
+            "description": [
+              "\nReturns a promise that resolves to true if this item is compatible given\nthe context and should be displayed to user, otherwise resolves to false."
+            ],
+            "signature": [
+              "(context: Context) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ui-actions-browser",
+                "id": "def-common.Presentable.isCompatible.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Presentable.grouping",
+            "type": "Array",
+            "tags": [],
+            "label": "grouping",
+            "description": [
+              "\nGrouping where this item should appear as a submenu. Each entry is a new\nsub-menu level. For example, used to show drilldowns and sharing options\nin panel context menu in a sub-menu."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.PresentableGrouping",
+                "text": "PresentableGrouping"
+              },
+              "<Context> | undefined"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.PresentableGroup",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresentableGroup",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.PresentableGroup",
+            "text": "PresentableGroup"
+          },
+          "<Context> extends Partial<Pick<",
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
+            "text": "Presentable"
+          },
+          "<Context>, \"order\" | \"getDisplayName\" | \"getIconType\" | \"getDisplayNameTooltip\">>"
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.PresentableGroup.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.RowClickContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "RowClickContext",
+        "description": [],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.RowClickContext.embeddable",
+            "type": "Unknown",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.RowClickContext.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "{ rowIndex: number; table: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              "; columns?: string[] | undefined; }"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.Trigger",
+        "type": "Interface",
+        "tags": [],
+        "label": "Trigger",
+        "description": [
+          "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Trigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Trigger.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nUser friendly name of the trigger."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.Trigger.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nA longer user friendly description of the trigger."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.CATEGORIZE_FIELD_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "CATEGORIZE_FIELD_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"CATEGORIZE_FIELD_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.PresentableGrouping",
+        "type": "Type",
+        "tags": [],
+        "label": "PresentableGrouping",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.PresentableGroup",
+            "text": "PresentableGroup"
+          },
+          "<Context>[]"
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.ROW_CLICK_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "ROW_CLICK_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"ROW_CLICK_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.VISUALIZE_FIELD_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_FIELD_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"VISUALIZE_FIELD_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.VISUALIZE_GEO_FIELD_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_GEO_FIELD_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"VISUALIZE_GEO_FIELD_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.categorizeFieldTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "categorizeFieldTrigger",
+        "description": [],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.categorizeFieldTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.categorizeFieldTrigger.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.categorizeFieldTrigger.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.defaultTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultTrigger",
+        "description": [],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/default_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.defaultTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/default_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.defaultTrigger.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/default_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.defaultTrigger.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/default_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.rowClickTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "rowClickTrigger",
+        "description": [],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.rowClickTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.rowClickTrigger.title",
+            "type": "Any",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.rowClickTrigger.description",
+            "type": "Any",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.visualizeFieldTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "visualizeFieldTrigger",
+        "description": [],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.visualizeFieldTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.visualizeFieldTrigger.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.visualizeFieldTrigger.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.visualizeGeoFieldTrigger",
+        "type": "Object",
+        "tags": [],
+        "label": "visualizeGeoFieldTrigger",
+        "description": [],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.visualizeGeoFieldTrigger.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.visualizeGeoFieldTrigger.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-actions-browser",
+            "id": "def-common.visualizeGeoFieldTrigger.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

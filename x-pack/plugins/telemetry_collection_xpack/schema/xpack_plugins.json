@@ -2762,6 +2762,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/rust": {
+              "type": "long"
+            },
             "opentelemetry/swift": {
               "type": "long"
             },
@@ -2777,6 +2780,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -2865,6 +2874,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -2945,6 +2960,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3033,6 +3054,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3113,6 +3140,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3201,6 +3234,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3281,6 +3320,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3369,6 +3414,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3449,6 +3500,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3537,6 +3594,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3617,6 +3680,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -4223,6 +4292,9 @@
                   },
                   "version": {
                     "type": "keyword"
+                  },
+                  "activation_method": {
+                    "type": "keyword"
                   }
                 }
               },
@@ -4714,6 +4786,77 @@
                 "daily": {
                   "type": "long"
                 },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4802,6 +4945,77 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4831,6 +5045,77 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4858,6 +5143,77 @@
                     },
                     "totalWithAtLeastOne": {
                       "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -5098,6 +5454,38 @@
                 }
               }
             },
+            "vulnerabilities": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latest_vulnerabilities": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
             "score": {
               "properties": {
                 "doc_count": {
@@ -5112,6 +5500,190 @@
                 "last_doc_timestamp": {
                   "type": "date"
                 }
+              }
+            },
+            "latestPackageVersion": {
+              "type": "keyword"
+            },
+            "cspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "kspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "vuln_mgmt": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "resources_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "resource_type": {
+                "type": "keyword"
+              },
+              "resource_type_doc_count": {
+                "type": "long"
+              },
+              "resource_sub_type": {
+                "type": "keyword"
+              },
+              "resource_sub_type_doc_count": {
+                "type": "long"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "accounts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "posture_score": {
+                "type": "long"
+              },
+              "latest_findings_doc_count": {
+                "type": "long"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              },
+              "agents_count": {
+                "type": "short"
+              },
+              "nodes_count": {
+                "type": "short"
+              },
+              "pods_count": {
+                "type": "short"
+              }
+            }
+          }
+        },
+        "rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "rule_id": {
+                "type": "keyword"
+              },
+              "rule_name": {
+                "type": "keyword"
+              },
+              "rule_section": {
+                "type": "keyword"
+              },
+              "rule_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "feature": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "deployment_mode": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
+                "type": "long"
               }
             }
           }
@@ -5202,6 +5774,18 @@
               "type": "long",
               "_meta": {
                 "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of of enrolled agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents currently unenrolled"
               }
             },
             "total_all_statuses": {
@@ -5313,18 +5897,6 @@
     },
     "maps": {
       "properties": {
-        "indexPatternsWithGeoFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoPointFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoShapeFieldCount": {
-          "type": "long"
-        },
-        "geoShapeAggLayersCount": {
-          "type": "long"
-        },
         "mapsTotalCount": {
           "type": "long"
         },
@@ -5989,6 +6561,34 @@
         },
         "joins": {
           "properties": {
+            "distance": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of distance joins per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of distance joins per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of distance joins per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of distance joins in cluster"
+                  }
+                }
+              }
+            },
             "term": {
               "properties": {
                 "min": {
@@ -6368,126 +6968,6 @@
         }
       }
     },
-    "osquery": {
-      "properties": {
-        "live_query_usage": {
-          "properties": {
-            "session": {
-              "properties": {
-                "count": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Number of osquery action requests"
-                  }
-                },
-                "errors": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Number of osquery action requests that resulted in errors"
-                  }
-                }
-              }
-            },
-            "cumulative": {
-              "properties": {
-                "queries": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Number of osquery actions stored in Elasticsearch"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "scheduled_queries": {
-          "properties": {
-            "queryGroups": {
-              "properties": {
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Number of osquery policies/query groups"
-                  }
-                },
-                "empty": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Number of empty osquery policies/query groups"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "agent_info": {
-          "properties": {
-            "enrolled": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of agents enrolled in a policy with an osquery integration"
-              }
-            }
-          }
-        },
-        "beat_metrics": {
-          "properties": {
-            "usage": {
-              "properties": {
-                "cpu": {
-                  "properties": {
-                    "latest": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Latest cpu usage sample in ms"
-                      }
-                    },
-                    "max": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Max cpu usage sample over 24 hours in ms"
-                      }
-                    },
-                    "avg": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Mean cpu usage over 24 hours in ms"
-                      }
-                    }
-                  }
-                },
-                "memory": {
-                  "properties": {
-                    "rss": {
-                      "properties": {
-                        "latest": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Latest resident set size sample"
-                          }
-                        },
-                        "max": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Max resident set size sample over 24 hours"
-                          }
-                        },
-                        "avg": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Mean resident set size sample over 24 hours"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "reporting": {
       "properties": {
         "csv_searchsource": {
@@ -6594,6 +7074,109 @@
           }
         },
         "csv_searchsource_immediate": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "output_size": {
+              "properties": {
+                "1.0": {
+                  "type": "long"
+                },
+                "5.0": {
+                  "type": "long"
+                },
+                "25.0": {
+                  "type": "long"
+                },
+                "50.0": {
+                  "type": "long"
+                },
+                "75.0": {
+                  "type": "long"
+                },
+                "95.0": {
+                  "type": "long"
+                },
+                "99.0": {
+                  "type": "long"
+                }
+              }
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "csv_rows": {
+                  "properties": {
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "error_codes": {
+              "properties": {
+                "authentication_expired_error": {
+                  "type": "long"
+                },
+                "queue_timeout_error": {
+                  "type": "long"
+                },
+                "unknown_error": {
+                  "type": "long"
+                },
+                "kibana_shutting_down_error": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "csv_v2": {
           "properties": {
             "available": {
               "type": "boolean"
@@ -7354,6 +7937,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7439,6 +8038,22 @@
                   }
                 },
                 "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_v2": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -7554,6 +8169,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7654,6 +8285,22 @@
                     }
                   }
                 },
+                "csv_v2": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -7739,6 +8386,22 @@
                   }
                 },
                 "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_v2": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -7972,6 +8635,109 @@
               }
             },
             "csv_searchsource_immediate": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "output_size": {
+                  "properties": {
+                    "1.0": {
+                      "type": "long"
+                    },
+                    "5.0": {
+                      "type": "long"
+                    },
+                    "25.0": {
+                      "type": "long"
+                    },
+                    "50.0": {
+                      "type": "long"
+                    },
+                    "75.0": {
+                      "type": "long"
+                    },
+                    "95.0": {
+                      "type": "long"
+                    },
+                    "99.0": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "metrics": {
+                  "properties": {
+                    "csv_rows": {
+                      "properties": {
+                        "50.0": {
+                          "type": "long"
+                        },
+                        "75.0": {
+                          "type": "long"
+                        },
+                        "95.0": {
+                          "type": "long"
+                        },
+                        "99.0": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "error_codes": {
+                  "properties": {
+                    "authentication_expired_error": {
+                      "type": "long"
+                    },
+                    "queue_timeout_error": {
+                      "type": "long"
+                    },
+                    "unknown_error": {
+                      "type": "long"
+                    },
+                    "kibana_shutting_down_error": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_v2": {
               "properties": {
                 "available": {
                   "type": "boolean"
@@ -8732,6 +9498,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -8817,6 +9599,22 @@
                       }
                     },
                     "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_v2": {
                       "properties": {
                         "search": {
                           "type": "long"
@@ -8932,6 +9730,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -9032,6 +9846,22 @@
                         }
                       }
                     },
+                    "csv_v2": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -9117,6 +9947,22 @@
                       }
                     },
                     "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_v2": {
                       "properties": {
                         "search": {
                           "type": "long"
@@ -9452,6 +10298,12 @@
           "type": "long",
           "_meta": {
             "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionConcurrentSessionsMaxSessions": {
+          "type": "long",
+          "_meta": {
+            "description": "The maximum number of the concurrent user sessions (0 if not configured)."
           }
         },
         "anonymousCredentialType": {
@@ -13075,6 +13927,133 @@
               }
             }
           }
+        },
+        "dashboardMetrics": {
+          "properties": {
+            "dashboard_tag": {
+              "properties": {
+                "created_at": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "The time the tab was created"
+                  }
+                },
+                "linked_dashboards_count": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of associated dashboards"
+                  }
+                }
+              }
+            },
+            "dashboards": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "created_at": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The time the dashboard was created"
+                    }
+                  },
+                  "dashboard_id": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The dashboard saved object id"
+                    }
+                  },
+                  "error_message": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The relevant error message"
+                    }
+                  },
+                  "error_status_code": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "The relevant error status code"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "slo": {
+      "properties": {
+        "slo": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of slos in the cluster"
+              }
+            },
+            "by_status": {
+              "properties": {
+                "enabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of enabled slos in the cluster"
+                  }
+                },
+                "disabled": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of disabled slos in the cluster"
+                  }
+                }
+              }
+            },
+            "by_sli_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by sli type in the cluster"
+                  }
+                }
+              }
+            },
+            "by_rolling_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by rolling duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_calendar_aligned_duration": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by calendar aligned duration in the cluster"
+                  }
+                }
+              }
+            },
+            "by_budgeting_method": {
+              "properties": {
+                "occurrences": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by timeslices budgeting method in the cluster"
+                  }
+                },
+                "timeslices": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The number of slos by occurrences budgeting method in the cluster"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -13288,6 +14267,18 @@
             "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to false."
           }
         },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to false."
+          }
+        },
         "apiCalls.resolveCopySavedObjectsErrors.total": {
           "type": "long",
           "_meta": {
@@ -13316,6 +14307,18 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to false."
           }
         },
         "apiCalls.disableLegacyUrlAliases.total": {
@@ -13423,6 +14426,40 @@
         }
       }
     },
+    "transform": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "transform_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "notStarted": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error message health check"
+                      }
+                    },
+                    "healthCheck": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the health check with the stats API"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "upgrade-assistant-telemetry": {
       "properties": {
         "features": {
@@ -13433,147 +14470,6 @@
                   "type": "boolean",
                   "_meta": {
                     "description": "Whether user has enabled Elasticsearch deprecation logging"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "uptime": {
-      "properties": {
-        "last_24_hours": {
-          "properties": {
-            "hits": {
-              "properties": {
-                "autoRefreshEnabled": {
-                  "type": "boolean"
-                },
-                "autorefreshInterval": {
-                  "type": "array",
-                  "items": {
-                    "type": "long"
-                  }
-                },
-                "dateRangeEnd": {
-                  "type": "array",
-                  "items": {
-                    "type": "date"
-                  }
-                },
-                "dateRangeStart": {
-                  "type": "array",
-                  "items": {
-                    "type": "date"
-                  }
-                },
-                "monitor_frequency": {
-                  "type": "array",
-                  "items": {
-                    "type": "long"
-                  }
-                },
-                "monitor_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of monitor names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of monitor names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of monitor names"
-                      }
-                    }
-                  }
-                },
-                "monitor_page": {
-                  "type": "long"
-                },
-                "no_of_unique_monitors": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique configured monitors"
-                  }
-                },
-                "no_of_unique_observer_locations": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique monitor observer locations"
-                  }
-                },
-                "observer_location_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of monitor observer location names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of monitor observer location names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of monitor observer location names"
-                      }
-                    }
-                  }
-                },
-                "overview_page": {
-                  "type": "long"
-                },
-                "settings_page": {
-                  "type": "long"
-                },
-                "fleet_monitor_name_stats": {
-                  "properties": {
-                    "avg_length": {
-                      "type": "float",
-                      "_meta": {
-                        "description": "This field represents the average length of fleet managed monitor names"
-                      }
-                    },
-                    "max_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the max length of fleet managed monitor names"
-                      }
-                    },
-                    "min_length": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "This field represents the min length of fleet managed monitor names"
-                      }
-                    }
-                  }
-                },
-                "fleet_monitor_frequency": {
-                  "type": "array",
-                  "items": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "This field represents the average the monitor frequency of fleet managed monitors"
-                    }
-                  }
-                },
-                "fleet_no_of_unique_monitors": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "This field represents the number of unique configured fleet managed monitors"
                   }
                 }
               }

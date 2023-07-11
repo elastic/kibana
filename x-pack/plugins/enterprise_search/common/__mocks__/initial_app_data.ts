@@ -31,6 +31,14 @@ export const DEFAULT_INITIAL_APP_DATA = {
     hasAppSearchAccess: true,
     hasWorkplaceSearchAccess: true,
   },
+  features: {
+    hasConnectors: true,
+    hasDefaultIngestPipeline: true,
+    hasDocumentLevelSecurityEnabled: true,
+    hasIncrementalSyncEnabled: true,
+    hasNativeConnectors: true,
+    hasWebCrawler: true,
+  },
   appSearch: {
     accountId: 'some-id-string',
     onboardingComplete: true,

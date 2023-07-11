@@ -58,6 +58,8 @@ describe('useUserProfileForm', () => {
     coreStart.http.post.mockReset().mockResolvedValue(undefined);
     coreStart.notifications.toasts.addDanger.mockReset();
     coreStart.notifications.toasts.addSuccess.mockReset();
+    coreStart.settings.client.get.mockReset();
+    coreStart.settings.client.isOverridden.mockReset();
   });
 
   it('should initialise form with values from user profile', () => {
@@ -74,6 +76,9 @@ describe('useUserProfileForm', () => {
             "color": "#D36086",
             "imageUrl": "",
             "initials": "fn",
+          },
+          "userSettings": Object {
+            "darkMode": "",
           },
         },
         "user": Object {
@@ -228,6 +233,166 @@ describe('useUserProfileForm', () => {
       );
 
       expect(testWrapper.exists('UserAvatar')).toBeFalsy();
+    });
+  });
+
+  describe('Dark Mode Form', () => {
+    it('should display if the User is not a cloud user', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const overrideMsg = testWrapper.find('EuiText[data-test-subj="themeOverrideMessage"]');
+      expect(overrideMsg).toHaveLength(0);
+
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          false
+        );
+      });
+    });
+
+    it('should not display if the User is a cloud user', () => {
+      const data: UserProfileData = {};
+
+      const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={cloudUser} data={data} />
+        </Providers>
+      );
+
+      expect(testWrapper.exists('EuiKeyPadMenu[data-test-subj="themeMenu"]')).toBeFalsy();
+    });
+
+    it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
+      const data: UserProfileData = {};
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        1,
+        { title: 'Profile updated' },
+        {}
+      );
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ title: 'Profile updated' }),
+        expect.objectContaining({ toastLifeTimeMs: 300000 })
+      );
+    });
+
+    it('should be disabled if the theme has been set to `darkMode: true` in the config', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(true);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      expect(overrideMsg).toHaveLength(1);
+
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          true
+        );
+      });
+    });
+
+    it('should be disabled if the theme has been set to `darkMode: false` in the config', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      expect(overrideMsg).toHaveLength(1);
+
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          true
+        );
+      });
     });
   });
 });

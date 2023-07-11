@@ -129,3 +129,50 @@ export const mockAttributes: LensAttributes = {
     },
   ],
 };
+
+export const mockExtraFilter = [
+  {
+    meta: {
+      type: 'phrases',
+      key: '_index',
+      params: ['.alerts-security.alerts-default'],
+      alias: null,
+      negate: false,
+      disabled: false,
+    },
+    query: {
+      bool: {
+        should: [
+          {
+            match_phrase: {
+              _index: '.alerts-security.alerts-default',
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  },
+];
+
+export const mockRulePreviewFilter = (internalReferenceId: string, ruleId: string) => [
+  {
+    meta: {
+      disabled: false,
+      negate: false,
+      alias: null,
+      index: internalReferenceId,
+      key: 'kibana.alert.rule.uuid',
+      field: 'kibana.alert.rule.uuid',
+      params: {
+        query: ruleId,
+      },
+      type: 'phrase',
+    },
+    query: {
+      match_phrase: {
+        'kibana.alert.rule.uuid': ruleId,
+      },
+    },
+  },
+];

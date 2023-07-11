@@ -12,10 +12,10 @@ import type { Observable } from 'rxjs';
 import type { CoreTheme, I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView, ISearchSource } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
-import { updateSearchSource } from '../../utils/update_search_source';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -25,12 +25,11 @@ const ALERT_TYPE_ID = '.es-query';
 interface AlertsPopoverProps {
   onClose: () => void;
   anchorElement: HTMLElement;
-  searchSource: ISearchSource;
+  stateContainer: DiscoverStateContainer;
   savedQueryId?: string;
   adHocDataViews: DataView[];
   I18nContext: I18nStart['Context'];
   services: DiscoverServices;
-  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
 }
 
 interface EsQueryAlertMetaData {
@@ -39,15 +38,13 @@ interface EsQueryAlertMetaData {
 }
 
 export function AlertsPopover({
-  searchSource,
   anchorElement,
-  savedQueryId,
   adHocDataViews,
   services,
+  stateContainer,
   onClose: originalOnClose,
-  updateDataViewList,
 }: AlertsPopoverProps) {
-  const dataView = searchSource.getField('index')!;
+  const dataView = stateContainer.internalState.getState().dataView;
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
   const onClose = useCallback(() => {
@@ -59,20 +56,15 @@ export function AlertsPopover({
    * Provides the default parameters used to initialize the new rule
    */
   const getParams = useCallback(() => {
-    const nextSearchSource = searchSource.createCopy();
-    updateSearchSource(nextSearchSource, true, {
-      dataView: searchSource.getField('index')!,
-      services,
-      sort: [],
-      useNewFieldsApi: true,
-    });
-
+    const savedQueryId = stateContainer.appState.getState().savedQuery;
     return {
       searchType: 'searchSource',
-      searchConfiguration: nextSearchSource.getSerializedFields(),
+      searchConfiguration: stateContainer.savedSearchState
+        .getState()
+        .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [savedQueryId, searchSource, services]);
+  }, [stateContainer]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -87,11 +79,12 @@ export function AlertsPopover({
       return;
     }
 
-    const onFinishFlyoutInteraction = (metadata: EsQueryAlertMetaData) => {
-      updateDataViewList(metadata.adHocDataViewList);
+    const onFinishFlyoutInteraction = async (metadata: EsQueryAlertMetaData) => {
+      await stateContainer.actions.loadDataViewList();
+      stateContainer.internalState.transitions.setAdHocDataViews(metadata.adHocDataViewList);
     };
 
-    return triggersActionsUi?.getAddAlertFlyout({
+    return triggersActionsUi?.getAddRuleFlyout({
       metadata: discoverMetadata,
       consumer: 'discover',
       onClose: (_, metadata) => {
@@ -105,16 +98,9 @@ export function AlertsPopover({
       ruleTypeId: ALERT_TYPE_ID,
       initialValues: { params: getParams() },
     });
-  }, [
-    alertFlyoutVisible,
-    triggersActionsUi,
-    discoverMetadata,
-    getParams,
-    updateDataViewList,
-    onClose,
-  ]);
+  }, [alertFlyoutVisible, triggersActionsUi, discoverMetadata, getParams, onClose, stateContainer]);
 
-  const hasTimeFieldName = dataView.timeFieldName;
+  const hasTimeFieldName = Boolean(dataView?.timeFieldName);
   const panels = [
     {
       id: 'mainPanel',
@@ -180,20 +166,16 @@ export function openAlertsPopover({
   I18nContext,
   theme$,
   anchorElement,
-  searchSource,
+  stateContainer,
   services,
   adHocDataViews,
-  savedQueryId,
-  updateDataViewList,
 }: {
   I18nContext: I18nStart['Context'];
   theme$: Observable<CoreTheme>;
   anchorElement: HTMLElement;
-  searchSource: ISearchSource;
+  stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
   adHocDataViews: DataView[];
-  savedQueryId?: string;
-  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -210,12 +192,10 @@ export function openAlertsPopover({
           <AlertsPopover
             onClose={closeAlertsPopover}
             anchorElement={anchorElement}
-            searchSource={searchSource}
-            savedQueryId={savedQueryId}
+            stateContainer={stateContainer}
             adHocDataViews={adHocDataViews}
             I18nContext={I18nContext}
             services={services}
-            updateDataViewList={updateDataViewList}
           />
         </KibanaThemeProvider>
       </KibanaContextProvider>

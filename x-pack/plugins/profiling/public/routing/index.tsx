@@ -11,12 +11,17 @@ import * as t from 'io-ts';
 import React from 'react';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
-import { FlameGraphComparisonMode } from '../../common/flamegraph';
-import { FlameGraphsView } from '../components/flame_graphs_view';
-import { FunctionsView } from '../components/functions_view';
+import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
-import { RouteBreadcrumb } from '../components/route_breadcrumb';
-import { StackTracesView } from '../components/stack_traces_view';
+import { FlameGraphsView } from '../views/flamegraphs';
+import { DifferentialFlameGraphsView } from '../views/flamegraphs/differential_flamegraphs';
+import { FlameGraphView } from '../views/flamegraphs/flamegraph';
+import { FunctionsView } from '../views/functions';
+import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
+import { TopNFunctionsView } from '../views/functions/topn';
+import { NoDataTabs, NoDataView } from '../views/no_data_view';
+import { StackTracesView } from '../views/stack_traces_view';
+import { RouteBreadcrumb } from './route_breadcrumb';
 
 const routes = {
   '/': {
@@ -31,6 +36,27 @@ const routes = {
       </RouteBreadcrumb>
     ),
     children: {
+      '/add-data-instructions': {
+        element: <NoDataView />,
+        params: t.type({
+          query: t.type({
+            selectedTab: t.union([
+              t.literal(NoDataTabs.Binary),
+              t.literal(NoDataTabs.Deb),
+              t.literal(NoDataTabs.Docker),
+              t.literal(NoDataTabs.ElasticAgentIntegration),
+              t.literal(NoDataTabs.Kubernetes),
+              t.literal(NoDataTabs.RPM),
+              t.literal(NoDataTabs.Symbols),
+            ]),
+          }),
+        }),
+        defaults: {
+          query: {
+            selectedTab: NoDataTabs.Kubernetes,
+          },
+        },
+      },
       '/': {
         children: {
           '/stacktraces/{topNType}': {
@@ -61,7 +87,7 @@ const routes = {
             },
           },
           '/stacktraces': {
-            element: <RedirectTo pathname="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/threads" />,
           },
           '/flamegraphs': {
             element: (
@@ -85,9 +111,14 @@ const routes = {
                     })}
                     href="/flamegraphs/flamegraph"
                   >
-                    <Outlet />
+                    <FlameGraphView />
                   </RouteBreadcrumb>
                 ),
+                params: t.type({
+                  query: t.partial({
+                    searchText: t.string,
+                  }),
+                }),
               },
               '/flamegraphs/differential': {
                 element: (
@@ -97,23 +128,38 @@ const routes = {
                     })}
                     href="/flamegraphs/differential"
                   >
-                    <Outlet />
+                    <DifferentialFlameGraphsView />
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.type({
-                    comparisonRangeFrom: t.string,
-                    comparisonRangeTo: t.string,
-                    comparisonKuery: t.string,
-                    comparisonMode: t.union([
-                      t.literal(FlameGraphComparisonMode.Absolute),
-                      t.literal(FlameGraphComparisonMode.Relative),
-                    ]),
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      comparisonRangeFrom: t.string,
+                      comparisonRangeTo: t.string,
+                      comparisonKuery: t.string,
+                      comparisonMode: t.union([
+                        t.literal(ComparisonMode.Absolute),
+                        t.literal(ComparisonMode.Relative),
+                      ]),
+                      normalizationMode: t.union([
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
+                      ]),
+                    }),
+                    t.partial({
+                      baseline: toNumberRt,
+                      comparison: toNumberRt,
+                      searchText: t.string,
+                    }),
+                  ]),
                 }),
                 defaults: {
                   query: {
-                    comparisonMode: FlameGraphComparisonMode.Absolute,
+                    comparisonRangeFrom: 'now-15m',
+                    comparisonRangeTo: 'now',
+                    comparisonKuery: '',
+                    comparisonMode: ComparisonMode.Absolute,
+                    normalizationMode: NormalizationMode.Time,
                   },
                 },
               },
@@ -153,7 +199,7 @@ const routes = {
                     })}
                     href="/functions/topn"
                   >
-                    <Outlet />
+                    <TopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
               },
@@ -165,21 +211,39 @@ const routes = {
                     })}
                     href="/functions/differential"
                   >
-                    <Outlet />
+                    <DifferentialTopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.type({
-                    comparisonRangeFrom: t.string,
-                    comparisonRangeTo: t.string,
-                    comparisonKuery: t.string,
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      comparisonRangeFrom: t.string,
+                      comparisonRangeTo: t.string,
+                      comparisonKuery: t.string,
+                      normalizationMode: t.union([
+                        t.literal(NormalizationMode.Scale),
+                        t.literal(NormalizationMode.Time),
+                      ]),
+                    }),
+                    t.partial({
+                      baseline: toNumberRt,
+                      comparison: toNumberRt,
+                    }),
+                  ]),
                 }),
+                defaults: {
+                  query: {
+                    comparisonRangeFrom: 'now-15m',
+                    comparisonRangeTo: 'now',
+                    comparisonKuery: '',
+                    normalizationMode: NormalizationMode.Time,
+                  },
+                },
               },
             },
           },
           '/': {
-            element: <RedirectTo pathname="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/threads" />,
           },
         },
         element: <Outlet />,

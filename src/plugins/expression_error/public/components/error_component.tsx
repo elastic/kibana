@@ -52,7 +52,7 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
               height: buttonSize,
               width: buttonSize,
             }}
-            type="alert"
+            type="warning"
           />
         }
         isOpen={isPopoverOpen}

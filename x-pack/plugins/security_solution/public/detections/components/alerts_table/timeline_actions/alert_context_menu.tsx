@@ -7,12 +7,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip, EuiContextMenu } from '@elastic/eui';
 import { indexOf } from 'lodash';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
@@ -21,13 +23,11 @@ import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../detection_engine/rule_exceptions/utils/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import type { Ecs } from '../../../../../common/ecs';
 import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { TableId } from '../../../../../common/types';
 import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
@@ -44,6 +44,8 @@ import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import { useOpenAlertDetailsAction } from './use_open_alert_details';
+import type { AlertTableContextMenuItem } from '../types';
+import { useAlertTagsActions } from './use_alert_tags_actions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -53,6 +55,7 @@ interface AlertContextMenuProps {
   ecsRowData: Ecs;
   onRuleChange?: () => void;
   scopeId: string;
+  refetch: (() => void) | undefined;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
@@ -65,6 +68,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   scopeId,
   globalQuery,
   timelineQuery,
+  refetch,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
@@ -89,6 +93,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     isActiveTimelines: isActiveTimeline(scopeId ?? ''),
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     isInDetections,
+    refetch,
   });
 
   const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
@@ -124,12 +129,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           data-test-subj="timeline-context-menu-button"
           size="s"
           iconType="boxesHorizontal"
+          data-popover-open={isPopoverOpen}
           onClick={onButtonClick}
           isDisabled={disabled}
         />
       </EuiToolTip>
     );
-  }, [disabled, onButtonClick, ariaLabel]);
+  }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -143,8 +149,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       }
     } else {
       refetchQuery(globalQuery);
+      if (refetch) refetch();
     }
-  }, [scopeId, globalQuery, timelineQuery, routeProps]);
+  }, [scopeId, globalQuery, timelineQuery, routeProps, refetch]);
 
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
@@ -170,7 +177,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const { actionItems: statusActionItems } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
-    indexName: ecsRowData?._index ?? '',
     scopeId,
     refetch: refetchAll,
     closePopover,
@@ -215,12 +221,19 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ruleId,
   });
 
-  const items: React.ReactElement[] = useMemo(
+  const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
+    closePopover,
+    ecsRowData,
+    refetch: refetchAll,
+  });
+
+  const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
             ...addToCaseActionItems,
             ...statusActionItems,
+            ...alertTagsItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
             ...alertDetailsActionItems,
@@ -241,8 +254,31 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       alertDetailsActionItems,
       eventFilterActionItems,
       canCreateEndpointEventFilters,
+      alertTagsItems,
     ]
   );
+
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        items,
+      },
+      ...alertTagsPanels,
+    ],
+    [alertTagsPanels, items]
+  );
+
+  const osqueryFlyout = useMemo(() => {
+    return (
+      <OsqueryFlyout
+        agentId={agentId}
+        defaultValues={alertId ? { alertIds: [alertId] } : undefined}
+        onClose={handleOnOsqueryClick}
+        ecsData={ecsRowData}
+      />
+    );
+  }, [agentId, alertId, ecsRowData, handleOnOsqueryClick]);
 
   return (
     <>
@@ -258,7 +294,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
               anchorPosition="downLeft"
               repositionOnScroll
             >
-              <EuiContextMenuPanel size="s" items={items} />
+              <EuiContextMenu
+                size="s"
+                initialPanelId={0}
+                panels={panels}
+                data-test-subj="actions-context-menu"
+              />
             </EuiPopover>
           </EventsTdContent>
         </div>
@@ -284,14 +325,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
-      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
-        <OsqueryFlyout
-          agentId={agentId}
-          defaultValues={alertId ? { alertIds: [alertId] } : undefined}
-          onClose={handleOnOsqueryClick}
-          ecsData={ecsRowData}
-        />
-      )}
+      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && osqueryFlyout}
     </>
   );
 };
@@ -425,7 +459,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    memoRuleIndices == null;
+    (memoRuleIndices == null && memoDataViewId == null);
 
   return (
     <AddExceptionFlyout

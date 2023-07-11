@@ -14,10 +14,10 @@ import type {
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ComponentType, JSXElementConstructor, ReactNode } from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
-import type { Ecs } from '../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
-import type { SortColumnTable } from '../data_table';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -79,9 +79,10 @@ export type ColumnHeaderOptions = Pick<
   | 'initialWidth'
   | 'isSortable'
   | 'schema'
+  | 'isExpandable'
+  | 'isResizable'
 > & {
   aggregatable?: boolean;
-  dataTableCellActions?: DataTableCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string | null;

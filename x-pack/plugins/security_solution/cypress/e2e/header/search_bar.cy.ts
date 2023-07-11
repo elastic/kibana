@@ -23,7 +23,7 @@ import { HOSTS_URL } from '../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 describe('SearchBar', () => {
-  before(() => {
+  beforeEach(() => {
     login();
     visit(HOSTS_URL);
     waitForAllHostsToBeLoaded();

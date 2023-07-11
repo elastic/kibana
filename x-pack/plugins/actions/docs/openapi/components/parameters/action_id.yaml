@@ -1,0 +1,7 @@
+in: path
+name: actionId
+description: An identifier for the action.
+required: true
+schema:
+  type: string
+  example: c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad

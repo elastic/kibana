@@ -12,6 +12,7 @@ import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
 import { spaceMigrations, usageStatsMigrations } from './migrations';
 import { SavedObjectsSpacesExtension } from './saved_objects_spaces_extension';
+import { SpacesSavedObjectSchemas } from './schemas';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
@@ -25,6 +26,7 @@ export class SpacesSavedObjectsService {
       hidden: true,
       namespaceType: 'agnostic',
       mappings: SpacesSavedObjectMappings,
+      schemas: SpacesSavedObjectSchemas,
       migrations: {
         '6.6.0': spaceMigrations.migrateTo660,
       },

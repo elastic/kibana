@@ -24,7 +24,6 @@ import { css } from '@emotion/react';
 import type { History } from 'history';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
 
 import type { NotificationsStart } from '@kbn/core/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
@@ -32,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { Route } from '@kbn/shared-ux-router';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
@@ -518,7 +518,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           return (
             <EuiText color="subdued" size="s">
               <EuiLink
-                data-test-subj={`roleRowName-${recordAP.name}`}
+                data-test-subj={`apiKeyRowName-${recordAP.name}`}
                 onClick={() => {
                   this.setState({ selectedApiKey: recordAP, isUpdateFlyoutVisible: true });
                 }}

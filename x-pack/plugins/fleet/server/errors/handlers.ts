@@ -15,6 +15,8 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 
+import { UninstallTokenError } from '../../common/errors';
+
 import { appContextService } from '../services';
 
 import {
@@ -31,6 +33,7 @@ import {
   PackageFailedVerificationError,
   PackagePolicyNotFoundError,
   FleetUnauthorizedError,
+  PackagePolicyNameExistsError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -77,6 +80,12 @@ const getHTTPResponseCode = (error: FleetError): number => {
   }
   if (error instanceof FleetUnauthorizedError) {
     return 403; // Unauthorized
+  }
+  if (error instanceof PackagePolicyNameExistsError) {
+    return 409; // Conflict
+  }
+  if (error instanceof UninstallTokenError) {
+    return 500; // Internal Error
   }
   return 400; // Bad Request
 };

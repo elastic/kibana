@@ -17,7 +17,7 @@ import {
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
@@ -38,7 +38,9 @@ export interface TabMenuItem {
   id: string;
   label: string;
   testSubj?: string;
-  route: string;
+  route?: string;
+  onClick?: () => void;
+  prepend?: React.ReactNode;
 }
 export interface PageTemplateProps {
   title: string;
@@ -139,8 +141,10 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
                     disabled={isDisabledTab(product)}
                     title={item.label}
                     data-test-subj={item.testSubj}
-                    href={createHref(item.route)}
-                    isSelected={isTabSelected(item.route)}
+                    href={item.route ? createHref(item.route) : undefined}
+                    isSelected={item.route ? isTabSelected(item.route) : undefined}
+                    onClick={item.onClick}
+                    prepend={item.prepend}
                   >
                     {item.label}
                   </EuiTab>

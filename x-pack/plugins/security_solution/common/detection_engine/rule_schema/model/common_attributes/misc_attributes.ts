@@ -47,7 +47,7 @@ export type RuleMetadata = t.TypeOf<typeof RuleMetadata>;
 export const RuleMetadata = t.object; // should be a more specific type?
 
 export type RuleLicense = t.TypeOf<typeof RuleLicense>;
-export const RuleLicense = t.string; // should be non-empty string?
+export const RuleLicense = t.string;
 
 export type RuleAuthorArray = t.TypeOf<typeof RuleAuthorArray>;
 export const RuleAuthorArray = t.array(t.string); // should be non-empty strings?

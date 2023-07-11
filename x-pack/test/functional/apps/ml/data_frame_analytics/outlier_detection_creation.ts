@@ -5,8 +5,34 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FieldStatsType } from '../common/types';
+import {
+  type DiscoverUrlConfig,
+  type DashboardUrlConfig,
+  type OtherUrlConfig,
+} from '../../../services/ml/data_frame_analytics_edit';
+
+const testDiscoverCustomUrl: DiscoverUrlConfig = {
+  label: 'Show data',
+  indexPattern: 'ft_ihp_outlier',
+  queryEntityFieldNames: ['SaleType'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testDashboardCustomUrl: DashboardUrlConfig = {
+  label: 'Show dashboard',
+  dashboardName: 'ML Test',
+  queryEntityFieldNames: ['SaleType'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testOtherCustomUrl: OtherUrlConfig = {
+  label: 'elastic.co',
+  url: 'https://www.elastic.co/',
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -14,9 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
   const editedDescription = 'Edited description';
 
   describe('outlier detection creation', function () {
+    let testDashboardId: string | null = null;
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
+      testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -28,6 +57,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const jobId = `ihp_1_${Date.now()}`;
+
+    const fieldStatsEntries = [
+      {
+        fieldName: '1stFlrSF',
+        type: 'keyword' as FieldStatsType,
+        isIncludeFieldInput: true,
+      },
+    ];
 
     const testDataList = [
       {
@@ -64,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
             // markers
             { color: '#5078AA', percentage: 15 },
             // grey boilerplate
-            { color: '#6A717D', percentage: 12 },
+            { color: '#69707D', percentage: 12 },
           ],
           scatterplotMatrixColorStatsResults: [
             // outlier markers
@@ -72,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
             // regular markers
             { color: '#6496BE', percentage: 15 },
             // tick/grid/axis
-            { color: '#6E6E82', percentage: 11 },
+            { color: '#69707D', percentage: 12 },
             { color: '#D2DCE6', percentage: 10 },
             // anti-aliasing
             { color: '#F5F7FA', percentage: 35 },
@@ -92,16 +129,61 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '2mb',
+                  'Version',
+                  '8.10.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '1460',
+                  'Test docs',
+                  '0',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: [
+                  'Phase 4/4',
+                  'reindexing',
+                  '100%',
+                  'loading_data',
+                  '100%',
+                  'computing_outliers',
+                  '100%',
+                  'writing_results',
+                  '100%',
+                ],
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: jobId,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
-                  description:
-                    'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
+                  '': '',
+                  timestamp: 'March 1st 2023, 19:00:41',
+                  timing_stats: '{"elapsed_time":49}',
+                  n_neighbors: '0',
+                  method: 'ensemble',
+                  compute_feature_influence: 'true',
+                  feature_influence_threshold: '0.1',
+                  outlier_fraction: '0.05',
+                  standardization_enabled: 'true',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -170,6 +252,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+              fieldName,
+              fieldType
+            );
+          }
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'
@@ -270,6 +362,40 @@ export default function ({ getService }: FtrProviderContext) {
             testData.jobId,
             testData.expected.rowDetails
           );
+        });
+
+        it('adds discover custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for discover url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds discover custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
+            testData.jobId,
+            testDiscoverCustomUrl
+          );
+        });
+
+        it('adds dashboard custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds dashboard custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
+            testData.jobId,
+            testDashboardCustomUrl,
+            {
+              index: 1,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'SaleType:\"$SaleType$\"'))`,
+            }
+          );
+        });
+
+        it('adds other custom url type to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for other url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('add other type custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

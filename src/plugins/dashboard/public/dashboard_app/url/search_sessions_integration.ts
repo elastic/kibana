@@ -11,10 +11,10 @@ import { History } from 'history';
 
 import {
   getQueryParams,
-  replaceUrlHashQuery,
   IKbnUrlStateStorage,
   createQueryParamObservable,
 } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 
@@ -83,7 +83,7 @@ function getLocatorParams({
   const {
     componentState: { lastSavedId },
     explicitInput: { panels, query, viewMode },
-  } = container.getReduxEmbeddableTools().getState();
+  } = container.getState();
 
   return {
     viewMode,

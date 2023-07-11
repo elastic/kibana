@@ -20,15 +20,11 @@ import React, {
   RefObject,
   ReactElement,
 } from 'react';
-import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';
-import {
-  AlertTypeCount,
-  Process,
-  ProcessEventAlertCategory,
-} from '../../../common/types/process_tree';
+import type { AlertTypeCount, Process, ProcessEventAlertCategory } from '../../../common';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
@@ -42,6 +38,10 @@ import { TextHighlight } from './text_highlight';
 
 export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
   defaultMessage: 'Exec user change',
+});
+
+export const COLLAPSE_ALL = i18n.translate('xpack.sessionView.collapseAll', {
+  defaultMessage: 'Collapse all',
 });
 
 export interface ProcessDeps {
@@ -61,6 +61,7 @@ export interface ProcessDeps {
   onJumpToOutput: (entityId: string) => void;
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
+  handleCollapseProcessTree?: () => void;
 }
 
 /**
@@ -83,6 +84,7 @@ export function ProcessTreeNode({
   onJumpToOutput,
   loadPreviousButton,
   loadNextButton,
+  handleCollapseProcessTree,
 }: ProcessDeps) {
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
@@ -133,7 +135,15 @@ export function ProcessTreeNode({
 
   const alertTypeCounts = useMemo(() => {
     const alertCounts: AlertTypeCount[] = chain(alerts)
-      .groupBy((alert) => alert.event?.category?.[0])
+      .groupBy((alert) => {
+        const category = alert.event?.category;
+
+        if (Array.isArray(category)) {
+          return category?.[0];
+        }
+
+        return category;
+      })
       .map((processAlerts, alertCategory) => ({
         category: alertCategory as ProcessEventAlertCategory,
         count: processAlerts.length,
@@ -176,8 +186,12 @@ export function ProcessTreeNode({
       }
 
       onProcessSelected?.(process);
+
+      if (isSessionLeader && scrollerRef.current) {
+        scrollerRef.current.scrollTop = 0;
+      }
     },
-    [onProcessSelected, process]
+    [isSessionLeader, onProcessSelected, process, scrollerRef]
   );
 
   const processDetails = process.getDetails();
@@ -219,6 +233,19 @@ export function ProcessTreeNode({
 
   const children = process.getChildren(verboseMode);
 
+  const user = processDetails?.process?.user;
+  const userName = useMemo(() => {
+    if (user?.name) {
+      return user.name;
+    } else if (user?.id === '0') {
+      return 'root';
+    } else if (user?.id) {
+      return `uid: ${user?.id}`;
+    }
+
+    return '-';
+  }, [user?.id, user?.name]);
+
   if (!processDetails?.process) {
     return null;
   }
@@ -231,13 +258,12 @@ export function ProcessTreeNode({
     parent,
     working_directory: workingDirectory,
     start,
-    user,
   } = processDetails.process;
 
   const shouldRenderChildren = isSessionLeader || (childrenExpanded && children?.length > 0);
   const childrenTreeDepth = depth + 1;
 
-  const showUserEscalation = !isSessionLeader && !!user?.name && user.name !== parent?.user?.name;
+  const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent?.user?.id;
   const interactiveSession = !!tty;
   const sessionIcon = interactiveSession ? 'desktop' : 'gear';
   const iconTestSubj = hasExec
@@ -245,6 +271,8 @@ export function ProcessTreeNode({
     : 'sessionView:processTreeNodeForkIcon';
 
   const timeStampsNormal = formatDate(start, dateFormat);
+
+  const promptText = `${workingDirectory ?? ''} ${args?.join(' ')}`;
 
   return (
     <div>
@@ -273,7 +301,13 @@ export function ProcessTreeNode({
               <Nbsp />
               <EuiIcon type="user" />
               <Nbsp />
-              <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+              <b css={styles.darkText}>{userName}</b>
+              <Nbsp />
+              <span css={styles.jumpToTop}>
+                <EuiToolTip title={COLLAPSE_ALL}>
+                  <EuiButtonIcon size="xs" iconType="fold" onClick={handleCollapseProcessTree} />
+                </EuiToolTip>
+              </span>
             </span>
           ) : (
             <>
@@ -287,7 +321,7 @@ export function ProcessTreeNode({
               </EuiToolTip>
               <span css={styles.textSection}>
                 <TextHighlight
-                  text={`${workingDirectory ?? ''} ${args?.join(' ')}`}
+                  text={promptText}
                   match={process.searchMatched}
                   highlightStyle={styles.searchHighlight}
                 >
@@ -309,7 +343,7 @@ export function ProcessTreeNode({
               css={buttonStyles.userChangedButton}
               aria-label={EXEC_USER_CHANGE}
             >
-              {EXEC_USER_CHANGE} :<span>{user.name}</span>
+              {EXEC_USER_CHANGE} ({userName})
             </EuiButton>
           )}
           {!isSessionLeader && children.length > 0 && (

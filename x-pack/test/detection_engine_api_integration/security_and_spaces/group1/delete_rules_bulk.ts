@@ -14,8 +14,8 @@ import {
   createLegacyRuleAction,
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -24,12 +24,14 @@ import {
   getWebHookAction,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('delete_rules_bulk', () => {
     describe('deprecations', () => {
@@ -54,8 +56,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {
@@ -166,8 +168,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {
@@ -307,6 +309,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -355,6 +358,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
         expect(body[1].actions).to.eql([
@@ -366,6 +370,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -386,6 +391,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
+
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+          createRuleBody.id
+        );
 
         // bulk delete the rule
         await supertest
@@ -410,6 +422,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Expect that we have exactly 0 legacy rules after the deletion
         expect(bodyAfterDelete.total).to.eql(0);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
     });
   });

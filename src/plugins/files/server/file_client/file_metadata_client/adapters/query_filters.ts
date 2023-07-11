@@ -7,7 +7,7 @@
  */
 
 import { pipe, forEach } from 'lodash/fp';
-import { escapeKuery, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 
 import { getFlattenedObject } from '@kbn/std';
 
@@ -22,16 +22,19 @@ export function filterDeletedFiles({ attrPrefix }: { attrPrefix: string }): Kuer
 
 export function filterArgsToKuery({
   extension,
+  mimeType,
   kind,
+  kindToExclude,
   meta,
   name,
   status,
+  user,
   attrPrefix = '',
 }: Omit<FindFileArgs, 'page' | 'perPage'> & { attrPrefix?: string }): KueryNode {
   const kueryExpressions: KueryNode[] = [filterDeletedFiles({ attrPrefix })];
 
   const addFilters = (
-    fieldName: keyof FileMetadata,
+    fieldName: keyof FileMetadata | string,
     values: string[] = [],
     isWildcard = false
   ): void => {
@@ -41,10 +44,21 @@ export function filterArgsToKuery({
         .map((value) =>
           nodeBuilder.is(
             `${attrPrefix}.${fieldName}`,
-            isWildcard ? nodeTypes.wildcard.buildNode(value) : escapeKuery(value)
+            isWildcard ? nodeTypes.wildcard.buildNode(value) : value
           )
         );
       kueryExpressions.push(nodeBuilder.or(orExpressions));
+    }
+  };
+
+  const addExcludeFilters = (fieldName: keyof FileMetadata | string, values: string[] = []) => {
+    if (values.length) {
+      const andExpressions = values
+        .filter(Boolean)
+        .map((value) =>
+          nodeTypes.function.buildNode('not', nodeBuilder.is(`${attrPrefix}.${fieldName}`, value))
+        );
+      kueryExpressions.push(nodeBuilder.and(andExpressions));
     }
   };
 
@@ -52,6 +66,9 @@ export function filterArgsToKuery({
   addFilters('FileKind', kind);
   addFilters('Status', status);
   addFilters('extension', extension);
+  addFilters('mime_type', mimeType);
+  addFilters('user.id', user);
+  addExcludeFilters('FileKind', kindToExclude);
 
   if (meta) {
     const addMetaFilters = pipe(

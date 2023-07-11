@@ -15,10 +15,15 @@ import { unwrapPromise } from './lib/result_type';
 const DEFAULT_BUFFER_MAX_DURATION = 50;
 
 export class BufferedTaskStore implements Updatable {
-  private bufferedUpdate: Operation<ConcreteTaskInstance, Error>;
+  private bufferedUpdate: Operation<ConcreteTaskInstance>;
   constructor(private readonly taskStore: TaskStore, options: BufferOptions) {
-    this.bufferedUpdate = createBuffer<ConcreteTaskInstance, Error>(
-      (docs) => taskStore.bulkUpdate(docs),
+    this.bufferedUpdate = createBuffer<ConcreteTaskInstance>(
+      // Setting validate: false because we'll validate per update call
+      //
+      // Ideally we could accumulate the "validate" options and pass them
+      // to .bulkUpdate per doc, but the required changes to the bulk_operation_buffer
+      // to track the values are high and deffered for now.
+      (docs) => taskStore.bulkUpdate(docs, { validate: false }),
       {
         bufferMaxDuration: DEFAULT_BUFFER_MAX_DURATION,
         ...options,
@@ -26,8 +31,17 @@ export class BufferedTaskStore implements Updatable {
     );
   }
 
-  public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    return unwrapPromise(this.bufferedUpdate(doc));
+  public async update(
+    doc: ConcreteTaskInstance,
+    options: { validate: boolean }
+  ): Promise<ConcreteTaskInstance> {
+    const docToUpdate = this.taskStore.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
+      validate: options.validate,
+    });
+    const result = await unwrapPromise(this.bufferedUpdate(docToUpdate));
+    return this.taskStore.taskValidator.getValidatedTaskInstanceFromReading(result, {
+      validate: options.validate,
+    });
   }
 
   public async remove(id: string): Promise<void> {

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { CloudPlugin } from './plugin';
+import type { DecodedCloudId } from '../common/decode_cloud_id';
 
 const baseConfig = {
   base_url: 'https://cloud.elastic.co',
@@ -16,22 +18,28 @@ const baseConfig = {
 };
 
 describe('Cloud Plugin', () => {
+  beforeEach(() => {
+    parseDeploymentIdFromDeploymentUrlMock.mockReset().mockReturnValue('deployment-id');
+    decodeCloudIdMock.mockReset().mockReturnValue({});
+  });
+
+  const setupPlugin = () => {
+    const initContext = coreMock.createPluginInitializerContext({
+      ...baseConfig,
+      id: 'cloudId',
+      cname: 'cloud.elastic.co',
+    });
+    const plugin = new CloudPlugin(initContext);
+
+    const coreSetup = coreMock.createSetup();
+    const setup = plugin.setup(coreSetup, {});
+    const start = plugin.start();
+
+    return { setup, start };
+  };
+
   describe('#setup', () => {
     describe('interface', () => {
-      const setupPlugin = () => {
-        const initContext = coreMock.createPluginInitializerContext({
-          ...baseConfig,
-          id: 'cloudId',
-          cname: 'cloud.elastic.co',
-        });
-        const plugin = new CloudPlugin(initContext);
-
-        const coreSetup = coreMock.createSetup();
-        const setup = plugin.setup(coreSetup, {});
-
-        return { setup };
-      };
-
       it('exposes isCloudEnabled', () => {
         const { setup } = setupPlugin();
         expect(setup.isCloudEnabled).toBe(true);
@@ -47,14 +55,49 @@ describe('Cloud Plugin', () => {
         expect(setup.instanceSizeMb).toBeUndefined();
       });
 
-      it('exposes deploymentId', () => {
-        const { setup } = setupPlugin();
-        expect(setup.deploymentId).toBe('abc123');
-      });
-
       it('exposes apm', () => {
         const { setup } = setupPlugin();
         expect(setup.apm).toStrictEqual({ url: undefined, secretToken: undefined });
+      });
+
+      it('exposes deploymentId', () => {
+        parseDeploymentIdFromDeploymentUrlMock.mockReturnValue('some-deployment-id');
+        const { setup } = setupPlugin();
+        expect(setup.deploymentId).toBe('some-deployment-id');
+        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledTimes(2); // called when registering the analytic context too
+        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledWith(
+          baseConfig.deployment_url
+        );
+      });
+
+      it('exposes components decoded from the cloudId', () => {
+        const decodedId: DecodedCloudId = {
+          defaultPort: '9000',
+          host: 'host',
+          elasticsearchUrl: 'elasticsearch-url',
+          kibanaUrl: 'kibana-url',
+        };
+        decodeCloudIdMock.mockReturnValue(decodedId);
+        const { setup } = setupPlugin();
+        expect(setup).toEqual(
+          expect.objectContaining({
+            cloudDefaultPort: '9000',
+            cloudHost: 'host',
+            elasticsearchUrl: 'elasticsearch-url',
+            kibanaUrl: 'kibana-url',
+          })
+        );
+        expect(decodeCloudIdMock).toHaveBeenCalledTimes(1);
+        expect(decodeCloudIdMock).toHaveBeenCalledWith('cloudId', expect.any(Object));
+      });
+    });
+  });
+
+  describe('#start', () => {
+    describe('interface', () => {
+      it('exposes isCloudEnabled', () => {
+        const { start } = setupPlugin();
+        expect(start.isCloudEnabled).toBe(true);
       });
     });
   });

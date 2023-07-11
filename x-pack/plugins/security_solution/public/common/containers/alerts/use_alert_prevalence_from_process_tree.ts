@@ -10,15 +10,29 @@ import { useTimelineDataFilters } from '../../../timelines/containers/use_timeli
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
+export interface StatsNode {
+  data: object;
+  id: string;
+  name: string;
+  parent?: string;
+  stats: {
+    total: number;
+    byCategory: {
+      alerts?: number;
+    };
+  };
+}
 interface UserAlertPrevalenceFromProcessTreeResult {
   loading: boolean;
   alertIds: undefined | string[];
+  statsNodes: undefined | StatsNode[];
   count?: number;
   error: boolean;
 }
 
 interface ProcessTreeAlertPrevalenceResponse {
   alertIds: string[] | undefined;
+  statsNodes: StatsNode[] | undefined;
 }
 
 interface EntityResponse {
@@ -28,7 +42,6 @@ interface EntityResponse {
 }
 
 interface UseAlertPrevalenceFromProcessTree {
-  processEntityId: string;
   documentId: string;
   isActiveTimeline: boolean;
   indices: string[];
@@ -40,17 +53,7 @@ interface UseAlertDocumentAnalyzerSchema {
 }
 
 interface TreeResponse {
-  statsNodes: Array<{
-    data: object;
-    id: string;
-    parent: string;
-    stats: {
-      total: number;
-      byCategory: {
-        alerts?: number;
-      };
-    };
-  }>;
+  statsNodes: StatsNode[];
   alertIds: string[];
 }
 
@@ -92,7 +95,6 @@ function useAlertDocumentAnalyzerSchema({ documentId, indices }: UseAlertDocumen
 }
 
 export function useAlertPrevalenceFromProcessTree({
-  processEntityId,
   documentId,
   isActiveTimeline,
   indices,
@@ -126,18 +128,21 @@ export function useAlertPrevalenceFromProcessTree({
       loading: true,
       error: false,
       alertIds: undefined,
+      statsNodes: undefined,
     };
   } else if (query.data) {
     return {
       loading: false,
       error: false,
       alertIds: query.data.alertIds,
+      statsNodes: query.data.statsNodes,
     };
   } else {
     return {
       loading: false,
       error: true,
       alertIds: undefined,
+      statsNodes: undefined,
     };
   }
 }

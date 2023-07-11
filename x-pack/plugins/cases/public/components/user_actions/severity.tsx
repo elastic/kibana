@@ -23,11 +23,11 @@ const getLabelTitle = (userAction: UserActionResponse<SeverityUserAction>) => {
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
-      data-test-subj={`${userAction.actionId}-user-action-severity-title`}
+      data-test-subj={`${userAction.id}-user-action-severity-title`}
       responsive={false}
     >
       <EuiFlexItem grow={false}>{SET_SEVERITY_TO}</EuiFlexItem>
-      <EuiFlexItem data-test-subj={`${userAction.actionId}-user-action-severity-title-${severity}`}>
+      <EuiFlexItem data-test-subj={`${userAction.id}-user-action-severity-title-${severity}`}>
         <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
       </EuiFlexItem>
     </EuiFlexGroup>

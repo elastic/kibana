@@ -30,7 +30,8 @@ export const Bar = styled.aside.attrs({
     ${border &&
     css`
       border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.euiSizeS};
+      padding-bottom: ${theme.eui.euiSizeXS};
+      align-items: center;
     `}
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
@@ -47,6 +48,7 @@ export const BarSection = styled.div.attrs({
   ${({ grow, theme }) => css`
     & + & {
       margin-top: ${theme.eui.euiSizeS};
+      align-items: center;
     }
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
@@ -112,9 +114,9 @@ export const BarGroup = styled.div.attrs({
 `;
 BarGroup.displayName = 'BarGroup';
 
-export const BarText = styled.p.attrs({
-  className: 'siemUtilityBar__text',
-})<{ shouldWrap: boolean }>`
+export const BarText = styled.p.attrs(({ className }) => ({
+  className: className || 'siemUtilityBar__text',
+}))<{ shouldWrap: boolean }>`
   ${({ shouldWrap, theme }) => css`
     color: ${theme.eui.euiTextSubduedColor};
     font-size: ${theme.eui.euiFontSizeXS};
@@ -129,7 +131,6 @@ export const BarAction = styled.div.attrs({
 })`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
   `}
 `;
 BarAction.displayName = 'BarAction';

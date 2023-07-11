@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
 interface Duration {
@@ -12,28 +14,23 @@ interface Duration {
   unit: DurationUnit;
 }
 
-interface SLO {
+interface WindowSchema {
   id: string;
-  name: string;
-  timeWindow: {
-    duration: Duration;
-  };
-  objective: {
-    target: number;
-  };
-  summary: {
-    sliValue: number;
-    errorBudget: {
-      remaining: number;
-    };
-  };
+  burnRateThreshold: number;
+  maxBurnRateThreshold: number;
+  longWindow: Duration;
+  shortWindow: Duration;
+  actionGroup: string;
 }
 
-interface SLOList {
-  results: SLO[];
-  page: number;
-  perPage: number;
-  total: number;
+interface BurnRateRuleParams extends RuleTypeParams {
+  sloId: string;
+  windows: WindowSchema[];
 }
 
-export type { Duration, DurationUnit, SLO, SLOList };
+interface ChartData {
+  key: number;
+  value: number | undefined;
+}
+
+export type { BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema };

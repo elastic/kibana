@@ -12,7 +12,7 @@ import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 /**
  * The sub action connector is defined here
- * x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts
+ * x-pack/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts
  */
 const createSubActionConnector = async ({
   supertest,
@@ -91,6 +91,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(res.body).to.eql({
           id: res.body.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           is_missing_secrets: false,
           name: 'My sub connector',

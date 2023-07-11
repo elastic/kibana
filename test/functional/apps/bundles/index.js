@@ -14,8 +14,6 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('bundle compression', function () {
-    this.tags('skipCoverage');
-
     let buildNum;
     before(async () => {
       const resp = await supertest.get('/api/status').expect(200);

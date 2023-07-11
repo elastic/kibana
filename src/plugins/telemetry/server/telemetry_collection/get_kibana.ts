@@ -43,15 +43,12 @@ export function handleKibanaStats(
     ...kibanaStats.os,
   };
   const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {
-    if (typeof value !== 'string') {
-      // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
-      return acc;
+    // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
+    if (typeof value === 'string') {
+      acc[`${key}s`] = [{ [key]: value, count: 1 }];
     }
-    return {
-      ...acc,
-      [`${key}s`]: [{ [key]: value, count: 1 }],
-    };
-  }, {});
+    return acc;
+  }, {} as Record<string, unknown[]>);
 
   const version = serverVersion.replace(/-snapshot/i, ''); // Shouldn't we better maintain the -snapshot so we can differentiate between actual final releases and snapshots?
 

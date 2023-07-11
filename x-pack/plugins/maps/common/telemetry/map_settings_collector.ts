@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapAttributes } from '../content_management';
 import { MapSettings } from '../descriptor_types';
 
 export class MapSettingsCollector {
   private _customIconsCount: number = 0;
 
-  constructor(attributes: MapSavedObjectAttributes) {
+  constructor(attributes: MapAttributes) {
     if (!attributes || !attributes.mapStateJSON) {
       return;
     }

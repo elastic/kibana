@@ -131,6 +131,7 @@ export const IndexPatternTable = ({
       <EuiButton
         color="danger"
         iconType="trash"
+        data-test-subj="delete-data-views-button"
         onClick={() => clickHandler(selectedItems, deleteModalMsg(selectedItems, !!spaces))}
       >
         <FormattedMessage
@@ -232,9 +233,9 @@ export const IndexPatternTable = ({
             </>
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
-            <>
-              &emsp;<EuiBadge key={tagKey}>{tagName}</EuiBadge>
-            </>
+            <span key={tagKey}>
+              &emsp;<EuiBadge>{tagName}</EuiBadge>
+            </span>
           ))}
         </div>
       ),

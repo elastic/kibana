@@ -5,80 +5,125 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import { useState } from 'react';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
+import { FindSLOResponse } from '@kbn/slo-schema';
 
-import type { SLOList } from '../../typings/slo';
-import { useDataFetcher } from '../use_data_fetcher';
-import { toSLO } from '../../utils/slo/slo';
-
-const EMPTY_LIST = {
-  results: [],
-  total: 0,
-  page: 0,
-  perPage: 0,
-};
+import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 interface SLOListParams {
   name?: string;
+  page?: number;
+  sortBy?: string;
+  indicatorTypes?: string[];
+  shouldRefetch?: boolean;
 }
 
-interface UseFetchSloListResponse {
-  loading: boolean;
-  sloList: SLOList;
+export interface UseFetchSloListResponse {
+  isInitialLoading: boolean;
+  isLoading: boolean;
+  isRefetching: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  sloList: FindSLOResponse | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<FindSLOResponse | undefined, unknown>>;
 }
 
-const useFetchSloList = (name?: string): UseFetchSloListResponse => {
-  const params: SLOListParams = useMemo(() => ({ name }), [name]);
-  const shouldExecuteApiCall = useCallback(
-    (apiCallParams: SLOListParams) => apiCallParams.name === params.name,
-    [params]
+const SHORT_REFETCH_INTERVAL = 1000 * 5; // 5 seconds
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
+
+export function useFetchSloList({
+  name = '',
+  page = 1,
+  sortBy = 'creationTime',
+  indicatorTypes = [],
+  shouldRefetch,
+}: SLOListParams | undefined = {}): UseFetchSloListResponse {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const queryClient = useQueryClient();
+
+  const [stateRefetchInterval, setStateRefetchInterval] = useState<number | undefined>(
+    SHORT_REFETCH_INTERVAL
   );
 
-  const { loading, data: sloList } = useDataFetcher<SLOListParams, SLOList>({
-    paramsForApiCall: params,
-    initialDataState: EMPTY_LIST,
-    executeApiCall: fetchSloList,
-    shouldExecuteApiCall,
-  });
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
+    {
+      queryKey: sloKeys.list({ name, page, sortBy, indicatorTypes }),
+      queryFn: async ({ signal }) => {
+        try {
+          const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
+            query: {
+              ...(page && { page }),
+              ...(name && { name }),
+              ...(sortBy && { sortBy }),
+              ...(indicatorTypes &&
+                indicatorTypes.length > 0 && {
+                  indicatorTypes: indicatorTypes.join(','),
+                }),
+            },
+            signal,
+          });
 
-  return { loading, sloList };
-};
-
-const fetchSloList = async (
-  params: SLOListParams,
-  abortController: AbortController,
-  http: HttpSetup
-): Promise<SLOList> => {
-  try {
-    const response = await http.get<Record<string, unknown>>(`/api/observability/slos`, {
-      query: {
-        ...(params.name && { name: params.name }),
+          return response;
+        } catch (error) {
+          throw error;
+        }
       },
-      signal: abortController.signal,
-    });
-    if (response !== undefined) {
-      return toSLOList(response);
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      refetchInterval: shouldRefetch ? stateRefetchInterval : undefined,
+      staleTime: 1000,
+      retry: (failureCount, error) => {
+        if (String(error) === 'Error: Forbidden') {
+          return false;
+        }
+        return failureCount < 4;
+      },
+      onSuccess: ({ results }: FindSLOResponse) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.historicalSummaries(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.activeAlerts(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
+
+        if (!shouldRefetch) {
+          return;
+        }
+
+        if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
+          setStateRefetchInterval(SHORT_REFETCH_INTERVAL);
+        } else {
+          setStateRefetchInterval(LONG_REFETCH_INTERVAL);
+        }
+      },
+      onError: (error: Error) => {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.observability.slo.list.errorNotification', {
+            defaultMessage: 'Something went wrong while fetching SLOs',
+          }),
+        });
+      },
     }
-  } catch (error) {
-    // ignore error for retrieving slos
-  }
-
-  return EMPTY_LIST;
-};
-
-function toSLOList(response: Record<string, unknown>): SLOList {
-  if (!Array.isArray(response.results)) {
-    throw new Error('Invalid response');
-  }
+  );
 
   return {
-    results: response.results.map((result) => toSLO(result)),
-    page: Number(response.page),
-    perPage: Number(response.per_page),
-    total: Number(response.total),
+    sloList: data,
+    isInitialLoading,
+    isLoading,
+    isRefetching,
+    isSuccess,
+    isError,
+    refetch,
   };
 }
-
-export { useFetchSloList };
-export type { UseFetchSloListResponse };

@@ -25,7 +25,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CommentType } from '../../../common/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
@@ -36,6 +36,7 @@ import type { AddCommentFormSchema } from './schema';
 import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -57,7 +58,7 @@ export interface AddCommentProps {
   id: string;
   caseId: string;
   onCommentSaving?: () => void;
-  onCommentPosted: (newCase: Case) => void;
+  onCommentPosted: (newCase: CaseUI) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
 }
@@ -71,7 +72,7 @@ export const AddComment = React.memo(
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner, appId } = useCasesContext();
-      const { isLoading, createAttachments } = useCreateAttachments();
+      const { isLoading, mutate: createAttachments } = useCreateAttachments();
       const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -113,17 +114,24 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          createAttachments({
-            caseId,
-            caseOwner: owner[0],
-            data: [{ ...data, type: CommentType.user }],
-            updateCase: onCommentPosted,
-          });
 
-          removeItemFromSessionStorage(draftStorageKey);
+          createAttachments(
+            {
+              caseId,
+              caseOwner: owner[0],
+              attachments: [{ ...data, type: CommentType.user }],
+            },
+            {
+              onSuccess: (theCase) => {
+                onCommentPosted(theCase);
+              },
+            }
+          );
 
           reset({ defaultValue: {} });
         }
+
+        removeItemFromSessionStorage(draftStorageKey);
       }, [
         submit,
         onCommentSaving,
@@ -167,6 +175,9 @@ export const AddComment = React.memo(
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [focusOnContext]);
 
+      const isDisabled =
+        isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
+
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
@@ -193,7 +204,7 @@ export const AddComment = React.memo(
                           data-test-subj="submit-comment"
                           fill
                           iconType="plusInCircle"
-                          isDisabled={!comment || isLoading}
+                          isDisabled={isDisabled}
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >

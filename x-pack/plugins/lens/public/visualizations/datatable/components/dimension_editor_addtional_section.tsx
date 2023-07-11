@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
-import { useDebouncedValue } from '../../../shared_components';
 import type { ColumnState } from '../../../../common/expressions';
 
 import {

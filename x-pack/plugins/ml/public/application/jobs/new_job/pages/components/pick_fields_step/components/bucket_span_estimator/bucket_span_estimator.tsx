@@ -8,9 +8,9 @@
 import React, { FC, useState, useEffect, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
 import { isAdvancedJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MLCATEGORY } from '../../../../../../../../../common/constants/field_types';
 
 import { useEstimateBucketSpan, ESTIMATE_STATUS } from './estimate_bucket_span';
 
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { status, estimateBucketSpan } = useEstimateBucketSpan();
   const [noDetectors, setNoDetectors] = useState(jobCreator.detectors.length === 0);
   const [isUsingMlCategory, setIsUsingMlCategory] = useState(checkIsUsingMlCategory());
@@ -33,7 +33,7 @@ export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
     setNoDetectors(jobCreator.detectors.length === 0);
     setIsUsingMlCategory(checkIsUsingMlCategory());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobCreatorUpdate]);
+  }, [jobCreatorUpdated]);
 
   function checkIsUsingMlCategory() {
     return (

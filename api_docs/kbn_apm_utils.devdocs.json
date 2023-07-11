@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/apm-utils",
-        "id": "def-server.parseSpanOptions",
+        "id": "def-common.parseSpanOptions",
         "type": "Function",
         "tags": [],
         "label": "parseSpanOptions",
@@ -22,17 +30,17 @@
           "(optionsOrName: string | ",
           {
             "pluginId": "@kbn/apm-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmUtilsPluginApi",
-            "section": "def-server.SpanOptions",
+            "section": "def-common.SpanOptions",
             "text": "SpanOptions"
           },
           ") => ",
           {
             "pluginId": "@kbn/apm-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmUtilsPluginApi",
-            "section": "def-server.SpanOptions",
+            "section": "def-common.SpanOptions",
             "text": "SpanOptions"
           }
         ],
@@ -42,7 +50,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.parseSpanOptions.$1",
+            "id": "def-common.parseSpanOptions.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "optionsOrName",
@@ -51,9 +59,9 @@
               "string | ",
               {
                 "pluginId": "@kbn/apm-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmUtilsPluginApi",
-                "section": "def-server.SpanOptions",
+                "section": "def-common.SpanOptions",
                 "text": "SpanOptions"
               }
             ],
@@ -68,7 +76,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-utils",
-        "id": "def-server.withSpan",
+        "id": "def-common.withSpan",
         "type": "Function",
         "tags": [],
         "label": "withSpan",
@@ -77,9 +85,9 @@
           "(optionsOrName: string | ",
           {
             "pluginId": "@kbn/apm-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnApmUtilsPluginApi",
-            "section": "def-server.SpanOptions",
+            "section": "def-common.SpanOptions",
             "text": "SpanOptions"
           },
           ", cb: (span?: ",
@@ -92,7 +100,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.withSpan.$1",
+            "id": "def-common.withSpan.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "optionsOrName",
@@ -101,9 +109,9 @@
               "string | ",
               {
                 "pluginId": "@kbn/apm-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnApmUtilsPluginApi",
-                "section": "def-server.SpanOptions",
+                "section": "def-common.SpanOptions",
                 "text": "SpanOptions"
               }
             ],
@@ -114,7 +122,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.withSpan.$2",
+            "id": "def-common.withSpan.$2",
             "type": "Function",
             "tags": [],
             "label": "cb",
@@ -137,7 +145,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/apm-utils",
-        "id": "def-server.SpanOptions",
+        "id": "def-common.SpanOptions",
         "type": "Interface",
         "tags": [],
         "label": "SpanOptions",
@@ -148,7 +156,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.SpanOptions.name",
+            "id": "def-common.SpanOptions.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -159,7 +167,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.SpanOptions.type",
+            "id": "def-common.SpanOptions.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -173,7 +181,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.SpanOptions.subtype",
+            "id": "def-common.SpanOptions.subtype",
             "type": "string",
             "tags": [],
             "label": "subtype",
@@ -187,7 +195,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.SpanOptions.labels",
+            "id": "def-common.SpanOptions.labels",
             "type": "Object",
             "tags": [],
             "label": "labels",
@@ -201,7 +209,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-utils",
-            "id": "def-server.SpanOptions.intercept",
+            "id": "def-common.SpanOptions.intercept",
             "type": "CompoundType",
             "tags": [],
             "label": "intercept",
@@ -217,14 +225,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

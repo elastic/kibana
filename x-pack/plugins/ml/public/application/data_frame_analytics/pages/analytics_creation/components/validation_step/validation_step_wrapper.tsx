@@ -6,9 +6,12 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { EuiForm } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+
+import { EuiForm } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ValidationStep } from './validation_step';
@@ -16,7 +19,6 @@ import { ValidationStepDetails } from './validation_step_details';
 import { ANALYTICS_STEPS } from '../../page';
 import { useMlApiContext } from '../../../../../contexts/kibana';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import {
   CalloutMessage,
   ValidateAnalyticsJobResponse,

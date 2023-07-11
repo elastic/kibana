@@ -6,6 +6,7 @@
  */
 
 import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
+import { css } from '@emotion/react';
 import type {
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -19,7 +20,7 @@ import {
   EuiDataGrid,
   EuiPanel,
   EuiLink,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiProgress,
   EuiIconTip,
 } from '@elastic/eui';
@@ -49,7 +50,10 @@ const DataContext = createContext<ResultEdges>([]);
 
 const StyledEuiDataGrid = styled(EuiDataGrid)`
   :not(.euiDataGrid--fullScreen) {
-    max-height: 500px;
+    .euiDataGrid__virtualized {
+      height: 100% !important;
+      max-height: 500px;
+    }
   }
 `;
 
@@ -61,6 +65,7 @@ export interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -70,6 +75,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   liveQueryActionId,
+  error,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -367,7 +373,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   useEffect(
     () =>
       setIsLive(() => {
-        if (!agentIds?.length || expired) return false;
+        if (!agentIds?.length || expired || error) return false;
 
         return !!(
           aggregations.totalResponded !== agentIds?.length ||
@@ -381,9 +387,14 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations?.totalRowCount,
       allResultsData?.edges.length,
       allResultsData?.total,
+      error,
       expired,
     ]
   );
+
+  if (isLoading) {
+    return <EuiSkeletonText lines={5} />;
+  }
 
   if (!hasActionResultsPrivileges) {
     return (
@@ -395,7 +406,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage
@@ -412,16 +423,20 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (isLoading) {
-    return <EuiLoadingContent lines={5} />;
-  }
-
   return (
     <>
-      {isLive && <EuiProgress color="primary" size="xs" />}
+      {isLive && (
+        <EuiProgress
+          color="primary"
+          size="xs"
+          css={css`
+            margin-top: -2px;
+          `}
+        />
+      )}
 
       {!allResultsData?.edges.length ? (
-        <EuiPanel hasShadow={false}>
+        <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
         </EuiPanel>
       ) : (

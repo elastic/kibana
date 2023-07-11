@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { Environment } from '../../../common/environment_rt';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getEnvironments } from './get_environments';
 import { rangeRt } from '../default_api_types';
@@ -27,11 +28,7 @@ const environmentsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    environments: Array<
-      | 'ENVIRONMENT_NOT_DEFINED'
-      | 'ENVIRONMENT_ALL'
-      | t.Branded<string, import('@kbn/io-ts-utils').NonEmptyStringBrand>
-    >;
+    environments: Environment[];
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { context, params, config } = resources;

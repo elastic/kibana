@@ -21,6 +21,7 @@ import {
   EuiDatePickerRange,
   EuiSelect,
   EuiSuperSelect,
+  EuiFormControlLayoutDelimited,
 } from '@elastic/eui';
 
 import { BlockedWindowItem } from './blocked_window_item';
@@ -75,22 +76,27 @@ describe('BlockedWindowItem', () => {
   it('handles "start" time change', () => {
     const wrapper = shallow(<BlockedWindowItem {...props} />);
     const dayRange = wrapper.find(EuiDatePickerRange).dive();
-    dayRange
+    const rangeDelimiter = dayRange.find(EuiFormControlLayoutDelimited).dive();
+
+    rangeDelimiter
       .find(EuiDatePicker)
       .first()
       .simulate('change', moment().utc().set({ hour: 10, minute: 0, seconds: 0 }));
 
+    expect(rangeDelimiter.find(EuiDatePicker)).toHaveLength(2);
     expect(setBlockedTimeWindow).toHaveBeenCalledWith(0, 'start', '10:00:00Z');
   });
 
   it('handles "end" time change', () => {
     const wrapper = shallow(<BlockedWindowItem {...props} />);
     const dayRange = wrapper.find(EuiDatePickerRange).dive();
-    dayRange
+    const rangeDelimiter = dayRange.find(EuiFormControlLayoutDelimited).dive();
+    rangeDelimiter
       .find(EuiDatePicker)
       .last()
       .simulate('change', moment().utc().set({ hour: 12, minute: 0, seconds: 0 }));
 
+    expect(rangeDelimiter.find(EuiDatePicker)).toHaveLength(2);
     expect(setBlockedTimeWindow).toHaveBeenCalledWith(0, 'end', '12:00:00Z');
   });
 });

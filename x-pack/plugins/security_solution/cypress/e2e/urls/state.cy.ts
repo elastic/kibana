@@ -16,10 +16,11 @@ import { HOSTS_NAMES } from '../../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../../screens/hosts/main';
 import {
   BREADCRUMBS,
-  EXPLORE,
+  EXPLORE_PANEL_BTN,
   HOSTS,
   KQL_INPUT,
   NETWORK,
+  LOADING_INDICATOR,
   openNavigationPanel,
 } from '../../screens/security_header';
 import { TIMELINE_TITLE } from '../../screens/timeline';
@@ -70,7 +71,7 @@ const ABSOLUTE_DATE = {
 };
 
 describe('url state', () => {
-  before(() => {
+  beforeEach(() => {
     login();
   });
 
@@ -221,7 +222,7 @@ describe('url state', () => {
     kqlSearch('source.ip: "10.142.0.9" {enter}');
     navigateFromHeaderTo(HOSTS);
 
-    openNavigationPanel(EXPLORE);
+    openNavigationPanel(EXPLORE_PANEL_BTN);
     cy.get(NETWORK).should(
       'have.attr',
       'href',
@@ -235,7 +236,7 @@ describe('url state', () => {
     openAllHosts();
     waitForAllHostsToBeLoaded();
 
-    openNavigationPanel(EXPLORE);
+    openNavigationPanel(EXPLORE_PANEL_BTN);
     cy.get(HOSTS).should(
       'have.attr',
       'href',
@@ -276,7 +277,6 @@ describe('url state', () => {
 
   it('Do not clears kql when navigating to a new page', () => {
     visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    kqlSearch('source.ip: "10.142.0.9"{enter}');
     navigateFromHeaderTo(NETWORK);
     cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
@@ -287,15 +287,14 @@ describe('url state', () => {
     populateTimeline();
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
-
-    addNameToTimeline(getTimeline().title);
-
+    cy.get(LOADING_INDICATOR).should('not.exist');
     cy.wait('@timeline').then(({ response }) => {
+      addNameToTimeline(getTimeline().title);
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
-      cy.visit('/app/home');
-      cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
+      visit('/app/home');
+      visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');

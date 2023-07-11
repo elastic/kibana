@@ -8,16 +8,16 @@
 import type React from 'react';
 import type { AllTimelinesVariables } from '../../containers/all';
 import type { TimelineModel } from '../../store/timeline/model';
-import type { NoteResult } from '../../../../common/types/timeline/note';
+import type { Note } from '../../../../common/types/timeline/note/api';
 import type {
+  RowRendererId,
+  SingleTimelineResolveResponse,
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
   TimelineStatus,
   TemplateTimelineTypeLiteral,
-  RowRendererId,
   TimelineStatusLiteralWithNull,
-  SingleTimelineResolveResponse,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -57,6 +57,7 @@ export interface OpenTimelineResult {
   noteIds?: string[] | null;
   notes?: TimelineResultNote[] | null;
   pinnedEventIds?: Readonly<Record<string, boolean>> | null;
+  queryType?: { hasEql: boolean; hasQuery: boolean };
   savedObjectId?: string | null;
   status?: TimelineStatus | null;
   title?: string | null;
@@ -135,7 +136,8 @@ export type ActionTimelineToShow =
   | 'delete'
   | 'export'
   | 'selectable'
-  | 'createRule';
+  | 'createRule'
+  | 'createRuleFromEql';
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
@@ -152,6 +154,9 @@ export interface OpenTimelineProps {
   importDataModalToggle?: boolean;
   /** If this callback is specified, a "Create rule from timeline" button will be displayed, and this callback will be invoked when the button is clicked */
   onCreateRule?: OnCreateRuleFromTimeline;
+
+  /** If this callback is specified, a "Create rule from timeline correlation" button will be displayed, and this callback will be invoked when the button is clicked */
+  onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   /** If this callback is specified, a "Favorite Selected" button will be displayed, and this callback will be invoked when the button is clicked */
   onAddTimelinesToFavorites?: OnAddTimelinesToFavorites;
   /** If this callback is specified, a "Delete Selected" button will be displayed, and this callback will be invoked when the button is clicked */
@@ -214,11 +219,12 @@ export interface UpdateTimeline {
   id: string;
   forceNotes?: boolean;
   from: string;
-  notes: NoteResult[] | null | undefined;
+  notes: Note[] | null | undefined;
   resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
+  ruleAuthor?: string;
 }
 
 export type DispatchUpdateTimeline = ({
@@ -230,6 +236,7 @@ export type DispatchUpdateTimeline = ({
   timeline,
   to,
   ruleNote,
+  ruleAuthor,
 }: UpdateTimeline) => () => void;
 
 export enum TimelineTabsStyle {

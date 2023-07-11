@@ -8,10 +8,14 @@
 export const getSLOSettingsTemplate = (name: string) => ({
   name,
   template: {
-    settings: {},
+    settings: {
+      hidden: true,
+    },
   },
   _meta: {
     description: 'Settings for SLO rollup data',
     version: 1,
+    managed: true,
+    managed_by: 'observability',
   },
 });

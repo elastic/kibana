@@ -71,6 +71,8 @@ interface HasPrivileges {
 type AuthorizedConsumers = Record<string, HasPrivileges>;
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
+  hasGetSummarizedAlerts?: boolean;
+  hasFieldsForAAD?: boolean;
 }
 
 type IsAuthorizedAtProducerLevel = boolean;

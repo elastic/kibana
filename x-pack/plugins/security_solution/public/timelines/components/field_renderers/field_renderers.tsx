@@ -8,10 +8,15 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, Fragment, useMemo, useState } from 'react';
+import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 
-import type { HostEcs } from '../../../../common/ecs/host';
+import type { HostEcs } from '@kbn/securitysolution-ecs';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
 import type {
   AutonomousSystem,
   FlowTarget,
@@ -25,9 +30,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
-import type { QueryOperator } from '../../../../common/types';
-import { IS_OPERATOR } from '../../../../common/types';
-import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -196,6 +200,7 @@ interface DefaultFieldRendererProps {
   moreMaxHeight?: string;
   render?: (item: string) => React.ReactNode;
   rowItems: string[] | null | undefined;
+  sourcererScopeId?: SourcererScopeName;
 }
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
@@ -206,6 +211,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
   render,
   rowItems,
+  sourcererScopeId,
 }) => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
@@ -247,13 +253,12 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
             attrName={attrName}
-            fieldType="keyword"
             idPrefix={idPrefix}
-            isAggregatable={true}
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
             rowItems={rowItems}
+            sourcererScopeId={sourcererScopeId}
           />
         </EuiFlexItem>
       </DraggableContainerFlexGroup>
@@ -270,102 +275,69 @@ export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
 interface DefaultFieldRendererOverflowProps {
-  attrName?: string;
-  fieldType?: string;
+  attrName: string;
   rowItems: string[];
   idPrefix: string;
-  isAggregatable?: boolean;
   render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
+  sourcererScopeId?: SourcererScopeName;
 }
 
 interface MoreContainerProps {
-  attrName?: string;
-  dragDisplayValue?: string;
-  fieldType?: string;
+  fieldName: string;
+  values: string[];
   idPrefix: string;
-  isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
-  rowItems: string[];
+  sourcererScopeId?: SourcererScopeName;
 }
 
-/** A container (with overflow) for showing "More" items in a popover */
 export const MoreContainer = React.memo<MoreContainerProps>(
   ({
-    attrName,
-    dragDisplayValue,
-    fieldType,
+    fieldName,
     idPrefix,
-    isAggregatable,
     moreMaxHeight,
     overflowIndexStart,
     render,
-    rowItems,
+    values,
+    sourcererScopeId,
   }) => {
+    const { timelineId } = useContext(TimelineContext);
+
     const moreItemsWithHoverActions = useMemo(
       () =>
-        rowItems.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, rowItem, index) => {
-          const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
-          const dataProvider =
-            typeof rowItem === 'string' && attrName != null
-              ? {
-                  and: [],
-                  enabled: true,
-                  id,
-                  name: rowItem,
-                  excluded: false,
-                  kqlQuery: '',
-                  queryMatch: {
-                    field: attrName,
-                    value: rowItem,
-                    displayValue: dragDisplayValue ?? rowItem,
-                    operator: IS_OPERATOR as QueryOperator,
-                  },
-                }
-              : undefined;
+        values.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, value, index) => {
+          const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
 
-          if (dataProvider != null) {
+          if (typeof value === 'string' && fieldName != null) {
             acc.push(
-              <EuiFlexItem key={`${idPrefix}-${id}`}>
-                <DraggableWrapper
-                  dataProvider={dataProvider}
-                  isDraggable={false}
-                  render={() => (render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
-                  scopeId={undefined}
-                  fieldType={fieldType}
-                  isAggregatable={isAggregatable}
-                />
+              <EuiFlexItem key={id}>
+                <SecurityCellActions
+                  key={id}
+                  mode={CellActionsMode.HOVER_DOWN}
+                  visibleCellActions={5}
+                  showActionTooltips
+                  triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  data={{
+                    value,
+                    field: fieldName,
+                  }}
+                  sourcererScopeId={sourcererScopeId ?? SourcererScopeName.default}
+                  metadata={{
+                    scopeId: timelineId ?? undefined,
+                  }}
+                >
+                  <>{render ? render(value) : defaultToEmptyTag(value)}</>
+                </SecurityCellActions>
               </EuiFlexItem>
             );
           }
 
           return acc;
         }, []),
-      [
-        attrName,
-        dragDisplayValue,
-        fieldType,
-        idPrefix,
-        isAggregatable,
-        overflowIndexStart,
-        render,
-        rowItems,
-      ]
-    );
-
-    const moreItems = useMemo(
-      () =>
-        rowItems.slice(overflowIndexStart).map((rowItem, index) => {
-          return (
-            <EuiFlexItem grow={1} key={`${rowItem}-${index}`}>
-              {(render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
-            </EuiFlexItem>
-          );
-        }),
-      [overflowIndexStart, render, rowItems]
+      [values, overflowIndexStart, idPrefix, fieldName, timelineId, render, sourcererScopeId]
     );
 
     return (
@@ -378,7 +350,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
         }}
       >
         <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
-          {attrName != null ? moreItemsWithHoverActions : moreItems}
+          {moreItemsWithHoverActions}
         </EuiFlexGroup>
       </div>
     );
@@ -394,8 +366,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
     overflowIndexStart = 5,
     render,
     rowItems,
-    fieldType,
-    isAggregatable,
+    sourcererScopeId,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
@@ -431,14 +402,13 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             panelClassName="withHoverActions__popover"
           >
             <MoreContainer
-              attrName={attrName}
+              fieldName={attrName}
               idPrefix={idPrefix}
               render={render}
-              rowItems={rowItems}
+              values={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
-              fieldType={fieldType}
-              isAggregatable={isAggregatable}
+              sourcererScopeId={sourcererScopeId}
             />
           </EuiPopover>
         )}

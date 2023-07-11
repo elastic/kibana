@@ -12,6 +12,7 @@ import type {
   GetAgentStatusResponse,
   GetPackagePoliciesResponse,
   GetPackagesResponse,
+  GetInfoResponse,
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
 } from '@kbn/fleet-plugin/common';
@@ -138,6 +139,24 @@ export const fleetGetPackageListHttpMock =
       },
     },
   ]);
+
+export type FleetGetPackageHttpMockInterface = ResponseProvidersInterface<{
+  endpointPackage: () => GetInfoResponse;
+}>;
+export const fleetGetPackageHttpMock = httpHandlerMockFactory<FleetGetPackageHttpMockInterface>([
+  {
+    id: 'endpointPackage',
+    method: 'get',
+    path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
+    handler() {
+      const generator = new EndpointDocGenerator('seed');
+
+      return {
+        item: generator.generateEpmPackageInfo(),
+      };
+    },
+  },
+]);
 
 export type FleetGetEndpointPackagePolicyHttpMockInterface = ResponseProvidersInterface<{
   endpointPackagePolicy: () => GetPolicyResponse;

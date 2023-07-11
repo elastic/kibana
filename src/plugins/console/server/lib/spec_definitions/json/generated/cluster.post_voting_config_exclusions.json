@@ -3,7 +3,8 @@
     "url_params": {
       "node_ids": "",
       "node_names": "",
-      "timeout": ""
+      "timeout": "",
+      "master_timeout": ""
     },
     "methods": [
       "POST"

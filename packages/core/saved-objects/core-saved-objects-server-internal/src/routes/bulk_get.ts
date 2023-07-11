@@ -7,18 +7,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfAnyTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerBulkGetRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_get',
@@ -34,11 +43,23 @@ export const registerBulkGetRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'post',
+        path: '/api/saved_objects/_bulk_get',
+        req,
+        logger,
+      });
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkGet({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      const result = await savedObjects.client.bulkGet(req.body);
+      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
+      if (!allowHttpApiAccess) {
+        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+      }
+      const result = await savedObjects.client.bulkGet(req.body, {
+        migrationVersionCompatibility: 'compatible',
+      });
       return res.ok({ body: result });
     })
   );

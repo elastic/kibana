@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../../common/constants';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import { UpsertMonitorRequest } from '..';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
@@ -13,6 +15,7 @@ import {
   MonitorManagementListResultCodec,
   ServiceLocationErrors,
   SyntheticsMonitor,
+  MonitorFiltersResult,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
@@ -29,7 +32,10 @@ function toMonitorManagementListQueryArgs(
     query: pageState.query,
     tags: pageState.tags,
     locations: pageState.locations,
-    monitorType: pageState.monitorType,
+    monitorTypes: pageState.monitorTypes,
+    projects: pageState.projects,
+    schedules: pageState.schedules,
+    monitorQueryIds: pageState.monitorQueryIds,
     searchFields: [],
   };
 }
@@ -40,34 +46,41 @@ export const fetchMonitorManagementList = async (
   const params = toMonitorManagementListQueryArgs(pageState);
 
   return await apiService.get(
-    API_URLS.SYNTHETICS_MONITORS,
+    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
     params,
     MonitorManagementListResultCodec
   );
 };
 
-export const fetchDeleteMonitor = async ({ id }: { id: string }): Promise<void> => {
-  return await apiService.delete(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
+export const fetchDeleteMonitor = async ({ configId }: { configId: string }): Promise<void> => {
+  return await apiService.delete(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`);
 };
+
+export type UpsertMonitorResponse =
+  | { attributes: { errors: ServiceLocationErrors }; id: string }
+  | SavedObject<SyntheticsMonitor>;
 
 export const fetchUpsertMonitor = async ({
   monitor,
-  id,
-}: {
-  monitor: Partial<SyntheticsMonitor> | Partial<EncryptedSyntheticsMonitor>;
-  id?: string;
-}): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
-  if (id) {
-    return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
+  configId,
+}: UpsertMonitorRequest): Promise<UpsertMonitorResponse> => {
+  if (configId) {
+    return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`, monitor);
   } else {
-    return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+    return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor);
   }
 };
 
-export const fetchCreateMonitor = async ({
+export const createGettingStartedMonitor = async ({
   monitor,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
-  return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
+    gettingStarted: true,
+  });
+};
+
+export const fetchMonitorFilters = async (): Promise<MonitorFiltersResult> => {
+  return await apiService.get(SYNTHETICS_API_URLS.FILTERS);
 };

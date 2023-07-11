@@ -38,7 +38,7 @@ export const useInputHints = () => {
   const isInputPopoverOpen = Boolean(useWithInputShowPopover());
   const commandEntered = useWithInputCommandEntered();
   const commandList = useWithCommandList();
-  const { textEntered } = useWithInputTextEntered();
+  const { leftOfCursorText } = useWithInputTextEntered();
 
   const commandEnteredDefinition = useMemo<CommandDefinition | undefined>(() => {
     if (commandEntered) {
@@ -105,10 +105,10 @@ export const useInputHints = () => {
       dispatch({
         type: 'updateFooterContent',
         payload: {
-          value: textEntered || isInputPopoverOpen ? '' : UP_ARROW_ACCESS_HISTORY_HINT,
+          value: leftOfCursorText || isInputPopoverOpen ? '' : UP_ARROW_ACCESS_HISTORY_HINT,
         },
       });
       dispatch({ type: 'setInputState', payload: { value: undefined } });
     }
-  }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen, textEntered]);
+  }, [commandEntered, commandEnteredDefinition, dispatch, isInputPopoverOpen, leftOfCursorText]);
 };

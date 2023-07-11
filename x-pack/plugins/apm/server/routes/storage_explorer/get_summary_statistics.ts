@@ -33,7 +33,20 @@ import {
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getTracesPerMinute({
+interface SharedOptions {
+  apmEventClient: APMEventClient;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  start: number;
+  end: number;
+  environment: string;
+  kuery: string;
+}
+
+type TracesPerMinuteOptions = SharedOptions & {
+  searchAggregatedTransactions: boolean;
+};
+
+async function getTracesPerMinute({
   apmEventClient,
   indexLifecyclePhase,
   start,
@@ -41,15 +54,7 @@ export async function getTracesPerMinute({
   environment,
   kuery,
   searchAggregatedTransactions,
-}: {
-  apmEventClient: APMEventClient;
-  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  start: number;
-  end: number;
-  environment: string;
-  kuery: string;
-  searchAggregatedTransactions: boolean;
-}) {
+}: TracesPerMinuteOptions) {
   const response = await apmEventClient.search('get_traces_per_minute', {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -95,7 +100,13 @@ export async function getTracesPerMinute({
   });
 }
 
-export async function getMainSummaryStats({
+type MainSummaryStatsOptions = SharedOptions & {
+  context: ApmPluginRequestHandlerContext;
+  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  randomSampler: RandomSampler;
+};
+
+async function getMainSummaryStats({
   apmEventClient,
   context,
   indexLifecyclePhase,
@@ -104,16 +115,7 @@ export async function getMainSummaryStats({
   end,
   environment,
   kuery,
-}: {
-  apmEventClient: APMEventClient;
-  context: ApmPluginRequestHandlerContext;
-  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  randomSampler: RandomSampler;
-  start: number;
-  end: number;
-  environment: string;
-  kuery: string;
-}) {
+}: MainSummaryStatsOptions) {
   const [totalIndicesStats, totalDiskSpace, res] = await Promise.all([
     getTotalIndicesStats({ context, apmEventClient }),
     getApmDiskSpacedUsedPct(context),
@@ -196,5 +198,54 @@ export async function getMainSummaryStats({
     numberOfServices: res.aggregations?.services_count.value ?? 0,
     estimatedIncrementalSize,
     dailyDataGeneration: estimatedIncrementalSize / durationAsDays,
+  };
+}
+
+export interface StorageExplorerSummaryStatisticsResponse {
+  tracesPerMinute: number;
+  totalSize: number;
+  diskSpaceUsedPct: number;
+  numberOfServices: number;
+  estimatedIncrementalSize: number;
+  dailyDataGeneration: number;
+}
+
+export async function getSummaryStatistics({
+  apmEventClient,
+  context,
+  start,
+  end,
+  environment,
+  kuery,
+  randomSampler,
+  indexLifecyclePhase,
+  searchAggregatedTransactions,
+}: TracesPerMinuteOptions &
+  MainSummaryStatsOptions): Promise<StorageExplorerSummaryStatisticsResponse> {
+  const [mainSummaryStats, tracesPerMinute] = await Promise.all([
+    getMainSummaryStats({
+      apmEventClient,
+      context,
+      indexLifecyclePhase,
+      randomSampler,
+      start,
+      end,
+      environment,
+      kuery,
+    }),
+    getTracesPerMinute({
+      apmEventClient,
+      indexLifecyclePhase,
+      start,
+      end,
+      environment,
+      kuery,
+      searchAggregatedTransactions,
+    }),
+  ]);
+
+  return {
+    ...mainSummaryStats,
+    tracesPerMinute,
   };
 }

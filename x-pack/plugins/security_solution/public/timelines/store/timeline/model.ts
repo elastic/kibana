@@ -13,18 +13,20 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  TimelineEventsType,
-  TimelineType,
-  TimelineStatus,
   TimelineTabs,
   ScrollToTopEvent,
   SortColumnTimeline,
   ColumnHeaderOptions,
   DataProvider,
-  RowRendererId,
   SerializedFilterQuery,
+  TimelineEventsType,
 } from '../../../../common/types/timeline';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
+import type {
+  RowRendererId,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/types/timeline/api';
+import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event/api';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
@@ -130,6 +132,7 @@ export interface TimelineModel {
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   isLoading: boolean;
+  selectAll: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -171,6 +174,7 @@ export type SubsetTimelineModel = Readonly<
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
     | 'dateRange'
+    | 'selectAll'
     | 'selectedEventIds'
     | 'sessionViewConfig'
     | 'show'

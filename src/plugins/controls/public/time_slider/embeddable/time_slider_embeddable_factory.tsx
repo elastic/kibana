@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import {
   createTimeSliderExtract,
   createTimeSliderInject,
@@ -24,7 +24,7 @@ export class TimeSliderEmbeddableFactory
   constructor() {}
 
   public async create(initialInput: any, parent?: IContainer) {
-    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { TimeSliderControlEmbeddable } = await import('./time_slider_embeddable');
 
     return Promise.resolve(
@@ -35,6 +35,7 @@ export class TimeSliderEmbeddableFactory
   public isFieldCompatible = () => false;
 
   public isEditable = () => Promise.resolve(false);
+  public canCreateNew = () => false;
 
   public getDisplayName = () =>
     i18n.translate('controls.timeSlider.displayName', {

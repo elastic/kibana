@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
@@ -117,8 +117,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     const [bucket] = uniqueBuckets;
 
     const extendedLayer: ExtendedLayer = {
+      ignoreGlobalFilters: Boolean(
+        model.ignore_global_filter ||
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          visibleSeries.some(({ ignore_global_filter }) => ignore_global_filter)
+      ),
       indexPatternId: indexPatternId as string,
-      layerId: uuid(),
+      layerId: uuidv4(),
       columns: [...metrics, ...(bucket ? [bucket] : [])],
       columnOrder: [],
     };

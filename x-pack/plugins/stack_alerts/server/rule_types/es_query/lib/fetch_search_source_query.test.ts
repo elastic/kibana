@@ -7,8 +7,11 @@
 
 import { OnlySearchSourceRuleParams } from '../types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { updateSearchSource } from './fetch_search_source_query';
-import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { updateSearchSource, getSmallerDataViewSpec } from './fetch_search_source_query';
+import {
+  createStubDataView,
+  stubbedSavedObjectIndexPattern,
+} from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { Comparator } from '../../../../common/comparator_types';
@@ -64,6 +67,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource, dateStart, dateEnd } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         undefined
       );
@@ -101,6 +105,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );
@@ -122,6 +127,7 @@ describe('fetchSearchSourceQuery', () => {
               Object {
                 "range": Object {
                   "time": Object {
+                    "format": "strict_date_optional_time",
                     "gt": "2020-02-09T23:12:41.941Z",
                   },
                 },
@@ -143,6 +149,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-01-09T22:12:41.941Z'
       );
@@ -178,6 +185,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );
@@ -219,6 +227,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );
@@ -271,6 +280,123 @@ describe('fetchSearchSourceQuery', () => {
             "stats_bucket": Object {
               "buckets_path": "groupAgg._count",
             },
+          },
+        }
+      `);
+    });
+  });
+
+  describe('getSmallerDataViewSpec', () => {
+    it('should remove "count"s but keep other props like "customLabel"', async () => {
+      const fieldsMap = {
+        test1: {
+          name: 'test1',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test2: {
+          name: 'test2',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test3: {
+          name: 'test3',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+      };
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: undefined,
+            },
+          })
+        )?.fieldAttrs
+      ).toBeUndefined();
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: {
+                test1: {
+                  count: 11,
+                },
+                test2: {
+                  count: 12,
+                },
+              },
+            },
+          })
+        )?.fieldAttrs
+      ).toBeUndefined();
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: {
+                test1: {
+                  count: 11,
+                  customLabel: 'test11',
+                },
+                test2: {
+                  count: 12,
+                },
+              },
+            },
+          })
+        )?.fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+        }
+      `);
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: {
+                test1: {
+                  count: 11,
+                  customLabel: 'test11',
+                },
+                test2: {
+                  customLabel: 'test12',
+                },
+                test3: {
+                  count: 30,
+                },
+              },
+            },
+          })
+        )?.fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+          "test2": Object {
+            "customLabel": "test12",
           },
         }
       `);

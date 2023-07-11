@@ -54,24 +54,24 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
   }) => (
     <EuiModal onClose={resetPermissionsModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            responsive={false}
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <SourceIcon serviceType={serviceType} name={addedSourceName} size="xxl" />
-            </EuiFlexItem>
-            <EuiFlexItem>
+        <EuiFlexGroup
+          justifyContent="flexStart"
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+        >
+          <EuiFlexItem grow={false}>
+            <SourceIcon serviceType={serviceType} name={addedSourceName} size="xxl" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiModalHeaderTitle>
               {i18n.translate('xpack.enterpriseSearch.workplaceSearch.sourcesView.modal.heading', {
                 defaultMessage: '{addedSourceName} requires additional configuration',
                 values: { addedSourceName },
               })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeaderTitle>
+            </EuiModalHeaderTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText grow={false}>

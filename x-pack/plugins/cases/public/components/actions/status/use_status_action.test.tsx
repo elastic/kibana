@@ -94,10 +94,9 @@ describe('useStatusAction', () => {
       await waitFor(() => {
         expect(onAction).toHaveBeenCalled();
         expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith(
-          [{ status, id: basicCase.id, version: basicCase.version }],
-          expect.anything()
-        );
+        expect(updateSpy).toHaveBeenCalledWith({
+          cases: [{ status, id: basicCase.id, version: basicCase.version }],
+        });
       });
     }
   });
@@ -126,9 +125,10 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          expectedMessage
-        );
+        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: expectedMessage,
+          className: 'eui-textBreakWord',
+        });
       });
     }
   );
@@ -157,9 +157,10 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-          expectedMessage
-        );
+        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          title: expectedMessage,
+          className: 'eui-textBreakWord',
+        });
       });
     }
   );

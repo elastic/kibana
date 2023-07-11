@@ -19,7 +19,11 @@ interface Props {
   isLoading: boolean;
 }
 
-export function ServiceGroupsListItems({ items, serviceGroupCounts }: Props) {
+export function ServiceGroupsListItems({
+  items,
+  serviceGroupCounts,
+  isLoading,
+}: Props) {
   const router = useApmRouter();
   const { query } = useApmParams('/service-groups');
 
@@ -40,6 +44,7 @@ export function ServiceGroupsListItems({ items, serviceGroupCounts }: Props) {
               kuery: '',
             },
           })}
+          isLoading={isLoading}
         />
       ))}
     </EuiFlexGroup>

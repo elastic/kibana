@@ -12,10 +12,10 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import type { NewTermsRuleParams } from '../../rule_schema';
 import { newTermsRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { singleSearchAfter } from '../../signals/single_search_after';
-import { getFilter } from '../../signals/get_filter';
-import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
-import type { EventsAndTerms } from '../factories/utils/wrap_new_terms_alerts';
+import { singleSearchAfter } from '../utils/single_search_after';
+import { getFilter } from '../utils/get_filter';
+import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
+import type { EventsAndTerms } from './wrap_new_terms_alerts';
 import type {
   DocFetchAggResult,
   RecentTermsAggResult,
@@ -38,9 +38,10 @@ import {
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
+  getMaxSignalsWarning,
   getUnprocessedExceptionsWarnings,
-} from '../../signals/utils';
-import { createEnrichEventsFunction } from '../../signals/enrichments';
+} from '../utils/utils';
+import { createEnrichEventsFunction } from '../utils/enrichments';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -107,6 +108,8 @@ export const createNewTermsAlertType = (
           exceptionFilter,
           unprocessedExceptions,
           alertTimestampOverride,
+          publicBaseUrl,
+          inputIndexFields,
         },
         services,
         params,
@@ -130,6 +133,7 @@ export const createNewTermsAlertType = (
         type: params.type,
         query: params.query,
         exceptionFilter,
+        fields: inputIndexFields,
       });
 
       const parsedHistoryWindowSize = parseDateString({
@@ -153,7 +157,7 @@ export const createNewTermsAlertType = (
       // it's possible for the array to be truncated but alert documents could fail to be created for other reasons,
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
-      while (result.createdSignalsCount < params.maxSignals) {
+      while (result.createdSignalsCount <= params.maxSignals) {
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
@@ -299,6 +303,8 @@ export const createNewTermsAlertType = (
             mergeStrategy,
             indicesToQuery: inputIndex,
             alertTimestampOverride,
+            ruleExecutionLogger,
+            publicBaseUrl,
           });
 
           const bulkCreateResult = await bulkCreate(
@@ -313,6 +319,7 @@ export const createNewTermsAlertType = (
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
 
           if (bulkCreateResult.alertsWereTruncated) {
+            result.warningMessages.push(getMaxSignalsWarning());
             break;
           }
         }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import chalk from 'chalk';
 import ora from 'ora';
 import { Command } from 'commander';

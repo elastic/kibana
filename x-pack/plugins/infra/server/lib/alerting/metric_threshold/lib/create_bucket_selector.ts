@@ -32,12 +32,14 @@ export const createBucketSelector = (
   const isCount = condition.aggType === Aggregators.COUNT;
   const isRate = condition.aggType === Aggregators.RATE;
   const bucketPath = isCount
-    ? 'currentPeriod>_count'
+    ? "currentPeriod['all']>_count"
     : isRate
     ? `aggregatedValue`
     : isPercentile
-    ? `currentPeriod>aggregatedValue[${condition.aggType === Aggregators.P95 ? '95' : '99'}]`
-    : 'currentPeriod>aggregatedValue';
+    ? `currentPeriod[\'all\']>aggregatedValue[${
+        condition.aggType === Aggregators.P95 ? '95' : '99'
+      }]`
+    : "currentPeriod['all']>aggregatedValue";
 
   const shouldWarn = hasWarn
     ? {
@@ -74,7 +76,7 @@ export const createBucketSelector = (
       bucket_script: {
         buckets_path: {
           lastPeriod: 'lastPeriod>_count',
-          currentPeriod: 'currentPeriod>_count',
+          currentPeriod: "currentPeriod['all']>_count",
         },
         script: 'params.lastPeriod > 0 && params.currentPeriod < 1 ? 1 : 0',
       },
@@ -83,7 +85,7 @@ export const createBucketSelector = (
       bucket_script: {
         buckets_path: {
           lastPeriod: 'lastPeriod>_count',
-          currentPeriod: 'currentPeriod>_count',
+          currentPeriod: "currentPeriod['all']>_count",
         },
         script: 'params.lastPeriod < 1 && params.currentPeriod > 0 ? 1 : 0',
       },

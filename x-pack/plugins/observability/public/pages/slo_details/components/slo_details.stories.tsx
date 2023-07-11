@@ -8,19 +8,21 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { anSLO } from '../../../../common/data/slo';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { buildSlo } from '../../../data/slo/slo';
 import { SloDetails as Component, Props } from './slo_details';
 
 export default {
   component: Component,
   title: 'app/SLO/DetailsPage/SloDetails',
-  argTypes: {},
+  decorators: [KibanaReactStorybookDecorator],
 };
 
 const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps: Props = {
-  slo: anSLO,
+  slo: buildSlo(),
+  isAutoRefreshing: false,
 };
 
 export const SloDetails = Template.bind({});

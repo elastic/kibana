@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 
 import {
   useEuiBackgroundColor,
@@ -18,63 +18,62 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTableSortingType,
+  EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
   useEuiTheme,
   euiPaletteColorBlind,
 } from '@elastic/eui';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { escapeKuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
-
-import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { MiniHistogram } from '../mini_histogram';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { SpikeAnalysisTable } from './spike_analysis_table';
 import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_provider';
+import type { GroupTableItem } from './types';
+import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
+import { useViewInDiscoverAction } from './use_view_in_discover_action';
+import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
 const ACTIONS_COLUMN_WIDTH = '60px';
 const NOT_AVAILABLE = '--';
-const MAX_GROUP_BADGES = 10;
+const MAX_GROUP_BADGES = 5;
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
-const viewInDiscoverMessage = i18n.translate(
-  'xpack.aiops.spikeAnalysisTable.linksMenu.viewInDiscover',
-  {
-    defaultMessage: 'View in Discover',
-  }
-);
-
-export interface GroupTableItem {
-  id: string;
-  docCount: number;
-  pValue: number | null;
-  group: Record<string, string | number>;
-  repeatedValues: Record<string, string | number>;
-  histogram: ChangePoint['histogram'];
-}
 
 interface SpikeAnalysisTableProps {
-  changePoints: ChangePoint[];
+  significantTerms: SignificantTerm[];
   groupTableItems: GroupTableItem[];
-  dataViewId?: string;
   loading: boolean;
+  searchQuery: estypes.QueryDslQueryContainer;
+  timeRangeMs: TimeRangeMs;
+  dataView: DataView;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
-  changePoints,
+  significantTerms,
   groupTableItems,
-  dataViewId,
   loading,
+  dataView,
+  timeRangeMs,
+  searchQuery,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -90,109 +89,48 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
     useSpikeAnalysisTableRowContext();
+  const dataViewId = dataView.id;
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      const { group, repeatedValues } = item;
-
-      const expandedTableItems = [];
-      const fullGroup = { ...group, ...repeatedValues };
-
-      for (const fieldName in fullGroup) {
-        if (fullGroup.hasOwnProperty(fieldName)) {
-          const fieldValue = fullGroup[fieldName];
-          expandedTableItems.push({
-            fieldName: `${fieldName}`,
-            fieldValue: `${fullGroup[fieldName]}`,
-            ...(changePoints.find(
-              (changePoint) =>
-                (changePoint.fieldName === fieldName ||
-                  changePoint.fieldName === `${fieldName}.keyword`) &&
-                (changePoint.fieldValue === fieldValue ||
-                  changePoint.fieldValue === `${fieldValue}.keyword`)
-            ) ?? {}),
-          });
-        }
-      }
-
       itemIdToExpandedRowMapValues[item.id] = (
         <SpikeAnalysisTable
-          changePoints={expandedTableItems as ChangePoint[]}
+          significantTerms={item.groupItemsSortedByUniqueness.reduce<SignificantTerm[]>(
+            (p, groupItem) => {
+              const st = significantTerms.find(
+                (d) => d.fieldName === groupItem.fieldName && d.fieldValue === groupItem.fieldValue
+              );
+
+              if (st !== undefined) {
+                p.push({
+                  ...st,
+                  unique: (groupItem.duplicate ?? 0) <= 1,
+                });
+              }
+
+              return p;
+            },
+            []
+          )}
           loading={loading}
-          dataViewId={dataViewId}
+          isExpandedRow
+          dataView={dataView}
+          timeRangeMs={timeRangeMs}
+          searchQuery={searchQuery}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
-  const { application, share, data } = useAiopsAppContext();
-
-  const discoverLocator = useMemo(
-    () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
-    [share.url.locators]
-  );
-
-  const discoverUrlError = useMemo(() => {
-    if (!application.capabilities.discover?.show) {
-      const discoverNotEnabled = i18n.translate(
-        'xpack.aiops.spikeAnalysisTable.discoverNotEnabledErrorMessage',
-        {
-          defaultMessage: 'Discover is not enabled',
-        }
-      );
-
-      return discoverNotEnabled;
-    }
-    if (!discoverLocator) {
-      const discoverLocatorMissing = i18n.translate(
-        'xpack.aiops.spikeAnalysisTable.discoverLocatorMissingErrorMessage',
-        {
-          defaultMessage: 'No locator for Discover detected',
-        }
-      );
-
-      return discoverLocatorMissing;
-    }
-    if (!dataViewId) {
-      const autoGeneratedDiscoverLinkError = i18n.translate(
-        'xpack.aiops.spikeAnalysisTable.autoGeneratedDiscoverLinkErrorMessage',
-        {
-          defaultMessage: 'Unable to link to Discover; no data view exists for this index',
-        }
-      );
-
-      return autoGeneratedDiscoverLinkError;
-    }
-  }, [application.capabilities.discover?.show, dataViewId, discoverLocator]);
-
-  const generateDiscoverUrl = async (groupTableItem: GroupTableItem) => {
-    if (discoverLocator !== undefined) {
-      const url = await discoverLocator.getRedirectUrl({
-        indexPatternId: dataViewId,
-        timeRange: data.query.timefilter.timefilter.getTime(),
-        filters: data.query.filterManager.getFilters(),
-        query: {
-          language: SEARCH_QUERY_LANGUAGE.KUERY,
-          query: [
-            ...Object.entries(groupTableItem.group).map(
-              ([fieldName, fieldValue]) =>
-                `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
-            ),
-            ...Object.entries(groupTableItem.repeatedValues).map(
-              ([fieldName, fieldValue]) =>
-                `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
-            ),
-          ].join(' AND '),
-        },
-      });
-
-      return url;
-    }
-  };
+  const copyToClipBoardAction = useCopyToClipboardAction();
+  const viewInDiscoverAction = useViewInDiscoverAction(dataViewId);
+  const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataViewId);
 
   const columns: Array<EuiBasicTableColumn<GroupTableItem>> = [
     {
@@ -238,7 +176,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupColumnTooltip',
             {
               defaultMessage:
-                'Displays field/value pairs unique to the group. Expand row to see all field/value pairs.',
+                'Displays up to {maxItemCount} group items sorted by uniqueness and document count. Expand row to see all field/value pairs.',
+              values: { maxItemCount: MAX_GROUP_BADGES },
             }
           )}
         >
@@ -251,58 +190,58 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           </>
         </EuiToolTip>
       ),
-      render: (_, { group, repeatedValues }) => {
+      render: (_, { uniqueItemsCount, groupItemsSortedByUniqueness }) => {
         const valuesBadges = [];
-        const hasExtraBadges = Object.keys(group).length > MAX_GROUP_BADGES;
 
-        for (const fieldName in group) {
-          if (group.hasOwnProperty(fieldName)) {
-            if (valuesBadges.length === MAX_GROUP_BADGES) break;
-            valuesBadges.push(
-              <>
-                <EuiBadge
-                  key={`${fieldName}-id`}
-                  data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
-                  color="hollow"
-                >
-                  <span>{`${fieldName}: `}</span>
-                  <span style={{ color: visColors[2] }}>{`${group[fieldName]}`}</span>
-                </EuiBadge>
-                <EuiSpacer size="xs" />
-              </>
-            );
-          }
-        }
-        if (Object.keys(repeatedValues).length > 0 || hasExtraBadges) {
+        for (const groupItem of groupItemsSortedByUniqueness) {
+          const { fieldName, fieldValue, duplicate } = groupItem;
+          if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
-            <>
-              <EuiBadge
-                key={`$more-id`}
-                data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
-                color="hollow"
-              >
-                {hasExtraBadges ? (
-                  <>
-                    <FormattedMessage
-                      id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                      defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}}"
-                      values={{ count: Object.keys(group).length - MAX_GROUP_BADGES }}
-                    />
-                    <br />
-                  </>
-                ) : null}
-                {Object.keys(repeatedValues).length > 0 ? (
-                  <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreRepeatedLabel"
-                    defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}} also appearing in other groups"
-                    values={{ count: Object.keys(repeatedValues).length }}
-                  />
-                ) : null}
+            <span key={`${fieldName}-id`}>
+              <EuiBadge data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge" color="hollow">
+                <span>
+                  {(duplicate ?? 0) <= 1 ? '* ' : ''}
+                  {`${fieldName}: `}
+                </span>
+                <span style={{ color: visColors[2] }}>{`${fieldValue}`}</span>
               </EuiBadge>
               <EuiSpacer size="xs" />
-            </>
+            </span>
           );
         }
+
+        if (groupItemsSortedByUniqueness.length > MAX_GROUP_BADGES) {
+          valuesBadges.push(
+            <EuiText
+              key={`group-info-id`}
+              data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupInfo"
+              color="subdued"
+              size="xs"
+            >
+              <FormattedMessage
+                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupItemsInfo"
+                defaultMessage="Showing {valuesBadges} out of {count} items."
+                values={{
+                  count: groupItemsSortedByUniqueness.length,
+                  valuesBadges: valuesBadges.length,
+                }}
+              />
+              {uniqueItemsCount > MAX_GROUP_BADGES ? (
+                <>
+                  {' '}
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupUniqueItemsInfo"
+                    defaultMessage="{count, plural, one {# item} other {# items}} unique to this group."
+                    values={{
+                      count: uniqueItemsCount,
+                    }}
+                  />
+                </>
+              ) : null}
+            </EuiText>
+          );
+        }
+
         return valuesBadges;
       },
       sortable: false,
@@ -320,7 +259,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
             {
               defaultMessage:
-                'A visual representation of the impact of the group on the message rate difference',
+                'A visual representation of the impact of the group on the message rate difference.',
             }
           )}
         >
@@ -343,6 +282,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               defaultMessage: 'Group',
             }
           )}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
         />
       ),
       sortable: false,
@@ -369,7 +310,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueColumnTooltip',
             {
               defaultMessage:
-                'The significance of changes in the frequency of values; lower values indicate greater change',
+                'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
             }
           )}
         >
@@ -419,26 +360,13 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     },
     {
       'data-test-subj': 'aiOpsSpikeAnalysisTableColumnAction',
-      name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.spikeAnalysisGroupsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
       actions: [
-        {
-          name: () => (
-            <EuiToolTip content={discoverUrlError ? discoverUrlError : viewInDiscoverMessage}>
-              <EuiIcon type="discoverApp" />
-            </EuiToolTip>
-          ),
-          description: viewInDiscoverMessage,
-          type: 'button',
-          onClick: async (tableItem) => {
-            const openInDiscoverUrl = await generateDiscoverUrl(tableItem);
-            if (typeof openInDiscoverUrl === 'string') {
-              await application.navigateToUrl(openInDiscoverUrl);
-            }
-          },
-          enabled: () => discoverUrlError === undefined,
-        },
+        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+        copyToClipBoardAction,
       ],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'top',
@@ -446,13 +374,17 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   ];
 
   const onChange = useCallback((tableSettings) => {
-    const { index, size } = tableSettings.page;
-    const { field, direction } = tableSettings.sort;
+    if (tableSettings.page) {
+      const { index, size } = tableSettings.page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
 
-    setPageIndex(index);
-    setPageSize(size);
-    setSortField(field);
-    setSortDirection(direction);
+    if (tableSettings.sort) {
+      const { field, direction } = tableSettings.sort;
+      setSortField(field);
+      setSortDirection(direction);
+    }
   }, []);
 
   const { pagination, pageOfItems, sorting } = useMemo(() => {
@@ -460,14 +392,25 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     const itemCount = groupTableItems?.length ?? 0;
 
     let items = groupTableItems ?? [];
-    items = sortBy(groupTableItems, (item) => {
-      if (item && typeof item[sortField] === 'string') {
-        // @ts-ignore Object is possibly null or undefined
-        return item[sortField].toLowerCase();
-      }
-      return item[sortField];
-    });
-    items = sortDirection === 'asc' ? items : items.reverse();
+
+    const sortIteratees = [
+      (item: GroupTableItem) => {
+        if (item && typeof item[sortField] === 'string') {
+          // @ts-ignore Object is possibly null or undefined
+          return item[sortField].toLowerCase();
+        }
+        return item[sortField];
+      },
+    ];
+    const sortDirections = [sortDirection];
+
+    // Only if the table is sorted by p-value, add a secondary sort by doc count.
+    if (sortField === 'pValue') {
+      sortIteratees.push((item: GroupTableItem) => item.docCount);
+      sortDirections.push(sortDirection);
+    }
+
+    items = orderBy(groupTableItems, sortIteratees, sortDirections);
 
     return {
       pageOfItems: items.slice(pageStart, pageStart + pageSize),
@@ -513,7 +456,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       onChange={onChange}
-      pagination={pagination}
+      pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}
       loading={false}
       sorting={sorting as EuiTableSortingType<GroupTableItem>}
       rowProps={(group) => {

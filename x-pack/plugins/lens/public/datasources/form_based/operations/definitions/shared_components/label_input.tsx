@@ -8,7 +8,7 @@
 import React, { useRef } from 'react';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '../../../../../shared_components';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 
 export const LabelInput = ({
   value,
@@ -27,7 +27,10 @@ export const LabelInput = ({
   dataTestSubj?: string;
   compressed?: boolean;
 }) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
+  const { inputValue, handleInputChange } = useDebouncedValue(
+    { value, onChange },
+    { allowFalsyValue: true }
+  );
   const localKeyHold = useRef(false);
 
   return (

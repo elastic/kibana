@@ -9,6 +9,8 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
@@ -17,9 +19,8 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-
-import { AppState } from '../services/discover_state';
-import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram';
+import { isTextBasedQuery } from './is_text_based_query';
+import { getValidViewMode } from './get_valid_view_mode';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -48,9 +49,9 @@ export function getStateDefaults({
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, uiSettings);
-  const chartHidden = storage.get(CHART_HIDDEN_KEY);
+  const chartHidden = getChartHidden(storage, 'discover');
 
-  const defaultState: AppState = {
+  const defaultState: DiscoverAppState = {
     query,
     sort: !sort.length
       ? getDefaultSort(
@@ -62,7 +63,7 @@ export function getStateDefaults({
     columns,
     index: dataView?.id,
     interval: 'auto',
-    filters: cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'],
+    filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
@@ -82,7 +83,10 @@ export function getStateDefaults({
     defaultState.rowHeight = savedSearch.rowHeight;
   }
   if (savedSearch.viewMode) {
-    defaultState.viewMode = savedSearch.viewMode;
+    defaultState.viewMode = getValidViewMode({
+      viewMode: savedSearch.viewMode,
+      isTextBasedQueryMode: isTextBasedQuery(query),
+    });
   }
   if (savedSearch.hideAggregatedPreview) {
     defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;

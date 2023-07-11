@@ -14,7 +14,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
   );
 
   return {
-    testFiles: [require.resolve('./apis')],
     services,
     servers: xPackFunctionalTestsConfig.get('servers'),
     security: xPackFunctionalTestsConfig.get('security'),
@@ -31,9 +30,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
-        '--xpack.uptime.service.password=test',
-        '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-        '--xpack.uptime.service.devUrl=mockDevUrl',
         '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       ],
     },

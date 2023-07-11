@@ -35,7 +35,7 @@ export interface Exception {
   stacktrace?: Stackframe[];
 }
 
-interface Log {
+export interface Log {
   message: string;
   stacktrace?: Stackframe[];
 }
@@ -56,6 +56,7 @@ export interface ErrorRaw extends APMBaseDoc {
     exception?: Exception[];
     page?: Page; // special property for RUM: shared by error and transaction
     log?: Log;
+    stack_trace?: string;
     custom?: Record<string, unknown>;
   };
 

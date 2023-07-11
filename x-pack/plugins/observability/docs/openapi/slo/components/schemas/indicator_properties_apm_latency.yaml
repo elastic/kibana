@@ -1,0 +1,51 @@
+title: APM latency
+required:
+  - type
+  - params
+description: Defines properties for the APM latency indicator type
+type: object
+properties:
+  params:
+    description: An object containing the indicator parameters.
+    type: object
+    nullable: false
+    required:
+      - service
+      - environment
+      - transactionType
+      - transactionName
+      - index
+      - threshold
+    properties:
+      service:
+        description: The APM service name
+        type: string
+        example: o11y-app
+      environment:
+        description: The APM service environment or "*"
+        type: string
+        example: production
+      transactionType:
+        description: The APM transaction type or "*"
+        type: string
+        example: request
+      transactionName:
+        description: The APM transaction name or "*"
+        type: string
+        example: GET /my/api
+      filter:
+        description: KQL query used for filtering the data
+        type: string
+        example: 'service.foo : "bar"'
+      index: 
+        description: The index used by APM metrics
+        type: string
+        example: metrics-apm*,apm*
+      threshold:
+        description: The latency threshold in milliseconds
+        type: number
+        example: 250
+  type:
+    description: The type of indicator.
+    type: string
+    example: sli.apm.transactionDuration

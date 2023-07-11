@@ -13,7 +13,61 @@ import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elastics
 import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
 import { getEcsResponseLog } from './get_ecs_response_log';
+
+/**
+ * The logger-relevant request meta of an ES request
+ */
+export interface RequestDebugMeta {
+  /**
+   * The requested method
+   */
+  method: string;
+  /**
+   * The requested endpoint + querystring
+   */
+  url: string;
+  /**
+   * The request body (it may be redacted)
+   */
+  body: string;
+  /**
+   * The status code of the response
+   */
+  statusCode: number | null;
+}
+
+/**
+ * Known list of APIs that should redact the request body in the logs
+ */
+const APIS_TO_REDACT_IN_LOGS: ElasticsearchApiToRedactInLogs[] = [
+  { path: '/_security/' },
+  { path: '/_xpack/security/' },
+  { method: 'POST', path: '/_reindex' },
+  { method: 'PUT', path: '/_watcher/watch' },
+  { method: 'PUT', path: '/_xpack/watcher/watch' },
+  { method: 'PUT', path: '/_snapshot/' },
+  { method: 'PUT', path: '/_logstash/pipeline/' },
+  { method: 'POST', path: '/_nodes/reload_secure_settings' },
+  { method: 'POST', path: /\/_nodes\/.+\/reload_secure_settings/ },
+];
+
+function shouldRedactBodyInLogs(
+  requestDebugMeta: RequestDebugMeta,
+  extendedList: ElasticsearchApiToRedactInLogs[] = []
+) {
+  return [...APIS_TO_REDACT_IN_LOGS, ...extendedList].some(({ path, method }) => {
+    if (!method || method === requestDebugMeta.method) {
+      if (typeof path === 'string') {
+        return requestDebugMeta.url.includes(path);
+      } else {
+        return path.test(requestDebugMeta.url);
+      }
+    }
+    return false;
+  });
+}
 
 const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
   if (qs === undefined || typeof qs === 'string') {
@@ -58,35 +112,43 @@ function getContentLength(headers?: IncomingHttpHeaders): number | undefined {
  *
  * so it could be copy-pasted into the Dev console
  */
-function getResponseMessage(event: DiagnosticResult, bytesMsg: string): string {
-  const errorMeta = getRequestDebugMeta(event);
-  const body = errorMeta.body ? `\n${errorMeta.body}` : '';
-  return `${errorMeta.statusCode}${bytesMsg}\n${errorMeta.method} ${errorMeta.url}${body}`;
+function getResponseMessage(
+  event: DiagnosticResult,
+  bytesMsg: string,
+  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[]
+): string {
+  const debugMeta = getRequestDebugMeta(event, apisToRedactInLogs);
+  const body = debugMeta.body ? `\n${debugMeta.body}` : '';
+  return `${debugMeta.statusCode}${bytesMsg}\n${debugMeta.method} ${debugMeta.url}${body}`;
 }
 
 /**
  * Returns stringified debug information from an Elasticsearch request event
  * useful for logging in case of an unexpected failure.
  */
-export function getRequestDebugMeta(event: DiagnosticResult): {
-  url: string;
-  body: string;
-  statusCode: number | null;
-  method: string;
-} {
+export function getRequestDebugMeta(
+  event: DiagnosticResult,
+  apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[]
+): RequestDebugMeta {
   const params = event.meta.request.params;
   // definition is wrong, `params.querystring` can be either a string or an object
   const querystring = convertQueryString(params.querystring);
-  return {
+
+  const debugMeta: RequestDebugMeta = {
     url: `${params.path}${querystring ? `?${querystring}` : ''}`,
     body: params.body ? `${ensureString(params.body)}` : '',
     method: params.method,
     statusCode: event.statusCode!,
   };
+
+  // Some known APIs may contain sensitive information in the request body that we don't want to expose to the logs.
+  return shouldRedactBodyInLogs(debugMeta, apisToRedactInLogs)
+    ? { ...debugMeta, body: '[redacted]' }
+    : debugMeta;
 }
 
 /** HTTP Warning headers have the following syntax:
- * <warn-code> <warn-agent> <warn-text> (where warn-code is a three digit number)
+ * <warn-code> <warn-agent> <warn-text> (where warn-code is a three-digit number)
  * This function tests if a warning comes from an Elasticsearch warn-agent
  * */
 const isEsWarning = (warning: string) => /\d\d\d Elasticsearch-/.test(warning);
@@ -95,10 +157,12 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   logger,
   client,
   type,
+  apisToRedactInLogs,
 }: {
   logger: Logger;
   client: Client;
   type: string;
+  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 }) => {
   const queryLogger = logger.get('query', type);
   const deprecationLogger = logger.get('deprecation');
@@ -111,12 +175,14 @@ export const instrumentEsQueryAndDeprecationLogger = ({
       let queryMsg = '';
       if (error) {
         if (error instanceof errors.ResponseError) {
-          queryMsg = `${getResponseMessage(event, bytesMsg)} ${getErrorMessage(error)}`;
+          queryMsg = `${getResponseMessage(event, bytesMsg, apisToRedactInLogs)} ${getErrorMessage(
+            error
+          )}`;
         } else {
           queryMsg = getErrorMessage(error);
         }
       } else {
-        queryMsg = getResponseMessage(event, bytesMsg);
+        queryMsg = getResponseMessage(event, bytesMsg, apisToRedactInLogs);
       }
 
       queryLogger.debug(queryMsg, meta);
@@ -137,7 +203,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
             ? 'kibana'
             : 'user';
 
-        // Strip the first 5 stack trace lines as these are irrelavent to finding the call site
+        // Strip the first 5 stack trace lines as these are irrelevant to finding the call site
         const stackTrace = new Error().stack?.split('\n').slice(5).join('\n');
 
         deprecationLogger.debug(

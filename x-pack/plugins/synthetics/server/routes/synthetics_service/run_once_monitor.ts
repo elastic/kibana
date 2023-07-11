@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { MonitorFields } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
-import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
-  path: API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
   validate: {
     body: schema.any(),
     params: schema.object({
@@ -26,7 +26,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const validationResult = validateMonitor(monitor);
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
@@ -37,16 +37,15 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
 
-    const errors = await syntheticsService.runOnceConfigs([
-      formatHeartbeatRequest({
-        // making it enabled, even if it's disabled in the UI
-        monitor: { ...validationResult.decodedMonitor, enabled: true },
-        monitorId,
-        heartbeatId: monitorId,
-        runOnce: true,
-        params: paramsBySpace[spaceId],
-      }),
-    ]);
+    const errors = await syntheticsService.runOnceConfigs({
+      // making it enabled, even if it's disabled in the UI
+      monitor: { ...validationResult.decodedMonitor, enabled: true },
+      configId: monitorId,
+      heartbeatId: monitorId,
+      runOnce: true,
+      testRunId: monitorId,
+      params: paramsBySpace[spaceId],
+    });
 
     if (errors) {
       return { errors };

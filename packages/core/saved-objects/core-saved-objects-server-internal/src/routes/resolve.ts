@@ -7,17 +7,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
+import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest } from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerResolveRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/resolve/{type}/{id}',
@@ -29,13 +35,23 @@ export const registerResolveRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/resolve/{type}/{id}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { savedObjects } = await context.core;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsResolve({ request: req }).catch(() => {});
-
-      const result = await savedObjects.client.resolve(type, id);
+      if (!allowHttpApiAccess) {
+        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+      }
+      const result = await savedObjects.client.resolve(type, id, {
+        migrationVersionCompatibility: 'compatible',
+      });
       return res.ok({ body: result });
     })
   );

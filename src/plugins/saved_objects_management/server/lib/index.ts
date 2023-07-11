@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { toSavedObjectWithMeta } from './to_saved_object_with_meta';
 export { injectMetaAttributes } from './inject_meta_attributes';
 export { findAll } from './find_all';
 export { findRelationships } from './find_relationships';

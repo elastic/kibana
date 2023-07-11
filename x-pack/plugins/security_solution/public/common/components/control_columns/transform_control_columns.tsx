@@ -10,6 +10,8 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from 
 import type { ComponentType } from 'react';
 import React from 'react';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { addBuildingBlockStyle, getPageRowIndex } from '@kbn/securitysolution-data-table';
+import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type {
   BrowserFields,
   TimelineItem,
@@ -22,10 +24,7 @@ import type {
   ControlColumnProps,
   OnRowSelected,
   OnSelectAll,
-  SortColumnTable,
 } from '../../../../common/types';
-import { addBuildingBlockStyle } from '../data_table/helpers';
-import { getPageRowIndex } from '../data_table/pagination';
 import { RowAction } from './row_action';
 
 const EmptyHeaderCellRender: ComponentType = () => null;
@@ -34,7 +33,6 @@ export interface TransformColumnsProps {
   columnHeaders: ColumnHeaderOptions[];
   controlColumns: ControlColumnProps[];
   data: TimelineItem[];
-  disabledCellActions: string[];
   fieldBrowserOptions?: FieldBrowserOptions;
   loadingEventIds: string[];
   onRowSelected: OnRowSelected;
@@ -73,8 +71,8 @@ export const transformControlColumns = ({
   theme,
   setEventsLoading,
   setEventsDeleted,
-}: TransformColumnsProps): EuiDataGridControlColumn[] =>
-  controlColumns.map(
+}: TransformColumnsProps): EuiDataGridControlColumn[] => {
+  return controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,
       headerCellRender: () => {
@@ -123,7 +121,7 @@ export const transformControlColumns = ({
             columnId={columnId ?? ''}
             columnHeaders={columnHeaders}
             controlColumn={controlColumns[i]}
-            data={data}
+            data={data[pageRowIndex]}
             disabled={false}
             index={i}
             isDetails={isDetails}
@@ -150,3 +148,4 @@ export const transformControlColumns = ({
       width,
     })
   );
+};

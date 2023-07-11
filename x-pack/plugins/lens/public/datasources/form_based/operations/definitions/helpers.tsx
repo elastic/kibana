@@ -6,23 +6,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isEqual } from 'lodash';
+import { LastValueColumn } from '@kbn/visualizations-plugin/common';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '.';
+import {
+  type FieldBasedOperationErrorMessage,
+  type GenericIndexPatternColumn,
+  operationDefinitionMap,
+} from '.';
 import {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import type { FormBasedLayer } from '../../types';
+import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
-  column: FieldBasedIndexPatternColumn,
+  layer: FormBasedLayer,
+  columnId: string,
   indexPattern?: IndexPattern
-) {
+): FieldBasedOperationErrorMessage[] | undefined {
   if (!indexPattern) {
     return;
   }
+
+  const column = layer.columns[columnId] as FieldBasedIndexPatternColumn;
   const { operationType } = column;
   const operationDefinition = operationType ? operationDefinitionMap[operationType] : undefined;
   const fieldNames =
@@ -55,18 +66,11 @@ export function getInvalidFieldMessage(
     // Missing fields have priority over wrong type
     // This has been moved as some transferable checks also perform exist checks internally and fail eventually
     // but that would make type mismatch error appear in place of missing fields scenarios
-    const missingFields = fields.map((field, i) => (field ? null : fieldNames[i])).filter(Boolean);
+    const missingFields = fields
+      .map((field, i) => (field ? null : fieldNames[i]))
+      .filter(Boolean) as string[];
     if (missingFields.length) {
-      return [
-        i18n.translate('xpack.lens.indexPattern.fieldsNotFound', {
-          defaultMessage:
-            '{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found',
-          values: {
-            count: missingFields.length,
-            missingFields: missingFields.join(', '),
-          },
-        }),
-      ];
+      return [generateMissingFieldMessage(missingFields, columnId)];
     }
     if (isWrongType) {
       // as fallback show all the fields as invalid?
@@ -88,15 +92,45 @@ export function getInvalidFieldMessage(
   return undefined;
 }
 
+export const generateMissingFieldMessage = (
+  missingFields: string[],
+  columnId: string
+): FieldBasedOperationErrorMessage => ({
+  message: (
+    <FormattedMessage
+      id="xpack.lens.indexPattern.fieldsNotFound"
+      defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+      values={{
+        count: missingFields.length,
+        missingFields: (
+          <>
+            {missingFields.map((field, index) => (
+              <Fragment key={field}>
+                <strong>{field}</strong>
+                {index + 1 === missingFields.length ? '' : ', '}
+              </Fragment>
+            ))}
+          </>
+        ),
+      }}
+    />
+  ),
+  displayLocations: [
+    { id: 'toolbar' },
+    { id: 'dimensionButton', dimensionId: columnId },
+    { id: 'embeddableBadge' },
+  ],
+});
+
 export function combineErrorMessages(
-  errorMessages: Array<string[] | undefined>
-): string[] | undefined {
-  const messages = (errorMessages.filter(Boolean) as string[][]).flat();
+  errorMessages: Array<FieldBasedOperationErrorMessage[] | undefined>
+): FieldBasedOperationErrorMessage[] | undefined {
+  const messages = (errorMessages.filter(Boolean) as FieldBasedOperationErrorMessage[][]).flat();
   return messages.length ? messages : undefined;
 }
 
-export function getSafeName(name: string, indexPattern: IndexPattern): string {
-  const field = indexPattern.getFieldByName(name);
+export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
+  const field = indexPattern?.getFieldByName(name);
   return field
     ? field.displayName
     : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -158,11 +192,25 @@ export function getFormatFromPreviousColumn(
     : undefined;
 }
 
+export function getExistsFilter(field: string) {
+  return {
+    query: `${field}: *`,
+    language: 'kuery',
+  };
+}
+
 export function getFilter(
   previousColumn: GenericIndexPatternColumn | undefined,
   columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
 ) {
   let filter = previousColumn?.filter;
+  if (
+    previousColumn &&
+    isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn) &&
+    isEqual(filter, getExistsFilter((previousColumn as LastValueColumn)?.sourceField))
+  ) {
+    return;
+  }
   if (columnParams) {
     if ('kql' in columnParams) {
       filter = { query: columnParams.kql ?? '', language: 'kuery' };
@@ -171,4 +219,8 @@ export function getFilter(
     }
   }
   return filter;
+}
+
+export function isMetricCounterField(field?: IndexPatternField) {
+  return field?.timeSeriesMetric === 'counter';
 }

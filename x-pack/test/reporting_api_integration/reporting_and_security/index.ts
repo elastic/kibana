@@ -23,6 +23,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./security_roles_privileges'));
     loadTestFile(require.resolve('./download_csv_dashboard'));
     loadTestFile(require.resolve('./generate_csv_discover'));
+    loadTestFile(require.resolve('./csv_v2'));
     loadTestFile(require.resolve('./network_policy'));
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./usage'));

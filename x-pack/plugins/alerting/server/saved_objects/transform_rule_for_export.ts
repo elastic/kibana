@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
+import { getRuleExecutionStatusPendingAttributes } from '../lib/rule_execution_status';
 import { RawRule } from '../types';
 
 export function transformRulesForExport(rules: SavedObject[]): Array<SavedObject<RawRule>> {
@@ -26,8 +26,9 @@ function transformRuleForExport(
       enabled: false,
       apiKey: null,
       apiKeyOwner: null,
+      apiKeyCreatedByUser: null,
       scheduledTaskId: null,
-      executionStatus: getRuleExecutionStatusPending(exportDate),
+      executionStatus: getRuleExecutionStatusPendingAttributes(exportDate),
     },
   };
 }

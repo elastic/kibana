@@ -13,6 +13,11 @@ export type {
   StepStatus,
   GuideStep,
   GuideStatus,
+  GuideConfig,
+  StepConfig,
+  StepDescriptionWithLink,
+  GuideParams,
 } from './src/types';
-export { GuideCard, InfrastructureLinkCard } from './src/components/landing_page';
-export type { GuideCardUseCase } from './src/components/landing_page';
+export { GuideCards, GuideFilters } from './src/components/landing_page';
+export type { GuideFilterValues } from './src/components/landing_page';
+export { testGuideId, testGuideConfig } from './src/common/test_guide_config';

@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from './translations';
 
 import type { ConnectorFieldsProps } from '../types';
 import type { ServiceNowITSMFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
-import type { Fields, Choice } from './types';
+import type { Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 import { DeprecatedCallout } from '../deprecated_callout';
 
-const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
+const choicesToGet = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
   urgency: [],
   severity: [],
@@ -28,248 +32,184 @@ const defaultFields: Fields = {
   subcategory: [],
 };
 
-const ServiceNowITSMFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsProps<ServiceNowITSMFieldsType>
-> =
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
-  ({ isEdit = true, fields, connector, onChange }) => {
-    const init = useRef(true);
-    const {
-      severity = null,
-      urgency = null,
-      impact = null,
-      category = null,
-      subcategory = null,
-    } = fields ?? {};
-    const { http, notifications } = useKibana().services;
-    const [choices, setChoices] = useState<Fields>(defaultFields);
-    const showConnectorWarning = connector.isDeprecated;
+const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
+  connector,
+}) => {
+  const form = useFormContext();
+  const [{ fields }] = useFormData<{ fields: ServiceNowITSMFieldsType }>();
 
-    const categoryOptions = useMemo(
-      () => choicesToEuiOptions(choices.category),
-      [choices.category]
-    );
-    const urgencyOptions = useMemo(() => choicesToEuiOptions(choices.urgency), [choices.urgency]);
-    const severityOptions = useMemo(
-      () => choicesToEuiOptions(choices.severity),
-      [choices.severity]
-    );
-    const impactOptions = useMemo(() => choicesToEuiOptions(choices.impact), [choices.impact]);
+  const { category = null } = fields ?? {};
 
-    const subcategoryOptions = useMemo(
-      () =>
-        choicesToEuiOptions(
-          choices.subcategory.filter((choice) => choice.dependent_value === category)
-        ),
-      [choices.subcategory, category]
-    );
+  const { http } = useKibana().services;
+  const showConnectorWarning = connector.isDeprecated;
 
-    const listItems = useMemo(
-      () => [
-        ...(urgency != null && urgency.length > 0
-          ? [
-              {
-                title: i18n.URGENCY,
-                description: urgencyOptions.find((option) => `${option.value}` === urgency)?.text,
-              },
-            ]
-          : []),
-        ...(severity != null && severity.length > 0
-          ? [
-              {
-                title: i18n.SEVERITY,
-                description: severityOptions.find((option) => `${option.value}` === severity)?.text,
-              },
-            ]
-          : []),
-        ...(impact != null && impact.length > 0
-          ? [
-              {
-                title: i18n.IMPACT,
-                description: impactOptions.find((option) => `${option.value}` === impact)?.text,
-              },
-            ]
-          : []),
-        ...(category != null && category.length > 0
-          ? [
-              {
-                title: i18n.CATEGORY,
-                description: categoryOptions.find((option) => `${option.value}` === category)?.text,
-              },
-            ]
-          : []),
-        ...(subcategory != null && subcategory.length > 0
-          ? [
-              {
-                title: i18n.SUBCATEGORY,
-                description: subcategoryOptions.find((option) => `${option.value}` === subcategory)
-                  ?.text,
-              },
-            ]
-          : []),
-      ],
-      [
-        category,
-        categoryOptions,
-        impact,
-        impactOptions,
-        severity,
-        severityOptions,
-        subcategory,
-        subcategoryOptions,
-        urgency,
-        urgencyOptions,
-      ]
-    );
+  const {
+    isLoading,
+    isFetching,
+    data: choicesData,
+  } = useGetChoices({
+    http,
+    connector,
+    fields: choicesToGet,
+  });
 
-    const onChoicesSuccess = (values: Choice[]) => {
-      setChoices(
-        values.reduce(
-          (acc, value) => ({
-            ...acc,
-            [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
-          }),
-          defaultFields
-        )
-      );
-    };
+  const choices = choicesData?.data ?? [];
+  const isLoadingChoices = isLoading || isFetching;
 
-    const { isLoading: isLoadingChoices } = useGetChoices({
-      http,
-      toastNotifications: notifications.toasts,
-      connector,
-      fields: useGetChoicesFields,
-      onSuccess: onChoicesSuccess,
-    });
+  const choicesFormatted = choices.reduce(
+    (acc, value) => ({
+      ...acc,
+      [value.element]: [...(acc[value.element] != null ? acc[value.element] : []), value],
+    }),
+    defaultFields
+  );
 
-    const onChangeCb = useCallback(
-      (
-        key: keyof ServiceNowITSMFieldsType,
-        value: ServiceNowITSMFieldsType[keyof ServiceNowITSMFieldsType]
-      ) => {
-        onChange({ ...fields, [key]: value });
-      },
-      [fields, onChange]
-    );
+  const categoryOptions = useMemo(
+    () => choicesToEuiOptions(choicesFormatted.category),
+    [choicesFormatted.category]
+  );
+  const urgencyOptions = useMemo(
+    () => choicesToEuiOptions(choicesFormatted.urgency),
+    [choicesFormatted.urgency]
+  );
+  const severityOptions = useMemo(
+    () => choicesToEuiOptions(choicesFormatted.severity),
+    [choicesFormatted.severity]
+  );
+  const impactOptions = useMemo(
+    () => choicesToEuiOptions(choicesFormatted.impact),
+    [choicesFormatted.impact]
+  );
 
-    // Set field at initialization
-    useEffect(() => {
-      if (init.current) {
-        init.current = false;
-        onChange({ urgency, severity, impact, category, subcategory });
-      }
-    }, [category, impact, onChange, severity, subcategory, urgency]);
+  const subcategoryOptions = useMemo(
+    () =>
+      choicesToEuiOptions(
+        choicesFormatted.subcategory.filter((choice) => choice.dependent_value === category)
+      ),
+    [choicesFormatted.subcategory, category]
+  );
 
-    return (
-      <>
-        {showConnectorWarning && (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <DeprecatedCallout />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        {isEdit ? (
-          <div data-test-subj="connector-fields-sn-itsm">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow fullWidth label={i18n.URGENCY}>
-                  <EuiSelect
-                    fullWidth
-                    data-test-subj="urgencySelect"
-                    options={urgencyOptions}
-                    value={urgency ?? undefined}
-                    isLoading={isLoadingChoices}
-                    disabled={isLoadingChoices}
-                    hasNoInitialSelection
-                    onChange={(e) => onChangeCb('urgency', e.target.value)}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow fullWidth label={i18n.SEVERITY}>
-                  <EuiSelect
-                    fullWidth
-                    data-test-subj="severitySelect"
-                    options={severityOptions}
-                    value={severity ?? undefined}
-                    isLoading={isLoadingChoices}
-                    disabled={isLoadingChoices}
-                    hasNoInitialSelection
-                    onChange={(e) => onChangeCb('severity', e.target.value)}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow fullWidth label={i18n.IMPACT}>
-                  <EuiSelect
-                    fullWidth
-                    data-test-subj="impactSelect"
-                    options={impactOptions}
-                    value={impact ?? undefined}
-                    isLoading={isLoadingChoices}
-                    disabled={isLoadingChoices}
-                    hasNoInitialSelection
-                    onChange={(e) => onChangeCb('impact', e.target.value)}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow fullWidth label={i18n.CATEGORY}>
-                  <EuiSelect
-                    fullWidth
-                    data-test-subj="categorySelect"
-                    options={categoryOptions}
-                    value={category ?? undefined}
-                    isLoading={isLoadingChoices}
-                    disabled={isLoadingChoices}
-                    hasNoInitialSelection
-                    onChange={(e) =>
-                      onChange({ ...fields, category: e.target.value, subcategory: null })
-                    }
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {subcategoryOptions?.length > 0 ? (
-                  <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
-                    <EuiSelect
-                      fullWidth
-                      data-test-subj="subcategorySelect"
-                      options={subcategoryOptions}
-                      // Needs an empty string instead of undefined to select the blank option when changing categories
-                      value={subcategory ?? ''}
-                      isLoading={isLoadingChoices}
-                      disabled={isLoadingChoices}
-                      hasNoInitialSelection
-                      onChange={(e) => onChangeCb('subcategory', e.target.value)}
-                    />
-                  </EuiFormRow>
-                ) : null}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        ) : (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <ConnectorCard
-                connectorType={ConnectorTypes.serviceNowITSM}
-                title={connector.name}
-                listItems={listItems}
-                isLoading={false}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </>
-    );
+  const onCategoryChange = () => {
+    form.setFieldValue('fields.subcategory', null);
   };
 
+  return (
+    <>
+      {showConnectorWarning && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <DeprecatedCallout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiFlexGroup data-test-subj="connector-fields-sn-itsm" direction="column" gutterSize="s">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="fields.urgency"
+              component={SelectField}
+              config={{
+                label: i18n.URGENCY,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'urgencySelect',
+                  options: urgencyOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="fields.severity"
+              component={SelectField}
+              config={{
+                label: i18n.SEVERITY,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'severitySelect',
+                  options: severityOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <UseField
+              path="fields.impact"
+              component={SelectField}
+              config={{
+                label: i18n.IMPACT,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'impactSelect',
+                  options: impactOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="fields.category"
+              component={SelectField}
+              config={{
+                label: i18n.CATEGORY,
+              }}
+              onChange={onCategoryChange}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'categorySelect',
+                  options: categoryOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <UseField
+              path="fields.subcategory"
+              component={SelectField}
+              config={{
+                label: i18n.SUBCATEGORY,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'subcategorySelect',
+                  options: subcategoryOptions,
+                  hasNoInitialSelection: true,
+                  fullWidth: true,
+                  disabled: isLoadingChoices,
+                  isLoading: isLoadingChoices,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </>
+  );
+};
+
+ServiceNowITSMFieldsComponent.displayName = 'ServiceNowITSMFields';
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowITSMFieldsComponent as default };

@@ -6,16 +6,18 @@
  */
 
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
+  testFiles?: string[];
 }
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license, disabledPlugins = [] } = options;
+  const { license, disabledPlugins = [], testFiles } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
@@ -31,7 +33,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/apis/`)],
+      testFiles: testFiles ?? [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
         es: config.kibana.api.get('services.es'),
@@ -63,7 +65,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // disable anonymouse access so that we're testing both on and off in different suites
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
+          `--plugin-path=${path.resolve(__dirname, 'plugins/spaces_test_plugin')}`,
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),

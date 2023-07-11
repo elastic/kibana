@@ -67,6 +67,9 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
 
     if (aggs?.hasTimeShifts() && Object.keys(aggs?.getTimeShifts()).length > 1 && aggs.timeRange) {
       const shift = orderAgg.getTimeShift();
+      // The timeRange can be either absolute or relative
+      // We need the absolute/resolved one for moment, so use the helper method
+      const timeRange = aggs.getResolvedTimeRange();
       orderAgg = aggs.createAggConfig(
         {
           type: 'filtered_metric',
@@ -84,11 +87,11 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
                         range: {
                           [aggs.timeFields![0]]: {
                             gte: moment
-                              .tz(aggs.timeRange.from, aggs.timeZone)
+                              .tz(timeRange?.min, aggs.timeZone)
                               .subtract(shift || 0)
                               .toISOString(),
                             lte: moment
-                              .tz(aggs.timeRange.to, aggs.timeZone)
+                              .tz(timeRange?.max, aggs.timeZone)
                               .subtract(shift || 0)
                               .toISOString(),
                           },

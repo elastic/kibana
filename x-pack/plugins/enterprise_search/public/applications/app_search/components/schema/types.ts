@@ -17,6 +17,7 @@ export interface SchemaApiResponse {
   mostRecentIndexJob: IndexJob;
   unconfirmedFields: string[];
   unsearchedUnconfirmedFields: boolean;
+  incompleteFields: string[];
 }
 
 export interface MetaEngineSchemaApiResponse {

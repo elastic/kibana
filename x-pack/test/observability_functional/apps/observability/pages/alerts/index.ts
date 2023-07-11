@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts >', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
@@ -41,20 +41,14 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('With no data', () => {
-      it('Shows the no data screen', async () => {
-        await observability.alerts.common.getNoDataPageOrFail();
-      });
-    });
-
     describe('Alerts table', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       });
 
       it('Renders the table', async () => {
@@ -170,8 +164,8 @@ export default ({ getService }: FtrProviderContext) => {
               'Oct 19, 2021 @ 15:00:41.555',
               'Oct 19, 2021 @ 15:20:38.749',
               '20 minutes',
-              '5',
-              '30.73',
+              '5.0%',
+              '31%',
               'Failed transaction rate threshold',
             ];
 

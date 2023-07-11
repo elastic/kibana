@@ -10,12 +10,14 @@ import {
   buildEsQuery,
   buildQueryFromFilters,
   decorateQuery,
+  Filter,
   fromKueryExpression,
+  Query,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { useDataSource } from '../../../../../contexts/ml';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-import { getQueryFromSavedSearchObject } from '../../../../../util/index_utils';
 
 // `undefined` is used for a non-initialized state
 // `null` is set if no saved search is used
@@ -32,22 +34,27 @@ export function useSavedSearch() {
   const [savedSearchQuery, setSavedSearchQuery] = useState<SavedSearchQuery>(undefined);
   const [savedSearchQueryStr, setSavedSearchQueryStr] = useState<SavedSearchQueryStr>(undefined);
 
-  const mlContext = useMlContext();
-  const { currentSavedSearch, currentDataView, kibanaConfig } = mlContext;
+  const {
+    services: { uiSettings },
+  } = useMlKibana();
+
+  const { selectedDataView, selectedSavedSearch } = useDataSource();
 
   const getQueryData = () => {
     let qry: any = {};
     let qryString;
 
-    if (currentSavedSearch !== null) {
-      const { query, filter } = getQueryFromSavedSearchObject(currentSavedSearch);
+    if (selectedSavedSearch) {
+      // FIXME: Add support for AggregateQuery type #150091
+      const query = selectedSavedSearch.searchSource.getField('query') as Query;
+      const filter = (selectedSavedSearch.searchSource.getField('filter') ?? []) as Filter[];
       const queryLanguage = query.language;
       qryString = query.query;
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
         const ast = fromKueryExpression(qryString);
-        qry = toElasticsearchQuery(ast, currentDataView);
-        const filterQuery = buildQueryFromFilters(filter, currentDataView);
+        qry = toElasticsearchQuery(ast, selectedDataView);
+        const filterQuery = buildQueryFromFilters(filter, selectedDataView);
         if (qry.bool === undefined) {
           qry.bool = {};
           // toElasticsearchQuery may add a single match_all item to the
@@ -71,8 +78,8 @@ export function useSavedSearch() {
         qry.bool.filter = [...qry.bool.filter, ...filterQuery.filter];
         qry.bool.must_not = [...qry.bool.must_not, ...filterQuery.must_not];
       } else {
-        qry = buildEsQuery(currentDataView, [query], filter);
-        decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+        qry = buildEsQuery(selectedDataView, [query], filter);
+        decorateQuery(qry, uiSettings.get('query:queryString:options'));
       }
 
       setSavedSearchQuery(qry);

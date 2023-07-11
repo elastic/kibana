@@ -11,9 +11,10 @@ import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
-import { Route } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
 

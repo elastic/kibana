@@ -10,9 +10,9 @@ import { CaseSeverityRt } from '../case';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const SeverityUserActionPayloadRt = rt.type({ severity: CaseSeverityRt });
+export const SeverityUserActionPayloadRt = rt.strict({ severity: CaseSeverityRt });
 
-export const SeverityUserActionRt = rt.type({
+export const SeverityUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.severity),
   payload: SeverityUserActionPayloadRt,
 });

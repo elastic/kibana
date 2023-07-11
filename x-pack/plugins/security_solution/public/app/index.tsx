@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
@@ -37,17 +36,20 @@ export const renderApp = ({
       theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
-        <Switch>
+        <Routes>
           {subPluginRoutes.map((route, index) => {
             return <Route key={`route-${index}`} {...route} />;
           })}
           <Route>
             <NotFoundPage />
           </Route>
-        </Switch>
+        </Routes>
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element
   );
-  return () => unmountComponentAtNode(element);
+  return () => {
+    services.data.search.session.clear();
+    unmountComponentAtNode(element);
+  };
 };

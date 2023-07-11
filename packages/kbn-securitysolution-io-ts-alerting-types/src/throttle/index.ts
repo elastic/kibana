@@ -13,5 +13,5 @@ export type RuleActionThrottle = t.TypeOf<typeof RuleActionThrottle>;
 export const RuleActionThrottle = t.union([
   t.literal('no_actions'),
   t.literal('rule'),
-  TimeDuration({ allowedUnits: ['h', 'd'] }),
+  TimeDuration({ allowedUnits: ['s', 'm', 'h', 'd'] }),
 ]);

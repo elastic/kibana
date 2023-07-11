@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
+const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
+  const spacesService = getService('spaces');
+
+  const idSpace1 = 'space1';
 
   const configs = [
     { jobId: 'fq_001', spaceId: undefined },
-    { jobId: 'fq_002', spaceId: 'space1' },
+    { jobId: 'fq_002', spaceId: idSpace1 },
   ];
 
   const failConfig = { jobId: 'fq_fail', spaceId: undefined };
@@ -25,8 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      await ml.securityUI.loginAsMlPowerUser();
 
       // Prepare jobs to generate notifications
+      await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       for (const config of configs) {
         await ml.api.createAnomalyDetectionJob(
           ml.commonConfig.getADFqSingleMetricJobConfig(config.jobId),
@@ -34,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       }
 
-      await ml.securityUI.loginAsMlPowerUser();
       await PageObjects.common.navigateToApp('ml', {
         basePath: '',
       });
@@ -44,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       for (const { jobId } of [...configs, failConfig]) {
         await ml.api.deleteAnomalyDetectionJobES(jobId);
       }
+      await spacesService.delete(idSpace1);
       await ml.testResources.cleanMLSavedObjects();
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
@@ -58,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.notifications.table.waitForTableToLoad();
       await ml.notifications.table.assertRowsNumberPerPage(25);
+      await ml.notifications.table.assertTableSorting('timestamp', 0, 'desc');
     });
 
     it('does not show notifications from another space', async () => {
@@ -91,6 +100,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // refresh the page to avoid 1m wait
       await browser.refresh();
       await ml.notifications.assertNotificationErrorsCount(0);
+    });
+
+    it('supports custom sorting for notifications level', async () => {
+      await ml.navigation.navigateToNotifications();
+      await ml.notifications.table.waitForTableToLoad();
+
+      await PageObjects.timePicker.pauseAutoRefresh();
+      const fromTime = moment().subtract(1, 'week').format(timepickerFormat);
+      const toTime = moment().format(timepickerFormat);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
+      await ml.notifications.table.waitForTableToLoad();
+
+      await ml.notifications.table.sortByField('level', 1, 'desc');
+      const rowsDesc = await ml.notifications.table.parseTable();
+      expect(rowsDesc[0].level).to.eql('error');
+
+      await ml.notifications.table.sortByField('level', 1, 'asc');
+      const rowsAsc = await ml.notifications.table.parseTable();
+      expect(rowsAsc[0].level).to.eql('info');
     });
   });
 }

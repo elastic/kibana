@@ -26,6 +26,10 @@ import {
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
 
+export interface DataViewField extends DataViewFieldBase {
+  conflictDescriptions?: Record<string, string[]>;
+}
+
 export interface OperatorOption {
   message: string;
   value: string;
@@ -35,7 +39,7 @@ export interface OperatorOption {
 
 export interface FormattedBuilderEntry {
   id: string;
-  field: DataViewFieldBase | undefined;
+  field: DataViewField | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;

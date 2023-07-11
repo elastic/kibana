@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Field, Aggregation, AggId, FieldId } from '../../../../common/types/fields';
-import { EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import {
+  type Field,
+  type Aggregation,
+  type AggId,
+  type FieldId,
+  EVENT_RATE_FIELD_ID,
+} from '@kbn/ml-anomaly-utils';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
@@ -44,8 +49,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(dataView.title, dataView.type === 'rollup');
-      const { fields: allFields, aggs } = createObjects(resp, dataView.title);
+      const resp = await ml.jobs.newJobCaps(dataView.getIndexPattern(), dataView.type === 'rollup');
+      const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
 
       if (this._includeEventRateField === true) {
         addEventRateField(aggs, allFields);
@@ -64,6 +69,7 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       // keyword fields over text fields.
       // e.g. if foo.keyword and foo exist, don't add foo to the list.
       this._fields = fields;
+      this.removeCounterFields();
       // set the category fields to contain fields which have been filtered to prefer text fields.
       this._catFields = catFields;
       this._dateFields = dateFields;
@@ -154,6 +160,7 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     name: 'Event rate',
     type: ES_FIELD_TYPES.INTEGER,
     aggregatable: true,
+    counter: false,
     aggs: [],
   };
 

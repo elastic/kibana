@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiConfirmModal,
-  EuiEmptyPrompt,
-  EuiLoadingContent,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../common/hooks/use_value_changed';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
-import type { Rule, RulesSortingFields } from '../../../rule_management/logic';
-import { usePrePackagedRulesStatus } from '../../../rule_management/logic/use_pre_packaged_rules_status';
+import type { Rule } from '../../../rule_management/logic';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
@@ -31,7 +24,7 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { AllRulesTabs } from './rules_table_toolbar';
-import { RulesTableUtilityBar } from './rules_table_utility_bar';
+import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
@@ -39,6 +32,9 @@ import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_
 import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
+import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
+import type { FindRulesSortField } from '../../../../../common/detection_engine/rule_management';
+import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -62,11 +58,11 @@ const NO_ITEMS_MESSAGE = (
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const [{ canUserCRUD }] = useUserData();
   const hasPermissions = hasUserCRUDPermission(canUserCRUD);
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const tableRef = useRef<EuiBasicTable>(null);
   const rulesTableContext = useRulesTableContext();
-  const { data: prePackagedRulesStatus, isLoading: isPrepackagedStatusLoading } =
-    usePrePackagedRulesStatus();
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
 
   const {
     state: {
@@ -129,20 +125,19 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     executeBulkActionsDryRun,
   });
 
-  const paginationMemo = useMemo(
-    () => ({
+  const paginationMemo = useMemo(() => {
+    return {
       pageIndex: pagination.page - 1,
       pageSize: pagination.perPage,
       totalItemCount: pagination.total,
       pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-    }),
-    [pagination]
-  );
+    };
+  }, [pagination.page, pagination.perPage, pagination.total]);
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
       setSortingOptions({
-        field: (sort?.field as RulesSortingFields) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
+        field: (sort?.field as FindRulesSortField) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
         order: sort?.direction ?? 'desc',
       });
       setPage(page.index + 1);
@@ -176,6 +171,10 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       tableRef.current.setSelection(rules.filter((rule) => ruleIds.includes(rule.id)));
     }
   }, selectedRuleIds);
+
+  const isTableSelectable =
+    hasPermissions &&
+    (selectedTab === AllRulesTabs.management || selectedTab === AllRulesTabs.monitoring);
 
   const euiBasicTableSelectionProps = useMemo(
     () => ({
@@ -214,22 +213,36 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
   const isTableEmpty =
-    !isPrepackagedStatusLoading &&
-    prePackagedRulesStatus?.rules_custom_installed === 0 &&
-    prePackagedRulesStatus.rules_installed === 0;
+    ruleManagementFilters?.rules_summary.custom_count === 0 &&
+    ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
 
-  const shouldShowRulesTable = !isPrepackagedStatusLoading && !isLoading && !isTableEmpty;
+  const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
-  const tableProps =
-    selectedTab === AllRulesTabs.rules
-      ? {
-          'data-test-subj': 'rules-table',
-          columns: rulesColumns,
-        }
-      : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
+  let tableProps;
+  switch (selectedTab) {
+    case AllRulesTabs.management:
+      tableProps = {
+        'data-test-subj': 'rules-management-table',
+        columns: rulesColumns,
+      };
+      break;
+    case AllRulesTabs.monitoring:
+      tableProps = {
+        'data-test-subj': 'rules-monitoring-table',
+        columns: monitoringColumns,
+      };
+      break;
+    default:
+      tableProps = {
+        'data-test-subj': 'rules-management-table',
+        columns: rulesColumns,
+      };
+      break;
+  }
 
-  const shouldShowLinearProgress = isFetched && isRefetching;
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
+  const numberOfSelectedRules = isAllSelected ? pagination.total : selectedRuleIds?.length ?? 1;
 
   return (
     <>
@@ -245,9 +258,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
       {isTableEmpty && <PrePackagedRulesPrompt />}
-      {isLoading && (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-      )}
       {isDeleteConfirmationVisible && (
         <EuiConfirmModal
           title={i18n.DELETE_CONFIRMATION_TITLE}
@@ -274,7 +284,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
           onConfirm={confirmRuleDuplication}
-          rulesCount={selectedRuleIds?.length ? selectedRuleIds?.length : 1}
+          rulesCount={numberOfSelectedRules}
         />
       )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
@@ -297,12 +307,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <EuiBasicTable
             itemId="id"
             items={rules}
-            isSelectable={hasPermissions}
+            isSelectable={isTableSelectable}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}
             pagination={paginationMemo}
             ref={tableRef}
-            selection={hasPermissions ? euiBasicTableSelectionProps : undefined}
+            selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
             sorting={{
               sort: {
                 // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation

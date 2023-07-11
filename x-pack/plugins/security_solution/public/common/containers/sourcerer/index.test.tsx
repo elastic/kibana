@@ -33,10 +33,10 @@ import {
 } from '../../mock';
 import type { SelectedDataView } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { postSourcererDataView } from './api';
 import * as source from '../source/use_data_view';
 import { sourcererActions } from '../../store/sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+import { createSourcererDataView } from './create_sourcerer_data_view';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -49,7 +49,7 @@ const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
 jest.mock('../../lib/apm/use_track_http_request');
 jest.mock('../../../detections/components/user_info');
-jest.mock('./api');
+jest.mock('./create_sourcerer_data_view');
 jest.mock('../../utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -68,9 +68,16 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 const mockSearch = jest.fn();
 
 const mockAddWarning = jest.fn();
+const mockAddError = jest.fn();
+const mockCreateSourcererDataView = jest.fn(() => {
+  const errToReturn = new Error('fake error');
+  errToReturn.name = 'AbortError';
+  throw errToReturn;
+});
+
 jest.mock('../../lib/kibana', () => ({
   useToasts: () => ({
-    addError: jest.fn(),
+    addError: mockAddError,
     addSuccess: jest.fn(),
     addWarning: mockAddWarning,
     remove: jest.fn(),
@@ -85,17 +92,60 @@ jest.mock('../../lib/kibana', () => ({
         },
       },
       data: {
+        dataViews: {
+          get: mockSearch.mockImplementation(
+            async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+              Promise.resolve({
+                id: dataViewId,
+                matchedIndices: refreshFields
+                  ? ['hello', 'world', 'refreshed']
+                  : ['hello', 'world'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => 'hello*,world*,refreshed*',
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
+              })
+          ),
+        },
         indexPatterns: {
           getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
-        },
-        search: {
-          search: mockSearch.mockImplementation(() => ({
-            subscribe: jest.fn().mockImplementation(() => ({
-              error: jest.fn(),
-              next: jest.fn(),
-              unsubscribe: jest.fn(),
-            })),
-          })),
         },
       },
       notifications: {},
@@ -141,7 +191,7 @@ describe('Sourcerer Hooks', () => {
       defaultDataView: mockSourcererState.defaultDataView,
       kibanaDataViews: [mockSourcererState.defaultDataView],
     };
-    (postSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
+    (createSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
 
     store = createStore(
       {
@@ -272,6 +322,91 @@ describe('Sourcerer Hooks', () => {
           text: 'Users with write permission need to access the Elastic Security app to initialize the app source data.',
           title: 'Write role required to generate data',
         });
+      });
+    });
+  });
+
+  it('does not call addError if updateSourcererDataView receives an AbortError', async () => {
+    // createSourcererDataView throws an 'AbortError' which
+    // puts us in the catch block, but the addError toast is not called
+    (createSourcererDataView as jest.Mock).mockImplementation(mockCreateSourcererDataView);
+
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            title: DEFAULT_INDEX_PATTERN.join(','),
+            patternList: DEFAULT_INDEX_PATTERN,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        loading: false,
+        signalIndexName: mockSourcererState.signalIndexName,
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitForNextUpdate();
+      rerender();
+
+      await waitFor(() => {
+        expect(mockCreateSourcererDataView).toHaveBeenCalled();
+        expect(mockAddError).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  it('does call addError if updateSourcererDataView receives a non-abort error', async () => {
+    // createSourcererDataView throws an 'AbortError' which
+    // puts us in the catch block, but the addError toast is not called
+    (createSourcererDataView as jest.Mock).mockImplementation(() => {
+      throw Error('fake error');
+    });
+
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          signalIndexName: null,
+          defaultDataView: {
+            ...mockGlobalState.sourcerer.defaultDataView,
+            title: DEFAULT_INDEX_PATTERN.join(','),
+            patternList: DEFAULT_INDEX_PATTERN,
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+    await act(async () => {
+      mockUseUserInfo.mockImplementation(() => ({
+        ...userInfoState,
+        loading: false,
+        signalIndexName: mockSourcererState.signalIndexName,
+      }));
+      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      });
+
+      await waitForNextUpdate();
+      rerender();
+
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalled();
       });
     });
   });
@@ -586,6 +721,7 @@ describe('Sourcerer Hooks', () => {
           '-filebeat-*',
           '-packetbeat-*',
         ]);
+        expect(result.current.indexPattern).toHaveProperty('getName');
       });
     });
   });

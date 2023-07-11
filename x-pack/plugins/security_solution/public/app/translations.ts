@@ -7,9 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
+  defaultMessage: 'Elastic AI Assistant',
+});
+
 export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overview', {
   defaultMessage: 'Overview',
 });
+
+export const DATA_QUALITY = i18n.translate(
+  'xpack.securitySolution.navigation.ecsDataQualityDashboard',
+  {
+    defaultMessage: 'Data Quality',
+  }
+);
+
+export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.navigation.entityRiskScore',
+  {
+    defaultMessage: 'Entity Risk Score',
+  }
+);
 
 export const DETECTION_RESPONSE = i18n.translate(
   'xpack.securitySolution.navigation.detectionResponse',
@@ -37,6 +55,13 @@ export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dash
   defaultMessage: 'Dashboards',
 });
 
+export const COVERAGE_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.navigation.coverageOverviewDashboard',
+  {
+    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+  }
+);
+
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
   defaultMessage: 'Network',
 });
@@ -53,8 +78,16 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
 
+export const SIEM_RULES = i18n.translate('xpack.securitySolution.navigation.siemRules', {
+  defaultMessage: 'SIEM Rules',
+});
+
+export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRules', {
+  defaultMessage: 'Add Rules',
+});
+
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Rule Exceptions',
+  defaultMessage: 'Shared Exception Lists',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -112,8 +145,8 @@ export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore
 export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.investigate', {
   defaultMessage: 'Investigate',
 });
-export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
-  defaultMessage: 'Manage',
+export const SETTINGS = i18n.translate('xpack.securitySolution.navigation.settings', {
+  defaultMessage: 'Settings',
 });
 
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {

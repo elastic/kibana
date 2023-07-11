@@ -8,8 +8,7 @@
 import { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import { ML__INCREMENTAL_ID } from '../../data_frame_analytics/common/fields';
+import { ML__INCREMENTAL_ID } from '@kbn/ml-data-frame-analytics-utils';
 
 export const useScatterplotFieldOptions = (
   indexPattern?: DataView,

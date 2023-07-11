@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointActionListRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { actionListHandler } from './list_handler';
 
@@ -26,16 +26,23 @@ export function registerActionListRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
-  router.get(
-    {
-      path: ENDPOINTS_ACTION_LIST_ROUTE,
-      validate: EndpointActionListRequestSchema,
+  router.versioned
+    .get({
+      access: 'public',
+      path: BASE_ENDPOINT_ACTION_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { any: ['canReadActionsLogManagement', 'canAccessEndpointActionsLogManagement'] },
-      endpointContext.logFactory.get('endpointActionList'),
-      actionListHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionListRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canReadActionsLogManagement', 'canAccessEndpointActionsLogManagement'] },
+        endpointContext.logFactory.get('endpointActionList'),
+        actionListHandler(endpointContext)
+      )
+    );
 }

@@ -62,7 +62,7 @@ export const ConfirmForceInstallModal: React.FC<{
       <EuiCallOut
         title={title}
         color="warning"
-        iconType="alert"
+        iconType="warning"
         children={
           <FormattedMessage
             id="xpack.fleet.ConfirmForceInstallModal.calloutBody"

@@ -23,12 +23,12 @@ import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
-import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 import { SourceEditorArgs } from '../source';
 import {
+  DataFilters,
   ESPewPewSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
@@ -66,13 +66,19 @@ export class ESPewPewSource extends AbstractESAggSource {
     this._descriptor = descriptor;
   }
 
+  getBucketsName() {
+    return i18n.translate('xpack.maps.source.pewPew.bucketsName', {
+      defaultMessage: 'paths',
+    });
+  }
+
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor
+        bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -81,8 +87,15 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return false;
+  }
+
+  getSyncMeta(dataFilters: DataFilters) {
+    return {
+      ...super.getSyncMeta(dataFilters),
+      geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
+    };
   }
 
   isGeoGridPrecisionAware() {
@@ -125,13 +138,13 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
@@ -149,7 +162,7 @@ export class ESPewPewSource extends AbstractESAggSource {
           sourceGrid: {
             geotile_grid: {
               field: this._descriptor.sourceGeoField,
-              precision: searchFilters.geogridPrecision,
+              precision: this.getGeoGridPrecision(requestMeta.zoom),
               size: 500,
             },
             aggs: {
@@ -177,14 +190,26 @@ export class ESPewPewSource extends AbstractESAggSource {
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate('xpack.maps.pewPew.requestName', {
+        defaultMessage: '{layerName} paths request',
+        values: { layerName },
+      }),
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-        defaultMessage: 'Source-destination connections request',
+        defaultMessage:
+          'Get paths from data view: {dataViewName}, source: {sourceFieldName}, destination: {destFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          destFieldName: this._descriptor.destGeoField,
+          sourceFieldName: this._descriptor.sourceGeoField,
+        },
       }),
-      searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_pew_pew_source:connections' },
+        requestMeta.executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -229,7 +254,10 @@ export class ESPewPewSource extends AbstractESAggSource {
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: makePublicExecutionContext('es_pew_pew_source:bounds'),
+          executionContext: mergeExecutionContext(
+            { description: 'es_pew_pew_source:bounds' },
+            boundsFilters.executionContext
+          ),
         })
       );
       const destBounds = (esResp.aggregations?.destFitToBounds as AggregationsGeoBoundsAggregate)
@@ -276,8 +304,3 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 }
-
-registerSource({
-  ConstructorFunction: ESPewPewSource,
-  type: SOURCE_TYPES.ES_PEW_PEW,
-});

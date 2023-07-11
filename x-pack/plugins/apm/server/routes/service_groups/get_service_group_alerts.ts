@@ -15,7 +15,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
-import { ApmAlertsClient } from './get_apm_alerts_client';
+import { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 export async function getServiceGroupAlerts({
   serviceGroups,
@@ -33,13 +33,12 @@ export async function getServiceGroupAlerts({
   if (!spaceId || serviceGroups.length === 0) {
     return {};
   }
-  const serviceGroupsKueryMap: Record<string, QueryDslQueryContainer> =
-    serviceGroups.reduce((acc, sg) => {
-      return {
-        ...acc,
-        [sg.id]: kqlQuery(sg.kuery)[0],
-      };
-    }, {});
+  const serviceGroupsKueryMap = serviceGroups.reduce<
+    Record<string, QueryDslQueryContainer>
+  >((acc, sg) => {
+    acc[sg.id] = kqlQuery(sg.kuery)[0];
+    return acc;
+  }, {});
   const params = {
     size: 0,
     query: {
@@ -79,13 +78,11 @@ export async function getServiceGroupAlerts({
   const { buckets: filterAggBuckets } = (result.aggregations
     ?.service_groups ?? { buckets: {} }) as ServiceGroupsAggResponse;
 
-  const serviceGroupAlertsCount: Record<string, number> = Object.keys(
-    filterAggBuckets
-  ).reduce((acc, serviceGroupId) => {
-    return {
-      ...acc,
-      [serviceGroupId]: filterAggBuckets[serviceGroupId].alerts_count.value,
-    };
+  const serviceGroupAlertsCount = Object.keys(filterAggBuckets).reduce<
+    Record<string, number>
+  >((acc, serviceGroupId) => {
+    acc[serviceGroupId] = filterAggBuckets[serviceGroupId].alerts_count.value;
+    return acc;
   }, {});
 
   return serviceGroupAlertsCount;

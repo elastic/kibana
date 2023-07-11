@@ -1,0 +1,14 @@
+title: Update Webhook - Case Managment connector request
+type: object
+required:
+  - config
+  - name
+properties:
+  config:
+    $ref: 'config_properties_cases_webhook.yaml'
+  name:
+    type: string
+    description: The display name for the connector.
+    example: my-connector
+  secrets:
+    $ref: 'secrets_properties_cases_webhook.yaml' 

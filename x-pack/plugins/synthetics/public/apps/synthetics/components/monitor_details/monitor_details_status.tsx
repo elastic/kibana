@@ -6,17 +6,29 @@
  */
 import React from 'react';
 
-import { MonitorStatus } from '../common/components/monitor_status';
+import { EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
+import { MonitorStatus, STATUS_LABEL } from '../common/components/monitor_status';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
 export const MonitorDetailsStatus = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
 
-  const { monitor } = useSelectedMonitor();
+  const { monitor, isMonitorMissing } = useSelectedMonitor();
 
   if (!monitor) {
-    return null;
+    return (
+      <EuiDescriptionList
+        align="left"
+        compressed={false}
+        listItems={[
+          {
+            title: STATUS_LABEL,
+            description: isMonitorMissing ? <></> : <EuiSkeletonText lines={1} />,
+          },
+        ]}
+      />
+    );
   }
 
   return (

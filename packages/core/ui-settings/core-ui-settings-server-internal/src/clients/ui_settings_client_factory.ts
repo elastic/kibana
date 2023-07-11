@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UiSettingsServiceOptions } from '@kbn/core-ui-settings-server-internal';
+import type { UiSettingsServiceOptions } from '../..';
 import { UiSettingsClient } from './ui_settings_client';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
 

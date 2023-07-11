@@ -7,13 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
+
+export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
+  defaultMessage: 'Search',
+});
+export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
+  defaultMessage: 'Enterprise Search',
+});
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
   }),
@@ -26,9 +32,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   ID: 'enterpriseSearchContent',
-  NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
     defaultMessage: 'Content',
   }),
@@ -41,10 +45,26 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const ESRE_PLUGIN = {
+  ID: 'enterpriseSearchEsre',
+  NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
+    defaultMessage: 'ESRE',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
+    defaultMessage: 'ESRE',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.esre.description', {
+    defaultMessage:
+      'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
+  }),
+  URL: '/app/enterprise_search/esre',
+  LOGO: 'logoEnterpriseSearch',
+};
+
 export const ANALYTICS_PLUGIN = {
   ID: 'enterpriseSearchAnalytics',
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
-    defaultMessage: 'Behavorial Analytics',
+    defaultMessage: 'Behavioral Analytics',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
     defaultMessage:
@@ -100,10 +120,10 @@ export const WORKPLACE_SEARCH_PLUGIN = {
 export const SEARCH_EXPERIENCES_PLUGIN = {
   ID: 'searchExperiences',
   NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
-    defaultMessage: 'Enterprise Search',
+    defaultMessage: 'Search Experiences',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
-    defaultMessage: 'Search experiences',
+    defaultMessage: 'Search Experiences',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
     defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
@@ -115,6 +135,36 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
   ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
   APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
   WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
+};
+
+export const APPLICATIONS_PLUGIN = {
+  ID: 'enterpriseSearchApplications',
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
+    defaultMessage: 'Applications',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
+    defaultMessage: 'Search Applications',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/applications',
+};
+
+export const VECTOR_SEARCH_PLUGIN = {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.vectorSearch.description', {
+    defaultMessage:
+      'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
+  }),
+  ID: 'enterpriseSearchVectorSearch',
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
+    defaultMessage: 'Vector Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.vectorSearch.navTitle', {
+    defaultMessage: 'Vector Search',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/vector_search',
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
@@ -148,3 +198,20 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   reduce_whitespace: true,
   run_ml_inference: false,
 };
+
+export enum INGESTION_METHOD_IDS {
+  API = 'api',
+  CONNECTOR = 'connector',
+  CRAWLER = 'crawler',
+}
+
+export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasDocumentLevelSecurityEnabled: true,
+  hasIncrementalSyncEnabled: true,
+  hasNativeConnectors: true,
+  hasWebCrawler: true,
+};
+
+export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';

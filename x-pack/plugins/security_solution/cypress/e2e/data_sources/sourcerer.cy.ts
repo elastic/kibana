@@ -11,7 +11,6 @@ import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
 import {
   addIndexToDefault,
   clickAlertCheckbox,
-  deleteAlertsIndex,
   deselectSourcererOptions,
   isDataViewSelection,
   isHostsStatValue,
@@ -23,9 +22,9 @@ import {
   openAdvancedSettings,
   openDataViewSelection,
   openSourcerer,
+  refreshUntilAlertsIndexExists,
   resetSourcerer,
   saveSourcerer,
-  waitForAlertsIndexToExist,
 } from '../../tasks/sourcerer';
 import { postDataView } from '../../tasks/common';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
@@ -46,7 +45,6 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 describe('Sourcerer', () => {
   before(() => {
     esArchiverResetKibana();
-    deleteAlertsIndex();
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
   describe('permissions', () => {
@@ -61,11 +59,9 @@ describe('Sourcerer', () => {
   });
 
   describe('Default scope', () => {
-    before(() => {
-      login();
-    });
     beforeEach(() => {
       cy.clearLocalStorage();
+      login();
       visit(HOSTS_URL);
     });
 
@@ -127,7 +123,7 @@ describe('Sourcerer', () => {
       isSourcererSelection(`auditbeat-*`);
       isNotSourcererSelection('*beat*');
       addIndexToDefault('*beat*');
-      isHostsStatValue('1 ');
+      isHostsStatValue('1');
       openSourcerer();
       openAdvancedSettings();
       isSourcererSelection(`auditbeat-*`);
@@ -136,27 +132,19 @@ describe('Sourcerer', () => {
   });
 });
 describe('Timeline scope', () => {
-  before(() => {
-    login();
-  });
   beforeEach(() => {
     cy.clearLocalStorage();
+    login();
     visit(TIMELINES_URL);
   });
 
-  it('correctly loads SIEM data view before and after signals index exists', () => {
+  it('correctly loads SIEM data view', () => {
     openTimelineUsingToggle();
     openSourcerer('timeline');
     isDataViewSelection(siemDataViewTitle);
     openAdvancedSettings();
     isSourcererSelection(`auditbeat-*`);
-    isNotSourcererSelection(`${DEFAULT_ALERTS_INDEX}-default`);
-    isSourcererOptions(
-      [...DEFAULT_INDEX_PATTERN, `${DEFAULT_ALERTS_INDEX}-default`].filter(
-        (pattern) => pattern !== 'auditbeat-*'
-      )
-    );
-    waitForAlertsIndexToExist();
+    isSourcererSelection(`${DEFAULT_ALERTS_INDEX}-default`);
     isSourcererOptions(DEFAULT_INDEX_PATTERN.filter((pattern) => pattern !== 'auditbeat-*'));
     isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
   });
@@ -209,10 +197,13 @@ describe('Timeline scope', () => {
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
       );
     });
+
     beforeEach(() => {
+      login();
       visit(TIMELINES_URL);
-      waitForAlertsIndexToExist();
+      refreshUntilAlertsIndexExists();
     });
+
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
       openTimelineById(this.timelineId).then(() => {
         cy.get(SOURCERER.badgeAlerts).should(`not.exist`);

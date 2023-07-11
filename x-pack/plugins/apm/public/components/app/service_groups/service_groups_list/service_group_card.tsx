@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBadge,
@@ -11,7 +12,6 @@ import {
   EuiCardProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -22,19 +22,20 @@ import {
   SERVICE_GROUP_COLOR_DEFAULT,
 } from '../../../../../common/service_groups';
 import { useObservabilityActiveAlertsHref } from '../../../shared/links/kibana';
+import { ServiceStat } from './service_stat';
 
 interface Props {
   serviceGroup: ServiceGroup;
-  hideServiceCount?: boolean;
   href?: string;
   serviceGroupCounts?: { services: number; alerts: number };
+  isLoading: boolean;
 }
 
 export function ServiceGroupsCard({
   serviceGroup,
-  hideServiceCount = false,
   href,
   serviceGroupCounts,
+  isLoading,
 }: Props) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
@@ -43,27 +44,6 @@ export function ServiceGroupsCard({
     style: { width: isMobile ? '100%' : 286 },
     icon: (
       <>
-        {serviceGroupCounts?.alerts && (
-          <div>
-            <EuiBadge
-              iconType="alert"
-              color="danger"
-              href={activeAlertsHref}
-              {...({
-                onClick(e: React.SyntheticEvent) {
-                  e.stopPropagation(); // prevents extra click thru to EuiCard's href destination
-                },
-              } as object)} // workaround for type check that prevents href + onclick
-            >
-              {i18n.translate('xpack.apm.serviceGroups.cardsList.alertCount', {
-                defaultMessage:
-                  '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
-                values: { alertsCount: serviceGroupCounts.alerts },
-              })}
-            </EuiBadge>
-            <EuiSpacer size="s" />
-          </div>
-        )}
         <EuiAvatar
           name={serviceGroup.groupName}
           color={serviceGroup.color || SERVICE_GROUP_COLOR_DEFAULT}
@@ -83,24 +63,56 @@ export function ServiceGroupsCard({
               )}
           </EuiText>
         </EuiFlexItem>
-        {!hideServiceCount && (
-          <EuiFlexItem>
-            <EuiText size="s">
-              {serviceGroupCounts === undefined ? (
-                <>&nbsp;</>
-              ) : (
-                i18n.translate(
-                  'xpack.apm.serviceGroups.cardsList.serviceCount',
+        <EuiFlexGroup alignItems="center">
+          <ServiceStat loading={isLoading}>
+            <EuiFlexItem>
+              <EuiText size="xs" textAlign="left">
+                {serviceGroupCounts !== undefined &&
+                  i18n.translate(
+                    'xpack.apm.serviceGroups.cardsList.serviceCount',
+                    {
+                      defaultMessage:
+                        '{servicesCount} {servicesCount, plural, one {service} other {services}}',
+                      values: { servicesCount: serviceGroupCounts.services },
+                    }
+                  )}
+              </EuiText>
+            </EuiFlexItem>
+          </ServiceStat>
+          <ServiceStat loading={isLoading} grow={isLoading}>
+            {serviceGroupCounts && serviceGroupCounts.alerts > 0 && (
+              <EuiToolTip
+                position="bottom"
+                content={i18n.translate(
+                  'xpack.apm.home.serviceGroups.tooltip.activeAlertsExplanation',
                   {
-                    defaultMessage:
-                      '{servicesCount} {servicesCount, plural, one {service} other {services}}',
-                    values: { servicesCount: serviceGroupCounts.services },
+                    defaultMessage: 'Active alerts',
                   }
-                )
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        )}
+                )}
+              >
+                <EuiBadge
+                  iconType="warning"
+                  color="danger"
+                  href={activeAlertsHref}
+                  {...({
+                    onClick(e: React.SyntheticEvent) {
+                      e.stopPropagation(); // prevents extra click thru to EuiCard's href destination
+                    },
+                  } as object)} // workaround for type check that prevents href + onclick
+                >
+                  {i18n.translate(
+                    'xpack.apm.serviceGroups.cardsList.alertCount',
+                    {
+                      defaultMessage:
+                        '{alertsCount} {alertsCount, plural, one {alert} other {alerts}}',
+                      values: { alertsCount: serviceGroupCounts.alerts },
+                    }
+                  )}
+                </EuiBadge>
+              </EuiToolTip>
+            )}
+          </ServiceStat>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     ),
     href,

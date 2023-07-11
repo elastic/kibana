@@ -16,17 +16,19 @@ import {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceInventoryOptimizedSorting,
-  enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableAgentExplorerView,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
   enableInfrastructureHostsView,
+  syntheticsThrottlingEnabled,
+  enableLegacyUptimeApp,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -38,36 +40,12 @@ const technicalPreviewLabel = i18n.translate(
   { defaultMessage: 'technical preview' }
 );
 
-function feedbackLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
-    'xpack.observability.uiSettings.giveFeedBackLabel',
-    { defaultMessage: 'Give feedback' }
-  )}</a>`;
-}
-
 type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
 /**
  * uiSettings definitions for Observability.
  */
 export const uiSettings: Record<string, UiSettings> = {
-  [enableNewSyntheticsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
-      defaultMessage: 'Enable new synthetic monitoring application',
-    }),
-    value: false,
-    description: i18n.translate(
-      'xpack.observability.enableNewSyntheticsViewExperimentDescriptionBeta',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
-        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-      }
-    ),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-  },
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
@@ -98,7 +76,8 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
-      defaultMessage: 'Enable the comparison feature in APM app',
+      defaultMessage:
+        'Determines whether the comparison feature is enabled or disabled by default in the APM app.',
     }),
     schema: schema.boolean(),
   },
@@ -177,10 +156,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
         values: {
           technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-          feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),
         },
       }
     ),
@@ -208,10 +186,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-trace-explorer' }),
       },
     }),
     schema: schema.boolean(),
@@ -219,25 +196,6 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
-  },
-  [apmOperationsTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
-      defaultMessage: 'APM Operations Breakdown',
-    }),
-    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
-      defaultMessage:
-        '{betaLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: false,
   },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
@@ -258,13 +216,11 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
       defaultMessage: 'Infrastructure Hosts view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the Hosts view in the Infrastructure app. {feedbackLink}.',
+      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-host-observability' }),
+        betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
@@ -276,10 +232,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-aws-lambda' }),
       },
     }),
     schema: schema.boolean(),
@@ -294,16 +249,15 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Agent explorer',
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      defaultMessage: '{betaLabel} Enables Agent explorer view.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
-    showInLabs: true,
   },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
@@ -328,6 +282,34 @@ export const uiSettings: Record<string, UiSettings> = {
     value: 0.2,
     schema: schema.number({ min: 0 }),
   },
+  [apmEnableServiceMetrics]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
+      defaultMessage: 'Service transaction metrics',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
+      defaultMessage:
+        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
+      values: { betaLabel: `<em>[${betaLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [apmEnableContinuousRollups]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
+      defaultMessage: 'Continuous rollups',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
+      defaultMessage:
+        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
+      values: { betaLabel: `<em>[${betaLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
   [enableCriticalPath]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableCriticalPath', {
@@ -345,4 +327,45 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     showInLabs: true,
   },
+  [syntheticsThrottlingEnabled]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
+      defaultMessage: 'Enable Synthetics throttling (Experimental)',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.syntheticsThrottlingEnabledExperimentDescription',
+      {
+        defaultMessage:
+          'Enable the throttling setting in Synthetics monitor configurations. Note that throttling may still not be available for your monitors even if the setting is active. Intended for internal use only. {link}',
+        values: {
+          link: throttlingDocsLink({
+            href: 'https://github.com/elastic/synthetics/blob/main/docs/throttling.md',
+          }),
+        },
+      }
+    ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [enableLegacyUptimeApp]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableLegacyUptimeApp', {
+      defaultMessage: 'Always show legacy Uptime app',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
+      defaultMessage:
+        "By default, the legacy Uptime app is hidden from the interface when it doesn't have any data for more than a week. Enable this option to always show it.",
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
 };
+
+function throttlingDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.throttlingDocsLinkText',
+    { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}

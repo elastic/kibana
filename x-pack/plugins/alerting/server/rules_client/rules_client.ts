@@ -10,7 +10,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
 import { clone, CloneArguments } from './methods/clone';
-import { create, CreateOptions } from './methods/create';
+import { createRule, CreateRuleParams } from '../application/rule/create';
 import { get, GetParams } from './methods/get';
 import { resolve, ResolveParams } from './methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
@@ -33,7 +33,7 @@ import {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 import { find, FindParams } from './methods/find';
-import { aggregate, AggregateOptions } from './methods/aggregate';
+import { aggregate, AggregateParams } from './methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
 import { bulkDeleteRules } from './methods/bulk_delete';
@@ -51,8 +51,9 @@ import { unmuteAll } from './methods/unmute_all';
 import { muteInstance } from './methods/mute_instance';
 import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
-import { listAlertTypes } from './methods/list_alert_types';
+import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
+import { getTags, GetTagsParams } from './methods/get_tags';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -66,6 +67,31 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'activeSnoozes',
 ];
 
+export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([
+  'activeSnoozes',
+  'alertTypeId',
+  'apiKey',
+  'apiKeyOwner',
+  'apiKeyCreatedByUser',
+  'consumer',
+  'createdAt',
+  'createdBy',
+  'enabled',
+  'executionStatus',
+  'id',
+  'isSnoozedUntil',
+  'lastRun',
+  'monitoring',
+  'muteAll',
+  'mutedInstanceIds',
+  'nextRun',
+  'revision',
+  'running',
+  'snoozeSchedule',
+  'updatedBy',
+  'updatedAt',
+]);
+
 export class RulesClient {
   private readonly context: RulesClientContext;
 
@@ -77,11 +103,12 @@ export class RulesClient {
     };
   }
 
-  public aggregate = (params?: { options?: AggregateOptions }) => aggregate(this.context, params);
+  public aggregate = <T = Record<string, unknown>>(params: AggregateParams<T>): Promise<T> =>
+    aggregate<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
-  public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>
-    create<Params>(this.context, params);
+  public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
+    createRule<Params>(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
     find<Params>(this.context, params);
@@ -121,8 +148,10 @@ export class RulesClient {
   public snooze = (options: SnoozeParams) => snooze(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnooze(this.context, options);
 
-  public clearExpiredSnoozes = (options: { id: string }) =>
-    clearExpiredSnoozes(this.context, options);
+  public clearExpiredSnoozes = (options: {
+    rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>;
+    version?: string;
+  }) => clearExpiredSnoozes(this.context, options);
 
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
@@ -131,11 +160,21 @@ export class RulesClient {
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
-  public listAlertTypes = () => listAlertTypes(this.context);
+  public listRuleTypes = () => listRuleTypes(this.context);
 
   public getSpaceId(): string | undefined {
     return this.context.spaceId;
   }
+
+  public getAuthorization() {
+    return this.context.authorization;
+  }
+
+  public getAuditLogger() {
+    return this.context.auditLogger;
+  }
+
+  public getTags = (params: GetTagsParams) => getTags(this.context, params);
 
   public getAlertFromRaw = (params: GetAlertFromRawParams) =>
     getAlertFromRaw(
@@ -146,6 +185,7 @@ export class RulesClient {
       params.references,
       params.includeLegacyId,
       params.excludeFromPublicApi,
-      params.includeSnoozeData
+      params.includeSnoozeData,
+      params.omitGeneratedValues
     );
 }

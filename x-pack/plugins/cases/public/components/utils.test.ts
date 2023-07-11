@@ -9,9 +9,15 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import {
   connectorDeprecationValidator,
+  convertEmptyValuesToNull,
   getConnectorIcon,
+  getConnectorsFormDeserializer,
+  getConnectorsFormSerializer,
   isDeprecatedConnector,
+  isEmptyValue,
   removeItemFromSessionStorage,
+  parseURL,
+  stringifyToURL,
 } from './utils';
 
 describe('Utils', () => {
@@ -22,6 +28,7 @@ describe('Utils', () => {
     config: { usesTableApi: false },
     secrets: {},
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   };
 
@@ -113,6 +120,139 @@ describe('Utils', () => {
       removeItemFromSessionStorage(sessionKey);
 
       expect(sessionStorage.getItem(sessionKey)).toBe(null);
+    });
+  });
+
+  describe('getConnectorsFormSerializer', () => {
+    it('converts empty values to null', () => {
+      const res = getConnectorsFormSerializer({
+        // @ts-expect-error: expects real connector fields.
+        fields: { foo: null, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+
+      expect(res).toEqual({ fields: { foo: null, bar: null, baz: null, qux: null, quux: null } });
+    });
+
+    it('does not converts non-empty values to null', () => {
+      const fields = {
+        foo: 1,
+        bar: 'test',
+        baz: true,
+        qux: false,
+        quux: { test: 'test', foo: null, bar: undefined },
+        test: [null, 'test', 1, true, false, {}, '', undefined],
+      };
+
+      const res = getConnectorsFormSerializer({
+        // @ts-expect-error: expects real connector fields.
+        fields,
+      });
+
+      expect(res).toEqual({ fields });
+    });
+  });
+
+  describe('getConnectorsFormDeserializer', () => {
+    it('converts null values to undefined', () => {
+      const res = getConnectorsFormDeserializer({
+        // @ts-expect-error: expects real connector fields.
+        fields: { foo: null, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+
+      expect(res).toEqual({
+        fields: { foo: undefined, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+    });
+  });
+
+  describe('convertEmptyValuesToNull', () => {
+    it('converts empty values to null', () => {
+      const res = convertEmptyValuesToNull({
+        foo: null,
+        bar: undefined,
+        baz: [],
+        qux: '',
+        quux: {},
+      });
+
+      expect(res).toEqual({ foo: null, bar: null, baz: null, qux: null, quux: null });
+    });
+
+    it('does not converts non-empty values to null', () => {
+      const fields = {
+        foo: 1,
+        bar: 'test',
+        baz: true,
+        qux: false,
+        quux: { test: 'test', foo: null, bar: undefined },
+        test: [null, 'test', 1, true, false, {}, '', undefined],
+      };
+
+      const res = convertEmptyValuesToNull(fields);
+
+      expect(res).toEqual(fields);
+    });
+
+    it.each([null, undefined])('returns null if the value is %s', (value) => {
+      const res = convertEmptyValuesToNull(value);
+      expect(res).toEqual(null);
+    });
+  });
+
+  describe('isEmptyValue', () => {
+    it.each([null, undefined, [], '', {}])('returns true for value: %s', (value) => {
+      expect(isEmptyValue(value)).toBe(true);
+    });
+
+    it.each([
+      1,
+      'test',
+      true,
+      false,
+      { test: 'test', foo: null, bar: undefined },
+      [null, 'test', 1, true, false, {}, '', undefined],
+    ])('returns false for value: %s', (value) => {
+      expect(isEmptyValue(value)).toBe(false);
+    });
+  });
+
+  describe('parseUrl', () => {
+    it('parses URL correctly into object', () => {
+      expect(
+        parseURL(
+          'severity=critical&status=open&page=1&perPage=10&sortField=createdAt&sortOrder=desc'
+        )
+      ).toEqual({
+        page: '1',
+        severity: 'critical',
+        perPage: '10',
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        status: 'open',
+      });
+    });
+
+    it('parses empty URL correctly into object', () => {
+      expect(parseURL('')).toEqual({});
+    });
+  });
+
+  describe('stringifyToURL', () => {
+    it('stringifies object correctly into URL', () => {
+      expect(
+        stringifyToURL({
+          page: '1',
+          severity: 'critical',
+          perPage: '10',
+          sortField: 'createdAt',
+          sortOrder: 'desc',
+          status: 'open',
+        })
+      ).toBe('page=1&severity=critical&perPage=10&sortField=createdAt&sortOrder=desc&status=open');
+    });
+
+    it('stringifies empty object correctly into URL', () => {
+      expect(stringifyToURL({})).toBe('');
     });
   });
 });

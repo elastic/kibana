@@ -7,15 +7,17 @@
 
 import type { PostTransformsPreviewRequestSchema } from '../../../common/api_schemas/transforms';
 
-import { PivotQuery } from './request';
+import { TransformConfigQuery } from './request';
 
 export const INIT_MAX_COLUMNS = 20;
 
-export const getPivotPreviewDevConsoleStatement = (request: PostTransformsPreviewRequestSchema) => {
+export const getTransformPreviewDevConsoleStatement = (
+  request: PostTransformsPreviewRequestSchema
+) => {
   return `POST _transform/_preview\n${JSON.stringify(request, null, 2)}\n`;
 };
 
-export const getIndexDevConsoleStatement = (query: PivotQuery, dataViewTitle: string) => {
+export const getIndexDevConsoleStatement = (query: TransformConfigQuery, dataViewTitle: string) => {
   return `GET ${dataViewTitle}/_search\n${JSON.stringify(
     {
       query,

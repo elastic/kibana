@@ -32,6 +32,7 @@ export const StepNumberNav = ({
         <EuiFlexGroup alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="syntheticsStepNumberNavButton"
               onClick={handlePreviousStep}
               disabled={!hasPreviousStep}
               iconType="arrowLeft"
@@ -53,6 +54,7 @@ export const StepNumberNav = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="syntheticsStepNumberNavButton"
               onClick={handleNextStep}
               disabled={!hasNextStep}
               iconType="arrowRight"

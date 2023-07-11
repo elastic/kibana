@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
 import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
+import { basicPush } from '../../containers/mock';
+import type { CaseConnectors } from '../../containers/types';
 
 export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-1',
     actionTypeId: '.servicenow',
-    name: 'My Connector',
+    name: 'My SN connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
     id: 'resilient-2',
     actionTypeId: '.resilient',
-    name: 'My Connector 2',
+    name: 'My Resilient connector',
     config: {
       apiUrl: 'https://test/',
       orgId: '201',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -37,6 +42,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance.atlassian.ne',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -47,17 +53,19 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
     id: 'servicenow-uses-table-api',
     actionTypeId: '.servicenow',
-    name: 'My Connector',
+    name: 'My deprecated SN connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
       usesTableApi: true,
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: true,
   },
 ];
@@ -71,6 +79,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: false,
   },
   {
     id: '.index',
@@ -80,6 +89,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: false,
   },
   {
     id: '.servicenow',
@@ -89,6 +99,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
   {
     id: '.jira',
@@ -98,6 +109,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
   {
     id: '.resilient',
@@ -107,6 +119,7 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
   {
     id: '.servicenow-sir',
@@ -116,5 +129,55 @@ export const actionTypesMock: ActionTypeConnector[] = [
     enabledInConfig: true,
     enabledInLicense: true,
     supportedFeatureIds: ['alerting', 'cases'],
+    isSystemActionType: false,
   },
 ];
+
+/**
+ * Construct a mock getConnectors response object
+ *
+ * @param overrides is an object where the key is the path for setting a field in the returned object. For example to set
+ *  the externalService.connectorId pass the following overrides object:
+ *
+ * ```
+ *    {
+ *      'push.details.externalService.connectorId': '123'
+ *    }
+ * ```
+ */
+export const getCaseConnectorsMockResponse = (
+  overrides?: Record<string, unknown>
+): CaseConnectors => {
+  return connectorsMock.reduce((acc, connector) => {
+    const newConnectors: CaseConnectors = {
+      ...acc,
+      [connector.id]: {
+        id: connector.id,
+        name: connector.name,
+        type: connector.actionTypeId,
+        fields: null,
+        push: {
+          needsToBePushed: false,
+          hasBeenPushed: true,
+          details: {
+            oldestUserActionPushDate: '2023-01-17T09:46:29.813Z',
+            latestUserActionPushDate: '2023-01-17T09:46:29.813Z',
+            externalService: {
+              ...basicPush,
+              connectorId: connector.id,
+              connectorName: connector.name,
+            },
+          },
+        },
+      },
+    };
+
+    if (overrides != null) {
+      for (const path of Object.keys(overrides)) {
+        set(newConnectors[connector.id], path, overrides[path]);
+      }
+    }
+
+    return newConnectors;
+  }, {});
+};

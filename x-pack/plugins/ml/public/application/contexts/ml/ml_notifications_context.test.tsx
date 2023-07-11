@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { of, throwError } from 'rxjs';
 import { useMlNotifications, MlNotificationsContextProvider } from './ml_notifications_context';
-import { useStorage } from '../storage';
+import { useStorage } from '@kbn/ml-local-storage';
 import { useMlKibana } from '../kibana';
 
 const mockCountMessages = jest.fn(() => {
@@ -43,7 +43,7 @@ jest.mock('../kibana', () => ({
 }));
 
 const mockSetStorageValue = jest.fn();
-jest.mock('../storage', () => ({
+jest.mock('@kbn/ml-local-storage', () => ({
   useStorage: jest.fn(() => {
     return [undefined, mockSetStorageValue];
   }),

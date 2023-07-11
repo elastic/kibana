@@ -109,7 +109,63 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.equal(undefined);
       await uninstallPackage(testPkgName, '9999.0.0');
     });
+    describe('Installed Packages', () => {
+      before(async () => {
+        await installPackage(testPkgName, testPkgVersion);
+        await installPackage('experimental', '0.1.0');
+        await installPackage('endpoint', '8.6.1');
+      });
+      after(async () => {
+        await uninstallPackage(testPkgName, testPkgVersion);
+        await uninstallPackage('experimental', '0.1.0');
+        await uninstallPackage('endpoint', '8.6.1');
+      });
+      it('Allows the fetching of installed packages', async () => {
+        const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(3);
+      });
+      it('Can be limited with perPage', async () => {
+        const res = await supertest.get(`/api/fleet/epm/packages/installed?perPage=2`).expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(2);
+      });
+      it('Can be queried by dataStreamType', async () => {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/installed?dataStreamType=metrics`)
+          .expect(200);
+        const packages = res.body.items;
+        let dataStreams = [] as any;
+        packages.forEach((packageItem: any) => {
+          dataStreams = dataStreams.concat(packageItem.dataStreams);
+        });
+        const streamsWithWrongType = dataStreams.filter((stream: any) => {
+          return !stream.name.startsWith('metrics-');
+        });
+        expect(streamsWithWrongType.length).to.be(0);
+      });
+      it('Can be sorted', async () => {
+        const ascRes = await supertest
+          .get(`/api/fleet/epm/packages/installed?sortOrder=asc`)
+          .expect(200);
+        const ascPackages = ascRes.body.items;
+        expect(ascPackages[0].name).to.be('apache');
 
+        const descRes = await supertest
+          .get(`/api/fleet/epm/packages/installed?sortOrder=desc`)
+          .expect(200);
+        const descPackages = descRes.body.items;
+        expect(descPackages[0].name).to.be('experimental');
+      });
+      it('Can be filtered by name', async () => {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/installed?nameQuery=experimental`)
+          .expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(1);
+        expect(packages[0].name).to.be('experimental');
+      });
+    });
     it('returns a 404 for a package that do not exists', async function () {
       await supertest.get('/api/fleet/epm/packages/notexists/99.99.99').expect(404);
     });
@@ -151,7 +207,7 @@ export default function (providerContext: FtrProviderContext) {
       // not from the package registry. This is because they contain a field the registry
       // does not support
       const res = await supertest
-        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1?prerelease=true`)
+        .get(`/api/fleet/epm/packages/integration_to_input/2.0.0`)
         .expect(200);
 
       const packageInfo = res.body.item;
@@ -207,6 +263,35 @@ export default function (providerContext: FtrProviderContext) {
         ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
       );
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
+    });
+
+    it('allows user with only package level permission to access corresponding packages', async function () {
+      const pkg = 'endpoint';
+      const pkgVersion = '8.6.0';
+      await installPackage(pkg, pkgVersion);
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${pkg}/${pkgVersion}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(200);
+      expect(response.body.item.name).to.be(pkg);
+      expect(response.body.item.version).to.be(pkgVersion);
+      await uninstallPackage(pkg, pkgVersion);
+    });
+
+    it('rejects user with only package level permission to access unauthorized packages', async function () {
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(403);
+      expect(response.body.message).to.be(
+        'Authorization denied to package: apache. Allowed package(s): endpoint'
+      );
     });
   });
 }

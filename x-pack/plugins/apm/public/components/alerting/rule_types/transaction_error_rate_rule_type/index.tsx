@@ -6,16 +6,23 @@
  */
 
 import { defaults, omit } from 'lodash';
-import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ForLastExpression,
   TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
@@ -23,20 +30,35 @@ import {
   IsAboveField,
   ServiceField,
   TransactionTypeField,
+  TransactionNameField,
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+} from '../../../../../common/es_fields/apm';
+import {
+  ErrorState,
+  LoadingState,
+  NoDataState,
+} from '../../ui_components/chart_preview/chart_preview_helper';
 
-interface RuleParams {
+export interface RuleParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
   serviceName?: string;
   transactionType?: string;
+  transactionName?: string;
   environment?: string;
+  groupBy?: string[] | undefined;
 }
 
-interface Props {
+export interface Props {
   ruleParams: RuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
@@ -61,15 +83,13 @@ export function TransactionErrorRateRuleType(props: Props) {
     }
   );
 
-  const thresholdAsPercent = (params.threshold ?? 0) / 100;
-
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
         windowUnit: params.windowUnit,
       });
-      if (interval && start && end) {
+      if (params.windowSize && start && end) {
         return callApmApi(
           'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
           {
@@ -78,9 +98,11 @@ export function TransactionErrorRateRuleType(props: Props) {
                 environment: params.environment,
                 serviceName: params.serviceName,
                 transactionType: params.transactionType,
+                transactionName: params.transactionName,
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
               },
             },
           }
@@ -89,25 +111,53 @@ export function TransactionErrorRateRuleType(props: Props) {
     },
     [
       params.transactionType,
+      params.transactionName,
       params.environment,
       params.serviceName,
       params.windowSize,
       params.windowUnit,
+      params.groupBy,
     ]
+  );
+
+  const onGroupByChange = useCallback(
+    (group: string[] | null) => {
+      setRuleParams('groupBy', group ?? []);
+    },
+    [setRuleParams]
   );
 
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
-      onChange={(value) => setRuleParams('serviceName', value)}
+      onChange={(value) => {
+        if (value !== params.serviceName) {
+          setRuleParams('serviceName', value);
+          setRuleParams('transactionType', undefined);
+          setRuleParams('transactionName', undefined);
+          setRuleParams('environment', ENVIRONMENT_ALL.value);
+        }
+      }}
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
       onChange={(value) => setRuleParams('transactionType', value)}
+      serviceName={params.serviceName}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setRuleParams('environment', value)}
+      onChange={(value) =>
+        setRuleParams(
+          'environment',
+          value !== '' ? value : ENVIRONMENT_ALL.value
+        )
+      }
+      serviceName={params.serviceName}
+    />,
+    <TransactionNameField
+      currentValue={params.transactionName}
+      onChange={(value) => setRuleParams('transactionName', value)}
+      serviceName={params.serviceName}
     />,
     <IsAboveField
       value={params.threshold}
@@ -130,19 +180,68 @@ export function TransactionErrorRateRuleType(props: Props) {
     />,
   ];
 
-  const chartPreview = (
+  const errorRateChartPreview = data?.errorRateChartPreview;
+  const series = errorRateChartPreview?.series ?? [];
+  const hasData = series.length > 0;
+  const totalGroups = errorRateChartPreview?.totalGroups ?? 0;
+
+  const chartPreview = isPending(status) ? (
+    <LoadingState />
+  ) : !hasData ? (
+    <NoDataState />
+  ) : status === FETCH_STATUS.SUCCESS ? (
     <ChartPreview
-      series={[{ data: data?.errorRateChartPreview ?? [] }]}
-      yTickFormat={(d: number | null) => asPercent(d, 1)}
-      threshold={thresholdAsPercent}
+      series={series}
+      yTickFormat={(d: number | null) => asPercent(d, 100)}
+      threshold={params.threshold}
       uiSettings={services.uiSettings}
+      timeSize={params.windowSize}
+      timeUnit={params.windowUnit}
+      totalGroups={totalGroups}
     />
+  ) : (
+    <ErrorState />
+  );
+
+  const groupAlertsBy = (
+    <>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.apm.ruleFlyout.errorRate.createAlertPerText',
+          {
+            defaultMessage: 'Group alerts by',
+          }
+        )}
+        helpText={i18n.translate(
+          'xpack.apm.ruleFlyout.errorRate.createAlertPerHelpText',
+          {
+            defaultMessage:
+              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name, service.environment and transaction.type.',
+          }
+        )}
+        fullWidth
+        display="rowCompressed"
+      >
+        <APMRuleGroupBy
+          onChange={onGroupByChange}
+          options={{ groupBy: ruleParams.groupBy }}
+          fields={[TRANSACTION_NAME]}
+          preSelectedOptions={[
+            SERVICE_NAME,
+            SERVICE_ENVIRONMENT,
+            TRANSACTION_TYPE,
+          ]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
   );
 
   return (
     <ApmRuleParamsContainer
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       fields={fields}
+      groupAlertsBy={groupAlertsBy}
       defaultParams={params}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}

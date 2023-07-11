@@ -8,11 +8,11 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { JobId } from './anomaly_detection_jobs/job';
-import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
 import type { SearchQueryLanguage } from '../constants/search';
 import type { ListingPageUrlState } from './common';
-import type { InfluencersFilterQuery } from './es_client';
 import { ML_PAGES } from '../constants/locator';
 
 type OptionalPageState = object | undefined;
@@ -48,6 +48,7 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
@@ -57,7 +58,6 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
-  | typeof ML_PAGES.ACCESS_DENIED
   | typeof ML_PAGES.DATA_VISUALIZER
   | typeof ML_PAGES.DATA_VISUALIZER_FILE
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
@@ -202,7 +202,7 @@ export interface TrainedModelsQueryState {
   modelId?: string;
 }
 
-export interface TrainedModelsNodesQueryState {
+export interface MemoryUsageNodesQueryState {
   nodeId?: string;
 }
 
@@ -275,7 +275,7 @@ export type MlLocatorState =
   | MlGenericUrlState
   | NotificationsUrlState
   | TrainedModelsUrlState
-  | TrainedModelsNodesUrlState;
+  | MemoryUsageUrlState;
 
 export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
@@ -286,9 +286,9 @@ export type TrainedModelsUrlState = MLPageState<
   TrainedModelsQueryState | undefined
 >;
 
-export type TrainedModelsNodesUrlState = MLPageState<
-  typeof ML_PAGES.TRAINED_MODELS_NODES,
-  TrainedModelsNodesQueryState | undefined
+export type MemoryUsageUrlState = MLPageState<
+  typeof ML_PAGES.MEMORY_USAGE,
+  MemoryUsageNodesQueryState | undefined
 >;
 
 export interface NotificationsQueryState {

@@ -9,7 +9,6 @@
 import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
@@ -21,6 +20,7 @@ import type {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { sortObjects } from './sort_objects';
 import { SavedObjectsExportError } from './errors';
@@ -30,6 +30,7 @@ import {
   getPreservedOrderComparator,
   type SavedObjectComparator,
 } from './utils';
+import { EXPORT_ALL_TYPES_TOKEN } from './constants';
 
 /**
  * @internal
@@ -39,6 +40,7 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
   readonly #exportSizeLimit: number;
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #log: Logger;
+  readonly #exportableTypes: string[];
 
   constructor({
     savedObjectsClient,
@@ -55,6 +57,9 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
     this.#savedObjectsClient = savedObjectsClient;
     this.#exportSizeLimit = exportSizeLimit;
     this.#typeRegistry = typeRegistry;
+    this.#exportableTypes = this.#typeRegistry
+      .getImportableAndExportableTypes()
+      .map((type) => type.name);
   }
 
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
@@ -146,6 +151,10 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
     hasReference,
     search,
   }: SavedObjectsExportByTypeOptions) {
+    if (types.includes(EXPORT_ALL_TYPES_TOKEN)) {
+      types = this.#exportableTypes;
+    }
+
     const finder = this.#savedObjectsClient.createPointInTimeFinder({
       type: types,
       hasReference,

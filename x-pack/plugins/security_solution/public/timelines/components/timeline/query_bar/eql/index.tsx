@@ -107,6 +107,8 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     watch: ['eqlQueryBar'],
   });
 
+  const prevEqlQuery = useRef<TimelineEqlQueryBar['eqlQueryBar']['query']['query']>('');
+
   const optionsData = useMemo(
     () =>
       isEmpty(indexPattern.fields)
@@ -156,10 +158,11 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   useEffect(() => {
     if (
       formEqlQueryBar != null &&
-      !isEmpty(formEqlQueryBar.query.query) &&
+      prevEqlQuery.current !== formEqlQueryBar.query.query &&
       isQueryBarValid &&
       !isQueryBarValidating
     ) {
+      prevEqlQuery.current = formEqlQueryBar.query.query;
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,

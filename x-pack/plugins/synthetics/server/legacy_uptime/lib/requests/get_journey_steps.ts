@@ -6,8 +6,8 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UptimeEsClient } from '../../../lib';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
@@ -33,10 +33,13 @@ export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
 
 type ResultType = JourneyStep & { '@timestamp': string };
 
-export const getJourneySteps: UMElasticsearchQueryFn<
-  GetJourneyStepsParams,
-  JourneyStep[]
-> = async ({ uptimeEsClient, checkGroup, syntheticEventTypes }) => {
+export const getJourneySteps = async ({
+  uptimeEsClient,
+  checkGroup,
+  syntheticEventTypes,
+}: GetJourneyStepsParams & {
+  uptimeEsClient: UptimeEsClient;
+}): Promise<JourneyStep[]> => {
   const params = {
     query: {
       bool: {
@@ -63,7 +66,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<
     },
     size: 500,
   };
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search({ body: params }, 'getJourneySteps');
 
   const steps = result.hits.hits.map(
     ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType

@@ -8,8 +8,8 @@ with the new version.
 ==== Saved object migration failures
 
 If {kib} unexpectedly terminates while migrating a saved object index, {kib} automatically attempts to
-perform the migration again when the process restarts. Do not delete any saved objects indices to 
-fix a failed migration. Unlike previous versions, {kib} 7.12.0 and later does not require deleting 
+perform the migration again when the process restarts. Do not delete any saved objects indices to
+fix a failed migration. Unlike previous versions, {kib} 7.12.0 and later does not require deleting
 indices to release a failed migration lock.
 
 If upgrade migrations fail repeatedly, refer to
@@ -18,14 +18,6 @@ When you address the root cause for the migration failure,
 {kib} automatically retries the migration.
 If you're unable to resolve a failed migration, contact Support.
 
-
-[float]
-[[upgrade-migrations-old-indices]]
-==== Old `.kibana_N` indices
-
-After the migrations complete, multiple {kib} indices are created in {es}: (`.kibana_1`, `.kibana_2`, `.kibana_7.12.0` etc).
-{kib} only uses the index that the `.kibana` and `.kibana_task_manager` aliases point to.
-The other {kib} indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling {kib} back to a previous version.
 
 [float]
 ==== Known issues with {fleet} beta
@@ -133,7 +125,7 @@ Migrations will fail if saved objects belong to an unknown
 saved object type. Unknown saved objects are typically caused by performing manual modifications
 to the {es} index (no longer allowed in 8.x), or by disabling a plugin that had previously created a saved object.
 
-We recommend using the {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant]
+We recommend using the <<upgrade-assistant,Upgrade Assistant>>
 to discover and remedy any unknown saved object types. {kib} version 7.17.0 deployments containing unknown saved
 object types will also log the following warning message:
 

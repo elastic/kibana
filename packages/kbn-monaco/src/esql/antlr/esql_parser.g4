@@ -39,30 +39,38 @@ whereCommand
     ;
 
 booleanExpression
-    : NOT booleanExpression                                               #logicalNot
-    | valueExpression                                                     #booleanDefault
-    | left=booleanExpression operator=AND right=booleanExpression         #logicalBinary
-    | left=booleanExpression operator=OR right=booleanExpression          #logicalBinary
+    : NOT booleanExpression
+    | valueExpression
+    | left=booleanExpression operator=AND right=booleanExpression
+    | left=booleanExpression operator=OR right=booleanExpression
     ;
 
 valueExpression
-    : functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP  #valueFunctionExpression
-    | operatorExpression                                                                          #valueExpressionDefault
-    | left=operatorExpression comparisonOperator right=operatorExpression                         #comparison
+    : operatorExpression
+    | comparison
+    ;
+
+comparison
+    : left=operatorExpression comparisonOperator right=operatorExpression
+    ;
+
+mathFn
+    : functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP
     ;
 
 operatorExpression
-    : primaryExpression                                                                       #operatorExpressionDefault
-    | operator=(MINUS | PLUS) operatorExpression                                              #arithmeticUnary
-    | left=operatorExpression operator=(ASTERISK | SLASH | PERCENT) right=operatorExpression  #arithmeticBinary
-    | left=operatorExpression operator=(PLUS | MINUS) right=operatorExpression                #arithmeticBinary
+    : primaryExpression
+    | mathFn
+    | operator=(MINUS | PLUS) operatorExpression
+    | left=operatorExpression operator=(ASTERISK | SLASH | PERCENT) right=operatorExpression
+    | left=operatorExpression operator=(PLUS | MINUS) right=operatorExpression
     ;
 
 primaryExpression
-    : constant                                                                          #constantDefault
-    | qualifiedName                                                                     #dereference
-    | LP booleanExpression RP                                                           #parenthesizedExpression
-    | identifier LP (booleanExpression (COMMA booleanExpression)*)? RP                  #functionExpression
+    : constant
+    | qualifiedName
+    | LP booleanExpression RP
+    | identifier LP (booleanExpression (COMMA booleanExpression)*)? RP
     ;
 
 rowCommand
@@ -74,10 +82,13 @@ fields
     ;
 
 field
-    : qualifiedName ASSIGN valueExpression
-    | booleanExpression
-    | qualifiedName ASSIGN booleanExpression
+    : booleanExpression
+    | userVariable ASSIGN booleanExpression
     ;
+
+userVariable
+   :  identifier
+   ;
 
 fromCommand
     : FROM sourceIdentifier (COMMA sourceIdentifier)*
@@ -115,13 +126,8 @@ identifier
     ;
 
 functionIdentifier
-    : ROUND_FUNCTION_MATH
-    | AVG_FUNCTION_MATH
-    | SUM_FUNCTION_MATH
-    | MIN_FUNCTION_MATH
-    | MAX_FUNCTION_MATH
+    : UNARY_FUNCTION
     ;
-
 
 constant
     : NULL                                                                              #nullLiteral
@@ -139,7 +145,7 @@ sortCommand
     ;
 
 orderExpression
-    : booleanExpression ordering=(ASC | DESC)? (NULLS nullOrdering=(FIRST | LAST))?
+    : booleanExpression (ORDERING)? (NULLS_ORDERING (NULLS_ORDERING_DIRECTION))?
     ;
 
 projectCommand
@@ -152,7 +158,7 @@ projectClause
     ;
 
 booleanValue
-    : TRUE | FALSE
+    : BOOLEAN_VALUE
     ;
 
 number
@@ -165,7 +171,7 @@ string
     ;
 
 comparisonOperator
-    : EQ | NEQ | LT | LTE | GT | GTE
+    : COMPARISON_OPERATOR
     ;
 
 explainCommand

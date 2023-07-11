@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import { MlResultsService } from '../../../services/results_service';
 import { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
-import { getSeverityType } from '../../../../../common/util/anomaly_utils';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 

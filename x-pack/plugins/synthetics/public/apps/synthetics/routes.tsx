@@ -7,86 +7,72 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiIcon, EuiLink, EuiPageHeaderProps, useEuiTheme } from '@elastic/eui';
-import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { CertificateTitle } from './components/certificates/certificate_title';
+import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
+import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
+import { ClientPluginsStart } from '../../plugin';
+import { getMonitorsRoute } from './components/monitors_page/route_config';
+import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
+import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
+import { getStepDetailsRoute } from './components/step_details_page/route_config';
+import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
-import { ErrorDetailsPage } from './components/error_details/error_details_page';
-import { StepTitle } from './components/step_details_page/step_title';
 import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
-import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
-import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
-import { MonitorsPageHeader } from './components/monitors_page/management/page_header/monitors_page_header';
-import { CreateMonitorButton } from './components/monitors_page/create_monitor_button';
-import { OverviewPage } from './components/monitors_page/overview/overview_page';
-import { SyntheticsPageTemplateComponent } from './components/common/pages/synthetics_page_template';
-import { NotFoundPage } from './components/common/pages/not_found';
 import {
-  MonitorTypePortalNode,
+  InspectMonitorPortalNode,
   MonitorDetailsLinkPortalNode,
+  MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  CERTIFICATES_ROUTE,
   GETTING_STARTED_ROUTE,
-  MONITORS_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITOR_ERRORS_ROUTE,
-  MONITOR_HISTORY_ROUTE,
-  MONITOR_ROUTE,
-  ERROR_DETAILS_ROUTE,
-  STEP_DETAIL_ROUTE,
-  OVERVIEW_ROUTE,
   TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
-import { MonitorsPageWithServiceAllowed } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
-import { RunTestManually } from './components/monitor_details/run_test_manually';
-import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
-import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
-import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
-import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
-import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
-import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
-import { StepDetailPage } from './components/step_details_page/step_detail_page';
-import { useSelectedMonitor } from './components/monitor_details/hooks/use_selected_monitor';
+import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
+import { CertificatesPage } from './components/certificates/certificates';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  is404?: () => boolean;
 };
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
 });
 
-export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.heading',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
-
 const getRoutes = (
   euiTheme: EuiThemeComputed,
   history: ReturnType<typeof useHistory>,
+  location: ReturnType<typeof useLocation>,
   syntheticsPath: string
 ): RouteProps[] => {
   return [
     ...getSettingsRouteConfig(history, syntheticsPath, baseTitle),
+    getErrorDetailsRouteConfig(history, syntheticsPath, baseTitle),
+    getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
+    getStepDetailsRoute(history, syntheticsPath, baseTitle),
+    ...getMonitorDetailsRoute(history, syntheticsPath, baseTitle),
+    ...getMonitorsRoute(history, location, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
@@ -98,126 +84,6 @@ const getRoutes = (
       pageSectionProps: {
         alignment: 'center',
         paddingSize: 'none',
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.monitorDetails.title', {
-        defaultMessage: 'Synthetics Monitor Details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_ROUTE,
-      is404: function useIs404() {
-        const { error } = useSelectedMonitor();
-        return error?.body.statusCode === 404;
-      },
-      component: () => (
-        <MonitorDetailsPage>
-          <MonitorSummary />
-        </MonitorDetailsPage>
-      ),
-      dataTestSubj: 'syntheticsMonitorDetailsPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'overview'),
-    },
-    {
-      title: i18n.translate('xpack.synthetics.monitorHistory.title', {
-        defaultMessage: 'Synthetics Monitor History | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_HISTORY_ROUTE,
-      is404: function useIs404() {
-        const { error } = useSelectedMonitor();
-        return error?.body.statusCode === 404;
-      },
-      component: () => (
-        <MonitorDetailsPage>
-          <MonitorHistory />
-        </MonitorDetailsPage>
-      ),
-      dataTestSubj: 'syntheticsMonitorHistoryPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'history'),
-    },
-    {
-      title: i18n.translate('xpack.synthetics.monitorErrors.title', {
-        defaultMessage: 'Synthetics Monitor Errors | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_ERRORS_ROUTE,
-      is404: function useIs404() {
-        const { error } = useSelectedMonitor();
-        return error?.body.statusCode === 404;
-      },
-      component: () => (
-        <MonitorDetailsPage>
-          <MonitorErrors />
-        </MonitorDetailsPage>
-      ),
-      dataTestSubj: 'syntheticsMonitorHistoryPage',
-      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'errors'),
-    },
-    {
-      title: i18n.translate('xpack.synthetics.overviewRoute.title', {
-        defaultMessage: 'Synthetics Overview | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: OVERVIEW_ROUTE,
-      component: OverviewPage,
-      dataTestSubj: 'syntheticsOverviewPage',
-      pageHeader: {
-        pageTitle: <MonitorsPageHeader />,
-        rightSideItems: [<CreateMonitorButton />],
-        tabs: [
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.overviewTab.title"
-                defaultMessage="Overview"
-              />
-            ),
-            isSelected: true,
-          },
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.monitorsTab.title"
-                defaultMessage="Management"
-              />
-            ),
-            href: `${syntheticsPath}${MONITORS_ROUTE}`,
-          },
-        ],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.monitorManagementRoute.title', {
-        defaultMessage: 'Monitor Management | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITORS_ROUTE,
-      component: MonitorsPageWithServiceAllowed,
-      dataTestSubj: 'syntheticsMonitorManagementPage',
-      pageHeader: {
-        pageTitle: <MonitorsPageHeader />,
-        rightSideItems: [<CreateMonitorButton />],
-        tabs: [
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.overviewTab.title"
-                defaultMessage="Overview"
-              />
-            ),
-            href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
-          },
-          {
-            label: (
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.monitorsTab.title"
-                defaultMessage="Management"
-              />
-            ),
-            isSelected: true,
-          },
-        ],
       },
     },
     {
@@ -236,22 +102,7 @@ const getRoutes = (
             defaultMessage="Create Monitor"
           />
         ),
-        children: (
-          <FormattedMessage
-            id="xpack.synthetics.addMonitor.pageHeader.description"
-            defaultMessage="For more information about available monitor types and other options, see our {docs}."
-            values={{
-              docs: (
-                <EuiLink target="_blank" href="#">
-                  <FormattedMessage
-                    id="xpack.synthetics.addMonitor.pageHeader.docsLink"
-                    defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
+        rightSideItems: [<OutPortal node={InspectMonitorPortalNode} />],
       },
     },
     {
@@ -270,47 +121,15 @@ const getRoutes = (
             defaultMessage="Edit Monitor"
           />
         ),
-        rightSideItems: [<OutPortal node={MonitorTypePortalNode} />],
+        rightSideItems: [
+          <OutPortal node={MonitorTypePortalNode} />,
+          <OutPortal node={InspectMonitorPortalNode} />,
+        ],
         breadcrumbs: [
           {
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
           },
         ],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.stepDetailsRoute.title', {
-        defaultMessage: 'Step details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: STEP_DETAIL_ROUTE,
-      component: StepDetailPage,
-      dataTestSubj: 'syntheticsMonitorEditPage',
-      pageHeader: {
-        pageTitle: <StepTitle />,
-        rightSideItems: [],
-        breadcrumbs: [
-          {
-            text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
-          },
-        ],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.errorDetailsRoute.title', {
-        defaultMessage: 'Error details | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: ERROR_DETAILS_ROUTE,
-      component: ErrorDetailsPage,
-      dataTestSubj: 'syntheticsMonitorEditPage',
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
-            defaultMessage="Error details"
-          />
-        ),
       },
     },
     {
@@ -330,73 +149,20 @@ const getRoutes = (
         ),
       },
     },
+    {
+      title: i18n.translate('xpack.synthetics.certificatesRoute.title', {
+        defaultMessage: `Certificates | {baseTitle}`,
+        values: { baseTitle },
+      }),
+      path: CERTIFICATES_ROUTE,
+      component: CertificatesPage,
+      dataTestSubj: 'uptimeCertificatesPage',
+      pageHeader: {
+        pageTitle: <CertificateTitle />,
+        rightSideItems: [<CertRefreshBtn />],
+      },
+    },
   ];
-};
-
-const getMonitorSummaryHeader = (
-  history: ReturnType<typeof useHistory>,
-  syntheticsPath: string,
-  selectedTab: 'overview' | 'history' | 'errors'
-): EuiPageHeaderProps => {
-  // Not a component, but it doesn't matter. Hooks are just functions
-  const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
-
-  if (!match) {
-    return {};
-  }
-
-  const search = history.location.search;
-  const monitorId = match.params.monitorId;
-
-  return {
-    pageTitle: <MonitorDetailsPageTitle />,
-    breadcrumbs: [
-      {
-        text: (
-          <>
-            <EuiIcon size="s" type="arrowLeft" />{' '}
-            <FormattedMessage
-              id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
-              defaultMessage="Monitors"
-            />
-          </>
-        ),
-        color: 'primary',
-        'aria-current': false,
-        href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
-      },
-    ],
-    rightSideItems: [
-      <RunTestManually />,
-      <MonitorDetailsLastRun />,
-      <MonitorDetailsStatus />,
-      <MonitorDetailsLocation />,
-    ],
-    tabs: [
-      {
-        label: i18n.translate('xpack.synthetics.monitorOverviewTab.title', {
-          defaultMessage: 'Overview',
-        }),
-        isSelected: selectedTab === 'overview',
-        href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
-      },
-      {
-        label: i18n.translate('xpack.synthetics.monitorHistoryTab.title', {
-          defaultMessage: 'History',
-        }),
-        isSelected: selectedTab === 'history',
-        href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
-      },
-      {
-        label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
-          defaultMessage: 'Errors',
-        }),
-        prepend: <EuiIcon type="alert" color="danger" />,
-        isSelected: selectedTab === 'errors',
-        href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
-      },
-    ],
-  };
 };
 
 const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
@@ -407,20 +173,25 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
-  const { services } = useKibana();
+  const { application } = useKibana<ClientPluginsStart>().services;
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const location = useLocation();
+
   const routes = getRoutes(
     euiTheme,
     history,
-    services.application!.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
+    location,
+    application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
   );
 
   apiService.addInspectorRequest = addInspectorRequest;
 
+  const isUnPrivileged = useSyntheticsPrivileges();
+
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -428,30 +199,45 @@ export const PageRouter: FC = () => {
           component: RouteComponent,
           dataTestSubj,
           pageHeader,
-          is404,
           ...pageTemplateProps
         }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              {is404?.() ? (
-                <SyntheticsPageTemplateComponent path={path} {...pageTemplateProps}>
-                  <NotFoundPrompt />
-                </SyntheticsPageTemplateComponent>
-              ) : (
-                <SyntheticsPageTemplateComponent
-                  path={path}
-                  pageHeader={pageHeader}
-                  {...pageTemplateProps}
-                >
-                  <RouteComponent />
-                </SyntheticsPageTemplateComponent>
-              )}
+              <SyntheticsPageTemplateComponent
+                pageHeader={isUnPrivileged ? undefined : pageHeader}
+                data-test-subj={'synthetics-page-template'}
+                isPageDataLoaded={true}
+                {...pageTemplateProps}
+              >
+                {isUnPrivileged || <RouteComponent />}
+              </SyntheticsPageTemplateComponent>
             </div>
           </Route>
         )
       )}
-      <Route component={NotFoundPage} />
-    </Switch>
+      <Route
+        component={() => (
+          <SyntheticsPageTemplateComponent>
+            <NotFoundPrompt
+              actions={[
+                <EuiButtonEmpty
+                  data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButton"
+                  iconType="arrowLeft"
+                  flush="both"
+                  onClick={() => {
+                    application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);
+                  }}
+                >
+                  {i18n.translate('xpack.synthetics.routes.goToSynthetics', {
+                    defaultMessage: 'Go to Synthetics Home Page',
+                  })}
+                </EuiButtonEmpty>,
+              ]}
+            />
+          </SyntheticsPageTemplateComponent>
+        )}
+      />
+    </Routes>
   );
 };

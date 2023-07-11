@@ -80,3 +80,41 @@ export const getImportThreatMatchRulesSchemaMock = (ruleId = 'rule-1'): RuleToIm
     },
   ],
 });
+
+export const webHookConnector = {
+  id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+  type: 'action',
+  updated_at: '2023-01-25T14:35:52.852Z',
+  created_at: '2023-01-25T14:35:52.852Z',
+  version: 'WzUxNTksMV0=',
+  attributes: {
+    actionTypeId: '.webhook',
+    name: 'webhook',
+    isMissingSecrets: false,
+    config: {},
+    secrets: {},
+  },
+  references: [],
+  migrationVersion: { action: '8.3.0' },
+  coreMigrationVersion: '8.7.0',
+};
+
+export const ruleWithConnectorNdJSON = (): string => {
+  const items = [
+    {
+      ...getImportRulesSchemaMock(),
+      actions: [
+        {
+          group: 'default',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+          action_type_id: '.webhook',
+          params: {},
+        },
+      ],
+    },
+    webHookConnector,
+  ];
+  const stringOfExceptions = items.map((item) => JSON.stringify(item));
+
+  return stringOfExceptions.join('\n');
+};

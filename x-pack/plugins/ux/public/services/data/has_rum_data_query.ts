@@ -16,14 +16,17 @@ import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { rangeQuery } from './range_query';
 
 export function formatHasRumResult<T>(
-  esResult: ESSearchResponse<T, ReturnType<typeof hasRumDataQuery>>,
+  esResult: ESSearchResponse<
+    T,
+    ReturnType<typeof hasRumDataQuery>,
+    { restTotalHitsAsInt: false }
+  >,
   indices?: string
 ) {
   if (!esResult) return esResult;
   return {
     indices,
-    // @ts-ignore total.value is undefined by the returned type, total is a `number`
-    hasData: esResult.hits.total > 0,
+    hasData: esResult.hits.total.value > 0,
     serviceName:
       esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
   };

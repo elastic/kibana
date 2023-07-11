@@ -7,6 +7,8 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
+import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
+
 import {
   calculatePackagePrivilegesFromCapabilities,
   calculatePackagePrivilegesFromKibanaPrivileges,
@@ -15,11 +17,8 @@ import { ENDPOINT_PRIVILEGES } from './constants';
 
 const SECURITY_SOLUTION_ID = DEFAULT_APP_CATEGORIES.security.id;
 
-function generateActions(
-  privileges: typeof ENDPOINT_PRIVILEGES,
-  overrides: Record<string, boolean> = {}
-) {
-  return privileges.reduce((acc, privilege) => {
+function generateActions<T>(privileges: T, overrides: Record<string, boolean> = {}) {
+  return Object.keys(privileges).reduce((acc, privilege) => {
     const executePackageAction = overrides[privilege] || false;
 
     return {
@@ -42,9 +41,25 @@ describe('fleet authz', () => {
         writeHostIsolationExceptions: true,
         writeHostIsolation: false,
       };
+
+      const transformCapabilities = {
+        canCreateTransform: false,
+        canDeleteTransform: false,
+        canGetTransform: true,
+        canStartStopTransform: false,
+      };
+
       const expected = {
         endpoint: {
           actions: generateActions(ENDPOINT_PRIVILEGES, endpointCapabilities),
+        },
+        transform: {
+          actions: {
+            canCreateTransform: { executePackageAction: false },
+            canDeleteTransform: { executePackageAction: false },
+            canGetTransform: { executePackageAction: true },
+            canStartStopTransform: { executePackageAction: false },
+          },
         },
       };
       const actual = calculatePackagePrivilegesFromCapabilities({
@@ -52,6 +67,7 @@ describe('fleet authz', () => {
         management: {},
         catalogue: {},
         siem: endpointCapabilities,
+        transform: transformCapabilities,
       });
 
       expect(actual).toEqual(expected);
@@ -68,6 +84,8 @@ describe('fleet authz', () => {
         { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolationExceptions`, authorized: true },
         { privilege: `${SECURITY_SOLUTION_ID}-writeHostIsolation`, authorized: false },
         { privilege: `${SECURITY_SOLUTION_ID}-ignoreMe`, authorized: true },
+        { privilege: `${TRANSFORM_PLUGIN_ID}-admin`, authorized: true },
+        { privilege: `${TRANSFORM_PLUGIN_ID}-read`, authorized: true },
       ];
       const expected = {
         endpoint: {
@@ -79,6 +97,14 @@ describe('fleet authz', () => {
             writeHostIsolationExceptions: true,
             writeHostIsolation: false,
           }),
+        },
+        transform: {
+          actions: {
+            canCreateTransform: { executePackageAction: true },
+            canDeleteTransform: { executePackageAction: true },
+            canGetTransform: { executePackageAction: true },
+            canStartStopTransform: { executePackageAction: true },
+          },
         },
       };
       const actual = calculatePackagePrivilegesFromKibanaPrivileges(endpointPrivileges);

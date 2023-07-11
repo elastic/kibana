@@ -15,8 +15,8 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
-import type { SavedTimeline } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import type { SavedTimeline } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 

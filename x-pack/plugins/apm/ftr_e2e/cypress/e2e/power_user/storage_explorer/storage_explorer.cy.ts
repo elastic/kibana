@@ -72,15 +72,15 @@ describe('Storage Explorer', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Storage explorer');
+      cy.contains('h1', 'Storage Explorer');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
     });
 
     it('has a list of summary stats', () => {
       cy.contains('Total APM size');
-      cy.contains('Disk space used');
-      cy.contains('Incremental APM size');
+      cy.contains('Relative disk space used');
+      cy.contains('Delta in APM size');
       cy.contains('Daily data generation');
       cy.contains('Traces per minute');
       cy.contains('Number of services');
@@ -140,12 +140,6 @@ describe('Storage Explorer', () => {
       });
     });
 
-    it('when clicking the refresh button', () => {
-      cy.wait(mainAliasNames);
-      cy.contains('Refresh').click();
-      cy.wait(mainAliasNames);
-    });
-
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
 
@@ -154,9 +148,6 @@ describe('Storage Explorer', () => {
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
       cy.contains('Update').click();
-      cy.wait(mainAliasNames);
-
-      cy.contains('Refresh').click();
       cy.wait(mainAliasNames);
     });
 

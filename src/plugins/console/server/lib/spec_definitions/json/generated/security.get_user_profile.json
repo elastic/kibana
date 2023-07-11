@@ -1,0 +1,14 @@
+{
+  "security.get_user_profile": {
+    "url_params": {
+      "data": []
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/profile/{uid}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-user-profile.html"
+  }
+}

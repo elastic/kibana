@@ -42,6 +42,26 @@ export const sendRequest = <D = any, E = RequestError>(
   return _sendRequest<D, E>(httpClient, config);
 };
 
+// Sends requests with better ergonomics for React Query, e.g. throw error rather
+// than resolving with an `error` property in the result. Also returns `data` directly
+// as opposed to { data } in a response object.
+export const sendRequestForRq = async <D = any, E = RequestError>(
+  config: SendRequestConfig
+): Promise<D> => {
+  if (!httpClient) {
+    throw new Error('sendRequest has no http client set');
+  }
+
+  const response = await _sendRequest<D, E>(httpClient, config);
+
+  if (response.error) {
+    throw response.error;
+  }
+
+  // Data can't be null so long as `_sendRequest` did not throw
+  return response.data!;
+};
+
 export const useRequest = <D = any, E = RequestError>(config: UseRequestConfig) => {
   if (!httpClient) {
     throw new Error('sendRequest has no http client set');

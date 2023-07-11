@@ -18,6 +18,15 @@ import { EventsForm } from '../../components/events_form';
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
   {
     name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.credentialAccess',
+      {
+        defaultMessage: 'Credential Access',
+      }
+    ),
+    protectionField: 'credential_access',
+  },
+  {
+    name: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',
       {
         defaultMessage: 'DLL and Driver Load',

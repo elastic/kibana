@@ -8,11 +8,13 @@
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
 import {
-  SyncStatus,
   ConnectorStatus,
+  DisplayType,
+  FieldType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
+  SyncStatus,
 } from '../../../../common/types/connectors';
 
 import {
@@ -42,7 +44,32 @@ export const apiIndex: ApiViewIndex = {
 export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
-    configuration: { foo: { label: 'bar', value: 'barbar' } },
+    configuration: {
+      foo: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'bar',
+        options: [],
+        order: 1,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'barbar',
+      },
+    },
+    custom_scheduling: {
+      foo: {
+        configuration_overrides: {},
+        enabled: false,
+        interval: '',
+        last_synced: null,
+        name: '',
+      },
+    },
     description: null,
     error: null,
     features: null,
@@ -101,14 +128,29 @@ export const connectorIndex: ConnectorViewIndex = {
     index_name: 'connector',
     is_native: false,
     language: 'en',
+    last_access_control_sync_error: null,
+    last_access_control_sync_scheduled_at: null,
+    last_access_control_sync_status: SyncStatus.COMPLETED,
+    last_incremental_sync_scheduled_at: null,
     last_seen: null,
     last_sync_error: null,
+    last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'connector',
     scheduling: {
-      enabled: false,
-      interval: '',
+      access_control: {
+        enabled: false,
+        interval: '',
+      },
+      full: {
+        enabled: false,
+        interval: '',
+      },
+      incremental: {
+        enabled: false,
+        interval: '',
+      },
     },
     service_type: null,
     status: ConnectorStatus.CONFIGURED,
@@ -132,7 +174,32 @@ export const connectorIndex: ConnectorViewIndex = {
 export const crawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
-    configuration: { foo: { label: 'bar', value: 'barbar' } },
+    configuration: {
+      foo: {
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
+        label: 'bar',
+        options: [],
+        order: 1,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'barbar',
+      },
+    },
+    custom_scheduling: {
+      foo: {
+        configuration_overrides: {},
+        enabled: false,
+        interval: '',
+        last_synced: null,
+        name: '',
+      },
+    },
     description: null,
     error: null,
     features: null,
@@ -191,14 +258,29 @@ export const crawlerIndex: CrawlerViewIndex = {
     index_name: 'crawler',
     is_native: true,
     language: 'en',
+    last_access_control_sync_error: null,
+    last_access_control_sync_scheduled_at: null,
+    last_access_control_sync_status: SyncStatus.COMPLETED,
+    last_incremental_sync_scheduled_at: null,
     last_seen: null,
     last_sync_error: null,
+    last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'crawler',
     scheduling: {
-      enabled: false,
-      interval: '',
+      access_control: {
+        enabled: false,
+        interval: '',
+      },
+      full: {
+        enabled: false,
+        interval: '',
+      },
+      incremental: {
+        enabled: false,
+        interval: '',
+      },
     },
     service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
     status: ConnectorStatus.CONFIGURED,

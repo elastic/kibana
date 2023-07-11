@@ -93,6 +93,11 @@ export interface RuleExecutionContext {
   ruleName: string;
 
   /**
+   * Current revision of the rule being execution (rule.revision)
+   */
+  ruleRevision: number;
+
+  /**
    * Alerting Framework's rule type id of the rule being executed.
    */
   ruleType: string;
@@ -101,6 +106,10 @@ export interface RuleExecutionContext {
    * Kibana space id of the rule being executed.
    */
   spaceId: string;
+}
+
+export interface RunningStatusChangeArgs {
+  newStatus: RuleExecutionStatus.running;
 }
 
 /**

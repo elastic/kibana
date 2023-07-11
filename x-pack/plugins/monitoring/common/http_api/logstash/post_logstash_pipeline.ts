@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { clusterUuidRT, ccsRT } from '../shared';
+import { clusterUuidRT, ccsRT, timeRangeRT } from '../shared';
 
 export const postLogstashPipelineRequestParamsRT = rt.type({
   clusterUuid: clusterUuidRT,
@@ -21,4 +21,15 @@ export const postLogstashPipelineRequestPayloadRT = rt.intersection([
   rt.partial({
     detailVertexId: rt.string,
   }),
+  rt.type({
+    timeRange: timeRangeRT,
+  }),
 ]);
+
+export type PostLogstashPipelineRequestParams = rt.TypeOf<
+  typeof postLogstashPipelineRequestParamsRT
+>;
+
+export type PostLogstashPipelineRequestPayload = rt.TypeOf<
+  typeof postLogstashPipelineRequestPayloadRT
+>;

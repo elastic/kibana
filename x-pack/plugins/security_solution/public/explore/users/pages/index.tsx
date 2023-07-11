@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+
 import { USERS_PATH } from '../../../../common/constants';
 import { UsersTableType } from '../store/model';
 import { Users } from './users';
@@ -16,7 +17,7 @@ import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './const
 
 export const UsersContainer = React.memo(() => {
   return (
-    <Switch>
+    <Routes>
       <Route path={usersTabPath}>
         <Users />
       </Route>
@@ -83,7 +84,7 @@ export const UsersContainer = React.memo(() => {
           <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
         )}
       />
-    </Switch>
+    </Routes>
   );
 });
 

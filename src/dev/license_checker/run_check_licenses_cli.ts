@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { getInstalledPackages } from '../npm';
 

@@ -10,22 +10,27 @@ import expect from '@kbn/expect';
 import {
   testGuideStep1ActiveState,
   testGuideNotActiveState,
+  testGuideStep1InProgressState,
+  testGuideStep2ActiveState,
+  testGuideParams,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import {
   pluginStateSavedObjectsType,
   pluginStateSavedObjectsId,
   guideStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
-import { testGuideId } from '@kbn/guided-onboarding-plugin/common';
+import { testGuideId } from '@kbn/guided-onboarding';
+import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
+import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createGuides, createPluginState } from './helpers';
 
-const putStatePath = `/api/guided_onboarding/state`;
+const putStatePath = `${API_BASE_PATH}/state`;
 export default function testPutState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('PUT /api/guided_onboarding/state', () => {
+  describe(`PUT ${putStatePath}`, () => {
     afterEach(async () => {
       // Clean up saved objects
       await kibanaServer.savedObjects.clean({
@@ -126,7 +131,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       // create an active guide and an inactive guide
       await createGuides(kibanaServer, [
         testGuideStep1ActiveState,
-        { ...testGuideNotActiveState, guideId: 'search' },
+        { ...testGuideNotActiveState, guideId: appSearchGuideId },
       ]);
 
       // Create a new guide with isActive: true
@@ -150,7 +155,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
 
       const searchGuideSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: 'search',
+        id: appSearchGuideId,
       });
       expect(searchGuideSO.attributes.isActive).to.eql(false);
 
@@ -159,6 +164,30 @@ export default function testPutState({ getService }: FtrProviderContext) {
         id: 'kubernetes',
       });
       expect(kubernetesGuide.attributes.isActive).to.eql(true);
+    });
+
+    it('saves dynamic params if provided', async () => {
+      // create a guide
+      await createGuides(kibanaServer, [testGuideStep1InProgressState]);
+
+      // complete step1 with dynamic params
+      await supertest
+        .put(putStatePath)
+        .set('kbn-xsrf', 'true')
+        .send({
+          guide: {
+            ...testGuideStep2ActiveState,
+            params: testGuideParams,
+          },
+        })
+        .expect(200);
+
+      // check that params object was saved
+      const testGuideSO = await kibanaServer.savedObjects.get({
+        type: guideStateSavedObjectsType,
+        id: testGuideId,
+      });
+      expect(testGuideSO.attributes.params).to.eql(testGuideParams);
     });
   });
 }

@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -16,8 +16,8 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { InspectorContextProvider } from '@kbn/observability-plugin/public';
-import { SyntheticsAppProps, SyntheticsDataViewContextProvider } from './contexts';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { SyntheticsAppProps } from './contexts';
 
 import {
   SyntheticsRefreshContextProvider,
@@ -30,8 +30,8 @@ import { PageRouter } from './routes';
 import { store, storage, setBasePath } from './state';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
+import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
 
-// added a comment to trigger test
 const Application = (props: SyntheticsAppProps) => {
   const {
     basePath,
@@ -64,6 +64,7 @@ const Application = (props: SyntheticsAppProps) => {
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
   kibanaService.core = core;
+  kibanaService.startPlugins = startPlugins;
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
@@ -90,6 +91,8 @@ const Application = (props: SyntheticsAppProps) => {
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
+                observabilityShared: startPlugins.observabilityShared,
+                exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,
                 fleet: startPlugins.fleet,
@@ -99,23 +102,22 @@ const Application = (props: SyntheticsAppProps) => {
                 <EuiThemeProvider darkMode={darkMode}>
                   <SyntheticsRefreshContextProvider>
                     <SyntheticsSettingsContextProvider {...props}>
-                      <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-                        <SyntheticsThemeContextProvider darkMode={darkMode}>
-                          <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                            <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                              <RedirectAppLinks
-                                className={APP_WRAPPER_CLASS}
-                                application={core.application}
-                              >
-                                <InspectorContextProvider>
-                                  <PageRouter />
-                                  <ActionMenu appMountParameters={appMountParameters} />
-                                </InspectorContextProvider>
-                              </RedirectAppLinks>
-                            </div>
-                          </SyntheticsStartupPluginsContextProvider>
-                        </SyntheticsThemeContextProvider>
-                      </SyntheticsDataViewContextProvider>
+                      <SyntheticsThemeContextProvider darkMode={darkMode}>
+                        <SyntheticsStartupPluginsContextProvider {...startPlugins}>
+                          <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                            <RedirectAppLinks
+                              className={APP_WRAPPER_CLASS}
+                              application={core.application}
+                            >
+                              <InspectorContextProvider>
+                                <PageRouter />
+                                <ActionMenu appMountParameters={appMountParameters} />
+                                <TestNowModeFlyoutContainer />
+                              </InspectorContextProvider>
+                            </RedirectAppLinks>
+                          </div>
+                        </SyntheticsStartupPluginsContextProvider>
+                      </SyntheticsThemeContextProvider>
                     </SyntheticsSettingsContextProvider>
                   </SyntheticsRefreshContextProvider>
                 </EuiThemeProvider>

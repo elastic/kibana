@@ -68,6 +68,7 @@ export const BucketRT = rt.record(
     MetricValueTypeRT,
     TermsWithMetrics,
     rt.record(rt.string, rt.string),
+    rt.type({ doc_count: rt.number }),
   ])
 );
 

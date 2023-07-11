@@ -6,10 +6,9 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { isEmpty } from 'lodash';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { checkArtifactHasData } from '../../../../management/services/exceptions_list/check_artifact_has_data';
-import { HostIsolationExceptionsApiClient } from '../../../../management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { useCurrentUser, useHttp, useKibana } from '../../../lib/kibana';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
 import type {
   EndpointPrivileges,
@@ -19,10 +18,8 @@ import type {
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../../../../common/endpoint/service/authz';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -32,7 +29,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental
  */
 export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const isMounted = useIsMounted();
-  const http = useHttp();
   const user = useCurrentUser();
 
   const kibanaServices = useKibana().services;
@@ -44,54 +40,21 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const fleetAuthz = fleetServicesFromUseKibana?.authz ?? fleetServicesFromPluginStart?.authz;
 
   const licenseService = useLicense();
-  const isPlatinumPlus = licenseService.isPlatinumPlus();
 
   const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
 
-  const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
-  const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
-
-  const [checkHostIsolationExceptionsDone, setCheckHostIsolationExceptionsDone] =
-    useState<boolean>(false);
-  const [hasHostIsolationExceptionsItems, setHasHostIsolationExceptionsItems] =
-    useState<boolean>(false);
-
-  const securitySolutionPermissions = useMemo(
-    () => calculatePermissionsFromCapabilities(kibanaServices.application.capabilities),
-    [kibanaServices.application.capabilities]
-  );
-
   const privileges = useMemo(() => {
-    const loading = !userRolesCheckDone || !user || !checkHostIsolationExceptionsDone;
+    const loading = !userRolesCheckDone || !user;
 
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading,
-      ...(!loading && fleetAuthz
-        ? calculateEndpointAuthz(
-            licenseService,
-            fleetAuthz,
-            userRoles,
-            isEndpointRbacEnabled || isEndpointRbacV1Enabled,
-            securitySolutionPermissions,
-            hasHostIsolationExceptionsItems
-          )
+      ...(!loading && fleetAuthz && !isEmpty(user)
+        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
         : getEndpointAuthzInitialState()),
     });
-
     return privilegeList;
-  }, [
-    userRolesCheckDone,
-    user,
-    checkHostIsolationExceptionsDone,
-    fleetAuthz,
-    licenseService,
-    userRoles,
-    isEndpointRbacEnabled,
-    isEndpointRbacV1Enabled,
-    securitySolutionPermissions,
-    hasHostIsolationExceptionsItems,
-  ]);
+  }, [userRolesCheckDone, user, fleetAuthz, licenseService, userRoles]);
 
   // get user roles
   useEffect(() => {
@@ -102,30 +65,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
       }
     })();
   }, [isMounted, user]);
-
-  // Check if Host Isolation Exceptions exist if license is not Platinum+
-  useEffect(() => {
-    if (!isPlatinumPlus) {
-      // Reset these back to false. Case license is changed while the user is logged in.
-      setHasHostIsolationExceptionsItems(false);
-      setCheckHostIsolationExceptionsDone(false);
-
-      checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(http))
-        .then((hasData) => {
-          if (isMounted()) {
-            setHasHostIsolationExceptionsItems(hasData);
-          }
-        })
-        .finally(() => {
-          if (isMounted()) {
-            setCheckHostIsolationExceptionsDone(true);
-          }
-        });
-    } else {
-      setHasHostIsolationExceptionsItems(true);
-      setCheckHostIsolationExceptionsDone(true);
-    }
-  }, [http, isMounted, isPlatinumPlus]);
 
   return privileges;
 };

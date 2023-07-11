@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,47 +23,76 @@ export const ViewLocationMonitors = ({
   const onButtonClick = () => setIsPopoverOpen((prevState) => !prevState);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const button = <EuiButtonEmpty onClick={onButtonClick}>{count}</EuiButtonEmpty>;
+  const button = (
+    <EuiButtonEmpty data-test-subj="syntheticsViewLocationMonitorsButton" onClick={onButtonClick}>
+      {count}
+    </EuiButtonEmpty>
+  );
 
   const history = useHistory();
 
+  const { formattedLocationName, href, viewMonitorsMessage } = useMemo(
+    () => ({
+      formattedLocationName: <strong>{locationName}</strong>,
+      href:
+        count > 0
+          ? history.createHref({
+              pathname: '/monitors',
+              search: `?locations=${JSON.stringify([locationName])}`,
+            })
+          : history.createHref({
+              pathname: '/add-monitor',
+            }),
+      viewMonitorsMessage: count > 0 ? VIEW_LOCATION_MONITORS : CREATE_MONITOR,
+    }),
+    [count, history, locationName]
+  );
+
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <FormattedMessage
-        id="xpack.synthetics.monitorManagement.viewMonitors"
-        defaultMessage="Location {name} has {count, number} {count, plural,one {monitor} other {monitors}} running."
-        values={{ count, name: <strong>{locationName}</strong> }}
-      />
-      <EuiSpacer size="s" />
       {count > 0 ? (
-        <EuiButton
-          href={history.createHref({
-            pathname: '/monitors',
-            search: `?locations=${JSON.stringify([locationName])}`,
-          })}
-        >
-          {VIEW_LOCATION_MONITORS}
-        </EuiButton>
+        <GreaterThanZeroMessage count={count} name={formattedLocationName} />
       ) : (
-        <EuiButton
-          href={history.createHref({
-            pathname: '/add-monitor',
-          })}
-        >
-          {CREATE_MONITOR}
-        </EuiButton>
+        <ZeroMessage name={formattedLocationName} />
       )}
+
+      <EuiSpacer size="s" />
+      <ViewLocationMonitorsButton href={href}>{viewMonitorsMessage}</ViewLocationMonitorsButton>
     </EuiPopover>
+  );
+};
+
+const ViewLocationMonitorsButton: React.FC<{ href: string }> = ({ href, children }) => {
+  return (
+    <EuiButton data-test-subj="syntheticsViewLocationMonitorsButton" href={href}>
+      {children}
+    </EuiButton>
   );
 };
 
 const VIEW_LOCATION_MONITORS = i18n.translate(
   'xpack.synthetics.monitorManagement.viewLocationMonitors',
   {
-    defaultMessage: 'View location monitors',
+    defaultMessage: 'View monitors',
   }
 );
 
 const CREATE_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.createLocationMonitors', {
   defaultMessage: 'Create monitor',
 });
+
+const GreaterThanZeroMessage = ({ count, name }: { count: number; name: JSX.Element }) => (
+  <FormattedMessage
+    id="xpack.synthetics.monitorManagement.viewMonitors"
+    defaultMessage="{name} is used in {count, number} {count, plural,one {monitor} other {monitors}}."
+    values={{ count, name }}
+  />
+);
+
+const ZeroMessage = ({ name }: { name: JSX.Element }) => (
+  <FormattedMessage
+    id="xpack.synthetics.monitorManagement.viewZeroMonitors"
+    defaultMessage="{name} isn't used in any monitors yet."
+    values={{ name }}
+  />
+);

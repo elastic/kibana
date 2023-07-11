@@ -14,7 +14,6 @@ import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { AlertsOverview } from '../../app/alerts_overview';
 import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
@@ -22,20 +21,22 @@ import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
 import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 export function page({
   title,
-  tab,
+  tabKey,
   element,
   searchBarOptions,
 }: {
   title: string;
-  tab: React.ComponentProps<typeof MobileServiceTemplate>['selectedTab'];
+  tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
-    showKueryBar?: boolean;
+    showUnifiedSearchBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
+    showMobileFilters?: boolean;
     hidden?: boolean;
   };
 }): {
@@ -45,7 +46,7 @@ export function page({
     element: (
       <MobileServiceTemplate
         title={title}
-        selectedTab={tab}
+        selectedTabKey={tabKey}
         searchBarOptions={searchBarOptions}
       >
         {element}
@@ -54,12 +55,12 @@ export function page({
   };
 }
 
-export const mobileServiceDetail = {
+export const mobileServiceDetailRoute = {
   '/mobile-services/{serviceName}': {
     element: (
-      <TimeRangeMetadataContextProvider>
+      <ApmTimeRangeMetadataContextProvider>
         <Outlet />
-      </TimeRangeMetadataContextProvider>
+      </ApmTimeRangeMetadataContextProvider>
     ),
     params: t.intersection([
       t.type({
@@ -99,13 +100,14 @@ export const mobileServiceDetail = {
       '/mobile-services/{serviceName}/overview': {
         ...page({
           element: <MobileServiceOverview />,
-          tab: 'overview',
+          tabKey: 'overview',
           title: i18n.translate('xpack.apm.views.overview.title', {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
             showTransactionTypeSelector: true,
             showTimeComparison: true,
+            showMobileFilters: true,
           },
         }),
         params: t.partial({
@@ -123,7 +125,7 @@ export const mobileServiceDetail = {
       },
       '/mobile-services/{serviceName}/transactions': {
         ...page({
-          tab: 'transactions',
+          tabKey: 'transactions',
           title: i18n.translate('xpack.apm.views.transactions.title', {
             defaultMessage: 'Transactions',
           }),
@@ -131,6 +133,7 @@ export const mobileServiceDetail = {
           searchBarOptions: {
             showTransactionTypeSelector: true,
             showTimeComparison: true,
+            showMobileFilters: true,
           },
         }),
         params: t.partial({
@@ -139,6 +142,11 @@ export const mobileServiceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            device: t.string,
+            osVersion: t.string,
+            appVersion: t.string,
+            netConnectionType: t.string,
+            mobileSelectedTab: t.string,
           }),
         }),
         children: {
@@ -154,6 +162,7 @@ export const mobileServiceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
@@ -170,7 +179,7 @@ export const mobileServiceDetail = {
         },
       },
       '/mobile-services/{serviceName}/service-map': page({
-        tab: 'service-map',
+        tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
           defaultMessage: 'Service Map',
         }),
@@ -179,16 +188,23 @@ export const mobileServiceDetail = {
           hidden: true,
         },
       }),
-      '/mobile-services/{serviceName}/alerts': page({
-        tab: 'alerts',
-        title: i18n.translate('xpack.apm.views.alerts.title', {
-          defaultMessage: 'Alerts',
+      '/mobile-services/{serviceName}/alerts': {
+        ...page({
+          tabKey: 'alerts',
+          title: i18n.translate('xpack.apm.views.alerts.title', {
+            defaultMessage: 'Alerts',
+          }),
+          element: <AlertsOverview />,
+          searchBarOptions: {
+            hidden: true,
+          },
         }),
-        element: <AlertsOverview />,
-        searchBarOptions: {
-          hidden: true,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            alertStatus: t.string,
+          }),
+        }),
+      },
       '/mobile-services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,
       },

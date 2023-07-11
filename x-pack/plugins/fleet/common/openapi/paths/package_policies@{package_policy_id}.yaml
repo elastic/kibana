@@ -1,6 +1,13 @@
+parameters:
+  - schema:
+      type: string
+    name: packagePolicyId
+    in: path
+    required: true
 get:
-  summary: Package policy - Info
-  tags: []
+  summary: Get package policy by ID
+  tags:
+    - Package policies
   responses:
     '200':
       description: OK
@@ -13,15 +20,15 @@ get:
                 $ref: ../components/schemas/package_policy.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-package-policy
-parameters:
-  - schema:
-      type: string
-    name: packagePolicyId
-    in: path
-    required: true
+  parameters:
+    - $ref: ../components/parameters/format.yaml
 put:
-  summary: Package policy - Update
+  summary: Update package policy by ID
+  tags:
+    - Package policies
   operationId: update-package-policy
   requestBody:
     content:
@@ -43,11 +50,15 @@ put:
             required:
               - item
               - sucess
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/format.yaml
 delete:
-  summary: Package policy - Delete
-  tags: []
+  summary: Delete package policy by ID
+  tags:
+    - Package policies
   operationId: delete-package-policy
   responses:
     '200':
@@ -61,12 +72,9 @@ delete:
                 type: string
             required:
               - id
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
-    - schema:
-        type: string
-      name: packagePolicyId
-      in: path
-      required: true
     - schema:
         type: boolean
       name: force

@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+// WARNING: This test running in Function Test Runner is building a live
+// LifecycleRuleExecutor, feeding it some mock data, but letting it write
+// it's various alerts to indices.  I suspect it's quite fragile, and I
+// added this comment to fix some fragility in the way the alert factory
+// was built.  I suspect it will suffer more such things in the future.
+// I fixed this as a drive-by, but opened an issue to do something later,
+// if needed: https://github.com/elastic/kibana/issues/144557
+
 import { type Subject, ReplaySubject } from 'rxjs';
 import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import {
   AlertConsumers,
   ALERT_REASON,
@@ -29,7 +37,7 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
+import { cleanupRegistryIndices, getMockAlertFactory } from '../../../common/lib/helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function createLifecycleExecutorApiTest({ getService }: FtrProviderContext) {
@@ -57,8 +65,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
     return Promise.resolve(client);
   };
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('createLifecycleExecutor', () => {
+  describe('createLifecycleExecutor', () => {
     let ruleDataClient: IRuleDataClient;
     let pluginStop$: Subject<void>;
 
@@ -74,6 +81,10 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         isWriteEnabled: true,
         isWriterCacheEnabled: false,
         disabledRegistrationContexts: [] as string[],
+        frameworkAlerts: {
+          enabled: () => false,
+          getContextInitializationPromise: async () => ({ result: false }),
+        },
         pluginStop$,
       });
 
@@ -163,16 +174,18 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         });
 
         // Returns the current state of the alert
-        return Promise.resolve(state);
+        return Promise.resolve({ state });
       });
 
+      const ruleId = 'rule-id';
       // Create the options with the minimal amount of values to test the lifecycle executor
       const options = {
-        alertId: id,
+        alertId: ruleId,
         spaceId: 'default',
         tags: ['test'],
         startedAt: new Date(),
         rule: {
+          id: ruleId,
           name: 'test rule',
           ruleTypeId: 'observability.test.fake',
           ruleTypeName: 'test',
@@ -180,8 +193,13 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
+        },
+        flappingSettings: {
+          enabled: false,
+          lookBackWindow: 20,
+          statusChangeThreshold: 4,
         },
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
@@ -192,8 +210,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       >;
 
       // Execute the rule the first time
-      const results = await executor(options);
-      expect(results.wrapped).to.eql({
+      const executorResult = await executor(options);
+      expect(executorResult.state.wrapped).to.eql({
         testObject: {
           host: { name: 'host-01' },
           id: 'host-01',
@@ -201,12 +219,15 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         },
       });
 
+      const alertUuid = executorResult.state.trackedAlerts['host-01'].alertUuid;
+      expect(alertUuid).to.be('uuid-1');
+
       // We need to refresh the index so the data is available for the next call
       await es.indices.refresh({ index: `${ruleDataClient.indexName}*` });
 
       // Execute again to ensure that we read the object and write it again with the updated state
-      const nextResults = await executor({ ...options, state: results });
-      expect(nextResults.wrapped).to.eql({
+      const nextExecutorResult = await executor({ ...options, state: executorResult.state });
+      expect(nextExecutorResult.state.wrapped).to.eql({
         testObject: {
           host: { name: 'host-01' },
           id: 'host-01',
@@ -228,7 +249,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
               filter: [
                 {
                   term: {
-                    [ALERT_UUID]: nextResults.trackedAlerts['host-01'].alertUuid,
+                    [ALERT_UUID]: nextExecutorResult.state.trackedAlerts['host-01'].alertUuid,
                   },
                 },
               ],
@@ -239,7 +260,9 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       const source = response.hits.hits[0]._source as any;
 
       // The state in Elasticsearch should match the state returned from the executor
-      expect(source.testObject).to.eql(nextResults.wrapped && nextResults.wrapped.testObject);
+      expect(source.testObject).to.eql(
+        nextExecutorResult.state.wrapped && nextExecutorResult.state.wrapped.testObject
+      );
     });
   });
 }

@@ -5,8 +5,34 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
+import {
+  type DiscoverUrlConfig,
+  type DashboardUrlConfig,
+  type OtherUrlConfig,
+} from '../../../services/ml/data_frame_analytics_edit';
+
+const testDiscoverCustomUrl: DiscoverUrlConfig = {
+  label: 'Show data',
+  indexPattern: 'ft_bank_marketing',
+  queryEntityFieldNames: ['day'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testDashboardCustomUrl: DashboardUrlConfig = {
+  label: 'Show dashboard',
+  dashboardName: 'ML Test',
+  queryEntityFieldNames: ['day'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testOtherCustomUrl: OtherUrlConfig = {
+  label: 'elastic.co',
+  url: 'https://www.elastic.co/',
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -14,10 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
   const editedDescription = 'Edited description';
 
   describe('classification creation', function () {
+    let testDashboardId: string | null = null;
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
-      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
 
       await ml.securityUI.loginAsMlPowerUser();
     });
@@ -49,6 +77,18 @@ export default function ({ getService }: FtrProviderContext) {
         trainingPercent: 20,
         modelMemory: '60mb',
         createIndexPattern: true,
+        fieldStatsEntries: [
+          {
+            fieldName: 'age',
+            type: 'number' as FieldStatsType,
+            isDependentVariableInput: true,
+          },
+          {
+            fieldName: 'balance.keyword',
+            type: 'keyword' as FieldStatsType,
+            isDependentVariableInput: true,
+          },
+        ],
         expected: {
           rocCurveColorState: [
             // tick/grid/axis
@@ -76,16 +116,78 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '25mb',
+                  'Version',
+                  '8.10.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '1862',
+                  'Test docs',
+                  '7452',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: [
+                  'Phase 8/8',
+                  'reindexing',
+                  '100%',
+                  'loading_data',
+                  '100%',
+                  'feature_selection',
+                  '100%',
+                  'coarse_parameter_search',
+                  '100%',
+                  'fine_tuning_parameters',
+                  '100%',
+                  'final_training',
+                  '100%',
+                  'writing_results',
+                  '100%',
+                  'inference',
+                  '100%',
+                ],
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: jobId,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":1862,"test_docs_count":7452,"skipped_docs_count":0}',
-                  description:
-                    "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+                  '': '',
+                  timestamp: 'February 24th 2023, 22:47:21',
+                  timing_stats: '{"elapsed_time":106,"iteration_time":75}',
+                  class_assignment_objective: 'maximize_minimum_recall',
+                  alpha: '7.472711200701066',
+                  downsample_factor: '0.3052602404313446',
+                  eta: '0.5195489124616268',
+                  eta_growth_rate_per_tree: '1.2597744562308133',
+                  feature_bag_fraction: '0.2828427124746191',
+                  gamma: '2.02003625000462',
+                  lambda: '0.5454579969846399',
+                  max_attempts_to_add_tree: '3',
+                  max_optimization_rounds_per_hyperparameter: '2',
+                  max_trees: '5',
+                  num_folds: '5',
+                  num_splits_per_feature: '75',
+                  soft_tree_depth_limit: '8.425554156072732',
+                  soft_tree_depth_tolerance: '0.15',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '8/8' } },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -138,8 +240,20 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep('inputs the dependent variable');
+          await ml.testExecution.logTestStep(
+            'opens field stats flyout from dependent variable input'
+          );
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          for (const { fieldName, type: fieldType } of testData.fieldStatsEntries.filter(
+            (e) => e.isDependentVariableInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
+              fieldName,
+              fieldType
+            );
+          }
+
+          await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
           await ml.testExecution.logTestStep('inputs the training percent');
@@ -256,6 +370,40 @@ export default function ({ getService }: FtrProviderContext) {
             testData.jobId,
             testData.expected.rowDetails
           );
+        });
+
+        it('adds discover custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for discover url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds discover custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
+            testData.jobId,
+            testDiscoverCustomUrl
+          );
+        });
+
+        it('adds dashboard custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds dashboard custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
+            testData.jobId,
+            testDashboardCustomUrl,
+            {
+              index: 1,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'day:\"$day$\"'))`,
+            }
+          );
+        });
+
+        it('adds other custom url type to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for other url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+
+          await ml.testExecution.logTestStep('adds other type custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

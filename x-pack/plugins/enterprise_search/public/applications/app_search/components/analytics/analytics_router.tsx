@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   ENGINE_ANALYTICS_PATH,
@@ -34,7 +36,7 @@ import {
 
 export const AnalyticsRouter: React.FC = () => {
   return (
-    <Switch>
+    <Routes>
       <Route exact path={ENGINE_ANALYTICS_PATH}>
         <Analytics />
       </Route>
@@ -62,6 +64,6 @@ export const AnalyticsRouter: React.FC = () => {
       <Route>
         <NotFound pageChrome={getEngineBreadcrumbs([ANALYTICS_TITLE])} />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "cloud",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "cloud"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ]
+  }
+}

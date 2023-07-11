@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const TEST_TYPES = [
-    'sampleOneTimeTaskTimingOut',
+    'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleTask',
@@ -31,6 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
+    'sampleRecurringTaskWithInvalidIndirectParam',
+    'sampleOneTimeTaskWithInvalidIndirectParam',
+    'sampleTaskWithParamsSchema',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -46,7 +49,9 @@ export default function ({ getService }: FtrProviderContext) {
         'ML:saved-objects-sync',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.cases-webhook',
+        'actions:.d3security',
         'actions:.email',
+        'actions:.gen-ai',
         'actions:.index',
         'actions:.jira',
         'actions:.opsgenie',
@@ -57,9 +62,11 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.servicenow-itom',
         'actions:.servicenow-sir',
         'actions:.slack',
+        'actions:.slack_api',
         'actions:.swimlane',
         'actions:.teams',
         'actions:.tines',
+        'actions:.torq',
         'actions:.webhook',
         'actions:.xmatters',
         'actions_telemetry',
@@ -96,9 +103,12 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:siem.queryRule',
         'alerting:siem.savedQueryRule',
         'alerting:siem.thresholdRule',
+        'alerting:slo.rules.burnRate',
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',
+        'alerting:xpack.synthetics.alerts.monitorStatus',
+        'alerting:xpack.synthetics.alerts.tls',
         'alerting:xpack.uptime.alerts.durationAnomaly',
         'alerting:xpack.uptime.alerts.monitorStatus',
         'alerting:xpack.uptime.alerts.tls',
@@ -109,7 +119,6 @@ export default function ({ getService }: FtrProviderContext) {
         'apm-source-map-migration-task',
         'apm-telemetry-task',
         'cases-telemetry-task',
-        'cleanup_failed_action_executions',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
         'endpoint:metadata-check-transforms-task',

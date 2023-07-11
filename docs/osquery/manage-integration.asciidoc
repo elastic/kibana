@@ -63,7 +63,7 @@ While this allows you to use advanced Osquery functionality like pack discovery 
 
 . Edit the *Osquery config* JSON field to apply your preferred Osquery configuration. Note the following:
 
-* The field may already have content if you have scheduled packs for this agent policy. To keep these packs scheduled, do not remove the `packs` section.
+* The field may already have content if you've scheduled packs for this agent policy. To keep these packs scheduled, do not remove the `packs` section. The `shard` field value is the percentage of agents in the policy using the pack.
 
 * Refer to the https://osquery.readthedocs.io/en/stable/[Osquery documentation] for configuration options.
 

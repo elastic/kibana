@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,
@@ -21,7 +21,7 @@ import {
 } from '../../../common/components/utility_bar';
 
 import { importTimelines } from '../../containers/api';
-
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditTimelineActions } from './export_timeline';
@@ -45,6 +45,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
     onCreateRule,
+    onCreateRuleFromEql,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -78,8 +79,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       onCompleteEditTimelineAction,
     } = useEditTimelineActions();
 
+    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
     const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
-      deleteTimelines,
+      deleteTimelines: kibanaSecuritySolutionsPrivileges.crud ? deleteTimelines : undefined,
       selectedItems,
       tableRef,
       timelineType,
@@ -149,28 +151,44 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const createRule: ActionTimelineToShow[] = ['createRule'];
-      const timelineActions: ActionTimelineToShow[] = [
-        'createFrom',
-        'duplicate',
-        ...(onCreateRule != null ? createRule : []),
-      ];
+      if (kibanaSecuritySolutionsPrivileges.crud) {
+        const createRule: ActionTimelineToShow[] = ['createRule'];
+        const createRuleFromEql: ActionTimelineToShow[] = ['createRuleFromEql'];
+        const timelineActions: ActionTimelineToShow[] = [
+          'createFrom',
+          'duplicate',
+          ...(onCreateRule != null ? createRule : []),
+          ...(onCreateRuleFromEql != null ? createRuleFromEql : []),
+        ];
 
+        if (timelineStatus !== TimelineStatus.immutable) {
+          timelineActions.push('export');
+          timelineActions.push('selectable');
+        }
+
+        if (
+          onDeleteSelected != null &&
+          deleteTimelines != null &&
+          timelineStatus !== TimelineStatus.immutable
+        ) {
+          timelineActions.push('delete');
+        }
+
+        return timelineActions;
+      }
+      // user with read access should only see export
       if (timelineStatus !== TimelineStatus.immutable) {
-        timelineActions.push('export');
-        timelineActions.push('selectable');
+        return ['export', 'selectable'];
       }
-
-      if (
-        onDeleteSelected != null &&
-        deleteTimelines != null &&
-        timelineStatus !== TimelineStatus.immutable
-      ) {
-        timelineActions.push('delete');
-      }
-
-      return timelineActions;
-    }, [onCreateRule, timelineStatus, onDeleteSelected, deleteTimelines]);
+      return [];
+    }, [
+      onCreateRule,
+      onCreateRuleFromEql,
+      timelineStatus,
+      onDeleteSelected,
+      deleteTimelines,
+      kibanaSecuritySolutionsPrivileges,
+    ]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 
@@ -264,6 +282,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
             enableExportTimelineDownloader={enableExportTimelineDownloader}
             onCreateRule={onCreateRule}
+            onCreateRuleFromEql={onCreateRuleFromEql}
             onOpenDeleteTimelineModal={onOpenDeleteTimelineModal}
             onOpenTimeline={onOpenTimeline}
             onSelectionChange={onSelectionChange}

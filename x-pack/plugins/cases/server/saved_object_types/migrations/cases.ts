@@ -7,16 +7,18 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { cloneDeep, unset } from 'lodash';
+import { cloneDeep, unset, flow } from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
-import type { ESConnectorFields } from '../../services';
 import type { CaseAttributes } from '../../../common/api';
 import { CaseSeverity, ConnectorTypes } from '../../../common/api';
+
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SEVERITY_EXTERNAL_TO_ESMODEL,
+  STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
 import {
   transformConnectorIdToReference,
@@ -24,6 +26,8 @@ import {
 } from './user_actions/connector_id';
 import { CASE_TYPE_INDIVIDUAL } from './constants';
 import { pipeMigrations } from './utils';
+import type { ConnectorPersistedFields } from '../../common/types/connectors';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -34,7 +38,7 @@ interface SanitizedCaseConnector {
     id: string;
     name: string | null;
     type: string | null;
-    fields: null | ESConnectorFields;
+    fields: null | ConnectorPersistedFields;
   };
 }
 
@@ -131,6 +135,53 @@ export const addAssignees = (
   return { ...doc, attributes: { ...doc.attributes, assignees }, references: doc.references ?? [] };
 };
 
+export const convertSeverity = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<
+  Omit<CaseAttributes, 'severity'> & { severity: CasePersistedSeverity }
+> => {
+  const severity =
+    SEVERITY_EXTERNAL_TO_ESMODEL[doc.attributes.severity] ?? CasePersistedSeverity.LOW;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, severity },
+    references: doc.references ?? [],
+  };
+};
+
+export const convertStatus = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'status'> & { status: CasePersistedStatus }> => {
+  const status = STATUS_EXTERNAL_TO_ESMODEL[doc.attributes?.status] ?? CasePersistedStatus.OPEN;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, status },
+    references: doc.references ?? [],
+  };
+};
+
+export const addTotalAlerts = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<CaseAttributes & { total_alerts: number }> => {
+  const total_alerts = -1;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, total_alerts },
+    references: doc.references ?? [],
+  };
+};
+
+export const addTotalComments = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<CaseAttributes & { total_comments: number }> => {
+  const total_comments = -1;
+  return {
+    ...doc,
+    attributes: { ...doc.attributes, total_comments },
+    references: doc.references ?? [],
+  };
+};
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -194,4 +245,5 @@ export const caseMigrations = {
   '8.1.0': removeCaseType,
   '8.3.0': pipeMigrations(addDuration, addSeverity),
   '8.5.0': addAssignees,
+  '8.7.0': flow(convertSeverity, convertStatus, addTotalAlerts, addTotalComments),
 };

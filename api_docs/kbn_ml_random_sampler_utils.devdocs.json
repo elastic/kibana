@@ -1,0 +1,136 @@
+{
+  "id": "@kbn/ml-random-sampler-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.createRandomSamplerWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "createRandomSamplerWrapper",
+        "description": [
+          "\nFactory to create the random sampler wrapper utility."
+        ],
+        "signature": [
+          "(options: RandomSamplerOptions) => { wrap: <T extends Record<string, ",
+          "AggregationsAggregationContainer",
+          ">>(aggs: T) => Record<string, ",
+          "AggregationsAggregationContainer",
+          "> | T; unwrap: <T extends Record<string, ",
+          "AggregationsAggregate",
+          ">>(responseAggs: T) => T | T[string]; probability: number; }"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.createRandomSamplerWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "RandomSamplerOptions"
+            ],
+            "signature": [
+              "RandomSamplerOptions"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "random sampler wrapper utility"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.getSampleProbability",
+        "type": "Function",
+        "tags": [],
+        "label": "getSampleProbability",
+        "description": [
+          "\nReturns a dynamic sample probability to be used with the `random_sampler` aggregation."
+        ],
+        "signature": [
+          "(totalDocCount: number) => number"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/get_sample_probability.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.getSampleProbability.$1",
+            "type": "number",
+            "tags": [],
+            "label": "totalDocCount",
+            "description": [
+              "The total document count to derive the sample probability from."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/get_sample_probability.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "sample probability"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.RandomSamplerWrapper",
+        "type": "Type",
+        "tags": [],
+        "label": "RandomSamplerWrapper",
+        "description": [
+          "\nThe return type of the `createRandomSamplerWrapper` factory."
+        ],
+        "signature": [
+          "{ wrap: <T extends Record<string, ",
+          "AggregationsAggregationContainer",
+          ">>(aggs: T) => Record<string, ",
+          "AggregationsAggregationContainer",
+          "> | T; unwrap: <T extends Record<string, ",
+          "AggregationsAggregate",
+          ">>(responseAggs: T) => T | T[string]; probability: number; }"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

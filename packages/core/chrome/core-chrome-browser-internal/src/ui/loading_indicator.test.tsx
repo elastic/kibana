@@ -27,4 +27,15 @@ describe('kbnLoadingIndicator', () => {
     }, 300);
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('shows logo image when customLogo is set', () => {
+    const wrapper = shallow(
+      <LoadingIndicator loadingCount$={new BehaviorSubject(1)} customLogo={'customLogo'} />
+    );
+    // Pause the check beyond the 250ms delay that it has
+    setTimeout(() => {
+      expect(wrapper.prop('data-test-subj')).toBe('globalLoadingIndicator');
+    }, 300);
+    expect(wrapper).toMatchSnapshot();
+  });
 });

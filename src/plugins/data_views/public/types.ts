@@ -8,6 +8,10 @@
 
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { DataViewsServicePublicMethods } from './data_views';
 import { HasDataService } from '../common';
 
@@ -82,6 +86,10 @@ export interface DataViewsPublicSetupDependencies {
    * Field formats
    */
   fieldFormats: FieldFormatsSetup;
+  /**
+   * Content management
+   */
+  contentManagement: ContentManagementPublicSetup;
 }
 
 /**
@@ -92,6 +100,10 @@ export interface DataViewsPublicStartDependencies {
    * Field formats
    */
   fieldFormats: FieldFormatsStart;
+  /**
+   * Content management
+   */
+  contentManagement: ContentManagementPublicStart;
 }
 
 /**

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import type { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
@@ -42,9 +41,6 @@ import type {
 import type { EsIndex } from '../../../../common/types/es_index';
 
 import type { SavedSearchQuery } from '../use_search_items';
-
-// Default sampler shard size used for field histograms
-export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;
 
 export interface FieldHistogramRequestConfig {
   fieldName: string;
@@ -134,32 +130,6 @@ const apiFactory = () => ({
     transformId: TransformId
   ): Promise<GetTransformsAuditMessagesResponseSchema | IHttpFetchError> {
     return Promise.resolve({ messages: [], total: 0 });
-  },
-  async esSearch(payload: any): Promise<estypes.SearchResponse | IHttpFetchError> {
-    const hits = [];
-
-    // simulate a cross cluster search result
-    // against a cluster that doesn't support fields
-    if (payload.index.includes(':')) {
-      hits.push({
-        _id: 'the-doc',
-        _index: 'the-index',
-      });
-    }
-
-    return Promise.resolve({
-      hits: {
-        hits,
-        total: {
-          value: 0,
-          relation: 'eq',
-        },
-        max_score: 0,
-      },
-      timed_out: false,
-      took: 10,
-      _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
-    });
   },
 
   async getEsIndices(): Promise<EsIndex[] | IHttpFetchError> {

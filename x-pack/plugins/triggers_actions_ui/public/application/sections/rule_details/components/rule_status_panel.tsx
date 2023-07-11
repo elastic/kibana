@@ -21,11 +21,12 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { RuleStatusDropdown, RulesListNotifyBadge } from '../..';
+import { RuleStatusDropdown } from '../..';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
 
 export interface RuleStatusPanelProps {
   rule: any;
@@ -57,12 +58,8 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   statusMessage,
   loadExecutionLogAggregations,
 }) => {
-  const [isSnoozeLoading, setIsSnoozeLoading] = useState(false);
-  const [isSnoozeOpen, setIsSnoozeOpen] = useState(false);
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
 
-  const openSnooze = useCallback(() => setIsSnoozeOpen(true), [setIsSnoozeOpen]);
-  const closeSnooze = useCallback(() => setIsSnoozeOpen(false), [setIsSnoozeOpen]);
   const onSnoozeRule = useCallback(
     (snoozeSchedule) => snoozeRule(rule, snoozeSchedule),
     [rule, snoozeRule]
@@ -186,12 +183,9 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
       <EuiHorizontalRule margin="none" />
       <EuiPanel hasShadow={false}>
         <RulesListNotifyBadge
-          rule={{ ...rule, isEditable }}
-          isOpen={isSnoozeOpen}
-          isLoading={isSnoozeLoading}
-          onLoading={setIsSnoozeLoading}
-          onClick={openSnooze}
-          onClose={closeSnooze}
+          snoozeSettings={rule}
+          loading={!rule}
+          disabled={!isEditable}
           onRuleChanged={requestRefresh}
           snoozeRule={onSnoozeRule}
           unsnoozeRule={onUnsnoozeRule}

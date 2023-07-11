@@ -9,10 +9,16 @@
 import { format as formatUrl } from 'url';
 import { stringify } from 'query-string';
 import { createBrowserHistory, History } from 'history';
-import { decodeState, encodeState } from '../state_encoder';
-import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
-import { replaceUrlHashQuery, replaceUrlQuery } from './format';
+import { parseUrl, parseUrlHash } from '../../../common/state_management/parse';
+import { decodeState } from '../state_encoder';
 import { url as urlUtils } from '../../../common';
+import {
+  createSetStateToKbnUrl,
+  SetStateToKbnUrlHashOptions,
+} from '../../../common/state_management/set_state_to_kbn_url';
+import { persistState } from '../state_hash';
+
+export const getCurrentUrl = (history: History) => history.createHref(history.location);
 
 /**
  * Parses a kibana url and retrieves all the states encoded into the URL,
@@ -90,27 +96,22 @@ export function getStateFromKbnUrl<State>(
  * By default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:
  * http://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}
  *
- * { storeInHashQuery: false } option should be used in you want to store you state in a main query (not in a hash):
+ * { storeInHashQuery: false } option should be used in you want to store your state in a main query (not in a hash):
  * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  */
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
-  { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean } = {
+  { useHash = false, storeInHashQuery = true }: SetStateToKbnUrlHashOptions = {
     useHash: false,
     storeInHashQuery: true,
   },
   rawUrl = window.location.href
-): string {
-  const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
-  return replacer(rawUrl, (query) => {
-    const encoded = encodeState(state, useHash);
-    return {
-      ...query,
-      [key]: encoded,
-    };
-  });
+) {
+  return internalSetStateToKbnUrl(key, state, { useHash, storeInHashQuery }, rawUrl);
 }
+
+const internalSetStateToKbnUrl = createSetStateToKbnUrl(persistState);
 
 /**
  * A tiny wrapper around history library to listen for url changes and update url

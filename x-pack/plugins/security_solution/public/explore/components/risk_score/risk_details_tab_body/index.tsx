@@ -30,8 +30,9 @@ import type { HostRiskScore, UserRiskScore } from '../../../../../common/search_
 import { buildEntityNameFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
-import { useDashboardButtonHref } from '../../../../common/hooks/use_dashboard_button_href';
+import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};
@@ -48,6 +49,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     riskEntity: RiskScoreEntity;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
+  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   const queryId = useMemo(
     () =>
       riskEntity === RiskScoreEntity.host
@@ -62,11 +64,7 @@ const RiskDetailsTabBodyComponent: React.FC<
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
 
-  const { buttonHref } = useDashboardButtonHref({
-    to: endDate,
-    from: startDate,
-    title: getDashboardTitle(riskEntity),
-  });
+  const buttonHref = useDashboardHref({ title: getDashboardTitle(riskEntity) });
 
   const timerange = useMemo(
     () => ({
@@ -85,6 +83,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
     [entityName, riskEntity]
   );
+
   const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
     filterQuery,
     onlyLatest: false,
@@ -131,6 +130,10 @@ const RiskDetailsTabBodyComponent: React.FC<
     isDeprecated: isDeprecated && !loading,
   };
 
+  if (RiskScoreUpsell) {
+    return <RiskScoreUpsell />;
+  }
+
   if (status.isDisabled || status.isDeprecated) {
     return (
       <EnableRiskScore
@@ -152,13 +155,14 @@ const RiskDetailsTabBodyComponent: React.FC<
         <EuiFlexItem grow={2}>
           <RiskScoreOverTime
             from={startDate}
-            to={endDate}
             loading={loading}
-            riskScore={data}
             queryId={queryId}
+            riskEntity={riskEntity}
+            riskScore={data}
             title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
-            toggleStatus={overTimeToggleStatus}
+            to={endDate}
             toggleQuery={toggleOverTimeQuery}
+            toggleStatus={overTimeToggleStatus}
           />
         </EuiFlexItem>
 
@@ -180,6 +184,8 @@ const RiskDetailsTabBodyComponent: React.FC<
             isDisabled={!buttonHref}
             data-test-subj={`risky-${riskEntity}s-view-dashboard-button`}
             target="_blank"
+            iconType="popout"
+            iconSide="right"
           >
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>

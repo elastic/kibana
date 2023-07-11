@@ -7,7 +7,13 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
-import type { FleetAuthzRouter } from '../../services/security';
+import type { FleetAuthz } from '../../../common';
+
+import {
+  calculateRouteAuthz,
+  type FleetAuthzRouter,
+  getRouteRequiredAuthz,
+} from '../../services/security';
 
 import type {
   DeletePackageResponse,
@@ -21,32 +27,41 @@ import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
+  GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
   InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
   DeletePackageRequestSchemaDeprecated,
-  BulkUpgradePackagesFromRegistryRequestSchema,
+  BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
+  ReauthorizeTransformRequestSchema,
+  GetDataStreamsRequestSchema,
 } from '../../types';
 
 import {
   getCategoriesHandler,
   getListHandler,
+  getInstalledListHandler,
   getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
+  getBulkAssetsHandler,
   installPackageFromRegistryHandler,
   installPackageByUploadHandler,
   deletePackageHandler,
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
   updatePackageHandler,
+  getVerificationKeyIdHandler,
+  reauthorizeTransformsHandler,
+  getDataStreamsHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -72,6 +87,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getListHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
+      validate: GetInstalledPackagesRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getInstalledListHandler
   );
 
   router.get(
@@ -111,9 +137,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
+          .granted,
     },
     getInfoHandler
   );
@@ -143,7 +169,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-      validate: BulkUpgradePackagesFromRegistryRequestSchema,
+      validate: BulkInstallPackagesFromRegistryRequestSchema,
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
       },
@@ -181,14 +207,49 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     deletePackageHandler
   );
 
+  router.get(
+    {
+      path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
+      validate: false,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getVerificationKeyIdHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
+      validate: GetDataStreamsRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getDataStreamsHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
+      validate: GetBulkAssetsRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getBulkAssetsHandler
+  );
+
   // deprecated since 8.0
   router.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
       validate: GetInfoRequestSchemaDeprecated,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
+        ).granted,
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
@@ -236,7 +297,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const newRequest = {
+        ...request,
+        params: splitPkgKey(request.params.pkgkey),
+        query: request.query,
+      } as any;
       const resp: IKibanaResponse<InstallPackageResponse> = await installPackageFromRegistryHandler(
         context,
         newRequest,
@@ -269,5 +334,27 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       }
       return resp;
     }
+  );
+
+  // Update transforms with es-secondary-authorization headers,
+  // append authorized_by to transform's _meta, and start transforms
+  router.post(
+    {
+      path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
+      validate: ReauthorizeTransformRequestSchema,
+      fleetAuthz: {
+        integrations: { installPackages: true },
+        packagePrivileges: {
+          transform: {
+            actions: {
+              canStartStopTransform: {
+                executePackageAction: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    reauthorizeTransformsHandler
   );
 };

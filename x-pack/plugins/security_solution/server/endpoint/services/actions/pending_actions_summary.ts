@@ -8,7 +8,10 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getActionList } from '..';
 import type { EndpointMetadataService } from '../metadata';
-import type { ActionDetails, EndpointPendingActions } from '../../../../common/endpoint/types';
+import type {
+  ActionListApiResponse,
+  EndpointPendingActions,
+} from '../../../../common/endpoint/types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
@@ -21,8 +24,7 @@ export const getPendingActionsSummary = async (
   metadataService: EndpointMetadataService,
   logger: Logger,
   /** The Fleet Agent IDs to be checked */
-  agentIDs: string[],
-  isPendingActionResponsesWithAckEnabled: boolean
+  agentIDs: string[]
 ): Promise<EndpointPendingActions[]> => {
   const { data: unExpiredActionList } = await getActionList({
     esClient,
@@ -34,19 +36,21 @@ export const getPendingActionsSummary = async (
   });
 
   // Store a map of `agent_id => array of actions`
-  const unExpiredByAgentId: Record<string, ActionDetails[]> = unExpiredActionList.reduce<
-    Record<string, ActionDetails[]>
-  >((byAgentMap, action) => {
-    for (const agent of action.agents) {
-      if (!byAgentMap[agent]) {
-        byAgentMap[agent] = [];
-      }
+  const unExpiredByAgentId: Record<string, ActionListApiResponse['data']> =
+    unExpiredActionList.reduce<Record<string, ActionListApiResponse['data']>>(
+      (byAgentMap, action) => {
+        for (const agent of action.agents) {
+          if (!byAgentMap[agent]) {
+            byAgentMap[agent] = [];
+          }
 
-      byAgentMap[agent].push(action);
-    }
+          byAgentMap[agent].push(action);
+        }
 
-    return byAgentMap;
-  }, {});
+        return byAgentMap;
+      },
+      {}
+    );
 
   const pending: EndpointPendingActions[] = [];
 
@@ -55,12 +59,8 @@ export const getPendingActionsSummary = async (
   for (const agentID of agentIDs) {
     const agentPendingActions: EndpointPendingActions['pending_actions'] = {};
     const setActionAsPending = (commandName: string) => {
-      // Add the command to the list of pending actions, but set it to zero if the
-      // `pendingActionResponsesWithAck` feature flag is false.
-      // Otherwise, just increment the count for this command
-      agentPendingActions[commandName] = !isPendingActionResponsesWithAckEnabled
-        ? 0
-        : (agentPendingActions[commandName] ?? 0) + 1;
+      // Add the command to the list of pending actions and increment the count for this command
+      agentPendingActions[commandName] = (agentPendingActions[commandName] ?? 0) + 1;
     };
 
     pending.push({

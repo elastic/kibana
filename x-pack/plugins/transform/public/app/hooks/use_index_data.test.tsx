@@ -13,8 +13,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from '@kbn/core/public';
+import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { getMlSharedImports, UseIndexDataReturnType } from '../../shared_imports';
+import { getMlSharedImports } from '../../shared_imports';
 
 import { SimpleQuery } from '../common';
 
@@ -25,9 +27,7 @@ jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
 jest.mock('./use_api');
 
-import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const query: SimpleQuery = {
   query_string: {
@@ -36,13 +36,13 @@ const query: SimpleQuery = {
   },
 };
 
-const runtimeMappings = {
+const runtimeMappings: RuntimeMappings = {
   rt_bytes_bigger: {
     type: 'double',
     script: {
       source: "emit(doc['bytes'].value * 2.0)",
     },
-  } as RuntimeField,
+  },
 };
 
 describe('Transform: useIndexData()', () => {
@@ -59,7 +59,7 @@ describe('Transform: useIndexData()', () => {
         useIndexData(
           {
             id: 'the-id',
-            title: 'the-title',
+            getIndexPattern: () => 'the-index-pattern',
             fields: [],
           } as unknown as SearchItems['dataView'],
           query,
@@ -82,16 +82,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
   test('Minimal initialization, no cross cluster search warning.', async () => {
     // Arrange
     const dataView = {
-      title: 'the-data-view-title',
+      getIndexPattern: () => 'the-data-view-index-pattern',
       fields: [] as any[],
     } as SearchItems['dataView'];
 
     const mlSharedImports = await getMlSharedImports();
 
     const Wrapper = () => {
-      const {
-        ml: { DataGrid },
-      } = useAppDependencies();
       const props = {
         ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
         copyToClipboard: 'the-copy-to-clipboard-code',
@@ -125,16 +122,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
   test('Cross-cluster search warning', async () => {
     // Arrange
     const dataView = {
-      title: 'remote:the-index-pattern-title',
+      getIndexPattern: () => 'remote:the-index-pattern-title',
       fields: [] as any[],
     } as SearchItems['dataView'];
 
     const mlSharedImports = await getMlSharedImports();
 
     const Wrapper = () => {
-      const {
-        ml: { DataGrid },
-      } = useAppDependencies();
       const props = {
         ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
         copyToClipboard: 'the-copy-to-clipboard-code',

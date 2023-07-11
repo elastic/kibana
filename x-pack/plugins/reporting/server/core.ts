@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import Hapi from '@hapi/hapi';
 import type {
+  CoreSetup,
   DocLinksServiceSetup,
+  FakeRawRequest,
+  Headers,
   IBasePath,
   IClusterClient,
+  KibanaRequest,
   Logger,
   PackageInfo,
   PluginInitializerContext,
@@ -18,8 +21,9 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { KibanaRequest, CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -39,9 +43,9 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
-import type { ReportingConfig, ReportingSetup } from '.';
+import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
-import { ReportingConfigType } from './config';
+import { createConfig, ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -67,6 +71,7 @@ export interface ReportingInternalStart {
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
+  discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
@@ -78,32 +83,51 @@ export interface ReportingInternalStart {
 /**
  * @internal
  */
+export interface ReportingServerInfo {
+  port: number;
+  name: string;
+  uuid: string;
+  basePath: string;
+  protocol: string;
+  hostname: string;
+}
+
+/**
+ * @internal
+ */
 export class ReportingCore {
   private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
-  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
+  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
-  private config?: ReportingConfig; // final config, includes dynamic values based on OS type
+  private config: ReportingConfigType;
   private executing: Set<string>;
 
   public getContract: () => ReportingSetup;
 
   private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
 
-  constructor(private logger: Logger, context: PluginInitializerContext<ReportingConfigType>) {
+  constructor(
+    private core: CoreSetup,
+    private logger: Logger,
+    private context: PluginInitializerContext<ReportingConfigType>
+  ) {
     this.packageInfo = context.env.packageInfo;
-    const syncConfig = context.config.get<ReportingConfigType>();
-    this.deprecatedAllowedRoles = syncConfig.roles.enabled ? syncConfig.roles.allow : false;
-    this.executeTask = new ExecuteReportTask(this, syncConfig, this.logger);
-    this.monitorTask = new MonitorReportsTask(this, syncConfig, this.logger);
+    const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
+    this.config = config;
+
+    this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
+    this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.monitorTask = new MonitorReportsTask(this, config, this.logger);
 
     this.getContract = () => ({
-      usesUiCapabilities: () => syncConfig.roles.enabled === false,
+      usesUiCapabilities: () => config.roles.enabled === false,
+      registerExportTypes: (id) => id,
     });
 
     this.executing = new Set();
@@ -189,7 +213,7 @@ export class ReportingCore {
   /*
    * Allows config to be set in the background
    */
-  public setConfig(config: ReportingConfig) {
+  public setConfig(config: ReportingConfigType) {
     this.config = config;
     this.pluginSetup$.next(true);
   }
@@ -230,12 +254,25 @@ export class ReportingCore {
   }
 
   /*
+   * Returns configurable server info
+   */
+  public getServerInfo(): ReportingServerInfo {
+    const { http } = this.core;
+    const serverInfo = http.getServerInfo();
+    return {
+      basePath: this.core.http.basePath.serverBasePath,
+      hostname: serverInfo.hostname,
+      name: serverInfo.name,
+      port: serverInfo.port,
+      uuid: this.context.env.instanceUuid,
+      protocol: serverInfo.protocol,
+    };
+  }
+
+  /*
    * Gives synchronous access to the config
    */
-  public getConfig(): ReportingConfig {
-    if (!this.config) {
-      throw new Error('Config is not yet initialized');
-    }
+  public getConfig(): ReportingConfigType {
     return this.config;
   }
 
@@ -323,14 +360,16 @@ export class ReportingCore {
     }
   }
 
-  public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
-    const fakeRequest = CoreKibanaRequest.from({
+  public getFakeRequest(
+    headers: Headers,
+    spaceId: string | undefined,
+    logger = this.logger
+  ): KibanaRequest {
+    const rawRequest: FakeRawRequest = {
+      headers,
       path: '/',
-      route: { settings: {} },
-      url: { href: '/' },
-      raw: { req: { url: '/' } },
-      ...baseRequest,
-    } as Hapi.Request);
+    };
+    const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {

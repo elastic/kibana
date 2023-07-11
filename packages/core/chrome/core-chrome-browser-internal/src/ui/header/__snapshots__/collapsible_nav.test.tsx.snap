@@ -10,6 +10,7 @@ Array [
   <nav
     data-eui="EuiFlyout"
     data-test-subj="collapsibleNav"
+    role="dialog"
   >
     <button
       aria-label="Close this dialog"
@@ -21,35 +22,39 @@ Array [
       style="flex-shrink: 0;"
     >
       <div
-        class="euiCollapsibleNavGroup euiCollapsibleNavGroup--dark eui-yScroll"
+        class="euiCollapsibleNavGroup eui-yScroll emotion-euiCollapsibleNavGroup-notCollapsible-dark"
         id="generated-id"
         style="max-height: 40vh;"
       >
         <div
-          class="euiCollapsibleNavGroup__children"
+          class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
-          <ul
-            class="euiListGroup emotion-euiListGroup-none"
-            style="max-inline-size: none;"
+          <span
+            class="euiThemeProvider emotion-euiColorMode-dark-colorClassName"
           >
-            <li
-              class="euiListGroupItem emotion-euiListGroupItem-text-s"
+            <ul
+              class="euiListGroup emotion-euiListGroup-none"
+              style="max-inline-size: none;"
             >
-              <a
-                class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-text-isClickable"
-                data-test-subj="collapsibleNavCustomNavLink"
-                href="Custom link"
-                rel="noreferrer"
+              <li
+                class="euiListGroupItem emotion-euiListGroupItem-text-s"
               >
-                <span
-                  class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                  title="Custom link"
+                <a
+                  class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-text-isClickable"
+                  data-test-subj="collapsibleNavCustomNavLink"
+                  href="Custom link"
+                  rel="noreferrer"
                 >
-                  Custom link
-                </span>
-              </a>
-            </li>
-          </ul>
+                  <span
+                    class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                    title="Custom link"
+                  >
+                    Custom link
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </span>
         </div>
       </div>
     </div>
@@ -61,12 +66,12 @@ Array [
       style="flex-shrink: 0;"
     >
       <div
-        class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+        class="euiCollapsibleNavGroup eui-yScroll emotion-euiCollapsibleNavGroup-notCollapsible-light"
         id="generated-id"
         style="max-height: 40vh;"
       >
         <div
-          class="euiCollapsibleNavGroup__children"
+          class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <ul
             aria-label="Pinned links"
@@ -100,7 +105,7 @@ Array [
       </div>
     </div>
     <div
-      class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+      class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-light"
       data-test-subj="collapsibleNavGroup-recentlyViewed"
     >
       <div
@@ -136,7 +141,7 @@ Array [
           aria-controls="generated-id"
           aria-expanded="true"
           aria-labelledby="generated-id"
-          class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
+          class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
           tabindex="-1"
           type="button"
         >
@@ -160,7 +165,7 @@ Array [
             class=" emotion-euiAccordion__children"
           >
             <div
-              class="euiCollapsibleNavGroup__children"
+              class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
             >
               <ul
                 aria-label="Recently viewed links"
@@ -215,10 +220,10 @@ Array [
       class="euiHorizontalRule euiHorizontalRule--full emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem eui-yScroll emotion-euiFlexItem-grow-1"
+      class="euiFlexItem kbnCollapsibleNav__solutions emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-kibana"
       >
         <div
@@ -261,7 +266,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -285,7 +290,7 @@ Array [
               class=" emotion-euiAccordion__children"
             >
               <div
-                class="euiCollapsibleNavGroup__children"
+                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
               >
                 <ul
                   aria-label="Primary navigation links, Analytics"
@@ -350,7 +355,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-observability"
       >
         <div
@@ -393,7 +398,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -417,7 +422,7 @@ Array [
               class=" emotion-euiAccordion__children"
             >
               <div
-                class="euiCollapsibleNavGroup__children"
+                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
               >
                 <ul
                   aria-label="Primary navigation links, Observability"
@@ -465,7 +470,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-securitySolution"
       >
         <div
@@ -508,7 +513,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -532,7 +537,7 @@ Array [
               class=" emotion-euiAccordion__children"
             >
               <div
-                class="euiCollapsibleNavGroup__children"
+                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
               >
                 <ul
                   aria-label="Primary navigation links, Security"
@@ -563,7 +568,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-management"
       >
         <div
@@ -606,7 +611,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-empty-text-hoverStyles-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -630,7 +635,7 @@ Array [
               class=" emotion-euiAccordion__children"
             >
               <div
-                class="euiCollapsibleNavGroup__children"
+                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
               >
                 <ul
                   aria-label="Primary navigation links, Management"
@@ -661,12 +666,12 @@ Array [
         </div>
       </div>
       <div
-        class="euiCollapsibleNavGroup"
+        class="euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-notCollapsible-none"
         data-test-subj="collapsibleNavGroup-noCategory"
         id="generated-id"
       >
         <div
-          class="euiCollapsibleNavGroup__children"
+          class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <ul
             class="euiListGroup emotion-euiListGroup-s-flush-maxWidthDefault"
@@ -862,6 +867,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
+    className="kbnCollapsibleNav"
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}
@@ -1047,6 +1053,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
+    className="kbnCollapsibleNav"
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}

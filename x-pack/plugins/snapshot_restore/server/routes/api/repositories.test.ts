@@ -380,6 +380,29 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
+    it('should return successful ES response when using unknown setting', async () => {
+      const mockEsResponse = {
+        [name]: { type: 's3', settings: { awsAccount: 'test-account' } },
+      };
+      getRepoFn.mockResolvedValue({ [name]: {} });
+      createRepoFn.mockResolvedValue(mockEsResponse);
+
+      const expectedResponse = mockEsResponse;
+
+      await expect(
+        router.runRequest({
+          ...mockRequest,
+          body: {
+            name,
+            type: 's3',
+            settings: {
+              path_style_access: 'test-account',
+            },
+          },
+        })
+      ).resolves.toEqual({ body: expectedResponse });
+    });
+
     it('should throw if ES error', async () => {
       getRepoFn.mockRejectedValue(new Error());
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();

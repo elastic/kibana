@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
-  Field,
-  Aggregation,
-  NewJobCaps,
-  METRIC_AGG_TYPE,
-  RollupFields,
+  type Field,
+  type Aggregation,
+  type NewJobCaps,
+  type RollupFields,
   EVENT_RATE_FIELD_ID,
-} from '../types/fields';
-import { ML_JOB_AGGREGATION } from '../constants/aggregation_types';
+  METRIC_AGG_TYPE,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
 
-const categoryFieldTypes = [
+export const categoryFieldTypes = [
   ES_FIELD_TYPES.TEXT,
   ES_FIELD_TYPES.KEYWORD,
   ES_FIELD_TYPES.IP,
@@ -60,7 +60,9 @@ export function combineFieldsAndAggs(
         default:
           // all other aggs take numerical fields
           numericalFields.forEach((f) => {
-            mix(f, a);
+            if (f.aggregatable) {
+              mix(f, a);
+            }
           });
           break;
       }

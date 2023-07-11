@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const syncParamsSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -20,7 +21,7 @@ export const syncParamsSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = ()
     request,
     server,
   }): Promise<any> => {
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     const allPrivateLocations = await getPrivateLocations(
       syntheticsMonitorClient,

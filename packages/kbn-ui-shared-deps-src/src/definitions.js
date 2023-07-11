@@ -7,12 +7,18 @@
  */
 
 const Path = require('path');
+const Fs = require('fs');
+
+const { REPO_ROOT } = require('@kbn/repo-info');
+
+const localDist = Path.resolve(__dirname, '../shared_built_assets');
+const bazelDist = Path.resolve(REPO_ROOT, 'bazel-bin', Path.relative(REPO_ROOT, localDist));
 
 // extracted const vars
 /**
  * Absolute path to the distributable directory
  */
-const distDir = Path.resolve(__dirname, '../../shared_built_assets');
+const distDir = Fs.existsSync(localDist) ? localDist : bazelDist;
 
 /**
  * Filename of the main bundle file in the distributable directory
@@ -44,10 +50,12 @@ const externals = {
   'react-dom/server': '__kbnSharedDeps__.ReactDomServer',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
+  'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
+  'io-ts': '__kbnSharedDeps__.IoTs',
 
   /**
    * big deps which are locked to a single version
@@ -73,6 +81,7 @@ const externals = {
    * runtime deps which don't need to be copied across all bundles
    */
   tslib: '__kbnSharedDeps__.TsLib',
+  uuid: '__kbnSharedDeps__.Uuid',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',

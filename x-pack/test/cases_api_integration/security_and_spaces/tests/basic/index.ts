@@ -39,5 +39,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
+
+    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+    loadTestFile(require.resolve('../common/kibana_alerting_cases_index'));
   });
 };

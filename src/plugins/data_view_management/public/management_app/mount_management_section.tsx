@@ -8,7 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -39,7 +40,7 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const [
-    { application, chrome, uiSettings, notifications, overlays, http, docLinks, theme },
+    { application, chrome, uiSettings, settings, notifications, overlays, http, docLinks, theme },
     {
       data,
       dataViewFieldEditor,
@@ -62,6 +63,7 @@ export async function mountManagementSection(
     application,
     chrome,
     uiSettings,
+    settings,
     notifications,
     overlays,
     unifiedSearch,
@@ -85,7 +87,7 @@ export async function mountManagementSection(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <Router history={params.history}>
-            <Switch>
+            <Routes>
               <Route path={['/create']}>
                 <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
               </Route>
@@ -99,7 +101,7 @@ export async function mountManagementSection(
               <Route path={['/']}>
                 <IndexPatternTableWithRouter canSave={canSave} />
               </Route>
-            </Switch>
+            </Routes>
           </Router>
         </I18nProvider>
       </KibanaThemeProvider>

@@ -40,6 +40,7 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 const DEFAULT_STACK_BY = 'event.dataset';
 
 const ID = 'eventsByDatasetOverview';
+const CHART_HEIGHT = 160;
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
@@ -58,6 +59,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   showSpacer?: boolean;
   scopeId?: string;
   toggleTopN?: () => void;
+  hideQueryToggle?: boolean;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -92,6 +94,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   scopeId,
   to,
   toggleTopN,
+  hideQueryToggle = false,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
@@ -202,6 +205,8 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       scopeId={scopeId}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
+      chartHeight={CHART_HEIGHT}
+      hideQueryToggle={hideQueryToggle}
     />
   );
 };

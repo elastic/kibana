@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Partition, Settings } from '@elastic/charts';
+import { LIGHT_THEME, Partition, Settings } from '@elastic/charts';
 import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
 import { render } from '@testing-library/react';
 import type { DonutChartProps } from './donutchart';
@@ -15,7 +15,7 @@ import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
@@ -47,14 +47,12 @@ jest.mock('./draggable_legend', () => {
   };
 });
 
+const mockBaseTheme = LIGHT_THEME;
 jest.mock('./common', () => {
   return {
-    useTheme: jest.fn(() => ({
-      eui: {
-        euiScrollBar: 0,
-        euiColorDarkShade: '#fff',
-        euiScrollBarCorner: '#ccc',
-      },
+    useThemes: jest.fn(() => ({
+      baseTheme: mockBaseTheme,
+      theme: {},
     })),
   };
 });
@@ -75,7 +73,7 @@ describe('DonutChart', () => {
     totalCount: parsedMockAlertsData?.open?.total,
     legendItems: (['critical', 'high', 'medium', 'low'] as Severity[]).map((d) => ({
       color: testColors[d],
-      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d}`),
+      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuidv4()}-${d}`),
       timelineId: undefined,
       field: 'kibana.alert.severity',
       value: d,
@@ -94,24 +92,18 @@ describe('DonutChart', () => {
     const { container } = render(<DonutChart {...props} />);
     expect(container.querySelector(`[data-test-subj="es-chart-settings"]`)).toBeInTheDocument();
 
-    expect((Settings as jest.Mock).mock.calls[0][0]).toEqual({
-      baseTheme: {
-        eui: {
-          euiColorDarkShade: '#fff',
-          euiScrollBar: 0,
-          euiScrollBarCorner: '#ccc',
-        },
-      },
-      theme: {
-        chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
-        partition: {
-          circlePadding: 4,
-          emptySizeRatio: 0.8,
-          idealFontSizeJump: 1.1,
-          outerSizeRatio: 1,
-        },
+    const settingsProps = (Settings as jest.Mock).mock.calls[0][0];
+    expect(settingsProps.baseTheme).toEqual(LIGHT_THEME);
+    expect(settingsProps.theme[0]).toEqual({
+      chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
+      partition: {
+        circlePadding: 4,
+        emptySizeRatio: 0.8,
+        idealFontSizeJump: 1.1,
+        outerSizeRatio: 1,
       },
     });
+    expect(settingsProps.onElementClick).toBeInstanceOf(Function);
   });
 
   test('should render an empty chart', () => {

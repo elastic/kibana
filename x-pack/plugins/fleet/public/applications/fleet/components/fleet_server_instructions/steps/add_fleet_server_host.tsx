@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import {
   EuiSwitch,
   EuiButton,
@@ -14,7 +15,7 @@ import {
   EuiCode,
   EuiForm,
   EuiFormErrorText,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
   EuiFormRow,
@@ -33,9 +34,11 @@ import { FleetServerHostSelect } from '../components';
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,
   disabled,
+  onClose,
 }: {
   fleetServerHostForm: FleetServerHostForm;
   disabled: boolean;
+  onClose: () => void;
 }): EuiStepProps => {
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle', {
@@ -43,15 +46,17 @@ export const getAddFleetServerHostStep = ({
     }),
     status: disabled ? 'disabled' : undefined,
     children: disabled ? null : (
-      <AddFleetServerHostStepContent fleetServerHostForm={fleetServerHostForm} />
+      <AddFleetServerHostStepContent fleetServerHostForm={fleetServerHostForm} onClose={onClose} />
     ),
   };
 };
 
 export const AddFleetServerHostStepContent = ({
   fleetServerHostForm,
+  onClose,
 }: {
   fleetServerHostForm: FleetServerHostForm;
+  onClose: () => void;
 }) => {
   const {
     setFleetServerHost,
@@ -107,8 +112,24 @@ export const AddFleetServerHostStepContent = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.fleetServerSetup.addFleetServerHostStepDescription"
-          defaultMessage="First, set the public IP or host name and port that agents will use to reach Fleet Server. It uses port {port} by default. We'll then generate a policy for you automatically. "
-          values={{ port: <EuiCode>8220</EuiCode> }}
+          defaultMessage="First, set the public IP or host name and port that agents will use to reach Fleet Server. It uses port {port} by default {toolTip}. We'll then generate a policy for you automatically. "
+          values={{
+            port: <EuiCode>8220</EuiCode>,
+            toolTip: (
+              <EuiIconTip
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.fleetServerSetup.getStartedInstructionsPortTooltips"
+                    defaultMessage="This can only be set during Fleet Server installation."
+                  />
+                }
+                position="right"
+              />
+            ),
+          }}
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -159,6 +180,7 @@ export const AddFleetServerHostStepContent = ({
                     defaultMessage: 'Specify host URL',
                   }
                 )}
+                isUrl
               />
               {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
             </>
@@ -210,12 +232,13 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: submittedFleetServerHost.host_urls[0],
                 fleetSettingsLink: (
-                  <EuiLink href={getHref('settings')}>
+                  // eslint-disable-next-line @elastic/eui/href-or-on-click
+                  <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
                     />
-                  </EuiLink>
+                  </EuiButtonEmpty>
                 ),
               }}
             />

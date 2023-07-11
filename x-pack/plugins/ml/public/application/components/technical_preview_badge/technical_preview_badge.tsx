@@ -11,13 +11,13 @@ import { EuiBetaBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export const TechnicalPreviewBadge: FC = () => {
+export const TechnicalPreviewBadge: FC<{ compressed?: boolean }> = ({ compressed = false }) => {
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
         defaultMessage: 'Technical preview',
       })}
-      size="m"
+      size={compressed ? 's' : 'm'}
       color="hollow"
       tooltipContent={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaTooltipContent', {
         defaultMessage:

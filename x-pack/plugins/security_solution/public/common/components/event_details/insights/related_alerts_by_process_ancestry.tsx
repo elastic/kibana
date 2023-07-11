@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { Filter } from '@kbn/es-query';
 import { isActiveTimeline } from '../../../../helpers';
@@ -25,10 +25,8 @@ import {
   PROCESS_ANCESTRY_ERROR,
   PROCESS_ANCESTRY_FILTER,
 } from './translations';
-import { BETA } from '../../../translations';
 
 interface Props {
-  data: TimelineEventsDetailsItem;
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
@@ -70,7 +68,7 @@ const dataProviderLimit = 5;
  * state inside the component rather than to add it to Redux.
  */
 export const RelatedAlertsByProcessAncestry = React.memo<Props>(
-  ({ data, originalDocumentId, index, eventId, scopeId }) => {
+  ({ originalDocumentId, index, eventId, scopeId }) => {
     const [showContent, setShowContent] = useState(false);
     const [cache, setCache] = useState<Partial<Cache>>({});
 
@@ -92,7 +90,6 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
       }
       return (
         <FetchAndNotifyCachedAlertsByProcessAncestry
-          data={data}
           index={index}
           originalDocumentId={originalDocumentId}
           eventId={eventId}
@@ -100,9 +97,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
           onCacheLoad={setCache}
         />
       );
-    }, [showContent, cache.alertIds, data, index, originalDocumentId, eventId, scopeId]);
-
-    const betaBadge = useMemo(() => <EuiBetaBadge size="s" label={BETA} color="subdued" />, []);
+    }, [showContent, cache.alertIds, index, originalDocumentId, eventId, scopeId]);
 
     return (
       <InsightAccordion
@@ -116,7 +111,6 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
         }
         renderContent={renderContent}
         onToggle={onToggle}
-        extraAction={betaBadge}
       />
     );
   }
@@ -128,20 +122,16 @@ RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
  * Fetches data, displays a loading and error state and notifies about on success
  */
 const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
-  data: TimelineEventsDetailsItem;
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
   isActiveTimelines: boolean;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
-  const { values: wrappedProcessEntityId } = data;
+}> = ({ originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
   const { values: indices } = index;
   const { values: wrappedDocumentId } = originalDocumentId;
   const documentId = Array.isArray(wrappedDocumentId) ? wrappedDocumentId[0] : '';
-  const processEntityId = Array.isArray(wrappedProcessEntityId) ? wrappedProcessEntityId[0] : '';
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
-    processEntityId,
     isActiveTimeline: isActiveTimelines,
     documentId,
     indices: indices ?? [],

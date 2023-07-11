@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import qs from 'query-string';
 
 import {

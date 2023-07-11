@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { HttpStart } from '@kbn/core/public';
 import { isErrorEmbeddable, openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
-import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainer } from '../dashboard_container';
@@ -18,14 +19,21 @@ export function addFromLibrary(this: DashboardContainer) {
     notifications,
     usageCollection,
     settings: { uiSettings, theme },
-    dashboardSavedObject: { savedObjectsClient },
     embeddable: { getEmbeddableFactories, getEmbeddableFactory },
+    http,
+    savedObjectsManagement,
+    savedObjectsTagging,
   } = pluginServices.getServices();
 
   if (isErrorEmbeddable(this)) return;
   this.openOverlay(
     openAddPanelFlyout({
-      SavedObjectFinder: getSavedObjectFinder({ client: savedObjectsClient }, uiSettings),
+      SavedObjectFinder: getSavedObjectFinder(
+        uiSettings,
+        http as HttpStart,
+        savedObjectsManagement,
+        savedObjectsTagging.api
+      ),
       reportUiCounter: usageCollection.reportUiCounter,
       getAllFactories: getEmbeddableFactories,
       getFactory: getEmbeddableFactory,
@@ -33,6 +41,10 @@ export function addFromLibrary(this: DashboardContainer) {
       notifications,
       overlays,
       theme,
+      onAddPanel: (id: string) => {
+        this.setScrollToPanelId(id);
+        this.setHighlightPanelId(id);
+      },
     })
   );
 }

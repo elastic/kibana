@@ -74,6 +74,16 @@ const symbolizedTests = [
     },
     expected: 'full;oom_reaper;crash();main()',
   },
+  {
+    params: {
+      fileID: '',
+      addressOrLine: 75,
+      exeFilename: 'oom_reaper',
+      sourceFilename: '/code/functionsimsearch/learning/simhashweightslossfunctor.hpp',
+      functionName: 'crash()',
+    },
+    expected: 'full;oom_reaper;crash();learning/simhashweightslossfunctor.hpp',
+  },
 ];
 
 describe('Frame group operations', () => {

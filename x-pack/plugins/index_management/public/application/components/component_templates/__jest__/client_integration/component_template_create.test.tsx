@@ -14,6 +14,23 @@ import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 
