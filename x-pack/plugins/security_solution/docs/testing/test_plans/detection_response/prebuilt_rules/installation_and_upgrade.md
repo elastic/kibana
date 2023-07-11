@@ -173,6 +173,8 @@ TODO: Check why for the legacy API Dmitrii has added 2 integration tests for `ru
 - `should update outdated prebuilt rules when previous historical versions available`
 - `should update outdated prebuilt rules when previous historical versions unavailable`
 
+(NOTE: the second scenario tests that, if a new version of a rule is released, it can upgrade the current instance of that rule even if the historical versions of that rule are no longer in the package)
+
 Notes:
 
 - Legacy API:
@@ -220,7 +222,7 @@ Notes:
 
 ### Scenarios for the real package
 
-#### **Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new pckage**
+#### **Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package**
 
 **Automation**: 1 integration test with real packages.
 

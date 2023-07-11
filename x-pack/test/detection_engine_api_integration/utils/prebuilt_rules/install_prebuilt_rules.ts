@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import { RuleVersionSpecifier } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
 import { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
@@ -37,9 +36,8 @@ export const installPrebuiltRules = async (
   }
   const response = await supertest
     .post(PERFORM_RULE_INSTALLATION_URL)
-    .send(payload)
     .set('kbn-xsrf', 'true')
-    .send()
+    .send(payload)
     .expect(200);
 
   return response.body;
