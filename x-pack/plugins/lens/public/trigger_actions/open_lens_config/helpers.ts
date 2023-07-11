@@ -29,7 +29,7 @@ function tracksOverlays(root: unknown): root is TracksOverlays {
 }
 
 export async function isActionCompatible(embeddable: IEmbeddable) {
-  return Boolean(isLensEmbeddable(embeddable));
+  return Boolean(isLensEmbeddable(embeddable) && embeddable.isTextBasedLanguage());
 }
 
 export async function executeAction({ embeddable, startDependencies, overlays, theme }: Context) {
