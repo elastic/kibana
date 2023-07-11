@@ -69,8 +69,8 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   // Using a ref to prevent rerenders in the child components while keeping the latest state
-  const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
-  getSuggestionForField.current = (field: DragDropIdentifier) => {
+  const getSuggestionForField = useRef<(field?: DragDropIdentifier) => Suggestion | undefined>();
+  getSuggestionForField.current = (field?: DragDropIdentifier) => {
     if (!field || !activeDatasourceId) {
       return;
     }

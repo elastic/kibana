@@ -103,7 +103,7 @@ interface WorkspaceState {
   errors: UserMessage[];
 }
 
-const dropProps = {
+const staticDropProps = {
   value: {
     id: 'lnsWorkspace',
     humanData: {
@@ -113,6 +113,8 @@ const dropProps = {
     },
   },
   order: [1, 0, 0, 0],
+  dataTestSubj: 'lnsWorkspace',
+  draggable: false,
 };
 
 const executionContext: KibanaExecutionContext = {
@@ -124,36 +126,19 @@ const executionContext: KibanaExecutionContext = {
 
 const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
 
-export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
-  const { getSuggestionForField, ...restProps } = props;
-
-  const [{ dragging }] = useDragDropContext();
-
-  const suggestionForDraggedField = useMemo(
-    () => dragging && getSuggestionForField(dragging),
-    [dragging, getSuggestionForField]
-  );
-
-  return (
-    <InnerWorkspacePanel {...restProps} suggestionForDraggedField={suggestionForDraggedField} />
-  );
-});
-
 // Exported for testing purposes only.
-export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
+export const WorkspacePanel = ({
   framePublicAPI,
   visualizationMap,
   datasourceMap,
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
-  suggestionForDraggedField,
+  getSuggestionForField,
   lensInspector,
   getUserMessages,
   addUserMessages,
-}: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
-  suggestionForDraggedField: Suggestion | undefined;
-}) {
+}: WorkspacePanelProps) => {
   const dispatchLens = useLensDispatch();
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const visualization = useLensSelector(selectVisualization);
@@ -175,6 +160,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   // NOTE: This does not reflect the actual visualization render
   const initialWorkspaceRenderComplete = useRef<boolean>();
+
+  const [{ dragging }] = useDragDropContext();
+
 
   const renderDeps = useRef<{
     datasourceMap: DatasourceMap;
@@ -474,12 +462,16 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [plugins.uiActions]
   );
 
-  const onDrop = useCallback(() => {
-    if (suggestionForDraggedField) {
-      trackUiCounterEvents('drop_onto_workspace');
-      switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
-    }
-  }, [suggestionForDraggedField, dispatchLens]);
+  const onDrop = useCallback(
+    (draggedItem) => {
+      const suggestionForDraggedField = getSuggestionForField(draggedItem);
+      if (suggestionForDraggedField) {
+        trackUiCounterEvents('drop_onto_workspace');
+        switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
+      }
+    },
+    [dispatchLens, getSuggestionForField]
+  );
 
   const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
 
@@ -600,7 +592,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
-  const [{ dragging }] = useDragDropContext();
   const renderWorkspace = () => {
     const customWorkspaceRenderer =
       activeDatasourceId &&
@@ -627,15 +618,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
     return (
       <DragDrop
+        {...staticDropProps}
         className={classNames('lnsWorkspacePanel__dragDrop', {
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
         })}
-        dataTestSubj="lnsWorkspace"
-        draggable={false}
-        dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
+        dropTypes={getSuggestionForField(dragging) ? ['field_add'] : undefined}
         onDrop={onDrop}
-        value={dropProps.value}
-        order={dropProps.order}
       >
         <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
       </DragDrop>
@@ -657,7 +645,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       {renderWorkspace()}
     </WorkspacePanelWrapper>
   );
-});
+};
 
 function useReportingState(errors: UserMessage[]): {
   isRenderComplete: boolean;
