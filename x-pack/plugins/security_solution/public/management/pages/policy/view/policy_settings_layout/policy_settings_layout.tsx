@@ -9,14 +9,8 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiBottomBar,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -162,7 +156,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
 
       <EuiSpacer size="xxl" />
 
-      <EuiBottomBar paddingSize="s">
+      <KibanaPageTemplate.BottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -193,7 +187,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </EuiBottomBar>
+      </KibanaPageTemplate.BottomBar>
     </>
   );
 });
