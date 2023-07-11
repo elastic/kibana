@@ -198,7 +198,7 @@ const dataComparisonedNoLabel = i18n.translate(
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
   'xpack.dataVisualizer.dataComparison.showOnlyDriftedFieldsOptionLabel',
-  { defaultMessage: 'Show only fields with data drifted' }
+  { defaultMessage: 'Show only fields with drifted data' }
 );
 
 interface DataComparisonViewProps {

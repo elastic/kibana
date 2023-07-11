@@ -172,7 +172,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings, data } = services;
+  const { uiSettings, data } = services;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
