@@ -125,6 +125,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
       id={id}
       title={title}
       iconType={icon}
+      iconSize={'m'}
       isCollapsible={true}
       initialIsOpen={isActive}
       onToggle={(isOpen) => setIsCollapsed(!isOpen)}
