@@ -166,19 +166,16 @@ export const getRotatingNumberVisualization = ({
     return { ...prevState, accessor: undefined };
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <EuiFormRow label="Pick a color">
-          <EuiColorPicker
-            onChange={(newColor) => {
-              props.setState({ ...props.state, color: newColor });
-            }}
-            color={props.state.color}
-          />
-        </EuiFormRow>
-      </KibanaThemeProvider>,
-      domElement
+  DimensionEditorComponent(props) {
+    return (
+      <EuiFormRow label="Pick a color">
+        <EuiColorPicker
+          onChange={(newColor) => {
+            props.setState({ ...props.state, color: newColor });
+          }}
+          color={props.state.color}
+        />
+      </EuiFormRow>
     );
   },
 });

@@ -195,20 +195,16 @@ export const getVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
+  DimensionEditorComponent(props) {
     if (props.groupId === REGION_KEY_GROUP_ID) {
-      render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <I18nProvider>
-            <RegionKeyEditor
-              emsFileLayers={emsFileLayers}
-              state={props.state}
-              setState={props.setState}
-            />
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <RegionKeyEditor
+          emsFileLayers={emsFileLayers}
+          state={props.state}
+          setState={props.setState}
+        />
       );
     }
+    return null;
   },
 });
