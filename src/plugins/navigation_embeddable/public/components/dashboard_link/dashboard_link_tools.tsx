@@ -63,12 +63,10 @@ const fetchDashboards = async ({
 
     /** ... so that we can force them to the top of the list as necessary. */
     if (currentDashboardId) {
-      dashboardList.pop(); // the result should still be of `size,` so remove the dashboard at the end of the list
-      dashboardList.unshift(await fetchDashboard(currentDashboardId)); // in order to force the current dashboard to the start of the list
+      dashboardList.unshift(await fetchDashboard(currentDashboardId));
     }
 
     if (selectedDashboardId !== currentDashboardId && selectedDashboardId) {
-      dashboardList.pop();
       dashboardList.unshift(await fetchDashboard(selectedDashboardId));
     }
   }

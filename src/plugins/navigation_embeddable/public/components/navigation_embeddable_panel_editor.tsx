@@ -23,6 +23,7 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  // euiDragDropReorder,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 

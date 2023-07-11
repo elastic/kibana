@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Subject } from 'rxjs';
+import { memoize } from 'lodash';
 import { skip, take, takeUntil } from 'rxjs/operators';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -16,6 +17,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import { coreServices } from '../services/kibana_services';
 import { NavigationEmbeddableInput } from '../embeddable/types';
 import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
+import { memoizedFetchDashboards } from '../components/dashboard_link/dashboard_link_tools';
 
 /**
  * @throws in case user cancels
@@ -64,6 +66,8 @@ export async function openEditorFlyout(
     );
 
     editorFlyout.onClose.then(() => {
+      // we should always re-fetch the dashboards when the editor is opened; so, clear the cache on close
+      memoizedFetchDashboards.cache = new memoize.Cache();
       closed$.next(true);
     });
   });
