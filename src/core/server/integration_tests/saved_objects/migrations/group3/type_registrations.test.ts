@@ -132,6 +132,7 @@ const previouslyRegisteredTypes = [
   'uptime-synthetics-api-key',
   'url',
   'usage-counters',
+  'versioned_enrcyption_definition',
   'visualization',
   'workplace_search_telemetry',
 ].sort();
