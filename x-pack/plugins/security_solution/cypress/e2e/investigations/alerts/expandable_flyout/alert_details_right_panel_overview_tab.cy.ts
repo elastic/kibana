@@ -11,11 +11,11 @@ import {
   expandFirstAlertExpandableFlyout,
 } from '../../../../tasks/expandable_flyout/common';
 import {
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_NAVIGATE_TO_RULE_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS,
@@ -49,7 +49,7 @@ import {
   clickInvestigationGuideButton,
   clickPrevalenceViewAllButton,
   clickThreatIntelligenceViewAllButton,
-  toggleOverviewTabDescriptionSection,
+  toggleOverviewTabAboutSection,
   toggleOverviewTabInsightsSection,
   toggleOverviewTabInvestigationSection,
   toggleOverviewTabVisualizationsSection,
@@ -81,18 +81,16 @@ describe(
       expandFirstAlertExpandableFlyout();
     });
 
-    describe('description section', () => {
-      it('should display description section', () => {
+    describe('about section', () => {
+      it('should display about section', () => {
         cy.log('header and content');
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_HEADER)
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER)
           .should('be.visible')
-          .and('have.text', 'Description');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_CONTENT).should(
-          'be.visible'
-        );
+          .and('have.text', 'About');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('be.visible');
 
-        cy.log('expand button');
+        cy.log('description');
 
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE)
           .should('be.visible')
@@ -143,7 +141,7 @@ describe(
 
     describe('investigation section', () => {
       it('should display investigation section', () => {
-        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
 
         cy.log('header and content');
@@ -192,7 +190,7 @@ describe(
 
     describe('insights section', () => {
       it('should display entities section', () => {
-        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();
 
         cy.log('header and content');
@@ -216,7 +214,7 @@ describe(
       });
 
       it('should display threat intelligence section', () => {
-        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();
 
         cy.log('header and content');
@@ -258,7 +256,7 @@ describe(
 
         createNewCaseFromExpandableFlyout();
 
-        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();
 
         cy.log('header and content');
@@ -299,7 +297,7 @@ describe(
       // TODO work on getting proper data to make the prevalence section work here
       //  we need to generate enough data to have at least one field with prevalence
       it.skip('should display prevalence section', () => {
-        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabAboutSection();
         toggleOverviewTabInsightsSection();
 
         cy.log('header and content');
@@ -326,7 +324,7 @@ describe(
 
     describe('visualizations section', () => {
       it('should display analyzer and session previews', () => {
-        toggleOverviewTabDescriptionSection();
+        toggleOverviewTabAboutSection();
         toggleOverviewTabVisualizationsSection();
 
         cy.log('analyzer graph preview');
