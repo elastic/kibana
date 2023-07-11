@@ -7,6 +7,7 @@
 
 import { each, flatMap, flatten, map, reduce } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { EndpointParamsConfig } from '../../../../common/detection_engine/rule_response_actions/schemas/endpoint';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { RuleResponseEndpointAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type {
@@ -25,28 +26,28 @@ export const endpointResponseAction = (
   const uniqueAlerts = reduce(
     alerts,
     (acc: EndpointResponseActionAlerts, alert) => {
+      const agentId = alert.agent.id;
+      const agentName = alert.agent?.name;
       return {
         ...acc,
-        [alert.agent.id]: {
-          ...acc[alert.agent.id],
+        [agentId]: {
+          ...acc[agentId],
           agent: {
-            ...acc[alert.agent.id]?.agent,
-            id: alert.agent.id,
-            name: alert.agent.name,
+            ...acc[agentId]?.agent,
+            id: agentId,
+            name: agentName,
           },
           pids: {
-            ...(acc[alert.agent.id]?.pids || {}),
-            ...getProcessAlerts(acc, alert),
+            ...(acc[agentId]?.pids || {}),
+            ...getProcessAlerts(acc, alert, responseAction.params.config),
           },
           hosts: {
-            ...(acc[alert.agent.id]?.hosts || {}),
-            [alert.agent.id]: {
-              name: alert.agent?.name
-                ? alert.agent.name
-                : acc[alert.agent.id]?.hosts[alert.agent.id].name ?? '',
+            ...(acc[agentId]?.hosts || {}),
+            [agentId]: {
+              name: agentName ? agentName : acc[agentId]?.hosts[agentId].name ?? '',
             },
           },
-          alertIds: [...(acc[alert.agent.id]?.alertIds || []), alert._id],
+          alertIds: [...(acc[agentId]?.alertIds || []), alert._id],
         },
       };
     },
@@ -60,15 +61,18 @@ export const endpointResponseAction = (
     rule_name: alerts[0][ALERT_RULE_NAME],
   };
 
-  if (command === 'isolate') {
+  if (command === 'isolate' || command === 'running-processes') {
     return Promise.all(
       map(uniqueAlerts, async (alertPerAgent) =>
-        endpointAppContextService.getActionCreateService().createActionFromAlert({
-          hosts: alertPerAgent.hosts,
-          endpoint_ids: [alertPerAgent.agent.id],
-          alert_ids: alertPerAgent.alertIds,
-          ...commonData,
-        })
+        endpointAppContextService.getActionCreateService().createActionFromAlert(
+          {
+            hosts: alertPerAgent.hosts,
+            endpoint_ids: [alertPerAgent.agent.id],
+            alert_ids: alertPerAgent.alertIds,
+            ...commonData,
+          },
+          [alertPerAgent.agent.id]
+        )
       )
     );
   }
@@ -78,19 +82,27 @@ export const endpointResponseAction = (
 
     return Promise.all(
       each(flatAlerts, async (alert) => {
-        return endpointAppContextService.getActionCreateService().createActionFromAlert({
-          hosts: alert.hosts,
-          endpoint_ids: [alert.agentId],
-          alert_ids: alert.alertIds,
-          parameters: alert.parameters,
-          ...commonData,
-        });
+        return endpointAppContextService.getActionCreateService().createActionFromAlert(
+          {
+            hosts: alert.hosts,
+            endpoint_ids: [alert.agentId],
+            alert_ids: alert.alertIds,
+            parameters: alert.parameters,
+            ...commonData,
+          },
+          [alert.agentId]
+        );
       })
     );
   }
 };
-const getProcessAlerts = (acc: ResponseActionsAlerts, alert: Alert) => {
-  const pid = alert.process?.pid;
+const getProcessAlerts = (
+  acc: EndpointResponseActionAlerts,
+  alert: Alert,
+  config?: EndpointParamsConfig
+) => {
+  const pidField = (config?.parent && alert.process?.parent?.pid) ?? alert.process?.pid;
+  const pid = (config?.field ? alert[config.field] : pidField) as string;
   const { _id, agent } = alert;
   const { id: agentId, name } = agent as AlertAgent;
 

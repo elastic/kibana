@@ -52,6 +52,7 @@ export const actionCreateService = (
     // create an Action ID and use that to dispatch action to ES & Fleet Server
     const actionID = uuidv4();
 
+    console.log({ payload, agents });
     await writeActionToIndices({
       actionID,
       agents,

@@ -249,6 +249,7 @@ describe('Update rule route', () => {
                 params: {
                   command: 'isolate',
                   comment: '',
+                  config: undefined,
                 },
               },
             ],

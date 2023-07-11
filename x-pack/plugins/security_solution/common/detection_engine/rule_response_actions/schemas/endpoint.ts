@@ -13,9 +13,17 @@ function keyObject<T extends readonly string[]>(arr: T): { [K in T[number]]: nul
   return Object.fromEntries(arr.map((v) => [v, null])) as never;
 }
 
+const EndpointParamsConfig = t.type({
+  field: t.union([t.string, t.undefined]),
+  parent: t.union([t.boolean, t.undefined]),
+});
+
+export type EndpointParamsConfig = t.TypeOf<typeof EndpointParamsConfig>;
+
 export const EndpointParams = t.type({
   command: t.keyof(keyObject(ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)),
   comment: t.union([t.string, t.undefined]),
+  config: t.union([EndpointParamsConfig, t.undefined]),
 });
 
 export type EndpointParams = t.TypeOf<typeof EndpointParams>;

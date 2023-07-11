@@ -7,11 +7,18 @@
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 
-export type Alert = ParsedTechnicalFields & {
-  _id: string;
-  agent?: AlertAgent;
-  process?: { pid: string };
-};
+export type Alert = ParsedTechnicalFields &
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Record<string, any> & {
+    _id: string;
+    agent?: AlertAgent;
+    process?: {
+      pid: string;
+      parent: {
+        pid: string;
+      };
+    };
+  };
 
 export interface AlertAgent {
   id: string;
