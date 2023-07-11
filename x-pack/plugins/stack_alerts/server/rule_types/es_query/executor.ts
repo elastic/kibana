@@ -40,14 +40,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     spaceId,
     logger,
   } = options;
-  const {
-    alertFactory,
-    scopedClusterClient,
-    searchSourceClient,
-    share,
-    dataViews,
-    ruleResultService,
-  } = services;
+  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
@@ -57,7 +50,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
   const isEsqlQuery = isEsqlQueryRule(params.searchType);
-  const isGroupAgg = isGroupAggregation(params.termField) || (isEsqlQuery && params.alertId);
+  const isGroupAgg = isGroupAggregation(params.termField);
 
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
@@ -86,14 +79,12 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ruleId,
         alertLimit,
         params: params as OnlyEsqlQueryRuleParams,
-        latestTimestamp,
         spacePrefix,
         services: {
           share,
           scopedClusterClient,
           logger,
           dataViews,
-          ruleResultService,
         },
       })
     : await fetchEsQuery({

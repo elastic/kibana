@@ -650,8 +650,7 @@ export class TaskRunner<
       IExecutionStatusAndMetrics
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) =>
-        executionStatusFromState(ruleRunStateWithMetrics, this.ruleResult, runDate),
+      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, runDate),
       (err: ElasticsearchError) => executionStatusFromError(err, runDate)
     );
 

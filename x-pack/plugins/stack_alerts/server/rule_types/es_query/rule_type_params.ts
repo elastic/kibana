@@ -89,12 +89,6 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
   ),
-  alertId: schema.conditional(
-    schema.siblingRef('searchType'),
-    schema.literal('esqlQuery'),
-    schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
-    schema.never()
-  ),
 };
 
 export const EsQueryRuleParamsSchema = schema.object(EsQueryRuleParamsSchemaProperties, {

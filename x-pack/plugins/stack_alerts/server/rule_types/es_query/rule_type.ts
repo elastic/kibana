@@ -132,12 +132,6 @@ export function getRuleType(
       defaultMessage: 'ESQL query field used to fetch data from Elasticsearch.',
     }
   );
-  const actionVariableAlertIdLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextAlertIdLabel',
-    {
-      defaultMessage: 'The string field path used to group alerts.',
-    }
-  );
 
   const actionVariableContextLinkLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
@@ -173,7 +167,6 @@ export function getRuleType(
         { name: 'esQuery', description: actionVariableContextQueryLabel },
         { name: 'index', description: actionVariableContextIndexLabel },
         { name: 'esqlQuery', description: actionVariableEsqlQueryLabel },
-        { name: 'alertId', description: actionVariableAlertIdLabel },
       ],
     },
     useSavedObjectReferences: {
