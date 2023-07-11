@@ -21,7 +21,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'common',
     'infraHome',
     'infraMetricsExplorer',
-    'timePicker',
     'infraSavedViews',
   ]);
   const testSubjects = getService('testSubjects');
@@ -37,12 +36,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.goToMetricExplorer();
-        await pageObjects.timePicker.setAbsoluteRange(
-          START_DATE.format(timepickerFormat),
-          END_DATE.format(timepickerFormat)
-        );
+        await pageObjects.common.setTime({
+          from: START_DATE.format(timepickerFormat),
+          to: END_DATE.format(timepickerFormat),
+        });
       });
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.common.unsetTime();
+      });
 
       it('should render the correct page title', async () => {
         const documentTitle = await browser.getTitle();
