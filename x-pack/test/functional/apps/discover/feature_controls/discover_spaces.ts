@@ -25,6 +25,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
 
+  async function setDiscoverTimeRange() {
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
+  }
+
   describe('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -46,7 +50,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: 'custom_space',
           disabledFeatures: [],
         });
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       });
 
       after(async () => {
@@ -58,7 +61,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/spaces'
         );
-        await PageObjects.common.unsetTime();
       });
 
       it('shows discover navlink', async () => {
@@ -82,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
+        await setDiscoverTimeRange();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
@@ -151,6 +154,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
+        await setDiscoverTimeRange();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
