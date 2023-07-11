@@ -71,11 +71,11 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     return {
       ...getCustomMetricIndicatorAggregation.execute({
         type: 'good',
-        aggregationKey: 'sli.numerator',
+        aggregationKey: 'slo.numerator',
       }),
       ...getCustomMetricIndicatorAggregation.execute({
         type: 'total',
-        aggregationKey: 'sli.denominator',
+        aggregationKey: 'slo.denominator',
       }),
       ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
         'slo.isGoodSlice': {
