@@ -53,7 +53,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       <BehaviourProtectionCard {...props} data-test-subj={getTestId('behaviour')} />
       <EuiSpacer size="l" />
 
-      <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attachSurface')} />
+      <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attackSurface')} />
       <EuiSpacer size="l" />
 
       <FormSectionTitle>{SETTINGS_SECTION_TITLE}</FormSectionTitle>

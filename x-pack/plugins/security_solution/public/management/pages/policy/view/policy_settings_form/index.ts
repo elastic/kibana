@@ -6,4 +6,3 @@
  */
 
 export { PolicySettingsForm } from './policy_settings_form';
-export { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from './protection_notice_supported_endpoint_version';
