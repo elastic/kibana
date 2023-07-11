@@ -616,9 +616,16 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
 
   return (
     <>
-      <EuiBadge key={firstRole} color="hollow" data-test-subj={`role${firstRole}`}>
-        {firstRole}
-      </EuiBadge>
+      <div
+        style={{
+          maxWidth: '100px',
+          display: 'inline-block',
+        }}
+      >
+        <EuiBadge key={firstRole} color="hollow" data-test-subj={`role${firstRole}`}>
+          {firstRole}
+        </EuiBadge>
+      </div>
       {remainingRoles.length ? renderMoreRoles() : null}
     </>
   );
