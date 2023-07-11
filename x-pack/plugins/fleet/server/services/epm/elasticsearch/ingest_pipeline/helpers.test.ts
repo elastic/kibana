@@ -230,6 +230,7 @@ processors:
                     name: logs-test@custom
                     ignore_missing_pipeline: true
                 - reroute:
+                    tag: test
                     dataset: test.reroute
                     namespace: default
                     if: true == true
@@ -270,7 +271,7 @@ processors:
       });
 
       expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"reroute\\":{\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
+        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"reroute\\":{\\"tag\\":\\"test\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
       );
     });
   });

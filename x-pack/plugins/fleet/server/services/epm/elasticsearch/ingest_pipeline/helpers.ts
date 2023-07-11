@@ -89,6 +89,7 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
   };
   const rerouteProcessors = localRoutingRules.map((routingRule) => ({
     reroute: {
+      tag: pipeline.dataStream?.dataset,
       dataset: routingRule.target_dataset,
       namespace: routingRule.namespace,
       if: routingRule.if,
