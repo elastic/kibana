@@ -111,10 +111,12 @@ export class ReportingCore {
   private executing: Set<string>;
   private csvSearchSourceExport: CsvSearchSourceExportType;
   private csvV2ExportType: CsvV2ExportType;
+  private csvSearchSourceImmediateExport: CsvSearchSourceImmediateExportType;
   private pdfExport: PdfExportType;
   private pdfV1Export: PdfV1ExportType;
   private pngV1Export: PngV1ExportType;
-  private csvSearchSourceImmediateExport: CsvSearchSourceImmediateExportType;
+
+
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -156,6 +158,7 @@ export class ReportingCore {
     this.exportTypesRegistry.register(this.pdfV1Export);
     this.exportTypesRegistry.register(this.pngV1Export);
     this.exportTypesRegistry.register(this.csvSearchSourceImmediateExport);
+
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -184,7 +187,6 @@ export class ReportingCore {
     this.csvSearchSourceExport.setup(setupDeps);
     this.csvV2ExportType.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
-
     this.csvSearchSourceImmediateExport.setup(setupDeps);
     this.pdfV1Export.setup(setupDeps);
     this.pngV1Export.setup(setupDeps);

@@ -58,20 +58,14 @@ export function DimensionButton({
       css={css`
         ${useEuiFontSize('s')}
         border-radius: ${euiThemeVars.euiBorderRadius};
+        position: relative;
+        line-height: 1;
+        overflow: hidden;
         display: flex;
         align-items: center;
-        overflow: hidden;
+        gap: ${euiThemeVars.euiSizeS};
         min-height: ${euiThemeVars.euiSizeXL};
-        position: relative;
-
-        &:hover,
-        &:focus {
-          .lnsLayerPanel__dimensionRemove {
-            visibility: visible;
-            opacity: 1;
-            transition: opacity ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
-          }
-        }
+        padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
       `}
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
@@ -120,12 +114,17 @@ export function DimensionButton({
         })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
         css={css`
-          margin-right: ${euiThemeVars.euiSizeS};
-          visibility: hidden;
-          opacity: 0;
           color: ${euiThemeVars.euiTextSubduedColor};
+          transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+          transition-property: color, opacity, background-color, transform;
+          opacity: 0;
 
-          &:hover {
+          .domDragDrop:hover &,
+          .domDragDrop:focus-within & {
+            opacity: 1;
+          }
+          &:hover,
+          &:focus {
             color: ${euiThemeVars.euiColorDangerText};
           }
         `}
