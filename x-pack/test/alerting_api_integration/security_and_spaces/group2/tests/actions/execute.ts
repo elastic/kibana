@@ -583,7 +583,6 @@ export default function ({ getService }: FtrProviderContext) {
           ['execute-start', { equal: 1 }],
           ['execute', { equal: 1 }],
         ]),
-        // filter: 'event.action:(execute)',
       });
     });
 
@@ -632,43 +631,5 @@ export default function ({ getService }: FtrProviderContext) {
     if (errorMessage) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);
     }
-
-    // const event = events[0];
-
-    // const duration = event?.event?.duration;
-    // const eventStart = Date.parse(event?.event?.start || 'undefined');
-    // const eventEnd = Date.parse(event?.event?.end || 'undefined');
-    // const dateNow = Date.now();
-
-    // expect(typeof duration).to.be('number');
-    // expect(eventStart).to.be.ok();
-    // expect(eventEnd).to.be.ok();
-
-    // const durationDiff = Math.abs(
-    //   Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    // );
-
-    // // account for rounding errors
-    // expect(durationDiff < 1).to.equal(true);
-    // expect(eventStart <= eventEnd).to.equal(true);
-    // expect(eventEnd <= dateNow).to.equal(true);
-
-    // expect(event?.event?.outcome).to.equal(outcome);
-
-    // expect(event?.kibana?.saved_objects).to.eql([
-    //   {
-    //     rel: 'primary',
-    //     type: 'action',
-    //     id: connectorId,
-    //     type_id: actionTypeId,
-    //     namespace: spaceId,
-    //   },
-    // ]);
-
-    // expect(event?.message).to.eql(message);
-
-    // if (errorMessage) {
-    //   expect(event?.error?.message).to.eql(errorMessage);
-    // }
   }
 }

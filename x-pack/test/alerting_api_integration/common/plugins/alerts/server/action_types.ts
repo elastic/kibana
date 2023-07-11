@@ -433,7 +433,7 @@ function getSystemActionType() {
 }
 
 function getSystemActionTypeWithKibanaPrivileges() {
-  const result: ActionType<{}, {}, {}> = {
+  const result: ActionType<{}, {}, { index?: string; reference?: string }> = {
     id: 'test.system-action-kibana-privileges',
     name: 'Test system action with kibana privileges',
     minimumLicenseRequired: 'platinum',
@@ -455,7 +455,29 @@ function getSystemActionTypeWithKibanaPrivileges() {
       },
     },
     isSystemActionType: true,
-    async executor({ config, secrets, params, services, actionId }) {
+    /**
+     * The executor writes a doc to the
+     * testing index. The test uses the doc
+     * to verify that the action is executed
+     * correctly
+     */
+    async executor({ params, services, actionId }) {
+      const { index, reference } = params;
+
+      if (index == null || reference == null) {
+        return { status: 'ok', actionId };
+      }
+
+      await services.scopedClusterClient.index({
+        index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          reference,
+          source: 'action:test.system-action-kibana-privileges',
+        },
+      });
+
       return { status: 'ok', actionId };
     },
   };

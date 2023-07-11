@@ -350,6 +350,10 @@ export function defineRoutes(
         });
         return res.noContent();
       } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
         return res.badRequest({ body: err });
       }
     }

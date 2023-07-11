@@ -159,20 +159,6 @@ export class ActionExecutor {
           actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
         }
 
-        /**
-         * Perform additional authorization checks for system actions.
-         * It will thrown an error in case of failure.
-         *
-         */
-        if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
-          const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
-            actionTypeId,
-            params
-          );
-
-          authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
-        }
-
         const actionType = actionTypeRegistry.get(actionTypeId);
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
@@ -225,6 +211,19 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
+          /**
+           * Perform additional authorization checks for system actions.
+           * It will thrown an error in case of failure.
+           *
+           */
+          await ensureAuthorizedToExecute({
+            params,
+            actionId,
+            actionTypeId,
+            actionTypeRegistry,
+            authorization,
+          });
+
           const configurationUtilities = actionTypeRegistry.getUtils();
           const { validatedParams, validatedConfig, validatedSecrets } = validateAction(
             {
@@ -250,7 +249,10 @@ export class ActionExecutor {
             source,
           });
         } catch (err) {
-          if (err.reason === ActionExecutionErrorReason.Validation) {
+          if (
+            err.reason === ActionExecutionErrorReason.Validation ||
+            err.reason === ActionExecutionErrorReason.Authorization
+          ) {
             rawResult = err.result;
           } else {
             rawResult = {
@@ -519,3 +521,37 @@ function validateAction(
     });
   }
 }
+
+interface EnsureAuthorizedToExecuteOpts {
+  actionId: string;
+  actionTypeId: string;
+  params: Record<string, unknown>;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  authorization: ActionsAuthorization;
+}
+
+const ensureAuthorizedToExecute = async ({
+  actionId,
+  actionTypeId,
+  params,
+  actionTypeRegistry,
+  authorization,
+}: EnsureAuthorizedToExecuteOpts) => {
+  try {
+    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
+      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
+        actionTypeId,
+        params
+      );
+
+      await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
+    }
+  } catch (error) {
+    throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {
+      actionId,
+      status: 'error',
+      message: error.message,
+      retry: false,
+    });
+  }
+};

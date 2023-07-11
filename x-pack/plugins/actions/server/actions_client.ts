@@ -718,9 +718,9 @@ export class ActionsClient {
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
-  private getSystemActionKibanaPrivileges(actionId: string, metadata?: Record<string, unknown>) {
+  private getSystemActionKibanaPrivileges(connectorId: string, metadata?: Record<string, unknown>) {
     const inMemoryConnector = this.inMemoryConnectors.find(
-      (connector) => connector.id === actionId
+      (connector) => connector.id === connectorId
     );
 
     const additionalPrivileges = inMemoryConnector?.isSystemAction
@@ -772,6 +772,7 @@ export class ActionsClient {
        * for system actions (kibana privileges) will be performed
        * inside the ActionExecutor at execution time
        */
+
       await this.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
       trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
