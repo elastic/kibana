@@ -118,7 +118,6 @@ export class ReportingCore {
   private pngExport: PngExportType;
   private pngV1Export: PngV1ExportType;
 
-
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
