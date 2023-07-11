@@ -101,7 +101,7 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
-   * Returns the kibana privileges of an action type
+   * Returns the kibana privileges of a system action type
    */
   public getSystemActionKibanaPrivileges(
     actionTypeId: string,

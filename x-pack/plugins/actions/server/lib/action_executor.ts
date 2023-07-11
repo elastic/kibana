@@ -212,9 +212,9 @@ export class ActionExecutor {
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
           /**
-           * Perform additional authorization checks for system actions.
+           * Ensures correct permissions for execution and
+           * performs authorization checks for system actions.
            * It will thrown an error in case of failure.
-           *
            */
           await ensureAuthorizedToExecute({
             params,

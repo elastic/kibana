@@ -754,26 +754,6 @@ describe('actionTypeRegistry', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return an empty array if the action type is not a system action but registers kibana privileges', () => {
-      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
-
-      registry.register({
-        id: 'foo',
-        name: 'Foo',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-
-      const result = registry.getSystemActionKibanaPrivileges('foo');
-      expect(result).toEqual([]);
-    });
-
     it('should return an empty array if the action type is not a system action but defines kibana privileges', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
       const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);

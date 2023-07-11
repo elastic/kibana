@@ -516,6 +516,12 @@ export default function ({ getService }: FtrProviderContext) {
             });
 
           switch (scenario.id) {
+            /**
+             * The users in these scenarios may have access
+             * to Actions but do not have access to
+             * the system action. They should not be able to
+             * to execute even if they have access to Actions.
+             */
             case 'no_kibana_privileges at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
@@ -529,6 +535,11 @@ export default function ({ getService }: FtrProviderContext) {
                 message: 'Unauthorized to execute actions',
               });
               break;
+            /**
+             * The users in these scenarios have access
+             * to Actions and to the system action. They should be able to
+             * execute.
+             */
             case 'superuser at space1':
             case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
