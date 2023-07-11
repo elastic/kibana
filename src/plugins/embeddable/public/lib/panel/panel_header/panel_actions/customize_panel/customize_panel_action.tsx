@@ -87,12 +87,12 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
 
   public getDisplayName({ embeddable }: CustomizePanelActionContext): string {
     return i18n.translate('embeddableApi.customizePanel.action.displayName', {
-      defaultMessage: 'Edit panel settings',
+      defaultMessage: 'Panel settings',
     });
   }
 
   public getIconType() {
-    return 'pencil';
+    return 'gear';
   }
 
   public async isCompatible({ embeddable }: CustomizePanelActionContext) {
