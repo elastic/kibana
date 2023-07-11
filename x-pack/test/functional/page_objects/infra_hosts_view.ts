@@ -40,6 +40,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async clickOverviewFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-overview');
+    },
+
     async clickMetadataFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-metadata');
     },
