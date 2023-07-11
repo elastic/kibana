@@ -17,4 +17,5 @@ export {
   wrapWithTheme,
   type KibanaThemeProviderProps,
 } from '@kbn/react-kibana-context';
-export type { UseEuiTheme as EuiTheme } from '@elastic/eui';
+export { useKibanaTheme } from './use_theme';
+export type { EuiTheme } from './types';
