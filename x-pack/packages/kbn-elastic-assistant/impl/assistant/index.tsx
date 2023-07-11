@@ -139,9 +139,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
-  const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>(
-    augmentMessageCodeBlocks(currentConversation)
-  );
+  const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
     setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
@@ -339,17 +337,13 @@ const AssistantComponent: React.FC<Props> = ({
     setShowMissingConnectorCallout(!connectorExists);
   }, [connectors, currentConversation]);
 
-  const CodeBlockPortals = useMemo(
+  const createCodeBlockPortals = useCallback(
     () =>
-      messageCodeBlocks.map((codeBlocks: CodeBlockDetails[]) => {
+      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[]) => {
         return codeBlocks.map((codeBlock: CodeBlockDetails) => {
-          const element: Element = codeBlock.controlContainer as Element;
-
-          return codeBlock.controlContainer != null ? (
-            createPortal(codeBlock.button, element)
-          ) : (
-            <></>
-          );
+          const getElement = codeBlock.getControlContainer;
+          const element = getElement?.();
+          return element ? createPortal(codeBlock.button, element) : <></>;
         });
       }),
     [messageCodeBlocks]
@@ -445,7 +439,7 @@ const AssistantComponent: React.FC<Props> = ({
         )}
 
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-        {CodeBlockPortals}
+        {createCodeBlockPortals()}
 
         {!isWelcomeSetup && (
           <>
