@@ -20,16 +20,14 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
 
   public async installAndStart(): Promise<void> {
     const allTransformIds = ALL_TRANSFORM_TEMPLATES.map((t) => t.transform_id);
-    const response = await retryTransientEsErrors(
-      () =>
-        this.esClient.transform.getTransform(
-          { transform_id: allTransformIds, allow_no_match: true },
-          { ignore: [404] }
-        ),
-      { logger: this.logger }
+    const response = await this.execute(() =>
+      this.esClient.transform.getTransform(
+        { transform_id: allTransformIds, allow_no_match: true },
+        { ignore: [404] }
+      )
     );
 
-    // @ts-ignore Incorrectly typed
+    // @ts-ignore incorrectly typed
     const existingTransforms = response.existingTransforms || response.transforms;
 
     for (const transformTemplate of ALL_TRANSFORM_TEMPLATES) {
@@ -63,38 +61,35 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
     transformTemplate: TransformPutTransformRequest
   ) {
     this.logger.info(`Installing SLO summary transform: ${transformId}`);
-    await retryTransientEsErrors(
-      () => this.esClient.transform.putTransform(transformTemplate, { ignore: [409] }),
-      { logger: this.logger }
+    await this.execute(() =>
+      this.esClient.transform.putTransform(transformTemplate, { ignore: [409] })
     );
   }
 
   private async deletePreviousTransformVersion(transformId: string) {
     this.logger.info(`Deleting previous SLO summary transform: ${transformId}`);
-    await retryTransientEsErrors(
-      () =>
-        this.esClient.transform.stopTransform(
-          { transform_id: transformId, allow_no_match: true, force: true },
-          { ignore: [409, 404] }
-        ),
-      { logger: this.logger }
+    await this.execute(() =>
+      this.esClient.transform.stopTransform(
+        { transform_id: transformId, allow_no_match: true, force: true },
+        { ignore: [409, 404] }
+      )
     );
-    await retryTransientEsErrors(
-      () =>
-        this.esClient.transform.deleteTransform(
-          { transform_id: transformId, force: true },
-          { ignore: [409, 404] }
-        ),
-      { logger: this.logger }
+    await this.execute(() =>
+      this.esClient.transform.deleteTransform(
+        { transform_id: transformId, force: true },
+        { ignore: [409, 404] }
+      )
     );
   }
 
   private async startTransform(transformId: string) {
     this.logger.info(`Starting SLO summary transform: ${transformId}`);
-    await retryTransientEsErrors(
-      () =>
-        this.esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
-      { logger: this.logger }
+    await this.execute(() =>
+      this.esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] })
     );
+  }
+
+  private async execute<T>(esCall: () => Promise<T>): Promise<T> {
+    return retryTransientEsErrors(esCall, { logger: this.logger });
   }
 }
