@@ -8,9 +8,9 @@
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { getTracker } from '@kbn/reporting-common';
 import { PdfScreenshotOptions } from '../../../types';
 import type { PdfMetrics } from '../../../../common/types';
-import { getTracker } from '../../common/pdf_tracker';
 
 interface PdfResult {
   buffer: Uint8Array | null;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -29,7 +29,11 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
-import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import type {
+  CancellationToken,
+  ReportingRequestHandlerContext,
+  TaskRunResult,
+} from '@kbn/reporting-common';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import { ExportTypesRegistry } from './lib';
@@ -92,10 +96,6 @@ export interface ReportingStartDeps {
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
-
-export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: ReportingStart | null;
-}>;
 
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 

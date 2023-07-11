@@ -16,7 +16,7 @@ import { createMockConfigSchema, createMockReportingCore } from '../../test_help
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
-jest.mock('../../lib/crypto', () => ({
+jest.mock('@kbn/reporting-common/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),

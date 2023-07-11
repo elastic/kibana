@@ -7,3 +7,4 @@
  */
 
 export { CsvGenerator } from './src/generate_csv';
+export { CONTENT_TYPE_CSV } from './src/constants';

@@ -7,7 +7,24 @@
  */
 
 export { CancellationToken } from './cancellation_token';
-export type { TaskRunMetrics, CsvMetrics, TaskRunResult } from './metrics';
 export * from './errors';
 export * from './constants';
-export * from './schema_utils';
+export * from './export_types/schema_utils';
+export * from './export_types/types';
+export * from './export_types/metrics';
+export {
+  cryptoFactory,
+  decryptJobHeaders,
+  getFieldFormats,
+  getFullRedirectAppUrl,
+  getCustomLogo,
+  getTracker,
+  ExportType,
+} from './export_types';
+export type {
+  BaseParams,
+  BasePayload,
+  BaseExportTypeSetupDeps,
+  BaseExportTypeStartDeps,
+  ReportingConfigType,
+} from './export_types';
