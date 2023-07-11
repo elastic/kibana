@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  TransformGetTransformTransformSummary,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SLO_RESOURCES_VERSION } from '../../../assets/constants';
 import { retryTransientEsErrors } from '../../../utils/retry';
@@ -30,7 +33,9 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
 
       // @ts-ignore incorrectly typed
       const existingTransforms = response.existingTransforms || response.transforms;
-      const transform = existingTransforms?.find((t) => t.id === transformId);
+      const transform = existingTransforms?.find(
+        (t: TransformGetTransformTransformSummary) => t.id === transformId
+      );
 
       const transformAlreadyInstalled =
         !!transform && transform._meta?.version === SLO_RESOURCES_VERSION;
