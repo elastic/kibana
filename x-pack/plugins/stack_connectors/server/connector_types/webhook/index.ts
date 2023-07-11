@@ -194,7 +194,7 @@ export async function executor(
 
   if (!isEmpty(sslCertificate)) {
     configurationUtilities.getSSLSettings = () => ({
-      verificationMode: 'certificate',
+      verificationMode: 'none',
       ...sslCertificate,
     });
   }
