@@ -18,16 +18,19 @@ import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const StyledEuiModal = styled(EuiModal)`
-  min-width: 1200px;
-  max-height: 100%;
-  height: 100%;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
+  min-width: 95vw;
+  min-height: 25vh;
 `;
+interface Props {
+  isAssistantEnabled: boolean;
+}
 
 /**
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export const AssistantOverlay: React.FC = React.memo(() => {
+export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
@@ -79,8 +82,12 @@ export const AssistantOverlay: React.FC = React.memo(() => {
   return (
     <>
       {isModalVisible && (
-        <StyledEuiModal onClose={handleCloseModal}>
-          <Assistant conversationId={conversationId} promptContextId={promptContextId} />
+        <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
+          <Assistant
+            isAssistantEnabled={isAssistantEnabled}
+            conversationId={conversationId}
+            promptContextId={promptContextId}
+          />
         </StyledEuiModal>
       )}
     </>

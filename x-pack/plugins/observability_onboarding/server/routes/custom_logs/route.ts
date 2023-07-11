@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -167,10 +168,9 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       });
 
     if (!savedObservabilityOnboardingState) {
-      return {
-        message:
-          'Unable to report setup progress - onboarding session not found.',
-      };
+      throw Boom.notFound(
+        'Unable to report setup progress - onboarding session not found.'
+      );
     }
 
     const {
@@ -212,39 +212,44 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
       request,
     } = resources;
     const coreStart = await core.start();
-    const savedObjectsClient =
-      coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const savedObservabilityOnboardingState =
-      (await getObservabilityOnboardingState({
+      await getObservabilityOnboardingState({
         savedObjectsClient,
         savedObjectId: onboardingId,
-      })) || null;
+      });
+
+    if (!savedObservabilityOnboardingState) {
+      throw Boom.notFound(
+        'Unable to report setup progress - onboarding session not found.'
+      );
+    }
+
     const progress = { ...savedObservabilityOnboardingState?.progress };
 
     const esClient =
       coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-    if (savedObservabilityOnboardingState) {
-      const {
-        state: { datasetName: dataset, namespace },
-      } = savedObservabilityOnboardingState;
-      if (progress['ea-status'] === 'complete') {
-        try {
-          const hasLogs = await getHasLogs({
-            dataset,
-            namespace,
-            esClient,
-          });
-          if (hasLogs) {
-            progress['logs-ingest'] = 'complete';
-          } else {
-            progress['logs-ingest'] = 'loading';
-          }
-        } catch (error) {
-          progress['logs-ingest'] = 'warning';
+
+    const {
+      state: { datasetName: dataset, namespace },
+    } = savedObservabilityOnboardingState;
+    if (progress['ea-status'] === 'complete') {
+      try {
+        const hasLogs = await getHasLogs({
+          dataset,
+          namespace,
+          esClient,
+        });
+        if (hasLogs) {
+          progress['logs-ingest'] = 'complete';
+        } else {
+          progress['logs-ingest'] = 'loading';
         }
-      } else {
-        progress['logs-ingest'] = 'incomplete';
+      } catch (error) {
+        progress['logs-ingest'] = 'warning';
       }
+    } else {
+      progress['logs-ingest'] = 'incomplete';
     }
 
     return { progress };

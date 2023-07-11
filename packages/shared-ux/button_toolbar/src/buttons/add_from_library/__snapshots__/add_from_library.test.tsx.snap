@@ -2,7 +2,7 @@
 
 exports[`<AddFromLibraryButton /> is rendered 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-EuiButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
   intl="[object Object]"
   type="button"
 >

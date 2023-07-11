@@ -27,7 +27,6 @@ import { useMlKibana, useMlLink } from '../contexts/kibana';
 import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
-import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 import { getMlNodesCount } from '../ml_nodes_check/check_ml_nodes';
 
 export const overviewPanelDefaultState = Object.freeze({
@@ -37,7 +36,6 @@ export const overviewPanelDefaultState = Object.freeze({
 });
 
 export const OverviewPage: FC = () => {
-  const serverless = useIsServerless();
   const [canViewMlNodes, canCreateJob] = usePermissionCheck(['canViewMlNodes', 'canCreateJob']);
 
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
@@ -83,7 +81,7 @@ export const OverviewPage: FC = () => {
       />
       <UpgradeWarning />
 
-      {canViewMlNodes && serverless === false ? (
+      {canViewMlNodes ? (
         <>
           <CollapsiblePanel
             isOpen={panelsState.nodes}

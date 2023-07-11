@@ -15,6 +15,7 @@ import {
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { DefaultAlertService } from '../default_alerts/default_alert_service';
+import { triggerTestNow } from '../synthetics_service/test_now_monitor';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
@@ -45,11 +46,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     query: schema.object({
       id: schema.maybe(schema.string()),
       preserve_namespace: schema.maybe(schema.boolean()),
+      gettingStarted: schema.maybe(schema.boolean()),
     }),
   },
   writeAccess: true,
   handler: async (routeContext): Promise<any> => {
-    const { context, request, response, savedObjectsClient, server } = routeContext;
+    const { request, response, savedObjectsClient, server } = routeContext;
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
 
@@ -91,20 +93,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           },
         });
       }
-
-      try {
-        // we do this async, so we don't block the user, error handling will be done on the UI via separate api
-        const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-        defaultAlertService.setupDefaultAlerts().then(() => {
-          server.logger.debug(
-            `Successfully created default alert for monitor: ${newMonitor.attributes.name}`
-          );
-        });
-      } catch (e) {
-        server.logger.error(
-          `Error creating default alert: ${e} for monitor: ${newMonitor.attributes.name}`
-        );
-      }
+      initDefaultAlerts(newMonitor.attributes.name, routeContext);
+      setupGettingStarted(newMonitor.id, routeContext);
 
       return response.ok({ body: newMonitor });
     } catch (getErr) {
@@ -303,4 +293,39 @@ export const getMonitorNamespace = (
     throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
   }
   return namespace;
+};
+
+const initDefaultAlerts = (name: string, routeContext: RouteContext) => {
+  const { server, savedObjectsClient, context } = routeContext;
+  try {
+    // we do this async, so we don't block the user, error handling will be done on the UI via separate api
+    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    defaultAlertService.setupDefaultAlerts().then(() => {
+      server.logger.debug(`Successfully created default alert for monitor: ${name}`);
+    });
+  } catch (e) {
+    server.logger.error(`Error creating default alert: ${e} for monitor: ${name}`);
+  }
+};
+
+const setupGettingStarted = (configId: string, routeContext: RouteContext) => {
+  const { server, request } = routeContext;
+
+  try {
+    const { gettingStarted } = request.query;
+
+    if (gettingStarted) {
+      // ignore await, since we don't want to block the response
+      triggerTestNow(configId, routeContext)
+        .then(() => {
+          server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
+        })
+        .catch((e) => {
+          server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`);
+        });
+    }
+  } catch (e) {
+    server.logger.info(`Error triggering test for getting started monitor: ${configId}`);
+    server.logger.error(e);
+  }
 };

@@ -13,6 +13,12 @@ import { getIndexPatternService } from './kibana_services';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
 
+export function getIsTimeseries(dataView: DataView): boolean {
+  return dataView.fields.some((field) => {
+    return field.timeSeriesDimension || field.timeSeriesMetric;
+  });
+}
+
 export function getGeoTileAggNotSupportedReason(field: DataViewField): string | null {
   if (!field.aggregatable) {
     return i18n.translate('xpack.maps.geoTileAgg.disabled.docValues', {

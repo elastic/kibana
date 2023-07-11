@@ -77,7 +77,6 @@ export const SecuritySolutionFlyout = memo(() => {
   return (
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
-      onClose={() => {}}
       handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
     />
   );

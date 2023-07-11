@@ -21,9 +21,9 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { getChartTheme } from '../../../../utils/get_chart_theme';
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,

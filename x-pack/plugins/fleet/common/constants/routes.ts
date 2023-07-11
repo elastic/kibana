@@ -171,6 +171,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 
 export const UNINSTALL_TOKEN_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
+  INFO_PATTERN: `${API_ROOT}/uninstall_tokens/{uninstallTokenId}`,
 };
 
 // Agents setup API routes
