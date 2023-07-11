@@ -839,7 +839,7 @@ For more information, see <<kibana-privileges>>.
 
 `GET /api/apm/sourcemaps`
 
-[[apm-sourcemap-get-example]]
+[[android-sourcemap-get-example]]
 ===== Example
 
 The following example requests all uploaded source maps:
