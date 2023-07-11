@@ -48,8 +48,6 @@ export type UpdateUserProfileHook = (props?: Props) => {
   userProfileData?: UserProfileData | null;
 };
 
-let useUpdateUserProfile: UpdateUserProfileHook | undefined;
-
 const i18nTexts = {
   notificationSuccess: {
     title: i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
@@ -64,17 +62,10 @@ const i18nTexts = {
   },
 };
 
-export const getUseUpdateUserProfile = (
-  { apiClient, notifications }: Deps,
-  useCacheInstance = true
-) => {
-  if (useUpdateUserProfile && useCacheInstance) {
-    return useUpdateUserProfile;
-  }
-
+export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
   const { userProfile$ } = apiClient;
 
-  useUpdateUserProfile = ({ notificationSuccess = {}, pageReloadChecker }: Props = {}) => {
+  const useUpdateUserProfile = ({ notificationSuccess = {}, pageReloadChecker }: Props = {}) => {
     const {
       enabled: notificationSuccessEnabled = true,
       title: notificationTitle = i18nTexts.notificationSuccess.title,

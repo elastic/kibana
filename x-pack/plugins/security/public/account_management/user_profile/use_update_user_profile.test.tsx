@@ -119,13 +119,10 @@ describe('useUpdateUserProfile', () => {
     await userProfileApiClient2.getCurrent(); // Sets the initial value of the userProfile$ Observable
 
     const { result } = renderHook(() =>
-      getUseUpdateUserProfile(
-        {
-          apiClient: userProfileApiClient2,
-          notifications,
-        },
-        false // Don't use the cached hook instance
-      )({
+      getUseUpdateUserProfile({
+        apiClient: userProfileApiClient2,
+        notifications,
+      })({
         pageReloadChecker,
       })
     );
