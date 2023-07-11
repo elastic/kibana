@@ -913,6 +913,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 
 # Additional plugins and packages maintained by the ML team.
 /x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/aiops/ @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
