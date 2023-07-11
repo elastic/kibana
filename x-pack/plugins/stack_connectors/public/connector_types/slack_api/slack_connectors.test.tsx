@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import SlackActionFields from './slack_connectors';
-import { useFetchChannels } from './use_fetch_channels';
+import { useFetchChannels } from './use_valid_channels';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('./use_fetch_channels');

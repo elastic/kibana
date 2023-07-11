@@ -18,9 +18,10 @@ import type {
   PostMessageSubActionParams,
   SlackApiService,
   PostMessageResponse,
-  GetChannelsResponse,
   SlackAPiResponse,
-  ChannelsResponse,
+  ValidChannelResponse,
+  GetAllowedChannelsResponse,
+  ChannelResponse,
 } from '../../../common/slack_api/types';
 import {
   retryResultSeconds,
@@ -31,9 +32,6 @@ import {
 } from '../../../common/slack_api/lib';
 import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-
-const RE_TRY = 5;
-const LIMIT = 1000;
 
 const buildSlackExecutorErrorResponse = ({
   slackApiError,
@@ -106,12 +104,18 @@ const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
 };
 
 export const createExternalService = (
-  { config, secrets }: { config?: { allowedChannels?: string[] }; secrets: { token: string } },
+  {
+    config,
+    secrets,
+  }: {
+    config?: { allowedChannelIds?: string[] };
+    secrets: { token: string };
+  },
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): SlackApiService => {
   const { token } = secrets;
-  const { allowedChannels } = config || { allowedChannels: [] };
+  const { allowedChannelIds } = config || { allowedChannelIds: [] };
   if (!token) {
     throw Error(`[Action][${SLACK_CONNECTOR_NAME}]: Wrong configuration.`);
   }
@@ -124,72 +128,30 @@ export const createExternalService = (
     },
   });
 
-  const getChannels = async (): Promise<
-    ConnectorTypeExecutorResult<GetChannelsResponse | void>
-  > => {
+  const validChannelId = async (
+    channelId: string
+  ): Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>> => {
     try {
-      const fetchChannels = (cursor: string = ''): Promise<AxiosResponse<GetChannelsResponse>> => {
-        return request<GetChannelsResponse>({
+      const validChannel = (): Promise<AxiosResponse<ValidChannelResponse>> => {
+        return request<ValidChannelResponse>({
           axios: axiosInstance,
           configurationUtilities,
           logger,
           method: 'get',
-          url: `conversations.list?exclude_archived=true&types=public_channel,private_channel&limit=${LIMIT}${
-            cursor.length > 0 ? `&cursor=${cursor}` : ''
-          }`,
+          url: `conversations.info?channel=${channelId}`,
         });
       };
-
-      let numberOfFetch = 0;
-      let cursor = '';
-      const channels: ChannelsResponse[] = [];
-      let result: AxiosResponse<GetChannelsResponse> = {
-        data: { ok: false, channels },
-        status: 0,
-        statusText: '',
-        headers: {},
-        config: {},
-      };
-
-      while (numberOfFetch < RE_TRY) {
-        result = await fetchChannels(cursor);
-        if (result.data.ok && (result.data?.channels ?? []).length > 0) {
-          channels.push(...(result.data?.channels ?? []));
-        }
-        if (
-          result.data.ok &&
-          result.data.response_metadata &&
-          result.data.response_metadata.next_cursor &&
-          result.data.response_metadata.next_cursor.length > 0
-        ) {
-          numberOfFetch += 1;
-          cursor = result.data.response_metadata.next_cursor;
-        } else {
-          break;
-        }
-      }
-      result.data.channels = channels;
-      const responseData = result.data;
-      if ((allowedChannels ?? []).length > 0) {
-        const allowedChannelsList = channels.filter((channel: ChannelsResponse) =>
-          allowedChannels?.includes(channel.name)
-        );
-        allowedChannels?.forEach((ac) => {
-          if (!allowedChannelsList.find((c: ChannelsResponse) => c.name === ac)) {
-            allowedChannelsList.push({
-              id: '-1',
-              name: ac,
-              is_channel: true,
-              is_archived: false,
-              is_private: false,
-            });
-          }
+      if (channelId.length === 0) {
+        return buildSlackExecutorErrorResponse({
+          slackApiError: new Error('The channel id is empty'),
+          logger,
         });
-        responseData.channels = allowedChannelsList;
       }
 
-      return buildSlackExecutorSuccessResponse<GetChannelsResponse>({
-        slackApiResponseData: responseData,
+      const result = await validChannel();
+
+      return buildSlackExecutorSuccessResponse<ValidChannelResponse>({
+        slackApiResponseData: result.data,
       });
     } catch (error) {
       return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
@@ -198,17 +160,33 @@ export const createExternalService = (
 
   const postMessage = async ({
     channels,
+    channelId = '',
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       if (
-        allowedChannels &&
-        allowedChannels.length > 0 &&
-        !channels.every((c) => allowedChannels?.includes(c))
+        channelId.length > 0 &&
+        allowedChannelIds &&
+        allowedChannelIds.length > 0 &&
+        !allowedChannelIds.includes(channelId)
       ) {
         return buildSlackExecutorErrorResponse({
           slackApiError: {
-            message: `The channel "${channels.join()}" is not included in the allowed channels list "${allowedChannels.join()}"`,
+            message: `The channel id "${channelId}" is not included in the allowed channels list "${allowedChannelIds.join()}"`,
+          },
+          logger,
+        });
+      }
+
+      let channelToUse = channelId;
+      if (channelToUse.length === 0 && channels && channels.length > 0 && channels[0].length > 0) {
+        channelToUse = channels[0];
+      }
+
+      if (channelToUse.length === 0) {
+        return buildSlackExecutorErrorResponse({
+          slackApiError: {
+            message: `The channel is empty"`,
           },
           logger,
         });
@@ -219,7 +197,7 @@ export const createExternalService = (
         method: 'post',
         url: 'chat.postMessage',
         logger,
-        data: { channel: channels[0], text },
+        data: { channel: channelToUse, text },
         configurationUtilities,
       });
 
@@ -229,8 +207,43 @@ export const createExternalService = (
     }
   };
 
+  const getAllowedChannels = async (): Promise<
+    ConnectorTypeExecutorResult<GetAllowedChannelsResponse | void>
+  > => {
+    try {
+      const validChannel = (channelId: string): Promise<AxiosResponse<ValidChannelResponse>> => {
+        return request<ValidChannelResponse>({
+          axios: axiosInstance,
+          configurationUtilities,
+          logger,
+          method: 'get',
+          url: `conversations.info?channel=${channelId}`,
+        });
+      };
+      const promiseValidChannels = [];
+      for (const channelId of allowedChannelIds ?? []) {
+        promiseValidChannels.push(validChannel(channelId));
+      }
+      const validChannels: ChannelResponse[] = [];
+      const resultValidChannels = await Promise.all(promiseValidChannels);
+
+      resultValidChannels.forEach((result, resultIdx) => {
+        if (result.data.ok && result.data?.channel) {
+          validChannels.push(result.data?.channel);
+        }
+      });
+
+      return buildSlackExecutorSuccessResponse<GetAllowedChannelsResponse>({
+        slackApiResponseData: { ok: true, channels: validChannels },
+      });
+    } catch (error) {
+      return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
+    }
+  };
+
   return {
-    getChannels,
+    validChannelId,
+    getAllowedChannels,
     postMessage,
   };
 };

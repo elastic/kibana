@@ -9,9 +9,24 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiSpacer, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFormRow,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFieldText,
+} from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import type { GetChannelsResponse, PostMessageParams } from '../../../common/slack_api/types';
+import { debounce } from 'lodash';
+import type {
+  GetAllowedChannelsResponse,
+  PostMessageParams,
+  ValidChannelIdSubActionParams,
+  ValidChannelResponse,
+} from '../../../common/slack_api/types';
+
+/** wait this many ms after the user completes typing before applying the filter input */
+const INPUT_TIMEOUT = 250;
 
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessageParams>> = ({
   actionConnector,
@@ -24,7 +39,8 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   useDefaultMessage,
 }) => {
   const { subAction, subActionParams } = actionParams;
-  const { channels = [], text } = subActionParams ?? {};
+  const { channels = [], text, channelId = '' } = subActionParams ?? {};
+  const [validChannelId, setValidChannelId] = useState('');
   const { toasts } = useKibana().notifications;
 
   useEffect(() => {
@@ -49,12 +65,25 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
   }
 
   const {
-    response: { channels: channelsInfo } = {},
+    response: { channels: channelsInfo = [] } = {},
     isLoading: isLoadingChannels,
     error: channelsError,
-  } = useSubAction<void, GetChannelsResponse>({
+  } = useSubAction<void, GetAllowedChannelsResponse>({
     connectorId: actionConnector?.id,
-    subAction: 'getChannels',
+    subAction: 'getAllowedChannels',
+  });
+
+  const {
+    response: { channel: channelValidInfo } = {},
+    isLoading: isValidatingChannel,
+    error: channelValidError,
+  } = useSubAction<ValidChannelIdSubActionParams, ValidChannelResponse>({
+    connectorId: actionConnector?.id,
+    subAction: 'validChannelId',
+    subActionParams: {
+      channelId: validChannelId,
+    },
+    disabled: validChannelId.length === 0,
   });
 
   useEffect(() => {
@@ -79,9 +108,21 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     () =>
       channelsInfo
         ?.filter((slackChannel) => slackChannel.is_channel)
-        .map((slackChannel) => ({ label: slackChannel.name })) ?? [],
+        .map((slackChannel) => ({
+          label: `${slackChannel.id} - ${slackChannel.name}`,
+          value: slackChannel.id,
+        })) ?? [],
     [channelsInfo]
   );
+
+  const typeChannelInput = useMemo(() => {
+    if (channels.length > 0 && channelId.length === 0) {
+      return 'channel-name';
+    } else if (channelsInfo.length > 0) {
+      return 'channel-allowed-id';
+    }
+    return 'channel-id';
+  }, [channelId.length, channels.length, channelsInfo.length]);
 
   const onChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
@@ -92,6 +133,72 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
     },
     [editAction, index, text]
   );
+  const debounceSetToken = debounce((validThisChannelId: string) => {
+    setValidChannelId(validThisChannelId);
+  }, INPUT_TIMEOUT);
+
+  const ChannelInput = useCallback(() => {
+    if (typeChannelInput === 'channel-name') {
+      return (
+        <EuiFieldText
+          data-test-subj="slackApiChannelName"
+          name="slackApiChannelName"
+          value={channels[0]}
+          onChange={(e) => {
+            editAction('subActionParams', { channels: [e.target.value], text }, index);
+          }}
+          isInvalid={false}
+          fullWidth={true}
+        />
+      );
+    } else if (typeChannelInput === 'channel-id') {
+      // TO DO validate
+      return (
+        <EuiFieldText
+          data-test-subj="slackApiChannelId"
+          name="slackApiChannelId"
+          value={channelId}
+          isLoading={isValidatingChannel}
+          onChange={(e) => {
+            debounceSetToken(e.target.value);
+            editAction(
+              'subActionParams',
+              { channels: undefined, channelId: e.target.value, text },
+              index
+            );
+          }}
+          isInvalid={false}
+          fullWidth={true}
+        />
+      );
+    } else if (typeChannelInput === 'channel-allowed-id') {
+      return (
+        <EuiComboBox
+          noSuggestions={false}
+          data-test-subj="slackChannelsComboBox"
+          isLoading={isLoadingChannels}
+          options={slackChannels}
+          selectedOptions={selectedChannels}
+          onChange={onChange}
+          singleSelection={true}
+        />
+      );
+    }
+    return null;
+  }, [
+    channelId,
+    channels,
+    debounceSetToken,
+    editAction,
+    index,
+    isLoadingChannels,
+    isValidatingChannel,
+    onChange,
+    selectedChannels,
+    slackChannels,
+    text,
+    typeChannelInput,
+  ]);
 
   return (
     <>
@@ -103,15 +210,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<PostMessagePa
         error={errors.channels}
         isInvalid={errors.channels?.length > 0 && channels.length === 0}
       >
-        <EuiComboBox
-          noSuggestions={false}
-          data-test-subj="slackChannelsComboBox"
-          isLoading={isLoadingChannels}
-          options={slackChannels}
-          selectedOptions={selectedChannels}
-          onChange={onChange}
-          singleSelection={true}
-        />
+        <ChannelInput />
       </EuiFormRow>
       <EuiSpacer size="m" />
       <TextAreaWithMessageVariables
