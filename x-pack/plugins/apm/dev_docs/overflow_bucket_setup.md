@@ -1,31 +1,30 @@
 # Table of contents
 1. [Summary](#summary)
-2. [Pre-requisites](#prerequisites)
-3. [Using tilt](#tilt)
-4. [Other ways](#other)
+2. [Start stack using Tilt](#Tilt)
+3. [Start stack manually](#manually)
 
 ## Summary
 
 8.7 introduced Overflow Buckets for Metrics. The below setup would enable generating the overflow buckets for the metrics indices.
 
-## Pre-requisites
-
-- Install golang and set go path properly
-
-## Using tilt
+## Start stack using Tilt
 
 With a 1GB server, MaxTransactionGroups is 5000 and MaxServices is 1000. Per-service max transaction groups is hardcoded as 10% of max transaction groups, i.e. 500.
 
 ### Pre-requisites
-1. Clone [Apm-server](https://github.com/elastic/apm-server/tree/main) repository
-2. Install [Docker](https://www.docker.com/products/docker-desktop/).
-3. Install [Tilt](https://docs.tilt.dev/install.html).
-4. Execute `tilt up` in the root of the repository.
+1. Install golang and set go path properly
+2. Clone [Apm-server](https://github.com/elastic/apm-server/tree/main) repository
+3. Install [Docker](https://www.docker.com/products/docker-desktop/).
+4. Install [Tilt](https://docs.tilt.dev/install.html).
+5. Execute `tilt up` in the root of the repository. This will start an APM server, an es and a kibana for you. You can verify the status of the components accessing [http://localhost:10350/](http://localhost:10350/).
 
 For more detailed instructions you can check [apm-server dev documentation](https://github.com/elastic/apm-server/blob/main/dev_docs/TESTING.md#tilt--kubernetes).
 
 ### Steps to generate data
 - Copy paste the below script in a file called `load_generator.go`
+<details>
+  <summary>load_generator.go</summary>
+  
   ```go
   package main
 
@@ -66,8 +65,13 @@ For more detailed instructions you can check [apm-server dev documentation](http
     span.End()
   }
   ```
+</details>
+
 #### Overflow buckets for transactions
 - Create a Bash Script file in order to test overflow bucket with transactions, name it anything - e.g., `generator_tx_max.sh`. Note that this test will generate 600 TxGroups which exceeds the known limit of 500
+<details>
+  <summary>generator_tx_max.sh</summary>
+
   ```sh
   #!/usr/bin/env bash
 
@@ -81,10 +85,15 @@ For more detailed instructions you can check [apm-server dev documentation](http
 
   echo "Ending script"
   ```
+</details>
+
 - Run `sh generator_tx_max` to generate the data
 
 #### Overflow buckets for services
 - Create a Bash Script file in order to test overflow bucket with transactions, name it anything - e.g., `generator_service_max.sh`. Note that this test will generate 2000 services which exceeds the known limit of 1000
+<details>
+  <summary>generator_service_max.sh</summary>
+
   ```sh
   #!/usr/bin/env bash
 
@@ -101,12 +110,15 @@ For more detailed instructions you can check [apm-server dev documentation](http
 
   echo "Ending script"
   ```
+</details>
+
 - Run `sh generator_service_max` to generate the data
 
-## Other way
+## Start stack manually
 
 ### Pre-requisites
 
+- Install golang and set go path properly
 - Run Elasticsearch locally
   ```
   yarn es snapshot
