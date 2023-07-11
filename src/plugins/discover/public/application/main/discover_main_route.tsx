@@ -34,6 +34,10 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
+import {
+  DiscoverProfileName,
+  DiscoverProfileNameProvider,
+} from '../../customizations/profile_provider';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -44,9 +48,10 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  profileName: DiscoverProfileName;
 }
 
-export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
+export function DiscoverMainRoute({ customizationCallbacks, isDev, profileName }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -287,9 +292,11 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
-      <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} />
-      </DiscoverMainProvider>
+      <DiscoverProfileNameProvider profileName={profileName}>
+        <DiscoverMainProvider value={stateContainer}>
+          <DiscoverMainAppMemoized stateContainer={stateContainer} />
+        </DiscoverMainProvider>
+      </DiscoverProfileNameProvider>
     </DiscoverCustomizationProvider>
   );
 }

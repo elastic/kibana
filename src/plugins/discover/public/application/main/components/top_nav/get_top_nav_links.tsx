@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { DiscoverProfileName } from '../../../../customizations/profile_provider';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -18,6 +19,40 @@ import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { openAlertsPopover } from './open_alerts_popover';
 import type { TopNavCustomization } from '../../../../customizations';
+
+const getSwitchProfileEntry = (profileName: DiscoverProfileName, services: DiscoverServices) => {
+  const badge = { iconType: 'beaker', label: 'Technical preview' };
+
+  if (profileName === 'default') {
+    return {
+      id: 'switchToLogsProfile',
+      label: i18n.translate('discover.localMenu.localMenu.switchToLogsProfileTitle', {
+        defaultMessage: 'Switch to Logs mode',
+      }),
+      description: i18n.translate('discover.localMenu.switchToLogsProfileDescription', {
+        defaultMessage: 'Switch to Logs mode',
+      }),
+      badge,
+      run: () => services.locator.navigate({ profile: 'log-explorer' }),
+      testId: 'switchToLogsProfile',
+    };
+  }
+
+  if (profileName === 'log-explorer') {
+    return {
+      id: 'switchToDefaultProfile',
+      label: i18n.translate('discover.localMenu.localMenu.switchToDefaultProfileTitle', {
+        defaultMessage: 'Switch to Default mode',
+      }),
+      description: i18n.translate('discover.localMenu.switchToDefaultProfileDescription', {
+        defaultMessage: 'Switch to Default mode',
+      }),
+      badge,
+      run: () => services.locator.navigate({ profile: 'default' }),
+      testId: 'switchToDefaultProfile',
+    };
+  }
+};
 
 /**
  * Helper function to build the top nav links
@@ -30,6 +65,7 @@ export const getTopNavLinks = ({
   isPlainRecord,
   adHocDataViews,
   topNavCustomization,
+  profileName,
 }: {
   dataView: DataView;
   services: DiscoverServices;
@@ -38,7 +74,10 @@ export const getTopNavLinks = ({
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
+  profileName: DiscoverProfileName;
 }): TopNavMenuData[] => {
+  const switchProfile = getSwitchProfileEntry(profileName, services);
+
   const alerts = {
     id: 'alerts',
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
@@ -220,6 +259,10 @@ export const getTopNavLinks = ({
 
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
+
+  if (switchProfile) {
+    entries.push({ data: switchProfile, order: 0 });
+  }
 
   if (!defaultMenu?.newItem?.disabled) {
     entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });

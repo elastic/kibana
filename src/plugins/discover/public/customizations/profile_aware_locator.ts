@@ -31,6 +31,11 @@ export class ProfileAwareLocator<T extends { profile?: string }> implements Loca
   }
 
   private injectProfile(params: T) {
+    if (params.profile === 'default') {
+      delete params.profile;
+      return params;
+    }
+
     if (params.profile) {
       return params;
     }
