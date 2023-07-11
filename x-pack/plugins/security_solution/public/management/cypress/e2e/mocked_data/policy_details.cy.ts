@@ -43,39 +43,39 @@ describe('Policy Details', () => {
   });
 
   describe('Malware Protection card', () => {
-    const testSubjects = getPolicySettingsFormTestSubjects().memory;
+    const malwareTestSubj = getPolicySettingsFormTestSubjects().malware;
 
     it('user should be able to see related rules', () => {
-      cy.getByTestSubj(testSubjects.card).contains('related detection rules').click();
+      cy.getByTestSubj(malwareTestSubj.card).contains('related detection rules').click();
 
       cy.url().should('contain', 'app/security/rules/management');
     });
 
     it('changing protection level should enable or disable user notification', () => {
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).click();
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).should(
+      cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();
+      cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).should(
         'have.attr',
         'aria-checked',
         'true'
       );
 
       // Default: Prevent + Notify user enabled
-      cy.getByTestSubj(testSubjects.protectionPreventRadio).find('input').should('be.checked');
-      cy.getByTestSubj(testSubjects.notifyUserCheckbox).should('be.checked');
+      cy.getByTestSubj(malwareTestSubj.protectionPreventRadio).find('input').should('be.checked');
+      cy.getByTestSubj(malwareTestSubj.notifyUserCheckbox).should('be.checked');
 
       // Changing to Detect -> Notify user disabled
-      cy.getByTestSubj(testSubjects.protectionDetectRadio).find('label').click();
-      cy.getByTestSubj(testSubjects.notifyUserCheckbox).should('not.be.checked');
+      cy.getByTestSubj(malwareTestSubj.protectionDetectRadio).find('label').click();
+      cy.getByTestSubj(malwareTestSubj.notifyUserCheckbox).should('not.be.checked');
 
       // Changing back to Prevent -> Notify user enabled
-      cy.getByTestSubj(testSubjects.protectionPreventRadio).find('label').click();
-      cy.getByTestSubj(testSubjects.notifyUserCheckbox).should('be.checked');
+      cy.getByTestSubj(malwareTestSubj.protectionPreventRadio).find('label').click();
+      cy.getByTestSubj(malwareTestSubj.notifyUserCheckbox).should('be.checked');
     });
 
     it('disabling protection should disable notification in yaml for every OS', () => {
       // Enable malware protection and user notification
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).click();
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).should(
+      cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();
+      cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).should(
         'have.attr',
         'aria-checked',
         'true'
@@ -89,8 +89,8 @@ describe('Policy Details', () => {
       });
 
       // disable malware protection
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).click();
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).should(
+      cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();
+      cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).should(
         'have.attr',
         'aria-checked',
         'false'
@@ -111,12 +111,12 @@ describe('Policy Details', () => {
         expect(policyConfig.windows.malware.mode).to.equal(ProtectionModes.off);
       });
 
-      cy.getByTestSubj(testSubjects.osValuesContainer).should(
+      cy.getByTestSubj(malwareTestSubj.osValuesContainer).should(
         'contain.text',
         'Windows, Mac, Linux'
       );
 
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).click();
+      cy.getByTestSubj(malwareTestSubj.enableDisableSwitch).click();
       savePolicyForm();
 
       yieldPolicyConfig().then((policyConfig) => {
@@ -128,33 +128,35 @@ describe('Policy Details', () => {
   });
 
   describe('Ransomware Protection card', () => {
-    const testSubjects = getPolicySettingsFormTestSubjects().ransomware;
+    const ransomwareTestSubj = getPolicySettingsFormTestSubjects().ransomware;
 
     it('user should be able to see related rules', () => {
-      cy.getByTestSubj(testSubjects.card).contains('related detection rules').click();
+      cy.getByTestSubj(ransomwareTestSubj.card).contains('related detection rules').click();
 
       cy.url().should('contain', 'app/security/rules/management');
     });
 
     it('changing protection level should enable or disable user notification', () => {
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).click();
-      cy.getByTestSubj(testSubjects.enableDisableSwitch).should(
+      cy.getByTestSubj(ransomwareTestSubj.enableDisableSwitch).click();
+      cy.getByTestSubj(ransomwareTestSubj.enableDisableSwitch).should(
         'have.attr',
         'aria-checked',
         'true'
       );
 
       // Default: Prevent + Notify user enabled
-      cy.getByTestSubj(testSubjects.protectionPreventRadio).find('input').should('be.checked');
-      cy.getByTestSubj(testSubjects.notifyUserCheckbox).should('be.checked');
+      cy.getByTestSubj(ransomwareTestSubj.protectionPreventRadio)
+        .find('input')
+        .should('be.checked');
+      cy.getByTestSubj(ransomwareTestSubj.notifyUserCheckbox).should('be.checked');
 
       // Changing to Detect -> Notify user disabled
-      cy.getByTestSubj(testSubjects.protectionDetectRadio).find('label').click();
-      cy.getByTestSubj(testSubjects.notifyUserCheckbox).should('not.be.checked');
+      cy.getByTestSubj(ransomwareTestSubj.protectionDetectRadio).find('label').click();
+      cy.getByTestSubj(ransomwareTestSubj.notifyUserCheckbox).should('not.be.checked');
 
       // Changing back to Prevent -> Notify user enabled
-      cy.getByTestSubj(testSubjects.protectionPreventRadio).find('label').click();
-      cy.getByTestSubj(testSubjects.notifyUserCheckbox).should('be.checked');
+      cy.getByTestSubj(ransomwareTestSubj.protectionPreventRadio).find('label').click();
+      cy.getByTestSubj(ransomwareTestSubj.notifyUserCheckbox).should('be.checked');
     });
   });
 
