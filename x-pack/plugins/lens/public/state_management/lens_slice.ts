@@ -197,7 +197,7 @@ export const updateStateFromSuggestion = createAction<{
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
-  redirectCallback: (savedObjectId?: string) => void;
+  redirectCallback?: (savedObjectId?: string) => void;
   history?: History<unknown>;
 }>('lens/loadInitial');
 export const initEmpty = createAction(
@@ -911,7 +911,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state,
       payload: PayloadAction<{
         initialInput?: LensEmbeddableInput;
-        redirectCallback: (savedObjectId?: string) => void;
+        redirectCallback?: (savedObjectId?: string) => void;
         history?: History<unknown>;
       }>
     ) => state,

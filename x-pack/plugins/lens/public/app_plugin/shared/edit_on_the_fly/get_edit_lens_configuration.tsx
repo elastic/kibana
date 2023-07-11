@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -74,10 +74,6 @@ export function getEditLensConfiguration(
       loadLensService();
     }, []);
 
-    const redirectCallback = useCallback((id?: string) => {
-      // do nothing
-    }, []);
-
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }
@@ -96,7 +92,6 @@ export function getEditLensConfiguration(
     } as unknown as PreloadedState<LensState>);
     lensStore.dispatch(
       loadInitial({
-        redirectCallback,
         initialInput: {
           attributes,
           id: '797798a7-8746-4ace-a459-65e42a4f0fde',
