@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { sleep } from '../helper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -203,7 +202,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-          await sleep(1000);
+          pageObjects.header.waitUntilLoadingHasFinished();
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const sorted = values
