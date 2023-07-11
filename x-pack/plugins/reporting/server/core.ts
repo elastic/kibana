@@ -46,9 +46,10 @@ import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
 import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate/csv_searchsource_immediate';
 import { CsvV2ExportType } from './export_types/csv_v2';
-import { PngV1ExportType } from './export_types/png';
 import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PdfExportType } from './export_types/printable_pdf_v2';
+import { PngV1ExportType } from './export_types/png';
+import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -113,6 +114,7 @@ export class ReportingCore {
   private csvV2ExportType: CsvV2ExportType;
   private pdfExport: PdfExportType;
   private pdfV1Export: PdfV1ExportType;
+  private pngExport: PngExportType;
   private pngV1Export: PngV1ExportType;
   private csvSearchSourceImmediateExport: CsvSearchSourceImmediateExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
@@ -143,6 +145,9 @@ export class ReportingCore {
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
+
+    this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.pngExport);
 
     // deprecated export types for tests
     this.pdfV1Export = new PdfV1ExportType(this.core, this.config, this.logger, this.context);
@@ -203,12 +208,14 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
     const reportingStart = this.getContract();
-    this.csvSearchSourceExport.start({ ...startDeps, reporting: reportingStart });
-    this.csvV2ExportType.start({ ...startDeps, reporting: reportingStart });
-    this.pdfExport.start({ ...startDeps, reporting: reportingStart });
-    this.csvSearchSourceImmediateExport.start({ ...startDeps, reporting: reportingStart });
-    this.pdfV1Export.start({ ...startDeps, reporting: reportingStart });
-    this.pngV1Export.start({ ...startDeps, reporting: reportingStart });
+    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
+    this.csvSearchSourceExport.start(exportTypeStartDeps);
+    this.csvV2ExportType.start(exportTypeStartDeps);
+    this.pdfExport.start(exportTypeStartDeps);
+    this.pngExport.start(exportTypeStartDeps);
+    this.csvSearchSourceImmediateExport.start(exportTypeStartDeps);
+    this.pdfV1Export.start(exportTypeStartDeps);
+    this.pngV1Export.start(exportTypeStartDeps);
 
     await this.assertKibanaIsAvailable();
 
