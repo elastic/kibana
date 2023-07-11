@@ -769,7 +769,7 @@ For more information, see <<kibana-privileges>>.
 `POST /api/apm/androidmaps`
 
 [role="child_attributes"]
-[[apm-sourcemap-post-req-body]]
+[[android-sourcemap-post-req-body]]
 ===== Request body
 
 `service_name`::
