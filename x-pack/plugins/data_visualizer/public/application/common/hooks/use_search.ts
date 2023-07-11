@@ -15,7 +15,7 @@ import { useDataVisualizerKibana } from '../../kibana_context';
 import type { BasicAppState } from '../../data_comparison/types';
 
 export const useSearch = (
-  { dataView, savedSearch }: { dataView: DataView; savedSearch: SavedSearch | null },
+  { dataView, savedSearch }: { dataView: DataView; savedSearch: SavedSearch | null | undefined },
   appState: BasicAppState,
   readOnly: boolean = false
 ) => {

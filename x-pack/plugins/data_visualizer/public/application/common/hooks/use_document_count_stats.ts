@@ -186,7 +186,6 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
-  // @TODO: figure out why this is called twice
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
 

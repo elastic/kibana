@@ -10,7 +10,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { TimeBuckets } from '../../common/time_buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
-// @TODO: refactor
 export const useTimeBuckets = () => {
   const { uiSettings } = useAiopsAppContext();
 

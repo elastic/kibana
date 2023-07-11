@@ -67,7 +67,7 @@ export const useData = (
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, searchQuery, timeRange]);
+  }, [lastRefresh, JSON.stringify({ searchQuery, timeRange })]);
 
   const documentStats = useDocumentCountStats(docCountRequestParams, undefined, lastRefresh);
 

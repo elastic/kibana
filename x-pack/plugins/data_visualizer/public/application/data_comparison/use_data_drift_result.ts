@@ -470,7 +470,6 @@ export const useFetchDataComparisonResult = ({
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedBaseline', {
               defaultMessage: `Loaded production data.`,
-              values: { referenceIndex },
             })
           );
 
@@ -550,7 +549,6 @@ export const useFetchDataComparisonResult = ({
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingHistogramData', {
               defaultMessage: `Loading histogram data.`,
-              values: { referenceIndex },
             })
           );
 
@@ -595,8 +593,7 @@ export const useFetchDataComparisonResult = ({
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedHistogramData', {
-              defaultMessage: `Successfully loaded histogram data.`,
-              values: { referenceIndex },
+              defaultMessage: `Loaded histogram data.`,
             })
           );
 

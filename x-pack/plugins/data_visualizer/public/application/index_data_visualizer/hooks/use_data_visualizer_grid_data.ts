@@ -122,7 +122,6 @@ export const useDataVisualizerGridData = (
   );
 
   /** Prepare required params to pass to search strategy **/
-  // @TODO: replace with useSearch()
   const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
     const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
