@@ -51,7 +51,7 @@ export class CsvSearchSourceExportType extends ExportType<
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     const logger = args[2];
-    this.logger = logger.get('csv-searchsource-export');
+    this.logger = logger.get('csv-searchsource');
   }
 
   public createJob = (jobParams: JobParamsCSV) => {

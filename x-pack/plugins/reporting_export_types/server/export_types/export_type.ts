@@ -12,3 +12,4 @@ export type {
 export { PngExportType } from './png_v2';
 export { PdfExportType } from './printable_pdf_v2';
 export { CsvSearchSourceExportType } from './csv_searchsource';
+export { CsvV2ExportType } from './csv_v2';

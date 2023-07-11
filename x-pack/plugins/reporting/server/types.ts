@@ -30,6 +30,11 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import { Logger } from '@kbn/core/server';
+import {
+  ExportTypesPluginSetup,
+  ExportTypesPluginStart,
+} from '@kbn/reporting-export-types-plugin/server';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import { ExportTypesRegistry } from './lib';
@@ -80,6 +85,7 @@ export interface ReportingSetupDeps {
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  exportTypes: ExportTypesPluginSetup;
 }
 
 export interface ReportingStartDeps {
@@ -90,6 +96,7 @@ export interface ReportingStartDeps {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+  exportType: ExportTypesPluginStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
@@ -107,3 +114,8 @@ export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'ti
 }
 
 export type { BaseParams, BasePayload };
+
+export type RunTaskFnFactory<RunTaskFnType> = (
+  reporting: ReportingCore,
+  logger: Logger
+) => RunTaskFnType;

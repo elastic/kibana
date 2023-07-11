@@ -6,39 +6,34 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-
-import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
 import {
   CsvSearchSourceExportType,
   CsvV2ExportType,
   ExportType,
   PdfExportType,
   PngExportType,
-} from './export_types';
+} from './export_types/export_type';
 import { ExportTypesPluginSetup, ExportTypesPluginStart } from './types';
 
 export class ExportTypesPlugin
   implements Plugin<{}, {}, ExportTypesPluginSetup, ExportTypesPluginStart>
 {
-  public exportTypes: ExportType[];
+  private logger: Logger;
+  exportTypes: ExportType[] = [];
 
-  constructor(
-    private core: CoreSetup,
-    reportingConfig: ReportingConfigType,
-    initializerContext: PluginInitializerContext<typeof ConfigSchema>,
-    logger: Logger
-  ) {
-    this.exportTypes = [
-      new CsvSearchSourceExportType(this.core, reportingConfig, logger, initializerContext),
-      new CsvV2ExportType(this.core, reportingConfig, logger, initializerContext),
-      new PdfExportType(this.core, reportingConfig, logger, initializerContext),
-      new PngExportType(this.core, reportingConfig, logger, initializerContext),
-    ];
-    logger = initializerContext.logger.get();
+  constructor(context: PluginInitializerContext<ReportingConfigType>) {
+    this.logger = context.logger.get();
   }
 
-  public setup(core: CoreSetup, pluginsSetup: ExportTypesPluginSetup) {
+  public setup({}, pluginsSetup: ExportTypesPluginSetup) {
     const { reporting } = pluginsSetup;
+    this.exportTypes = [
+      new CsvSearchSourceExportType(this.logger, context),
+      new CsvV2ExportType(this.logger, context),
+      new PdfExportType(this.logger, context),
+      new PngExportType(this.logger, context),
+    ];
     this.exportTypes.forEach((eType) => {
       reporting.registerExportTypes(eType);
     });

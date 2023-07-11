@@ -38,10 +38,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type {
-  ExportTypesPluginSetup,
-  ExportTypesPluginStart,
-} from '@kbn/reporting-export-types-plugin/server';
+import type { ExportTypesPluginSetup } from '@kbn/reporting-export-types-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
@@ -83,7 +80,7 @@ export interface ReportingInternalStart {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
-  exportTypes: ExportTypesPluginStart;
+  // exportTypes: ExportTypesPluginStart;
 }
 
 /**
@@ -172,7 +169,6 @@ export class ReportingCore {
     // this.csvSearchSourceExport.setup(setupDeps);
     // this.csvV2ExportType.setup(setupDeps);
     // this.pdfExport.setup(setupDeps);
-    setupDeps.exportTypes.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -187,8 +183,6 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    const reportingStart = this.getContract();
-    startDeps.exportTypes.start({ ...startDeps, reporting: reportingStart });
     // this.csvSearchSourceExport.start({ ...startDeps, reporting: reportingStart });
     // this.csvV2ExportType.start({ ...startDeps, reporting: reportingStart });
     // this.pdfExport.start({ ...startDeps, reporting: reportingStart });
