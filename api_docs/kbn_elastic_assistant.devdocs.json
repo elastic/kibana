@@ -90,7 +90,7 @@
           "\nModal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever\ncomponent currently has focus and any specific context it may provide through the SAssInterface."
         ],
         "signature": [
-          "React.FunctionComponent<{}>"
+          "React.NamedExoticComponent<Props>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/assistant_overlay/index.tsx",
         "deprecated": false,
@@ -100,26 +100,12 @@
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.AssistantOverlay.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.AssistantOverlay.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
+              "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,

@@ -60,10 +60,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraProcessRowButton');
     },
 
-    async clickFlyoutUptimeLink() {
-      return testSubjects.click('hostsView-flyout-uptime-link');
-    },
-
     async clickFlyoutApmServicesLink() {
       return testSubjects.click('hostsView-flyout-apm-services-link');
     },

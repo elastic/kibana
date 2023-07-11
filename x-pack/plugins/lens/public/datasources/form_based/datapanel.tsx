@@ -27,7 +27,6 @@ import {
   useExistingFieldsFetcher,
   useGroupedFields,
 } from '@kbn/unified-field-list';
-import { ChildDragDropProvider, DragContextState } from '@kbn/dom-drag-drop';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
@@ -41,7 +40,7 @@ import { FieldItem } from '../common/field_item';
 
 export type Props = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState>,
-  'core' | 'onChangeIndexPattern'
+  'core' | 'onChangeIndexPattern' | 'dragDropContext'
 > & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -77,7 +76,6 @@ function onSupportedFieldFilter(field: IndexPatternField): boolean {
 
 export function FormBasedDataPanel({
   state,
-  dragDropContext,
   core,
   data,
   dataViews,
@@ -144,7 +142,6 @@ export function FormBasedDataPanel({
           query={query}
           dateRange={dateRange}
           filters={filters}
-          dragDropContext={dragDropContext}
           core={core}
           data={data}
           dataViews={dataViews}
@@ -171,7 +168,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   query,
   dateRange,
   filters,
-  dragDropContext,
   core,
   data,
   dataViews,
@@ -187,14 +183,13 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   activeIndexPatterns,
 }: Omit<
   DatasourceDataPanelProps,
-  'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
+  'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns' | 'dragDropContext'
 > & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
-  dragDropContext: DragContextState;
   charts: ChartsPluginSetup;
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -398,20 +393,18 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   );
 
   return (
-    <ChildDragDropProvider {...dragDropContext}>
-      <FieldList
-        className="lnsInnerIndexPatternDataPanel"
-        isProcessing={isProcessing}
-        prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
-      >
-        <FieldListGrouped<IndexPatternField>
-          {...fieldListGroupedProps}
-          renderFieldItem={renderFieldItem}
-          data-test-subj="lnsIndexPattern"
-          localStorageKeyPrefix="lens"
-        />
-      </FieldList>
-    </ChildDragDropProvider>
+    <FieldList
+      className="lnsInnerIndexPatternDataPanel"
+      isProcessing={isProcessing}
+      prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
+    >
+      <FieldListGrouped<IndexPatternField>
+        {...fieldListGroupedProps}
+        renderFieldItem={renderFieldItem}
+        data-test-subj="lnsIndexPattern"
+        localStorageKeyPrefix="lens"
+      />
+    </FieldList>
   );
 };
 

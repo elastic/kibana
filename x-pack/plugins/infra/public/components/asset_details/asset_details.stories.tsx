@@ -16,7 +16,7 @@ import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_
 import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
 
-const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices', 'uptime'];
+const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices'];
 const tabs: Tab[] = [
   {
     id: FlyoutTabIds.OVERVIEW,
@@ -59,13 +59,6 @@ const tabs: Tab[] = [
       defaultMessage: 'APM',
     }),
     'data-test-subj': 'hostsView-flyout-apm-link',
-  },
-  {
-    id: FlyoutTabIds.LINK_TO_UPTIME,
-    name: i18n.translate('xpack.infra.infra.nodeDetails.updtimeTabLabel', {
-      defaultMessage: 'Uptime',
-    }),
-    'data-test-subj': 'hostsView-flyout-uptime-link',
   },
 ];
 

@@ -17,8 +17,8 @@ import { depsStartMock } from '../../../../common/mock/endpoint';
 import type { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import { createSpyMiddleware } from '../../../../common/store/test_utils';
 import type {
-  Immutable,
   HostIsolationResponse,
+  Immutable,
   ISOLATION_ACTIONS,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
@@ -28,8 +28,7 @@ import { listData } from './selectors';
 import type { EndpointState, TransformStats } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
-import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { getEndpointListPath } from '../../../common/routing';
 import type { FailedResourceState, LoadedResourceState } from '../../../state';
 import {
   isFailedResourceState,
@@ -43,10 +42,7 @@ import {
   hostIsolationResponseMock,
 } from '../../../../common/lib/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
-import {
-  HOST_METADATA_GET_ROUTE,
-  HOST_METADATA_LIST_ROUTE,
-} from '../../../../../common/endpoint/constants';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
 jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
@@ -341,68 +337,6 @@ describe('endpoint list middleware', () => {
         TransformStats[]
       >;
       expect(failedAction.error).toBe(apiError);
-    });
-  });
-
-  describe('loads selected endpoint details', () => {
-    beforeEach(() => {
-      endpointPageHttpMock(fakeHttpServices);
-    });
-
-    const endpointList = getEndpointListApiResponse();
-    const agentId = endpointList.data[0].metadata.agent.id;
-    const search = getEndpointDetailsPath({
-      name: 'endpointDetails',
-      selected_endpoint: agentId,
-    });
-    const dispatchUserChangedUrl = () => {
-      dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
-    };
-
-    it('triggers the endpoint details related actions when the url is changed', async () => {
-      dispatchUserChangedUrl();
-
-      // Note: these are left intentionally in sequence
-      // to test specific race conditions that currently exist in the middleware
-      await waitForAction('serverCancelledPolicyItemsLoading');
-
-      // loads the endpoints list
-      await waitForAction('serverReturnedEndpointList');
-
-      // loads the specific endpoint details
-      await waitForAction('serverReturnedEndpointDetails');
-
-      // loads the specific endpoint pending actions
-      await waitForAction('endpointPendingActionsStateChanged');
-
-      expect(fakeHttpServices.get).toHaveBeenCalledWith(
-        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-        { version: '2023-10-31' }
-      );
-    });
-
-    it('handles the endpointDetailsLoad action', async () => {
-      const endpointId = agentId;
-      dispatch({
-        type: 'endpointDetailsLoad',
-        payload: {
-          endpointId,
-        },
-      });
-
-      // note: this action does not load the endpoints list
-
-      // loads the specific endpoint details
-      await waitForAction('serverReturnedEndpointDetails');
-      await waitForAction('serverReturnedEndpointNonExistingPolicies');
-
-      // loads the specific endpoint pending actions
-      await waitForAction('endpointPendingActionsStateChanged');
-
-      expect(fakeHttpServices.get).toHaveBeenCalledWith(
-        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId }),
-        { version: '2023-10-31' }
-      );
     });
   });
 });

@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 import { AssetDetailsProps, FlyoutTabIds, LinkOptions, Tab, TabIds } from '../types';
 import {
   LinkToApmServices,
-  LinkToUptime,
   LinkToAlertsRule,
   LinkToNodeDetails,
   TabToApmTraces,
@@ -57,14 +56,13 @@ export const Header = ({ tabs = [], links = [], compact }: Props) => {
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = {
     nodeDetails: (
       <LinkToNodeDetails
-        nodeId={node.id}
+        nodeName={node.name}
         nodeType={nodeType}
         currentTimestamp={toTimestampRange(timeRange).to}
       />
     ),
     alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
     apmServices: <LinkToApmServices nodeName={node.name} apmField={APM_FIELD} />,
-    uptime: <LinkToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} />,
   };
 
   const tabEntries = tabs.map(({ name, ...tab }) => {

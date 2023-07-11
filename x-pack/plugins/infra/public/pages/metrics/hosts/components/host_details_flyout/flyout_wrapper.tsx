@@ -72,7 +72,7 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
         })
       }
       tabs={orderedFlyoutTabs}
-      links={['apmServices', 'uptime']}
+      links={['apmServices', 'nodeDetails']}
       renderMode={{
         showInFlyout: true,
         closeFlyout,

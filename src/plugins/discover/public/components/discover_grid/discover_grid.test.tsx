@@ -11,7 +11,7 @@ import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
-import { buildDataViewMock, fields } from '../../__mocks__/data_view';
+import { buildDataViewMock, deepMockedFields } from '../../__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -28,7 +28,7 @@ jest.mock('@kbn/cell-actions', () => ({
 
 export const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
-  fields,
+  fields: deepMockedFields,
   timeFieldName: '@timestamp',
 });
 
@@ -259,18 +259,8 @@ describe('DiscoverGrid', () => {
           triggerId: 'test',
           getCellValue: expect.any(Function),
           fields: [
-            {
-              name: '@timestamp',
-              type: 'date',
-              aggregatable: true,
-              searchable: undefined,
-            },
-            {
-              name: 'message',
-              type: 'string',
-              aggregatable: false,
-              searchable: undefined,
-            },
+            dataViewMock.getFieldByName('@timestamp')?.toSpec(),
+            dataViewMock.getFieldByName('message')?.toSpec(),
           ],
         })
       );
