@@ -211,12 +211,12 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'test-field',
             disabled: false,
             modelId: 'test-model',
             modelType: '',
             pipelineName: 'unit-test',
-            sourceField: 'body',
+            sourceFields: ['body'],
+            indexFields: ['body'],
           },
         ]);
       });
@@ -258,13 +258,13 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'title',
             disabled: true,
             disabledReason: expect.stringContaining('title, body_content'),
             modelId: 'test-model',
             modelType: '',
             pipelineName: 'unit-test',
-            sourceField: 'title',
+            sourceFields: ['title', 'body', 'body_content'],
+            indexFields: ['body'],
           },
         ]);
       });
@@ -288,12 +288,12 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'test-field',
             disabled: false,
             pipelineName: 'unit-test',
             modelType: '',
             modelId: '',
-            sourceField: 'body',
+            sourceFields: ['body'],
+            indexFields: ['body'],
           },
         ]);
       });
@@ -326,13 +326,13 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'test-field',
             disabled: true,
             disabledReason: expect.any(String),
             pipelineName: 'unit-test',
             modelType: '',
             modelId: 'test-model',
-            sourceField: 'body',
+            sourceFields: ['body'],
+            indexFields: ['body'],
           },
         ]);
       });
