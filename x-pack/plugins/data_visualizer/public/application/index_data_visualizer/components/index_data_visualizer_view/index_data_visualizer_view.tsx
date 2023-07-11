@@ -24,7 +24,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -188,26 +187,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
-
-  useEffect(() => {
-    if (!currentDataView.isTimeBased()) {
-      toasts.addWarning({
-        title: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
-          {
-            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
-            values: { dataViewTitle: currentDataView.title },
-          }
-        ),
-        text: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
-          {
-            defaultMessage: 'Anomaly detection only runs over time-based indices',
-          }
-        ),
-      });
-    }
-  }, [currentDataView, toasts]);
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
 
