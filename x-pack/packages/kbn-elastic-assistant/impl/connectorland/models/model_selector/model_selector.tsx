@@ -16,7 +16,6 @@ export const MODEL_GPT_4_32K = 'gpt-4-32k';
 const DEFAULT_MODELS = [MODEL_GPT_3_5_TURBO, MODEL_GPT_4, MODEL_GPT_4_32K];
 
 interface Props {
-  onModelDeleted?: (model: string) => void;
   onModelSelectionChange?: (model?: string) => void;
   models?: string[];
   selectedModel?: string;
@@ -28,12 +27,7 @@ interface Props {
  * TODO: Pull from API once connector supports it `GET https://api.openai.com/v1/models` as models are added/deprecated
  */
 export const ModelSelector: React.FC<Props> = React.memo(
-  ({
-    models = DEFAULT_MODELS,
-    onModelDeleted,
-    onModelSelectionChange,
-    selectedModel = DEFAULT_MODELS[0],
-  }) => {
+  ({ models = DEFAULT_MODELS, onModelSelectionChange, selectedModel = DEFAULT_MODELS[0] }) => {
     // Form options
     const [options, setOptions] = useState<EuiComboBoxOptionOption[]>(
       models.map((model) => ({
@@ -99,6 +93,7 @@ export const ModelSelector: React.FC<Props> = React.memo(
       <EuiComboBox
         aria-label={i18n.HELP_LABEL}
         compressed
+        isClearable={false}
         placeholder={i18n.PLACEHOLDER_TEXT}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
         singleSelection={{ asPlainText: true }}

@@ -48,6 +48,7 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
     <div>
       {selectedPrompt == null || isEditing ? (
         <SelectSystemPrompt
+          allSystemPrompts={allSystemPrompts}
           clearSelectedSystemPrompt={handleClearSystemPrompt}
           conversation={conversation}
           data-test-subj="systemPrompt"

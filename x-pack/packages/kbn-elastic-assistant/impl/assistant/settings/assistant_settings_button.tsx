@@ -23,12 +23,8 @@ interface Props {
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
   ({ isDisabled = false, selectedConversation }) => {
-    const {
-      isSettingsModalVisible,
-      selectedSettingsTab,
-      setIsSettingsModalVisible,
-      setSelectedSettingsTab,
-    } = useAssistantContext();
+    const { isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab } =
+      useAssistantContext();
 
     // Modal control functions
     const cleanupAndCloseModal = useCallback(() => {
@@ -64,7 +60,6 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
         {isSettingsModalVisible && (
           <AssistantSettings
             selectedConversation={selectedConversation}
-            selectedTab={selectedSettingsTab}
             onClose={handleCloseModal}
             onSave={handleSave}
           />

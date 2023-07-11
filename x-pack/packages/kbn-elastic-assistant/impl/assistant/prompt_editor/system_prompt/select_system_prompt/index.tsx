@@ -28,6 +28,7 @@ import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
 import { TEST_IDS } from '../../../constants';
 
 export interface Props {
+  allSystemPrompts: Prompt[];
   compressed?: boolean;
   conversation: Conversation | undefined;
   selectedPrompt: Prompt | undefined;
@@ -37,11 +38,13 @@ export interface Props {
   isOpen?: boolean;
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
   showTitles?: boolean;
+  onSystemPromptSelectionChange?: (promptId: string) => void;
 }
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
 const SelectSystemPromptComponent: React.FC<Props> = ({
+  allSystemPrompts,
   compressed = false,
   conversation,
   selectedPrompt,
@@ -49,18 +52,12 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   isClearable = false,
   isEditing = false,
   isOpen = false,
+  onSystemPromptSelectionChange,
   setIsEditing,
   showTitles = false,
 }) => {
-  const {
-    allSystemPrompts,
-    conversations,
-    setAllSystemPrompts,
-    isSettingsModalVisible,
-    setConversations,
-    setIsSettingsModalVisible,
-    setSelectedSettingsTab,
-  } = useAssistantContext();
+  const { isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab } =
+    useAssistantContext();
   const { setApiConfig } = useConversation();
 
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
@@ -129,11 +126,17 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
         return;
       }
-      setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
+      // Note: if callback is provided, this component does not persist. Extract to separate component
+      if (onSystemPromptSelectionChange != null) {
+        onSystemPromptSelectionChange(selectedSystemPromptId);
+      } else {
+        setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
+      }
       setIsEditing?.(false);
     },
     [
       allSystemPrompts,
+      onSystemPromptSelectionChange,
       setIsEditing,
       setIsSettingsModalVisible,
       setSelectedSettingsTab,

@@ -508,7 +508,7 @@ const AssistantComponent: React.FC<Props> = ({
 
                     <EuiFlexItem grow={false}>
                       <AssistantSettingsButton
-                        isDisabled={currentConversation.replacements == null}
+                        isDisabled={isDisabled}
                         selectedConversation={currentConversation}
                       />
                     </EuiFlexItem>

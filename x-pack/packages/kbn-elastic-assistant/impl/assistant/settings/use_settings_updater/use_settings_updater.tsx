@@ -11,26 +11,32 @@ import { UseAssistantContext, useAssistantContext } from '../../../assistant_con
 
 interface UseSettingsUpdater {
   conversationSettings: UseAssistantContext['conversations'];
+  defaultAllow: string[];
+  defaultAllowReplacement: string[];
   quickPromptSettings: QuickPrompt[];
+  resetSettings: () => void;
+  systemPromptSettings: Prompt[];
+  setUpdatedDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
+  setUpdatedDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setUpdatedConversationSettings: React.Dispatch<
     React.SetStateAction<UseAssistantContext['conversations']>
   >;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
+  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
   saveSettings: () => void;
 }
-
-// TODO: Ensure base state gets reset on `cancel` action
 
 export const useSettingsUpdater = (): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
-    conversations,
     allQuickPrompts,
     allSystemPrompts,
+    conversations,
+    defaultAllow,
+    defaultAllowReplacement,
     setAllQuickPrompts,
     setAllSystemPrompts,
     setConversations,
-    setIsSettingsModalVisible,
     setDefaultAllow,
     setDefaultAllowReplacement,
   } = useAssistantContext();
@@ -48,15 +54,20 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] =
     useState<Prompt[]>(allSystemPrompts);
   // Anonymization
+  const [updatedDefaultAllow, setUpdatedDefaultAllow] = useState<string[]>(defaultAllow);
+  const [updatedDefaultAllowReplacement, setUpdatedDefaultAllowReplacement] =
+    useState<string[]>(defaultAllowReplacement);
 
-  // Callback for modal onSave, saves to local storage on change
-  const onSystemPromptsChange = useCallback(
-    (newSystemPrompts: Prompt[]) => {
-      setAllSystemPrompts(newSystemPrompts);
-      setIsSettingsModalVisible(false);
-    },
-    [setAllSystemPrompts, setIsSettingsModalVisible]
-  );
+  /**
+   * Reset all pending settings
+   */
+  const resetSettings = useCallback((): void => {
+    setUpdatedConversationSettings(conversations);
+    setUpdatedQuickPromptSettings(allQuickPrompts);
+    setUpdatedSystemPromptSettings(allSystemPrompts);
+    setUpdatedDefaultAllow(defaultAllow);
+    setUpdatedDefaultAllowReplacement(defaultAllowReplacement);
+  }, [allQuickPrompts, allSystemPrompts, conversations, defaultAllow, defaultAllowReplacement]);
 
   /**
    * Save all pending settings
@@ -65,20 +76,33 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
     setConversations(updatedConversationSettings);
+    setDefaultAllow(updatedDefaultAllow);
+    setDefaultAllowReplacement(updatedDefaultAllowReplacement);
   }, [
     setAllQuickPrompts,
     setAllSystemPrompts,
     setConversations,
+    setDefaultAllow,
+    setDefaultAllowReplacement,
     updatedConversationSettings,
+    updatedDefaultAllow,
+    updatedDefaultAllowReplacement,
     updatedQuickPromptSettings,
     updatedSystemPromptSettings,
   ]);
 
   return {
     conversationSettings: updatedConversationSettings,
-    setUpdatedConversationSettings,
+    defaultAllow: updatedDefaultAllow,
+    defaultAllowReplacement: updatedDefaultAllowReplacement,
     quickPromptSettings: updatedQuickPromptSettings,
-    setUpdatedQuickPromptSettings,
+    resetSettings,
+    systemPromptSettings: updatedSystemPromptSettings,
     saveSettings,
+    setUpdatedDefaultAllow,
+    setUpdatedDefaultAllowReplacement,
+    setUpdatedConversationSettings,
+    setUpdatedQuickPromptSettings,
+    setUpdatedSystemPromptSettings,
   };
 };

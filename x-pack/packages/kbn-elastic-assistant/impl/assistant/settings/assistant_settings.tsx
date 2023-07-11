@@ -23,7 +23,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { Conversation } from '../../..';
+import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { AnonymizationSettings } from '../../data_anonymization/settings/anonymization_settings';
@@ -59,7 +59,6 @@ interface Props {
   ) => void;
   onSave: () => void;
   selectedConversation: Conversation;
-  selectedTab?: SettingsTabs;
 }
 
 /**
@@ -67,18 +66,49 @@ interface Props {
  * anonymization, functions (coming soon!), and advanced settings.
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
-  ({ onClose, onSave, selectedConversation, selectedTab: defaultSelectedTab }) => {
-    const { actionTypeRegistry, allSystemPrompts, http } = useAssistantContext();
+  ({ onClose, onSave, selectedConversation: defaultSelectedConversation }) => {
+    const {
+      actionTypeRegistry,
+      allSystemPrompts,
+      http,
+      selectedSettingsTab,
+      setSelectedSettingsTab,
+    } = useAssistantContext();
     const {
       conversationSettings,
       setUpdatedConversationSettings,
       quickPromptSettings,
       setUpdatedQuickPromptSettings,
+      systemPromptSettings,
+      setUpdatedSystemPromptSettings,
       saveSettings,
     } = useSettingsUpdater();
-    const [selectedTab, setSelectedTab] = useState<SettingsTabs>(
-      defaultSelectedTab ?? CONVERSATIONS_TAB
+
+    // Local state for saving previously selected items so tab switching is friendlier
+    // Conversation Selected State
+    const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
+      () => {
+        return conversationSettings[defaultSelectedConversation.id];
+      }
     );
+    const onHandleSelectedConversationChange = useCallback(
+      (conversation?: Conversation) => {
+        setSelectedConversation(conversation ? conversationSettings[conversation.id] : undefined);
+      },
+      [conversationSettings]
+    );
+
+    // Quick Prompt Selection State
+    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
+    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
+      setSelectedQuickPrompt(quickPrompt);
+    }, []);
+
+    // System Prompt Selection State
+    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();
+    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
+      setSelectedSystemPrompt(systemPrompt);
+    }, []);
 
     const handleSave = useCallback(() => {
       saveSettings();
@@ -99,8 +129,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               <EuiKeyPadMenuItem
                 id={CONVERSATIONS_TAB}
                 label={i18n.CONVERSATIONS_MENU_ITEM}
-                isSelected={selectedTab === CONVERSATIONS_TAB}
-                onClick={() => setSelectedTab(CONVERSATIONS_TAB)}
+                isSelected={selectedSettingsTab === CONVERSATIONS_TAB}
+                onClick={() => setSelectedSettingsTab(CONVERSATIONS_TAB)}
               >
                 <>
                   <EuiIcon
@@ -125,8 +155,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               <EuiKeyPadMenuItem
                 id={QUICK_PROMPTS_TAB}
                 label={i18n.QUICK_PROMPTS_MENU_ITEM}
-                isSelected={selectedTab === QUICK_PROMPTS_TAB}
-                onClick={() => setSelectedTab(QUICK_PROMPTS_TAB)}
+                isSelected={selectedSettingsTab === QUICK_PROMPTS_TAB}
+                onClick={() => setSelectedSettingsTab(QUICK_PROMPTS_TAB)}
               >
                 <>
                   <EuiIcon type="editorComment" size="xxl" />
@@ -145,8 +175,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               <EuiKeyPadMenuItem
                 id={SYSTEM_PROMPTS_TAB}
                 label={i18n.SYSTEM_PROMPTS_MENU_ITEM}
-                isSelected={selectedTab === SYSTEM_PROMPTS_TAB}
-                onClick={() => setSelectedTab(SYSTEM_PROMPTS_TAB)}
+                isSelected={selectedSettingsTab === SYSTEM_PROMPTS_TAB}
+                onClick={() => setSelectedSettingsTab(SYSTEM_PROMPTS_TAB)}
               >
                 <EuiIcon type="editorComment" size="xxl" />
                 <EuiIcon
@@ -163,8 +193,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               <EuiKeyPadMenuItem
                 id={ANONYMIZATION_TAB}
                 label={i18n.ANONYMIZATION_MENU_ITEM}
-                isSelected={selectedTab === ANONYMIZATION_TAB}
-                onClick={() => setSelectedTab(ANONYMIZATION_TAB)}
+                isSelected={selectedSettingsTab === ANONYMIZATION_TAB}
+                onClick={() => setSelectedSettingsTab(ANONYMIZATION_TAB)}
               >
                 <EuiIcon type="eyeClosed" size="l" />
               </EuiKeyPadMenuItem>
@@ -172,17 +202,17 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               {/* <EuiKeyPadMenuItem*/}
               {/*  id={FUNCTIONS_TAB}*/}
               {/*  label={i18n.FUNCTIONS_MENU_ITEM}*/}
-              {/*  isSelected={selectedTab === FUNCTIONS_TAB}*/}
+              {/*  isSelected={selectedSettingsTab === FUNCTIONS_TAB}*/}
               {/*  isDisabled*/}
-              {/*  onClick={() => setSelectedTab(FUNCTIONS_TAB)}*/}
+              {/*  onClick={() => setSelectedSettingsTab(FUNCTIONS_TAB)}*/}
               {/* >*/}
               {/*  <EuiIcon type="function" size="l" />*/}
               {/* </EuiKeyPadMenuItem>*/}
               {/* <EuiKeyPadMenuItem*/}
               {/*  id={ADVANCED_TAB}*/}
               {/*  label={i18n.ADVANCED_MENU_ITEM}*/}
-              {/*  isSelected={selectedTab === ADVANCED_TAB}*/}
-              {/*  onClick={() => setSelectedTab(ADVANCED_TAB)}*/}
+              {/*  isSelected={selectedSettingsTab === ADVANCED_TAB}*/}
+              {/*  onClick={() => setSelectedSettingsTab(ADVANCED_TAB)}*/}
               {/* >*/}
               {/*  <EuiIcon type="wrench" size="l" />*/}
               {/* </EuiKeyPadMenuItem>*/}
@@ -198,28 +228,38 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   overflow-y: scroll;
                 `}
               >
-                {selectedTab === CONVERSATIONS_TAB && (
+                {selectedSettingsTab === CONVERSATIONS_TAB && (
                   <ConversationSettings
                     conversationSettings={conversationSettings}
                     setUpdatedConversationSettings={setUpdatedConversationSettings}
                     allSystemPrompts={allSystemPrompts}
                     actionTypeRegistry={actionTypeRegistry}
-                    conversation={selectedConversation}
+                    selectedConversation={selectedConversation}
+                    onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
                   />
                 )}
-                {selectedTab === QUICK_PROMPTS_TAB && (
+                {selectedSettingsTab === QUICK_PROMPTS_TAB && (
                   <QuickPromptSettings
                     quickPromptSettings={quickPromptSettings}
+                    onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
+                    selectedQuickPrompt={selectedQuickPrompt}
                     setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
                   />
                 )}
-                {selectedTab === SYSTEM_PROMPTS_TAB && (
-                  <SystemPromptSettings onSystemPromptsChange={() => {}} />
+                {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
+                  <SystemPromptSettings
+                    systemPromptSettings={systemPromptSettings}
+                    onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
+                    selectedSystemPrompt={selectedSystemPrompt}
+                    setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
+                  />
                 )}
-                {selectedTab === ANONYMIZATION_TAB && <AnonymizationSettings pageSize={5} />}
-                {selectedTab === FUNCTIONS_TAB && <></>}
-                {selectedTab === ADVANCED_TAB && <AdvancedSettings />}
+                {selectedSettingsTab === ANONYMIZATION_TAB && (
+                  <AnonymizationSettings pageSize={5} />
+                )}
+                {selectedSettingsTab === FUNCTIONS_TAB && <></>}
+                {selectedSettingsTab === ADVANCED_TAB && <AdvancedSettings />}
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner
                 grow={false}

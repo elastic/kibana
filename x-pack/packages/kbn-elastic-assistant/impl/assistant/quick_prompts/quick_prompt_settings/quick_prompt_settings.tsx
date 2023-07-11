@@ -30,6 +30,8 @@ const DEFAULT_COLOR = '#D36086';
 
 interface Props {
   quickPromptSettings: QuickPrompt[];
+  onSelectedQuickPromptChange?: (quickPrompt?: QuickPrompt) => void;
+  selectedQuickPrompt?: QuickPrompt;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
 }
 
@@ -37,18 +39,25 @@ interface Props {
  * Settings adding/removing quick prompts. Configure name, color, prompt and category.
  */
 export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
-  ({ quickPromptSettings, setUpdatedQuickPromptSettings }) => {
+  ({
+    quickPromptSettings,
+    onSelectedQuickPromptChange,
+    selectedQuickPrompt: defaultQuickPrompt,
+    setUpdatedQuickPromptSettings,
+  }) => {
     const { basePromptContexts } = useAssistantContext();
 
     // Form options
-    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt>();
+    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState(defaultQuickPrompt);
     // Prompt
-    const [prompt, setPrompt] = useState('');
+    const [prompt, setPrompt] = useState(defaultQuickPrompt?.prompt ?? '');
     const handlePromptTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setPrompt(e.target.value);
     }, []);
     // Color
-    const [color, setColor, errors] = useColorPickerState(DEFAULT_COLOR);
+    const [color, setColor, errors] = useColorPickerState(
+      defaultQuickPrompt?.color ?? DEFAULT_COLOR
+    );
     const handleColorChange = useCallback<EuiSetColorMethod>(
       (text, { hex, isValid }) => {
         if (selectedQuickPrompt != null) {
@@ -63,7 +72,9 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     );
     // Prompt Contexts/Categories
     const [selectedPromptContexts, setSelectedPromptContexts] = useState<PromptContextTemplate[]>(
-      []
+      basePromptContexts.filter((bpc) =>
+        defaultQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
+      ) ?? []
     );
     const onPromptContextSelectionChange = useCallback((pc: PromptContextTemplate[]) => {
       setSelectedPromptContexts(pc);
@@ -94,8 +105,9 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
             newQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
           ) ?? []
         );
+        onSelectedQuickPromptChange?.(newQuickPrompt);
       },
-      [basePromptContexts, setColor]
+      [basePromptContexts, onSelectedQuickPromptChange, setColor]
     );
 
     const onQuickPromptDeleted = useCallback(
