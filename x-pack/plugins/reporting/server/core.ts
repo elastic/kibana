@@ -141,6 +141,7 @@ export class ReportingCore {
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
 
+
     this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pngExport);
 
@@ -194,7 +195,7 @@ export class ReportingCore {
     this.csvV2ExportType.start(exportTypeStartDeps);
     this.pdfExport.start(exportTypeStartDeps);
     this.pngExport.start(exportTypeStartDeps);
-
+    
     await this.assertKibanaIsAvailable();
 
     const { taskManager } = startDeps;
