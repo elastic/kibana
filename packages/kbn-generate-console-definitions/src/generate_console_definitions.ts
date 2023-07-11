@@ -7,17 +7,17 @@
  */
 
 import fs from 'fs';
-import Path, { join } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import Path from 'path';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { generateQueryParams } from './generate_query_params';
-import { generateBodyParams } from './generate_body_params';
 import type {
   AutocompleteBodyParams,
   AutocompleteDefinition,
   AutocompleteUrlParams,
   SpecificationTypes,
 } from './types';
-import { findTypeDefinition } from './utils';
+import { createFolderIfDoesntExist, findTypeDefinition, saveJsonToFile } from './utils';
+import { BodyParamsGenerator } from './body_params_converter';
 
 const generateMethods = (endpoint: SpecificationTypes.Endpoint): string[] => {
   // this array consists of arrays of strings
@@ -43,20 +43,27 @@ const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string =>
   return endpoint.docUrl;
 };
 
-const generateParams = (
-  endpoint: SpecificationTypes.Endpoint,
-  schema: SpecificationTypes.Model
-): { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams } | undefined => {
+const generateParams = ({
+  endpoint,
+  schema,
+  bodyParamsGenerator,
+}: {
+  endpoint: SpecificationTypes.Endpoint;
+  schema: SpecificationTypes.Model;
+  bodyParamsGenerator: BodyParamsGenerator;
+}): { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams } | undefined => {
   const { request } = endpoint;
   if (!request) {
     return;
   }
-  const requestType = findTypeDefinition(schema, request);
-  if (!requestType) {
+  const requestTypeDefinition = findTypeDefinition(schema, request);
+  if (!requestTypeDefinition) {
     return;
   }
-  const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
-  const bodyParams = generateBodyParams(requestType as SpecificationTypes.Request, schema);
+
+  const requestType = requestTypeDefinition as SpecificationTypes.Request;
+  const urlParams = generateQueryParams(requestType, schema);
+  const bodyParams = bodyParamsGenerator.generate(requestType.body);
   return { urlParams, bodyParams };
 };
 
@@ -74,15 +81,20 @@ const addParams = (
   return definition;
 };
 
-const generateDefinition = (
-  endpoint: SpecificationTypes.Endpoint,
-  schema: SpecificationTypes.Model
-): AutocompleteDefinition => {
+const generateDefinition = ({
+  endpoint,
+  schema,
+  bodyParamsGenerator,
+}: {
+  endpoint: SpecificationTypes.Endpoint;
+  schema: SpecificationTypes.Model;
+  bodyParamsGenerator: BodyParamsGenerator;
+}): AutocompleteDefinition => {
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
   let definition: AutocompleteDefinition = {};
-  const params = generateParams(endpoint, schema);
+  const params = generateParams({ endpoint, schema, bodyParamsGenerator });
   if (params) {
     definition = addParams(definition, params);
   }
@@ -93,30 +105,45 @@ const generateDefinition = (
 
 export function generateConsoleDefinitions({
   specsRepo,
-  definitionsFolder,
+  generatedFilesFolder,
   log,
 }: {
   specsRepo: string;
-  definitionsFolder: string;
+  generatedFilesFolder: string;
   log: ToolingLog;
 }) {
   const pathToSchemaFile = Path.resolve(specsRepo, 'output/schema/schema.json');
   log.info('loading the ES specification schema file');
   const schema = JSON.parse(fs.readFileSync(pathToSchemaFile, 'utf8')) as SpecificationTypes.Model;
 
+  // convert endpoints
+  const definitionsFolder = Path.resolve(generatedFilesFolder, 'endpoints');
+  createFolderIfDoesntExist(definitionsFolder, log);
   const { endpoints } = schema;
   log.info(`iterating over endpoints array: ${endpoints.length} endpoints`);
+  const bodyParamsGenerator = new BodyParamsGenerator(schema);
   endpoints.forEach((endpoint) => {
     const { name } = endpoint;
     log.info(name);
-    const definition = generateDefinition(endpoint, schema);
+    const definition = generateDefinition({ endpoint, schema, bodyParamsGenerator });
     const fileContent: { [name: string]: AutocompleteDefinition } = {
       [name]: definition,
     };
-    fs.writeFileSync(
-      join(definitionsFolder, `${name}.json`),
-      JSON.stringify(fileContent, null, 2) + '\n',
-      'utf8'
-    );
+    saveJsonToFile({ folder: definitionsFolder, name, fileContent });
+  });
+
+  // convert global types needed for endpoint definitions
+  const globalsFolder = Path.resolve(generatedFilesFolder, 'globals');
+  createFolderIfDoesntExist(globalsFolder, log);
+  const globalTypes = bodyParamsGenerator.getPublicTypes();
+  console.log({ globalTypes });
+  const globalDefinitions = bodyParamsGenerator.convertGlobals();
+  console.log({ globalDefinitions });
+  globalDefinitions.forEach((globalDefinition) => {
+    const { name, params } = globalDefinition;
+    if (params && Object.keys(params).length > 0) {
+      const fileContent = { [name]: params };
+      saveJsonToFile({ folder: globalsFolder, name, fileContent });
+    }
   });
 }

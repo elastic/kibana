@@ -10,6 +10,7 @@ export type {
   AutocompleteDefinition,
   AutocompleteUrlParams,
   AutocompleteBodyParams,
+  GlobalDefinition,
 } from './autocomplete_definition_types';
 
 export * as SpecificationTypes from './specification_types';

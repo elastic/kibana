@@ -21,3 +21,8 @@ export interface AutocompleteDefinition {
   url_params?: AutocompleteUrlParams;
   data_autocomplete_rules?: AutocompleteBodyParams;
 }
+
+export interface GlobalDefinition {
+  name: string;
+  params: AutocompleteBodyParams;
+}
