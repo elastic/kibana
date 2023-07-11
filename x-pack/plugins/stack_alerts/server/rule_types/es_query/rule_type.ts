@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { ALERT_CONTEXT } from '@kbn/rule-data-utils';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -134,6 +136,14 @@ export function getRuleType(
     }
   );
 
+  const alerts: IRuleTypeAlerts = {
+    context: 'observability.esquery',
+    mappings: { fieldMap: { [ALERT_CONTEXT]: { type: 'object', array: false, required: false } } },
+    useEcs: false,
+    useLegacyAlerts: false,
+    shouldWrite: true,
+  };
+
   return {
     id: ES_QUERY_ID,
     name: ruleTypeName,
@@ -187,5 +197,6 @@ export function getRuleType(
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
+    alerts,
   };
 }
