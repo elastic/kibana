@@ -11,32 +11,15 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { schema, TypeOf } from '@kbn/config-schema';
 import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
 import { getAlertingHealthStatus } from './get_health';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
 export const HEALTH_TASK_ID = `Alerting-${HEALTH_TASK_TYPE}`;
-
-const stateSchemaByVersion = {
-  1: {
-    up: (state: Record<string, unknown>) => ({
-      runs: state.runs || 0,
-      // OK unless proven otherwise
-      health_status: state.health_status || HealthStatus.OK,
-    }),
-    schema: schema.object({
-      runs: schema.number(),
-      health_status: schema.string(),
-    }),
-  },
-};
-
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
-export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export function initializeAlertingHealth(
   logger: Logger,
@@ -53,18 +36,13 @@ export async function scheduleAlertingHealthCheck(
 ) {
   try {
     const interval = config.healthCheck.interval;
-    const state: LatestTaskStateSchema = {
-      runs: 0,
-      // OK unless proven otherwise
-      health_status: HealthStatus.OK,
-    };
     await taskManager.ensureScheduled({
       id: HEALTH_TASK_ID,
       taskType: HEALTH_TASK_TYPE,
       schedule: {
         interval,
       },
-      state,
+      state: emptyState,
       params: {},
     });
   } catch (e) {

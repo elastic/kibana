@@ -12,73 +12,14 @@ import {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import { schema, TypeOf } from '@kbn/config-schema';
 import { InMemoryConnector } from '../types';
 import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
 export const TASK_ID = `Actions-${TELEMETRY_TASK_TYPE}`;
 export const SCHEDULE: IntervalSchedule = { interval: '1d' };
-
-const stateSchemaByVersion = {
-  1: {
-    up: (state: Record<string, unknown>) => ({
-      has_errors: state.has_errors || false,
-      error_messages: state.error_messages || undefined,
-      runs: state.runs || 0,
-      count_total: state.count_total || 0,
-      count_by_type: state.count_by_type || {},
-      count_active_total: state.count_active_total || 0,
-      count_active_by_type: state.count_active_by_type || {},
-      count_active_alert_history_connectors: state.count_active_alert_history_connectors || 0,
-      count_active_email_connectors_by_service_type:
-        state.count_active_email_connectors_by_service_type || {},
-      count_actions_namespaces: state.count_actions_namespaces || 0,
-      count_actions_executions_per_day: state.count_actions_executions_per_day || 0,
-      count_actions_executions_by_type_per_day:
-        state.count_actions_executions_by_type_per_day || {},
-      count_actions_executions_failed_per_day: state.count_actions_executions_failed_per_day || 0,
-      count_actions_executions_failed_by_type_per_day:
-        state.count_actions_executions_failed_by_type_per_day || {},
-      avg_execution_time_per_day: state.avg_execution_time_per_day || 0,
-      avg_execution_time_by_type_per_day: state.avg_execution_time_by_type_per_day || {},
-      count_connector_types_by_action_run_outcome_per_day:
-        state.count_connector_types_by_action_run_outcome_per_day || {},
-    }),
-    schema: schema.object({
-      has_errors: schema.boolean(),
-      error_messages: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-      runs: schema.number(),
-      count_total: schema.number(),
-      count_by_type: schema.recordOf(schema.string(), schema.number()),
-      count_active_total: schema.number(),
-      count_active_by_type: schema.recordOf(schema.string(), schema.number()),
-      count_active_alert_history_connectors: schema.number(),
-      count_active_email_connectors_by_service_type: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_actions_namespaces: schema.number(),
-      count_actions_executions_per_day: schema.number(),
-      count_actions_executions_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_actions_executions_failed_per_day: schema.number(),
-      count_actions_executions_failed_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      avg_execution_time_per_day: schema.number(),
-      avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_connector_types_by_action_run_outcome_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-    }),
-  },
-};
-
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
-type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export function initializeActionsTelemetry(
   logger: Logger,
@@ -112,30 +53,11 @@ function registerActionsTelemetryTask(
 }
 
 async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContract) {
-  const state: LatestTaskStateSchema = {
-    has_errors: false,
-    error_messages: undefined,
-    runs: 0,
-    count_total: 0,
-    count_by_type: {},
-    count_active_total: 0,
-    count_active_by_type: {},
-    count_active_alert_history_connectors: 0,
-    count_active_email_connectors_by_service_type: {},
-    count_actions_namespaces: 0,
-    count_actions_executions_per_day: 0,
-    count_actions_executions_by_type_per_day: {},
-    count_actions_executions_failed_per_day: 0,
-    count_actions_executions_failed_by_type_per_day: {},
-    avg_execution_time_per_day: 0,
-    avg_execution_time_by_type_per_day: {},
-    count_connector_types_by_action_run_outcome_per_day: {},
-  };
   try {
     await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
-      state,
+      state: emptyState,
       params: {},
       schedule: SCHEDULE,
     });

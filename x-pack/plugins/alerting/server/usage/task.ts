@@ -12,7 +12,6 @@ import {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import { schema, TypeOf } from '@kbn/config-schema';
 
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
@@ -20,189 +19,12 @@ import {
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
 } from './lib/get_telemetry_from_event_log';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
 export const SCHEDULE: IntervalSchedule = { interval: '1d' };
-
-const stateSchemaByVersion = {
-  1: {
-    up: (state: Record<string, unknown>) => ({ ...state }),
-    schema: schema.object({
-      has_errors: schema.boolean(),
-      error_messages: schema.maybe(schema.arrayOf(schema.any())),
-      runs: schema.number(),
-      count_total: schema.number(),
-      count_by_type: schema.recordOf(schema.string(), schema.number()),
-      throttle_time: schema.object({
-        min: schema.string(),
-        avg: schema.string(),
-        max: schema.string(),
-      }),
-      schedule_time: schema.object({
-        min: schema.string(),
-        avg: schema.string(),
-        max: schema.string(),
-      }),
-      throttle_time_number_s: schema.object({
-        min: schema.number(),
-        avg: schema.number(),
-        max: schema.number(),
-      }),
-      schedule_time_number_s: schema.object({
-        min: schema.number(),
-        avg: schema.number(),
-        max: schema.number(),
-      }),
-      connectors_per_alert: schema.object({
-        min: schema.number(),
-        avg: schema.number(),
-        max: schema.number(),
-      }),
-      count_active_by_type: schema.recordOf(schema.string(), schema.number()),
-      count_active_total: schema.number(),
-      count_disabled_total: schema.number(),
-      count_rules_by_execution_status: schema.object({
-        success: schema.number(),
-        error: schema.number(),
-        warning: schema.number(),
-      }),
-      count_rules_with_tags: schema.number(),
-      count_rules_by_notify_when: schema.object({
-        on_action_group_change: schema.number(),
-        on_active_alert: schema.number(),
-        on_throttle_interval: schema.number(),
-      }),
-      count_rules_snoozed: schema.number(),
-      count_rules_muted: schema.number(),
-      count_rules_with_muted_alerts: schema.number(),
-      count_connector_types_by_consumers: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      count_rules_namespaces: schema.number(),
-      count_rules_executions_per_day: schema.number(),
-      count_rules_executions_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_rules_executions_failured_per_day: schema.number(),
-      count_rules_executions_failured_by_reason_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_rules_executions_failured_by_reason_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      count_rules_by_execution_status_per_day: schema.recordOf(schema.string(), schema.number()),
-      count_rules_executions_timeouts_per_day: schema.number(),
-      count_rules_executions_timeouts_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_failed_and_unrecognized_rule_tasks_per_day: schema.number(),
-      count_failed_and_unrecognized_rule_tasks_by_status_per_day: schema.recordOf(
-        schema.string(),
-        schema.number()
-      ),
-      count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      avg_execution_time_per_day: schema.number(),
-      avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      avg_es_search_duration_per_day: schema.number(),
-      avg_es_search_duration_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      avg_total_search_duration_per_day: schema.number(),
-      avg_total_search_duration_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-      percentile_num_generated_actions_per_day: schema.recordOf(schema.string(), schema.number()),
-      percentile_num_generated_actions_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-      percentile_num_alerts_per_day: schema.recordOf(schema.string(), schema.number()),
-      percentile_num_alerts_by_type_per_day: schema.recordOf(
-        schema.string(),
-        schema.recordOf(schema.string(), schema.number())
-      ),
-    }),
-  },
-};
-
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
-type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
-
-const emptyState: LatestTaskStateSchema = {
-  has_errors: false,
-  error_messages: undefined,
-  runs: 0,
-  count_total: 0,
-  count_by_type: {},
-  throttle_time: {
-    min: '0s',
-    avg: '0s',
-    max: '0s',
-  },
-  schedule_time: {
-    min: '0s',
-    avg: '0s',
-    max: '0s',
-  },
-  throttle_time_number_s: {
-    min: 0,
-    avg: 0,
-    max: 0,
-  },
-  schedule_time_number_s: {
-    min: 0,
-    avg: 0,
-    max: 0,
-  },
-  connectors_per_alert: {
-    min: 0,
-    avg: 0,
-    max: 0,
-  },
-  count_active_by_type: {},
-  count_active_total: 0,
-  count_disabled_total: 0,
-  count_rules_by_execution_status: {
-    success: 0,
-    error: 0,
-    warning: 0,
-  },
-  count_rules_with_tags: 0,
-  count_rules_by_notify_when: {
-    on_action_group_change: 0,
-    on_active_alert: 0,
-    on_throttle_interval: 0,
-  },
-  count_rules_snoozed: 0,
-  count_rules_muted: 0,
-  count_rules_with_muted_alerts: 0,
-  count_connector_types_by_consumers: {},
-  count_rules_namespaces: 0,
-  count_rules_executions_per_day: 0,
-  count_rules_executions_by_type_per_day: {},
-  count_rules_executions_failured_per_day: 0,
-  count_rules_executions_failured_by_reason_per_day: {},
-  count_rules_executions_failured_by_reason_by_type_per_day: {},
-  count_rules_by_execution_status_per_day: {},
-  count_rules_executions_timeouts_per_day: 0,
-  count_rules_executions_timeouts_by_type_per_day: {},
-  count_failed_and_unrecognized_rule_tasks_per_day: 0,
-  count_failed_and_unrecognized_rule_tasks_by_status_per_day: {},
-  count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {},
-  avg_execution_time_per_day: 0,
-  avg_execution_time_by_type_per_day: {},
-  avg_es_search_duration_per_day: 0,
-  avg_es_search_duration_by_type_per_day: {},
-  avg_total_search_duration_per_day: 0,
-  avg_total_search_duration_by_type_per_day: {},
-  percentile_num_generated_actions_per_day: {},
-  percentile_num_generated_actions_by_type_per_day: {},
-  percentile_num_alerts_per_day: {},
-  percentile_num_alerts_by_type_per_day: {},
-};
 
 export function initializeAlertingTelemetry(
   logger: Logger,
