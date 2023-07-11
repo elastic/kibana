@@ -137,6 +137,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
       expect.any(AbortSignal)
     );
     expect(addError).toHaveBeenCalled();
+    spy.mockRestore();
   });
 
   it('fetches next page with correct params', async () => {
