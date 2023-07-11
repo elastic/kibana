@@ -59,7 +59,7 @@ describe('EncryptedSavedObjects Plugin', () => {
       );
       plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
 
-      const startContract = plugin.start();
+      const startContract = plugin.start(coreMock.createStart());
       expect(startContract).toMatchInlineSnapshot(`
               Object {
                 "getClient": [Function],
