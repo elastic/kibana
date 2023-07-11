@@ -834,7 +834,7 @@ Returns an array of Fleet artifacts, including source map uploads.
 The user accessing this endpoint requires `Read` or `All` Kibana privileges for the {beat_kib_app} feature.
 For more information, see <<kibana-privileges>>.
 
-[[apm-sourcemap-get-req]]
+[[android-sourcemap-get-req]]
 ===== Request
 
 `GET /api/apm/sourcemaps`
