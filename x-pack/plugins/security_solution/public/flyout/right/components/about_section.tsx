@@ -9,13 +9,13 @@ import { EuiSpacer } from '@elastic/eui';
 import type { VFC } from 'react';
 import React from 'react';
 import { ExpandableSection } from './expandable_section';
-import { DESCRIPTION_SECTION_TEST_ID } from './test_ids';
-import { DESCRIPTION_TITLE } from './translations';
+import { ABOUT_SECTION_TEST_ID } from './test_ids';
+import { ABOUT_TITLE } from './translations';
 import { Description } from './description';
 import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
 
-export interface DescriptionSectionProps {
+export interface AboutSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
    */
@@ -25,12 +25,12 @@ export interface DescriptionSectionProps {
 /**
  * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
  */
-export const DescriptionSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
+export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
   return (
     <ExpandableSection
       expanded={expanded}
-      title={DESCRIPTION_TITLE}
-      data-test-subj={DESCRIPTION_SECTION_TEST_ID}
+      title={ABOUT_TITLE}
+      data-test-subj={ABOUT_SECTION_TEST_ID}
     >
       <Description />
       <EuiSpacer size="m" />
@@ -41,4 +41,4 @@ export const DescriptionSection: VFC<DescriptionSectionProps> = ({ expanded = tr
   );
 };
 
-DescriptionSection.displayName = 'DescriptionSection';
+AboutSection.displayName = 'AboutSection';

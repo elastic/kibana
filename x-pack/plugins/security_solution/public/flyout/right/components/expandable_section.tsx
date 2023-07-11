@@ -33,7 +33,7 @@ export interface DescriptionSectionProps {
 
 /**
  * Component used to render multiple sections in the Overview tab
- * - Description
+ * - About
  * - Investigation
  * - Visualizations
  * - Insights
