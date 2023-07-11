@@ -190,6 +190,23 @@ exports.Cluster = class Cluster {
   }
 
   /**
+   * Verify that Docker is installed locally
+   * @returns {Promise<void>}
+   */
+  async verifyDockerInstalled() {
+    this._log.info(chalk.bold('Verifying docker installed'));
+    const { stdout } = await execa('docker', ['--version']).catch((error) => {
+      throw createCliError(
+        `Docker not found locally. Install it from: https://www.docker.com\n\n${error.message}`
+      );
+    });
+
+    this._log.indent(4, () => {
+      this._log.info(stdout);
+    });
+  }
+
+  /**
    * Starts ES and returns resolved promise once started
    *
    * @param {String} installPath
