@@ -8,7 +8,7 @@
 import { BACK_TO_RULE_DETAILS, EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 
 export const saveEditedRule = () => {
-  cy.get(EDIT_SUBMIT_BUTTON).should('exist').click();
+  cy.get(EDIT_SUBMIT_BUTTON).should('exist').click({ force: true });
   cy.get(EDIT_SUBMIT_BUTTON).should('not.exist');
 };
 
