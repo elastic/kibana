@@ -198,10 +198,11 @@ export const NotifyUserOption = React.memo(
                     <h4>{CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL}</h4>
                   </EuiText>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} data-test-subj={getTestId('tooltipIconContainer')}>
+                <EuiFlexItem grow={false}>
                   <EuiIconTip
                     position="right"
-                    data-test-subj={getTestId('tooltip')}
+                    data-test-subj={getTestId('tooltipInfo')}
+                    anchorProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
                     content={
                       <>
                         <FormattedMessage

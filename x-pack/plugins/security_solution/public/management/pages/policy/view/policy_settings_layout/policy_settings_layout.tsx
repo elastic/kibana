@@ -91,6 +91,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
     sendPolicyUpdate({ policy: update })
       .then(() => {
         toasts.addSuccess({
+          'data-test-subj': 'policyDetailsSuccessMessage',
           title: i18n.translate(
             'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
             {
@@ -112,6 +113,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _
       })
       .catch((err) => {
         toasts.addDanger({
+          'data-test-subj': 'policyDetailsFailureMessage',
           title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
             defaultMessage: 'Failed!',
           }),

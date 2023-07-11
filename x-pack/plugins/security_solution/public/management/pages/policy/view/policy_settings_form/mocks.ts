@@ -29,46 +29,57 @@ export const getPolicySettingsFormTestSubjects = (
   formTopLevelTestSubj: string = 'endpointPolicyForm'
 ) => {
   const genTestSubj = createTestSubjGenerator(formTopLevelTestSubj);
-  const genMalwareTestSubj = genTestSubj.withPrefix('malware');
-  const genRansomwareTestSubj = genTestSubj.withPrefix('ransomware');
-  const genMemoryTestSubj = genTestSubj.withPrefix('memory');
-  const genBehaviourTestSubj = genTestSubj.withPrefix('behaviour');
+  const malwareTestSubj = genTestSubj.withPrefix('malware');
+  const ransomwareTestSubj = genTestSubj.withPrefix('ransomware');
+  const memoryTestSubj = genTestSubj.withPrefix('memory');
+  const behaviourTestSubj = genTestSubj.withPrefix('behaviour');
   const advancedSectionTestSubj = genTestSubj.withPrefix('advancedSection');
+  const windowsEventsTestSubj = genTestSubj.withPrefix('windowsEvents');
+  const macEventsTestSubj = genTestSubj.withPrefix('macEvents');
+  const linuxEventsTestSubj = genTestSubj.withPrefix('linuxEvents');
 
   const testSubj = {
     form: genTestSubj(),
 
     malware: {
-      card: genMalwareTestSubj(),
-      enableDisableSwitch: genMalwareTestSubj('enableDisableSwitch'),
-      protectionPreventRadio: genMalwareTestSubj('protectionLevel-preventRadio'),
-      protectionDetectRadio: genMalwareTestSubj('protectionLevel-detectRadio'),
-      notifyUserCheckbox: genMalwareTestSubj('notifyUser-checkbox'),
-      osValuesContainer: genMalwareTestSubj('osValues'),
+      card: malwareTestSubj(),
+      enableDisableSwitch: malwareTestSubj('enableDisableSwitch'),
+      protectionPreventRadio: malwareTestSubj('protectionLevel-preventRadio'),
+      protectionDetectRadio: malwareTestSubj('protectionLevel-detectRadio'),
+      notifyUserCheckbox: malwareTestSubj('notifyUser-checkbox'),
+      notifySupportedVersion: malwareTestSubj('notifyUser-supportedVersion'),
+      notifyCustomMessage: malwareTestSubj('notifyUser-customMessage'),
+      notifyCustomMessageTooltipIcon: malwareTestSubj('notifyUser-tooltipIcon'),
+      notifyCustomMessageTooltipInfo: malwareTestSubj('notifyUser-tooltipInfo'),
+      osValuesContainer: malwareTestSubj('osValues'),
     },
     ransomware: {
-      card: genRansomwareTestSubj(),
-      enableDisableSwitch: genRansomwareTestSubj('enableDisableSwitch'),
-      protectionPreventRadio: genRansomwareTestSubj('protectionLevel-preventRadio'),
-      protectionDetectRadio: genRansomwareTestSubj('protectionLevel-detectRadio'),
-      notifyUserCheckbox: genRansomwareTestSubj('notifyUser-checkbox'),
-      osValuesContainer: genRansomwareTestSubj('osValues'),
+      card: ransomwareTestSubj(),
+      enableDisableSwitch: ransomwareTestSubj('enableDisableSwitch'),
+      protectionPreventRadio: ransomwareTestSubj('protectionLevel-preventRadio'),
+      protectionDetectRadio: ransomwareTestSubj('protectionLevel-detectRadio'),
+      notifyUserCheckbox: ransomwareTestSubj('notifyUser-checkbox'),
+      notifySupportedVersion: ransomwareTestSubj('notifyUser-supportedVersion'),
+      notifyCustomMessage: ransomwareTestSubj('notifyUser-customMessage'),
+      notifyCustomMessageTooltipIcon: ransomwareTestSubj('notifyUser-tooltipIcon'),
+      notifyCustomMessageTooltipInfo: ransomwareTestSubj('notifyUser-tooltipInfo'),
+      osValuesContainer: ransomwareTestSubj('osValues'),
     },
     memory: {
-      card: genMemoryTestSubj(),
-      enableDisableSwitch: genMemoryTestSubj('enableDisableSwitch'),
-      protectionPreventRadio: genMemoryTestSubj('protectionLevel-preventRadio'),
-      protectionDetectRadio: genMemoryTestSubj('protectionLevel-detectRadio'),
-      notifyUserCheckbox: genMemoryTestSubj('notifyUser-checkbox'),
-      osValuesContainer: genMemoryTestSubj('osValues'),
+      card: memoryTestSubj(),
+      enableDisableSwitch: memoryTestSubj('enableDisableSwitch'),
+      protectionPreventRadio: memoryTestSubj('protectionLevel-preventRadio'),
+      protectionDetectRadio: memoryTestSubj('protectionLevel-detectRadio'),
+      notifyUserCheckbox: memoryTestSubj('notifyUser-checkbox'),
+      osValuesContainer: memoryTestSubj('osValues'),
     },
     behaviour: {
-      card: genBehaviourTestSubj(),
-      enableDisableSwitch: genBehaviourTestSubj('enableDisableSwitch'),
-      protectionPreventRadio: genBehaviourTestSubj('protectionLevel-preventRadio'),
-      protectionDetectRadio: genBehaviourTestSubj('protectionLevel-detectRadio'),
-      notifyUserCheckbox: genBehaviourTestSubj('notifyUser-checkbox'),
-      osValuesContainer: genBehaviourTestSubj('osValues'),
+      card: behaviourTestSubj(),
+      enableDisableSwitch: behaviourTestSubj('enableDisableSwitch'),
+      protectionPreventRadio: behaviourTestSubj('protectionLevel-preventRadio'),
+      protectionDetectRadio: behaviourTestSubj('protectionLevel-detectRadio'),
+      notifyUserCheckbox: behaviourTestSubj('notifyUser-checkbox'),
+      osValuesContainer: behaviourTestSubj('osValues'),
     },
     attachSurface: {
       card: genTestSubj('attackSurface'),
@@ -77,13 +88,18 @@ export const getPolicySettingsFormTestSubjects = (
     },
 
     windowsEvents: {
-      card: genTestSubj('windowsEvents'),
+      card: windowsEventsTestSubj(),
+      dnsCheckbox: windowsEventsTestSubj('dns'),
+      processCheckbox: windowsEventsTestSubj('process'),
+      fileCheckbox: windowsEventsTestSubj('file'),
     },
     macEvents: {
-      card: genTestSubj('macEvents'),
+      card: macEventsTestSubj(),
+      fileCheckbox: macEventsTestSubj('file'),
     },
     linuxEvents: {
-      card: genTestSubj('linuxEvents'),
+      card: linuxEventsTestSubj(),
+      fileCheckbox: linuxEventsTestSubj('file'),
     },
     antivirusRegistration: {
       card: genTestSubj('antivirusRegistration'),
