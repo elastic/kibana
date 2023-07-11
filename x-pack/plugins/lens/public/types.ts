@@ -43,7 +43,7 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common'
 import type {
   DraggingIdentifier,
   DragDropIdentifier,
-  DragContextState,
+  DragContextValue,
   DropType,
 } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
@@ -588,7 +588,7 @@ export interface DatasourceLayerSettingsProps<T = unknown> {
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
-  dragDropContext: DragContextState;
+  dragDropContext: DragContextValue;
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<
