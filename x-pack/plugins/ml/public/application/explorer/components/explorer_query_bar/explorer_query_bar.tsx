@@ -14,7 +14,7 @@ import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
 import { useMlKibana } from '../../../contexts/kibana';
 

@@ -16,10 +16,10 @@ import {
 } from '@elastic/eui';
 import { Query, Filter } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { SearchPanelContent } from './search_bar';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { SearchQueryLanguage } from '../../types/combined_query';
 import { OverallStats } from '../../types/overall_stats';
 
 interface Props {

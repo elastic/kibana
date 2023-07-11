@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getDefaultSwimlanePanelTitle } from '../../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { SWIMLANE_TYPE, SwimlaneType } from '../explorer_constants';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';

@@ -23,8 +23,8 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, isQuery, SearchSource } from '@kbn/data-plugin/common';
 import { FilterManager, mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { getDefaultQuery } from '@kbn/ml-query-utils';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
+import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
 
 /**
@@ -69,7 +69,7 @@ export function createMergedEsQuery(
   dataView?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
-  let combinedQuery = getDefaultQuery() as QueryDslQueryContainer;
+  let combinedQuery = getDefaultDSLQuery() as QueryDslQueryContainer;
 
   if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
@@ -145,7 +145,7 @@ export function getEsQueryFromSavedSearch({
     // Flattened query from search source may contain a clause that narrows the time range
     // which might interfere with global time pickers so we need to remove
     const savedQuery =
-      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultQuery();
+      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
 
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {

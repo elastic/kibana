@@ -11,4 +11,4 @@ export { ES_CLIENT_TOTAL_HITS_RELATION } from './src/es_client_total_hits_relati
 export { getSafeAggregationName } from './src/get_safe_aggregation_name';
 export { SEARCH_QUERY_LANGUAGE } from './src/types';
 export type { SearchQueryLanguage } from './src/types';
-export { getDefaultQuery } from './src/get_default_query';
+export { getDefaultDSLQuery } from './src/get_default_query';

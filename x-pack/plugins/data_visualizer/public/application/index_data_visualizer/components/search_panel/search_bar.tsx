@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
-import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export const SearchPanelContent = ({

@@ -30,7 +30,7 @@ import type { Query } from '@kbn/es-query';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import {

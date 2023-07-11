@@ -14,8 +14,9 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
 import { cloneDeep } from 'lodash';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type SearchQueryLanguage, getDefaultQuery } from '@kbn/ml-query-utils';
+import { type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
+import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
@@ -234,7 +235,9 @@ const getDataComparisonQuery = ({
   }
 
   const query: Query['query'] = cloneDeep(
-    !searchQuery || isPopulatedObject(searchQuery, ['match_all']) ? getDefaultQuery() : searchQuery
+    !searchQuery || isPopulatedObject(searchQuery, ['match_all'])
+      ? getDefaultDSLQuery()
+      : searchQuery
   );
 
   if (rangeFilter && isPopulatedObject<string, unknown>(query, ['bool'])) {

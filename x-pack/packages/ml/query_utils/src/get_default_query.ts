@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Query } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const DEFAULT_QUERY = {
   bool: {
@@ -18,6 +18,6 @@ const DEFAULT_QUERY = {
   },
 };
 
-export function getDefaultQuery(): Query['query'] {
+export function getDefaultDSLQuery(): QueryDslQueryContainer {
   return cloneDeep(DEFAULT_QUERY);
 }

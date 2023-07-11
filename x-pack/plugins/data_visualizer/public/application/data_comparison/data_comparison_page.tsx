@@ -32,6 +32,7 @@ import {
 } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { css } from '@emotion/react';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useData } from '../common/hooks/use_data';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -46,7 +47,6 @@ import { DataComparisonView } from './data_comparison_view';
 import { PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
-import type { SearchQueryLanguage } from '../index_data_visualizer/types/combined_query';
 import { DocumentCountWithDualBrush } from './document_count_with_dual_brush';
 
 const dataViewTitleHeader = css({
