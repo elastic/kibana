@@ -109,7 +109,7 @@ NOTE: {kibana-ref}/drilldowns.html[Drilldowns] are only available if the map is 
 
 You can create spatial filters in two ways:
 
-* Click the tool icon image:maps/images/tools_icon.png[], and then draw a shape, bounding box, or distance on the map to define the spatial filter.
+* Click the tool icon image:maps/images/tools_icon.png[tool icon], and then draw a shape, bounding box, or distance on the map to define the spatial filter.
 * Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
 
 [role="screenshot"]
