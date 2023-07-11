@@ -90,25 +90,13 @@ const trackRoute = createObservabilityServerRoute({
     tags: ['ai_assistant'],
   },
   handler: async (resources): Promise<void> => {
-    const {
-      params,
-      config,
-      dependencies: {
-        pluginsSetup: { core },
-      },
-    } = resources;
+    const { params, config } = resources;
 
     if (!config.aiAssistant?.enabled) {
       throw Boom.notImplemented();
     }
 
-    const info = await (
-      await core.getStartServices()
-    )[0].elasticsearch.client.asInternalUser.info();
-
     const feedbackBody = {
-      cluster_id: info.cluster_uuid,
-      cluster_name: info.cluster_name,
       prompt_name: params.path.promptId,
       feedback_action: params.body.feedbackAction,
       model:
