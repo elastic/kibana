@@ -13,20 +13,8 @@ export const rawConnectorSchema = schema.object({
   isMissingSecrets: schema.boolean(),
   config: schema.recordOf(schema.string(), schema.any()),
   secrets: schema.recordOf(schema.string(), schema.any()),
-  // PreconfiguredAction ---
   isPreconfigured: schema.maybe(schema.boolean()),
   isSystemAction: schema.boolean(),
-  id: schema.conditional(
-    schema.siblingRef('isPreconfigured'),
-    true,
-    schema.string(),
-    schema.never()
-  ),
-  isDeprecated: schema.conditional(
-    schema.siblingRef('isPreconfigured'),
-    true,
-    schema.boolean(),
-    schema.never()
-  ),
-  // --- PreconfiguredAction
+  id: schema.maybe(schema.string()),
+  isDeprecated: schema.maybe(schema.boolean()),
 });

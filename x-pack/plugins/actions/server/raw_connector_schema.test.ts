@@ -50,35 +50,9 @@ describe('Raw Connector Schema', () => {
     );
   });
 
-  test('invalid action with preconfigured params', () => {
-    expect(() => rawConnectorSchema.validate({ ...action, id: '1' })).toThrow(
-      "[id]: a value wasn't expected to be present"
-    );
-  });
-
-  test('invalid action with preconfigured params (isDeprecated)', () => {
-    expect(() => rawConnectorSchema.validate({ ...action, isDeprecated: '1' })).toThrow(
-      "[isDeprecated]: a value wasn't expected to be present"
-    );
-  });
-
   test('invalid preconfigured action', () => {
     expect(() => rawConnectorSchema.validate({ ...preconfiguredAction, foo: '1' })).toThrow(
       '[foo]: definition for this key is missing'
-    );
-  });
-
-  test('invalid preconfigured action without conditional param (id)', () => {
-    const { id, ...preconfiguredActionWithoutId } = preconfiguredAction;
-    expect(() => rawConnectorSchema.validate(preconfiguredActionWithoutId)).toThrow(
-      '[id]: expected value of type [string] but got [undefined]'
-    );
-  });
-
-  test('invalid preconfigured action without conditional param (isDeprecated)', () => {
-    const { isDeprecated, ...preconfiguredActionWithoutIsDeprecated } = preconfiguredAction;
-    expect(() => rawConnectorSchema.validate(preconfiguredActionWithoutIsDeprecated)).toThrow(
-      '[isDeprecated]: expected value of type [boolean] but got [undefined]'
     );
   });
 });
