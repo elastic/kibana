@@ -116,14 +116,14 @@ For diagnostic or exploratory purposes, action variables whose values are object
 
 For situations where your rule response returns arrays of data, you can loop through the `context`:
 
-[source]
+[source,sh]
 --------------------------------------------------
 {{#context}}{{.}}{{/context}}
 --------------------------------------------------
 
 For example, looping through search result hits:
 
-[source]
+[source,sh]
 --------------------------------------------------
 triggering data was:
 {{#context.hits}} - {{_source.message}}
@@ -154,7 +154,7 @@ The following capabilities are available:
 Mustache lambdas provide additional rendering capabilities for Mustache templates.
 A Mustache lambda is formatted like a Mustache section. For example:
 
-[source]
+[source,sh]
 ----
 {{#EvalMath}} round(context.value, 1) {{/EvalMath}}
 ----
@@ -169,7 +169,7 @@ The EvalMath lambda will evaluate the text passed to it as <<canvas-tinymath-fun
 
 For example, when the Mustache variable `context.value` is `3.1234`, the following template will render as `3.1`:
 
-[source]
+[source,sh]
 ----
 {{#EvalMath}} round(context.value, 1) {{/EvalMath}}
 ----
@@ -178,7 +178,7 @@ This lambda can access Mustache variables without having to wrap them in `{{}}`.
 However, if the value is in a string form (for example, an Elasticsearch numeric field whose source was indexed as a string), or could be escaped, escaping the value with triple quotes should allow this to work.
 For example, if the Mustache variable `context.value` is `"3.1234"`, the following template will render as `3.1`:
 
-[source]
+[source,sh]
 ----
 {{#EvalMath}} round( {{{context.value}}} , 1) {{/EvalMath}}
 ----
@@ -200,7 +200,7 @@ https://hjson.github.io/[Hjson] is a syntax extension to JSON. It has the follow
 To use it, surround your Hjson content with `{{#ParseHjson}}...{{/ParseHjson}}`.
 For example:
  
-[source]
+[source,sh]
 ----
 {{#ParseHjson}}
 {
@@ -234,7 +234,7 @@ The `<date>` parameter is required; the `<time zone>` and `<date format>` parame
 The default time zone is `"UTC"` and the default date format is `"YYYY-MM-DD hh:mma"`.
 For example, the following templates all render the same value:
  
-[source]
+[source,sh]
 ----
     {{#FormatDate}} {{{timestamp}}} {{/FormatDate}}
     {{#FormatDate}} {{{timestamp}}} ; UTC {{/FormatDate}}
@@ -285,7 +285,7 @@ The options and values that can be used with them are listed under `options` in 
 For example, the following template, given the value of context variable
 `context.value.condition0` is 628.4, will render as shown below.
 
-[source]
+[source,sh]
 ----
     original value: {{{context.value.condition0}}}
     formatted value: {{#FormatNumber}}
@@ -295,7 +295,7 @@ For example, the following template, given the value of context variable
 
 Rendered text:
 
-[source]
+[source,sh]
 ----
     original value: 628.4
     formatted value: 628,40 €
@@ -306,7 +306,7 @@ The `{{FormatNumber}}` and `{{EvalMath}}` lambdas can be used together to perfor
 For example, the following template, given the value of context variable
 `context.value.condition0` is 628.4 will render as shown below.
 
-[source]
+[source,sh]
 ----
     original value: {{{context.value.condition0}}}
     formatted value: {{#FormatNumber}}
@@ -317,7 +317,7 @@ For example, the following template, given the value of context variable
 
 Rendered text:
 
-[source]
+[source,sh]
 ----
     original value: 628.4
     formatted value: 62,84 €
