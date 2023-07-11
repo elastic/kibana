@@ -334,5 +334,3 @@ export const ENROLLMENT_API_KEY_MAPPINGS = {
     },
   },
 } as const;
-
-export const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';

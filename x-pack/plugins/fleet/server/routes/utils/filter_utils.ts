@@ -7,7 +7,6 @@
 
 import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 type KueryNode = any;
@@ -31,6 +30,7 @@ interface ValidateFilterKueryNodeParams {
   nestedKeys?: string;
   storeValue?: boolean;
   path?: string;
+  skipNormalization?: boolean;
 }
 
 export const validateFilterKueryNode = ({
@@ -41,6 +41,7 @@ export const validateFilterKueryNode = ({
   nestedKeys,
   storeValue = false,
   path = 'arguments',
+  skipNormalization,
 }: ValidateFilterKueryNodeParams): ValidateFilterKueryNode[] => {
   let localNestedKeys: string | undefined;
   return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
@@ -68,6 +69,7 @@ export const validateFilterKueryNode = ({
           path: `${myPath}.arguments`,
           hasNestedKey: ast.type === 'function' && ast.function === 'nested',
           nestedKeys: localNestedKeys || nestedKeys,
+          skipNormalization,
         }),
       ];
     }
@@ -82,7 +84,7 @@ export const validateFilterKueryNode = ({
         ...kueryNode,
         {
           astPath,
-          error: hasFilterKeyError(key, types, indexMapping),
+          error: hasFilterKeyError(key, types, indexMapping, skipNormalization),
           isSavedObjectAttr: isSavedObjectAttr(key, indexMapping),
           key,
           type: getType(key),
@@ -126,7 +128,8 @@ export const isSavedObjectAttr = (key: string | null | undefined, indexMapping: 
 export const hasFilterKeyError = (
   key: string | null | undefined,
   types: string[],
-  indexMapping: IndexMapping
+  indexMapping: IndexMapping,
+  skipNormalization?: boolean
 ): string | null => {
   if (key == null) {
     return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
@@ -141,19 +144,22 @@ export const hasFilterKeyError = (
     if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
       return `This type ${keySplit[0]} is not allowed`;
     }
+    // In some cases we don't want to check about the `attributes` presence
+    // In that case pass the `skipNormalization` parameter
     if (
-      (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||
-      (keySplit.length > 2 && keySplit[1] !== 'attributes')
+      (!skipNormalization && keySplit.length === 2 && fieldDefined(indexMapping, key)) ||
+      (!skipNormalization && keySplit.length > 2 && keySplit[1] !== 'attributes')
     ) {
       return `This key '${key}' does NOT match the filter proposition SavedObjectType.attributes.key`;
     }
+    // Check that the key exists in the mappings
+    const searchKey = skipNormalization
+      ? `${keySplit[0]}.${keySplit.slice(1, keySplit.length).join('.')}`
+      : `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`;
+
     if (
       (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
-      (keySplit.length > 2 &&
-        !fieldDefined(
-          indexMapping,
-          `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`
-        ))
+      (keySplit.length > 2 && !fieldDefined(indexMapping, searchKey))
     ) {
       return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
     }
@@ -206,7 +212,7 @@ export const validateKuery = (
   kuery: string | undefined,
   allowedTypes: string[],
   indexMapping: IndexMapping,
-  aggs?: Record<string, estypes.AggregationsAggregationContainer>
+  skipNormalization?: boolean
 ) => {
   let isValid = true;
   let error: string | undefined;
@@ -222,6 +228,7 @@ export const validateKuery = (
         types: allowedTypes,
         indexMapping,
         storeValue: true,
+        skipNormalization,
       });
       if (validationObject.some((obj) => obj.error != null)) {
         error = `KQLSyntaxError: ${validationObject

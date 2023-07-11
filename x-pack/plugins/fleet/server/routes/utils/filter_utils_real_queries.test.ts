@@ -15,8 +15,9 @@ import {
   PACKAGE_POLICIES_MAPPINGS,
   AGENT_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
-  FLEET_ENROLLMENT_API_PREFIX,
 } from '../../constants';
+
+import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
 import { validateFilterKueryNode, validateKuery } from './filter_utils';
 
@@ -176,6 +177,50 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
           error: null,
           isSavedObjectAttr: false,
           key: 'ingest-package-policies.attributes.package.name',
+          type: 'ingest-package-policies',
+        },
+      ]);
+    });
+
+    it('It fails if the kuery is not normalized', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        indexMapping: PACKAGE_POLICIES_MAPPINGS,
+        storeValue: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error:
+            "This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key",
+          isSavedObjectAttr: false,
+          key: 'ingest-package-policies.package.name',
+          type: 'ingest-package-policies',
+        },
+      ]);
+    });
+
+    it('It does not check attributes if skipNormalization is passed', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        indexMapping: PACKAGE_POLICIES_MAPPINGS,
+        storeValue: true,
+        skipNormalization: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: false,
+          key: 'ingest-package-policies.package.name',
           type: 'ingest-package-policies',
         },
       ]);
@@ -454,6 +499,16 @@ describe('validateKuery validates real kueries', () => {
         `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`,
         [AGENTS_PREFIX],
         AGENT_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Test 4 - valid kuery', async () => {
+      const validationObj = validateKuery(
+        `${AGENTS_PREFIX}.local_metadata.elastic.agent.version : "8.6.0"`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(true);
     });

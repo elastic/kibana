@@ -24,6 +24,8 @@ import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENT_POLICY_INDEX } from '../../../../../../common/constants';
+
 import {
   useAuthz,
   useGetAgentPolicies,
@@ -261,6 +263,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
               setSearch(newSearch);
             }}
             fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
+            indexPattern={AGENT_POLICY_INDEX}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

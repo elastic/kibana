@@ -187,7 +187,7 @@ export const getAgentsHandler: RequestHandler<
 
   try {
     // validate kuery
-    const validationObj = validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
+    const validationObj = validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
     if (validationObj?.error) {
       return response.badRequest({
         body: {
@@ -240,7 +240,7 @@ export const getAgentTagsHandler: RequestHandler<
 
   try {
     // validate kuery
-    validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
+    validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
 
     const tags = await AgentService.getAgentTags(soClient, esClient, {
       showInactive: request.query.showInactive,

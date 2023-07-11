@@ -40,7 +40,8 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
     const validationObj = validateKuery(
       kuery,
       [FLEET_ENROLLMENT_API_PREFIX],
-      ENROLLMENT_API_KEY_MAPPINGS
+      ENROLLMENT_API_KEY_MAPPINGS,
+      true
     );
     if (validationObj?.error) {
       return response.badRequest({
