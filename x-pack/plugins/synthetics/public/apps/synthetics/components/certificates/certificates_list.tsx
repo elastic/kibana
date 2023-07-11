@@ -46,10 +46,6 @@ interface Props {
 }
 
 export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
-  const onTableChange = (newVal: Partial<Props>) => {
-    onChange(newVal.page as Page, newVal.sort as CertSort);
-  };
-
   const pagination = {
     pageIndex: page.index,
     pageSize: page.size,
@@ -105,7 +101,9 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}
-      onChange={onTableChange}
+      onChange={(newVal) => {
+        onChange(newVal.page as Page, newVal.sort as CertSort);
+      }}
       sorting={{
         sort: {
           field: sort.field,
