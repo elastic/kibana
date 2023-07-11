@@ -110,7 +110,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setDefaultDataRange();
         await elasticChart.setNewChartUiDebugFlag(true);
       });
 
@@ -198,7 +197,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setDefaultDataRange();
       });
 
       it('are added when a cell magnifying glass is clicked', async function () {

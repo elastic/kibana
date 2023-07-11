@@ -426,8 +426,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('switch panel interval test', () => {
+      before(async () => {
+        await visualBuilder.setTime({ useUISettings: true });
+      });
       beforeEach(async () => {
-        await visualBuilder.setTime();
         await visualBuilder.clickMetric();
         await visualBuilder.checkMetricTabIsPresent();
         await visualBuilder.clickPanelOptions('metric');
@@ -545,10 +547,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await settings.setFieldFormat('string');
         await settings.setScriptedFieldStringTransform('title');
         await settings.controlChangeSave();
+        await visualBuilder.setTime({ useUISettings: true });
       });
 
       beforeEach(async () => {
-        await visualBuilder.setTime();
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('bytes');
         await visualBuilder.setMetricsGroupByTerms('machine.os.raw');

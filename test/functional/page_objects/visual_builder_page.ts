@@ -43,14 +43,20 @@ export class VisualBuilderPageObject extends FtrService {
     await this.visualize.navigateToNewVisualization();
     await this.visualize.clickVisualBuilder();
     await this.checkVisualBuilderIsPresent();
-    await this.setTime(fromTime, toTime);
+    await this.setTime({ fromTime, toTime });
   }
 
-  public async setTime(
+  public async setTime({
     fromTime = 'Sep 19, 2015 @ 06:31:44.000',
-    toTime = 'Sep 22, 2015 @ 18:31:44.000'
-  ) {
-    await this.timePicker.setAbsoluteRange(fromTime, toTime);
+    toTime = 'Sep 22, 2015 @ 18:31:44.000',
+    useUISettings = false,
+  } = {}) {
+    if (useUISettings) {
+      await this.common.setTime({ from: fromTime, to: toTime });
+    }
+    {
+      await this.timePicker.setAbsoluteRange(fromTime, toTime);
+    }
   }
 
   public async checkTabIsLoaded(testSubj: string, name: string) {
