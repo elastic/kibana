@@ -104,19 +104,27 @@ export const installOrUpgradeEndpointFleetPackage = async (
     );
   }
 
-  const firstError = bulkResp[0];
+  const installResponse = bulkResp[0];
 
-  if (isFleetBulkInstallError(firstError)) {
-    if (firstError.error instanceof Error) {
+  if (isFleetBulkInstallError(installResponse)) {
+    if (installResponse.error instanceof Error) {
       throw new EndpointDataLoadingError(
-        `Installing the Endpoint package failed: ${firstError.error.message}, exiting`,
+        `Installing the Endpoint package failed: ${installResponse.error.message}, exiting`,
         bulkResp
       );
     }
 
     // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
-    if (firstError.statusCode !== 409) {
-      throw new EndpointDataLoadingError(firstError.error, bulkResp);
+    if (installResponse.statusCode !== 409) {
+      // when `no_shard_available_action_exception` errors
+      // re-run install or upgrade after a delay
+      if (isNoShardAvailableActionExceptionError(installResponse)) {
+        await retryInstallOrUpgradeEndpointFleetPackage(
+          installOrUpgradeEndpointFleetPackage,
+          kbnClient
+        );
+      }
+      throw new EndpointDataLoadingError(installResponse.error, bulkResp);
     }
   }
 
@@ -128,3 +136,38 @@ function isFleetBulkInstallError(
 ): installResponse is IBulkInstallPackageHTTPError {
   return 'error' in installResponse && installResponse.error !== undefined;
 }
+
+function isNoShardAvailableActionExceptionError(error: IBulkInstallPackageHTTPError): boolean {
+  return (
+    typeof error.error === 'string' &&
+    error.error.includes(
+      'no_shard_available_action_exception: index [metrics-endpoint.metadata_current_default] has no active shard copy'
+    )
+  );
+}
+
+// retry logic for install or upgrade of endpoint package
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS = 3;
+
+const retryInstallOrUpgradeEndpointFleetPackage = async <T>(
+  func: (kbnClient: KbnClient) => Promise<T>,
+  kbnClient: KbnClient,
+  attempt = 0
+): Promise<T | undefined> => {
+  if (attempt < MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS) {
+    const retryCount = attempt + 1;
+    const retryDelaySec: number = Math.min(Math.pow(2, retryCount), 30); // 2s, 4s, 8s, 16s, 30s, 30s, 30s...
+
+    // @ts-expect-error
+    // TS2341: Property 'log' is private and only accessible within class 'KbnClient'.
+    const log = kbnClient ? kbnClient.log : console;
+    log.info(
+      `Retrying install/upgrade package operation after [${retryDelaySec}s] due to error: 'no_shard_available_action_exception'}`
+    );
+
+    // delay with some randomness
+    await delay(retryDelaySec * 1000 * Math.random());
+    return retryInstallOrUpgradeEndpointFleetPackage(func, kbnClient, retryCount);
+  }
+};
