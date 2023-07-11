@@ -800,6 +800,7 @@ export class Embeddable
           updateAll={this.updateVisualization.bind(this)}
           datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
+          panelId={this.id}
         />
       );
     }

@@ -21,7 +21,7 @@ import {
   loadInitial,
 } from '../../../state_management';
 import { getPreloadedState } from '../../../state_management/lens_slice';
-
+import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
   LensEditConfigurationFlyout,
@@ -56,6 +56,7 @@ export function getEditLensConfiguration(
     wrapInFlyout,
     datasourceId,
     adaptersTables,
+    panelId,
   }: EditLensConfigurationProps) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
@@ -94,7 +95,7 @@ export function getEditLensConfiguration(
       loadInitial({
         initialInput: {
           attributes,
-          id: '797798a7-8746-4ace-a459-65e42a4f0fde',
+          id: panelId ?? generateId(),
         },
       })
     );

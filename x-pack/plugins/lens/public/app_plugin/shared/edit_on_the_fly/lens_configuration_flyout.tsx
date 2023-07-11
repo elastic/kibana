@@ -40,6 +40,7 @@ export interface EditConfigPanelProps {
   datasourceMap: DatasourceMap;
   closeFlyout?: () => void;
   wrapInFlyout?: boolean;
+  panelId?: string;
   datasourceId: 'formBased' | 'textBased';
   adaptersTables?: Record<string, Datatable>;
 }
