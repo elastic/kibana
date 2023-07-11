@@ -697,7 +697,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
 
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
-    cy.get(REFRESH_BUTTON).click();
+    cy.get(REFRESH_BUTTON).click({ force: true });
     return cy
       .get(RULE_STATUS)
       .invoke('text')
