@@ -57,6 +57,11 @@ export interface DocumentCountChartPoint {
   value: number;
 }
 
+export interface BrushSettings {
+  label?: string;
+  annotationStyle?: RectAnnotationSpec['style'];
+  badgeWidth?: number;
+}
 export interface DocumentCountChartProps {
   dependencies: {
     data: DataPublicPluginStart;
@@ -75,15 +80,15 @@ export interface DocumentCountChartProps {
   isBrushCleared: boolean;
   /* Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
-  baselineLabel?: string;
-  deviationLabel?: string;
-  baselineAnnotationStyle?: RectAnnotationSpec['style'];
-  deviationAnnotationStyle?: RectAnnotationSpec['style'];
   barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  /** Optional settings override for the 'deviation' brush */
+  deviationBrush?: BrushSettings;
+  /** Optional settings override for the 'baseline' brush */
+  baselineBrush?: BrushSettings;
 }
 
 const SPEC_ID = 'document_count';
@@ -132,12 +137,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   isBrushCleared,
   autoAnalysisStart,
   barColorOverride,
-  barHighlightColorOverride,
-  baselineLabel,
-  deviationLabel,
-  baselineAnnotationStyle,
-  deviationAnnotationStyle,
   barStyleAccessor,
+  barHighlightColorOverride,
+  deviationBrush = {},
+  baselineBrush = {},
 }) => {
   const { data, uiSettings, fieldFormats, charts } = dependencies;
 
@@ -363,7 +366,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
               label={
-                baselineLabel ??
+                baselineBrush.label ??
                 i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
                   defaultMessage: 'Baseline',
                 })
@@ -371,11 +374,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
               timestampFrom={windowParameters.baselineMin}
               timestampTo={windowParameters.baselineMax}
-              width={BADGE_WIDTH}
+              width={baselineBrush.badgeWidth ?? BADGE_WIDTH}
             />
             <BrushBadge
               label={
-                deviationLabel ??
+                deviationBrush.label ??
                 i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
                   defaultMessage: 'Deviation',
                 })
@@ -383,7 +386,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
               timestampFrom={windowParameters.deviationMin}
               timestampTo={windowParameters.deviationMax}
-              width={BADGE_WIDTH}
+              width={deviationBrush.badgeWidth ?? BADGE_WIDTH}
             />
           </div>
           <div
@@ -468,13 +471,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
                 id="aiopsBaseline"
                 min={windowParameters.baselineMin}
                 max={windowParameters.baselineMax}
-                style={baselineAnnotationStyle}
+                style={baselineBrush.annotationStyle}
               />
               <DualBrushAnnotation
                 id="aiopsDeviation"
                 min={windowParameters.deviationMin}
                 max={windowParameters.deviationMax}
-                style={deviationAnnotationStyle}
+                style={deviationBrush.annotationStyle}
               />
             </>
           )}

@@ -6,4 +6,4 @@
  */
 
 export { DocumentCountChart } from './document_count_chart';
-export type { DocumentCountChartPoint } from './document_count_chart';
+export type { DocumentCountChartPoint, DocumentCountChartProps } from './document_count_chart';

@@ -285,20 +285,26 @@ export const DataComparisonPage: FC = () => {
                   totalCount={totalCount}
                   sampleProbability={sampleProbability}
                   initialAnalysisStart={initialAnalysisStart}
-                  baselineLabel={REFERENCE_LABEL}
-                  deviationLabel={PRODUCTION_LABEL}
                   barStyleAccessor={barStyleAccessor}
-                  baselineAnnotationStyle={{
-                    strokeWidth: 0,
-                    stroke: colors.referenceColor,
-                    fill: colors.referenceColor,
-                    opacity: 0.5,
+                  baselineBrush={{
+                    label: REFERENCE_LABEL,
+                    annotationStyle: {
+                      strokeWidth: 0,
+                      stroke: colors.referenceColor,
+                      fill: colors.referenceColor,
+                      opacity: 0.5,
+                    },
+                    badgeWidth: 80,
                   }}
-                  deviationAnnotationStyle={{
-                    strokeWidth: 0,
-                    stroke: colors.productionColor,
-                    fill: colors.productionColor,
-                    opacity: 0.5,
+                  deviationBrush={{
+                    label: PRODUCTION_LABEL,
+                    annotationStyle: {
+                      strokeWidth: 0,
+                      stroke: colors.productionColor,
+                      fill: colors.productionColor,
+                      opacity: 0.5,
+                    },
+                    badgeWidth: 80,
                   }}
                 />
               </EuiPanel>

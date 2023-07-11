@@ -6,18 +6,24 @@
  */
 
 import { WindowParameters } from '@kbn/aiops-utils';
-import {
-  BarStyleAccessor,
-  RectAnnotationSpec,
-} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import React, { FC } from 'react';
 import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { DocumentCountChartProps } from '@kbn/aiops-components';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 
-export interface DocumentCountContentProps {
+export interface DocumentCountContentProps
+  extends Omit<
+    DocumentCountChartProps,
+    | 'dependencies'
+    | 'chartPoints'
+    | 'timeRangeEarliest'
+    | 'timeRangeLatest'
+    | 'interval'
+    | 'chartPointsSplitLabel'
+  > {
   brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
@@ -32,11 +38,6 @@ export interface DocumentCountContentProps {
   barHighlightColorOverride?: string;
   windowParameters?: WindowParameters;
   incomingInitialAnalysisStart?: number | WindowParameters;
-  baselineLabel?: string;
-  deviationLabel?: string;
-  barStyleAccessor?: BarStyleAccessor;
-  baselineAnnotationStyle?: RectAnnotationSpec['style'];
-  deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
 export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
