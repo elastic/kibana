@@ -8,6 +8,7 @@
 import { useValues } from 'kea';
 
 import { EuiBreadcrumb } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import {
   ANALYTICS_PLUGIN,
@@ -125,7 +126,15 @@ export const useAnalyticsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: ANALYTICS_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
 
 export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([{ text: 'Getting started with Elasticsearch', path: '/' }, ...breadcrumbs]);
+  useSearchBreadcrumbs([
+    {
+      text: i18n.translate('xpack.enterpriseSearch.elasticsearch.breadcrumbs.title', {
+        defaultMessage: 'Getting started with Elasticsearch',
+      }),
+      path: '/',
+    },
+    ...breadcrumbs,
+  ]);
 
 export const useAppSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([{ text: APP_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
