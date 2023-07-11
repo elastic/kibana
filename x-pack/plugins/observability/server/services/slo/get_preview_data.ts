@@ -10,6 +10,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALL_VALUE, GetPreviewDataParams, GetPreviewDataResponse } from '@kbn/slo-schema';
 import { computeSLI } from '../../domain/services';
 import { InvalidQueryError } from '../../errors';
+import { GetCustomMetricIndicatorAggregation } from './aggregations';
 
 export class GetPreviewData {
   constructor(private esClient: ElasticsearchClient) {}
@@ -208,6 +209,47 @@ export class GetPreviewData {
         } catch (err) {
           throw new InvalidQueryError(`Invalid ES query`);
         }
+      case 'sli.metric.custom':
+        const timestampField = params.indicator.params.timestampField;
+        const filterQuery = getElastichsearchQueryOrThrow(params.indicator.params.filter);
+        const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(
+          params.indicator
+        );
+        const result = await this.esClient.search({
+          index: params.indicator.params.index,
+          query: {
+            bool: {
+              filter: [{ range: { [timestampField]: { gte: 'now-60m' } } }, filterQuery],
+            },
+          },
+          aggs: {
+            perMinute: {
+              date_histogram: {
+                field: timestampField,
+                fixed_interval: '1m',
+              },
+              aggs: {
+                ...getCustomMetricIndicatorAggregation.execute({
+                  type: 'good',
+                  aggregationKey: 'good',
+                }),
+                ...getCustomMetricIndicatorAggregation.execute({
+                  type: 'total',
+                  aggregationKey: 'total',
+                }),
+              },
+            },
+          },
+        });
+
+        // @ts-ignore buckets is not improperly typed
+        return result.aggregations?.perMinute.buckets.map((bucket) => ({
+          date: bucket.key_as_string,
+          sliValue:
+            !!bucket.good && !!bucket.total
+              ? computeSLI(bucket.good.value, bucket.total.value)
+              : null,
+        }));
 
       default:
         return [];
