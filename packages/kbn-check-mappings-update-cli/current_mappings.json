@@ -475,6 +475,16 @@
       }
     }
   },
+  "versioned_enrcyption_definition": {
+    "properties": {
+      "type": {
+        "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
+      }
+    }
+  },
   "telemetry": {
     "dynamic": false,
     "properties": {}
