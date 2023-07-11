@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
 
-export type UseTableState = ReturnType<typeof useTableState>;
+export interface UseTableState<T> {
+  onTableChange: EuiInMemoryTable<T>['onTableChange'];
+  pagination: Pagination;
+  sorting: { sort: { field: string; direction: Direction } };
+  setPageIndex: Dispatch<SetStateAction<number>>;
+}
+
 export function useTableState<T>(
   items: T[],
   initialSortField: string,

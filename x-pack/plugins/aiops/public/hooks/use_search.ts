@@ -8,13 +8,13 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-import type { BasicAppState } from '@kbn/data-visualizer-plugin/public/application/data_comparison/types';
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
+import type { AiOpsIndexBasedAppState } from '../application/utils/url_state';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const useSearch = (
   { dataView, savedSearch }: { dataView: DataView; savedSearch: SavedSearch | null },
-  appState: BasicAppState,
+  aiopsListState: AiOpsIndexBasedAppState,
   readOnly: boolean = false
 ) => {
   const {
@@ -31,17 +31,17 @@ export const useSearch = (
     filterManager,
   });
 
-  if (searchData === undefined || (appState && appState.searchString !== '')) {
-    if (appState?.filters && readOnly === false) {
+  if (searchData === undefined || (aiopsListState && aiopsListState.searchString !== '')) {
+    if (aiopsListState?.filters && readOnly === false) {
       const globalFilters = filterManager?.getGlobalFilters();
 
-      if (filterManager) filterManager.setFilters(appState.filters);
+      if (filterManager) filterManager.setFilters(aiopsListState.filters);
       if (globalFilters) filterManager?.addFilters(globalFilters);
     }
     return {
-      searchQuery: appState?.searchQuery,
-      searchString: appState?.searchString,
-      searchQueryLanguage: appState?.searchQueryLanguage,
+      searchQuery: aiopsListState?.searchQuery,
+      searchString: aiopsListState?.searchString,
+      searchQueryLanguage: aiopsListState?.searchQueryLanguage,
     };
   } else {
     return {

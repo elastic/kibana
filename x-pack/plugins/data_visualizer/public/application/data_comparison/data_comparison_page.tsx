@@ -250,7 +250,7 @@ export const DataComparisonPage: FC = () => {
       return null;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(windowParameters, colors)]
+    [JSON.stringify({ windowParameters, colors })]
   );
 
   return (

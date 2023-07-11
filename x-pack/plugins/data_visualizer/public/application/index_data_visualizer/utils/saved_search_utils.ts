@@ -69,7 +69,7 @@ export function createMergedEsQuery(
   dataView?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
-  let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
+  let combinedQuery = getDefaultQuery() as QueryDslQueryContainer;
 
   if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);

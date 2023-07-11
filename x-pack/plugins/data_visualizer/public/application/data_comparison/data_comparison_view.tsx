@@ -37,8 +37,8 @@ import { ProgressControls } from '@kbn/aiops-components';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
-import type { SearchQueryLanguage } from '@kbn/aiops-plugin/public/application/utils/search_utils';
 import { useTableState, UseTableState } from '@kbn/ml-in-memory-table';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { DataComparisonChartTooltipBody } from './data_comparison_chart_tooltip_body';
 import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
@@ -385,7 +385,7 @@ export const DataComparisonOverviewTable = ({
   sorting,
 }: {
   data: Feature[];
-} & UseTableState) => {
+} & UseTableState<Feature>) => {
   const euiTheme = useCurrentEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,

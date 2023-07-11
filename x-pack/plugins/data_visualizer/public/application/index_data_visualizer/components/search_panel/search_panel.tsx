@@ -51,6 +51,7 @@ interface Props {
 export const SearchPanel: FC<Props> = ({
   dataView,
   searchString,
+  searchQuery,
   searchQueryLanguage,
   overallStats,
   indexedFieldTypes,
@@ -97,6 +98,7 @@ export const SearchPanel: FC<Props> = ({
           dataView={dataView}
           setSearchParams={setSearchParams}
           searchString={searchString}
+          searchQuery={searchQuery}
           searchQueryLanguage={searchQueryLanguage}
         />
       </EuiFlexItem>
