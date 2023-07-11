@@ -36,8 +36,6 @@ export const LinkToApmServices = ({ nodeName, apmField }: LinkToApmServicesProps
       <EuiButtonEmpty
         data-test-subj="hostsView-flyout-apm-services-link"
         size="xs"
-        iconSide="left"
-        iconType="popout"
         flush="both"
         href={linkToApmServices}
       >
