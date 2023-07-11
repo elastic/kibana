@@ -26,10 +26,14 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_ENTERPRISE,
 } from '@kbn/reporting-plugin/common/constants';
-import { decryptJobHeaders } from '@kbn/reporting-plugin/server/export_types/common';
+import {
+  BaseExportTypeSetupDeps,
+  BaseExportTypeStartDeps,
+  decryptJobHeaders,
+  ExportType,
+} from '@kbn/reporting-plugin/server/export_types/common';
 import { getFieldFormats } from '@kbn/reporting-plugin/server/services';
 import { ReportingRequestHandlerContext } from '@kbn/reporting-plugin/server/types';
-import { BaseExportTypeSetupDeps, BaseExportTypeStartDeps, ExportType } from '../export_type';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
@@ -90,7 +94,7 @@ export class CsvV2ExportType extends ExportType<
     const locatorClient = await discoverPluginStart.locator.asScopedClient(req);
     const title = await locatorClient.titleFromLocator(params);
 
-    return { ...jobParams, title, objectType: 'search', isDeprecated: false };
+    return { ...jobParams, title, isDeprecated: false, objectType: 'search' };
   };
 
   public runTask = async (
