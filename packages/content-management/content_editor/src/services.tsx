@@ -26,6 +26,10 @@ export interface SavedObjectsReference {
   type: string;
 }
 
+export interface Theme {
+  readonly darkMode: boolean;
+}
+
 /**
  * Abstract external services for this component.
  */
@@ -34,6 +38,7 @@ export interface Services {
   notifyError: NotifyFn;
   TagList?: FC<{ references: SavedObjectsReference[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
+  theme$: Observable<Theme>;
 }
 
 const ContentEditorContext = React.createContext<Services | null>(null);
@@ -58,6 +63,9 @@ export interface ContentEditorKibanaDependencies {
       toasts: {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
+    };
+    theme: {
+      theme$: Observable<Theme>;
     };
   };
   /**
@@ -131,6 +139,7 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
       }}
       TagList={TagList}
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
+      theme$={core.theme.theme$}
     >
       {children}
     </ContentEditorProvider>

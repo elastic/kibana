@@ -6550,9 +6550,9 @@
               "; source: ",
               {
                 "pluginId": "@kbn/dom-drag-drop",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnDomDragDropPluginApi",
-                "section": "def-public.DragDropIdentifier",
+                "section": "def-common.DragDropIdentifier",
                 "text": "DragDropIdentifier"
               },
               "; frame: ",
@@ -6560,9 +6560,9 @@
               "; dropType: ",
               {
                 "pluginId": "@kbn/dom-drag-drop",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnDomDragDropPluginApi",
-                "section": "def-public.DropType",
+                "section": "def-common.DropType",
                 "text": "DropType"
               },
               "; group?: ",
@@ -6689,9 +6689,9 @@
               "<unknown>) => { dropTypes: ",
               {
                 "pluginId": "@kbn/dom-drag-drop",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnDomDragDropPluginApi",
-                "section": "def-public.DropType",
+                "section": "def-common.DropType",
                 "text": "DropType"
               },
               "[]; nextLabel?: string | undefined; } | undefined) | undefined"

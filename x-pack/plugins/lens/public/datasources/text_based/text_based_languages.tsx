@@ -20,6 +20,9 @@ import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import memoizeOne from 'memoize-one';
+import { isEqual } from 'lodash';
+import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -43,11 +46,23 @@ import type {
 import { FieldSelect } from './field_select';
 import type { Datasource, IndexPatternMap } from '../../types';
 import { LayerPanel } from './layerpanel';
-import { getUniqueLabelGenerator } from '../../utils';
+import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
 }
+
+const getSelectedFieldsFromColumns = memoizeOne(
+  (columns: TextBasedLayerColumn[]) =>
+    columns
+      .map((c) => {
+        if ('fieldName' in c) {
+          return c.fieldName;
+        }
+      })
+      .filter(nonNullable),
+  isEqual
+);
 
 export function getTextBasedDatasource({
   core,
@@ -344,30 +359,26 @@ export function getTextBasedDatasource({
       return toExpression(state, layerId);
     },
     getSelectedFields(state) {
-      const fields: string[] = [];
-      Object.values(state?.layers)?.forEach((l) => {
-        const { columns } = l;
-        Object.values(columns).forEach((c) => {
-          if ('fieldName' in c) {
-            fields.push(c.fieldName);
-          }
-        });
-      });
-      return fields;
+      return getSelectedFieldsFromColumns(
+        Object.values(state?.layers)?.flatMap((l) => Object.values(l.columns))
+      );
     },
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<TextBasedPrivateState>) {
       const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
+      const { dragDropContext, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
-            <TextBasedDataPanel
-              data={data}
-              dataViews={dataViews}
-              expressions={expressions}
-              layerFields={layerFields}
-              {...props}
-            />
+            <ChildDragDropProvider value={dragDropContext}>
+              <TextBasedDataPanel
+                data={data}
+                dataViews={dataViews}
+                expressions={expressions}
+                layerFields={layerFields}
+                {...otherProps}
+              />
+            </ChildDragDropProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
         domElement
