@@ -739,7 +739,7 @@ The following APIs are available:
 * <<android-sourcemap-delete>>
 
 [float]
-[[use-sourcemap-api]]
+[[use-android-sourcemap-api]]
 ==== How to use APM APIs
 
 .Expand for required headers, privileges, and usage details
