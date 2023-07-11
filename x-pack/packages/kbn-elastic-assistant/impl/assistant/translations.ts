@@ -98,6 +98,6 @@ export const TOOLTIP_ARIA_LABEL = i18n.translate(
 export const DOCUMENTATION = i18n.translate(
   'xpack.elasticAssistant.documentationLinks.documentation',
   {
-    defaultMessage: 'Documentation',
+    defaultMessage: 'documentation',
   }
 );

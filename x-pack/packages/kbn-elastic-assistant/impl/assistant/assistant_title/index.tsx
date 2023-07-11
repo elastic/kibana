@@ -16,7 +16,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from '../translations';
 
@@ -32,8 +32,8 @@ export const AssistantTitle: FunctionComponent<{
       <EuiLink
         aria-label={i18n.TOOLTIP_ARIA_LABEL}
         data-test-subj="externalDocumentationLink"
+        external
         href={url}
-        rel="noopener"
         target="_blank"
       >
         {i18n.DOCUMENTATION}

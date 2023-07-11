@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
