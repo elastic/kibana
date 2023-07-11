@@ -781,7 +781,7 @@ For more information, see <<kibana-privileges>>.
 `map_file`::
 (required, string or file upload) The R8-generated map.
 
-[[apm-sourcemap-post-example]]
+[[android-sourcemap-post-example]]
 ===== Examples
 
 The following example uploads a source map for a app named `foo` and a service version of `1.0.0`:
