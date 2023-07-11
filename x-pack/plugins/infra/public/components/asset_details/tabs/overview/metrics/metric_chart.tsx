@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { CSSProperties, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import {
   EuiIcon,
@@ -23,26 +23,19 @@ import {
   buildExistsHostsFilter,
 } from '../../../../../utils/filters/build';
 import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
-import {
-  useLensAttributes,
-  type Layer,
-  type LayerType,
-} from '../../../../../hooks/use_lens_attributes';
+import { useLensAttributes, type Layer } from '../../../../../hooks/use_lens_attributes';
 import type { FormulaConfig, XYLayerOptions } from '../../../../../common/visualizations';
 import type { StringDateRange } from '../../../types';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
-  layers: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
+  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
   dataView?: DataView;
   dateRange: StringDateRange;
   nodeName: string;
 }
 
 const MIN_HEIGHT = 250;
-const lensStyle: CSSProperties = {
-  height: MIN_HEIGHT,
-};
 
 export const MetricChart = ({
   id,
@@ -120,7 +113,7 @@ export const MetricChart = ({
         <LensWrapper
           id={`assetDetailsMetricsChart${id}`}
           attributes={attributes}
-          style={lensStyle}
+          style={{ height: MIN_HEIGHT }}
           extraActions={extraActions}
           dateRange={dateRange}
           filters={filters}

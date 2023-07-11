@@ -19,7 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
-import { useLensAttributes, Layer, LayerType } from '../../../../../../hooks/use_lens_attributes';
+import { useLensAttributes, Layer } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { FormulaConfig, XYLayerOptions } from '../../../../../../common/visualizations';
@@ -34,7 +34,7 @@ import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
-  layers: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
+  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
 }
 
 const lensStyle: CSSProperties = {
