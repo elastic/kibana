@@ -23,6 +23,7 @@ import {
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -210,55 +211,67 @@ function UserSettingsEditor({
       <FormRow
         name="data.userSettings.darkMode"
         label={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <FormLabel for="data.userSettings.darkMode">
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                  defaultMessage="Mode"
-                />
-              </FormLabel>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{renderHelpText(isThemeOverridden)}</EuiFlexItem>
-          </EuiFlexGroup>
+          <FormLabel for="data.userSettings.darkMode">
+            <FormattedMessage
+              id="xpack.security.accountManagement.userProfile.userSettings.theme"
+              defaultMessage="Mode"
+            />
+          </FormLabel>
         }
         fullWidth
       >
-        <EuiKeyPadMenu
-          aria-label={i18n.translate(
-            'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
-            {
-              defaultMessage: 'Elastic theme',
-            }
-          )}
-          data-test-subj="themeMenu"
-          checkable={true}
+        <EuiToolTip
+          data-test-subj="themeOverrideTooltip"
+          content={
+            isThemeOverridden ? (
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.overriddenMessage"
+                defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+              />
+            ) : (
+              ''
+            )
+          }
         >
-          {themeKeyPadMenuItem({
-            id: '',
-            label: i18n.translate(
-              'xpack.security.accountManagement.userProfile.defaultModeButton',
+          <EuiKeyPadMenu
+            aria-label={i18n.translate(
+              'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
               {
-                defaultMessage: 'Space default',
+                defaultMessage: 'Elastic theme',
               }
-            ),
-            icon: 'spaces',
-          })}
-          {themeKeyPadMenuItem({
-            id: 'light',
-            label: i18n.translate('xpack.security.accountManagement.userProfile.lightModeButton', {
-              defaultMessage: 'Light',
-            }),
-            icon: 'sun',
-          })}
-          {themeKeyPadMenuItem({
-            id: 'dark',
-            label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
-              defaultMessage: 'Dark',
-            }),
-            icon: 'moon',
-          })}
-        </EuiKeyPadMenu>
+            )}
+            data-test-subj="themeMenu"
+            checkable={true}
+          >
+            {themeKeyPadMenuItem({
+              id: '',
+              label: i18n.translate(
+                'xpack.security.accountManagement.userProfile.defaultModeButton',
+                {
+                  defaultMessage: 'Space default',
+                }
+              ),
+              icon: 'spaces',
+            })}
+            {themeKeyPadMenuItem({
+              id: 'light',
+              label: i18n.translate(
+                'xpack.security.accountManagement.userProfile.lightModeButton',
+                {
+                  defaultMessage: 'Light',
+                }
+              ),
+              icon: 'sun',
+            })}
+            {themeKeyPadMenuItem({
+              id: 'dark',
+              label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
+                defaultMessage: 'Dark',
+              }),
+              icon: 'moon',
+            })}
+          </EuiKeyPadMenu>
+        </EuiToolTip>
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -925,30 +938,6 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
     </EuiFlexGroup>
   );
 };
-
-function renderHelpText(isOverridden: boolean) {
-  if (isOverridden) {
-    return (
-      <EuiIconTip
-        data-test-subj="themeOverrideTooltip"
-        aria-label={i18n.translate(
-          'xpack.security.accountManagement.userProfile.themeModeLockedLabel',
-          {
-            defaultMessage: 'Theme mode locked',
-          }
-        )}
-        size="s"
-        type="lock"
-        content={
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.overriddenMessage"
-            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-          />
-        }
-      />
-    );
-  }
-}
 
 function determineIfThemeOverridden(settingsClient: IUiSettingsClient): {
   isThemeOverridden: boolean;
