@@ -30,11 +30,11 @@ export const AssistantTitle: FunctionComponent<{
   const documentationLink = useMemo(
     () => (
       <EuiLink
-        aria-label={i18n.DOCUMENTATION_ARIA_LABEL}
-        href={url}
-        target="_blank"
-        rel="noopener"
+        aria-label={i18n.TOOLTIP_ARIA_LABEL}
         data-test-subj="externalDocumentationLink"
+        href={url}
+        rel="noopener"
+        target="_blank"
       >
         {i18n.DOCUMENTATION}
       </EuiLink>
@@ -45,8 +45,8 @@ export const AssistantTitle: FunctionComponent<{
   const content = useMemo(
     () => (
       <FormattedMessage
-        id="xpack.elasticAssistant.assistant.technicalPreview.tooltipContent"
         defaultMessage="The Elastic AI Assistant is currently in beta. For more information on the assistant feature and its usage, please reference the {documentationLink}."
+        id="xpack.elasticAssistant.assistant.technicalPreview.tooltipContent"
         values={{
           documentationLink,
         }}
@@ -69,9 +69,9 @@ export const AssistantTitle: FunctionComponent<{
             button={
               <EuiButtonIcon
                 aria-label={i18n.TOOLTIP_ARIA_LABEL}
+                iconSize="l"
                 iconType="iInCircle"
                 onClick={onButtonClick}
-                iconSize="l"
               />
             }
             isOpen={isPopoverOpen}

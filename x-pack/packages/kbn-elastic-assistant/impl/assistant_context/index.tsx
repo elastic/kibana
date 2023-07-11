@@ -80,6 +80,7 @@ interface UseAssistantContext {
   allSystemPrompts: Prompt[];
   baseAllow: string[];
   baseAllowReplacement: string[];
+  docLinks: Omit<DocLinksStart, 'links'>;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePromptContexts: PromptContextTemplate[];
