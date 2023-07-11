@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { securityUsageReportingService as endpointUsageReportingService } from '../../routes/usage_reporting_service';
+export { securityUsageReportingService } from '../../routes/usage_reporting_service';
