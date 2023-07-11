@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+// these won't exist in on server
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SavedSearch } from './types';
-import { SAVED_SEARCH_TYPE } from './constants';
-import { fromSavedSearchAttributes } from './saved_searches_utils';
-import type { SavedSearchCrudTypes } from '../../../common/content_management';
 
-interface GetSavedSearchDependencies {
-  search: DataPublicPluginStart['search'];
-  contentManagement: ContentManagementPublicStart['client'];
+import { i18n } from '@kbn/i18n';
+import type { SavedSearch } from '../types';
+import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
+import { fromSavedSearchAttributes } from './saved_searches_utils';
+import type { SavedSearchCrudTypes } from '../content_management';
+
+export interface GetSavedSearchDependencies {
+  searchSourceCreate: ISearchStartSearchSource['create'];
+  getSavedSrch: (id: string) => Promise<SavedSearchCrudTypes['GetOut']>;
   spaces?: SpacesApi;
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
@@ -32,15 +33,9 @@ const getSavedSearchUrlConflictMessage = async (json: string) =>
 
 export const getSavedSearch = async (
   savedSearchId: string,
-  { search, spaces, savedObjectsTagging, contentManagement }: GetSavedSearchDependencies
+  { searchSourceCreate, spaces, savedObjectsTagging, getSavedSrch }: GetSavedSearchDependencies
 ) => {
-  const so = await contentManagement.get<
-    SavedSearchCrudTypes['GetIn'],
-    SavedSearchCrudTypes['GetOut']
-  >({
-    contentTypeId: SAVED_SEARCH_TYPE,
-    id: savedSearchId,
-  });
+  const so = await getSavedSrch(savedSearchId);
 
   // @ts-expect-error
   if (so.error) {
@@ -53,6 +48,7 @@ export const getSavedSearch = async (
         JSON.stringify({
           targetType: SAVED_SEARCH_TYPE,
           sourceId: savedSearchId,
+          // front end only
           targetSpace: (await spaces?.getActiveSpace())?.id,
         })
       )
@@ -65,11 +61,12 @@ export const getSavedSearch = async (
     savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
-  const searchSourceValues = injectSearchSourceReferences(
-    parsedSearchSourceJSON as Parameters<typeof injectSearchSourceReferences>[0],
+  const searchSourceValues = injectReferences(
+    parsedSearchSourceJSON as Parameters<typeof injectReferences>[0],
     savedSearch.references
   );
 
+  // front end only
   const tags = savedObjectsTagging
     ? savedObjectsTagging.ui.getTagIdsFromReferences(savedSearch.references)
     : undefined;
@@ -79,7 +76,7 @@ export const getSavedSearch = async (
     savedSearch.attributes,
     tags,
     savedSearch.references,
-    await search.searchSource.create(searchSourceValues),
+    await searchSourceCreate(searchSourceValues),
     so.meta
   );
 
@@ -92,9 +89,9 @@ export const getSavedSearch = async (
  * @param search
  */
 export const getNewSavedSearch = ({
-  search,
+  searchSource,
 }: {
-  search: DataPublicPluginStart['search'];
+  searchSource: ISearchStartSearchSource;
 }): SavedSearch => ({
-  searchSource: search.searchSource.createEmpty(),
+  searchSource: searchSource.createEmpty(),
 });

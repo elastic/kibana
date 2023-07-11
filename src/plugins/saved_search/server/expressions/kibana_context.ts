@@ -7,9 +7,10 @@
  */
 
 import { StartServicesAccessor } from '@kbn/core/server';
-import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/server';
-import { getKibanaContextFn } from '../../../common/search/expressions';
-import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { getKibanaContextFn } from '../../common';
+import { SavedSearchServerStartDeps } from '../plugin';
+import { getSavedSearch } from '../../common/service/get_saved_searches';
+import { SavedSearchAttributes } from '../../common/types';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -25,20 +26,36 @@ import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
  *
  * @internal
  */
-export function getKibanaContext({
-  getStartServices,
-}: {
-  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>;
-}) {
+export function getKibanaContext(
+  getStartServices: StartServicesAccessor<SavedSearchServerStartDeps>
+) {
   return getKibanaContextFn(async (getKibanaRequest) => {
     const request = getKibanaRequest && getKibanaRequest();
     if (!request) {
       throw new Error('KIBANA_CONTEXT_KIBANA_REQUEST_MISSING');
     }
 
-    const [{ savedObjects }] = await getStartServices();
+    const [{ savedObjects }, { data }] = await getStartServices();
     return {
-      savedObjectsClient: savedObjects.getScopedClient(request) as any as SavedObjectsClientCommon,
+      getSavedSearch: async (id: string) => {
+        const searchSourceCreate = (await data.search.searchSource.asScoped(request)).create;
+        const getSavedSrch = async (searchId: string) => {
+          const so = await savedObjects
+            .getScopedClient(request)
+            .resolve<SavedSearchAttributes>('search', searchId);
+
+          return {
+            item: so.saved_object,
+            meta: {
+              outcome: so.outcome,
+              aliasTargetId: so.alias_target_id,
+              aliasPurpose: so.alias_purpose,
+            },
+          };
+        };
+
+        return getSavedSearch(id, { searchSourceCreate, getSavedSrch });
+      },
     };
   });
 }
