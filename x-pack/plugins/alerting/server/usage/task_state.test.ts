@@ -107,7 +107,9 @@ describe('telemetry task state', () => {
         count_by_type: { '.index-threshold': 12 },
         count_connector_types_by_consumers: { '.index-threshold': 13 },
         count_disabled_total: 14,
-        count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {  '.index-threshold': 15 },
+        count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {
+          '.index-threshold': 15,
+        },
         count_failed_and_unrecognized_rule_tasks_by_status_per_day: { '.index-threshold': 16 },
         count_failed_and_unrecognized_rule_tasks_per_day: 17,
         count_rules_by_execution_status: {
