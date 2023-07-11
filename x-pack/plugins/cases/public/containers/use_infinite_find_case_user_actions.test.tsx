@@ -39,7 +39,6 @@ describe('UseInfiniteFindCaseUserActions', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
