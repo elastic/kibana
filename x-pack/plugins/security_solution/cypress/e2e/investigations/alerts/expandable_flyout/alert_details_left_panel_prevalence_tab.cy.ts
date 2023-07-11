@@ -30,32 +30,27 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-describe(
-  'Alert details expandable flyout left panel prevalence',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
-  () => {
-    beforeEach(() => {
-      cleanKibana();
-      login();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      openInsightsTab();
-      openPrevalenceTab();
-    });
+describe('Alert details expandable flyout left panel prevalence', () => {
+  beforeEach(() => {
+    cleanKibana();
+    login();
+    createRule(getNewRule());
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+    expandFirstAlertExpandableFlyout();
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    openInsightsTab();
+    openPrevalenceTab();
+  });
 
-    it('should display prevalence tab', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
-        .should('be.visible')
-        .and('have.text', 'Insights');
+  it('should display prevalence tab', () => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).should('be.visible').and('have.text', 'Insights');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Prevalence');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON)
+      .should('be.visible')
+      .and('have.text', 'Prevalence');
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE).should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_TYPE_CELL)
