@@ -34,6 +34,7 @@ import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
+import type { ActionsAuthorization } from '../authorization/actions_authorization';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -47,6 +48,7 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
+  getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
 }
 
 export interface TaskInfo {
@@ -103,6 +105,7 @@ export class ActionExecutor {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
+
     return withSpan(
       {
         name: `execute_action`,
@@ -120,11 +123,13 @@ export class ActionExecutor {
           eventLogger,
           inMemoryConnectors,
           security,
+          getActionsAuthorizationWithRequest,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+        const authorization = getActionsAuthorizationWithRequest(request);
 
         const actionInfo = await getActionInfoInternal(
           this.isESOCanEncrypt,
@@ -153,6 +158,7 @@ export class ActionExecutor {
         if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
           actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
         }
+
         const actionType = actionTypeRegistry.get(actionTypeId);
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
@@ -205,6 +211,19 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
+          /**
+           * Ensures correct permissions for execution and
+           * performs authorization checks for system actions.
+           * It will thrown an error in case of failure.
+           */
+          await ensureAuthorizedToExecute({
+            params,
+            actionId,
+            actionTypeId,
+            actionTypeRegistry,
+            authorization,
+          });
+
           const configurationUtilities = actionTypeRegistry.getUtils();
           const { validatedParams, validatedConfig, validatedSecrets } = validateAction(
             {
@@ -230,7 +249,10 @@ export class ActionExecutor {
             source,
           });
         } catch (err) {
-          if (err.reason === ActionExecutionErrorReason.Validation) {
+          if (
+            err.reason === ActionExecutionErrorReason.Validation ||
+            err.reason === ActionExecutionErrorReason.Authorization
+          ) {
             rawResult = err.result;
           } else {
             rawResult = {
@@ -499,3 +521,37 @@ function validateAction(
     });
   }
 }
+
+interface EnsureAuthorizedToExecuteOpts {
+  actionId: string;
+  actionTypeId: string;
+  params: Record<string, unknown>;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  authorization: ActionsAuthorization;
+}
+
+const ensureAuthorizedToExecute = async ({
+  actionId,
+  actionTypeId,
+  params,
+  actionTypeRegistry,
+  authorization,
+}: EnsureAuthorizedToExecuteOpts) => {
+  try {
+    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
+      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
+        actionTypeId,
+        params
+      );
+
+      await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
+    }
+  } catch (error) {
+    throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {
+      actionId,
+      status: 'error',
+      message: error.message,
+      retry: false,
+    });
+  }
+};

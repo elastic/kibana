@@ -101,6 +101,22 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
+   * Returns the kibana privileges of a system action type
+   */
+  public getSystemActionKibanaPrivileges(
+    actionTypeId: string,
+    metadata?: Record<string, unknown>
+  ): string[] {
+    const actionType = this.actionTypes.get(actionTypeId);
+
+    if (!actionType?.isSystemActionType) {
+      return [];
+    }
+
+    return actionType?.getKibanaPrivileges?.({ metadata }) ?? [];
+  }
+
+  /**
    * Registers an action type to the action type registry
    */
   public register<

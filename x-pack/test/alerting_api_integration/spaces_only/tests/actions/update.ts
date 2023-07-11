@@ -150,30 +150,6 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it(`shouldn't update a system connector`, async () => {
-      await supertest
-        .put(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/actions/connector/system-connector-test.system-action`
-        )
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'My action updated',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(400, {
-          statusCode: 400,
-          error: 'Bad Request',
-          message: 'System action system-connector-test.system-action is not allowed to update.',
-        });
-    });
-
     it('should notify feature usage when editing a gold action type', async () => {
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -359,30 +335,6 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message: 'System action system-connector-test.system-action can not be updated.',
-          });
-      });
-
-      it(`shouldn't update a system connector`, async () => {
-        await supertest
-          .put(
-            `${getUrlPrefix(
-              Spaces.space1.id
-            )}/api/actions/action/system-connector-test.system-action`
-          )
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'My action updated',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-            secrets: {
-              encrypted: 'This value should be encrypted',
-            },
-          })
-          .expect(400, {
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'System action system-connector-test.system-action is not allowed to update.',
           });
       });
 

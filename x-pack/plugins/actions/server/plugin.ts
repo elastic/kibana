@@ -516,6 +516,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       inMemoryConnectors: this.inMemoryConnectors,
+      getActionsAuthorizationWithRequest(request: KibanaRequest) {
+        return instantiateAuthorization(request);
+      },
     });
 
     taskRunnerFactory!.initialize({
