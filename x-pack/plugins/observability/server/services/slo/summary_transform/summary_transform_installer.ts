@@ -19,19 +19,17 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   public async installAndStart(): Promise<void> {
-    const allTransformIds = ALL_TRANSFORM_TEMPLATES.map((t) => t.transform_id);
-    const response = await this.execute(() =>
-      this.esClient.transform.getTransform(
-        { transform_id: allTransformIds, allow_no_match: true },
-        { ignore: [404] }
-      )
-    );
-
-    // @ts-ignore incorrectly typed
-    const existingTransforms = response.existingTransforms || response.transforms;
-
     for (const transformTemplate of ALL_TRANSFORM_TEMPLATES) {
       const transformId = transformTemplate.transform_id;
+      const response = await this.execute(() =>
+        this.esClient.transform.getTransform(
+          { transform_id: transformId, allow_no_match: true },
+          { ignore: [404] }
+        )
+      );
+
+      // @ts-ignore incorrectly typed
+      const existingTransforms = response.existingTransforms || response.transforms;
       const transform = existingTransforms?.find((t) => t.id === transformId);
 
       const transformAlreadyInstalled =
@@ -83,13 +81,13 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
   }
 
   private async startTransform(transformId: string) {
-    this.logger.info(`Starting SLO summary transform: ${transformId}`);
+    this.logger.info(`Starting SLO summary transform: ${transformId} - noop if already running`);
     await this.execute(() =>
       this.esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] })
     );
   }
 
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {
-    return retryTransientEsErrors(esCall, { logger: this.logger });
+    return await retryTransientEsErrors(esCall, { logger: this.logger });
   }
 }

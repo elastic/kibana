@@ -168,6 +168,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   }
 
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {
-    return retryTransientEsErrors(esCall, { logger: this.logger });
+    return await retryTransientEsErrors(esCall, { logger: this.logger });
   }
 }
