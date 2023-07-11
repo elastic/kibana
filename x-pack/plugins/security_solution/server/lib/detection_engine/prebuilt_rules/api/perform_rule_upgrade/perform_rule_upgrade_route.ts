@@ -39,7 +39,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
         body: buildRouteValidation(PerformRuleUpgradeRequestBody),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution-all'],
       },
     },
     async (context, request, response) => {

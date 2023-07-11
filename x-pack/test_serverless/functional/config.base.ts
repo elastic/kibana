@@ -52,6 +52,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
+        management: {
+          pathname: '/app/management',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
