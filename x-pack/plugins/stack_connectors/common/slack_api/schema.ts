@@ -11,9 +11,7 @@ export const SlackApiSecretsSchema = schema.object({
   token: schema.string({ minLength: 1 }),
 });
 
-export const SlackApiConfigSchema = schema.object({
-  allowedChannels: schema.maybe(schema.arrayOf(schema.string())),
-});
+export const SlackApiConfigSchema = schema.object({}, { defaultValue: {} });
 
 export const GetChannelsParamsSchema = schema.object({
   subAction: schema.literal('getChannels'),
