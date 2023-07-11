@@ -130,6 +130,7 @@ MINUS : '-';
 ASTERISK : '*';
 SLASH : '/';
 PERCENT : '%';
+TEN: '10';
 
 ORDERING
     : 'asc'
@@ -146,6 +147,9 @@ MATH_FUNCTION
     : R O U N D
     | A B S
     | P O W
+    | L O G TEN
+    | P I
+    | T A U
     | S U B S T R I N G
     | C O N C A T
     | S T A R T S UNDERSCORE W I T H

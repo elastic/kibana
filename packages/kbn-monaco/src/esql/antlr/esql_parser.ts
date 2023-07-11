@@ -80,30 +80,31 @@ export class esql_parser extends Parser {
 	public static readonly ASTERISK = 51;
 	public static readonly SLASH = 52;
 	public static readonly PERCENT = 53;
-	public static readonly ORDERING = 54;
-	public static readonly NULLS_ORDERING = 55;
-	public static readonly NULLS_ORDERING_DIRECTION = 56;
-	public static readonly MATH_FUNCTION = 57;
-	public static readonly UNARY_FUNCTION = 58;
-	public static readonly WHERE_FUNCTIONS = 59;
-	public static readonly UNQUOTED_IDENTIFIER = 60;
-	public static readonly QUOTED_IDENTIFIER = 61;
-	public static readonly EXPR_LINE_COMMENT = 62;
-	public static readonly EXPR_MULTILINE_COMMENT = 63;
-	public static readonly EXPR_WS = 64;
-	public static readonly SRC_UNQUOTED_IDENTIFIER = 65;
-	public static readonly SRC_QUOTED_IDENTIFIER = 66;
-	public static readonly SRC_LINE_COMMENT = 67;
-	public static readonly SRC_MULTILINE_COMMENT = 68;
-	public static readonly SRC_WS = 69;
-	public static readonly ON = 70;
-	public static readonly WITH = 71;
-	public static readonly ENR_UNQUOTED_IDENTIFIER = 72;
-	public static readonly ENR_QUOTED_IDENTIFIER = 73;
-	public static readonly ENR_LINE_COMMENT = 74;
-	public static readonly ENR_MULTILINE_COMMENT = 75;
-	public static readonly ENR_WS = 76;
-	public static readonly EXPLAIN_PIPE = 77;
+	public static readonly TEN = 54;
+	public static readonly ORDERING = 55;
+	public static readonly NULLS_ORDERING = 56;
+	public static readonly NULLS_ORDERING_DIRECTION = 57;
+	public static readonly MATH_FUNCTION = 58;
+	public static readonly UNARY_FUNCTION = 59;
+	public static readonly WHERE_FUNCTIONS = 60;
+	public static readonly UNQUOTED_IDENTIFIER = 61;
+	public static readonly QUOTED_IDENTIFIER = 62;
+	public static readonly EXPR_LINE_COMMENT = 63;
+	public static readonly EXPR_MULTILINE_COMMENT = 64;
+	public static readonly EXPR_WS = 65;
+	public static readonly SRC_UNQUOTED_IDENTIFIER = 66;
+	public static readonly SRC_QUOTED_IDENTIFIER = 67;
+	public static readonly SRC_LINE_COMMENT = 68;
+	public static readonly SRC_MULTILINE_COMMENT = 69;
+	public static readonly SRC_WS = 70;
+	public static readonly ON = 71;
+	public static readonly WITH = 72;
+	public static readonly ENR_UNQUOTED_IDENTIFIER = 73;
+	public static readonly ENR_QUOTED_IDENTIFIER = 74;
+	public static readonly ENR_LINE_COMMENT = 75;
+	public static readonly ENR_MULTILINE_COMMENT = 76;
+	public static readonly ENR_WS = 77;
+	public static readonly EXPLAIN_PIPE = 78;
 	public static readonly RULE_singleStatement = 0;
 	public static readonly RULE_query = 1;
 	public static readonly RULE_sourceCommand = 2;
@@ -187,7 +188,7 @@ export class esql_parser extends Parser {
 		"'by'", undefined, "'and'", undefined, undefined, "'.'", "'('", undefined, 
 		"']'", "'not'", undefined, undefined, undefined, "'null'", "'or'", "')'", 
 		"'_'", "'info'", "'functions'", undefined, undefined, "'+'", "'-'", "'*'", 
-		"'/'", "'%'", undefined, "'nulls'",
+		"'/'", "'%'", "'10'", undefined, "'nulls'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
 		undefined, "DISSECT", "GROK", "EVAL", "EXPLAIN", "FROM", "ROW", "STATS", 
@@ -198,12 +199,13 @@ export class esql_parser extends Parser {
 		"COMMA", "DOT", "LP", "OPENING_BRACKET", "CLOSING_BRACKET", "NOT", "LIKE", 
 		"RLIKE", "IN", "NULL", "OR", "RP", "UNDERSCORE", "INFO", "FUNCTIONS", 
 		"BOOLEAN_VALUE", "COMPARISON_OPERATOR", "PLUS", "MINUS", "ASTERISK", "SLASH", 
-		"PERCENT", "ORDERING", "NULLS_ORDERING", "NULLS_ORDERING_DIRECTION", "MATH_FUNCTION", 
-		"UNARY_FUNCTION", "WHERE_FUNCTIONS", "UNQUOTED_IDENTIFIER", "QUOTED_IDENTIFIER", 
-		"EXPR_LINE_COMMENT", "EXPR_MULTILINE_COMMENT", "EXPR_WS", "SRC_UNQUOTED_IDENTIFIER", 
-		"SRC_QUOTED_IDENTIFIER", "SRC_LINE_COMMENT", "SRC_MULTILINE_COMMENT", 
-		"SRC_WS", "ON", "WITH", "ENR_UNQUOTED_IDENTIFIER", "ENR_QUOTED_IDENTIFIER", 
-		"ENR_LINE_COMMENT", "ENR_MULTILINE_COMMENT", "ENR_WS", "EXPLAIN_PIPE",
+		"PERCENT", "TEN", "ORDERING", "NULLS_ORDERING", "NULLS_ORDERING_DIRECTION", 
+		"MATH_FUNCTION", "UNARY_FUNCTION", "WHERE_FUNCTIONS", "UNQUOTED_IDENTIFIER", 
+		"QUOTED_IDENTIFIER", "EXPR_LINE_COMMENT", "EXPR_MULTILINE_COMMENT", "EXPR_WS", 
+		"SRC_UNQUOTED_IDENTIFIER", "SRC_QUOTED_IDENTIFIER", "SRC_LINE_COMMENT", 
+		"SRC_MULTILINE_COMMENT", "SRC_WS", "ON", "WITH", "ENR_UNQUOTED_IDENTIFIER", 
+		"ENR_QUOTED_IDENTIFIER", "ENR_LINE_COMMENT", "ENR_MULTILINE_COMMENT", 
+		"ENR_WS", "EXPLAIN_PIPE",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(esql_parser._LITERAL_NAMES, esql_parser._SYMBOLIC_NAMES, []);
 
@@ -3107,7 +3109,7 @@ export class esql_parser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03O\u023A\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03P\u023A\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
@@ -3167,7 +3169,7 @@ export class esql_parser extends Parser {
 		"*\x02,\x02.\x020\x022\x024\x026\x028\x02:\x02<\x02>\x02@\x02B\x02D\x02" +
 		"F\x02H\x02J\x02L\x02N\x02P\x02R\x02T\x02V\x02X\x02Z\x02\\\x02^\x02`\x02" +
 		"b\x02d\x02f\x02h\x02j\x02l\x02n\x02p\x02r\x02t\x02\x02\x07\x03\x0234\x03" +
-		"\x0257\x03\x02JK\x03\x02CD\x03\x02>?\x02\u0254\x02v\x03\x02\x02\x02\x04" +
+		"\x0257\x03\x02KL\x03\x02DE\x03\x02?@\x02\u0254\x02v\x03\x02\x02\x02\x04" +
 		"y\x03\x02\x02\x02\x06\x88\x03\x02\x02\x02\b\x97\x03\x02\x02\x02\n\x99" +
 		"\x03\x02\x02\x02\f\xAD\x03\x02\x02\x02\x0E\xB1\x03\x02\x02\x02\x10\xB4" +
 		"\x03\x02\x02\x02\x12\xDD\x03\x02\x02\x02\x14\xEE\x03\x02\x02\x02\x16\u0109" +
@@ -3203,8 +3205,8 @@ export class esql_parser extends Parser {
 		"\x02\x02\x97\x91\x03\x02\x02\x02\x97\x92\x03\x02\x02\x02\x97\x93\x03\x02" +
 		"\x02\x02\x97\x94\x03\x02\x02\x02\x97\x95\x03\x02\x02\x02\x97\x96\x03\x02" +
 		"\x02\x02\x98\t\x03\x02\x02\x02\x99\x9A\x07\x12\x02\x02\x9A\x9D\x056\x1C" +
-		"\x02\x9B\x9C\x07H\x02\x02\x9C\x9E\x05*\x16\x02\x9D\x9B\x03\x02\x02\x02" +
-		"\x9D\x9E\x03\x02\x02\x02\x9E\xA8\x03\x02\x02\x02\x9F\xA0\x07I\x02\x02" +
+		"\x02\x9B\x9C\x07I\x02\x02\x9C\x9E\x05*\x16\x02\x9D\x9B\x03\x02\x02\x02" +
+		"\x9D\x9E\x03\x02\x02\x02\x9E\xA8\x03\x02\x02\x02\x9F\xA0\x07J\x02\x02" +
 		"\xA0\xA5\x05\f\x07\x02\xA1\xA2\x07\"\x02\x02\xA2\xA4\x05\f\x07\x02\xA3" +
 		"\xA1\x03\x02\x02\x02\xA4\xA7\x03\x02\x02\x02\xA5\xA3\x03\x02\x02\x02\xA5" +
 		"\xA6\x03\x02\x02\x02\xA6\xA9\x03\x02\x02\x02\xA7\xA5\x03\x02\x02\x02\xA8" +
@@ -3222,7 +3224,7 @@ export class esql_parser extends Parser {
 		"\x02\x02\xC7\xC8\x03\x02\x02\x02\xC8\xCA\x03\x02\x02\x02\xC9\xC7\x03\x02" +
 		"\x02\x02\xCA\xCB\x07-\x02\x02\xCB\xDE\x03\x02\x02\x02\xCC\xCE\x07\'\x02" +
 		"\x02\xCD\xCC\x03\x02\x02\x02\xCD\xCE\x03\x02\x02\x02\xCE\xCF\x03\x02\x02" +
-		"\x02\xCF\xD0\x07=\x02\x02\xD0\xD1\x07$\x02\x02\xD1\xD9\x05<\x1F\x02\xD2" +
+		"\x02\xCF\xD0\x07>\x02\x02\xD0\xD1\x07$\x02\x02\xD1\xD9\x05<\x1F\x02\xD2" +
 		"\xD3\x07\"\x02\x02\xD3\xD5\x058\x1D\x02\xD4\xD2\x03\x02\x02\x02\xD5\xD8" +
 		"\x03\x02\x02\x02\xD6\xD4\x03\x02\x02\x02\xD6\xD7\x03\x02\x02\x02\xD7\xDA" +
 		"\x03\x02\x02\x02\xD8\xD6\x03\x02\x02\x02\xD9\xD6\x03\x02\x02\x02\xD9\xDA" +
@@ -3315,7 +3317,7 @@ export class esql_parser extends Parser {
 		"\u01A0\u019E\x03\x02\x02\x02\u01A1\u01A4\x03\x02\x02\x02\u01A2\u01A0\x03" +
 		"\x02\x02\x02\u01A2\u01A3\x03\x02\x02\x02\u01A3?\x03\x02\x02\x02\u01A4" +
 		"\u01A2\x03\x02\x02\x02\u01A5\u01A6\t\x06\x02\x02\u01A6A\x03\x02\x02\x02" +
-		"\u01A7\u01A8\x07;\x02\x02\u01A8C\x03\x02\x02\x02\u01A9\u01AA\x07<\x02" +
+		"\u01A7\u01A8\x07<\x02\x02\u01A8C\x03\x02\x02\x02\u01A9\u01AA\x07=\x02" +
 		"\x02\u01AAE\x03\x02\x02\x02\u01AB\u01D1\x07+\x02\x02\u01AC\u01D1\x05H" +
 		"%\x02\u01AD\u01D1\x05d3\x02\u01AE\u01D1\x05l7\x02\u01AF\u01B0\x07%\x02" +
 		"\x02\u01B0\u01B5\x05H%\x02\u01B1\u01B2\x07\"\x02\x02\u01B2\u01B4\x05H" +
@@ -3341,9 +3343,9 @@ export class esql_parser extends Parser {
 		"\u01DE\x05N(\x02\u01DD\u01DB\x03\x02\x02\x02\u01DE\u01E1\x03\x02\x02\x02" +
 		"\u01DF\u01DD\x03\x02\x02\x02\u01DF\u01E0\x03\x02\x02\x02\u01E0M\x03\x02" +
 		"\x02\x02\u01E1\u01DF\x03\x02\x02\x02\u01E2\u01E4\x05\x14\v\x02\u01E3\u01E5" +
-		"\x078\x02\x02\u01E4\u01E3\x03\x02\x02\x02\u01E4\u01E5\x03\x02\x02\x02" +
-		"\u01E5\u01E8\x03\x02\x02\x02\u01E6\u01E7\x079\x02\x02\u01E7\u01E9\x07" +
-		":\x02\x02\u01E8\u01E6\x03\x02\x02\x02\u01E8\u01E9\x03\x02\x02\x02\u01E9" +
+		"\x079\x02\x02\u01E4\u01E3\x03\x02\x02\x02\u01E4\u01E5\x03\x02\x02\x02" +
+		"\u01E5\u01E8\x03\x02\x02\x02\u01E6\u01E7\x07:\x02\x02\u01E7\u01E9\x07" +
+		";\x02\x02\u01E8\u01E6\x03\x02\x02\x02\u01E8\u01E9\x03\x02\x02\x02\u01E9" +
 		"O\x03\x02\x02\x02\u01EA\u01EB\x07\x0E\x02\x02\u01EB\u01EC\x05> \x02\u01EC" +
 		"Q\x03\x02\x02\x02\u01ED\u01EE\x07\x13\x02\x02\u01EE\u01EF\x05> \x02\u01EF" +
 		"S\x03\x02\x02\x02\u01F0\u01F1\x07\x0F\x02\x02\u01F1\u01F2\x05> \x02\u01F2" +

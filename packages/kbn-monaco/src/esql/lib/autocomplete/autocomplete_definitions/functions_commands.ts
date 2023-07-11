@@ -89,6 +89,20 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'log10',
+    insertText: 'log10',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.log10Doc', {
+      defaultMessage: 'Returns the log base 10.',
+    }),
+    documentation: {
+      value: buildDocumentation('log10(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval s = log10(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'concat',
     insertText: 'concat',
     kind: 1,

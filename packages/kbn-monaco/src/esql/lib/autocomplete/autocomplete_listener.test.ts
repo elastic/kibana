@@ -142,6 +142,7 @@ describe('autocomplete_listener', () => {
       'round',
       'abs',
       'pow',
+      'log10',
       'concat',
       'substring',
       'starts_with',
