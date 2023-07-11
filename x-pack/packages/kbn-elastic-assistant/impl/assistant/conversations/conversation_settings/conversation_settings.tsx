@@ -36,6 +36,9 @@ export interface ConversationSettingsProps {
   isDisabled?: boolean;
 }
 
+/**
+ * Settings for adding/removing conversation and configuring default system prompt and connector.
+ */
 export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
   ({
     actionTypeRegistry,

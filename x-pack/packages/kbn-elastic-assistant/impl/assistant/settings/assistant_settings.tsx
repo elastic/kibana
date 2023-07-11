@@ -106,6 +106,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
       setSelectedQuickPrompt(quickPrompt);
     }, []);
+    useEffect(() => {
+      if (selectedQuickPrompt != null) {
+        setSelectedQuickPrompt(
+          quickPromptSettings.find((q) => q.title === selectedQuickPrompt.title)
+        );
+      }
+    }, [quickPromptSettings, selectedQuickPrompt]);
 
     // System Prompt Selection State
     const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();

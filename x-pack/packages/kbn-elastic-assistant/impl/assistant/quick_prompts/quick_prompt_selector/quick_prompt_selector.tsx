@@ -22,6 +22,7 @@ import * as i18n from './translations';
 import { QuickPrompt } from '../types';
 
 interface Props {
+  isDisabled?: boolean;
   onQuickPromptDeleted: (quickPromptTitle: string) => void;
   onQuickPromptSelectionChange: (quickPrompt?: QuickPrompt | string) => void;
   quickPrompts: QuickPrompt[];
@@ -34,7 +35,13 @@ export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boo
  * Selector for choosing and deleting Quick Prompts
  */
 export const QuickPromptSelector: React.FC<Props> = React.memo(
-  ({ quickPrompts, onQuickPromptDeleted, onQuickPromptSelectionChange, selectedQuickPrompt }) => {
+  ({
+    isDisabled = false,
+    quickPrompts,
+    onQuickPromptDeleted,
+    onQuickPromptSelectionChange,
+    selectedQuickPrompt,
+  }) => {
     // Form options
     const [options, setOptions] = useState<QuickPromptSelectorOption[]>(
       quickPrompts.map((qp) => ({
@@ -170,6 +177,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
       <EuiComboBox
         aria-label={i18n.QUICK_PROMPT_SELECTOR}
         compressed
+        isDisabled={isDisabled}
         placeholder={i18n.QUICK_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
         singleSelection={true}
