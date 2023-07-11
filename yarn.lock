@@ -1552,10 +1552,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@83.1.0":
-  version "83.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-83.1.0.tgz#ed1e409306da2ed9171d334e0ed7e6622c499141"
-  integrity sha512-l6ERa836K/U9dccZ4xkyf2tmTO54DeElhGXmNdq02CATbXNQ3YGnoAn99+HvA82oXF3zCSpy+pg5tLx6Ag1zaw==
+"@elastic/eui@84.0.0":
+  version "84.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-84.0.0.tgz#0d37da1fe3f2f9af54b62e127c9682d381111ba6"
+  integrity sha512-hgDWyXwlhpbNzQgIvGLppqSRMEVt2zMlXIxMzvlV6PYPJUh1K9f5pOyXtNyouFgYZG2bkltvG3cUrMLeBbgUkg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.194"
@@ -1576,7 +1576,7 @@
     react-beautiful-dnd "^13.1.0"
     react-dropzone "^11.5.3"
     react-element-to-jsx-string "^14.3.4"
-    react-focus-on "^3.7.0"
+    react-focus-on "^3.9.1"
     react-input-autosize "^3.0.0"
     react-is "^17.0.2"
     react-remove-scroll-bar "^2.3.4"
@@ -16295,6 +16295,13 @@ focus-lock@^0.11.2:
   dependencies:
     tslib "^2.0.3"
 
+focus-lock@^0.11.6:
+  version "0.11.6"
+  resolved "https://registry.yarnpkg.com/focus-lock/-/focus-lock-0.11.6.tgz#e8821e21d218f03e100f7dc27b733f9c4f61e683"
+  integrity sha512-KSuV3ur4gf2KqMNoZx3nXNVhqCkn42GuTYCX4tXPEwf0MjpFQmNMiN6m7dXaUXgIoivL6/65agoUMg4RLS0Vbg==
+  dependencies:
+    tslib "^2.0.3"
+
 folktale@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/folktale/-/folktale-2.0.1.tgz#6dc26a65565aefdef9520223e022dddf5b8d8462"
@@ -24450,6 +24457,18 @@ react-focus-lock@^2.9.2:
     use-callback-ref "^1.3.0"
     use-sidecar "^1.1.2"
 
+react-focus-lock@^2.9.4:
+  version "2.9.5"
+  resolved "https://registry.yarnpkg.com/react-focus-lock/-/react-focus-lock-2.9.5.tgz#8a82f4f0128cccc27b9e77a4472e8a22f1b52189"
+  integrity sha512-h6vrdgUbsH2HeD5I7I3Cx1PPrmwGuKYICS+kB9m+32X/9xHRrAbxgvaBpG7BFBN9h3tO+C3qX1QAVESmi4CiIA==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    focus-lock "^0.11.6"
+    prop-types "^15.6.2"
+    react-clientside-effect "^1.2.6"
+    use-callback-ref "^1.3.0"
+    use-sidecar "^1.1.2"
+
 react-focus-on@^3.7.0:
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/react-focus-on/-/react-focus-on-3.7.0.tgz#bf782b51483d52d1d336b7b09cb864897af26cdf"
@@ -24458,6 +24477,19 @@ react-focus-on@^3.7.0:
     aria-hidden "^1.2.2"
     react-focus-lock "^2.9.2"
     react-remove-scroll "^2.5.5"
+    react-style-singleton "^2.2.0"
+    tslib "^2.3.1"
+    use-callback-ref "^1.3.0"
+    use-sidecar "^1.1.2"
+
+react-focus-on@^3.9.1:
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/react-focus-on/-/react-focus-on-3.9.1.tgz#449a34ebb487c458d9d5526a74214c408544cfec"
+  integrity sha512-IYo2j4mgNpZEJNv+/XzZs3S3xhJbR+AFop092h4OMW7sbFpIMVWxp/Z61V/gfpsgOi7VnoSFXP2bfOWWkjjtOw==
+  dependencies:
+    aria-hidden "^1.2.2"
+    react-focus-lock "^2.9.4"
+    react-remove-scroll "^2.5.6"
     react-style-singleton "^2.2.0"
     tslib "^2.3.1"
     use-callback-ref "^1.3.0"
@@ -24608,6 +24640,17 @@ react-remove-scroll@^2.5.5:
   integrity sha512-ImKhrzJJsyXJfBZ4bzu8Bwpka14c/fQt0k+cyFp/PBhTfyDnU5hjOtM4AG/0AMyy8oKzOTR0lDgJIM7pYXI0kw==
   dependencies:
     react-remove-scroll-bar "^2.3.3"
+    react-style-singleton "^2.2.1"
+    tslib "^2.1.0"
+    use-callback-ref "^1.3.0"
+    use-sidecar "^1.1.2"
+
+react-remove-scroll@^2.5.6:
+  version "2.5.6"
+  resolved "https://packages.atlassian.com/api/npm/npm-remote/react-remove-scroll/-/react-remove-scroll-2.5.6.tgz#7510b8079e9c7eebe00e65a33daaa3aa29a10336"
+  integrity sha512-bO856ad1uDYLefgArk559IzUNeQ6SWH4QnrevIUjH+GczV56giDfl3h0Idptf2oIKxQmd1p9BN25jleKodTALg==
+  dependencies:
+    react-remove-scroll-bar "^2.3.4"
     react-style-singleton "^2.2.1"
     tslib "^2.1.0"
     use-callback-ref "^1.3.0"
