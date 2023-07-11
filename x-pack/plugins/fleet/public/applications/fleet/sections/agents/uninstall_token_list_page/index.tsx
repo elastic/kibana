@@ -85,10 +85,17 @@ export const UninstallTokenListPage = () => {
         data-test-subj="uninstallTokenListTable"
         items={tokens}
         columns={[
-          { field: 'policy_id', name: 'Policy ID' },
+          {
+            field: 'policy_id',
+            name: i18n.translate('xpack.fleet.uninstallTokenList.policyIdTitle', {
+              defaultMessage: 'Policy ID',
+            }),
+          },
           {
             field: 'created_at',
-            name: 'Created at',
+            name: i18n.translate('xpack.fleet.uninstallTokenList.createdAtTitle', {
+              defaultMessage: 'Created at',
+            }),
             render: (createdAt: string) =>
               createdAt ? (
                 <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
@@ -96,7 +103,9 @@ export const UninstallTokenListPage = () => {
           },
           {
             field: 'id',
-            name: 'Token',
+            name: i18n.translate('xpack.fleet.uninstallTokenList.tokenTitle', {
+              defaultMessage: 'Token',
+            }),
             render: (uninstallTokenId: string) => (
               <ApiKeyField
                 apiKeyId={uninstallTokenId}
