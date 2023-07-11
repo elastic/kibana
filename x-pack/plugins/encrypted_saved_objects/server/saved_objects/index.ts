@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 
+import { schema } from '@kbn/config-schema';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
@@ -24,6 +25,10 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
 import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
+
+// Embedding excluded AAD fields POC rev2
+// This is the name of our hidden saved object that stores the encryption metadata
+export const VERSIONED_ENCYRPTION_DEFINITION_TYPE = 'versioned_enrcyption_definition';
 
 export { normalizeNamespace };
 
@@ -89,6 +94,33 @@ export function setupSavedObjects({
       service,
       getCurrentUser: () => security?.authc.getCurrentUser(request) ?? undefined,
     });
+  });
+
+  // Embedding excluded AAD fields POC rev2
+  // a new (will be hidden) SO type to contain list of encrypted
+  // attributes and attributes to excluded from AAD
+  savedObjects.registerType({
+    name: VERSIONED_ENCYRPTION_DEFINITION_TYPE,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        type: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+      },
+    },
+    schemas: {
+      '8.10.0': schema.object({
+        type: schema.string({ minLength: 1 }),
+        version: schema.string({ minLength: 1 }),
+        attributesToEncrypt: schema.maybe(schema.arrayOf(schema.string())),
+        attributesToExcludeFromAAD: schema.maybe(schema.arrayOf(schema.string())),
+      }),
+    },
   });
 
   return (clientOpts) => {

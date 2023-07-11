@@ -16,6 +16,8 @@ export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
   private readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
+  public readonly type: string;
+  public readonly modelVersion?: string;
 
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
     const attributesToEncrypt = new Set<string>();
@@ -35,6 +37,11 @@ export class EncryptedSavedObjectAttributesDefinition {
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;
     this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
+
+    // Embedding excluded AAD fields POC rev2
+    // Hold onto the type and version so we can write the hidden SO's
+    this.type = typeRegistration.type;
+    this.modelVersion = typeRegistration.modelVersion;
   }
 
   /**
@@ -51,17 +58,11 @@ export class EncryptedSavedObjectAttributesDefinition {
    * @param attributeName Name of the attribute.
    * @param excludedAttributesOverride override list of attributes to exclude. Embedding excluded AAD fields POC.
    */
-  public shouldBeExcludedFromAAD(attributeName: string, excludedAttributesOverride?: string[]) {
+  public shouldBeExcludedFromAAD(attributeName: string) {
     return (
       this.shouldBeEncrypted(attributeName) ||
-      (!!excludedAttributesOverride
-        ? excludedAttributesOverride?.includes(attributeName)
-        : this.attributesToExcludeFromAAD != null &&
-          this.attributesToExcludeFromAAD.has(attributeName))
-      // original logic below...
-      // this.shouldBeEncrypted(attributeName) ||
-      // (this.attributesToExcludeFromAAD != null &&
-      //   this.attributesToExcludeFromAAD.has(attributeName))
+      (this.attributesToExcludeFromAAD != null &&
+        this.attributesToExcludeFromAAD.has(attributeName))
     );
   }
 

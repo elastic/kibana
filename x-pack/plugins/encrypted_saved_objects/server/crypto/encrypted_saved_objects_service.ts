@@ -9,13 +9,19 @@ import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
-import type { Logger } from '@kbn/core/server';
+import type {
+  ISavedObjectsRepository,
+  Logger,
+  SavedObject,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
+import { VERSIONED_ENCYRPTION_DEFINITION_TYPE } from '../saved_objects';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 
-export const ENCRPYPTED_HEADER_DELIMITER: string = ',';
 export const ENCRPYPTED_HEADER_EOH: string = '.EOH.';
 
 /**
@@ -36,6 +42,19 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+  readonly modelVersion?: string;
+}
+
+/**
+ * Embedding excluded AAD fields POC rev2
+ * Interface for writing/reading versioned ESO type metada
+ * to/from hidden saved objects
+ */
+interface EncryptedSavedObjectVersionedMetadata {
+  readonly type: string;
+  readonly modelVersion: string;
+  readonly attributesToEncrypt: string[];
+  readonly attributesToExcludeFromAAD: string[];
 }
 
 /**
@@ -115,6 +134,18 @@ export function descriptorToArray(descriptor: SavedObjectDescriptor) {
  * attributes.
  */
 export class EncryptedSavedObjectsService {
+  // Embedding excluded AAD fields POC rev2
+  // We need an internal repo to write and read the versioned ESO descriptors
+  private internalSoRepository: ISavedObjectsRepository | undefined;
+
+  // Embedding excluded AAD fields POC rev2
+  // Metadata is stored in an SO. Ehen we read one, we'll
+  // cache it in versionedAttributeDefinitions
+  private readonly versionedAttributeDefinitions: Map<
+    string,
+    EncryptedSavedObjectAttributesDefinition
+  > = new Map();
+
   /**
    * Map of all registered saved object types where the `key` is saved object type and the `value`
    * is the definition (names of attributes that need to be encrypted etc.).
@@ -123,6 +154,42 @@ export class EncryptedSavedObjectsService {
     new Map();
 
   constructor(private readonly options: EncryptedSavedObjectsServiceOptions) {}
+
+  // Embedding excluded AAD fields POC rev2
+  // Get and cache the metadata for a version of an ESO
+  private async getVersionedAttributeDefinition(
+    type: string,
+    modelVersion: string
+  ): Promise<EncryptedSavedObjectAttributesDefinition | undefined> {
+    if (!this.internalSoRepository) return undefined;
+
+    const id = type + modelVersion;
+    if (this.versionedAttributeDefinitions.has(id)) this.versionedAttributeDefinitions.get(id);
+
+    try {
+      // In actual implementation we could use find to match the type/version we're
+      // looking for. In the POC I've just hard-coded the ID of the objects.
+      const metadataObject: SavedObject<any> = await this.internalSoRepository.get(
+        VERSIONED_ENCYRPTION_DEFINITION_TYPE,
+        id
+      );
+
+      // Convert the SO attributes to a EncryptedSavedObjectAttributesDefinition
+      // this makes our life easier when we attempt decryption
+      const metadataAttributesDef = new EncryptedSavedObjectAttributesDefinition({
+        type: metadataObject.attributes.type,
+        attributesToEncrypt: new Set(metadataObject.attributes.attributesToEncrypt),
+        attributesToExcludeFromAAD: new Set(metadataObject.attributes.attributesToExcludeFromAAD),
+        modelVersion: metadataObject.attributes.modelVersion,
+      });
+
+      // Cache the versioned definition
+      this.versionedAttributeDefinitions.set(id, metadataAttributesDef);
+      return metadataAttributesDef;
+    } catch (e) {
+      return undefined;
+    }
+  }
 
   /**
    * Registers saved object type as the one that contains attributes that should be encrypted.
@@ -153,6 +220,36 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeDefinitions.has(type);
+  }
+
+  // Embedding excluded AAD fields POC rev2
+  // Initializes versioned type storage/caching
+  // Creates an internal SO repository to write/read the hidden encrpytion
+  // descriptors which contain per-version encrypted fields and AAD metadata
+  public async initializeVersionedMetadata(savedObjects: SavedObjectsServiceStart) {
+    this.internalSoRepository = savedObjects.createInternalRepository([
+      VERSIONED_ENCYRPTION_DEFINITION_TYPE,
+    ]);
+
+    const versionedEsoMetadata = new Array<SavedObjectsBulkCreateObject>();
+
+    this.typeDefinitions.forEach((versionedType) => {
+      if (!!versionedType.modelVersion) {
+        const attributes: EncryptedSavedObjectVersionedMetadata = {
+          type: versionedType.type,
+          modelVersion: versionedType.modelVersion,
+          attributesToEncrypt: [...versionedType.attributesToEncrypt.values()],
+          attributesToExcludeFromAAD: versionedType.getAttributesToExcludeFromAAD(),
+        };
+        const id = versionedType.type + versionedType.modelVersion; // forcing the ID in this POC
+        versionedEsoMetadata.push({ id, type: VERSIONED_ENCYRPTION_DEFINITION_TYPE, attributes });
+      }
+    });
+
+    // What is the risk of not awaiting this call?
+    // Where could we call this function where we can await it?
+    // This function (initializeVersionedMetadata) is being called from ESO plugin start.
+    await this.internalSoRepository.bulkCreate(versionedEsoMetadata, { overwrite: true });
   }
 
   /**
@@ -272,21 +369,28 @@ export class EncryptedSavedObjectsService {
   // the AAD exclusions to/from the encrypted data strings
   // This POC is NOT a suggested solution - it duplicates the ADD meta data in
   // each encrpyted attribute. Ideally, we should store it only once.
-  private createEncryptionHeader(attributesToExcludeFromAAD: string[] | undefined): string {
-    if (!attributesToExcludeFromAAD || attributesToExcludeFromAAD.length === 0) return '';
-    return attributesToExcludeFromAAD
-      .join(ENCRPYPTED_HEADER_DELIMITER)
-      .concat(ENCRPYPTED_HEADER_EOH);
+  // private createEncryptionHeader(attributesToExcludeFromAAD: string[] | undefined): string {
+  //   if (!attributesToExcludeFromAAD || attributesToExcludeFromAAD.length === 0) return '';
+  //   return attributesToExcludeFromAAD
+  //     .join(ENCRPYPTED_HEADER_DELIMITER)
+  //     .concat(ENCRPYPTED_HEADER_EOH);
+  // }
+
+  // Embedding excluded AAD fields POC v2
+  // The header now only needs to contain the version (to simulate the model version
+  // that would be written to the raw SO doc)
+  private createModelVersionHeader(modelVersion?: string): string {
+    if (!modelVersion) return '';
+    return modelVersion.concat(ENCRPYPTED_HEADER_EOH);
   }
-  private extractAADExcludedFieldsFromEncryptionHeader(encryptionString: string): {
-    fieldsExcludedFromAAD: string[] | undefined;
+  private extractModelVersionFromHeader(encryptionString: string): {
+    modelVersion: string | undefined;
     encryptedData: string;
   } {
     const parts = encryptionString.split(ENCRPYPTED_HEADER_EOH);
-    if (parts.length <= 1)
-      return { fieldsExcludedFromAAD: undefined, encryptedData: encryptionString };
+    if (parts.length <= 1) return { modelVersion: undefined, encryptedData: encryptionString };
     return {
-      fieldsExcludedFromAAD: parts[0].split(ENCRPYPTED_HEADER_DELIMITER),
+      modelVersion: parts[0],
       encryptedData: parts[1],
     };
   }
@@ -294,40 +398,28 @@ export class EncryptedSavedObjectsService {
   private *attributesToEncryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: CommonParameters
+    params?: CommonParameters,
+    modelVersion?: string
   ): Iterator<[unknown, string], T, string> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
     }
     let encryptionAAD: string | undefined;
-    let encryptionHeader = '';
+    const encryptionHeader = this.createModelVersionHeader(modelVersion);
 
     const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue != null) {
         if (!encryptionAAD) {
-          let attributesToExcludeFromAAD: string[] | undefined;
-          // Embedding excluded AAD fields POC
-          // During encrpytion we do NOT pass in an excluded fields
-          // override. We always want to generate this based on the
-          // registered object.
-          ({ encryptionAAD, attributesToExcludeFromAAD } = this.getAAD(
-            typeDefinition,
-            descriptor,
-            attributes
-          ));
-          encryptionHeader = this.createEncryptionHeader(attributesToExcludeFromAAD);
+          encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
         }
         try {
-          // Embedding excluded AAD fields POC
-          // Here we prefix the encrypted data with the AAD exclusion list.
-          // This is, of course, not acceptable as a real solution because it
-          // will store a copy of this meta data in ever encrypted field of an
-          // object. Ideally, the exclusion list would get stored elsewhere in
-          // the raw document only once OR could be stored once per SO type per
-          // version in an internal index.
+          // Embedding excluded AAD fields POC v2
+          // Here we prefix the encrypted data with the version string that was registered in this instance
+          // This will not be necessary in the real implementation, as the model version would be available
+          // from the raw SO soc.
           encryptedAttributes[attributeName] = encryptionHeader.concat(
             (yield [attributeValue, encryptionAAD])!
           );
@@ -380,7 +472,15 @@ export class EncryptedSavedObjectsService {
     attributes: T,
     params?: CommonParameters
   ): Promise<T> {
-    const iterator = this.attributesToEncryptIterator<T>(descriptor, attributes, params);
+    // Embedding excluded AAD fields POC v2
+    // Determine if there is a model version, and pass it into the iterator
+    const esoDef = this.typeDefinitions.get(descriptor.type);
+    const iterator = this.attributesToEncryptIterator<T>(
+      descriptor,
+      attributes,
+      params,
+      esoDef?.modelVersion
+    );
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
@@ -416,6 +516,9 @@ export class EncryptedSavedObjectsService {
     attributes: T,
     params?: CommonParameters
   ): T {
+    // Embedding excluded AAD fields POC v2
+    // No additional considerations are made for sync functions, as they are only
+    // utilized in migrations, before we have any access to the SO repo
     const iterator = this.attributesToEncryptIterator<T>(descriptor, attributes, params);
 
     let iteratorResult = iterator.next();
@@ -453,8 +556,33 @@ export class EncryptedSavedObjectsService {
     attributes: T,
     params?: DecryptParameters
   ): Promise<T> {
+    // Embedding excluded AAD fields POC v2
+    // Determine if there is a model version embedded into any of the encrypted fields.
+    // The POC operates under the assumption that the list of encrpted fields for a type
+    // are only ever augmented in new model versions.
+    let modelVersion: string | undefined;
+    const esoDef = this.typeDefinitions.get(descriptor.type);
+    const encryptedAttributes = esoDef ? [...esoDef.attributesToEncrypt] : [];
+
+    for (const attributeName of encryptedAttributes) {
+      const attributeValue = attributes[attributeName];
+      if (attributeValue == null || typeof attributeValue !== 'string') {
+        continue;
+      }
+
+      ({ modelVersion } = this.extractModelVersionFromHeader(attributeValue));
+      if (!!modelVersion) break;
+    }
+
+    // If there is a model version, then get the versioned metadata and pass it to
+    // the decrypt iterator
+    let metadata: EncryptedSavedObjectAttributesDefinition | undefined;
+    if (!!modelVersion && modelVersion !== esoDef?.modelVersion) {
+      metadata = await this.getVersionedAttributeDefinition(descriptor.type, modelVersion);
+    }
+
     const decrypters = this.getDecrypters(params?.omitPrimaryEncryptionKey);
-    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
+    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params, metadata);
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
@@ -504,6 +632,9 @@ export class EncryptedSavedObjectsService {
     attributes: T,
     params?: DecryptParameters
   ): T {
+    // Embedding excluded AAD fields POC v2
+    // No additional considerations are made for sync functions, as they are only
+    // utilized in migrations, before we have any access to the SO repo
     const decrypters = this.getDecrypters(params?.omitPrimaryEncryptionKey);
     const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
 
@@ -543,14 +674,22 @@ export class EncryptedSavedObjectsService {
   private *attributesToDecryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: DecryptParameters
+    params?: DecryptParameters,
+    typeDefinition?: EncryptedSavedObjectAttributesDefinition
   ): Iterator<[string, string[]], T, EncryptOutput> {
-    const typeDefinition = this.typeDefinitions.get(descriptor.type);
-    if (typeDefinition === undefined) {
-      return attributes;
+    // Embedding excluded AAD fields POC v2
+    // Check for a type definition coming in, if there isn't one, it's
+    // safe to load the one we registered in this version of the software.
+    if (!typeDefinition) {
+      typeDefinition = this.typeDefinitions.get(descriptor.type);
+      if (typeDefinition === undefined) {
+        return attributes;
+      }
     }
+
     const encryptionAADs: string[] = [];
     const decryptedAttributes: Record<string, EncryptOutput> = {};
+
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue == null) {
@@ -565,11 +704,10 @@ export class EncryptedSavedObjectsService {
         );
       }
 
-      // Embedding excluded AAD fields POC
-      // Get the ADD exclusion meta data if it's there, and make sure the
+      // Embedding excluded AAD fields POC v2
+      // Get the model version if it's there, and make sure the
       // encrypted data string is isolated from the meta data
-      const { fieldsExcludedFromAAD, encryptedData } =
-        this.extractAADExcludedFieldsFromEncryptionHeader(attributeValue);
+      const { encryptedData } = this.extractModelVersionFromHeader(attributeValue);
 
       if (!encryptionAADs.length) {
         if (params?.isTypeBeingConverted) {
@@ -577,37 +715,18 @@ export class EncryptedSavedObjectsService {
           // it with several different descriptors depending upon how the migrations are structured, and whether this is a full index
           // migration or a single document migration. Note that the originId is set either when the document is converted _or_ when it is
           // imported with "createNewCopies: false", so we have to try with and without it.
-          let encryptionAAD: string = '';
           const decryptDescriptors = params.originId
             ? [{ ...descriptor, id: params.originId }, descriptor]
             : [descriptor];
           for (const decryptDescriptor of decryptDescriptors) {
-            ({ encryptionAAD } = this.getAAD(
-              typeDefinition,
-              decryptDescriptor,
-              attributes,
-              fieldsExcludedFromAAD // If we have the meta data, use it
-            ));
-            encryptionAADs.push(encryptionAAD);
+            encryptionAADs.push(this.getAAD(typeDefinition, decryptDescriptor, attributes));
             if (descriptor.namespace) {
               const { namespace, ...alternateDescriptor } = decryptDescriptor;
-              ({ encryptionAAD } = this.getAAD(
-                typeDefinition,
-                alternateDescriptor,
-                attributes,
-                fieldsExcludedFromAAD // If we have the meta data, use it
-              ));
-              encryptionAADs.push(encryptionAAD);
+              encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
             }
           }
         } else {
-          const { encryptionAAD } = this.getAAD(
-            typeDefinition,
-            descriptor,
-            attributes,
-            fieldsExcludedFromAAD // If we have the meta data, use it
-          );
-          encryptionAADs.push(encryptionAAD);
+          encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
         }
       }
 
@@ -661,15 +780,13 @@ export class EncryptedSavedObjectsService {
   private getAAD(
     typeDefinition: EncryptedSavedObjectAttributesDefinition,
     descriptor: SavedObjectDescriptor,
-    attributes: Record<string, unknown>,
-    excludedAttributesOverride?: string[]
-  ): { encryptionAAD: string; attributesToExcludeFromAAD: string[] | undefined } {
+    attributes: Record<string, unknown>
+  ): string {
     // Collect all attributes (both keys and values) that should contribute to AAD.
     const attributesAAD: Record<string, unknown> = {};
+
     for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
-      // Embedding excluded AAD fields POC
-      // Pass the override down to the typeDefinition call
-      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey, excludedAttributesOverride)) {
+      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey)) {
         attributesAAD[attributeKey] = attributeValue;
       }
     }
@@ -682,13 +799,7 @@ export class EncryptedSavedObjectsService {
       );
     }
 
-    return {
-      encryptionAAD: stringify([...descriptorToArray(descriptor), attributesAAD]),
-      // Embedding excluded AAD fields POC
-      // return the attribute excluded from AAD so they can be embedded during encryption
-      attributesToExcludeFromAAD:
-        excludedAttributesOverride ?? typeDefinition.getAttributesToExcludeFromAAD(),
-    };
+    return stringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 
   /**

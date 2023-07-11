@@ -8,7 +8,13 @@
 import nodeCrypto from '@elastic/node-crypto';
 import { createHash } from 'crypto';
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
@@ -51,6 +57,7 @@ export class EncryptedSavedObjectsPlugin
 {
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
+  private esoService!: EncryptedSavedObjectsService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -80,16 +87,17 @@ export class EncryptedSavedObjectsPlugin
     const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
       nodeCrypto({ encryptionKey: decryptionKey })
     );
-    const service = Object.freeze(
-      new EncryptedSavedObjectsService({
-        primaryCrypto,
-        decryptionOnlyCryptos,
-        logger: this.logger,
-      })
-    );
+
+    // Embedding excluded AAD fields POC rev2
+    // Could no longer freeze - what is the risk?
+    this.esoService = new EncryptedSavedObjectsService({
+      primaryCrypto,
+      decryptionOnlyCryptos,
+      logger: this.logger,
+    });
 
     this.savedObjectsSetup = setupSavedObjects({
-      service,
+      service: this.esoService,
       savedObjects: core.savedObjects,
       security: deps.security,
       getStartServices: core.getStartServices,
@@ -101,7 +109,7 @@ export class EncryptedSavedObjectsPlugin
       encryptionKeyRotationService: Object.freeze(
         new EncryptionKeyRotationService({
           logger: this.logger.get('key-rotation-service'),
-          service,
+          service: this.esoService,
           getStartServices: core.getStartServices,
           security: deps.security,
         })
@@ -112,9 +120,9 @@ export class EncryptedSavedObjectsPlugin
     return {
       canEncrypt,
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
-        service.registerType(typeRegistration),
+        this.esoService.registerType(typeRegistration),
       createMigration: getCreateMigration(
-        service,
+        this.esoService,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService({
             primaryCrypto,
@@ -128,8 +136,11 @@ export class EncryptedSavedObjectsPlugin
     };
   }
 
-  public start() {
+  public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
+    // initializeVersionedMetadata contains an un-awaited async call to SO repo bulk save
+    // What is a more appropriate way of doing this?
+    this.esoService.initializeVersionedMetadata(savedObjects);
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),

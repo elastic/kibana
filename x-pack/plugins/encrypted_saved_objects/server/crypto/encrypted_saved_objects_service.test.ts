@@ -8,9 +8,13 @@
 import type { Crypto } from '@elastic/node-crypto';
 import nodeCrypto from '@elastic/node-crypto';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { coreMock, loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
 
+import { VERSIONED_ENCYRPTION_DEFINITION_TYPE } from '../saved_objects';
+import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 import {
   ENCRPYPTED_HEADER_EOH,
   EncryptedSavedObjectsService,
@@ -56,13 +60,38 @@ function removeEncryptionHeaders(attributes: Record<string, unknown>): Record<st
 
 let mockNodeCrypto: jest.Mocked<Crypto>;
 let service: EncryptedSavedObjectsService;
-beforeEach(() => {
-  mockNodeCrypto = createNodeCryptMock('encryption-key-abc');
+let mockSavedObjects: jest.Mocked<SavedObjectsServiceStart>;
+let mockSavedObjectsRepo: jest.Mocked<ISavedObjectsRepository>;
 
+// Embedding excluded AAD fields POC rev2
+// This function helps us simulate the plugin setup and start phases
+function setup(types?: EncryptedSavedObjectTypeRegistration[]) {
+  mockNodeCrypto = createNodeCryptMock('encryption-key-abc');
+  const coreSetupMock = coreMock.createSetup();
+  const coreStartMock = coreMock.createStart();
+  coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
+  mockSavedObjectsRepo = savedObjectsRepositoryMock.create();
+  mockSavedObjects = coreStartMock.savedObjects;
+  mockSavedObjects.createInternalRepository.mockImplementation((request, params) => {
+    return mockSavedObjectsRepo;
+  });
+
+  // simulate plugin setup phase
   service = new EncryptedSavedObjectsService({
     primaryCrypto: mockNodeCrypto,
     logger: loggingSystemMock.create().get(),
   });
+  types?.forEach((esoType) => service.registerType(esoType));
+
+  // simulate plugin start phase
+  if (!!types) {
+    service.initializeVersionedMetadata(mockSavedObjects);
+    expect(mockSavedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
+  }
+}
+
+beforeEach(() => {
+  setup();
 });
 
 afterEach(() => jest.resetAllMocks());
@@ -463,11 +492,6 @@ describe('#encryptAttributes', () => {
     mockNodeCrypto.encrypt.mockImplementation(
       async (valueToEncrypt, aad) => `|${valueToEncrypt}|${aad}|`
     );
-
-    service = new EncryptedSavedObjectsService({
-      primaryCrypto: mockNodeCrypto,
-      logger: loggingSystemMock.create().get(),
-    });
   });
 
   it('does not encrypt attributes for unknown types', async () => {
@@ -1476,11 +1500,6 @@ describe('#encryptAttributesSync', () => {
     mockNodeCrypto.encryptSync.mockImplementation(
       (valueToEncrypt, aad) => `|${valueToEncrypt}|${aad}|`
     );
-
-    service = new EncryptedSavedObjectsService({
-      primaryCrypto: mockNodeCrypto,
-      logger: loggingSystemMock.create().get(),
-    });
   });
 
   it('does not encrypt attributes that are not supposed to be encrypted', () => {
@@ -2433,14 +2452,35 @@ describe('Embedding excluded AAD fields POC', () => {
       attrFive: 'five',
     };
 
-    // Register a dummy V2 type with addition attribue "attrFour" that is excluded from AAD
-    service.registerType({
-      type: 'v2->v1',
-      attributesToEncrypt: new Set(['attrTwo']),
-      attributesToExcludeFromAAD: new Set(['attrOne', 'attrFour']),
+    // Register an ESO model version 2.0.0 in mock Kibana V2 with additional
+    // attribue "attrFour" that is excluded from AAD
+    setup([
+      {
+        type: 'v2->v1',
+        attributesToEncrypt: new Set(['attrTwo']),
+        attributesToExcludeFromAAD: new Set(['attrOne', 'attrFour']),
+        modelVersion: '2.0.0',
+      },
+    ]);
+
+    // Registered ESO types are written as metadata SO's on
+    // service.initializeVersionedMetadata() - see setup() above
+    const metadataSO = {
+      type: VERSIONED_ENCYRPTION_DEFINITION_TYPE,
+      id: 'v2->v12.0.0',
+      attributes: {
+        type: 'v2->v1',
+        modelVersion: '2.0.0',
+        attributesToEncrypt: ['attrTwo'],
+        attributesToExcludeFromAAD: ['attrOne', 'attrFour'],
+      },
+    };
+    expect(mockSavedObjectsRepo.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsRepo.bulkCreate).toHaveBeenLastCalledWith([metadataSO], {
+      overwrite: true,
     });
 
-    // Encrypt type as V2 would encrypt it
+    // Encrypt type as Kibana V2 would encrypt it
     const encryptedAttributesV2 = await service.encryptAttributes(
       { type: 'v2->v1', id: 'object-id' },
       attributesV2
@@ -2448,30 +2488,45 @@ describe('Embedding excluded AAD fields POC', () => {
 
     expect(encryptedAttributesV2).toEqual({
       attrOne: 'one',
-      attrTwo: expect.stringContaining('attrOne,attrFour' + ENCRPYPTED_HEADER_EOH), // encrypyted value contains the AAD exclusion header
+      attrTwo: expect.stringContaining('2.0.0' + ENCRPYPTED_HEADER_EOH), // encrypyted value contains the model version (only necessary for this POC)
       attrThree: 'three',
       attrFour: 'four',
       attrFive: 'five',
     });
 
-    // Create a new service to simulate V1
-    service = new EncryptedSavedObjectsService({
-      primaryCrypto: mockNodeCrypto,
-      logger: loggingSystemMock.create().get(),
-    });
+    // Create all new mocks and service to simulate a Kibana V1 (without registered ESO model version 2.0.0)
+    // Register the same type vith model version 1.0.0 without attribute "attrFour"
+    setup([
+      {
+        type: 'v2->v1',
+        attributesToEncrypt: new Set(['attrTwo']),
+        attributesToExcludeFromAAD: new Set(['attrOne']),
+        modelVersion: '1.0.0', // this will cause the decyption algorthm to look at saved metadata when trying to decrypt
+      },
+    ]);
 
-    // Register the same type but without attribute "attrFour"
-    service.registerType({
-      type: 'v2->v1',
-      attributesToEncrypt: new Set(['attrTwo']),
-      attributesToExcludeFromAAD: new Set(['attrOne']),
-    });
+    // Mock the get of the saved metadata
+    mockSavedObjectsRepo.get.mockResolvedValue({ ...metadataSO, references: [] });
 
-    // Decrypt should work
-    // As long as we have access to the raw document (which contains all of V2's attributes)
-    // V1 can decrypt V2 with the embedded meta data and then strip unknown attributes.
-    await expect(
-      service.decryptAttributes({ type: 'v2->v1', id: 'object-id' }, encryptedAttributesV2)
-    ).resolves.toEqual(attributesV2);
+    // The encrypted attributes contain model version 2.0.0, and will need the saved metadata to decrypt
+    // In the real implementation the model version will come from the raw saved object document being
+    // decrypted
+    const decryptedAttributes = await service.decryptAttributes(
+      { type: 'v2->v1', id: 'object-id' },
+      encryptedAttributesV2
+    );
+    expect(mockSavedObjectsRepo.get).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsRepo.get).toHaveBeenLastCalledWith(
+      VERSIONED_ENCYRPTION_DEFINITION_TYPE,
+      'v2->v12.0.0'
+    );
+
+    // Decrypt should work because it will use the AAD from the metadata above (model version 2.0.0)
+    // In the real implementation, as long as we have access to the raw document
+    // (which contains all of V2's attributes), SW V1 can decrypt model version V2
+    // with the saved metadata and then strip unknown attributes.
+    // In this test, we're mocking the SO get (see above), but relying on the same decision making we
+    // would have in the real implementation
+    expect(decryptedAttributes).toEqual(attributesV2);
   });
 });
