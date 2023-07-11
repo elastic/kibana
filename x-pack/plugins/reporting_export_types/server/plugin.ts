@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
 import {
   CsvSearchSourceExportType,
