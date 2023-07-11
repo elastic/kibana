@@ -7,47 +7,44 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  DESCRIPTION_SECTION_CONTENT_TEST_ID,
-  DESCRIPTION_SECTION_HEADER_TEST_ID,
-} from './test_ids';
-import { DescriptionSection } from './description_section';
+import { ABOUT_SECTION_CONTENT_TEST_ID, ABOUT_SECTION_HEADER_TEST_ID } from './test_ids';
+import { AboutSection } from './about_section';
 import { RightPanelContext } from '../context';
 
 const panelContextValue = {} as unknown as RightPanelContext;
 
 jest.mock('../../../common/components/link_to');
 
-describe('<DescriptionSection />', () => {
+describe('<AboutSection />', () => {
   it('should render the component collapsed', () => {
     const { getByTestId } = render(
       <RightPanelContext.Provider value={panelContextValue}>
-        <DescriptionSection />
+        <AboutSection />
       </RightPanelContext.Provider>
     );
 
-    expect(getByTestId(DESCRIPTION_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ABOUT_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render the component expanded', () => {
     const { getByTestId } = render(
       <RightPanelContext.Provider value={panelContextValue}>
-        <DescriptionSection expanded={true} />
+        <AboutSection expanded={true} />
       </RightPanelContext.Provider>
     );
 
-    expect(getByTestId(DESCRIPTION_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(DESCRIPTION_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ABOUT_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should expand the component when clicking on the arrow on header', () => {
     const { getByTestId } = render(
       <RightPanelContext.Provider value={panelContextValue}>
-        <DescriptionSection />
+        <AboutSection />
       </RightPanelContext.Provider>
     );
 
-    getByTestId(DESCRIPTION_SECTION_HEADER_TEST_ID).click();
-    expect(getByTestId(DESCRIPTION_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
+    getByTestId(ABOUT_SECTION_HEADER_TEST_ID).click();
+    expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 });
