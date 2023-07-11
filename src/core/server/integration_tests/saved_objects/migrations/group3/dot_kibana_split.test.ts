@@ -267,6 +267,7 @@ describe('split .kibana index into multiple system indices', () => {
             "uptime-synthetics-api-key",
             "url",
             "usage-counters",
+            "versioned_enrcyption_definition",
             "workplace_search_telemetry",
           ],
           ".kibana_so_search": Array [
