@@ -142,6 +142,7 @@ describe('useGetEndpointsList hook', () => {
                     : item.metadata.Endpoint.status,
                 },
               },
+              last_checkin: item.last_checkin,
             };
           }),
         };
@@ -164,9 +165,11 @@ describe('useGetEndpointsList hook', () => {
         const generator = new EndpointDocGenerator('seed');
         const total = 60;
         const data = Array.from({ length: total }, () => {
+          const newDate = new Date();
           const endpoint = {
-            metadata: generator.generateHostMetadata(),
+            metadata: generator.generateHostMetadata(newDate.getTime()),
             host_status: HostStatus.UNHEALTHY,
+            last_checkin: newDate.toISOString(),
           };
 
           generator.updateCommonInfo();
@@ -200,9 +203,11 @@ describe('useGetEndpointsList hook', () => {
         const generator = new EndpointDocGenerator('seed');
         const total = 61;
         const data = Array.from({ length: total }, () => {
+          const newDate = new Date();
           const endpoint = {
-            metadata: generator.generateHostMetadata(),
+            metadata: generator.generateHostMetadata(newDate.getTime()),
             host_status: HostStatus.UNHEALTHY,
+            last_checkin: newDate.toISOString(),
           };
 
           generator.updateCommonInfo();
@@ -229,7 +234,7 @@ describe('useGetEndpointsList hook', () => {
       .data.map((d) => d.metadata.agent.id)
       .slice(0, 50);
 
-    // call useGetEndpointsList  with all 50 agents selected
+    // call useGetEndpointsList with all 50 agents selected
     const res = await renderReactQueryHook(() =>
       useGetEndpointsList({ searchString: '', selectedAgentIds: agentIdsToSelect })
     );

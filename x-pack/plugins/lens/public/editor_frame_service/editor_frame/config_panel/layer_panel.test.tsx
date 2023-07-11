@@ -11,6 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
+import { LayerActions } from './layer_actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
@@ -19,6 +20,7 @@ import {
   createMockDatasource,
   DatasourceMock,
   mountWithProvider,
+  createMockedDragDropContext,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { DimensionButton } from '@kbn/visualization-ui-components/public';
@@ -50,19 +52,6 @@ afterEach(() => {
 
   container = undefined;
 });
-
-const defaultContext = {
-  dataTestSubjPrefix: 'lnsDragDrop',
-  dragging: undefined,
-  setDragging: jest.fn(),
-  setActiveDropTarget: () => {},
-  activeDropTarget: undefined,
-  dropTargetsByOrder: undefined,
-  keyboardMode: false,
-  setKeyboardMode: () => {},
-  setA11yMessage: jest.fn(),
-  registerDropTarget: jest.fn(),
-};
 
 const draggingField = {
   field: { name: 'dragged' },
@@ -114,8 +103,10 @@ describe('LayerPanel', () => {
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),
+      registerLibraryAnnotationGroup: jest.fn(),
       indexPatternService: createIndexPatternServiceMock(),
       getUserMessages: () => [],
+      displayLayerSettings: true,
     };
   }
 
@@ -201,6 +192,13 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
       const optionalLabel = instance.find('[data-test-subj="lnsGroup_optional"]').first();
       expect(optionalLabel.text()).toEqual('Optional');
+    });
+
+    it('should hide the layer actions if displayLayerSettings is set to false', async () => {
+      const { instance } = await mountWithProvider(
+        <LayerPanel {...getDefaultProps()} displayLayerSettings={false} />
+      );
+      expect(instance.find(LayerActions).exists()).toBe(false);
     });
 
     it('should render the group with a way to add a new column', async () => {
@@ -763,7 +761,7 @@ describe('LayerPanel', () => {
       });
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -807,7 +805,7 @@ describe('LayerPanel', () => {
       );
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -876,7 +874,7 @@ describe('LayerPanel', () => {
       };
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -946,7 +944,7 @@ describe('LayerPanel', () => {
       };
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>,
         undefined,
@@ -999,7 +997,7 @@ describe('LayerPanel', () => {
       };
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -1054,7 +1052,7 @@ describe('LayerPanel', () => {
       const mockOnRemoveDimension = jest.fn();
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
             onRemoveDimension={mockOnRemoveDimension}
@@ -1129,7 +1127,7 @@ describe('LayerPanel', () => {
       const mockOnRemoveDimension = jest.fn();
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
             onRemoveDimension={mockOnRemoveDimension}
@@ -1211,7 +1209,7 @@ describe('LayerPanel', () => {
       const mockOnRemoveDimension = jest.fn();
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
             onRemoveDimension={mockOnRemoveDimension}
@@ -1274,7 +1272,7 @@ describe('LayerPanel', () => {
       const mockOnRemoveDimension = jest.fn();
 
       const { instance } = await mountWithProvider(
-        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
             onRemoveDimension={mockOnRemoveDimension}

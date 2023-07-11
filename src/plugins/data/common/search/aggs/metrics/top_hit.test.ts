@@ -402,5 +402,10 @@ describe('Top hit metric', () => {
         });
       });
     });
+    it('returns phrase filter', () => {
+      expect(getTopHitMetricAgg().createFilter!(aggConfig, '10').query.match_phrase).toEqual({
+        bytes: 10,
+      });
+    });
   });
 });

@@ -96,6 +96,9 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const checkData = useCallback(async () => {
     try {
+      if (savedSearchId) {
+        return true; // bypass NoData screen
+      }
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
@@ -124,7 +127,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev]);
+  }, [data.dataViews, isDev, savedSearchId]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
@@ -221,9 +224,23 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
+    setLoading(true);
+    setHasESData(false);
+    setHasUserDataView(false);
+    setShowNoDataPage(false);
+    setError(undefined);
     // restore the previously selected data view for a new state
     loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
-  }, [loadSavedSearch, savedSearchId, stateContainer]);
+  }, [
+    loadSavedSearch,
+    savedSearchId,
+    stateContainer,
+    setLoading,
+    setHasESData,
+    setHasUserDataView,
+    setShowNoDataPage,
+    setError,
+  ]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
@@ -255,7 +272,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView />
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
       </AnalyticsNoDataPageKibanaProvider>
     );
   }

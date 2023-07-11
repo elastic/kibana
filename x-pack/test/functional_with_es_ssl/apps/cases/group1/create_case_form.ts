@@ -66,6 +66,39 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       expect(await button.getVisibleText()).equal('Add connector');
     });
 
+    it('displays errors correctly while creating a case', async () => {
+      const caseTitle = Array(161).fill('x').toString();
+      const longTag = Array(256).fill('a').toString();
+      const longCategory = Array(51).fill('x').toString();
+
+      await cases.create.openCreateCasePage();
+      await cases.create.createCase({
+        title: caseTitle,
+        description: '',
+        tag: longTag,
+        severity: CaseSeverity.HIGH,
+        category: longCategory,
+      });
+
+      const title = await find.byCssSelector('[data-test-subj="caseTitle"]');
+      expect(await title.getVisibleText()).contain(
+        'The length of the name is too long. The maximum length is 160 characters.'
+      );
+
+      const description = await testSubjects.find('caseDescription');
+      expect(await description.getVisibleText()).contain('A description is required.');
+
+      const tags = await testSubjects.find('caseTags');
+      expect(await tags.getVisibleText()).contain(
+        'The length of the tag is too long. The maximum length is 256 characters.'
+      );
+
+      const category = await testSubjects.find('case-create-form-category');
+      expect(await category.getVisibleText()).contain(
+        'The length of the category is too long. The maximum length is 50 characters.'
+      );
+    });
+
     describe('Assignees', function () {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);

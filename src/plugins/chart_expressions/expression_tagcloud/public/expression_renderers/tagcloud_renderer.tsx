@@ -86,6 +86,7 @@ export const tagcloudRenderer: (
                   renderComplete={renderComplete}
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
+                  overrides={config.overrides}
                 />
               </VisualizationContainer>
             )}

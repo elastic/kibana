@@ -21,8 +21,8 @@ import { appContextService } from '../services';
 
 import { CheckDeletedFilesTask, TYPE, VERSION } from './check_deleted_files_task';
 
-const MOCK_FILE_METADATA_INDEX = getFileMetadataIndexName('mock');
-const MOCK_FILE_DATA_INDEX = getFileDataIndexName('mock');
+const MOCK_FILE_METADATA_INDEX = '.ds-' + getFileMetadataIndexName('mock');
+const MOCK_FILE_DATA_INDEX = '.ds-' + getFileDataIndexName('mock');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -100,6 +100,35 @@ describe('check deleted files task', () => {
       return taskRunner.run();
     };
 
+    it('should search both metadata indexes', async () => {
+      esClient.search.mockResolvedValue({
+        took: 5,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          total: {
+            value: 0,
+            relation: 'eq',
+          },
+          hits: [],
+        },
+      });
+
+      await runTask();
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['.fleet-fileds-fromhost-meta-*', '.fleet-fileds-tohost-meta-*'],
+        }),
+        expect.anything()
+      );
+    });
+
     it('should attempt to update deleted files', async () => {
       // mock getReadyFiles search
       esClient.search
@@ -162,7 +191,7 @@ describe('check deleted files task', () => {
 
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         {
-          index: MOCK_FILE_METADATA_INDEX,
+          index: MOCK_FILE_METADATA_INDEX.replace('.ds-', ''),
           query: {
             ids: {
               values: ['metadata-testid2'],

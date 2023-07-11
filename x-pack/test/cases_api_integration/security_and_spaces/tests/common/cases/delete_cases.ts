@@ -143,6 +143,22 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCases({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
     });
 
+    it('unhappy path - 400s when trying to delete more than 100 cases at a time', async () => {
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: new Array(101).fill('id'),
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when trying to delete 0 cases at a time', async () => {
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: [],
+        expectedHttpCode: 400,
+      });
+    });
+
     describe('files', () => {
       afterEach(async () => {
         await deleteAllFiles({

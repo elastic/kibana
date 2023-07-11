@@ -12,7 +12,7 @@ interface TestDataTableActionLogPatternAnalysis {
   tableRowId: string;
   expected: {
     queryBar: string;
-    totalDocCount: string;
+    totalDocCount: number;
   };
 }
 
