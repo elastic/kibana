@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { useDiscoverProfileName } from '../../../../customizations/profile_provider';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
@@ -111,15 +112,17 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const topNavCustomization = useDiscoverCustomization('top_nav');
+  const profileName = useDiscoverProfileName();
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
+        adHocDataViews,
         dataView,
+        isPlainRecord,
+        onOpenInspector,
+        profileName,
         services,
         state: stateContainer,
-        onOpenInspector,
-        isPlainRecord,
-        adHocDataViews,
         topNavCustomization,
       }),
     [
@@ -127,6 +130,7 @@ export const DiscoverTopNav = ({
       dataView,
       isPlainRecord,
       onOpenInspector,
+      profileName,
       services,
       stateContainer,
       topNavCustomization,

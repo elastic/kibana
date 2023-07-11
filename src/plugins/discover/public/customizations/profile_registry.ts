@@ -19,7 +19,7 @@ export interface DiscoverProfileRegistry {
 }
 
 export const createProfileRegistry = (): DiscoverProfileRegistry => {
-  const profiles = new Map<string, DiscoverProfile>();
+  const profiles = new Map<string, DiscoverProfile>([['default', createProfile('default')]]);
 
   return {
     get: (name) => profiles.get(name.toLowerCase()),
@@ -30,10 +30,12 @@ export const createProfileRegistry = (): DiscoverProfileRegistry => {
 export const createCustomizeFunction =
   (profileRegistry: DiscoverProfileRegistry) =>
   (profileName: string, callback: CustomizationCallback) => {
-    const profile = profileRegistry.get(profileName) ?? {
-      name: profileName,
-      customizationCallbacks: [],
-    };
+    const profile = profileRegistry.get(profileName) ?? createProfile(profileName);
     profile.customizationCallbacks.push(callback);
     profileRegistry.set(profile);
   };
+
+const createProfile = (name: string): DiscoverProfile => ({
+  name,
+  customizationCallbacks: [],
+});

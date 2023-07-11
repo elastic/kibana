@@ -21,11 +21,13 @@ import { ViewAlertRoute } from './view_alert';
 import type { CustomizationCallback } from '../customizations';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
+import { DiscoverProfileName } from '../customizations/profile_provider';
 
 interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
+  profileName: DiscoverProfileName;
 }
 
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
@@ -70,7 +72,7 @@ interface CustomDiscoverRoutesProps {
 }
 
 export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
-  const { profile } = useParams<{ profile: string }>();
+  const { profile } = useParams<{ profile: DiscoverProfileName }>();
   const customizationCallbacks = useMemo(
     () => profileRegistry.get(profile)?.customizationCallbacks,
     [profile, profileRegistry]
@@ -80,6 +82,7 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
     return (
       <DiscoverRoutes
         prefix={addProfile('', profile)}
+        profileName={profile}
         customizationCallbacks={customizationCallbacks}
         {...props}
       />
@@ -116,7 +119,11 @@ export const DiscoverRouter = ({
               <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
             </Route>
             <Route path="/">
-              <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
+              <DiscoverRoutes
+                customizationCallbacks={customizationCallbacks}
+                profileName="default"
+                {...routeProps}
+              />
             </Route>
           </Routes>
         </Router>
