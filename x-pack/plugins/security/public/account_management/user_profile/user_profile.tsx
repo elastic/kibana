@@ -571,6 +571,7 @@ function UserPasswordEditor({
 }
 
 const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -618,7 +619,7 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
     <>
       <div
         style={{
-          maxWidth: '100px',
+          maxWidth: euiTheme.breakpoint.m / 6,
           display: 'inline-block',
         }}
       >
