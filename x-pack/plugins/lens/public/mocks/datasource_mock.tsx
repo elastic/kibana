@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { DatasourcePublicAPI, Datasource } from '../types';
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
@@ -44,8 +44,6 @@ export function createMockDatasource(
     getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => {}),
-    renderDataPanel: jest.fn(),
-    renderLayerPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state, _indexPatterns, dateRange, nowInstant) => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
@@ -53,8 +51,6 @@ export function createMockDatasource(
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
     uniqueLabels: jest.fn((_state, dataViews) => ({})),
-    renderDimensionTrigger: jest.fn(),
-    renderDimensionEditor: jest.fn(),
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
     createEmptyLayer: jest.fn(),
@@ -71,6 +67,11 @@ export function createMockDatasource(
     getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
     getDatasourceInfo: jest.fn(),
+
+    DataPanelComponent: jest.fn().mockImplementation(() => <div />),
+    LayerPanelComponent: jest.fn().mockImplementation(() => <div />),
+    DimensionTriggerComponent: jest.fn().mockImplementation(() => <div />),
+    DimensionEditorComponent: jest.fn().mockImplementation(() => <div />),
   };
 }
 

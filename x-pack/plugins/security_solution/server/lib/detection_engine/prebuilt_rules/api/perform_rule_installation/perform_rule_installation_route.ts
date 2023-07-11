@@ -35,7 +35,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
         body: buildRouteValidation(PerformRuleInstallationRequestBody),
       },
       options: {
-        tags: ['access:securitySolution-all'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
