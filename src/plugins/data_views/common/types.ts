@@ -297,7 +297,7 @@ export interface SavedObjectsClientCommon {
   create: (
     attributes: DataViewAttributes,
     // SavedObjectsCreateOptions
-    options: { id?: string; initialNamespaces?: string[] }
+    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id

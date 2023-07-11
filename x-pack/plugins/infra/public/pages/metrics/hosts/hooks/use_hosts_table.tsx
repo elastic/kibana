@@ -30,8 +30,9 @@ import { useHostsViewContext } from './use_hosts_view';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
-import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
-import { buildCombinedHostsFilter } from '../utils';
+import { TABLE_COLUMN_LABEL } from '../translations';
+import { TOOLTIP } from '../../../../common/visualizations/lens/dashboards/host/translations';
+import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types
@@ -254,7 +255,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={TOOLTIP.cpuUsage}
-            formula={hostLensFormulas.cpuUsage.formula.formula}
+            formula={hostLensFormulas.cpuUsage.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -269,7 +270,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={TOOLTIP.normalizedLoad1m}
-            formula={hostLensFormulas.normalizedLoad1m.formula.formula}
+            formula={hostLensFormulas.normalizedLoad1m.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -284,7 +285,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={TOOLTIP.memoryUsage}
-            formula={hostLensFormulas.memoryUsage.formula.formula}
+            formula={hostLensFormulas.memoryUsage.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -299,7 +300,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={TOOLTIP.memoryFree}
-            formula={hostLensFormulas.memoryFree.formula.formula}
+            formula={hostLensFormulas.memoryFree.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -314,7 +315,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskSpaceUsage.formula.formula}
+            formula={hostLensFormulas.diskSpaceUsage.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -329,7 +330,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={TOOLTIP.rx}
-            formula={hostLensFormulas.rx.formula.formula}
+            formula={hostLensFormulas.rx.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -345,7 +346,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={TOOLTIP.tx}
-            formula={hostLensFormulas.tx.formula.formula}
+            formula={hostLensFormulas.tx.value}
             popoverContainerRef={popoverContainerRef}
           />
         ),

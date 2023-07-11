@@ -7,14 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import {
-  EuiAvatar,
-  EuiBadge,
-  EuiCommentList,
-  EuiMarkdownFormat,
-  EuiText,
-  EuiTextAlign,
-} from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
@@ -38,10 +31,6 @@ import { useAssistantContext } from '../../assistant_context';
 import { WELCOME_CONVERSATION_TITLE } from '../../assistant/use_conversation/translations';
 
 const MESSAGE_INDEX_BEFORE_CONNECTOR = 2;
-
-const StyledCommentList = styled(EuiCommentList)`
-  margin-right: 20px;
-`;
 
 const ConnectorButtonWrapper = styled.div`
   margin-top: 20px;
@@ -72,12 +61,11 @@ export const useConnectorSetup = ({
   onSetupComplete,
   refetchConnectors,
 }: ConnectorSetupProps): {
-  connectorDialog: React.ReactElement;
-  connectorPrompt: React.ReactElement;
+  comments: EuiCommentProps[];
+  prompt: React.ReactElement;
 } => {
   const { appendMessage, setApiConfig, setConversation } = useConversation();
-  const lastCommentRef = useRef<HTMLDivElement | null>(null);
-
+  const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
   const { conversations } = useAssistantContext();
 
@@ -92,6 +80,7 @@ export const useConnectorSetup = ({
       actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
         enabledInConfig: true,
         enabledInLicense: true,
+        isSystemActionType: false,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['general'],
         id: '.gen-ai',
@@ -114,17 +103,17 @@ export const useConnectorSetup = ({
 
   // Once streaming of previous message is complete, proceed to next message
   const onHandleMessageStreamingComplete = useCallback(() => {
-    const timeoutId = setTimeout(
-      () => setCurrentMessageIndex(currentMessageIndex + 1),
-      conversation.messages[currentMessageIndex].presentation?.delay ?? 0
-    );
-
+    const timeoutId = setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ block: 'end' });
+      return setCurrentMessageIndex(currentMessageIndex + 1);
+    }, conversation.messages[currentMessageIndex]?.presentation?.delay ?? 0);
     return () => clearTimeout(timeoutId);
   }, [conversation.messages, currentMessageIndex]);
 
   // Show button to add connector after last message has finished streaming
   const onHandleLastMessageStreamingComplete = useCallback(() => {
     setShowAddConnectorButton(true);
+    bottomRef.current?.scrollIntoView({ block: 'end' });
     onSetupComplete?.();
     setConversation({ conversation: clearPresentationData(conversation) });
   }, [conversation, onSetupComplete, setConversation]);
@@ -138,12 +127,15 @@ export const useConnectorSetup = ({
   const commentBody = useCallback(
     (message: Message, index: number, length: number) => {
       // If timestamp is not set, set it to current time (will update conversation at end of setup)
-      if (conversation.messages[index].timestamp.length === 0) {
+      if (
+        conversation.messages[index].timestamp == null ||
+        conversation.messages[index].timestamp.length === 0
+      ) {
         conversation.messages[index].timestamp = new Date().toLocaleString();
       }
       const isLastMessage = index === length - 1;
       const enableStreaming =
-        (message.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
+        (message?.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
       return (
         <StreamingText
           text={message.content}
@@ -155,7 +147,7 @@ export const useConnectorSetup = ({
           {(streamedText, isStreamingComplete) => (
             <EuiText>
               <EuiMarkdownFormat className={`message-${index}`}>{streamedText}</EuiMarkdownFormat>
-              {isLastMessage && isStreamingComplete && <span ref={lastCommentRef} />}
+              <span ref={bottomRef} />
             </EuiText>
           )}
         </StreamingText>
@@ -169,31 +161,40 @@ export const useConnectorSetup = ({
     ]
   );
 
-  return {
-    connectorDialog: (
-      <StyledCommentList
-        comments={conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
-          const isUser = message.role === 'user';
+  const comments = useMemo(
+    () =>
+      conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
+        const isUser = message.role === 'user';
 
-          const commentProps: EuiCommentProps = {
-            username: isUser ? userName : assistantName,
-            children: commentBody(message, index, conversation.messages.length),
-            timelineAvatar: (
-              <EuiAvatar
-                name={i18n.CONNECTOR_SETUP_USER_ASSISTANT}
-                size="l"
-                color="subdued"
-                iconType={conversation?.theme?.assistant?.icon ?? 'logoElastic'}
-              />
-            ),
-            timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
-          };
-          return commentProps;
-        })}
-      />
-    ),
-    connectorPrompt: (
-      <div data-test-subj="connectorPrompt">
+        const commentProps: EuiCommentProps = {
+          username: isUser ? userName : assistantName,
+          children: commentBody(message, index, conversation.messages.length),
+          timelineAvatar: (
+            <EuiAvatar
+              name={i18n.CONNECTOR_SETUP_USER_ASSISTANT}
+              size="l"
+              color="subdued"
+              iconType={conversation?.theme?.assistant?.icon ?? 'logoElastic'}
+            />
+          ),
+          timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
+        };
+        return commentProps;
+      }),
+    [
+      assistantName,
+      commentBody,
+      conversation.messages,
+      conversation?.theme?.assistant?.icon,
+      currentMessageIndex,
+      userName,
+    ]
+  );
+
+  return {
+    comments,
+    prompt: (
+      <div data-test-subj="prompt">
         {(showAddConnectorButton || isConnectorConfigured) && (
           <ConnectorButtonWrapper>
             <ConnectorButton

@@ -31,7 +31,7 @@ export const SavedViews = ({ viewState }: Props) => {
   } = useMetricsExplorerViews();
 
   return (
-    <SavedViewsToolbarControls<MetricExplorerViewState>
+    <SavedViewsToolbarControls<any, MetricExplorerViewState>
       currentView={currentView}
       views={views}
       isFetchingViews={isFetchingViews}

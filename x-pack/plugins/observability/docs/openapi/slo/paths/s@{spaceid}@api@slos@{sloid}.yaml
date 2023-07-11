@@ -19,19 +19,25 @@ get:
             $ref: '../components/schemas/slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
     '404':
       description: Not found response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
@@ -63,19 +69,25 @@ put:
             $ref: '../components/schemas/slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
     '404':
       description: Not found response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
@@ -97,19 +109,25 @@ delete:
       description: Successful request
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
     '404':
       description: Not found response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'

@@ -25,6 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
+
 import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
@@ -51,7 +53,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
   const indexToShow =
     selectedIndexType === 'content-index'
       ? indexName
-      : indexName.replace('search-', '.search-acl-filter-');
+      : indexName.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
 
   const shouldShowAccessControlSwitch =
     hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
