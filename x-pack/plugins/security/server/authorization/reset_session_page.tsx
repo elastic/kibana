@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// @ts-expect-error no definitions in component folder
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+// @ts-expect-error no definitions in component folder
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
 import React from 'react';
 
