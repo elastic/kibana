@@ -21,12 +21,12 @@ import {
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
+import { useTableState } from '@kbn/ml-in-memory-table';
 import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { AiOpsFullIndexBasedAppState } from '../../../application/utils/url_state';
 import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
-import { useTableState } from './use_table_state';
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
 
@@ -67,7 +67,6 @@ export const CategoryTable: FC<Props> = ({
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  // @TODO: replace with package useTableState
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
 
   const labels = useMemo(
