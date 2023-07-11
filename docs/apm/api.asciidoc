@@ -898,7 +898,7 @@ Delete a previously uploaded source map.
 The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
 For more information, see <<kibana-privileges>>.
 
-[[apm-sourcemap-delete-req]]
+[[android-sourcemap-delete-req]]
 ===== Request
 
 `DELETE /api/apm/sourcemaps/:id`
