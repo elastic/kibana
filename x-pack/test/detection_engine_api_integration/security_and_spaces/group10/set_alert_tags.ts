@@ -17,7 +17,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllAlerts,
-  getAlertUpdateEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
@@ -25,6 +24,7 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
+  getAlertUpdateByQueryEmptyResponse,
 } from '../../utils';
 import { buildAlertTagsQuery, setAlertTags } from '../../utils/set_alert_tags';
 
@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
         // remove any server generated items that are indeterministic
         delete body.took;
 
-        expect(body).to.eql(getAlertUpdateEmptyResponse());
+        expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
       });
 
       it('should give errors when duplicate tags exist in both tags_to_add and tags_to_remove', async () => {

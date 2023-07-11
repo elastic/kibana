@@ -240,9 +240,8 @@ export class JourneyFtrHarness {
       return await block();
     }
 
-    const span = this.apm?.startSpan(name, type ?? null, {
-      childOf: this.currentTransaction,
-    });
+    const span = this.currentTransaction.startSpan(name, type ?? null);
+
     if (!span) {
       return await block();
     }

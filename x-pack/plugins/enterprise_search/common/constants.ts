@@ -10,11 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
+export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
+  defaultMessage: 'Search',
+});
+export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
+  defaultMessage: 'Enterprise Search',
+});
+
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
   }),
@@ -27,9 +32,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   ID: 'enterpriseSearchContent',
-  NAME: i18n.translate('xpack.enterpriseSearch.content.productName', {
-    defaultMessage: 'Enterprise Search',
-  }),
+  NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
     defaultMessage: 'Content',
   }),
@@ -150,7 +153,7 @@ export const APPLICATIONS_PLUGIN = {
 export const VECTOR_SEARCH_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.vectorSearch.description', {
     defaultMessage:
-      'Elasticsearch can be used as a vector database and search along with other semantic search methods.',
+      'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
   }),
   ID: 'enterpriseSearchVectorSearch',
   LOGO: 'logoEnterpriseSearch',
@@ -210,3 +213,5 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasNativeConnectors: true,
   hasWebCrawler: true,
 };
+
+export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';

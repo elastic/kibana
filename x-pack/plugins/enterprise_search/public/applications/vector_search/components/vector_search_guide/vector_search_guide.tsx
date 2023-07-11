@@ -87,12 +87,12 @@ export const VectorSearchGuide: React.FC = () => {
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.vectorSearch.guide.description"
-              defaultMessage="Elasticsearch can be used as a vector database and search along with other semantic search methods."
+              defaultMessage="Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases."
             />{' '}
             <EuiLink href={docLinks.knnSearch} target="_blank">
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.descriptionLink"
-                defaultMessage="Learn more about vector searches."
+                defaultMessage="Learn more about vector search."
               />
             </EuiLink>
           </p>
@@ -216,7 +216,7 @@ export const VectorSearchGuide: React.FC = () => {
               description={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.elser.description"
-                  defaultMessage="Learn about the configuration-free semantic search"
+                  defaultMessage="Learn about our model that enables semantic search without configuration"
                 />
               }
             />
@@ -235,7 +235,7 @@ export const VectorSearchGuide: React.FC = () => {
               description={
                 <FormattedMessage
                   id="xpack.enterpriseSearch.vectorSearch.guide.deployedModel.byoModel.description"
-                  defaultMessage="Learn how to load in compatible third-party models"
+                  defaultMessage="Learn how to upload compatible third-party models"
                 />
               }
             />

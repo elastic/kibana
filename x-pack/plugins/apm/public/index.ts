@@ -25,6 +25,9 @@ export interface ConfigSchema {
     sourcemapApiAvailable: boolean;
     storageExplorerAvailable: boolean;
   };
+  serverless: {
+    enabled: boolean;
+  };
 }
 
 export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (

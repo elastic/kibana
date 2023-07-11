@@ -15,6 +15,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ISearchEmbeddable, SearchInput } from './embeddable';
+export type { DiscoverStateContainer } from './application/main/services/discover_state';
+export type { CustomizationCallback } from './customizations';
 export { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
 export type { UseDiscoverMainRouteInternalProps } from './exports/discover_app';
