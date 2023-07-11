@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './native_renderer';
+declare namespace Cypress {
+  interface Chainable {
+    loginAsElasticUser(): Cypress.Chainable<Cypress.Response<any>>;
+    getByTestSubj(selector: string): Chainable<JQuery<Element>>;
+  }
+}
