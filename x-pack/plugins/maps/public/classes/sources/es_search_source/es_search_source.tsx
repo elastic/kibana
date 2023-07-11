@@ -128,6 +128,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       scalingType: isValidStringConfig(descriptor.scalingType)
         ? descriptor.scalingType!
         : SCALING_TYPES.MVT,
+      topHitsGroupByTimeseries: typeof normalizedDescriptor.topHitsGroupByTimeseries === 'boolean'
+        ? normalizedDescriptor.topHitsGroupByTimeseries
+        : false,
       topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
         ? descriptor.topHitsSplitField!
         : '',
@@ -271,9 +274,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters
   ) {
-    const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
+    const { topHitsGroupByTimeseries, topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
-    if (!topHitsSplitFieldName) {
+    if (!topHitsGroupByTimeseries && !topHitsSplitFieldName) {
       throw new Error('Cannot _getTopHits without topHitsSplitField');
     }
 
@@ -310,7 +313,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       };
     }
 
-    const topHitsSplitField: DataViewField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -319,26 +321,50 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
-    searchSource.setField('aggs', {
-      totalEntities: {
-        cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
-      },
-      entitySplit: {
-        terms: addFieldToDSL(termsAgg, topHitsSplitField),
-        aggs: {
-          entityHits: {
-            top_hits: topHits,
+
+    if (topHitsGroupByTimeseries) {
+      searchSource.setField('aggs', {
+        totalEntities: {
+          cardinality: { 
+            ...cardinalityAgg, 
+            field: '_tsid'
           },
         },
-      },
-    });
-    if (topHitsSplitField.type === 'string') {
-      const entityIsNotEmptyFilter = buildPhraseFilter(topHitsSplitField, '', indexPattern);
-      entityIsNotEmptyFilter.meta.negate = true;
-      searchSource.setField('filter', [
-        ...(searchSource.getField('filter') as Filter[]),
-        entityIsNotEmptyFilter,
-      ]);
+        entitySplit: {
+          terms: {
+            ...termsAgg,
+            field: '_tsid'
+          },
+          aggs: {
+            entityHits: {
+              top_hits: topHits,
+            },
+          },
+        },
+      });
+    } else {
+      const topHitsSplitField: DataViewField = getField(indexPattern, topHitsSplitFieldName);
+      searchSource.setField('aggs', {
+        totalEntities: {
+          cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
+        },
+        entitySplit: {
+          terms: addFieldToDSL(termsAgg, topHitsSplitField),
+          aggs: {
+            entityHits: {
+              top_hits: topHits,
+            },
+          },
+        },
+      });
+      if (topHitsSplitField.type === 'string') {
+        const entityIsNotEmptyFilter = buildPhraseFilter(topHitsSplitField, '', indexPattern);
+        entityIsNotEmptyFilter.meta.negate = true;
+        searchSource.setField('filter', [
+          ...(searchSource.getField('filter') as Filter[]),
+          entityIsNotEmptyFilter,
+        ]);
+      }
     }
 
     const resp = await this._runEsQuery({
@@ -354,7 +380,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           'Get top hits from data view: {dataViewName}, entities: {entitiesFieldName}, geospatial field: {geoFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
-          entitiesFieldName: topHitsSplitFieldName,
+          entitiesFieldName: topHitsGroupByTimeseries ? '_tsid' : topHitsSplitFieldName,
           geoFieldName: this._descriptor.geoField,
         },
       }),
@@ -475,8 +501,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   _isTopHits(): boolean {
-    const { scalingType, topHitsSplitField } = this._descriptor;
-    return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
+    return this._descriptor.scalingType === SCALING_TYPES.TOP_HITS;
   }
 
   async _getSourceIndexList(): Promise<string[]> {

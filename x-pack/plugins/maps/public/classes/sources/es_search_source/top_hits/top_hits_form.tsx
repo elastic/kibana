@@ -16,10 +16,13 @@ import { ValidatedRange } from '../../../../components/validated_range';
 import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
 import { loadIndexSettings } from '../util/load_index_settings';
 import { OnSourceChangeArgs } from '../../source';
+import { GroupByButtonGroup } from '../../es_geo_line_source/geo_line_form/group_by_button_group';
 
 interface Props {
+  groupByTimeseries: boolean;
   indexPatternId: string;
   isColumnCompressed?: boolean;
+  isTimeseries: boolean;
   onChange: (args: OnSourceChangeArgs) => void;
   sortField: string;
   sortFields: DataViewField[];
@@ -46,6 +49,10 @@ export class TopHitsForm extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  _onGroupByTimeseriesChange = (groupByTimeseries: boolean) => {
+    this.props.onChange({ propName: 'groupByTimeseries', value: groupByTimeseries });
   }
 
   _onTopHitsSplitFieldChange = (topHitsSplitField?: string) => {
@@ -80,110 +87,120 @@ export class TopHitsForm extends Component<Props, State> {
   }
 
   render() {
-    let sizeSlider;
-    let sortField;
-    let sortOrder;
-    if (this.props.topHitsSplitField) {
-      sizeSlider = (
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
-            defaultMessage: 'Documents per entity',
-          })}
-          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
-        >
-          <ValidatedRange
-            min={1}
-            max={this.state.maxInnerResultWindow}
-            step={1}
-            value={this.props.topHitsSize}
-            onChange={this._onTopHitsSizeChange}
-            showLabels
-            showInput
-            showRange
-            data-test-subj="layerPanelTopHitsSize"
-            compressed
-          />
-        </EuiFormRow>
-      );
-
-      sortField = (
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortFieldLabel', {
-            defaultMessage: 'Sort field',
-          })}
-          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
-        >
-          <SingleFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.sortFieldSelectPlaceholder', {
-              defaultMessage: 'Select sort field',
-            })}
-            value={this.props.sortField}
-            onChange={this._onSortFieldChange}
-            fields={this.props.sortFields}
-            compressed
-          />
-        </EuiFormRow>
-      );
-
-      sortOrder = (
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortOrderLabel', {
-            defaultMessage: 'Sort order',
-          })}
-          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
-        >
-          <EuiSelect
-            disabled={!this.props.sortField}
-            options={[
-              {
-                text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
-                  defaultMessage: 'ascending',
-                }),
-                value: SortDirection.asc,
-              },
-              {
-                text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
-                  defaultMessage: 'descending',
-                }),
-                value: SortDirection.desc,
-              },
-            ]}
-            value={this.props.sortOrder}
-            onChange={this._onSortOrderChange}
-            compressed
-          />
-        </EuiFormRow>
-      );
-    }
-
     return (
       <Fragment>
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
-            defaultMessage: 'Entity',
-          })}
-          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
-        >
-          <SingleFieldSelect
-            placeholder={i18n.translate(
-              'xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder',
-              {
-                defaultMessage: 'Select entity field',
-              }
-            )}
-            value={this.props.topHitsSplitField}
-            onChange={this._onTopHitsSplitFieldChange}
-            fields={this.props.termFields}
-            isClearable={false}
-            compressed
-          />
-        </EuiFormRow>
+        {this.props.isTimeseries && (
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.source.esSearch.topHitsGroupByLabel', {
+              defaultMessage: 'Group by',
+            })}
+            display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+          >
+            <GroupByButtonGroup
+              groupByTimeseries={this.props.groupByTimeseries}
+              onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
+            />
+          </EuiFormRow>
+        )}
 
-        {sizeSlider}
+        {!this.props.groupByTimeseries &&
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
+              defaultMessage: 'Entity',
+            })}
+            display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+          >
+            <SingleFieldSelect
+              placeholder={i18n.translate(
+                'xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder',
+                {
+                  defaultMessage: 'Select entity field',
+                }
+              )}
+              value={this.props.topHitsSplitField}
+              onChange={this._onTopHitsSplitFieldChange}
+              fields={this.props.termFields}
+              isClearable={false}
+              compressed
+            />
+          </EuiFormRow>
+        }
 
-        {sortField}
+        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && 
+          <EuiFormRow
+            label={this.props.groupByTimeseries
+              ? i18n.translate('xpack.maps.source.esSearch.topHitsTimeseriesSizeLabel', {
+                  defaultMessage: 'Documents per time series',
+                })
+              : i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
+                  defaultMessage: 'Documents per entity',
+                })
+            }
+            display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+          >
+            <ValidatedRange
+              min={1}
+              max={this.state.maxInnerResultWindow}
+              step={1}
+              value={this.props.topHitsSize}
+              onChange={this._onTopHitsSizeChange}
+              showLabels
+              showInput
+              showRange
+              data-test-subj="layerPanelTopHitsSize"
+              compressed
+            />
+          </EuiFormRow>
+        }
 
-        {sortOrder}
+        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && (
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortFieldLabel', {
+              defaultMessage: 'Sort field',
+            })}
+            display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+          >
+            <SingleFieldSelect
+              placeholder={i18n.translate('xpack.maps.source.esSearch.sortFieldSelectPlaceholder', {
+                defaultMessage: 'Select sort field',
+              })}
+              value={this.props.sortField}
+              onChange={this._onSortFieldChange}
+              fields={this.props.sortFields}
+              compressed
+            />
+          </EuiFormRow>
+        )}
+
+        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && (
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortOrderLabel', {
+              defaultMessage: 'Sort order',
+            })}
+            display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+          >
+            <EuiSelect
+              disabled={!this.props.sortField}
+              options={[
+                {
+                  text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
+                    defaultMessage: 'ascending',
+                  }),
+                  value: SortDirection.asc,
+                },
+                {
+                  text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
+                    defaultMessage: 'descending',
+                  }),
+                  value: SortDirection.desc,
+                },
+              ]}
+              value={this.props.sortOrder}
+              onChange={this._onSortOrderChange}
+              compressed
+            />
+          </EuiFormRow>
+        )}
       </Fragment>
     );
   }
