@@ -244,7 +244,7 @@ export const EsQueryExpression: React.FC<
           </EuiLink>
         }
       >
-        <CodeEditor // TODO unable to find context. Need CodeOwners to help
+        <CodeEditor
           languageId="xjson"
           width="100%"
           height="200px"
