@@ -105,7 +105,7 @@ Spatial filters have the following properties:
 * *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#geo-shape-spatial-relations[spatial relation operator] to use at search time.
 * *Action* specifies whether to apply the filter to the current view or to a drilldown action. 
 
-NOTE: {kibana-ref}/drilldowns.html[Drilldowns] are only available if the map is a panel in a {kibana-ref}/dashboard.html[dashboard], and not within the Maps application.
+NOTE: {kibana-ref}/drilldowns.html[Drilldowns] are available only if the map is a panel in a {kibana-ref}/dashboard.html[dashboard], and not within the Maps application.
 
 You can create spatial filters in two ways:
 
