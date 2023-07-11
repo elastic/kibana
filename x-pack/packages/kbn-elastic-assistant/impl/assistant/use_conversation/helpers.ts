@@ -33,8 +33,14 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   // If your codeblocks aren't getting tagged with the right language, add keywords to the array.
   const types = {
     eql: ['Event Query Language', 'EQL sequence query', 'EQL'],
-    kql: ['Kibana Query Language', 'KQL Query'],
-    dsl: ['Elasticsearch QueryDSL', 'Elasticsearch Query DSL', 'Elasticsearch DSL', 'Query DSL'],
+    kql: ['Kibana Query Language', 'KQL Query', 'KQL'],
+    dsl: [
+      'Elasticsearch QueryDSL',
+      'Elasticsearch Query DSL',
+      'Elasticsearch DSL',
+      'Query DSL',
+      'DSL',
+    ],
   };
 
   const result: CodeBlockDetails[] = matches.map((match) => {
