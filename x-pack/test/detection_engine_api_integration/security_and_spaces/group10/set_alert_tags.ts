@@ -17,7 +17,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllAlerts,
-  getAlertUpdateEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
