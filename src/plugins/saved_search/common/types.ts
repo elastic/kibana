@@ -8,6 +8,7 @@
 
 import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings {
@@ -75,4 +76,10 @@ export interface SavedSearch {
   rowsPerPage?: number;
   breakdownField?: string;
   references?: SavedObjectReference[];
+  sharingSavedObjectProps?: {
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+    errorJSON?: string;
+  };
 }
