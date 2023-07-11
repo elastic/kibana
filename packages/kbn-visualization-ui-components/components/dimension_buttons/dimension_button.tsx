@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import {
   EuiButtonIcon,
   EuiLink,
@@ -42,6 +42,7 @@ export interface DimensionButtonProps {
   message?: Message;
 }
 
+<<<<<<< HEAD:packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx
 export function DimensionButton({
   groupLabel,
   children,
@@ -126,10 +127,102 @@ export function DimensionButton({
           &:hover,
           &:focus {
             color: ${euiThemeVars.euiColorDangerText};
+=======
+export const DimensionButton = memo(
+  ({
+    groupLabel,
+    children,
+    onClick,
+    onRemoveClick,
+    accessorConfig,
+    label,
+    message,
+    ...otherProps // from Drag&Drop integration
+  }: DimensionButtonProps) => {
+    return (
+      <div
+        {...otherProps}
+        css={css`
+          ${useEuiFontSize('s')}
+          border-radius: ${euiThemeVars.euiBorderRadius};
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          min-height: ${euiThemeVars.euiSizeXL};
+          position: relative;
+
+          &:hover,
+          &:focus {
+            .lnsLayerPanel__dimensionRemove {
+              visibility: visible;
+              opacity: 1;
+              transition: opacity ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+            }
+>>>>>>> 2c27b75d75f (some memoization):src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx
           }
         `}
-      />
-      <PaletteIndicator accessorConfig={accessorConfig} />
-    </div>
-  );
-}
+      >
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
+          <EuiFlexItem>
+            <EuiToolTip content={message?.content} position="left">
+              <EuiLink
+                className="lnsLayerPanel__dimensionLink"
+                css={css`
+                  width: 100%;
+                  &:hover {
+                    text-decoration: none;
+                  }
+                `}
+                data-test-subj="lnsLayerPanel-dimensionLink"
+                onClick={() => onClick(accessorConfig.columnId)}
+                aria-label={triggerLinkA11yText(label)}
+                title={triggerLinkA11yText(label)}
+                color={
+                  message?.severity === 'error'
+                    ? 'danger'
+                    : message?.severity === 'warning'
+                    ? 'warning'
+                    : 'text'
+                }
+              >
+                <DimensionButtonIcon severity={message?.severity} accessorConfig={accessorConfig}>
+                  {children}
+                </DimensionButtonIcon>
+              </EuiLink>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiButtonIcon
+          className="lnsLayerPanel__dimensionRemove"
+          data-test-subj="indexPattern-dimension-remove"
+          iconType="trash"
+          size="xs"
+          color="danger"
+          aria-label={i18n.translate(
+            'visualizationUiComponents.dimensionButton.removeColumnLabel',
+            {
+              defaultMessage: 'Remove configuration from "{groupLabel}"',
+              values: { groupLabel },
+            }
+          )}
+          title={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
+            defaultMessage: 'Remove configuration from "{groupLabel}"',
+            values: { groupLabel },
+          })}
+          onClick={() => onRemoveClick(accessorConfig.columnId)}
+          css={css`
+            margin-right: ${euiThemeVars.euiSizeS};
+            visibility: hidden;
+            opacity: 0;
+            color: ${euiThemeVars.euiTextSubduedColor};
+
+            &:hover {
+              color: ${euiThemeVars.euiColorDangerText};
+            }
+          `}
+        />
+        <PaletteIndicator accessorConfig={accessorConfig} />
+      </div>
+    );
+  }
+);

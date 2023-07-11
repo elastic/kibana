@@ -62,7 +62,8 @@ const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
       label={buttonLabel || defaultButtonLabels.label}
       ariaLabel={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
       dataTestSubj="lns-empty-dimension"
-      onClick={() => onClick(columnId)}
+      columnId={columnId}
+      onClick={onClick}
     />
   );
 };

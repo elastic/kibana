@@ -501,13 +501,27 @@ export const WorkspacePanel = ({
 
     const hasSomethingToRender = localState.expressionToRender !== null;
 
-    const renderWorkspaceContents = hasSomethingToRender
-      ? renderVisualization
-      : !changesApplied
-      ? () => (
-          <ApplyChangesPrompt core={core} onApplyButtonClick={() => dispatchLens(applyChanges())} />
-        )
-      : () => <DragDropPrompt expressionExists={expressionExists} />;
+    const workspaceContents = hasSomethingToRender ? (
+      <VisualizationWrapper
+        expression={localState.expressionToRender}
+        framePublicAPI={framePublicAPI}
+        lensInspector={lensInspector}
+        onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
+        setLocalState={setLocalState}
+        localState={{ ...localState }}
+        errors={localState.errors}
+        ExpressionRendererComponent={ExpressionRendererComponent}
+        core={core}
+        activeDatasourceId={activeDatasourceId}
+        onRender$={onRender$}
+        onData$={onData$}
+      />
+    ) : !changesApplied ? (
+      <ApplyChangesPrompt core={core} onApplyButtonClick={() => dispatchLens(applyChanges())} />
+    ) : (
+      <DragDropPrompt expressionExists={expressionExists} />
+    );
 
     return (
       <DragDrop
@@ -518,7 +532,7 @@ export const WorkspacePanel = ({
         dropTypes={getSuggestionForField(dragging) ? ['field_add'] : undefined}
         onDrop={onDrop}
       >
-        <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
+        <div className="lnsWorkspacePanelWrapper__pageContentBody">{workspaceContents}</div>
       </DragDrop>
     );
   };

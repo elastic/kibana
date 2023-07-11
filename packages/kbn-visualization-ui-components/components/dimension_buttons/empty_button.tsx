@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DimensionTrigger } from './trigger';
 
+<<<<<<< HEAD:packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx
 export const EmptyDimensionButton = ({
   label,
   ariaLabel,
@@ -56,3 +57,56 @@ export const EmptyDimensionButton = ({
     </EuiButtonEmpty>
   );
 };
+=======
+export const EmptyDimensionButton = memo(
+  ({
+    label,
+    ariaLabel,
+    onClick,
+    dataTestSubj,
+    iconType,
+    columnId,
+    ...otherProps // from Drag&Drop integration
+  }: {
+    label: React.ReactNode;
+    ariaLabel: string;
+    onClick: () => void;
+    dataTestSubj?: string;
+    iconType?: string;
+    columnId: string;
+  }) => {
+    return (
+      <EuiButtonEmpty
+        {...otherProps}
+        css={css`
+          width: 100%;
+          border-radius: ${euiThemeVars.euiBorderRadius} !important;
+          border: ${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiBorderColor} !important;
+        `}
+        color="text" // as far as I can tell all this currently adds is the correct active background color
+        size="s"
+        iconType={iconType ?? 'plus'}
+        contentProps={{
+          css: css`
+            justify-content: flex-start;
+            padding: 0 !important;
+            color: ${euiThemeVars.euiTextSubduedColor};
+            gap: 0;
+
+            .euiIcon {
+              margin-left: ${euiThemeVars.euiSizeS};
+            }
+          `,
+        }}
+        aria-label={ariaLabel}
+        data-test-subj={dataTestSubj}
+        onClick={() => {
+          onClick(columnId);
+        }}
+      >
+        <DimensionTrigger label={label} dataTestSubj="emptyDimensionTrigger" />
+      </EuiButtonEmpty>
+    );
+  }
+);
+>>>>>>> 2c27b75d75f (some memoization):src/plugins/visualization_ui_components/public/components/dimension_buttons/empty_button.tsx

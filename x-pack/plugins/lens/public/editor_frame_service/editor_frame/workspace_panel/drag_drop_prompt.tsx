@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiLink, EuiTextColor } from '@elastic/eui';
 import classNames from 'classnames';
 import { DropIllustration } from '@kbn/chart-icons';
 
-export const DragDropPrompt = ({ expressionExists }: { expressionExists?: boolean }) => {
+export const DragDropPrompt = memo(({ expressionExists }: { expressionExists?: boolean }) => {
   return (
     <EuiText
       className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -60,4 +60,4 @@ export const DragDropPrompt = ({ expressionExists }: { expressionExists?: boolea
       </div>
     </EuiText>
   );
-};
+});
