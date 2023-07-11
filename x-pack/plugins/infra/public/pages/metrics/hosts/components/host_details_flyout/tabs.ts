@@ -37,4 +37,18 @@ export const orderedFlyoutTabs: Tab[] = [
     }),
     'data-test-subj': 'hostsView-flyout-tabs-logs',
   },
+  {
+    id: FlyoutTabIds.ANOMALIES,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
+      defaultMessage: 'Anomalies',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-anomalies',
+  },
+  {
+    id: FlyoutTabIds.OSQUERY,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
+      defaultMessage: 'Osquery',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-Osquery',
+  },
 ];
