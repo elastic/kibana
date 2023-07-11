@@ -352,7 +352,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
-  [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[]; // TODO do better
+  [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
 }
 
 export interface RegistryElasticsearch {
@@ -378,13 +378,11 @@ export interface RegistryDataStreamPrivileges {
 
 export interface RegistryDataStreamRoutingRules {
   source_dataset: string;
-  rules: RegistryRoutingRule[];
-}
-
-export interface RegistryRoutingRule {
-  target_dataset: string;
-  if: string;
-  namespace: string;
+  rules: Array<{
+    target_dataset: string;
+    if: string;
+    namespace: string;
+  }>;
 }
 
 export type RegistryVarType =
