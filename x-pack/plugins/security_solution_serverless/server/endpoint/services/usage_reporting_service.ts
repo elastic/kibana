@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import fetch, { Response } from 'node-fetch';
+import type { Response } from 'node-fetch';
+import fetch from 'node-fetch';
 
 import { USAGE_SERVICE_USAGE_URL } from '../../constants';
-import { UsageRecord } from '../../types';
+import type { UsageRecord } from '../../types';
 
 export class EndpointUsageReportingService {
   public async reportUsage(records: UsageRecord[]): Promise<Response> {
