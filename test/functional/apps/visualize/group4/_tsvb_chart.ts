@@ -35,6 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.setTime({ from, to });
     });
 
+    after(async () => {
+      await common.unsetTime();
+    });
+
     beforeEach(async () => {
       await security.testUser.setRoles(
         ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
@@ -426,9 +430,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('switch panel interval test', () => {
-      before(async () => {
-        await visualBuilder.setTime({ useUISettings: true });
-      });
       beforeEach(async () => {
         await visualBuilder.clickMetric();
         await visualBuilder.checkMetricTabIsPresent();
@@ -547,7 +548,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await settings.setFieldFormat('string');
         await settings.setScriptedFieldStringTransform('title');
         await settings.controlChangeSave();
-        await visualBuilder.setTime({ useUISettings: true });
       });
 
       beforeEach(async () => {
