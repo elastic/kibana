@@ -44,8 +44,8 @@ export const MonitorErrors = () => {
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
         <ErrorsTabContent
           location={location}
-          errorStates={errorStates ?? []}
-          upStates={upStates ?? []}
+          errorStates={errorStates}
+          upStates={upStates}
           loading={loading}
         />
       </div>
