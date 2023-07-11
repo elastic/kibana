@@ -903,7 +903,7 @@ For more information, see <<kibana-privileges>>.
 
 `DELETE /api/apm/sourcemaps/:id`
 
-[[apm-sourcemap-delete-example]]
+[[android-sourcemap-delete-example]]
 ===== Example
 
 The following example deletes a source map with an id of `apm:foo-1.0.0-android-644fd5a9`:
