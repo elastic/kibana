@@ -15,7 +15,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
-import { ValidationError, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { RecoveredActionGroupId } from '../common';
 
 const logger = loggingSystemMock.create().get();
