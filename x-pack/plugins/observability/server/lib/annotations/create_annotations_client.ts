@@ -37,7 +37,6 @@ export function createAnnotationsClient(params: {
       client: esClient,
       logger,
       mappings,
-      settings: {},
     });
 
   function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {

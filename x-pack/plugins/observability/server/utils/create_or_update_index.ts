@@ -23,7 +23,7 @@ export async function createOrUpdateIndex({
 }: {
   index: string;
   mappings: Mappings;
-  settings: IndexSettings;
+  settings?: IndexSettings;
   client: ElasticsearchClient;
   logger: Logger;
 }) {
@@ -44,7 +44,6 @@ export async function createOrUpdateIndex({
               index,
               client,
               mappings,
-              settings,
             })
           : await createNewIndex({
               index,
@@ -100,21 +99,14 @@ async function updateExistingIndex({
   index,
   client,
   mappings,
-  settings,
 }: {
   index: string;
   client: ElasticsearchClient;
   mappings: estypes.IndicesPutMappingRequest['body'];
-  settings: estypes.IndicesPutSettingsRequest['body'];
 }) {
-  return Promise.all([
-    client.indices.putSettings({
-      index,
-      body: settings,
-    }),
-    client.indices.putMapping({
-      index,
-      body: mappings,
-    }),
-  ]);
+  const res = await client.indices.putMapping({
+    index,
+    body: mappings,
+  });
+  return [res];
 }
