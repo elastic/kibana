@@ -648,6 +648,7 @@ export function LayerPanel(
                         background-color: ${euiThemeVars.euiColorLightShade} !important;
                         border-color: transparent !important;
                         box-shadow: none !important;
+                        padding: 0 ${euiThemeVars.euiSizeS};
                       `}
                     >
                       <DimensionTrigger
