@@ -10,7 +10,7 @@ import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Assistant } from '.';
 import { Conversation } from '../assistant_context/types';
-import { IHttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
