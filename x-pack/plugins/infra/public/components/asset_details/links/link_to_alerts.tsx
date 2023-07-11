@@ -10,11 +10,9 @@ import { EuiButtonEmpty } from '@elastic/eui';
 
 export interface LinkToAlertsRuleProps {
   onClick?: () => void;
-  inHostFlyout?: boolean;
 }
 
-// TODO customize message
-export const LinkToAlertsRule = ({ onClick, inHostFlyout }: LinkToAlertsRuleProps) => {
+export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
       data-test-subj="infraNodeContextPopoverCreateInventoryRuleButton"
@@ -26,7 +24,7 @@ export const LinkToAlertsRule = ({ onClick, inHostFlyout }: LinkToAlertsRuleProp
     >
       <FormattedMessage
         id="xpack.infra.infra.nodeDetails.createAlertLink"
-        defaultMessage="Create inventory rule"
+        defaultMessage="Create rule"
       />
     </EuiButtonEmpty>
   );

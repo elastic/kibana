@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   calculateTimeRangeBucketSize,
   getAlertSummaryTimeRange,
   useTimeBuckets,
 } from '@kbn/observability-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import type { AlertStatus } from '../../../../pages/metrics/hosts/types';
 import {
@@ -22,44 +22,40 @@ import {
   DEFAULT_INTERVAL,
   infraAlertFeatureIds,
 } from '../../../../pages/metrics/hosts/components/tabs/config';
-import type {
-  HostsState,
-  HostsStateUpdater,
-} from '../../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
+import type { HostsState } from '../../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import type { AlertsEsQuery } from '../../../../pages/metrics/hosts/hooks/use_alerts_query';
+import type { StringDateRange } from '../../types';
 
-// TODO replace once https://github.com/elastic/kibana/pull/160924 is ready
-import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LinkToAlertsRule } from '../../links/link_to_alerts';
 import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
+import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 
 const ALERT_STATUS: AlertStatus = 'all';
 
 export const AlertsSummaryContent = ({
   nodeName,
   nodeType,
-  currentTimeRange,
+  dateRange,
 }: {
   nodeName: string;
-  nodeType: string;
-  currentTimeRange: MetricsTimeInput;
+  nodeType: InventoryItemType;
+  dateRange: StringDateRange;
 }) => {
-  // TODO replace once https://github.com/elastic/kibana/pull/160924 is ready
-  const { onSubmit, searchCriteria } = useUnifiedSearchContext();
+  const [isAlertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
 
   const alertsEsQueryByStatus = useMemo(
     () =>
       createAlertsEsQuery({
-        dateRange: searchCriteria.dateRange,
+        dateRange,
         hostNodeNames: [nodeName],
         status: ALERT_STATUS,
       }),
-    [nodeName, searchCriteria.dateRange]
+    [nodeName, dateRange]
   );
 
   return (
-    <ContainerPanel>
+    <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <EuiText style={{ fontWeight: 700, textTransform: 'uppercase' }} size="s">
@@ -70,33 +66,34 @@ export const AlertsSummaryContent = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LinkToAlertsRule inHostFlyout />
+          <LinkToAlertsRule onClick={() => setAlertFlyoutVisible(true)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LinkToAlertsPage
             nodeName={nodeName}
             queryField={`${nodeType}.name`}
-            currentTimeRange={currentTimeRange}
+            dateRange={dateRange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <MemoAlertSummaryWidget
-        alertsQuery={alertsEsQueryByStatus}
-        dateRange={searchCriteria.dateRange}
-        onRangeSelection={onSubmit}
+      <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
+      <AlertFlyout
+        filter={`${findInventoryFields(nodeType).name}: "${nodeName}"`}
+        nodeType={nodeType}
+        setVisible={setAlertFlyoutVisible}
+        visible={isAlertFlyoutVisible}
       />
-    </ContainerPanel>
+    </>
   );
 };
 
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
   dateRange: HostsState['dateRange'];
-  onRangeSelection: HostsStateUpdater;
 }
 
 const MemoAlertSummaryWidget = React.memo(
-  ({ alertsQuery, dateRange, onRangeSelection }: MemoAlertSummaryWidgetProps) => {
+  ({ alertsQuery, dateRange }: MemoAlertSummaryWidgetProps) => {
     const { services } = useKibanaContextForPlugin();
 
     const summaryTimeRange = useSummaryTimeRange(dateRange);
@@ -116,23 +113,13 @@ const MemoAlertSummaryWidget = React.memo(
           featureIds={infraAlertFeatureIds}
           filter={alertsQuery}
           timeRange={summaryTimeRange}
-          // Can be added to hide the chart
-          // once https://github.com/elastic/kibana/pull/161263 is merged
-          // fullSize
-          // shouldHideCharts
+          fullSize
+          hideChart
         />
       </>
     );
   }
 );
-
-// This will be removed once https://github.com/elastic/kibana/pull/161263 is merged
-const ContainerPanel = styled.div`
-  && .euiPanel {
-    border: none;
-    pointer-events: none;
-  }
-`;
 
 const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
   const timeBuckets = useTimeBuckets();

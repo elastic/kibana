@@ -100,7 +100,7 @@ export const Overview = ({
       <AlertsSummaryContent
         nodeName={nodeName}
         nodeType={nodeType}
-        currentTimeRange={currentTimeRange}
+        dateRange={dateRange ?? DEFAULT_DATE_RANGE}
       />
       <EuiHorizontalRule margin="xs" />
     </EuiFlexGroup>
