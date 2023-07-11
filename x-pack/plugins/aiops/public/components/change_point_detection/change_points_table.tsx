@@ -116,7 +116,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       height: '80px',
       truncateText: false,
       valign: 'middle',
-      css: { display: 'block', padding: 0 },
       render: (annotation: ChangePointAnnotation) => {
         return <MiniChartPreview annotation={annotation} fieldConfig={fieldConfig} />;
       },
@@ -319,7 +318,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
   });
 
   return (
-    <div data-test-subj={'aiopChangePointPreviewChart'}>
+    <div data-test-subj={'aiopChangePointPreviewChart'} css={{ width: '100%' }}>
       <EmbeddableComponent
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}
