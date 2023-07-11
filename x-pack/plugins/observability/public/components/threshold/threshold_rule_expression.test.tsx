@@ -106,4 +106,44 @@ describe('Expression', () => {
       },
     ]);
   });
+
+  it('should show the error message', async () => {
+    const currentOptions = {
+      groupBy: 'host.hostname',
+      filterQuery: 'foo',
+      metrics: [
+        { aggregation: 'avg', field: 'system.load.1' },
+        { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
+      ] as MetricsExplorerMetric[],
+    };
+    const errorMessage = 'Error in searchSource create';
+    const kibanaMock = kibanaStartMock.startContract();
+    useKibanaMock.mockReturnValue({
+      ...kibanaMock,
+      services: {
+        ...kibanaMock.services,
+        data: {
+          dataViews: {
+            create: jest.fn(),
+          },
+          query: {
+            timefilter: {
+              timefilter: jest.fn(),
+            },
+          },
+          search: {
+            searchSource: {
+              create: jest.fn(() => {
+                throw new Error(errorMessage);
+              }),
+            },
+          },
+        },
+      },
+    });
+    const { wrapper } = await setup(currentOptions);
+    expect(wrapper.find(`[data-test-subj="thresholdRuleExpressionError"]`).first().text()).toBe(
+      errorMessage
+    );
+  });
 });

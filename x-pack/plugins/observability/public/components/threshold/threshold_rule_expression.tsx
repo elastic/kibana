@@ -10,11 +10,14 @@ import { debounce } from 'lodash';
 import {
   EuiAccordion,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
+  EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -68,6 +71,7 @@ export default function Expressions(props: Props) {
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
+  const [paramsError, setParamsError] = useState<Error>();
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -99,8 +103,7 @@ export default function Expressions(props: Props) {
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
       } catch (error) {
-        // TODO Handle error
-        console.log('error:', error);
+        setParamsError(error);
       }
     };
 
@@ -336,6 +339,26 @@ export default function Expressions(props: Props) {
       })
       .filter((g) => typeof g === 'string') as string[];
   }, [ruleParams, groupByFilterTestPatterns]);
+
+  if (paramsError) {
+    return (
+      <>
+        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
+          <p>{paramsError.message}</p>
+        </EuiCallOut>
+        <EuiSpacer size={'m'} />
+      </>
+    );
+  }
+
+  if (!searchSource) {
+    return (
+      <>
+        <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
+        <EuiSpacer size={'m'} />
+      </>
+    );
+  }
 
   return (
     <>
