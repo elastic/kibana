@@ -20,7 +20,10 @@ import {
 } from '../../../common/metrics_explorer_views';
 import type {
   CreateMetricsExplorerViewAttributesRequestPayload,
+  FindMetricsExplorerViewResponsePayload,
+  GetMetricsExplorerViewResposePayload,
   MetricsExplorerViewRequestQuery,
+  UpdateMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api/latest';
 import type {
   MetricsExplorerView,
@@ -42,7 +45,9 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   static STATIC_VIEW_ID = '0';
   static DEFAULT_SOURCE_ID = 'default';
 
-  public async find(query: MetricsExplorerViewRequestQuery): Promise<MetricsExplorerView[]> {
+  public async find(
+    query: MetricsExplorerViewRequestQuery
+  ): Promise<FindMetricsExplorerViewResponsePayload['data']> {
     this.logger.debug('Trying to load metrics explorer views ...');
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
@@ -72,7 +77,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   public async get(
     metricsExplorerViewId: string,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView> {
+  ): Promise<GetMetricsExplorerViewResposePayload> {
     this.logger.debug(`Trying to load metrics explorer view with id ${metricsExplorerViewId} ...`);
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
@@ -104,7 +109,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     metricsExplorerViewId: string | null,
     attributes: CreateMetricsExplorerViewAttributesRequestPayload,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<MetricsExplorerView> {
+  ): Promise<UpdateMetricsExplorerViewResponsePayload> {
     this.logger.debug(
       `Trying to update metrics explorer view with id "${metricsExplorerViewId}"...`
     );
