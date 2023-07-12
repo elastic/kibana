@@ -42,7 +42,7 @@ const defaultProps: Props = {
 describe('PromptEditorComponent', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('renders the system prompt selector when isNewConversation is true', async () => {
+  it('renders the system prompt viewer when isNewConversation is true', async () => {
     render(
       <TestProviders>
         <PromptEditor {...defaultProps} />
@@ -50,7 +50,7 @@ describe('PromptEditorComponent', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
+      expect(screen.getByTestId('systemPromptText')).toBeInTheDocument();
     });
   });
 
