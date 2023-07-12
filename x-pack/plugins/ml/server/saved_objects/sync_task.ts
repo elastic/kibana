@@ -22,6 +22,10 @@ const SAVED_OBJECTS_SYNC_TASK_TYPE = 'ML:saved-objects-sync';
 const SAVED_OBJECTS_SYNC_TASK_ID = 'ML:saved-objects-sync-task';
 const SAVED_OBJECTS_SYNC_INTERVAL_DEFAULT = '1h';
 
+/**
+ * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).
+ * This is required to support zero-downtime upgrades and rollbacks. See https://github.com/elastic/kibana/issues/155764.
+ */
 const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
