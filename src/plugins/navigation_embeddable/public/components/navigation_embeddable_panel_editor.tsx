@@ -29,13 +29,13 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
 import {
-  NavigationEmbeddableInput,
   NavigationEmbeddableLink,
+  NavigationEmbeddableInput,
   NavigationEmbeddableLinkList,
 } from '../embeddable/types';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
 
 import './navigation_embeddable.scss';
@@ -81,29 +81,26 @@ export const NavigationEmbeddablePanelEditor = ({
     [orderedLinks]
   );
 
-  const addLink = useCallback(async () => {
-    const newLink = await openLinkEditorFlyout({
-      parentDashboard,
-      ref: editLinkFlyoutRef,
-    });
-    if (newLink) setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length }]);
-  }, [editLinkFlyoutRef, orderedLinks, parentDashboard]);
-
-  const editLink = useCallback(
-    async (linkToEdit: NavigationEmbeddableLink) => {
+  const addOrEditLink = useCallback(
+    async (linkToEdit?: NavigationEmbeddableLink) => {
       const newLink = await openLinkEditorFlyout({
-        link: linkToEdit,
         parentDashboard,
+        link: linkToEdit,
         ref: editLinkFlyoutRef,
       });
       if (newLink) {
-        const newLinks = orderedLinks.map((link) => {
-          if (link.id === linkToEdit.id) {
-            return { ...newLink, order: linkToEdit.order };
-          }
-          return link;
-        });
-        setOrderedLinks(newLinks);
+        if (linkToEdit) {
+          setOrderedLinks(
+            orderedLinks.map((link) => {
+              if (link.id === linkToEdit.id) {
+                return { ...newLink, order: linkToEdit.order };
+              }
+              return link;
+            })
+          );
+        } else {
+          setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length }]);
+        }
       }
     },
     [editLinkFlyoutRef, orderedLinks, parentDashboard]
@@ -144,7 +141,7 @@ export const NavigationEmbeddablePanelEditor = ({
                   <EuiSpacer size="s" />
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
-                      <EuiButton onClick={addLink} iconType="plusInCircle">
+                      <EuiButton onClick={() => addOrEditLink()} iconType="plusInCircle">
                         {NavEmbeddableStrings.editor.getAddButtonLabel()}
                       </EuiButton>
                     </EuiFlexItem>
@@ -166,7 +163,7 @@ export const NavigationEmbeddablePanelEditor = ({
                           {(provided) => (
                             <NavigationEmbeddablePanelEditorLink
                               link={link}
-                              editLink={() => editLink(link)}
+                              editLink={() => addOrEditLink(link)}
                               deleteLink={() => deleteLink(link.id)}
                               dragHandleProps={provided.dragHandleProps}
                             />
@@ -175,7 +172,7 @@ export const NavigationEmbeddablePanelEditor = ({
                       ))}
                     </EuiDroppable>
                   </EuiDragDropContext>
-                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={addLink}>
+                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={() => addOrEditLink()}>
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>
