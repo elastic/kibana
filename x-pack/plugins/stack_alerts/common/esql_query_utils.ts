@@ -29,7 +29,7 @@ export interface EsqlTable {
 
 const ESQL_DOCUMENT_ID = 'esql_query_document';
 
-const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
+export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
   return columns.reduce<Record<string, string | null>>((acc, column, i) => {
     acc[column.name] = row[i];
 

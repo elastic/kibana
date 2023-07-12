@@ -5,35 +5,20 @@
  * 2.0.
  */
 import React, { ReactNode, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   copyToClipboard,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
-
-export const styles = {
-  grid: css`
-    .euiDataGridHeaderCell {
-      background: none;
-    }
-    .euiDataGridHeader .euiDataGridHeaderCell {
-      border-top: none;
-    }
-  `,
-};
+import { TestQueryRowTable } from './test_query_row_table';
 
 export interface TestQueryRowProps {
   fetch: () => Promise<{
@@ -159,57 +144,9 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
         </EuiFormRow>
       )}
       {showTable && testQueryRawResults && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiPanel style={{ overflow: 'hidden' }} hasShadow={false} hasBorder={true}>
-            <EuiDataGrid
-              css={styles.grid}
-              aria-label="Test query grid"
-              columns={testQueryRawResults.cols}
-              columnVisibility={{
-                visibleColumns: testQueryRawResults.cols.map((c) => c.id),
-                setVisibleColumns: () => {},
-              }}
-              rowCount={testQueryRawResults.rows.length}
-              gridStyle={{
-                border: 'horizontal',
-                rowHover: 'none',
-              }}
-              renderCellValue={({ rowIndex, columnId }) =>
-                testQueryRawResults.rows[rowIndex][columnId]
-              }
-              pagination={{
-                pageIndex: 0,
-                pageSize: 10,
-                onChangeItemsPerPage: () => {},
-                onChangePage: () => {},
-              }}
-              toolbarVisibility={false}
-            />
-            <EuiSpacer size="m" />
-            {testQueryAlerts && (
-              <EuiFlexGroup gutterSize="m">
-                <EuiFlexItem grow={false}>
-                  <EuiText>
-                    <h5>
-                      <FormattedMessage
-                        id="xpack.stackAlerts.esQuery.ui.testQueryAlerts"
-                        defaultMessage="Alerts generated"
-                      />
-                    </h5>
-                  </EuiText>
-                </EuiFlexItem>
-                {testQueryAlerts.map((alert, index) => {
-                  return (
-                    <EuiFlexItem key={index} grow={false}>
-                      <EuiBadge color="primary">{alert}</EuiBadge>
-                    </EuiFlexItem>
-                  );
-                })}
-              </EuiFlexGroup>
-            )}
-          </EuiPanel>
-        </>
+        <EuiFormRow>
+          <TestQueryRowTable rawResults={testQueryRawResults} alerts={testQueryAlerts} />
+        </EuiFormRow>
       )}
     </>
   );

@@ -20,7 +20,7 @@ import { DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import { toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
+import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
@@ -106,7 +106,7 @@ export const EsqlQueryExpression: React.FC<
             name: col.name,
             actions: false,
           })),
-          rows: hits.hits.slice(0, 5),
+          rows: esqlTable.values.slice(0, 5).map((row) => rowToDocument(esqlTable.columns, row)),
         },
       };
     }
