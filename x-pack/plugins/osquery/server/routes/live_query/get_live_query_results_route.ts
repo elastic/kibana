@@ -18,7 +18,7 @@ import type {
   ActionDetailsStrategyResponse,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getActionResponses } from './utils';
 
 export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
@@ -35,7 +35,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
           request: {
             query: schema.object(
               {
-                filterQuery: schema.maybe(schema.string()),
+                kql: schema.maybe(schema.string()),
                 page: schema.maybe(schema.number()),
                 pageSize: schema.maybe(schema.number()),
                 sort: schema.maybe(schema.string()),
@@ -64,7 +64,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                filterQuery: createFilter(request.query.filterQuery),
+                kql: request.query.kql,
                 factoryQueryType: OsqueryQueries.actionDetails,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
@@ -86,7 +86,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
-                filterQuery: createFilter(request.query.filterQuery),
+                kql: request.query.kql,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100

@@ -39,6 +39,8 @@ export const useAgentGroups = () => {
         data.search.search<AgentsRequestOptions, AgentsStrategyResponse>(
           {
             filterQuery: { terms: { policy_id: osqueryPolicies } },
+            // response fails when kql provided, not sure if it's aggregations or kql
+            // kql: `policy_id: ${osqueryPolicies}`,
             factoryQueryType: OsqueryQueries.agents,
             aggregations: {
               platforms: {

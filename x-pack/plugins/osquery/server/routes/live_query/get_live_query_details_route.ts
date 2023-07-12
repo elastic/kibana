@@ -39,7 +39,12 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
               },
               { unknowns: 'allow' }
             ),
-            query: schema.object({}, { unknowns: 'allow' }),
+            query: schema.object(
+              {
+                kql: schema.maybe(schema.string()),
+              },
+              { unknowns: 'allow' }
+            ),
           },
         },
       },
@@ -52,7 +57,7 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                filterQuery: request.query,
+                kql: request.query.kql,
                 factoryQueryType: OsqueryQueries.actionDetails,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }

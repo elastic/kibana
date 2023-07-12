@@ -20,7 +20,7 @@ import type {
   Direction,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
 export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned
@@ -36,7 +36,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
           request: {
             query: schema.object(
               {
-                filterQuery: schema.maybe(schema.string()),
+                kql: schema.maybe(schema.string()),
                 page: schema.maybe(schema.number()),
                 pageSize: schema.maybe(schema.number()),
                 sort: schema.maybe(schema.string()),
@@ -58,7 +58,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
             search.search<ActionsRequestOptions, ActionsStrategyResponse>(
               {
                 factoryQueryType: OsqueryQueries.actions,
-                filterQuery: createFilter(request.query.filterQuery),
+                kql: request.query.kql,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100

@@ -53,7 +53,7 @@ export const getActionResponses = (
       {
         actionId,
         factoryQueryType: OsqueryQueries.actionResults,
-        filterQuery: '',
+        kql: '',
         pagination: generateTablePaginationOptions(0, 1000),
         sort: {
           direction: Direction.desc,

@@ -6,34 +6,26 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { isEmpty } from 'lodash';
+import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildResultsQuery = ({
   actionId,
   agentId,
-  filterQuery,
+  kql,
   sort,
   pagination: { activePage, querySize },
 }: ResultsRequestOptions): ISearchRequestParams => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
-      match_phrase: {
-        action_id: actionId,
-      },
-    },
-    ...(agentId
-      ? [
-          {
-            match_phrase: {
-              'agent.id': agentId,
-            },
-          },
-        ]
-      : []),
-  ];
+  const actionIdQuery = `action_id: ${actionId}`;
+  const agentQuery = agentId ? ` and agent.id: ${agentId}` : '';
+  let filter = actionIdQuery + agentQuery;
+  if (!isEmpty(kql)) {
+    filter = actionIdQuery + ` and ${kql}`;
+  }
+
+  const query = getQueryFilter({ filter });
 
   const dslQuery = {
     allow_no_indices: true,
@@ -53,7 +45,7 @@ export const buildResultsQuery = ({
           },
         },
       },
-      query: { bool: { filter } },
+      query,
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,

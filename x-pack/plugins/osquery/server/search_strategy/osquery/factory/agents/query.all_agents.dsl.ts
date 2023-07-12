@@ -20,6 +20,13 @@ export const buildAgentsQuery = ({
     { term: { active: { value: 'true' } } },
     ...createQueryFilterClauses(filterQuery),
   ];
+  // const activeQuery = `active: true`;
+  // let filter = activeQuery;
+  // if (!isEmpty(kql)) {
+  //   filter = activeQuery + ` AND ${kql}`;
+  // }
+
+  // const query = getQueryFilter({ filter });
 
   const dslQuery = {
     allow_no_indices: true,

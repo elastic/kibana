@@ -36,7 +36,9 @@ export enum OsqueryQueries {
 export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
-  filterQuery: ESQuery | string | undefined;
+  // filterQuery to be removed, when I solve the aggregations problem with kql
+  filterQuery?: ESQuery | string | undefined;
+  kql?: string;
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
