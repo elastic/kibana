@@ -48,7 +48,7 @@ data.search.sessions.enabled: false
 advanced_settings.enabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
-# server.restrictInternalApis: true
+server.restrictInternalApis: true
 # Telemetry enabled by default and not disableable via UI
 telemetry.optIn: true
 telemetry.allowChangingOptInStatus: false

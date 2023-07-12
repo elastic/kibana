@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'some-value',
 };
 
 export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
