@@ -83,7 +83,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
       [selectedSystemPrompt, setUpdatedSystemPromptSettings]
     );
 
-    // Conversations this system prompt should be a default for // TODO: Calculate defaults from selectedSystemPrompt
+    // Conversations this system prompt should be a default for
     const conversationOptions = useMemo(
       () => Object.values(conversationSettings),
       [conversationSettings]

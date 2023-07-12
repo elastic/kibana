@@ -439,7 +439,6 @@ const AssistantComponent: React.FC<Props> = ({
         css={css`
           align-items: flex-start;
           flex-direction: column;
-          padding-bottom: 0;
         `}
       >
         {showTitle && (
