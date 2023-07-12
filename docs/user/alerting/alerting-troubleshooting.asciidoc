@@ -203,7 +203,7 @@ xpack.task_manager.poll_interval: 1h
 
 [WARNING]
 ====
-This approach should be used only temporarily as a last resort to restore function to {kib} when it is unresponsive and attempts to identify and <<controlling-rules,snooze or disable>> slow-running rules has not fixed the situation.
+This approach should be used only temporarily as a last resort to restore function to {kib} when it is unresponsive and attempts to identify and <<controlling-rules,snooze or disable>> slow-running rules have not fixed the situation.
 It severely throttles all background tasks, not just those relating to {alert-features}. The task manager will run only one task at a time and will look for more work each hour.
 ====
 
