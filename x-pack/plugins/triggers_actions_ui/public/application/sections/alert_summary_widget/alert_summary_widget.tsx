@@ -22,6 +22,7 @@ export const AlertSummaryWidget = ({
   fullSize,
   onClick = () => {},
   timeRange,
+  hideChart,
 }: AlertSummaryWidgetProps) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
@@ -46,6 +47,7 @@ export const AlertSummaryWidget = ({
         chartProps={chartProps}
         dateFormat={timeRange.dateFormat}
         recoveredAlertCount={recoveredAlertCount}
+        hideChart={hideChart}
       />
     ) : null
   ) : (

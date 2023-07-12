@@ -29,10 +29,11 @@ export interface ConversationSettingsPopoverProps {
   conversation: Conversation;
   http: HttpSetup;
   isDisabled?: boolean;
+  allSystemPrompts: Prompt[];
 }
 
 export const ConversationSettingsPopover: React.FC<ConversationSettingsPopoverProps> = React.memo(
-  ({ actionTypeRegistry, conversation, http, isDisabled = false }) => {
+  ({ actionTypeRegistry, conversation, http, isDisabled = false, allSystemPrompts }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     // So we can hide the settings popover when the connector modal is displayed
     const popoverPanelRef = useRef<HTMLElement | null>(null);
@@ -41,10 +42,13 @@ export const ConversationSettingsPopover: React.FC<ConversationSettingsPopoverPr
       return conversation.apiConfig?.provider;
     }, [conversation.apiConfig]);
 
-    const selectedPrompt: Prompt | undefined = useMemo(
-      () => conversation?.apiConfig.defaultSystemPrompt,
-      [conversation]
-    );
+    const selectedPrompt: Prompt | undefined = useMemo(() => {
+      const convoDefaultSystemPromptId = conversation?.apiConfig.defaultSystemPromptId;
+      if (convoDefaultSystemPromptId && allSystemPrompts) {
+        return allSystemPrompts.find((prompt) => prompt.id === convoDefaultSystemPromptId);
+      }
+      return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
+    }, [conversation, allSystemPrompts]);
 
     const closeSettingsHandler = useCallback(() => {
       setIsSettingsOpen(false);

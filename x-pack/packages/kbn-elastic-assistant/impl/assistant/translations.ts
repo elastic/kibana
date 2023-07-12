@@ -47,7 +47,7 @@ export const SETTINGS_CONNECTOR_TITLE = i18n.translate(
 export const SETTINGS_PROMPT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.promptTitle',
   {
-    defaultMessage: 'System Prompt',
+    defaultMessage: 'System prompt',
   }
 );
 
@@ -80,3 +80,24 @@ export const API_ERROR = i18n.translate('xpack.elasticAssistant.assistant.apiErr
   defaultMessage:
     'An error occurred sending your message. If the problem persists, please test the connector configuration.',
 });
+
+export const TOOLTIP_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.technicalPreview.tooltipTitle',
+  {
+    defaultMessage: 'Beta',
+  }
+);
+
+export const TOOLTIP_ARIA_LABEL = i18n.translate(
+  'xpack.elasticAssistant.documentationLinks.ariaLabel',
+  {
+    defaultMessage: 'Click to open Elastic Assistant documentation in a new tab',
+  }
+);
+
+export const DOCUMENTATION = i18n.translate(
+  'xpack.elasticAssistant.documentationLinks.documentation',
+  {
+    defaultMessage: 'documentation',
+  }
+);

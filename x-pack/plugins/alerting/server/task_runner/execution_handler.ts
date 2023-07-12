@@ -15,7 +15,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { GetPersistentAlertsParams, IAlertsClient } from '../alerts_client/types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { parseDuration, RawRule, CombinedPersistentAlerts, ThrottledActions } from '../types';
+import { parseDuration, CombinedPersistentAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
@@ -79,7 +79,7 @@ export class ExecutionHandler<
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
   private ruleRunMetricsStore: RuleRunMetricsStore;
-  private apiKey: RawRule['apiKey'];
+  private apiKey: string | null;
   private ruleConsumer: string;
   private executionId: string;
   private ruleLabel: string;
