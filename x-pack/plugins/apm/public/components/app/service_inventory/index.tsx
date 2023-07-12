@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
@@ -207,15 +207,29 @@ export function ServiceInventory() {
   const {
     core: { analytics },
   } = useApmPluginContext();
-  const fetchMainStatisticsStartTime = window.performance.now();
-  const { mainStatisticsFetch } = useServicesMainStatisticsFetcher();
-  const fetchMainStatisticsDuration =
-    window.performance.now() - fetchMainStatisticsStartTime;
 
-  reportPerformanceMetricEvent(analytics, {
-    eventName: 'serviceInventoryFetchMainStatistics',
-    duration: fetchMainStatisticsDuration,
-  });
+  const fetchMainStatisticsStartTime = useRef(0);
+  const fetchDetailStatisticsStartTime = useRef(0);
+
+  const { mainStatisticsFetch } = useServicesMainStatisticsFetcher();
+
+  // Report time for Main Statistics Fetch
+  useEffect(() => {
+    if (mainStatisticsFetch.status === FETCH_STATUS.LOADING) {
+      fetchMainStatisticsStartTime.current = window.performance.now();
+    }
+
+    if (
+      mainStatisticsFetch.status === FETCH_STATUS.FAILURE ||
+      mainStatisticsFetch.status === FETCH_STATUS.SUCCESS
+    ) {
+      reportPerformanceMetricEvent(analytics, {
+        eventName: 'serviceInventoryMainStatistics',
+        duration:
+          window.performance.now() - fetchMainStatisticsStartTime.current,
+      });
+    }
+  }, [analytics, mainStatisticsFetch.status]);
 
   const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
 
@@ -241,7 +255,6 @@ export function ServiceInventory() {
 
   const initialSortDirection = 'desc';
 
-  const fetchDetailStatisticsStartTime = window.performance.now();
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
     mainStatisticsFetch,
     initialSortField,
@@ -249,13 +262,23 @@ export function ServiceInventory() {
     tiebreakerField,
   });
 
-  const fetchDetailStatisticsDuration =
-    window.performance.now() - fetchDetailStatisticsStartTime;
+  // Report time for Detailed Statistics Fetch
+  useEffect(() => {
+    if (comparisonFetch.status === FETCH_STATUS.LOADING) {
+      fetchDetailStatisticsStartTime.current = window.performance.now();
+    }
 
-  reportPerformanceMetricEvent(analytics, {
-    eventName: 'serviceInventoryDetailStatistics',
-    duration: fetchDetailStatisticsDuration,
-  });
+    if (
+      comparisonFetch.status === FETCH_STATUS.FAILURE ||
+      comparisonFetch.status === FETCH_STATUS.SUCCESS
+    ) {
+      reportPerformanceMetricEvent(analytics, {
+        eventName: 'serviceInventoryDetailStatistics',
+        duration:
+          window.performance.now() - fetchDetailStatisticsStartTime.current,
+      });
+    }
+  }, [analytics, comparisonFetch.status]);
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
