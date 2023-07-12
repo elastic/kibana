@@ -15,6 +15,7 @@ elif [[ "$SERVERLESS_ENVIRONMENT" == "observability" ]]; then
   SERVERLESS_CONFIGS=(
     "x-pack/test_serverless/api_integration/test_suites/observability/config.ts"
     "x-pack/test_serverless/functional/test_suites/observability/config.ts"
+    "x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts"
   )
 elif [[ "$SERVERLESS_ENVIRONMENT" == "security" ]]; then
   SERVERLESS_CONFIGS=(
