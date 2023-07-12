@@ -47,7 +47,6 @@ export class NavigationEmbeddableFactoryDefinition
   }
 
   public async isEditable() {
-    // const { openEditorFlyout } = await import('../editor/open_editor_flyout');
     await untilPluginStartServicesReady();
     return Boolean(coreServices.application.capabilities.dashboard?.showWriteControls);
   }
