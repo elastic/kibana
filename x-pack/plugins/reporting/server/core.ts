@@ -208,6 +208,13 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+    
+    const reportingStart = this.getContract();
+    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
+    this.csvSearchSourceExport.start(exportTypeStartDeps);
+    this.csvV2ExportType.start(exportTypeStartDeps);
+    this.pdfExport.start(exportTypeStartDeps);
+    this.pngExport.start(exportTypeStartDeps);
 
     const reportingStart = this.getContract();
     const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
