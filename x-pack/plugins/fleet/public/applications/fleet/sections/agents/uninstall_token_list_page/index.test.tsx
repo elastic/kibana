@@ -155,7 +155,7 @@ describe('UninstallTokenList page', () => {
       useGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
       const renderResult = render();
 
-      renderResult.getAllByTestId('uninstallTokenListTableUninstallButton')[0].click();
+      renderResult.getAllByTestId('uninstallTokensUninstallButton')[0].click();
 
       await waitFor(() => {
         expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
@@ -171,7 +171,7 @@ describe('UninstallTokenList page', () => {
     it('should filter by policyID', async () => {
       const renderResult = render();
 
-      fireEvent.change(renderResult.getByTestId('policyIdSearchField'), {
+      fireEvent.change(renderResult.getByTestId('uninstallTokensPolicyIdSearchInput'), {
         target: { value: 'searched policy id' },
       });
 

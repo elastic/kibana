@@ -62,6 +62,7 @@ export const ApiKeyField: React.FunctionComponent<{
           css={css`
             font-family: ${euiTheme.font.familyCode};
           `}
+          data-test-subj="apiKeyField"
         >
           {state === 'VISIBLE' ? key : tokenMask}
         </EuiText>

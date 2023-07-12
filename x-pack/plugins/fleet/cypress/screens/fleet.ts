@@ -12,6 +12,7 @@ export const LANDING_PAGE_ADD_FLEET_SERVER_BUTTON = 'fleetServerLanding.addFleet
 export const AGENTS_TAB = 'fleet-agents-tab';
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
 export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
+export const UNINSTALL_TOKENS_TAB = 'fleet-uninstall-tokens-tab';
 export const DATA_STREAMS_TAB = 'fleet-datastreams-tab';
 export const SETTINGS_TAB = 'fleet-settings-tab';
 
@@ -51,6 +52,16 @@ export const ENROLLMENT_TOKENS = {
   LIST_TABLE: 'enrollmentTokenListTable',
   TABLE_REVOKE_BTN: 'enrollmentTokenTable.revokeBtn',
 };
+
+export const UNINSTALL_TOKENS = {
+  POLICY_ID_SEARCH_FIELD: 'uninstallTokensPolicyIdSearchInput',
+  POLICY_ID_TABLE_FIELD: 'uninstallTokensPolicyIdField',
+  UNINSTALL_BUTTON: 'uninstallTokensUninstallButton',
+  UNINSTALL_COMMAND_FLYOUT: 'uninstall-command-flyout',
+  TOKEN_FIELD: 'apiKeyField',
+  SHOW_HIDE_TOKEN_BUTTON: 'showHideTokenButton',
+};
+
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
 export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
 

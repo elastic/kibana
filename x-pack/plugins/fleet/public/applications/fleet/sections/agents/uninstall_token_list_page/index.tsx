@@ -76,7 +76,7 @@ export const UninstallTokenListPage = () => {
         placeholder={i18n.translate('xpack.fleet.uninstallTokenList.searchByPolicyPlaceholder', {
           defaultMessage: 'Search by policy ID',
         })}
-        data-test-subj="policyIdSearchField"
+        data-test-subj="uninstallTokensPolicyIdSearchInput"
       />
 
       <EuiSpacer size="m" />
@@ -91,7 +91,12 @@ export const UninstallTokenListPage = () => {
               defaultMessage: 'Policy ID',
             }),
             render: (policyId: string) => (
-              <EuiText size="s" className="eui-textTruncate" title={policyId}>
+              <EuiText
+                size="s"
+                className="eui-textTruncate"
+                title={policyId}
+                data-test-subj="uninstallTokensPolicyIdField"
+              >
                 {policyId}
               </EuiText>
             ),
@@ -140,7 +145,7 @@ export const UninstallTokenListPage = () => {
                   )}
                 >
                   <EuiButtonIcon
-                    data-test-subj="uninstallTokenListTableUninstallButton"
+                    data-test-subj="uninstallTokensUninstallButton"
                     aria-label={i18n.translate(
                       'xpack.fleet.uninstallTokenList.getUninstallCommandLabel',
                       { defaultMessage: 'Get uninstall command' }
