@@ -187,13 +187,6 @@ export const switchAndCleanDatasource = createAction<{
   visualizationId: string | null;
   currentIndexPatternId?: string;
 }>('lens/switchAndCleanDatasource');
-export const updateStateFromSuggestion = createAction<{
-  newDatasourceId: string;
-  visualizationId: string | null;
-  visualizationState: unknown;
-  datasourceState: unknown;
-  dataViews: DataViewsState;
-}>('lens/updateStateFromSuggestion');
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
@@ -288,7 +281,6 @@ export const lensActions = {
   submitSuggestion,
   switchDatasource,
   switchAndCleanDatasource,
-  updateStateFromSuggestion,
   navigateAway,
   loadInitial,
   initEmpty,
@@ -868,42 +860,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           ...visualization,
           state: newVizState,
         },
-      };
-    },
-    [updateStateFromSuggestion.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newDatasourceId: string;
-          visualizationId: string;
-          visualizationState: unknown;
-          datasourceState: unknown;
-          dataViews: DataViewsState;
-        };
-      }
-    ) => {
-      const visualization = {
-        activeId: payload.visualizationId,
-        state: payload.visualizationState,
-      };
-
-      const datasourceState = payload.datasourceState;
-
-      return {
-        ...state,
-        datasourceStates: {
-          [payload.newDatasourceId]: {
-            state: datasourceState,
-            isLoading: false,
-          },
-        },
-        activeDatasourceId: payload.newDatasourceId,
-        visualization: {
-          ...visualization,
-        },
-        dataViews: payload.dataViews,
       };
     },
     [navigateAway.type]: (state) => state,
