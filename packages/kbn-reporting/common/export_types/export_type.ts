@@ -22,12 +22,12 @@ import {
   IClusterClient,
 } from '@kbn/core/server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { ReportingStart } from '@kbn/reporting-plugin/server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import type { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
-import type { ReportingServerInfo } from '@kbn/reporting-plugin/server/core';
-import type { CreateJobFn, ReportingStart, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+import { ReportingConfigType } from './reporting_config_type';
+import { CreateJobFn, ReportingServerInfo, RunTaskFn } from './types';
 
 export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;

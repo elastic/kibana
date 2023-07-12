@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
+import { ReportingConfigType } from './reporting_config_type';
 
 describe('getFullRedirectAppUrl', () => {
   const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;

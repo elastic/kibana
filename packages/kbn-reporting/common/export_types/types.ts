@@ -6,8 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { CustomRequestHandlerContext } from '@kbn/core/server';
+import { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
+import { Writable } from 'stream';
+import { CancellationToken } from '../cancellation_token';
+import { BaseParams, BasePayload } from './base';
+import { TaskRunResult } from './metrics';
+
+// standard type for create job function of any ExportType implementation
+export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
+  jobParams: JobParamsType,
+  context: ReportingRequestHandlerContext,
+  req: KibanaRequest
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
+
+// standard type for run task function of any ExportType implementation
+export type RunTaskFn<TaskPayloadType = BasePayload> = (
+  jobId: string,
+  payload: TaskPayloadType,
+  cancellationToken: CancellationToken,
+  stream: Writable
+) => Promise<TaskRunResult>;
 
 // @TODO ReportingStart is imported from reporting-plugin/server
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

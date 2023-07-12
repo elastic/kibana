@@ -4926,6 +4926,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-export-types-common@link:packages/kbn-reporting/export_types/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-export-types-csv@link:packages/kbn-reporting/export_types/csv":
   version "0.0.0"
   uid ""

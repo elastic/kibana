@@ -7,7 +7,7 @@
  */
 
 import type { Headers, IUiSettingsClient } from '@kbn/core/server';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '.';
+import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../constants';
 
 export const getCustomLogo = async (uiSettingsClient: IUiSettingsClient, headers: Headers) => {
   const logo: string = await uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
