@@ -33,6 +33,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { WebhookAuthType, SSLCertType } from '../../../common/webhook/constants';
 import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];
@@ -47,14 +48,13 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   });
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const authTypeDefaultValue =
-    getFieldDefaultValue('config.authType') ?? 'webhook-authentication-basic';
-  const certTypeDefaultValue = getFieldDefaultValue('config.certType') ?? 'ssl-crt-key';
+  const authTypeDefaultValue = getFieldDefaultValue('config.authType') ?? WebhookAuthType.Basic;
+  const certTypeDefaultValue = getFieldDefaultValue('config.certType') ?? SSLCertType.CRT;
 
   const hasAuth = config == null ? true : config.hasAuth;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
-  const authType = config == null ? 'webhook-authentication-basic' : config.authType;
-  const certType = config == null ? 'ssl-crt-key' : config.certType;
+  const authType = config == null ? WebhookAuthType.Basic : config.authType;
+  const certType = config == null ? SSLCertType.CRT : config.certType;
 
   return (
     <>
@@ -136,11 +136,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               euiFieldProps: {
                 options: [
                   {
-                    id: 'webhook-authentication-basic',
+                    id: WebhookAuthType.Basic,
                     label: i18n.AUTHENTICATION_BASIC,
                   },
                   {
-                    id: 'webhook-authentication-ssl',
+                    id: WebhookAuthType.SSL,
                     label: i18n.AUTHENTICATION_SSL,
                   },
                 ],
@@ -151,7 +151,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             }}
           />
           <EuiSpacer size="s" />
-          {authType === 'webhook-authentication-basic' && (
+          {authType === WebhookAuthType.Basic && (
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
                 <UseField
@@ -197,18 +197,13 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             </EuiFlexGroup>
           )}
 
-          {authType === 'webhook-authentication-ssl' && (
+          {authType === WebhookAuthType.SSL && (
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
                 <UseField
                   path="secrets.password"
                   config={{
                     label: i18n.PASSWORD_LABEL,
-                    validations: [
-                      {
-                        validator: emptyField(i18n.PASSWORD_REQUIRED),
-                      },
-                    ],
                   }}
                   component={PasswordField}
                   componentProps={{
@@ -227,11 +222,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                     euiFieldProps: {
                       options: [
                         {
-                          id: 'ssl-crt-key',
+                          id: SSLCertType.CRT,
                           label: i18n.CERT_TYPE_CRT_KEY,
                         },
                         {
-                          id: 'ssl-pfx',
+                          id: SSLCertType.PFX,
                           label: i18n.CERT_TYPE_PFX,
                         },
                       ],
@@ -242,7 +237,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                   }}
                 />
                 <EuiSpacer size="s" />
-                {certType === 'ssl-crt-key' && (
+                {certType === SSLCertType.CRT && (
                   <EuiFlexGroup>
                     <EuiFlexItem>
                       <UseField
@@ -286,7 +281,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}
-                {certType === 'ssl-pfx' && (
+                {certType === SSLCertType.PFX && (
                   <UseField
                     path="secrets.pfx"
                     config={{

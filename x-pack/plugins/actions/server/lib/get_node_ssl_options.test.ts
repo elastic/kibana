@@ -34,15 +34,45 @@ describe('getNodeSSLOptions', () => {
   test('get node.js SSL options: rejectUnauthorized eql true for the verification mode value which does not exist, the logger called with the proper warning message', () => {
     const nodeOption = getNodeSSLOptions(logger, 'notexist');
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        "Unknown ssl verificationMode: notexist",
-      ],
-    ]
-  `);
+          Array [
+            Array [
+              "Unknown ssl verificationMode: notexist",
+            ],
+          ]
+      `);
     expect(nodeOption).toMatchObject({
       rejectUnauthorized: true,
     });
+  });
+
+  test('appends additional SSL options', () => {
+    const nodeOption = getNodeSSLOptions(logger, 'none', {
+      pfx: Buffer.from("Hi i'm a pfx"),
+      passphrase: 'aaaaaaa',
+    });
+    expect(nodeOption).toMatchInlineSnapshot(`
+      Object {
+        "passphrase": "aaaaaaa",
+        "pfx": Object {
+          "data": Array [
+            72,
+            105,
+            32,
+            105,
+            39,
+            109,
+            32,
+            97,
+            32,
+            112,
+            102,
+            120,
+          ],
+          "type": "Buffer",
+        },
+        "rejectUnauthorized": false,
+      }
+    `);
   });
 });
 

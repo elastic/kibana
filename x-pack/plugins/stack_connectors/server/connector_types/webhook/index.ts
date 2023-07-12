@@ -54,8 +54,8 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
-  authType: schema.string({ defaultValue: 'webhook-authentication-basic' }),
-  certType: schema.nullable(schema.string()),
+  authType: schema.maybe(schema.string()),
+  certType: schema.maybe(schema.string()),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -63,22 +63,22 @@ export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  crt: schema.nullable(schema.string()),
-  key: schema.nullable(schema.string()),
-  pfx: schema.nullable(schema.string()),
+  user: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string()),
+  crt: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  pfx: schema.maybe(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
     // user and password must be set together (or not at all)
     if (!secrets.password && !secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
     if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
-    if (secrets.password && secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
-    if (secrets.password && !secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
+    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
+    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
     return i18n.translate('xpack.stackConnectors.webhook.invalidUsernamePassword', {
       defaultMessage:
-        'must specify one of the following schemas: user and password; crt, key, and password; or pfx and password',
+        'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)',
     });
   },
 });

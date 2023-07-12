@@ -22,6 +22,8 @@ import {
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
+import { PFX_FILE, CRT_FILE, KEY_FILE } from './mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -69,15 +71,59 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: both user and password must be specified"`
+      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)"`
     );
   });
 
   test('succeeds when basic authentication credentials are omitted', () => {
-    expect(validateSecrets(connectorType, {}, { configurationUtilities })).toEqual({
-      password: null,
-      user: null,
-    });
+    expect(validateSecrets(connectorType, {}, { configurationUtilities })).toEqual({});
+  });
+
+  test('succeeds when secrets contains a certificate and keyfile', () => {
+    const secrets: Record<string, string> = {
+      password: 'supersecret',
+      crt: CRT_FILE,
+      key: KEY_FILE,
+    };
+    expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
+
+    const secretsWithoutPassword: Record<string, string> = {
+      crt: CRT_FILE,
+      key: KEY_FILE,
+    };
+
+    expect(
+      validateSecrets(connectorType, secretsWithoutPassword, { configurationUtilities })
+    ).toEqual(secretsWithoutPassword);
+  });
+
+  test('succeeds when secrets contains a pfx', () => {
+    const secrets: Record<string, string> = {
+      password: 'supersecret',
+      pfx: PFX_FILE,
+    };
+    expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
+
+    const secretsWithoutPassword: Record<string, string> = {
+      pfx: PFX_FILE,
+    };
+
+    expect(
+      validateSecrets(connectorType, secretsWithoutPassword, { configurationUtilities })
+    ).toEqual(secretsWithoutPassword);
+  });
+
+  test('fails when secret crt is provided but key omitted, or vice versa', () => {
+    expect(() => {
+      validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)"`
+    );
+    expect(() => {
+      validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)"`
+    );
   });
 });
 
@@ -120,10 +166,10 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [method]: types that failed validation:
-- [method.0]: expected value to equal [post]
-- [method.1]: expected value to equal [put]"
-`);
+      "error validating action type config: [method]: types that failed validation:
+      - [method.0]: expected value to equal [post]
+      - [method.1]: expected value to equal [put]"
+    `);
   });
 
   test('config validation passes when a url is specified', () => {
@@ -172,10 +218,10 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [headers]: types that failed validation:
-- [headers.0]: could not parse record value from json input
-- [headers.1]: expected value to equal [null]"
-`);
+      "error validating action type config: [headers]: types that failed validation:
+      - [headers.0]: could not parse record value from json input
+      - [headers.1]: expected value to equal [null]"
+    `);
   });
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
@@ -261,6 +307,7 @@ describe('execute()', () => {
         aheader: 'a value',
       },
       hasAuth: true,
+      authType: WebhookAuthType.Basic,
     };
     await connectorType.executor({
       actionId: 'some-id',
@@ -314,6 +361,155 @@ describe('execute()', () => {
     `);
   });
 
+  test('execute with ssl adds ssl settings to configuration utilities', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      hasAuth: true,
+      authType: WebhookAuthType.SSL,
+      certType: SSLCertType.CRT,
+    };
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { crt: CRT_FILE, key: KEY_FILE, password: 'passss' },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+    });
+
+    expect(configurationUtilities.getSSLSettings()).toMatchInlineSnapshot(`
+      Object {
+        "cert": Object {
+          "data": Array [
+            10,
+            45,
+            45,
+            45,
+            45,
+            45,
+            66,
+            69,
+            71,
+            73,
+            78,
+            32,
+            67,
+            69,
+            82,
+            84,
+            73,
+            70,
+            73,
+            67,
+            65,
+            84,
+            69,
+            45,
+            45,
+            45,
+            45,
+            45,
+            10,
+            45,
+            45,
+            45,
+            45,
+            45,
+            69,
+            78,
+            68,
+            32,
+            67,
+            69,
+            82,
+            84,
+            73,
+            70,
+            73,
+            67,
+            65,
+            84,
+            69,
+            45,
+            45,
+            45,
+            45,
+            45,
+            10,
+          ],
+          "type": "Buffer",
+        },
+        "key": Object {
+          "data": Array [
+            10,
+            45,
+            45,
+            45,
+            45,
+            45,
+            66,
+            69,
+            71,
+            73,
+            78,
+            32,
+            80,
+            82,
+            73,
+            86,
+            65,
+            84,
+            69,
+            32,
+            75,
+            69,
+            89,
+            45,
+            45,
+            45,
+            45,
+            45,
+            10,
+            45,
+            45,
+            45,
+            45,
+            45,
+            69,
+            78,
+            68,
+            32,
+            80,
+            82,
+            73,
+            86,
+            65,
+            84,
+            69,
+            32,
+            75,
+            69,
+            89,
+            45,
+            45,
+            45,
+            45,
+            45,
+            10,
+          ],
+          "type": "Buffer",
+        },
+        "passphrase": "passss",
+        "verificationMode": "none",
+      }
+    `);
+  });
+
   test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
@@ -352,7 +548,7 @@ describe('execute()', () => {
       },
       hasAuth: false,
     };
-    const secrets: ConnectorTypeSecretsType = { user: null, password: null };
+    const secrets: ConnectorTypeSecretsType = {};
     await connectorType.executor({
       actionId: 'some-id',
       services,
