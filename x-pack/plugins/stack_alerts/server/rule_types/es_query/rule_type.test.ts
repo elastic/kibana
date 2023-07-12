@@ -95,6 +95,10 @@ describe('ruleType', () => {
             "description": "The index the query was run against.",
             "name": "index",
           },
+          Object {
+            "description": "ESQL query field used to fetch data from Elasticsearch.",
+            "name": "esqlQuery",
+          },
         ],
       }
     `);
