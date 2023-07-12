@@ -133,7 +133,10 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
     ]);
   };
 
-  expect(alertsA.map(mapAlert)).to.eql(alertsB.map(mapAlert));
+  const sort = (alerts: any[]) =>
+    alerts.sort((a: any, b: any) => a.message.localeCompare(b.message));
+
+  expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
 }
 
 // eslint-disable-next-line import/no-default-export

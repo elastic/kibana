@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useCallback, useEffect } from 'react';
-import { useKibana, useNavigation } from '../../common/lib/kibana';
+import { KibanaServices, useKibana, useNavigation } from '../../common/lib/kibana';
 import type { ICasesDeepLinkId } from '../../common/navigation';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -84,6 +84,7 @@ export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
           ]
         : []),
     ]);
+    KibanaServices.get().serverless?.setBreadcrumbs([]);
   }, [pageDeepLink, appTitle, getAppUrl, applyBreadcrumbs]);
 };
 
@@ -93,16 +94,18 @@ export const useCasesTitleBreadcrumbs = (caseTitle: string) => {
   const applyBreadcrumbs = useApplyBreadcrumbs();
 
   useEffect(() => {
+    const titleBreadcrumb: ChromeBreadcrumb = {
+      text: caseTitle,
+    };
     const casesBreadcrumbs: ChromeBreadcrumb[] = [
       { text: appTitle, href: getAppUrl() },
       {
         text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
         href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
       },
-      {
-        text: caseTitle,
-      },
+      titleBreadcrumb,
     ];
     applyBreadcrumbs(casesBreadcrumbs);
+    KibanaServices.get().serverless?.setBreadcrumbs([titleBreadcrumb]);
   }, [caseTitle, appTitle, getAppUrl, applyBreadcrumbs]);
 };

@@ -357,6 +357,15 @@ export const CodeEditor: React.FC<Props> = ({
     ]
   );
 
+  useEffect(() => {
+    // Register themes when 'useDarkThem' changes
+    monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    monaco.editor.defineTheme(
+      'euiColorsTransparent',
+      useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    );
+  }, [useDarkTheme]);
+
   const _editorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
       if (__monaco !== monaco) {

@@ -358,8 +358,6 @@ export class SyntheticsMonitorClient {
 
   async inspectMonitor(
     monitorObj: { monitor: MonitorFields; id: string },
-    request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract,
     allPrivateLocations: PrivateLocation[],
     spaceId: string,
     hideParams: boolean,
