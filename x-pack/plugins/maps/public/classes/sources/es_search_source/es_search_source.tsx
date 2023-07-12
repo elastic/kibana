@@ -108,7 +108,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   protected readonly _tooltipFields: ESDocField[];
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
-    const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor) as AbstractESSourceDescriptor & Partial<ESSearchSourceDescriptor>;
+    const normalizedDescriptor = AbstractESSource.createDescriptor(
+      descriptor
+    ) as AbstractESSourceDescriptor & Partial<ESSearchSourceDescriptor>;
     if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESSearchSourceDescriptor without a geoField');
     }
