@@ -582,6 +582,7 @@ export interface PackageAssetReference {
 export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;
+  runtime?: any;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101

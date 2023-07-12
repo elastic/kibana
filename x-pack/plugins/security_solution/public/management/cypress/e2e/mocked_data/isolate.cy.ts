@@ -24,6 +24,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
+import { loadPage } from '../../tasks/common';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
@@ -78,7 +79,7 @@ describe('Isolate command', () => {
     });
 
     it('should allow filtering endpoint by Isolated status', () => {
-      cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
+      loadPage(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
       isolatedEndpointHostnames.forEach(checkEndpointIsIsolated);
@@ -130,7 +131,7 @@ describe('Isolate command', () => {
       let isolateRequestResponse: ActionDetails;
       let releaseRequestResponse: ActionDetails;
 
-      cy.visit(APP_ALERTS_PATH);
+      loadPage(APP_ALERTS_PATH);
       closeAllToasts();
 
       cy.getByTestSubj('alertsTable').within(() => {
@@ -189,8 +190,7 @@ describe('Isolate command', () => {
     });
   });
 
-  // Flaky: https://github.com/elastic/security-team/issues/7048
-  describe.skip('from Cases', () => {
+  describe('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
@@ -257,7 +257,7 @@ describe('Isolate command', () => {
       const releaseComment = `Releasing ${hostname}`;
       const caseAlertId = caseAlertActions.comments[alertId];
 
-      cy.visit(caseUrlPath);
+      loadPage(caseUrlPath);
       closeAllToasts();
       openCaseAlertDetails(caseAlertId);
 

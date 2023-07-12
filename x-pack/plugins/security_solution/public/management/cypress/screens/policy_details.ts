@@ -15,11 +15,11 @@ import type {
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import { APP_POLICIES_PATH } from '../../../../common/constants';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
-import { request } from '../tasks/common';
+import { request, loadPage } from '../tasks/common';
 import { expectAndCloseSuccessToast } from '../tasks/toasts';
 
 export const visitPolicyDetailsPage = () => {
-  cy.visit(APP_POLICIES_PATH);
+  loadPage(APP_POLICIES_PATH);
 
   cy.getByTestSubj('policyNameCellLink').eq(0).click({ force: true });
   cy.getByTestSubj('policyDetailsPage').should('exist');
