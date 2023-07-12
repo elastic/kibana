@@ -32,6 +32,7 @@ import type {
   PackageDataStreamTypes,
   PackageList,
   InstalledPackage,
+  PackageSpecManifest,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -197,19 +198,17 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
   const integrationManifests =
     integrations.length > 0
       ? await getInstalledPackageManifests(savedObjectsClient, integrations)
-      : [];
+      : new Map<string, PackageSpecManifest>();
 
   const integrationsWithManifestContent = integrations.map((integration) => {
     const { name, version } = integration;
-    const integrationAsset = integrationManifests.find((asset) => {
-      return asset.assetPath.startsWith(`${name}-${version}`);
-    });
+    const integrationAsset = integrationManifests.get(`${name}-${version}/manifest.yml`);
 
     return {
       ...integration,
-      title: integrationAsset?.manifest.title ?? undefined,
-      description: integrationAsset?.manifest.description ?? undefined,
-      icons: integrationAsset?.manifest.icons ?? undefined,
+      title: integrationAsset?.title ?? undefined,
+      description: integrationAsset?.description ?? undefined,
+      icons: integrationAsset?.icons ?? undefined,
     };
   });
 
@@ -332,10 +331,10 @@ export async function getInstalledPackageSavedObjects(
 
 export async function getInstalledPackageManifests(
   savedObjectsClient: SavedObjectsClientContract,
-  packages: InstalledPackage[]
+  installedPackages: InstalledPackage[]
 ) {
-  const pathFilters = packages.map((_package) => {
-    const { name, version } = _package;
+  const pathFilters = installedPackages.map((installedPackage) => {
+    const { name, version } = installedPackage;
     return nodeBuilder.is(
       `${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path`,
       `${name}-${version}/manifest.yml`
@@ -347,12 +346,13 @@ export async function getInstalledPackageManifests(
     filter: nodeBuilder.or(pathFilters),
   });
 
-  const parsedManifests = result.saved_objects.map((asset) => {
-    return {
-      assetPath: asset.attributes.asset_path,
-      manifest: yaml.load(asset.attributes.data_utf8),
-    };
-  });
+  const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
+    (acc, asset) => {
+      acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
+      return acc;
+    },
+    new Map()
+  );
 
   for (const savedObject of result.saved_objects) {
     auditLoggingService.writeCustomSoAuditLog({
