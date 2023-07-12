@@ -77,6 +77,8 @@ export const getPolicySettingsFormTestSubjects = (
     },
     behaviour: {
       card: behaviourTestSubj(),
+      lockedCard: behaviourTestSubj('locked'),
+      lockedCardTitle: behaviourTestSubj('locked-title'),
       enableDisableSwitch: behaviourTestSubj('enableDisableSwitch'),
       protectionPreventRadio: behaviourTestSubj('protectionLevel-preventRadio'),
       protectionDetectRadio: behaviourTestSubj('protectionLevel-detectRadio'),
