@@ -11,9 +11,8 @@ import {
   EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
+import { sloEditLocatorID } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { encode } from '@kbn/rison';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -26,13 +25,6 @@ interface Props {
   transactionType?: string;
   transactionName?: string;
 }
-type RecursivePartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<RecursivePartial<U>>
-    : T[P] extends object | undefined
-    ? RecursivePartial<T[P]>
-    : T[P];
-};
 
 export function SloCallout({
   dismissCallout,
@@ -41,21 +33,35 @@ export function SloCallout({
   transactionType,
   transactionName,
 }: Props) {
-  const { core } = useApmPluginContext();
-  const { basePath } = core.http;
-
-  const sloInput: RecursivePartial<CreateSLOInput> = {
-    indicator: {
-      type: 'sli.apm.transactionErrorRate',
-      params: {
-        service: serviceName,
-        environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
-        transactionName: transactionName ?? '',
-        transactionType: transactionType ?? '',
+  const {
+    plugins: {
+      share: {
+        url: { locators },
       },
     },
+  } = useApmPluginContext();
+
+  const handleClick = () => {
+    const locator = locators.get(sloEditLocatorID);
+
+    locator?.navigate(
+      {
+        indicator: {
+          type: 'sli.apm.transactionErrorRate',
+          params: {
+            service: serviceName,
+            environment:
+              environment === ENVIRONMENT_ALL.value ? '*' : environment,
+            transactionName: transactionName,
+            transactionType: transactionType,
+          },
+        },
+      },
+      {
+        replace: false,
+      }
+    );
   };
-  const sloParams = `?_a=${encode(sloInput)}`;
 
   return (
     <EuiCallOut
@@ -76,12 +82,7 @@ export function SloCallout({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiLink
-                data-test-subj="apmCreateSloLink"
-                href={basePath.prepend(
-                  `/app/observability/slos/create${sloParams}`
-                )}
-              >
+              <EuiLink data-test-subj="apmCreateSloLink" onClick={handleClick}>
                 <EuiButton
                   data-test-subj="apmSloCalloutCreateSloButton"
                   onClick={() => {
