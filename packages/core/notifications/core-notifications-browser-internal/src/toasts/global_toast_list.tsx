@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Toast } from '@kbn/core-notifications-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
+import { deduplicateToasts } from './deduplicate_toasts';
 
 interface Props {
   toasts$: Observable<Toast[]>;
@@ -38,7 +39,7 @@ export class GlobalToastList extends React.Component<Props, State> {
 
   public componentDidMount() {
     this.subscription = this.props.toasts$.subscribe((toasts) => {
-      this.setState({ toasts });
+      this.setState({ toasts: deduplicateToasts(toasts, this.props.dismissToast) });
     });
   }
 
