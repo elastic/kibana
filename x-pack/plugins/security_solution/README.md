@@ -140,5 +140,5 @@ yarn mappings:generate --fieldsCount=10000 --indexCount=500 --indexPrefix='.ds-h
 #### Load generated mappings
 
 ```bash
-yarn mappings:load --mappings-dir='mappings_folder'
+yarn mappings:load --mappings-dir='mappings_folder' --es-url=http://username:password@localhost:9200 --kibana-url=http://username:password@localhost:5601/app
 ```
