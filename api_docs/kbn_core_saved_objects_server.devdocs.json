@@ -6136,18 +6136,6 @@
             "path": "x-pack/plugins/actions/server/types.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/common/rule.ts"
           },
