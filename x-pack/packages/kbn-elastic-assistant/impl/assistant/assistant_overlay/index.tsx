@@ -60,7 +60,7 @@ export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationId(localStorageLastConversationId || WELCOME_CONVERSATION_TITLE);
+      setConversationId(localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE);
     }
 
     setIsModalVisible(!isModalVisible);
