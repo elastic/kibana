@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
-import { DashboardContainerInput } from '../../../../common';
+import { DashboardContainerInput, extractReferences } from '../../../../common';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
@@ -21,22 +20,22 @@ type UpdateDashboardMetaProps = Pick<
 interface UpdateDashboardMetaDependencies {
   contentManagement: DashboardStartDependencies['contentManagement'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
+  embeddable: DashboardContentManagementRequiredServices['embeddable'];
 }
 
 export const updateDashboardMeta = async (
   { id, title, description = '', tags }: UpdateDashboardMetaProps,
-  { contentManagement, savedObjectsTagging }: UpdateDashboardMetaDependencies
+  { contentManagement, savedObjectsTagging, embeddable }: UpdateDashboardMetaDependencies
 ) => {
   const [dashboard] = await findDashboardsByIds(contentManagement, [id]);
   if (dashboard.status === 'error') {
-    return dashboard;
+    return '';
   }
 
-  const dashboardReferences = [] as Reference[];
   const references =
     savedObjectsTagging.updateTagsReferences && tags.length
-      ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
-      : dashboardReferences;
+      ? savedObjectsTagging.updateTagsReferences(dashboard.references, tags)
+      : dashboard.references;
 
   return await contentManagement.client.update<
     DashboardCrudTypes['UpdateIn'],
@@ -44,7 +43,7 @@ export const updateDashboardMeta = async (
   >({
     contentTypeId: DASHBOARD_CONTENT_ID,
     id,
-    data: { ...dashboard.attributes, title, description },
+    data: { title, description },
     options: { references },
   });
 };

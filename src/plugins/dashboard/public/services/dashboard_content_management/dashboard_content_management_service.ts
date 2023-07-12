@@ -81,6 +81,6 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
       checkForDuplicateDashboardTitle(props, contentManagement),
     deleteDashboards: (ids) => deleteDashboards(ids, contentManagement),
     updateDashboardMeta: (props) =>
-      updateDashboardMeta(props, { contentManagement, savedObjectsTagging }),
+      updateDashboardMeta(props, { contentManagement, savedObjectsTagging, embeddable }),
   };
 };

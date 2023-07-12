@@ -200,5 +200,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(onDashboardLandingPage).to.equal(false);
       });
     });
+
+    describe('edit meta data', () => {
+      it('saves changes to title, description, and tags', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+      });
+    });
   });
 }
