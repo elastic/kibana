@@ -99,21 +99,19 @@ export function useMonitorErrors(monitorIdArg?: string) {
     const defaultValues = { upStates: [], errorStates: [] };
     // re-bucket states into error/up
     // including the `up` states is useful for determining error duration
-    const reduced =
+    const { errorStates, upStates } =
       data?.aggregations?.states.buckets.reduce<{
         upStates: PingState[];
         errorStates: PingState[];
       }>((prev, cur) => {
-        const source = cur.summary.hits.hits?.[0]._source as unknown as PingState | undefined;
+        const source = cur.summary.hits.hits?.[0]._source as PingState | undefined;
         if (source?.state.up === 0) {
           prev.errorStates.push(source as PingState);
-        } else if (source?.state.up !== undefined && source?.state.up >= 1) {
+        } else if (!!source?.state.up && source.state.up >= 1) {
           prev.upStates.push(source as PingState);
         }
         return prev;
       }, defaultValues) ?? defaultValues;
-
-    const { errorStates, upStates } = reduced;
 
     const hasActiveError: boolean =
       data?.aggregations?.latest.hits.hits.length === 1 &&
