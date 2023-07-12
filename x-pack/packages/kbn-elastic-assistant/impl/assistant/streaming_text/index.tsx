@@ -12,7 +12,7 @@ export interface StreamingTextProps {
   children?: (text: string, isStreamingComplete: boolean) => React.ReactNode;
   chunkSize?: number;
   delay?: number;
-  onStreamingComplete?: () => void;
+  onStreamingComplete: () => void;
 }
 
 export const StreamingText: React.FC<StreamingTextProps> = React.memo<StreamingTextProps>(
@@ -22,7 +22,7 @@ export const StreamingText: React.FC<StreamingTextProps> = React.memo<StreamingT
 
     useEffect(() => {
       if (delay === 0) {
-        onStreamingComplete?.();
+        onStreamingComplete();
       }
       // Only run on initial render so onStreamingComplete is only called once if delay is 0
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,7 +37,7 @@ export const StreamingText: React.FC<StreamingTextProps> = React.memo<StreamingT
       setIsStreamingComplete(false);
       const interval = setInterval(() => {
         if (currentPos >= text.length) {
-          onStreamingComplete?.();
+          onStreamingComplete();
           setIsStreamingComplete(true);
           clearInterval(interval);
           return;

@@ -103,11 +103,13 @@ export const useConnectorSetup = ({
 
   // Once streaming of previous message is complete, proceed to next message
   const onHandleMessageStreamingComplete = useCallback(() => {
-    const timeoutId = setTimeout(() => {
+    setTimeout(() => {
       bottomRef.current?.scrollIntoView({ block: 'end' });
+      if (currentMessageIndex >= MESSAGE_INDEX_BEFORE_CONNECTOR) {
+        return;
+      }
       return setCurrentMessageIndex(currentMessageIndex + 1);
     }, conversation.messages[currentMessageIndex]?.presentation?.delay ?? 0);
-    return () => clearTimeout(timeoutId);
   }, [conversation.messages, currentMessageIndex]);
 
   // Show button to add connector after last message has finished streaming
@@ -121,7 +123,8 @@ export const useConnectorSetup = ({
   // Show button to add connector after last message has finished streaming
   const handleSkipSetup = useCallback(() => {
     setCurrentMessageIndex(MESSAGE_INDEX_BEFORE_CONNECTOR);
-  }, [setCurrentMessageIndex]);
+    onHandleLastMessageStreamingComplete();
+  }, [onHandleLastMessageStreamingComplete]);
 
   // Create EuiCommentProps[] from conversation messages
   const commentBody = useCallback(
@@ -135,7 +138,10 @@ export const useConnectorSetup = ({
       }
       const isLastMessage = index === length - 1;
       const enableStreaming =
-        (message?.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
+        (message?.presentation?.stream ?? false) &&
+        currentMessageIndex !== length - 1 &&
+        index < MESSAGE_INDEX_BEFORE_CONNECTOR;
+
       return (
         <StreamingText
           text={message.content}
@@ -144,7 +150,7 @@ export const useConnectorSetup = ({
             isLastMessage ? onHandleLastMessageStreamingComplete : onHandleMessageStreamingComplete
           }
         >
-          {(streamedText, isStreamingComplete) => (
+          {(streamedText) => (
             <EuiText>
               <EuiMarkdownFormat className={`message-${index}`}>{streamedText}</EuiMarkdownFormat>
               <span ref={bottomRef} />

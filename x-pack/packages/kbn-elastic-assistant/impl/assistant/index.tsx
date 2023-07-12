@@ -126,10 +126,7 @@ const AssistantComponent: React.FC<Props> = ({
     return doesConversationHaveMessages
       ? {
           ...conversation,
-          messages: [
-            ...conversation.messages,
-            ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
-          ],
+          messages: [...conversation.messages],
         }
       : {
           ...conversation,
