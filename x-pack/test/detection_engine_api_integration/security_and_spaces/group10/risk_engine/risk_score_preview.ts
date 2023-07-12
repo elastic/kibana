@@ -24,10 +24,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: RiskScore[] }> => {
+    const defaultBody = { data_view_id: '.alerts-security.alerts-default' };
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
       .set('kbn-xsrf', 'true')
-      .send(body)
+      .send({ ...defaultBody, ...body })
       .expect(200);
     return result;
   };
