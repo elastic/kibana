@@ -3488,10 +3488,6 @@
                 "path": "x-pack/plugins/actions/server/routes/legacy/list_action_types.ts"
               },
               {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/scripts/route.ts"
               },
@@ -6266,10 +6262,6 @@
                 "path": "src/plugins/content_management/server/rpc/routes/routes.ts"
               },
               {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
-              },
-              {
                 "plugin": "data",
                 "path": "src/plugins/data/server/kql_telemetry/route.ts"
               },
@@ -6388,6 +6380,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/finish_maintenance_window.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_rules.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/fields_rules.ts"
               },
               {
                 "plugin": "alerting",
@@ -7242,10 +7242,6 @@
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_slack_api_channels.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/server.ts"
               },
@@ -7934,6 +7930,18 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/update_maintenance_window.test.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/fileds_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/fileds_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/suggestions/values_suggestion_rules.test.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/add_route.test.ts"
               },
@@ -8530,10 +8538,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/legacy/update.ts"
-              },
-              {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
                 "plugin": "alerting",
@@ -9666,10 +9670,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/legacy/delete.ts"
-              },
-              {
-                "plugin": "bfetch",
-                "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
                 "plugin": "share",
@@ -13707,6 +13707,10 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
               },
@@ -14431,6 +14435,10 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
               },
@@ -14615,6 +14623,10 @@
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
               },
               {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/public/fields/update_fields.ts"
               },
@@ -14689,6 +14701,10 @@
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/server/routes/explain_log_rate_spikes.ts"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
               },
               {
                 "plugin": "ml",
@@ -15043,10 +15059,6 @@
                 "path": "x-pack/plugins/osquery/server/routes/asset/update_assets_route.ts"
               },
               {
-                "plugin": "unifiedSearch",
-                "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_upload_handler.ts"
               },
@@ -15321,6 +15333,10 @@
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts"
+              },
+              {
+                "plugin": "bfetch",
+                "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
                 "plugin": "dataViews",

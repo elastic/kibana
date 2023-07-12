@@ -103,7 +103,7 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Applications',
       },
       {
-        id: 'standaloneExperiences',
+        id: 'enterpriseSearch',
         items: [
           {
             href: '/app/enterprise_search/app_search',
@@ -116,7 +116,7 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Workplace Search',
           },
         ],
-        name: 'Standalone Experiences',
+        name: 'Enterprise Search',
       },
     ]);
   });
@@ -136,8 +136,8 @@ describe('useEnterpriseSearchContentNav', () => {
     mockKibanaValues.uiSettings.get.mockReturnValue(false);
 
     const esNav = useEnterpriseSearchNav();
-    const standAloneNav = esNav?.find((item) => item.id === 'standaloneExperiences');
-    expect(standAloneNav).toBeUndefined();
+    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
+    expect(legacyESNav).toBeUndefined();
   });
 
   it('excludes App Search when the user has no access to it', () => {
@@ -154,10 +154,10 @@ describe('useEnterpriseSearchContentNav', () => {
     });
 
     const esNav = useEnterpriseSearchNav();
-    const standAloneNav = esNav?.find((item) => item.id === 'standaloneExperiences');
-    expect(standAloneNav).not.toBeUndefined();
-    expect(standAloneNav).toEqual({
-      id: 'standaloneExperiences',
+    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
+    expect(legacyESNav).not.toBeUndefined();
+    expect(legacyESNav).toEqual({
+      id: 'enterpriseSearch',
       items: [
         {
           href: '/app/enterprise_search/workplace_search',
@@ -165,7 +165,7 @@ describe('useEnterpriseSearchContentNav', () => {
           name: 'Workplace Search',
         },
       ],
-      name: 'Standalone Experiences',
+      name: 'Enterprise Search',
     });
   });
 
@@ -182,10 +182,10 @@ describe('useEnterpriseSearchContentNav', () => {
     });
 
     const esNav = useEnterpriseSearchNav();
-    const standAloneNav = esNav?.find((item) => item.id === 'standaloneExperiences');
-    expect(standAloneNav).not.toBeUndefined();
-    expect(standAloneNav).toEqual({
-      id: 'standaloneExperiences',
+    const legacyESNav = esNav?.find((item) => item.id === 'enterpriseSearch');
+    expect(legacyESNav).not.toBeUndefined();
+    expect(legacyESNav).toEqual({
+      id: 'enterpriseSearch',
       items: [
         {
           href: '/app/enterprise_search/app_search',
@@ -193,7 +193,7 @@ describe('useEnterpriseSearchContentNav', () => {
           name: 'App Search',
         },
       ],
-      name: 'Standalone Experiences',
+      name: 'Enterprise Search',
     });
   });
 });
@@ -271,7 +271,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
         name: 'Applications',
       },
       {
-        id: 'standaloneExperiences',
+        id: 'enterpriseSearch',
         items: [
           {
             href: '/app/enterprise_search/app_search',
@@ -284,7 +284,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             name: 'Workplace Search',
           },
         ],
-        name: 'Standalone Experiences',
+        name: 'Enterprise Search',
       },
     ]);
   });
@@ -296,7 +296,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
       'Overview',
       'Content',
       'Applications',
-      'Standalone Experiences',
+      'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'applications');
     expect(searchItem).not.toBeUndefined();
@@ -352,7 +352,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
       'Overview',
       'Content',
       'Applications',
-      'Standalone Experiences',
+      'Enterprise Search',
     ]);
     const searchItem = navItems?.find((ni) => ni.id === 'applications');
     expect(searchItem).not.toBeUndefined();
@@ -463,7 +463,7 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
       name: 'Applications',
     },
     {
-      id: 'standaloneExperiences',
+      id: 'enterpriseSearch',
       items: [
         {
           href: '/app/enterprise_search/app_search',
@@ -476,7 +476,7 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           name: 'Workplace Search',
         },
       ],
-      name: 'Standalone Experiences',
+      name: 'Enterprise Search',
     },
   ];
 
