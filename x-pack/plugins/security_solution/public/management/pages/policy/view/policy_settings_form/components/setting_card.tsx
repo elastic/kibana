@@ -78,7 +78,12 @@ export const SettingCard: FC<SettingCardProps> = memo(
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <SettingCardHeader data-test-subj={getTestId('osTitle')}>{TITLES.os}</SettingCardHeader>
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="s"
+              alignItems="center"
+              data-test-subj={getTestId('osValueContainer')}
+            >
               <EuiFlexItem grow={false}>
                 <EuiText size="s" data-test-subj={getTestId('osValues')}>
                   {supportedOss.map((os) => OS_TITLES[os]).join(', ')}{' '}

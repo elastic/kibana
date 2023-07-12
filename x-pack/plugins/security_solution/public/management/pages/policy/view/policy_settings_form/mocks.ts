@@ -37,6 +37,7 @@ export const getPolicySettingsFormTestSubjects = (
   const windowsEventsTestSubj = genTestSubj.withPrefix('windowsEvents');
   const macEventsTestSubj = genTestSubj.withPrefix('macEvents');
   const linuxEventsTestSubj = genTestSubj.withPrefix('linuxEvents');
+  const antivirusTestSubj = genTestSubj.withPrefix('antivirusRegistration');
 
   const testSubj = {
     form: genTestSubj(),
@@ -102,7 +103,10 @@ export const getPolicySettingsFormTestSubjects = (
       fileCheckbox: linuxEventsTestSubj('file'),
     },
     antivirusRegistration: {
-      card: genTestSubj('antivirusRegistration'),
+      card: antivirusTestSubj(),
+      enableDisableSwitch: antivirusTestSubj('switch'),
+      osValueContainer: antivirusTestSubj('osValueContainer'),
+      viewOnlyValue: antivirusTestSubj('value'),
     },
     advancedSection: {
       container: advancedSectionTestSubj(''),
