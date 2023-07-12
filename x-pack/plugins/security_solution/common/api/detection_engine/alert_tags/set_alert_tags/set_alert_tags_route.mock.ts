@@ -9,5 +9,9 @@ import type { SetAlertTagsRequestBody } from './set_alert_tags_route';
 
 export const getSetAlertTagsRequestMock = (
   tagsToAdd: string[] = [],
-  tagsToRemove: string[] = []
-): SetAlertTagsRequestBody => ({ tags: { tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove } });
+  tagsToRemove: string[] = [],
+  ids: string[] = []
+): SetAlertTagsRequestBody => ({
+  tags: { tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove },
+  ids,
+});

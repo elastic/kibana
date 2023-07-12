@@ -7,16 +7,14 @@
 
 import * as t from 'io-ts';
 
-import { alert_tag_query, alert_tags } from '../../model';
+import { alert_tag_ids, alert_tags } from '../../model';
 
-export const setAlertTagsRequestBody = t.intersection([
+export const setAlertTagsRequestBody = t.exact(
   t.type({
     tags: alert_tags,
-  }),
-  t.partial({
-    query: alert_tag_query,
-  }),
-]);
+    ids: alert_tag_ids,
+  })
+);
 
 export type SetAlertTagsRequestBody = t.TypeOf<typeof setAlertTagsRequestBody>;
 export type SetAlertTagsRequestBodyDecoded = SetAlertTagsRequestBody;

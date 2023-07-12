@@ -5,31 +5,21 @@
  * 2.0.
  */
 
-import { AlertTagQuery } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { AlertTagIds } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { SetAlertTagsRequestBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const setAlertTags = ({
   tagsToAdd,
   tagsToRemove,
-  query,
+  ids,
 }: {
   tagsToAdd: string[];
   tagsToRemove: string[];
-  query?: AlertTagQuery;
+  ids: AlertTagIds;
 }): SetAlertTagsRequestBody => ({
   tags: {
     tags_to_add: tagsToAdd,
     tags_to_remove: tagsToRemove,
   },
-  query,
-});
-
-export const buildAlertTagsQuery = (alertIds: string[]) => ({
-  bool: {
-    filter: {
-      terms: {
-        _id: alertIds,
-      },
-    },
-  },
+  ids,
 });

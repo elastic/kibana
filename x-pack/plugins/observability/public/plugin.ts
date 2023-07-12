@@ -54,6 +54,7 @@ import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public'
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
@@ -223,6 +224,8 @@ export class Plugin
       new SloDetailsLocatorDefinition()
     );
 
+    const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
+
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
@@ -349,6 +352,7 @@ export class Plugin
       rulesLocator,
       ruleDetailsLocator,
       sloDetailsLocator,
+      sloEditLocator,
       getCoPilotService: () => this.coPilotService!,
     };
   }
