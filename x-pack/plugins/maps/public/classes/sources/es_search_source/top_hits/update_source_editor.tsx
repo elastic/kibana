@@ -25,10 +25,10 @@ import { IField } from '../../../fields/field';
 
 interface Props {
   filterByMapBounds: boolean;
-  groupByTimeseries: boolean;
   indexPatternId: string;
   onChange: (args: OnSourceChangeArgs) => void;
   tooltipFields: IField[];
+  topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string;
   topHitsSize: number;
   sortField: string;
@@ -149,7 +149,6 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
 
           <EuiSkeletonText lines={3} size="s" isLoading={this.state.isLoading}>
             <TopHitsForm
-              groupByTimeseries={this.props.groupByTimeseries}
               indexPatternId={this.props.indexPatternId}
               isColumnCompressed={true}
               isTimeseries={this.state.isTimeseries}
@@ -158,6 +157,7 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
               sortFields={this.state.sortFields}
               sortOrder={this.props.sortOrder}
               termFields={this.state.termFields}
+              topHitsGroupByTimeseries={this.props.topHitsGroupByTimeseries}
               topHitsSplitField={this.props.topHitsSplitField}
               topHitsSize={this.props.topHitsSize}
             />

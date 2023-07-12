@@ -167,13 +167,13 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       return (
         <TopHitsUpdateSourceEditor
           source={this}
-          groupByTimeseries={this._descriptor.topHitsGroupByTimeseries}
           indexPatternId={this.getIndexPatternId()}
           onChange={sourceEditorArgs.onChange}
           tooltipFields={this._tooltipFields}
           sortField={this._descriptor.sortField}
           sortOrder={this._descriptor.sortOrder}
           filterByMapBounds={this.isFilterByMapBounds()}
+          topHitsGroupByTimeseries={this._descriptor.topHitsGroupByTimeseries}
           topHitsSplitField={this._descriptor.topHitsSplitField}
           topHitsSize={this._descriptor.topHitsSize}
         />

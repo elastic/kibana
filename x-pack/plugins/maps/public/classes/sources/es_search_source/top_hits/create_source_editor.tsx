@@ -31,7 +31,6 @@ interface Props {
 }
 
 interface State {
-  groupByTimeseries: boolean;
   indexPattern: DataView | null;
   isTimeseries: boolean;
   geoFields: DataViewField[];
@@ -40,13 +39,13 @@ interface State {
   sortFields: DataViewField[];
   sortOrder: SortDirection;
   termFields: DataViewField[];
+  topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string | null;
   topHitsSize: number;
 }
 
 export class CreateSourceEditor extends Component<Props, State> {
   state: State = {
-    groupByTimeseries: false,
     indexPattern: null,
     isTimeseries: false,
     geoFields: [],
@@ -55,6 +54,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     sortFields: [],
     sortOrder: SortDirection.desc,
     termFields: [],
+    topHitsGroupByTimeseries: false,
     topHitsSplitField: null,
     topHitsSize: 1,
   };
@@ -65,7 +65,6 @@ export class CreateSourceEditor extends Component<Props, State> {
 
     this.setState(
       {
-        groupByTimeseries: isTimeseries,
         indexPattern,
         isTimeseries,
         geoFields,
@@ -73,6 +72,7 @@ export class CreateSourceEditor extends Component<Props, State> {
         sortField: indexPattern.timeFieldName ? indexPattern.timeFieldName : null,
         sortFields: getSortFields(indexPattern.fields),
         termFields: getTermsFields(indexPattern.fields),
+        topHitsGroupByTimeseries: isTimeseries,
         topHitsSplitField: null,
       },
       this._previewLayer
@@ -95,15 +95,15 @@ export class CreateSourceEditor extends Component<Props, State> {
     const {
       indexPattern,
       geoFieldName,
-      groupByTimeseries,
       sortField,
       sortOrder,
+      topHitsGroupByTimeseries,
       topHitsSplitField,
       topHitsSize,
     } = this.state;
 
     const tooltipProperties: string[] = [];
-    if (groupByTimeseries) {
+    if (topHitsGroupByTimeseries) {
       const timeSeriesDimensionFieldNames = (indexPattern?.fields ?? [])
         .filter((field) => {
           return field.timeSeriesDimension;
@@ -122,7 +122,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     const field = geoFieldName && indexPattern?.getFieldByName(geoFieldName);
 
     const sourceConfig =
-      indexPattern && geoFieldName && sortField && (groupByTimeseries || topHitsSplitField)
+      indexPattern && geoFieldName && sortField && (topHitsGroupByTimeseries || topHitsSplitField)
         ? {
             indexPatternId: indexPattern.id,
             geoField: geoFieldName,
@@ -130,7 +130,7 @@ export class CreateSourceEditor extends Component<Props, State> {
             sortField,
             sortOrder,
             tooltipProperties,
-            topHitsGroupByTimeseries: groupByTimeseries,
+            topHitsGroupByTimeseries,
             topHitsSplitField: topHitsSplitField ? topHitsSplitField : undefined,
             topHitsSize,
           }
@@ -156,7 +156,6 @@ export class CreateSourceEditor extends Component<Props, State> {
 
     return (
       <TopHitsForm
-        groupByTimeseries={this.state.groupByTimeseries}
         indexPatternId={this.state.indexPattern.id}
         isColumnCompressed={false}
         isTimeseries={this.state.isTimeseries}
@@ -165,6 +164,7 @@ export class CreateSourceEditor extends Component<Props, State> {
         sortFields={this.state.sortFields}
         sortOrder={this.state.sortOrder}
         termFields={this.state.termFields}
+        topHitsGroupByTimeseries={this.state.topHitsGroupByTimeseries}
         topHitsSplitField={this.state.topHitsSplitField}
         topHitsSize={this.state.topHitsSize}
       />

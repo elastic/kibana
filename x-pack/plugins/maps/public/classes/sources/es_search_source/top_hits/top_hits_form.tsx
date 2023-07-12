@@ -19,7 +19,6 @@ import { OnSourceChangeArgs } from '../../source';
 import { GroupByButtonGroup } from '../../es_geo_line_source/geo_line_form/group_by_button_group';
 
 interface Props {
-  groupByTimeseries: boolean;
   indexPatternId: string;
   isColumnCompressed?: boolean;
   isTimeseries: boolean;
@@ -28,6 +27,7 @@ interface Props {
   sortFields: DataViewField[];
   sortOrder: SortDirection;
   termFields: DataViewField[];
+  topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string | null;
   topHitsSize: number;
 }
@@ -51,8 +51,8 @@ export class TopHitsForm extends Component<Props, State> {
     this._isMounted = false;
   }
 
-  _onGroupByTimeseriesChange = (groupByTimeseries: boolean) => {
-    this.props.onChange({ propName: 'groupByTimeseries', value: groupByTimeseries });
+  _onGroupByTimeseriesChange = (topHitsGroupByTimeseries: boolean) => {
+    this.props.onChange({ propName: 'topHitsGroupByTimeseries', value: topHitsGroupByTimeseries });
   };
 
   _onTopHitsSplitFieldChange = (topHitsSplitField?: string) => {
@@ -97,13 +97,13 @@ export class TopHitsForm extends Component<Props, State> {
             display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
           >
             <GroupByButtonGroup
-              groupByTimeseries={this.props.groupByTimeseries}
+              groupByTimeseries={this.props.topHitsGroupByTimeseries}
               onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
             />
           </EuiFormRow>
         )}
 
-        {!this.props.groupByTimeseries && (
+        {!this.props.topHitsGroupByTimeseries && (
           <EuiFormRow
             label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
               defaultMessage: 'Entity',
@@ -126,10 +126,10 @@ export class TopHitsForm extends Component<Props, State> {
           </EuiFormRow>
         )}
 
-        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && (
+        {(this.props.topHitsSplitField || this.props.topHitsGroupByTimeseries) && (
           <EuiFormRow
             label={
-              this.props.groupByTimeseries
+              this.props.topHitsGroupByTimeseries
                 ? i18n.translate('xpack.maps.source.esSearch.topHitsTimeseriesSizeLabel', {
                     defaultMessage: 'Documents per time series',
                   })
@@ -154,7 +154,7 @@ export class TopHitsForm extends Component<Props, State> {
           </EuiFormRow>
         )}
 
-        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && (
+        {(this.props.topHitsSplitField || this.props.topHitsGroupByTimeseries) && (
           <EuiFormRow
             label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortFieldLabel', {
               defaultMessage: 'Sort field',
@@ -173,7 +173,7 @@ export class TopHitsForm extends Component<Props, State> {
           </EuiFormRow>
         )}
 
-        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && (
+        {(this.props.topHitsSplitField || this.props.topHitsGroupByTimeseries) && (
           <EuiFormRow
             label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortOrderLabel', {
               defaultMessage: 'Sort order',
