@@ -65,6 +65,10 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
 
   // retrieve the last preview panel (most recent)
   const mostRecentPreview = preview ? preview[preview.length - 1] : undefined;
+  const previewTitle =
+    typeof mostRecentPreview?.state?.title === 'string'
+      ? mostRecentPreview?.state?.title
+      : undefined;
   const showBackButton = preview && preview.length > 1;
   const previewSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
@@ -115,6 +119,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
           component={previewSection.component({ ...(mostRecentPreview as FlyoutPanel) })}
           showBackButton={showBackButton}
           width={previewSectionWidth}
+          title={previewTitle}
         />
       ) : null}
     </EuiFlyout>

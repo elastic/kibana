@@ -13,6 +13,9 @@ import { RightPanelProvider } from './right/context';
 import type { LeftPanelProps } from './left';
 import { LeftPanel, LeftPanelKey } from './left';
 import { LeftPanelProvider } from './left/context';
+import type { PreviewPanelProps } from './preview';
+import { PreviewPanel, PreviewPanelKey } from './preview';
+import { PreviewPanelProvider } from './preview/context';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -33,6 +36,17 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       <LeftPanelProvider {...(props as LeftPanelProps).params}>
         <LeftPanel path={props.path as LeftPanelProps['path']} />
       </LeftPanelProvider>
+    ),
+  },
+  {
+    key: PreviewPanelKey,
+    component: (props) => (
+      <PreviewPanelProvider
+        {...(props as PreviewPanelProps).params}
+        {...(props as PreviewPanelProps).state}
+      >
+        <PreviewPanel path={props.path as PreviewPanelProps['path']} />
+      </PreviewPanelProvider>
     ),
   },
 ];

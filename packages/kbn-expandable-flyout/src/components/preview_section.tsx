@@ -11,8 +11,9 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiText,
   useEuiTheme,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -20,9 +21,10 @@ import {
   PREVIEW_SECTION,
   PREVIEW_SECTION_BACK_BUTTON,
   PREVIEW_SECTION_CLOSE_BUTTON,
+  PREVIEW_SECTION_HEADER,
 } from './test_ids';
 import { useExpandableFlyoutContext } from '../..';
-import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
+import { BACK_BUTTON, CLOSE_BUTTON, DEFAULT_PREVIEW_TITLE_TEXT } from './translations';
 
 interface PreviewSectionProps {
   /**
@@ -37,6 +39,10 @@ interface PreviewSectionProps {
    * Display the back button in the header
    */
   showBackButton: boolean;
+  /**
+   * Preview banner text to be shown
+   */
+  title?: string;
 }
 
 /**
@@ -47,6 +53,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   component,
   showBackButton,
   width,
+  title,
 }: PreviewSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutContext();
@@ -95,8 +102,10 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           opacity: 0.5;
         `}
       />
-      <div
+      <EuiSplitPanel.Outer
         css={css`
+          margin: ${euiTheme.size.xs};
+          height: 99%;
           position: absolute;
           top: 0;
           bottom: 0;
@@ -104,18 +113,19 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           left: ${left};
           z-index: 1000;
         `}
+        className="eui-yScroll"
+        data-test-subj={PREVIEW_SECTION}
       >
-        <EuiPanel
-          css={css`
-            margin: ${euiTheme.size.xs};
-            height: 100%;
-          `}
-          data-test-subj={PREVIEW_SECTION}
-        >
+        <EuiSplitPanel.Inner grow={false} color="warning" paddingSize="none">
+          <EuiText textAlign="center" color="warning" size="s">
+            {title ?? DEFAULT_PREVIEW_TITLE_TEXT}
+          </EuiText>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={false} paddingSize="s" data-test-subj={PREVIEW_SECTION_HEADER}>
           {header}
-          {component}
-        </EuiPanel>
-      </div>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner paddingSize="none">{component}</EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
     </>
   );
 };
