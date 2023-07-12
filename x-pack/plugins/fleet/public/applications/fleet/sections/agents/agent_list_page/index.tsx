@@ -520,17 +520,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </>
       )}
-      {/* TODO serverless agent soft limit */}
-      {showUnhealthyCallout && (
-        <>
-          {cloud?.deploymentUrl ? (
-            <FleetServerCloudUnhealthyCallout deploymentUrl={cloud.deploymentUrl} />
-          ) : (
-            <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
-          )}
-          <EuiSpacer size="l" />
-        </>
-      )}
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}
