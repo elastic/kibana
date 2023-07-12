@@ -38,7 +38,7 @@ import {
   DataComparisonField,
   TimeRange,
 } from './types';
-import { computeChi2PValue, loadCriticalValuesIntoCache } from './data_comparison_utils';
+import { computeChi2PValue, loadDataDriftCalcValuesIntoCache } from './data_comparison_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataComparisonField['type'] => {
   switch (kibanaType) {
@@ -366,6 +366,7 @@ export const useFetchDataComparisonResult = ({
             }
           }
 
+          setLoaded(0.05);
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingReference', {
               defaultMessage: `Loading reference data for {fieldsCount} fields.`,
@@ -552,6 +553,7 @@ export const useFetchDataComparisonResult = ({
             })
           );
 
+          setLoaded(0.75);
           const [productionHistogramResponse, referenceHistogramResponse] = await Promise.all([
             dataSearch(productionHistogramRequest, signal),
             dataSearch(referenceHistogramRequest, signal),
@@ -597,7 +599,7 @@ export const useFetchDataComparisonResult = ({
             })
           );
 
-          await loadCriticalValuesIntoCache();
+          await loadDataDriftCalcValuesIntoCache();
           setResult({
             data: processDataComparisonResult(data),
             status: FETCH_STATUS.SUCCESS,
