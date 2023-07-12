@@ -50,3 +50,8 @@ export const ALERT_STATUS_QUERY = {
   [ACTIVE_ALERTS.status]: ACTIVE_ALERTS.query,
   [RECOVERED_ALERTS.status]: RECOVERED_ALERTS.query,
 };
+
+export const ALERTS_DOC_HREF =
+  'https://www.elastic.co/guide/en/observability/current/create-alerts.html';
+
+export const ALERTS_PATH = '/app/observability/alerts';

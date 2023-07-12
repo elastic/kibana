@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERTS_DOC_HREF } from '../constants';
+import { ALERTS_DOC_HREF } from '../../../common/alerts/constants';
 import { LinkToAlertsHomePage } from '../links/link_to_alerts_page';
 
 export const AlertsTooltipContent = React.memo(() => {
