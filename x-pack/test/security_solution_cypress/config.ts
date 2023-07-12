@@ -55,7 +55,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
         // Specify which version of the detection-rules package to install
-        // `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1`,
+        `--xpack.securitySolution.prebuiltRulesPackageVersion=8.7.9-beta.1`,
         // Set an inexistent directory as the Fleet bundled packages location
         // in order to force Fleet to reach out to the registry to download the
         // packages listed in fleet_packages.json
