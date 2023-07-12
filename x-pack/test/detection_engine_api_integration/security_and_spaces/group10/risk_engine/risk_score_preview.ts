@@ -13,7 +13,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createSignalsIndex, deleteAllAlerts, deleteAllRules } from '../../../utils';
 import { dataGeneratorFactory } from '../../../utils/data_generator';
-import { buildDocument, createAndSyncRuleAndAlertsFactory, sanitizeScores } from './utils';
+import {
+  buildDocument,
+  createAndSyncRuleAndAlertsFactory,
+  deleteAllRiskScores,
+  sanitizeScores,
+} from './utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -72,6 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
+        await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });

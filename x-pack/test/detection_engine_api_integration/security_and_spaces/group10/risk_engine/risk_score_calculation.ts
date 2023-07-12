@@ -87,7 +87,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        // await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
