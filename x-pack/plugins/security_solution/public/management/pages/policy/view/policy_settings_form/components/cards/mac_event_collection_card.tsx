@@ -33,7 +33,7 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
   },
 ];
 
-type MacEventCollectionCardProps = PolicyFormComponentCommonProps;
+export type MacEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const MacEventCollectionCard = memo<MacEventCollectionCardProps>((props) => {
   return (

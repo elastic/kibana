@@ -103,11 +103,16 @@ export const getPolicySettingsFormTestSubjects = (
     },
     macEvents: {
       card: macEventsTestSubj(),
+      osValueContainer: macEventsTestSubj('osValueContainer'),
+      optionsContainer: macEventsTestSubj('options'),
       fileCheckbox: macEventsTestSubj('file'),
+      networkCheckbox: macEventsTestSubj('network'),
+      processCheckbox: macEventsTestSubj('process'),
     },
     linuxEvents: {
       card: linuxEventsTestSubj(),
       osValueContainer: linuxEventsTestSubj('osValueContainer'),
+      optionsContainer: linuxEventsTestSubj('options'),
       fileCheckbox: linuxEventsTestSubj('file'),
       networkCheckbox: linuxEventsTestSubj('network'),
       processCheckbox: linuxEventsTestSubj('process'),

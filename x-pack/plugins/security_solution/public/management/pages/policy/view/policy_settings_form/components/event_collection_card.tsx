@@ -134,23 +134,25 @@ export const EventCollectionCard = memo(
         </SettingCardHeader>
         <EuiSpacer size="s" />
 
-        {options.map(({ name, protectionField }) => {
-          const keyPath = `${policyOs}.events.${protectionField}`;
+        <div data-test-subj={getTestId('options')}>
+          {options.map(({ name, protectionField }) => {
+            const keyPath = `${policyOs}.events.${protectionField}`;
 
-          return (
-            <EventCheckbox
-              label={name}
-              key={keyPath}
-              keyPath={keyPath}
-              policy={policy}
-              onChange={onChange}
-              mode={mode}
-              data-test-subj={getTestId(protectionField as string)}
-            />
-          );
-        })}
+            return (
+              <EventCheckbox
+                label={name}
+                key={keyPath}
+                keyPath={keyPath}
+                policy={policy}
+                onChange={onChange}
+                mode={mode}
+                data-test-subj={getTestId(protectionField as string)}
+              />
+            );
+          })}
 
-        {selectedCount === 0 && !isEditMode && <div>{getEmptyValue()}</div>}
+          {selectedCount === 0 && !isEditMode && <div>{getEmptyValue()}</div>}
+        </div>
 
         {supplementalOptions &&
           supplementalOptions.map(

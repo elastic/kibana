@@ -14,14 +14,14 @@ import type { AppContextTestRender } from '../../../../../../../common/mock/endp
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
-import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
-import { LinuxEventCollectionCard } from './linux_event_collection_card';
 import { set } from 'lodash';
+import type { MacEventCollectionCardProps } from './mac_event_collection_card';
+import { MacEventCollectionCard } from './mac_event_collection_card';
 
-describe('Policy Linux Event Collection Card', () => {
-  const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;
+describe('Policy Mac Event Collection Card', () => {
+  const testSubj = getPolicySettingsFormTestSubjects('test').macEvents;
 
-  let formProps: LinuxEventCollectionCardProps;
+  let formProps: MacEventCollectionCardProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
 
@@ -36,8 +36,7 @@ describe('Policy Linux Event Collection Card', () => {
       'data-test-subj': testSubj.card,
     };
 
-    render = () =>
-      (renderResult = mockedContext.render(<LinuxEventCollectionCard {...formProps} />));
+    render = () => (renderResult = mockedContext.render(<MacEventCollectionCard {...formProps} />));
   });
 
   it('should render card with expected content', () => {
@@ -49,11 +48,7 @@ describe('Policy Linux Event Collection Card', () => {
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
-    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(
-      matchExactTextContent('Linux')
-    );
-    expect(getByTestId(testSubj.sessionDataCheckbox)).not.toBeChecked();
-    expect(getByTestId(testSubj.captureTerminalCheckbox)).toBeDisabled();
+    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(matchExactTextContent('Mac'));
   });
 
   describe('and is displayed in View mode', () => {
@@ -71,20 +66,18 @@ describe('Policy Linux Event Collection Card', () => {
           'Type' +
             'Event collection' +
             'Operating system' +
-            'Linux ' +
+            'Mac ' +
             '3 / 3 event collections enabled' +
             'Events' +
             'File' +
-            'Network' +
-            'Process'
+            'Process' +
+            'Network'
         )
       );
     });
 
     it('should render card with expected content when session data collection is enabled', () => {
-      set(formProps.policy, 'linux.events.session_data', true);
-      set(formProps.policy, 'linux.events.tty_io', true);
-      set(formProps.policy, 'linux.events.file', false);
+      set(formProps.policy, 'mac.events.file', false);
       render();
 
       const card = renderResult.getByTestId(testSubj.card);
@@ -95,16 +88,11 @@ describe('Policy Linux Event Collection Card', () => {
           'Type' +
             'Event collection' +
             'Operating system' +
-            'Linux ' +
+            'Mac ' +
             '2 / 3 event collections enabled' +
             'Events' +
-            'Network' +
             'Process' +
-            'Session data' +
-            'Collect session data' +
-            'Capture terminal output' +
-            'Info' +
-            'beta'
+            'Network'
         )
       );
     });
