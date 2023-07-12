@@ -13,8 +13,8 @@
   z-index: 1;
   cursor: row-resize;
   height: $euiSize;
-  margin-top: -($euiSize / 2);
-  margin-bottom: -($euiSize / 2);
+  margin-top: -(calc($euiSize / 2));
+  margin-bottom: -(calc($euiSize / 2));
 
   &:before,
   &:after {
@@ -64,7 +64,7 @@
         height $euiAnimSpeedFast ease,
         transform $euiAnimSpeedFast ease
       );
-      transition-delay: $euiAnimSpeedFast / 2;
+      transition-delay: calc($euiAnimSpeedFast / 2);
     }
   }
 
