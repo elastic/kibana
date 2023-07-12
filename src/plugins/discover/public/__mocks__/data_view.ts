@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
-export const fields = [
+export const shallowMockedFields = [
   {
     name: '_source',
     type: '_source',
@@ -73,6 +73,10 @@ export const fields = [
   },
 ] as DataView['fields'];
 
+export const deepMockedFields = shallowMockedFields.map(
+  (field) => new DataViewField(field)
+) as DataView['fields'];
+
 export const buildDataViewMock = ({
   name,
   fields: definedFields,
@@ -121,4 +125,7 @@ export const buildDataViewMock = ({
   return dataView;
 };
 
-export const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields });
+export const dataViewMock = buildDataViewMock({
+  name: 'the-data-view',
+  fields: shallowMockedFields,
+});
