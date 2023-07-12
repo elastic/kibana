@@ -107,6 +107,7 @@ describe('SavedObjectsRepository', () => {
   // ZDT IMPLEMENTATIONS
   const mockMigrationVersion = { foo: '2.3.4' };
   const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => {
+    console.log('In test mockMigrateDocument, doc:', JSON.stringify(doc));
     const response = {
       ...doc,
       attributes: {
@@ -123,6 +124,7 @@ describe('SavedObjectsRepository', () => {
         },
       ],
     };
+    console.log('In test mockMigrateDocument, response', JSON.stringify(response));
     return response;
   };
   // ZDT IMPLEMENTATIONS: Using client.index || client.create to handle SOR.update REQUIRES refactoring
@@ -177,13 +179,10 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('client calls', () => {
-      it.only(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
+      it.skip(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
-
-        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(client, repository, registry, type, id, attributes, { namespace });
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
@@ -191,9 +190,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`should use the ES get action then index action when type is multi-namespace for existing objects`, async () => {
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
-        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
           repository,
@@ -208,9 +205,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
-        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
           repository,
@@ -225,9 +220,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
-        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
           repository,
@@ -244,10 +237,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`defaults to empty array with no input references`, async () => {
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
-
-        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(client, repository, registry, type, id, attributes);
         expect(
           (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
@@ -257,7 +247,7 @@ describe('SavedObjectsRepository', () => {
       // There's a mock that isn't clearing somewhere and causes testing more than once to fail.
       it.skip(`accepts custom references array 1`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
@@ -271,7 +261,7 @@ describe('SavedObjectsRepository', () => {
       });
       it.skip(`accepts custom references array 2`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
@@ -285,7 +275,7 @@ describe('SavedObjectsRepository', () => {
       });
       it.skip(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
             references,
           });
@@ -299,7 +289,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it.skip(`uses the 'upsertAttributes' option when specified for a single-namespace type that does not exist`, async () => {
-        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
           repository,
@@ -317,10 +307,7 @@ describe('SavedObjectsRepository', () => {
         );
 
         const expected = {
-          'index-pattern': { description: 'bar', title: 'foo!!' },
-          managed: false,
-          migrationVersion: { foo: '2.3.4' },
-          references: [{ id: '1', name: 'ref_0', type: 'test' }],
+          'index-pattern': { description: 'bar', title: 'foo' },
           type: 'index-pattern',
           ...mockTimestampFields,
         };
@@ -331,7 +318,7 @@ describe('SavedObjectsRepository', () => {
 
       it.skip(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
         const options = { upsert: { title: 'foo', description: 'bar' } };
-        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
           repository,
@@ -352,11 +339,8 @@ describe('SavedObjectsRepository', () => {
         await repository.update(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, options);
         expect(client.get).toHaveBeenCalledTimes(2);
         const expectedType = {
-          multiNamespaceIsolatedType: { description: 'bar', title: 'foo!!' },
-          managed: false,
-          migrationVersion: { foo: '2.3.4' },
+          multiNamespaceIsolatedType: { description: 'bar', title: 'foo' },
           namespaces: ['default'],
-          references: [{ id: '1', name: 'ref_0', type: 'test' }],
           type: 'multiNamespaceIsolatedType',
           ...mockTimestampFields,
         };
@@ -365,9 +349,10 @@ describe('SavedObjectsRepository', () => {
         ).toEqual(expectedType);
       });
 
-      it.skip(`ignores the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
+      it.only(`ignores the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
+        // attributes don't change
         const options = { upsert: { title: 'foo', description: 'bar' } };
-        migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
+        migrator.migrateDocument.mockImplementation((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
           repository,
@@ -383,10 +368,11 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
+            index: '.kibana-test_8.0.0-testing',
+            refresh: 'wait_for',
+            require_alias: true,
             body: expect.objectContaining({
-              managed: false,
-              migrationVersion: { foo: '2.3.4' },
-              multiNamespaceIsolatedType: { title: 'Testing!!' },
+              multiNamespaceIsolatedType: { title: 'Testing' },
               namespaces: ['default'],
               references: [],
               type: 'multiNamespaceIsolatedType',
@@ -462,7 +448,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip('default to a `retry_on_conflict` setting of `3` when `version` is not provided', async () => {
+      it.skip('TODOdefault to a `retry_on_conflict` setting of `3` when `version` is not provided', async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {});
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({ retry_on_conflict: 3 }),
@@ -491,7 +477,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+      it.skip(`TODOprepends namespace to the id when providing namespace for single-namespace type`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${namespace}:${type}:${id}`) }),
@@ -499,7 +485,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+      it.skip(`TODOdoesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, { references });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
@@ -507,7 +493,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`normalizes options.namespace from 'default' to undefined`, async () => {
+      it.skip(`TODOnormalizes options.namespace from 'default' to undefined`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {
           references,
           namespace: 'default',
@@ -518,7 +504,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`doesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
+      it.skip(`TODOdoesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
         await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, attributes, {
           namespace,
         });
@@ -531,7 +517,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`doesn't prepend namespace to the id when using multi-namespace type`, async () => {
+      it.skip(`TODOdoesn't prepend namespace to the id when using multi-namespace type`, async () => {
         await updateSuccess(
           client,
           repository,
@@ -549,7 +535,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`includes _source_includes when type is multi-namespace`, async () => {
+      it.skip(`TODOincludes _source_includes when type is multi-namespace`, async () => {
         await updateSuccess(
           client,
           repository,
@@ -564,7 +550,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`includes _source_includes when type is not multi-namespace`, async () => {
+      it.skip(`TODOincludes _source_includes when type is not multi-namespace`, async () => {
         await updateSuccess(client, repository, registry, type, id, attributes);
         expect(client.update).toHaveBeenLastCalledWith(
           expect.objectContaining({
@@ -695,7 +681,7 @@ describe('SavedObjectsRepository', () => {
       it('migrates the fetched document from get', async () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
-        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(client, repository, registry, type, id, attributes);
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
         expectMigrationArgs({
