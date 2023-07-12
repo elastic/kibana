@@ -109,7 +109,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
-    const isServerlessEnabled = !!this.config.serverless?.projectId;
+    const isServerlessEnabled = !!this.config.serverless?.project_id;
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
@@ -140,7 +140,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       },
       isServerlessEnabled,
       serverless: {
-        projectId: this.config.serverless?.projectId,
+        projectId: this.config.serverless?.project_id,
       },
     };
   }

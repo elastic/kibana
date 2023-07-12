@@ -27,7 +27,7 @@ export interface CloudConfigType {
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
   serverless?: {
-    projectId: string;
+    project_id: string;
   };
 }
 
@@ -49,7 +49,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
-    this.isServerlessEnabled = !!this.config.serverless?.projectId;
+    this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
   }
 
@@ -84,7 +84,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       isCloudEnabled: this.isCloudEnabled,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
-        projectId: this.config.serverless?.projectId,
+        projectId: this.config.serverless?.project_id,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
@@ -122,7 +122,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       organizationUrl,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
-        projectId: this.config.serverless?.projectId,
+        projectId: this.config.serverless?.project_id,
       },
     };
   }

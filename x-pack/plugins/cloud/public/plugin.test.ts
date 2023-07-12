@@ -120,7 +120,7 @@ describe('Cloud Plugin', () => {
         it('is `true` when `serverless.projectId` is set', () => {
           const { setup } = setupPlugin({
             serverless: {
-              projectId: 'my-awesome-project',
+              project_id: 'my-awesome-project',
             },
           });
           expect(setup.isServerlessEnabled).toBe(true);
@@ -137,7 +137,7 @@ describe('Cloud Plugin', () => {
       it('exposes `serverless.projectId`', () => {
         const { setup } = setupPlugin({
           serverless: {
-            projectId: 'my-awesome-project',
+            project_id: 'my-awesome-project',
           },
         });
         expect(setup.serverless.projectId).toBe('my-awesome-project');
@@ -188,7 +188,7 @@ describe('Cloud Plugin', () => {
       it('is `true` when `serverless.projectId` is set', () => {
         const { plugin } = startPlugin({
           serverless: {
-            projectId: 'my-awesome-project',
+            project_id: 'my-awesome-project',
           },
         });
         const coreStart = coreMock.createStart();
@@ -209,7 +209,7 @@ describe('Cloud Plugin', () => {
     it('exposes `serverless.projectId`', () => {
       const { plugin } = startPlugin({
         serverless: {
-          projectId: 'my-awesome-project',
+          project_id: 'my-awesome-project',
         },
       });
       const coreStart = coreMock.createStart();

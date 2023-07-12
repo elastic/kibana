@@ -31,7 +31,7 @@ const configSchema = schema.object({
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
   serverless: schema.maybe(
     schema.object({
-      projectId: schema.string(),
+      project_id: schema.string(),
     })
   ),
 });
@@ -50,7 +50,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     trial_end_date: true,
     is_elastic_staff_owned: true,
     serverless: {
-      projectId: true,
+      project_id: true,
     },
   },
   schema: configSchema,
