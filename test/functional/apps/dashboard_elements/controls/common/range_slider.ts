@@ -46,16 +46,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+      await common.setTime({
+        from: 'Oct 22, 2018 @ 00:00:00.000',
+        to: 'Dec 3, 2018 @ 00:00:00.000',
+      });
       await common.navigateToApp('dashboard');
       await dashboardControls.enableControlsLab();
       await common.navigateToApp('dashboard');
       await dashboard.preserveCrossAppState();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-      await timePicker.setAbsoluteRange(
-        'Oct 22, 2018 @ 00:00:00.000',
-        'Dec 3, 2018 @ 00:00:00.000'
-      );
       await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
@@ -66,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.uiSettings.unset('defaultIndex');
+      await common.unsetTime();
       await security.testUser.restoreDefaults();
     });
 
