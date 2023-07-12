@@ -14,6 +14,7 @@ import type {
   AutocompleteBodyParams,
   AutocompleteDefinition,
   AutocompleteUrlParams,
+  AutocompleteAvailability,
   SpecificationTypes,
 } from './types';
 import { findTypeDefinition } from './utils';
@@ -65,6 +66,23 @@ const generateBodyParams = (
   return {};
 };
 
+const DEFAULT_STACK_ENDPOINT_AVAILABILITY = true;
+const DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY = false;
+
+const generateAvailability = (endpoint: SpecificationTypes.Endpoint): AutocompleteAvailability => {
+  const availability: AutocompleteAvailability = {
+    stack: DEFAULT_STACK_ENDPOINT_AVAILABILITY,
+    serverless: DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY,
+  };
+  if (endpoint.availability.stack?.visibility) {
+    availability.stack = endpoint.availability.stack?.visibility === 'public';
+  }
+  if (endpoint.availability.serverless?.visibility) {
+    availability.serverless = endpoint.availability.serverless?.visibility === 'public';
+  }
+  return availability;
+};
+
 const addParams = (
   definition: AutocompleteDefinition,
   params: { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams }
@@ -86,12 +104,13 @@ const generateDefinition = (
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
+  const availability = generateAvailability(endpoint);
   let definition: AutocompleteDefinition = {};
   const params = generateParams(endpoint, schema);
   if (params) {
     definition = addParams(definition, params);
   }
-  definition = { ...definition, methods, patterns, documentation };
+  definition = { ...definition, methods, patterns, documentation, availability };
 
   return definition;
 };

@@ -22,6 +22,11 @@ interface EndpointDescription {
   data_autocomplete_rules?: Record<string, unknown>;
   url_components?: Record<string, unknown>;
   priority?: number;
+  availability?: Record<string, boolean>;
+}
+
+export interface SpecDefinitionsDependencies {
+  endpointsAvailability: string;
 }
 
 export class SpecDefinitionsService {
@@ -92,9 +97,9 @@ export class SpecDefinitionsService {
     };
   }
 
-  public start() {
+  public start({ endpointsAvailability }: SpecDefinitionsDependencies) {
     if (!this.hasLoadedSpec) {
-      this.loadJsonSpec();
+      this.loadJsonSpec(endpointsAvailability);
       this.loadJSSpec();
       this.hasLoadedSpec = true;
     } else {
@@ -127,14 +132,20 @@ export class SpecDefinitionsService {
     }, {} as Record<string, EndpointDescription>);
   }
 
-  private loadJsonSpec() {
+  private loadJsonSpec(endpointsAvailability: string) {
     const result = this.loadJSONSpecInDir(AUTOCOMPLETE_DEFINITIONS_FOLDER);
     this.extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
       merge(result, this.loadJSONSpecInDir(extensionSpecFilePath));
     });
 
     Object.keys(result).forEach((endpoint) => {
-      this.addEndpointDescription(endpoint, result[endpoint]);
+      const description = result[endpoint];
+      const addEndpoint =
+        (endpointsAvailability === 'stack' && description.availability?.stack) ||
+        (endpointsAvailability === 'serverless' && description.availability?.serverless);
+      if (addEndpoint) {
+        this.addEndpointDescription(endpoint, description);
+      }
     });
   }
 
