@@ -429,6 +429,7 @@
     "@kbn/foo-plugin": "link:x-pack/test/ui_capabilities/common/plugins/foo_plugin",
     "@kbn/ftr-apis-plugin": "link:src/plugins/ftr_apis",
     "@kbn/functional-with-es-ssl-cases-test-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/cases",
+    "@kbn/gen-ai-streaming-response-example-plugin": "link:x-pack/examples/gen_ai_streaming_response_example",
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/generate-csv": "link:packages/kbn-generate-csv",
     "@kbn/generate-csv-types": "link:packages/kbn-generate-csv-types",

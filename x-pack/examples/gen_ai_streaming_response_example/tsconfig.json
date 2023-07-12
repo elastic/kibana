@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/i18n",
+    "@kbn/shared-ux-router",
+    "@kbn/config-schema",
+    "@kbn/stack-connectors-plugin",
+  ]
+}
