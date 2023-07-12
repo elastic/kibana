@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import chalk from 'chalk';
 import execa from 'execa';
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -32,33 +33,33 @@ export const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_I
  * Verify that Docker is installed locally
  */
 export async function verifyDockerInstalled(log: ToolingLog) {
+  log.info(chalk.bold('Verifying Docker is installed.'));
+
   const { stdout } = await execa('docker', ['--version']).catch((error) => {
     throw createCliError(
       `Docker not found locally. Install it from: https://www.docker.com\n\n${error.message}`
     );
   });
 
-  log.indent(4, () => {
-    log.info(stdout);
-  });
+  log.indent(4, () => log.info(stdout));
 }
 
 /**
  * Setup elastic Docker network if needed
  */
 export async function maybeCreateDockerNetwork(log: ToolingLog) {
-  log.indent(4);
+  log.info(chalk.bold('Checking status of elastic Docker network.'));
 
   const p = await execa('docker', ['network', 'create', 'elastic']).catch(({ message }) => {
     if (message.includes('network with name elastic already exists')) {
-      log.info('Using existing elastic Docker network.');
+      log.indent(4, () => log.info('Using existing network.'));
     } else {
       throw createCliError(message);
     }
   });
 
   if (p?.exitCode === 0) {
-    log.info('Created elastic Docker network.');
+    log.indent(4, () => log.info('Created new network.'));
   }
 }
 
