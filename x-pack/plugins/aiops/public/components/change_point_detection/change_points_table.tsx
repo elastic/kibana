@@ -116,6 +116,11 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       height: '80px',
       truncateText: false,
       valign: 'middle',
+      css: {
+        // Extra specificity needed here to override Sass styles
+        // TODO: Can be removed once EuiTable has been converted to Emotion
+        ['&.euiTableCellContent']: { display: 'block', padding: 0 },
+      },
       render: (annotation: ChangePointAnnotation) => {
         return <MiniChartPreview annotation={annotation} fieldConfig={fieldConfig} />;
       },
@@ -318,7 +323,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
   });
 
   return (
-    <div data-test-subj={'aiopChangePointPreviewChart'} css={{ width: '100%' }}>
+    <div data-test-subj={'aiopChangePointPreviewChart'}>
       <EmbeddableComponent
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}
