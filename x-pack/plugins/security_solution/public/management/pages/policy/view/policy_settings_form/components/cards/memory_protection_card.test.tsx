@@ -17,9 +17,14 @@ import React from 'react';
 import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
 import { set } from 'lodash';
 import type { MemoryProtectionCardProps } from './memory_protection_card';
-import { MemoryProtectionCard } from './memory_protection_card';
+import { LOCKED_CARD_MEMORY_TITLE, MemoryProtectionCard } from './memory_protection_card';
+import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
+import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
+import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../../../common/hooks/use_license');
+
+const useLicenseMock = _useLicense as jest.Mock;
 
 describe('Policy Memory Protections Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').memory;
@@ -57,6 +62,27 @@ describe('Policy Memory Protections Card', () => {
     expect(renderResult.getByTestId(testSubj.osValuesContainer)).toHaveTextContent(
       'Windows, Mac, Linux'
     );
+  });
+
+  describe('and license is lower than Platinum', () => {
+    beforeEach(() => {
+      const licenseServiceMock = createLicenseServiceMock();
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+
+      useLicenseMock.mockReturnValue(licenseServiceMock);
+    });
+
+    afterEach(() => {
+      useLicenseMock.mockReturnValue(licenseServiceMocked);
+    });
+
+    it('should show locked card if license not platinum+', () => {
+      render();
+
+      expect(renderResult.getByTestId(testSubj.lockedCardTitle)).toHaveTextContent(
+        matchExactTextContent(LOCKED_CARD_MEMORY_TITLE)
+      );
+    });
   });
 
   describe('and displayed in View mode', () => {

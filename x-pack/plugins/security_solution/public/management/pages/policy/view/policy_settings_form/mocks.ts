@@ -70,6 +70,8 @@ export const getPolicySettingsFormTestSubjects = (
     },
     memory: {
       card: memoryTestSubj(),
+      lockedCard: memoryTestSubj('locked'),
+      lockedCardTitle: memoryTestSubj('locked-title'),
       enableDisableSwitch: memoryTestSubj('enableDisableSwitch'),
       protectionPreventRadio: memoryTestSubj('protectionLevel-preventRadio'),
       protectionDetectRadio: memoryTestSubj('protectionLevel-detectRadio'),

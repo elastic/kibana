@@ -22,7 +22,7 @@ import type { PolicyFormComponentCommonProps } from '../../types';
 import { SettingCard } from '../setting_card';
 import { RelatedDetectionRulesCallout } from '../related_detection_rules_callout';
 
-const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
+export const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.memory',
   {
     defaultMessage: 'Memory Threat',
@@ -50,7 +50,9 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
     );
 
     if (!isPlatinumPlus) {
-      return <SettingLockedCard title={LOCKED_CARD_MEMORY_TITLE} />;
+      return (
+        <SettingLockedCard title={LOCKED_CARD_MEMORY_TITLE} data-test-subj={getTestId('locked')} />
+      );
     }
 
     return (
