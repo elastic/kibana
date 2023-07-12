@@ -10,7 +10,7 @@ import fetch, { Response } from 'node-fetch';
 import { USAGE_SERVICE_USAGE_URL } from '../../constants';
 import { UsageRecord } from '../../types';
 
-export class EndpointUsageReportingService {
+export class UsageReportingService {
   public async reportUsage(records: UsageRecord[]): Promise<Response> {
     return fetch(USAGE_SERVICE_USAGE_URL, {
       method: 'post',
@@ -20,4 +20,4 @@ export class EndpointUsageReportingService {
   }
 }
 
-export const endpointUsageReportingService = new EndpointUsageReportingService();
+export const usageReportingService = new UsageReportingService();
