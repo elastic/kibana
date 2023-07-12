@@ -37,8 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show a timestamp with nanoseconds in the first result row', async function () {
       const time = await PageObjects.timePicker.getTimeConfig();
-      expect(time.start).to.be(from);
-      expect(time.end).to.be(to);
+      expect(time.start).to.be(fromTime);
+      expect(time.end).to.be(toTime);
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData.startsWith('Sep 22, 2019 @ 23:50:13.253123345')).to.be.ok();
     });
