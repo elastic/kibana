@@ -33,10 +33,21 @@ export class NavigationEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<NavigationEmbeddableInput>
 {
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
-
   public isContainerType = false;
 
+  private openEditorFlyout?: (
+    initialInput?: Omit<NavigationEmbeddableInput, 'id'>,
+    parentDashboard?: DashboardContainer
+  ) => Promise<Partial<NavigationEmbeddableInput>>;
+
+  constructor() {
+    import('../editor/open_editor_flyout').then(({ openEditorFlyout }) => {
+      this.openEditorFlyout = openEditorFlyout;
+    });
+  }
+
   public async isEditable() {
+    // const { openEditorFlyout } = await import('../editor/open_editor_flyout');
     await untilPluginStartServicesReady();
     return Boolean(coreServices.application.capabilities.dashboard?.showWriteControls);
   }
@@ -73,13 +84,9 @@ export class NavigationEmbeddableFactoryDefinition
     initialInput?: NavigationEmbeddableInput,
     parent?: DashboardContainer
   ) {
-    if (!parent) return {};
+    if (!parent || !this.openEditorFlyout) return {};
 
-    const { openEditorFlyout: createNavigationEmbeddable } = await import(
-      '../editor/open_editor_flyout'
-    );
-
-    const input = await createNavigationEmbeddable(
+    const input = await this.openEditorFlyout(
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
       parent
     ).catch(() => {
