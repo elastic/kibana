@@ -2,13 +2,14 @@ post:
   summary: Creates a rule with a randomly generated rule identifier.
   operationId: createRule
   description: >
-    You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating.
+    To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating.
     For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.
     If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
-    NOTE: This API supports only token-based authentication.
-    When you create a rule, it identifies which roles you have at that point in time.
-    Thereafter, when the rule performs queries, it uses those security privileges.
-    If a user with different privileges updates the rule, its behavior might change.
+    This API supports both key- and token-based authentication.
+    To use key-based authentication, create an API key in Kibana and use it in the header of the API call.
+    To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically.
+    In both cases, the API key is subsequently used for authorization when the rule runs.
+    NOTE: If an API key with different privileges subsequently updates the rule, its behavior might change.
   tags:
     - alerting
   parameters:
