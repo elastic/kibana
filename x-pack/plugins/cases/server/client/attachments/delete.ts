@@ -7,8 +7,9 @@
 
 import Boom from '@hapi/boom';
 
+import { Actions, ActionTypes } from '../../../common/types/domain';
 import type { CommentRequest, CommentRequestAlertType } from '../../../common/api';
-import { Actions, ActionTypes, CommentRequestRt, decodeOrThrow } from '../../../common/api';
+import { CommentRequestRt, decodeOrThrow } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';

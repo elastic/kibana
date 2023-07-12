@@ -7,9 +7,10 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 
+import type { CommentUserAction } from '../../../../common/types/domain';
+import { Actions } from '../../../../common/types/domain';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { CommentUserAction } from '../../../../common/api';
-import { Actions, CommentType } from '../../../../common/api';
+import { CommentType } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { CommentUI } from '../../../containers/types';

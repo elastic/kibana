@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorUserAction } from '../../../common/api';
+import type { ConnectorUserAction } from '../../../common/types/domain';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';

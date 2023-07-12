@@ -9,10 +9,10 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { ActionTypes } from '../../../common/types/domain';
 import type { Case, CasePostRequest } from '../../../common/api';
 import {
   CaseRt,
-  ActionTypes,
   CasePostRequestRt,
   CaseSeverity,
   decodeWithExcessOrThrow,

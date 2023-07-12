@@ -7,18 +7,15 @@
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
+import type { ActionCategory, UserActionTypes } from '../../../../common/types/domain';
+import { Actions, ActionTypes } from '../../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
-import type {
-  ActionTypeValues,
-  CaseAssignees,
-  CaseUserProfile,
-  ActionCategory,
-} from '../../../../common/api';
-import { Actions, ActionTypes, decodeOrThrow } from '../../../../common/api';
+import type { CaseAssignees, CaseUserProfile } from '../../../../common/api';
+import { decodeOrThrow } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';
 import type {
   BuilderParameters,
@@ -147,7 +144,7 @@ export class UserActionPersister {
     return this.buildAddDeleteUserActions(params, createPayload, ActionTypes.tags);
   }
 
-  private buildAddDeleteUserActions<Item, ActionType extends ActionTypeValues>(
+  private buildAddDeleteUserActions<Item, ActionType extends UserActionTypes>(
     params: TypedUserActionDiffedItems<Item>,
     createPayload: CreatePayloadFunction<Item, ActionType>,
     actionType: ActionType
@@ -176,7 +173,7 @@ export class UserActionPersister {
     ];
   }
 
-  private buildUserAction<Item, ActionType extends ActionTypeValues>({
+  private buildUserAction<Item, ActionType extends UserActionTypes>({
     commonArgs,
     actionType,
     action,

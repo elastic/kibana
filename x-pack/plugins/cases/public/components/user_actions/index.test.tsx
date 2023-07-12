@@ -23,7 +23,7 @@ import {
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { Actions } from '../../../common/api';
+import { Actions } from '../../../common/types/domain';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';

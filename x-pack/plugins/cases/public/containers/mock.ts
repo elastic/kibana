@@ -6,6 +6,14 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
+import type {
+  ActionCategory,
+  CommentUserAction,
+  UserAction,
+  UserActions,
+  UserActionTypes,
+} from '../../common/types/domain';
+import { Actions, ActionTypes } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
 
 import type {
@@ -28,17 +36,9 @@ import type {
   CasesFindResponse,
   Cases,
   CasesStatusResponse,
-  UserAction,
-  UserActions,
   Comment,
-  ActionCategory,
-  UserActionTypes,
-  UserActionWithResponse,
-  CommentUserAction,
 } from '../../common/api';
 import {
-  Actions,
-  ActionTypes,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
@@ -53,6 +53,7 @@ import type {
   AttachmentViewObject,
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
+import type { UserActionWithResponse } from '../../common/types/api';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';

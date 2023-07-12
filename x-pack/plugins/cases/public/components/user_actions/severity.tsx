@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
-import type { SeverityUserAction } from '../../../common/api/cases/user_actions/severity';
+import type { SeverityUserAction } from '../../../common/types/domain';
 import { SET_SEVERITY_TO } from '../create/translations';
 import { createCommonUpdateUserActionBuilder } from './common';
 import type { UserActionBuilder, UserActionResponse } from './types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserActionTypes } from '../../../common/api';
+import type { UserActionTypes } from '../../../common/types/domain';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';

@@ -12,6 +12,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { Actions, ActionTypes } from '../../../common/types/domain';
 import type {
   Case,
   CommentAttributes,
@@ -20,7 +21,7 @@ import type {
   CommentRequestUserType,
   CommentRequestAlertType,
 } from '../../../common/api';
-import { CaseRt, CaseStatuses, CommentType, ActionTypes, Actions } from '../../../common/api';
+import { CaseRt, CaseStatuses, CommentType } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';

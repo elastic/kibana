@@ -17,12 +17,9 @@ import type {
   CaseStatuses,
   User,
   ActionConnector,
-  UserAction,
   SingleCaseMetricsResponse,
   Comment,
   Case as CaseSnakeCase,
-  UserActionFindResponse,
-  FindTypeField as UserActionFindTypeField,
   CommentResponseAlertsType,
   CasesFindResponse,
   CasesStatusResponse,
@@ -32,10 +29,15 @@ import type {
   CommentResponseTypePersistableState,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
-  CaseUserActionStatsResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
+import type { UserAction } from '../types/domain';
+import type {
+  CaseUserActionStatsResponse,
+  FindTypeField as UserActionFindTypeField,
+  UserActionFindResponse,
+} from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 

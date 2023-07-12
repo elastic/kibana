@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { CategoryUserAction } from '../../../common/api';
+import type { CategoryUserAction } from '../../../common/types/domain';
+import { Actions } from '../../../common/types/domain';
 import type { UserActionBuilder, UserActionResponse } from './types';
 
-import { Actions } from '../../../common/api';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 

@@ -7,8 +7,9 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { ActionTypes } from '../../../common/types/domain';
+import type { UserActionWithResponse } from '../../../common/types/api';
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import type {
   CaseUI,
   CaseConnectors,

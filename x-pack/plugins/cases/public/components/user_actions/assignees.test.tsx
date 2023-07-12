@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions } from '../../../common/api';
+import { Actions } from '../../../common/types/domain';
 import { elasticUser, getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createAssigneesUserActionBuilder, shouldAddAnd, shouldAddComma } from './assignees';

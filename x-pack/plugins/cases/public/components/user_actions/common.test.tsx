@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 
-import { Actions } from '../../../common/api';
+import { Actions } from '../../../common/types/domain';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';

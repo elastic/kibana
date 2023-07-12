@@ -33,11 +33,11 @@ import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../mocks';
-import { ActionTypes } from '../../../../common/api';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
+import { ActionTypes } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');

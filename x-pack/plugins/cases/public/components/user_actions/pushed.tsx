@@ -9,8 +9,8 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
-import type { PushedUserAction } from '../../../common/api';
-import { Actions } from '../../../common/api';
+import type { PushedUserAction } from '../../../common/types/domain';
+import { Actions } from '../../../common/types/domain';
 import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';

@@ -9,8 +9,8 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { ConnectorUserAction, ActionCategory } from '../../../common/api';
-import { Actions } from '../../../common/api';
+import type { ActionCategory, ConnectorUserAction } from '../../../common/types/domain';
+import { Actions } from '../../../common/types/domain';
 import { UserActionTimestamp } from './timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
 import { UserActionCopyLink } from './copy_link';

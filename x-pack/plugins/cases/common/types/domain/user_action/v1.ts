@@ -24,6 +24,9 @@ import { StatusUserActionRt } from './status/v1';
 import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
 
+export { ActionsRt, ActionTypes, Actions } from './action/v1';
+export { StatusUserActionRt } from './status/v1';
+
 export const UserActionCommonAttributesRt = rt.strict({
   created_at: rt.string,
   created_by: UserRt,
@@ -103,9 +106,6 @@ const UserActionRt = rt.intersection([
 export const UserActionsRt = rt.array(UserActionRt);
 
 export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
-export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
-    typeof CaseUserActionInjectedIdsRt
-  >;
 export type UserActionWithDeprecatedResponse<T> = T &
   rt.TypeOf<typeof CaseUserActionInjectedDeprecatedIdsRt>;
 
@@ -113,6 +113,7 @@ export type CaseUserActionWithoutReferenceIds = rt.TypeOf<
   typeof CaseUserActionWithoutReferenceIdsRt
 >;
 
+export type UserActionAttributes = rt.TypeOf<typeof UserActionAttributesRt>;
 export type UserActions = rt.TypeOf<typeof UserActionsRt>;
 export type UserAction = rt.TypeOf<typeof UserActionRt>;
 

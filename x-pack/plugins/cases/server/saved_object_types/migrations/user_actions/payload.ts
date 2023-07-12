@@ -15,8 +15,9 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { UserActionTypes } from '../../../../common/api';
-import { Actions, ActionTypes, CaseStatuses, CommentType } from '../../../../common/api';
+import type { UserActionTypes } from '../../../../common/types/domain';
+import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { CaseStatuses, CommentType } from '../../../../common/api';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
 import { logError } from '../utils';

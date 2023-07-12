@@ -6,8 +6,8 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import type { ActionCategory } from '../../../../common/api';
-import { ActionTypes, Actions } from '../../../../common/api';
+import type { ActionCategory } from '../../../../common/types/domain';
+import { Actions, ActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 

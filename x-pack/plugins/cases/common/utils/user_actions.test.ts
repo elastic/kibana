@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { ActionTypes } from '../api';
+import { ActionTypes } from '../types/domain';
 import {
   isConnectorUserAction,
   isTitleUserAction,

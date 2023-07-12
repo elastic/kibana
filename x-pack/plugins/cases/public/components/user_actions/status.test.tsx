@@ -9,11 +9,12 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions, CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createStatusUserActionBuilder } from './status';
 import { getMockBuilderArgs } from './mock';
+import { Actions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

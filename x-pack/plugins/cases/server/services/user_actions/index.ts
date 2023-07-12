@@ -13,12 +13,9 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import type { CaseUserActionDeprecatedResponse } from '../../../common/api';
-import {
-  decodeOrThrow,
-  ActionTypes,
-  CaseUserActionDeprecatedResponseRt,
-} from '../../../common/api';
+import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
+import { ActionTypes } from '../../../common/types/domain';
+import { decodeOrThrow } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -48,6 +45,7 @@ import type {
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
 import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
+import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;

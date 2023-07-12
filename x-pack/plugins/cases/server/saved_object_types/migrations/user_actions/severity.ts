@@ -6,8 +6,9 @@
  */
 
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import type { CreateCaseUserAction } from '../../../../common/api';
-import { ActionTypes, CaseSeverity } from '../../../../common/api';
+import type { CreateCaseUserAction } from '../../../../common/types/domain';
+import { ActionTypes } from '../../../../common/types/domain';
+import { CaseSeverity } from '../../../../common/api';
 
 export const addSeverityToCreateUserAction = (
   doc: SavedObjectUnsanitizedDoc<CreateCaseUserAction>

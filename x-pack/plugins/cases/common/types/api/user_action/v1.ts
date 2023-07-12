@@ -9,11 +9,16 @@ import * as rt from 'io-ts';
 import { paginationSchema } from '../../../schema';
 import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
 import { ActionTypes } from '../../domain/user_action/action/v1';
+import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
 import {
   CaseUserActionInjectedDeprecatedIdsRt,
   CaseUserActionBasicRt,
   UserActionsRt,
 } from '../../domain/user_action/v1';
+
+export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
+    typeof CaseUserActionInjectedIdsRt
+  >;
 
 /**
  * User actions stats API

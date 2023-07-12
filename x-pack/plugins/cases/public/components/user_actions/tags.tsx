@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { TagsUserAction } from '../../../common/api';
-import { Actions } from '../../../common/api';
+import type { TagsUserAction } from '../../../common/types/domain';
+import { Actions } from '../../../common/types/domain';
 import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tags/tags';

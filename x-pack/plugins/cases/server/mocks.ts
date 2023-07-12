@@ -13,20 +13,14 @@ import type {
   CommentRequestAlertType,
   CommentRequestUserType,
   ConnectorMappings,
-  UserActionAttributes,
 } from '../common/api';
-import {
-  Actions,
-  ActionTypes,
-  CaseSeverity,
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-} from '../common/api';
+import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
+import type { UserActionAttributes } from '../common/types/domain';
+import { Actions, ActionTypes } from '../common/types/domain';
 
 const lensPersistableState = {
   attributes: {

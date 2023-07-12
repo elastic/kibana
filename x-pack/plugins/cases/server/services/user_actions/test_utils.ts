@@ -12,18 +12,19 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { omit, get } from 'lodash';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type {
+  ActionCategory,
+  CaseUserActionWithoutReferenceIds,
+  ConnectorUserAction,
+} from '../../../common/types/domain';
+import { Actions } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import type {
-  CaseUserActionWithoutReferenceIds,
-  ConnectorUserAction,
-  ActionCategory,
-} from '../../../common/api';
-import { CaseSeverity, CaseStatuses, Actions } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,

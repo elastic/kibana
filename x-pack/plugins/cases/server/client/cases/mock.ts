@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import type {
-  Comment,
-  CommentResponseAlertsType,
-  CaseUserActionsDeprecatedResponse,
-} from '../../../common/api';
-import {
-  CommentType,
-  ConnectorTypes,
-  Actions,
-  ExternalReferenceStorageType,
-} from '../../../common/api';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import { Actions } from '../../../common/types/domain';
+import type { Comment, CommentResponseAlertsType } from '../../../common/api';
+import { CommentType, ConnectorTypes, ExternalReferenceStorageType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 export const updateUser = {

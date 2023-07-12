@@ -9,12 +9,13 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createPushedUserActionBuilder } from './pushed';
 import { getMockBuilderArgs } from './mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { Actions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { SettingsUserAction } from '../../../common/api';
+import type { SettingsUserAction } from '../../../common/types/domain';
 import type { UserActionBuilder, UserActionResponse } from './types';
 
 import { createCommonUpdateUserActionBuilder } from './common';

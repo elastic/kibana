@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import type { CreateCaseUserAction } from '../../../../common/api';
-import { ActionTypes } from '../../../../common/api';
+import type { CreateCaseUserAction } from '../../../../common/types/domain';
+import { ActionTypes } from '../../../../common/types/domain';
 
 export const addAssigneesToCreateUserAction = (
   doc: SavedObjectUnsanitizedDoc<CreateCaseUserAction>

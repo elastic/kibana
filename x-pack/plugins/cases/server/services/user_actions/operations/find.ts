@@ -8,10 +8,10 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import type { FindTypeField } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import type { ActionTypeValues, FindTypeField } from '../../../../common/api';
-import { Actions, ActionTypes, CommentType, decodeOrThrow } from '../../../../common/api';
+import { CommentType, decodeOrThrow } from '../../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -28,6 +28,8 @@ import type {
 } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
 import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
+import type { UserActionTypes } from '../../../../common/types/domain';
+import { Actions, ActionTypes } from '../../../../common/types/domain';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -167,7 +169,7 @@ export class UserActionFinder {
     );
   }
 
-  private static buildGenericTypeFilter(type: ActionTypeValues): KueryNode | undefined {
+  private static buildGenericTypeFilter(type: UserActionTypes): KueryNode | undefined {
     return buildFilter({
       filters: [type],
       field: 'type',

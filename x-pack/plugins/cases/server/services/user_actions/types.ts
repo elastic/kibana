@@ -15,23 +15,23 @@ import type {
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { AuditLogger } from '@kbn/security-plugin/server';
+import type {
+  ActionCategory,
+  CaseUserActionWithoutReferenceIds,
+  CommentUserAction,
+  ConnectorUserAction,
+  PushedUserAction,
+  UserActionTypes,
+} from '../../../common/types/domain';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
-  ActionTypeValues,
   CaseAttributes,
   CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CaseUserActionWithoutReferenceIds,
   CommentRequest,
-  CommentUserAction,
-  ConnectorUserAction,
-  PushedUserAction,
   User,
-  ActionCategory,
-  UserActionFindRequest,
-  UserActionTypes,
 } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
@@ -40,6 +40,7 @@ import type {
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { UserActionFindRequest } from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {
@@ -277,7 +278,7 @@ export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDiffer
   newValue: T[];
 }
 
-export type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
+export type CreatePayloadFunction<Item, ActionType extends UserActionTypes> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 
