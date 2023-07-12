@@ -17,21 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import {
-  Field,
-  useFetchIndexPatternFields,
-} from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
-
-interface Option {
-  label: string;
-  value: string;
-}
 
 export function CustomMetricIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
@@ -84,7 +78,7 @@ export function CustomMetricIndicatorTypeForm() {
 
                     field.onChange('');
                   }}
-                  options={createOptions(timestampFields)}
+                  options={createOptionsFromFields(timestampFields)}
                   selectedOptions={
                     !!watch('indicator.params.index') &&
                     !!field.value &&
@@ -221,12 +215,7 @@ export function CustomMetricIndicatorTypeForm() {
           }
         />
       </EuiPanel>
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
-}
-
-function createOptions(fields: Field[]): Option[] {
-  return fields
-    .map((field) => ({ label: field.name, value: field.name }))
-    .sort((a, b) => String(a.label).localeCompare(b.label));
 }
