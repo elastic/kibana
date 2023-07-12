@@ -15,8 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const from = 'Sep 22, 2019 @ 20:31:44.000';
-  const to = 'Sep 23, 2019 @ 03:31:44.000';
+  const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
+  const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
   describe('date_nanos', function () {
     before(async function () {
@@ -24,16 +24,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
-      await PageObjects.common.setTime({ from, to });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async function unloadMakelogs() {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await PageObjects.common.unsetTime();
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function () {
