@@ -67,7 +67,6 @@ import {
   ipRangeFunction,
   ISearchOptions,
   kibana,
-  kibanaContext,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
   kqlFunction,
@@ -95,7 +94,6 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SearchSessionService } from './session';
 import { registerBsearchRoute } from './routes/bsearch';
-import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
@@ -237,7 +235,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
-    expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
     expressions.registerFunction(fieldFunction);
     expressions.registerFunction(numericalRangeFunction);
     expressions.registerFunction(rangeFunction);
@@ -248,7 +245,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(removeFilterFunction);
     expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
-    expressions.registerType(kibanaContext);
+
     expressions.registerType(esRawResponse);
     expressions.registerType(eqlRawResponse);
 

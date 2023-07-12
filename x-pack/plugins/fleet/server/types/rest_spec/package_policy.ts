@@ -13,21 +13,39 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
+import { inputsFormat } from '../../../common/constants';
+
+import { BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
-  query: ListWithKuerySchema.extends({
+  query: schema.object({
+    page: schema.number({ defaultValue: 1 }),
+    perPage: schema.number({ defaultValue: 20 }),
+    kuery: schema.maybe(schema.string()),
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
     withAgentCount: schema.maybe(schema.boolean()),
   }),
 };
 
 export const BulkGetPackagePoliciesRequestSchema = {
   body: BulkRequestBodySchema,
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
     packagePolicyId: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 
@@ -36,6 +54,11 @@ export const CreatePackagePolicyRequestSchema = {
     CreatePackagePolicyRequestBodySchema,
     SimplifiedCreatePackagePolicyRequestBodySchema,
   ]),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const UpdatePackagePolicyRequestSchema = {
@@ -44,6 +67,11 @@ export const UpdatePackagePolicyRequestSchema = {
     UpdatePackagePolicyRequestBodySchema,
     SimplifiedCreatePackagePolicyRequestBodySchema,
   ]),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const DeletePackagePoliciesRequestSchema = {

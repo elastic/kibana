@@ -139,6 +139,23 @@ describe(
       });
     });
 
+    describe('visualizations section', () => {
+      it('should display analyzer and session previews', () => {
+        toggleOverviewTabAboutSection();
+        toggleOverviewTabVisualizationsSection();
+
+        cy.log('analyzer graph preview');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
+
+        cy.log('session view preview');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).scrollIntoView();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).should('be.visible');
+      });
+    });
+
     describe('investigation section', () => {
       it('should display investigation section', () => {
         toggleOverviewTabAboutSection();
@@ -319,23 +336,6 @@ describe(
 
         clickPrevalenceViewAllButton();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible'); // TODO update when we can navigate to Prevalence sub tab directly
-      });
-    });
-
-    describe('visualizations section', () => {
-      it('should display analyzer and session previews', () => {
-        toggleOverviewTabAboutSection();
-        toggleOverviewTabVisualizationsSection();
-
-        cy.log('analyzer graph preview');
-
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
-
-        cy.log('session view preview');
-
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).scrollIntoView();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW).should('be.visible');
       });
     });
   }
