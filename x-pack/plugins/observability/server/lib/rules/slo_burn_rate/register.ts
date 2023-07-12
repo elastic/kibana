@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/public';
+import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { sloFeatureId } from '../../../../common';

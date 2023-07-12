@@ -9,7 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { rulesLocatorID, RulesParams } from '@kbn/observability-shared-plugin/public';
+import { rulesLocatorID, RulesParams } from '@kbn/observability-shared-plugin/common';
 
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';

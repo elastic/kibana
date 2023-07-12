@@ -6,7 +6,7 @@
  */
 
 import { IBasePath } from '@kbn/core-http-server';
-import { AlertsLocatorParams } from '@kbn/observability-shared-plugin/public';
+import { AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';

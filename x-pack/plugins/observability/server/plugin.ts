@@ -23,7 +23,7 @@ import {
 } from '@kbn/cases-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { AlertsLocatorDefinition } from '@kbn/observability-shared-plugin/public/locators/observability/alerts';
+import { AlertsLocatorDefinition } from '@kbn/observability-shared-plugin/common';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {

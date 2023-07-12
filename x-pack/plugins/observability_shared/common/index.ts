@@ -125,3 +125,21 @@ export {
 
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
+
+export { AlertsLocatorDefinition, alertsLocatorID } from './locators/observability/alerts';
+export {
+  RuleDetailsLocatorDefinition,
+  ruleDetailsLocatorID,
+} from './locators/observability/rule_details';
+export { RulesLocatorDefinition, rulesLocatorID } from './locators/observability/rules';
+export {
+  SloDetailsLocatorDefinition,
+  sloDetailsLocatorID,
+} from './locators/observability/slo_details';
+export { SloEditLocatorDefinition, sloEditLocatorID } from './locators/observability/slo_edit';
+
+export type { AlertsLocatorParams } from './locators/observability/alerts';
+export type { RulesParams } from './locators/observability/rules';
+export type { SloEditLocatorParams } from './locators/observability/slo_edit';
+
+export type { AlertStatus, AlertStatusFilter } from './types';

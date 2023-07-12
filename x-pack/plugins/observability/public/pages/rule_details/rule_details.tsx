@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertStatus, ruleDetailsLocatorID } from '@kbn/observability-shared-plugin/public';
+import { AlertStatus, ruleDetailsLocatorID } from '@kbn/observability-shared-plugin/common';
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type { AlertConsumers } from '@kbn/rule-data-utils';

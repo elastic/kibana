@@ -36,7 +36,7 @@ import { createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO, StoredSLO } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { AlertsLocatorParams } from '@kbn/observability-shared-plugin/public';
+import { AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import {
   BurnRateAlertState,
   BurnRateAlertContext,

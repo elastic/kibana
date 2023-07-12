@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
-import { AlertStatus } from '@kbn/observability-shared-plugin/public';
+import { AlertStatus } from '@kbn/observability-shared-plugin/common';
 import { AlertsStatusFilter } from './components';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertStatus } from '@kbn/observability-shared-plugin/public';
+import { AlertStatus } from '@kbn/observability-shared-plugin/common';
 import { ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS } from '../constants';
 import { AlertStatusFilterProps } from '../types';
 

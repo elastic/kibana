@@ -9,7 +9,7 @@ import {
   createStateContainer,
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/public';
-import { AlertStatus } from '@kbn/observability-shared-plugin/public';
+import { AlertStatus } from '@kbn/observability-shared-plugin/common';
 import { ALL_ALERTS } from '../constants';
 
 interface AlertSearchBarContainerState {

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { rulesLocatorID, RulesParams } from '@kbn/observability-shared-plugin/public';
+import { rulesLocatorID, RulesParams } from '@kbn/observability-shared-plugin/common';
 import { sloKeys } from '../../../hooks/slo/query_key_factory';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';

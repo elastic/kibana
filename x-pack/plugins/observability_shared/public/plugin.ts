@@ -15,11 +15,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-import { AlertsLocatorDefinition } from './locators/observability/alerts';
-import { RulesLocatorDefinition } from './locators/observability/rules';
-import { RuleDetailsLocatorDefinition } from './locators/observability/rule_details';
-import { SloDetailsLocatorDefinition } from './locators/observability/slo_details';
-import { SloEditLocatorDefinition } from './locators/observability/slo_edit';
+import { AlertsLocatorDefinition } from '../common/locators/observability/alerts';
+import { RulesLocatorDefinition } from '../common/locators/observability/rules';
+import { RuleDetailsLocatorDefinition } from '../common/locators/observability/rule_details';
+import { SloDetailsLocatorDefinition } from '../common/locators/observability/slo_details';
+import { SloEditLocatorDefinition } from '../common/locators/observability/slo_edit';
 
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
@@ -44,31 +44,17 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public setup(_: CoreSetup, plugins: ObservabilitySharedSetup) {
-    const observabilityAlertsLocator = plugins.share.url.locators.create(
-      new AlertsLocatorDefinition()
-    );
-    const observabilityRulesLocator = plugins.share.url.locators.create(
-      new RulesLocatorDefinition()
-    );
+    plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const observabilityRuleDetailsLocator = plugins.share.url.locators.create(
-      new RuleDetailsLocatorDefinition()
-    );
+    plugins.share.url.locators.create(new RulesLocatorDefinition());
 
-    const observabilitySloDetailsLocator = plugins.share.url.locators.create(
-      new SloDetailsLocatorDefinition()
-    );
+    plugins.share.url.locators.create(new RuleDetailsLocatorDefinition());
 
-    const observabilitySloEditLocator = plugins.share.url.locators.create(
-      new SloEditLocatorDefinition()
-    );
+    plugins.share.url.locators.create(new SloDetailsLocatorDefinition());
+
+    plugins.share.url.locators.create(new SloEditLocatorDefinition());
 
     return {
-      observabilityAlertsLocator,
-      observabilityRulesLocator,
-      observabilityRuleDetailsLocator,
-      observabilitySloDetailsLocator,
-      observabilitySloEditLocator,
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },

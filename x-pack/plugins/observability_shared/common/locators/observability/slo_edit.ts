@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { BudgetingMethod, Indicator, TimeWindow } from '@kbn/slo-schema';
 import type { RecursivePartial } from '@elastic/charts';
 import type { SerializableRecord } from '@kbn/utility-types';
