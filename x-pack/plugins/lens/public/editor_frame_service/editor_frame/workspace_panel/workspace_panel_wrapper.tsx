@@ -19,7 +19,6 @@ import {
   Visualization,
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
-import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
 import { MessageList } from './message_list';
 import {
@@ -59,37 +58,37 @@ export function VisualizationToolbar(props: {
   const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
+  const { activeVisualization, onUpdateStateCb } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
-      if (!props.activeVisualization) {
+      if (!activeVisualization) {
         return;
       }
       dispatchLens(
         updateVisualizationState({
-          visualizationId: props.activeVisualization.id,
+          visualizationId: activeVisualization.id,
           newState,
         })
       );
-      if (activeDatasourceId && props.onUpdateStateCb) {
+      if (activeDatasourceId && onUpdateStateCb) {
         const dsState = datasourceStates[activeDatasourceId].state;
-        props.onUpdateStateCb?.(dsState, newState);
+        onUpdateStateCb?.(dsState, newState);
       }
     },
-    [activeDatasourceId, datasourceStates, dispatchLens, props]
+    [activeDatasourceId, datasourceStates, dispatchLens, activeVisualization, onUpdateStateCb]
   );
+
+  const ToolbarComponent = props.activeVisualization?.ToolbarComponent;
 
   return (
     <>
-      {props.activeVisualization && props.activeVisualization.renderToolbar && (
+      {ToolbarComponent && (
         <EuiFlexItem grow={false}>
-          <NativeRenderer
-            render={props.activeVisualization.renderToolbar}
-            nativeProps={{
-              frame: props.framePublicAPI,
-              state: visualization.state,
-              setState: setVisualizationState,
-            }}
-          />
+          {ToolbarComponent({
+            frame: props.framePublicAPI,
+            state: visualization.state,
+            setState: setVisualizationState,
+          })}
         </EuiFlexItem>
       )}
     </>
