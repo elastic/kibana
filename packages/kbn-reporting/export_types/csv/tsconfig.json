@@ -20,7 +20,6 @@
     "@kbn/reporting-common",
     "@kbn/discover-plugin",
     "@kbn/data-plugin",
-    "@kbn/screenshotting-plugin",
     "@kbn/generate-csv",
   ]
 }
