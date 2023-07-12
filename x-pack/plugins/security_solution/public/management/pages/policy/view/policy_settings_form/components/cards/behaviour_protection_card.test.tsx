@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
+import {
+  expectIsViewOnly,
+  getPolicySettingsFormTestSubjects,
+  matchExactTextContent,
+} from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -114,19 +118,21 @@ describe('Policy Behaviour Protection Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        'Type' +
-          'Malicious behavior' +
-          'Operating system' +
-          'Windows, Mac, Linux ' +
-          'Malicious behavior protections disabled' +
-          'Protection level' +
-          'Prevent' +
-          'User notification' +
-          'Agent version 7.15+' +
-          'Notify user' +
-          'Notification message' +
-          '—' +
-          'View related detection rules.'
+        matchExactTextContent(
+          'Type' +
+            'Malicious behavior' +
+            'Operating system' +
+            'Windows, Mac, Linux ' +
+            'Malicious behavior protections disabled' +
+            'Protection level' +
+            'Prevent' +
+            'User notification' +
+            'Agent version 7.15+' +
+            'Notify user' +
+            'Notification message' +
+            '—' +
+            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+        )
       );
     });
 
@@ -138,9 +144,19 @@ describe('Policy Behaviour Protection Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        'TypeMalicious behaviorOperating systemWindows, Mac, Linux Malicious behavior protections enabledProtection ' +
-          "levelPreventUser notificationAgent version 7.15+Don't notify userView related detection rules. Prebuilt rules " +
-          'are tagged “Elastic” on the Detection Rules page.'
+        matchExactTextContent(
+          'Type' +
+            'Malicious behavior' +
+            'Operating system' +
+            'Windows, Mac, Linux ' +
+            'Malicious behavior protections enabled' +
+            'Protection level' +
+            'Prevent' +
+            'User notification' +
+            'Agent version 7.15+' +
+            "Don't notify user" +
+            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+        )
       );
     });
   });
