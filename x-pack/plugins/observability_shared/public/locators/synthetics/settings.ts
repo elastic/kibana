@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
+export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 
 async function navigate() {
   return {

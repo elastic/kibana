@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { ACTIVE_ALERTS } from '../components/alert_search_bar/constants';
-import {
-  RULE_DETAILS_EXECUTION_TAB,
-  RULE_DETAILS_ALERTS_TAB,
-} from '../pages/rule_details/constants';
+import { RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB, RULES_PATH } from './rule_details';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
-import { RULES_PATH } from '../routes/paths';
 
 describe('RuleDetailsLocator', () => {
   const locator = new RuleDetailsLocatorDefinition();
@@ -48,7 +43,7 @@ describe('RuleDetailsLocator', () => {
       rangeFrom: 'mockedRangeTo',
       rangeTo: 'mockedRangeFrom',
       kuery: 'mockedKuery',
-      status: ACTIVE_ALERTS.status,
+      status: 'active',
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom,status:active)`

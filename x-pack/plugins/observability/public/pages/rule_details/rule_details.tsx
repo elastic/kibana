@@ -9,6 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AlertStatus, ruleDetailsLocatorID } from '@kbn/observability-shared-plugin/public';
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
@@ -25,7 +26,6 @@ import { HeaderActions } from './components/header_actions';
 import { RuleDetailsTabs } from './components/rule_details_tabs';
 import { getHealthColor } from './helpers/get_health_color';
 import { isRuleEditable } from './helpers/is_rule_editable';
-import { ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import {
   RULE_DETAILS_EXECUTION_TAB,
@@ -37,7 +37,6 @@ import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
-import type { AlertStatus } from '../../../common/typings';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 

@@ -8,7 +8,7 @@
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { ALERTS_PATH, AlertsLocatorDefinition } from './alerts';
 
-describe('RuleDetailsLocator', () => {
+describe('AlertDetailsLocator', () => {
   const locator = new AlertsLocatorDefinition();
   const baseUrlMock = 'https://kibana.dev';
   const spaceIdMock = 'mockedSpaceId';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { OVERVIEW_ROUTE } from '../../../common/constants';
-import { uptimeOverviewNavigatorParams } from './overview';
+import { uptimeOverviewNavigatorParams, OVERVIEW_ROUTE } from './overview';
 
 describe('uptimeOverviewNavigatorParams', () => {
   it('supplies the correct app name', async () => {

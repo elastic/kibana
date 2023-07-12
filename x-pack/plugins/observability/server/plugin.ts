@@ -39,7 +39,6 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
-import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
@@ -76,8 +75,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
     const config = this.initContext.config.get<ObservabilityConfig>();
-
-    const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,

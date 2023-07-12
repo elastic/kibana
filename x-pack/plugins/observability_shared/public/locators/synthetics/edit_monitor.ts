@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
+export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 
 async function navigate({ configId }: { configId: string }) {
   return {

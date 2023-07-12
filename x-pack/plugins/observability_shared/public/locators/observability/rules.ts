@@ -9,8 +9,11 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
-import { rulesLocatorID } from '../../common';
-import { RULES_PATH } from '../routes/paths';
+import { OBSERVABILITY_APP_BASE_PATH } from '../../constants';
+
+export const observabilityRulesLocatorID = 'RULES_LOCATOR';
+
+export const RULES_PATH = `${OBSERVABILITY_APP_BASE_PATH}/rules`;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RulesParams = {
@@ -24,7 +27,7 @@ export type RulesParams = {
 export interface RulesLocatorParams extends RulesParams, SerializableRecord {}
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
-  public readonly id = rulesLocatorID;
+  public readonly id = observabilityRulesLocatorID;
 
   public readonly getLocation = async ({
     lastResponse = [],

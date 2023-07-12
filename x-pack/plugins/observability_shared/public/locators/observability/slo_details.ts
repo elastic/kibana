@@ -7,8 +7,10 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { sloDetailsLocatorID } from '../../common';
-import { SLOS_PATH } from '../routes/paths';
+import { OBSERVABILITY_APP_BASE_PATH } from '../../constants';
+
+const SLOS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/slos`;
+export const observabilitySloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SloDetailsParams = {
@@ -22,7 +24,7 @@ export const getSloDetailsPath = (sloId: string) => {
 };
 
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
-  public readonly id = sloDetailsLocatorID;
+  public readonly id = observabilitySloDetailsLocatorID;
 
   public readonly getLocation = async ({ sloId = '' }: SloDetailsLocatorParams) => {
     return {

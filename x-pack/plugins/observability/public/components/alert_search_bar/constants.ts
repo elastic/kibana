@@ -7,8 +7,8 @@
 
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { AlertStatusFilter } from '@kbn/observability-shared-plugin/public';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { AlertStatusFilter } from '../../../common/typings';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 
 export const DEFAULT_QUERIES: Query[] = [];

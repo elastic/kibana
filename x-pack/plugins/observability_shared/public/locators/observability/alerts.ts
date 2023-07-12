@@ -11,9 +11,8 @@ import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { alertsLocatorID } from '..';
-import { ALERTS_URL_STORAGE_KEY } from '../constants';
-import type { AlertStatus } from '../typings';
+import type { AlertStatus } from '../../types';
+import { OBSERVABILITY_APP_BASE_PATH } from '../../constants';
 
 export interface AlertsLocatorParams extends SerializableRecord {
   baseUrl: string;
@@ -24,7 +23,9 @@ export interface AlertsLocatorParams extends SerializableRecord {
   status?: AlertStatus;
 }
 
-export const ALERTS_PATH = '/app/observability/alerts';
+export const ALERTS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/alerts`;
+
+export const alertsLocatorID = 'ALERTS_LOCATOR';
 
 function fromQuery(query: Record<string, any>) {
   const encodedQuery = urlUtils.encodeQuery(query, (value) =>
@@ -59,7 +60,7 @@ export class AlertsLocatorDefinition implements LocatorDefinition<AlertsLocatorP
 
     const path = addSpaceIdToPath(baseUrl, spaceId, ALERTS_PATH);
     const url = new URL(path);
-    url.search = fromQuery({ [ALERTS_URL_STORAGE_KEY]: rison.encodeUnknown(appState) });
+    url.search = fromQuery({ _a: rison.encodeUnknown(appState) });
 
     return {
       app: 'observability',
