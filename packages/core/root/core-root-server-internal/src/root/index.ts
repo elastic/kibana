@@ -81,7 +81,7 @@ export class Root {
   }
 
   public async shutdown(reason?: any) {
-    this.log.debug('shutting root down');
+    this.log.info('Kibana is shutting down');
 
     if (reason) {
       if (reason.code === 'EADDRINUSE' && Number.isInteger(reason.port)) {
@@ -91,7 +91,7 @@ export class Root {
       }
 
       if (reason.code !== MIGRATION_EXCEPTION_CODE) {
-        this.log.fatal(reason);
+        this.log.fatal(formatShutdownReason(reason));
       }
     }
 
@@ -159,3 +159,11 @@ export class Root {
     this.loggingConfigSubscription.add(connectSubscription);
   }
 }
+
+const formatShutdownReason = (reason: any): string => {
+  let message = `Reason: ${reason.message ?? reason}`;
+  if (reason.stack) {
+    message = `${message}\n${reason.stack}`;
+  }
+  return message;
+};

@@ -44,5 +44,6 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./bulk_get_assets'));
     loadTestFile(require.resolve('./install_dynamic_template_metric'));
     loadTestFile(require.resolve('./routing_rules'));
+    loadTestFile(require.resolve('./install_runtime_field'));
   });
 }
