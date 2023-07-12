@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema, type TypeOf } from '@kbn/config-schema';
+
+export const stateSchemaByVersion = {
+  1: {
+    // A task that was created < 8.10 will go through this "up" migration
+    // to ensure it matches the v1 schema.
+    up: (state: Record<string, unknown>) => ({
+      lastExecutionTimestamp: state.lastExecutionTimestamp || undefined,
+      runs: state.runs || 0,
+      hits: typeof state.hits === 'number' ? state.hits : undefined,
+    }),
+    schema: schema.object({
+      lastExecutionTimestamp: schema.maybe(schema.string()),
+      runs: schema.number(),
+      hits: schema.maybe(schema.number()),
+    }),
+  },
+};
+
+const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
+
+export const emptyState: LatestTaskStateSchema = {
+  lastExecutionTimestamp: undefined,
+  runs: 0,
+  hits: undefined,
+};
