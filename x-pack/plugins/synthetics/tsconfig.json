@@ -55,7 +55,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/es-types",
     "@kbn/core-http-server-mocks",
-    "@kbn/utility-types",
     "@kbn/telemetry-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-saved-objects-api-server",
