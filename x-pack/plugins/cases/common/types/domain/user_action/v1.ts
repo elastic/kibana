@@ -1,0 +1,159 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import * as rt from 'io-ts';
+import { UserRt } from '../../../api';
+import type { ActionTypeValues } from './action/v1';
+import { ActionsRt } from './action/v1';
+import { AssigneesUserActionRt } from './assignees/v1';
+import { CategoryUserActionRt } from './category/v1';
+import type { CommentUserActionPayloadWithoutIdsRt } from './comment/v1';
+import { CommentUserActionRt, CommentUserActionWithoutIdsRt } from './comment/v1';
+import { ConnectorUserActionRt, ConnectorUserActionWithoutConnectorIdRt } from './connector/v1';
+import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './create_case/v1';
+import { DeleteCaseUserActionRt } from './delete_case/v1';
+import { DescriptionUserActionRt } from './description/v1';
+import { PushedUserActionRt, PushedUserActionWithoutConnectorIdRt } from './pushed/v1';
+import { SettingsUserActionRt } from './settings/v1';
+import { SeverityUserActionRt } from './severity/v1';
+import { StatusUserActionRt } from './status/v1';
+import { TagsUserActionRt } from './tags/v1';
+import { TitleUserActionRt } from './title/v1';
+
+export const UserActionCommonAttributesRt = rt.strict({
+  created_at: rt.string,
+  created_by: UserRt,
+  owner: rt.string,
+  action: ActionsRt,
+});
+
+/**
+ * This should only be used for the getAll route and it should be removed when the route is removed
+ * @deprecated use CaseUserActionInjectedIdsRt instead
+ */
+export const CaseUserActionInjectedDeprecatedIdsRt = rt.strict({
+  action_id: rt.string,
+  case_id: rt.string,
+  comment_id: rt.union([rt.string, rt.null]),
+});
+
+export const CaseUserActionInjectedIdsRt = rt.strict({
+  comment_id: rt.union([rt.string, rt.null]),
+});
+
+const BasicUserActionsRt = rt.union([
+  DescriptionUserActionRt,
+  TagsUserActionRt,
+  TitleUserActionRt,
+  SettingsUserActionRt,
+  StatusUserActionRt,
+  SeverityUserActionRt,
+  AssigneesUserActionRt,
+  DeleteCaseUserActionRt,
+  CategoryUserActionRt,
+]);
+
+const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
+const CommonUserActionsWithoutIdsRt = rt.union([BasicUserActionsRt, CommentUserActionWithoutIdsRt]);
+
+const UserActionPayloadRt = rt.union([
+  CommonUserActionsWithIdsRt,
+  CreateCaseUserActionRt,
+  ConnectorUserActionRt,
+  PushedUserActionRt,
+]);
+
+const UserActionsWithoutIdsRt = rt.union([
+  CommonUserActionsWithoutIdsRt,
+  CreateCaseUserActionWithoutConnectorIdRt,
+  ConnectorUserActionWithoutConnectorIdRt,
+  PushedUserActionWithoutConnectorIdRt,
+]);
+
+const CaseUserActionBasicRt = rt.intersection([UserActionPayloadRt, UserActionCommonAttributesRt]);
+
+export const CaseUserActionWithoutReferenceIdsRt = rt.intersection([
+  UserActionsWithoutIdsRt,
+  UserActionCommonAttributesRt,
+]);
+
+/**
+ * This includes the comment_id but not the action_id or case_id
+ */
+export const UserActionAttributesRt = rt.intersection([
+  CaseUserActionBasicRt,
+  CaseUserActionInjectedIdsRt,
+]);
+
+const UserActionRt = rt.intersection([
+  UserActionAttributesRt,
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export const UserActionsRt = rt.array(UserActionRt);
+
+export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
+export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
+    typeof CaseUserActionInjectedIdsRt
+  >;
+export type UserActionWithDeprecatedResponse<T> = T &
+  rt.TypeOf<typeof CaseUserActionInjectedDeprecatedIdsRt>;
+
+export type CaseUserActionWithoutReferenceIds = rt.TypeOf<
+  typeof CaseUserActionWithoutReferenceIdsRt
+>;
+
+export type UserActions = rt.TypeOf<typeof UserActionsRt>;
+export type UserAction = rt.TypeOf<typeof UserActionRt>;
+
+/**
+ * This defines the high level category for the user action. Whether the user add, removed, updated something
+ */
+export type ActionCategory = rt.TypeOf<typeof ActionsRt>;
+/**
+ * This defines the type of the user action, meaning what individual action was taken, for example changing the status,
+ * adding an assignee etc.
+ */
+export type UserActionTypes = ActionTypeValues;
+
+/**
+ * User actions
+ */
+export type AssigneesUserAction = UserActionWithAttributes<rt.TypeOf<typeof AssigneesUserActionRt>>;
+export type CategoryUserAction = UserActionWithAttributes<rt.TypeOf<typeof CategoryUserActionRt>>;
+export type CommentUserAction = UserActionWithAttributes<rt.TypeOf<typeof CommentUserActionRt>>;
+export type CommentUserActionPayloadWithoutIds = UserActionWithAttributes<
+  rt.TypeOf<typeof CommentUserActionPayloadWithoutIdsRt>
+>;
+export type ConnectorUserAction = UserActionWithAttributes<rt.TypeOf<typeof ConnectorUserActionRt>>;
+export type ConnectorUserActionWithoutConnectorId = UserActionWithAttributes<
+  rt.TypeOf<typeof ConnectorUserActionWithoutConnectorIdRt>
+>;
+export type DeleteCaseUserAction = UserActionWithAttributes<
+  rt.TypeOf<typeof DeleteCaseUserActionRt>
+>;
+export type DescriptionUserAction = UserActionWithAttributes<
+  rt.TypeOf<typeof DescriptionUserActionRt>
+>;
+export type PushedUserAction = UserActionWithAttributes<rt.TypeOf<typeof PushedUserActionRt>>;
+export type PushedUserActionWithoutConnectorId = UserActionWithAttributes<
+  rt.TypeOf<typeof PushedUserActionWithoutConnectorIdRt>
+>;
+export type SettingsUserAction = UserActionWithAttributes<rt.TypeOf<typeof SettingsUserActionRt>>;
+export type SeverityUserAction = UserActionWithAttributes<rt.TypeOf<typeof SeverityUserActionRt>>;
+export type StatusUserAction = UserActionWithAttributes<rt.TypeOf<typeof StatusUserActionRt>>;
+export type TagsUserAction = UserActionWithAttributes<rt.TypeOf<typeof TagsUserActionRt>>;
+export type TitleUserAction = UserActionWithAttributes<rt.TypeOf<typeof TitleUserActionRt>>;
+export type CreateCaseUserAction = UserActionWithAttributes<
+  rt.TypeOf<typeof CreateCaseUserActionRt>
+>;
+export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
+  rt.TypeOf<typeof CreateCaseUserActionWithoutConnectorIdRt>
+>;
