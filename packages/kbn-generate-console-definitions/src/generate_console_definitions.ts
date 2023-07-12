@@ -17,7 +17,7 @@ import type {
   SpecificationTypes,
 } from './types';
 import { createFolderIfDoesntExist, findTypeDefinition, saveJsonToFile } from './utils';
-import { BodyParamsGenerator } from './body_params_converter';
+import { BodyParamsConverter } from './body_params_converter';
 
 const generateMethods = (endpoint: SpecificationTypes.Endpoint): string[] => {
   // this array consists of arrays of strings
@@ -46,11 +46,11 @@ const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string =>
 const generateParams = ({
   endpoint,
   schema,
-  bodyParamsGenerator,
+  bodyParamsConverter,
 }: {
   endpoint: SpecificationTypes.Endpoint;
   schema: SpecificationTypes.Model;
-  bodyParamsGenerator: BodyParamsGenerator;
+  bodyParamsConverter: BodyParamsConverter;
 }): { urlParams: AutocompleteUrlParams; bodyParams: AutocompleteBodyParams } | undefined => {
   const { request } = endpoint;
   if (!request) {
@@ -63,7 +63,7 @@ const generateParams = ({
 
   const requestType = requestTypeDefinition as SpecificationTypes.Request;
   const urlParams = generateQueryParams(requestType, schema);
-  const bodyParams = bodyParamsGenerator.generate(requestType.body);
+  const bodyParams = bodyParamsConverter.generate(requestType.body);
   return { urlParams, bodyParams };
 };
 
@@ -84,17 +84,17 @@ const addParams = (
 const generateDefinition = ({
   endpoint,
   schema,
-  bodyParamsGenerator,
+  bodyParamsConverter,
 }: {
   endpoint: SpecificationTypes.Endpoint;
   schema: SpecificationTypes.Model;
-  bodyParamsGenerator: BodyParamsGenerator;
+  bodyParamsConverter: BodyParamsConverter;
 }): AutocompleteDefinition => {
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
   let definition: AutocompleteDefinition = {};
-  const params = generateParams({ endpoint, schema, bodyParamsGenerator });
+  const params = generateParams({ endpoint, schema, bodyParamsConverter });
   if (params) {
     definition = addParams(definition, params);
   }
@@ -121,11 +121,11 @@ export function generateConsoleDefinitions({
   createFolderIfDoesntExist(definitionsFolder, log);
   const { endpoints } = schema;
   log.info(`iterating over endpoints array: ${endpoints.length} endpoints`);
-  const bodyParamsGenerator = new BodyParamsGenerator(schema);
+  const bodyParamsConverter = new BodyParamsConverter(schema);
   endpoints.forEach((endpoint) => {
     const { name } = endpoint;
     log.info(name);
-    const definition = generateDefinition({ endpoint, schema, bodyParamsGenerator });
+    const definition = generateDefinition({ endpoint, schema, bodyParamsConverter });
     const fileContent: { [name: string]: AutocompleteDefinition } = {
       [name]: definition,
     };
@@ -135,9 +135,9 @@ export function generateConsoleDefinitions({
   // convert global types needed for endpoint definitions
   const globalsFolder = Path.resolve(generatedFilesFolder, 'globals');
   createFolderIfDoesntExist(globalsFolder, log);
-  const globalTypes = bodyParamsGenerator.getPublicTypes();
+  const globalTypes = bodyParamsConverter.getPublicTypes();
   console.log({ globalTypes });
-  const globalDefinitions = bodyParamsGenerator.convertGlobals();
+  const globalDefinitions = bodyParamsConverter.convertGlobals();
   console.log({ globalDefinitions });
   globalDefinitions.forEach((globalDefinition) => {
     const { name, params } = globalDefinition;

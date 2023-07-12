@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { areTypeNamesEqual, findTypeDefinition, getCombinedGlobalName } from './utils';
+import {
+  areTypeNamesEqual,
+  cleanUpConvertedUnionItems,
+  findTypeDefinition,
+  getCombinedGlobalName,
+  getGlobalScopeLink,
+  isUnionOfInstanceAndArray,
+} from './utils';
 import type { AutocompleteBodyParams, GlobalDefinition, SpecificationTypes as S } from './types';
 
 /**
@@ -53,7 +60,7 @@ import type { AutocompleteBodyParams, GlobalDefinition, SpecificationTypes as S 
  *   - has a `value` property which is string, number or boolean
  */
 
-export class BodyParamsGenerator {
+export class BodyParamsConverter {
   private currentTypes: S.TypeName[];
   private globalTypes: S.TypeName[];
   private processedGlobals: S.TypeName[];
@@ -74,7 +81,7 @@ export class BodyParamsGenerator {
         return {};
       }
       case 'value': {
-        return this.convertValueOf(body.value);
+        return this.convertValueOf(body.value, undefined);
       }
       case 'properties': {
         return this.convertProperties(body.properties);
@@ -85,54 +92,55 @@ export class BodyParamsGenerator {
   private convertProperties(properties: S.Property[]): AutocompleteBodyParams {
     const bodyParams = {} as AutocompleteBodyParams;
     for (const property of properties) {
-      const { type, name } = property;
-      bodyParams[name] = this.convertValueOf(type);
+      const { type, name, serverDefault } = property;
+      bodyParams[name] = this.convertValueOf(type, serverDefault);
     }
     return bodyParams;
   }
 
-  private convertValueOf(valueOf: S.ValueOf): any {
+  private convertValueOf(valueOf: S.ValueOf, serverDefault: S.Property['serverDefault']): any {
     const { kind } = valueOf;
     switch (kind) {
       case 'instance_of':
-        return this.convertInstanceOf(valueOf);
+        return this.convertInstanceOf(valueOf, serverDefault);
       case 'array_of':
-        return this.convertArrayOf(valueOf);
+        return this.convertArrayOf(valueOf, serverDefault);
       case 'union_of':
-        return this.convertUnionOf(valueOf);
+        return this.convertUnionOf(valueOf, serverDefault);
       case 'dictionary_of':
-        return this.convertDictionaryOf(valueOf);
+        return this.convertDictionaryOf(valueOf, serverDefault);
       case 'literal_value':
-        return this.convertLiteralValue(valueOf);
+        return this.convertLiteralValue(valueOf, serverDefault);
       case 'user_defined_value':
       default:
         return '';
     }
   }
 
-  private convertInstanceOf(instanceOf: S.InstanceOf): any {
+  private convertInstanceOf(
+    instanceOf: S.InstanceOf,
+    serverDefault: S.Property['serverDefault']
+  ): any {
     const { type } = instanceOf;
     if (type.namespace === '_builtins') {
       /**
-       * - `string`
-       * - `boolean`
-       * - `number`
-       * - `null`
-       * - `void`
-       * - `binary`
+       * - `string`, `boolean`, `number`, `null`, `void`, `binary`
        */
-      return '';
+      if (type.name === 'boolean') {
+        return serverDefault ? serverDefault : { __one_of: [true, false] };
+      }
+      return serverDefault ? serverDefault.toString() : '';
     } else {
-      this.convertTypeName(type);
+      return this.convertTypeName(type, serverDefault);
     }
   }
 
-  private convertTypeName(typeName: S.TypeName): any {
+  private convertTypeName(typeName: S.TypeName, serverDefault: S.Property['serverDefault']): any {
     const definedType = findTypeDefinition(this.schema, typeName);
     if (definedType) {
       if (this.isInCurrentTypes(typeName)) {
         this.addGlobalType(typeName);
-        return this.getGlobalScopeLink(typeName);
+        return getGlobalScopeLink(typeName);
       } else {
         this.currentTypes.push(typeName);
       }
@@ -145,27 +153,61 @@ export class BodyParamsGenerator {
         result = this.convertEnum(definedType);
       } else if (definedType.kind === 'type_alias') {
         // type_alias
-        result = this.convertTypeAlias(definedType);
+        result = this.convertTypeAlias(definedType, serverDefault);
       }
       this.currentTypes.pop();
       return result;
     }
   }
 
-  private convertArrayOf = (arrayOf: S.ArrayOf): any => {
-    return '';
+  private convertArrayOf = (
+    arrayOf: S.ArrayOf,
+    serverDefault: S.Property['serverDefault']
+  ): any => {
+    return [this.convertValueOf(arrayOf.value, serverDefault)];
   };
 
-  private convertUnionOf = (unionOf: S.UnionOf): any => {
-    return '';
+  private convertUnionOf = (
+    unionOf: S.UnionOf,
+    serverDefault: S.Property['serverDefault']
+  ): any => {
+    let items;
+    if (isUnionOfInstanceAndArray(unionOf)) {
+      items = [this.convertValueOf(unionOf.items[0], serverDefault)];
+    } else {
+      items = unionOf.items.map((item) => this.convertValueOf(item, undefined));
+      if (serverDefault) {
+        items.unshift(serverDefault);
+      }
+    }
+    items = cleanUpConvertedUnionItems(items);
+    if (items.length > 0) {
+      return {
+        __one_of: items,
+      };
+    }
+    return [];
   };
 
-  private convertDictionaryOf = (dictionaryOf: S.DictionaryOf): any => {
-    return '';
+  private convertDictionaryOf = (
+    dictionaryOf: S.DictionaryOf,
+    serverDefault: S.Property['serverDefault']
+  ): any => {
+    let key = this.convertValueOf(dictionaryOf.key, undefined);
+    if (key === '') {
+      key = 'NAME';
+    }
+    const value = this.convertValueOf(dictionaryOf.value, serverDefault);
+    return {
+      [key]: value,
+    };
   };
 
-  private convertLiteralValue = (literalValue: S.LiteralValue): any => {
-    return '';
+  private convertLiteralValue = (
+    literalValue: S.LiteralValue,
+    serverDefault: S.Property['serverDefault']
+  ): any => {
+    return serverDefault ? serverDefault.toString() : literalValue.value;
   };
 
   private convertEnum(enumType: S.Enum): any {
@@ -174,19 +216,16 @@ export class BodyParamsGenerator {
     };
   }
 
-  private convertTypeAlias(typeAlias: S.TypeAlias): any {
-    return this.convertValueOf(typeAlias.type);
+  private convertTypeAlias(
+    typeAlias: S.TypeAlias,
+    serverDefault: S.Property['serverDefault']
+  ): any {
+    return this.convertValueOf(typeAlias.type, serverDefault);
   }
 
   private isInCurrentTypes(type: S.TypeName): boolean {
     const foundType = this.currentTypes.find((currentType) => areTypeNamesEqual(currentType, type));
     return !!foundType;
-  }
-
-  private getGlobalScopeLink(type: S.TypeName): any {
-    return {
-      __scope_link: getCombinedGlobalName(type),
-    };
   }
 
   private addGlobalType(typeName: S.TypeName) {
@@ -207,7 +246,7 @@ export class BodyParamsGenerator {
       const globalType = this.globalTypes.shift();
       if (globalType) {
         this.currentTypes = [];
-        const params = this.convertTypeName(globalType);
+        const params = this.convertTypeName(globalType, undefined);
         const name = getCombinedGlobalName(globalType);
         this.processedGlobals.push(globalType);
         globalDefinitions.push({ name, params });

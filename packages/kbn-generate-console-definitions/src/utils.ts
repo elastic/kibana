@@ -10,6 +10,7 @@ import fs from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { join } from 'path';
 import type { SpecificationTypes } from './types';
+import { SpecificationTypes as S } from './types';
 
 export const findTypeDefinition = (
   schema: SpecificationTypes.Model,
@@ -51,6 +52,53 @@ export const areTypeNamesEqual = (
   return typeNameA.name === typeNameB.name && typeNameA.namespace === typeNameB.namespace;
 };
 
+export const isUnionOfInstanceAndArray = (unionOf: S.UnionOf): boolean => {
+  /*
+   * often a union is an instance of a type and an array of the same type
+   * Example
+   * {
+            "items": [
+              {
+                "kind": "instance_of",
+                "type": {
+                  "name": "QueryContainer",
+                  "namespace": "_types.query_dsl"
+                }
+              },
+              {
+                "kind": "array_of",
+                "value": {
+                  "kind": "instance_of",
+                  "type": {
+                    "name": "QueryContainer",
+                    "namespace": "_types.query_dsl"
+                  }
+                }
+              }
+            ],
+            "kind": "union_of"
+          }
+   */
+  if (unionOf.items.length === 2) {
+    const item1 = unionOf.items[0];
+    const item2 = unionOf.items[1];
+    if (
+      item1.kind === 'instance_of' &&
+      item2.kind === 'array_of' &&
+      item2.value.kind === 'instance_of'
+    ) {
+      if (areTypeNamesEqual(item1.type, item2.value.type)) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+export const cleanUpConvertedUnionItems = (items: any[]) => {
+  return items.filter((item) => !!item && Object.keys(item).length > 0);
+};
+
 export const getCombinedGlobalName = (typeName: SpecificationTypes.TypeName): string => {
   const { name, namespace } = typeName;
   // remove "_global.", "_types." and "._types" from namespace
@@ -59,4 +107,10 @@ export const getCombinedGlobalName = (typeName: SpecificationTypes.TypeName): st
     .replace('_types.', '')
     .replace('._types', '');
   return `${clearedNameSpace}.${name}`;
+};
+
+export const getGlobalScopeLink = (type: S.TypeName) => {
+  return {
+    __scope_link: getCombinedGlobalName(type),
+  };
 };
