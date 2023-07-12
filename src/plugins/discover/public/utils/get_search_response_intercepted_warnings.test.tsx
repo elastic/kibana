@@ -7,67 +7,37 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { SearchResponseShardFailureWarning } from '@kbn/data-plugin/public/search/types';
 import {
   getSearchResponseInterceptedWarnings,
   removeInterceptedWarningDuplicates,
 } from './get_search_response_intercepted_warnings';
-import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
-
-const mockWarnings: SearchResponseShardFailureWarning[] = [
-  {
-    type: 'shard_failure',
-    message: '3 of 4 shards failed',
-    text: 'The data might be incomplete or wrong.',
-    reason: {
-      type: 'illegal_argument_exception',
-      reason: 'Field [__anonymous_] of type [boolean] does not support custom formats',
-    },
-  },
-  {
-    type: 'shard_failure',
-    message: '3 of 4 shards failed',
-    text: 'The data might be incomplete or wrong.',
-    reason: {
-      type: 'query_shard_exception',
-      reason:
-        'failed to create query: [.ds-kibana_sample_data_logs-2023.07.11-000001][0] Testing shard failures!',
-    },
-  },
-  {
-    type: 'shard_failure',
-    message: '1 of 4 shards failed',
-    text: 'The data might be incomplete or wrong.',
-    reason: {
-      type: 'query_shard_exception',
-      reason:
-        'failed to create query: [.ds-kibana_sample_data_logs-2023.07.11-000001][0] Testing shard failures!',
-    },
-  },
-];
+import { discoverServiceMock } from '../__mocks__/services';
+import { searchResponseWarningsMock } from '../__mocks__/search_response_warnings';
 
 describe('getSearchResponseInterceptedWarnings', () => {
   const inspectorAdapters = { requests: new RequestAdapter() };
 
   it('should catch warnings correctly', () => {
     const services = {
-      ...mockDiscoverServices,
+      ...discoverServiceMock,
     };
     services.data.search.showWarnings = jest.fn((adapter, callback) => {
       // @ts-expect-error for empty meta
-      callback?.(mockWarnings[0], {});
+      callback?.(searchResponseWarningsMock[0], {});
       // @ts-expect-error for empty meta
-      callback?.(mockWarnings[1], {});
+      callback?.(searchResponseWarningsMock[1], {});
       // @ts-expect-error for empty meta
-      callback?.(mockWarnings[2], {});
+      callback?.(searchResponseWarningsMock[2], {});
+      // @ts-expect-error for empty meta
+      callback?.(searchResponseWarningsMock[3], {});
 
       // plus duplicates
       // @ts-expect-error for empty meta
-      callback?.(mockWarnings[0], {});
+      callback?.(searchResponseWarningsMock[0], {});
       // @ts-expect-error for empty meta
-      callback?.(mockWarnings[1], {});
+      callback?.(searchResponseWarningsMock[1], {});
       // @ts-expect-error for empty meta
-      callback?.(mockWarnings[2], {});
+      callback?.(searchResponseWarningsMock[2], {});
     });
     expect(
       getSearchResponseInterceptedWarnings({
@@ -79,6 +49,14 @@ describe('getSearchResponseInterceptedWarnings', () => {
       })
     ).toMatchInlineSnapshot(`
       Array [
+        Object {
+          "action": undefined,
+          "originalWarning": Object {
+            "message": "Data might be incomplete because your request timed out",
+            "reason": undefined,
+            "type": "timed_out",
+          },
+        },
         Object {
           "action": <ShardFailureOpenModalButton
             color="primary"
@@ -160,11 +138,11 @@ describe('getSearchResponseInterceptedWarnings', () => {
 
   it('should not catch any warnings if disableShardFailureWarning is false', () => {
     const services = {
-      ...mockDiscoverServices,
+      ...discoverServiceMock,
     };
     services.data.search.showWarnings = jest.fn((adapter, callback) => {
       // @ts-expect-error for empty meta
-      callback?.(mockWarnings[0], {});
+      callback?.(searchResponseWarningsMock[0], {});
     });
     expect(
       getSearchResponseInterceptedWarnings({
@@ -180,7 +158,7 @@ describe('getSearchResponseInterceptedWarnings', () => {
 
 describe('removeInterceptedWarningDuplicates', () => {
   it('should remove duplicates successfully', () => {
-    const interceptedWarnings = mockWarnings.map((originalWarning) => ({
+    const interceptedWarnings = searchResponseWarningsMock.map((originalWarning) => ({
       originalWarning,
     }));
 

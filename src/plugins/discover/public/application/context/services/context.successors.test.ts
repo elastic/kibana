@@ -15,7 +15,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
-import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -85,7 +85,7 @@ describe('context successors', function () {
           [],
           dataPluginMock,
           false,
-          mockDiscoverServices
+          discoverServiceMock
         );
       };
     });
@@ -233,7 +233,7 @@ describe('context successors', function () {
           [],
           dataPluginMock,
           true,
-          mockDiscoverServices
+          discoverServiceMock
         );
       };
     });
@@ -322,7 +322,7 @@ describe('context successors', function () {
           dataPluginMock,
           true,
           {
-            ...mockDiscoverServices,
+            ...discoverServiceMock,
             data: dataPluginMock,
           }
         );

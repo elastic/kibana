@@ -19,51 +19,15 @@ import {
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { searchResponseWarningsMock } from '../../../__mocks__/search_response_warnings';
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-const mockInterceptedWarnings = [
-  {
-    originalWarning: {
-      type: 'shard_failure',
-      message: '3 of 4 shards failed',
-      text: 'The data might be incomplete or wrong.',
-      reason: {
-        type: 'illegal_argument_exception',
-        reason: 'Field [__anonymous_] of type [boolean] does not support custom formats',
-      },
-    },
-    action: <div>test1</div>,
-  },
-  {
-    originalWarning: {
-      type: 'shard_failure',
-      message: '3 of 4 shards failed',
-      text: 'The data might be incomplete or wrong.',
-      reason: {
-        type: 'query_shard_exception',
-        reason:
-          'failed to create query: [.ds-kibana_sample_data_logs-2023.07.11-000001][0] Testing shard failures!',
-      },
-    },
-    action: <div>test2</div>,
-  },
-  {
-    originalWarning: {
-      type: 'shard_failure',
-      message: '1 of 4 shards failed',
-      text: 'The data might be incomplete or wrong.',
-      reason: {
-        type: 'query_shard_exception',
-        reason:
-          'failed to create query: [.ds-kibana_sample_data_logs-2023.07.11-000001][0] Testing shard failures!',
-      },
-    },
-    action: <div>test3</div>,
-  },
-];
+const mockInterceptedWarnings = searchResponseWarningsMock.map((originalWarning) => ({
+  originalWarning,
+}));
 
 const mockFilterManager = createFilterManagerMock();
 

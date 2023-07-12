@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SearchResponseWarning, SortDirection } from '@kbn/data-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { searchResponseTimeoutWarningMock } from '../../../__mocks__/search_response_warnings';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,7 +35,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         expect(searchSourceStub.fetch$.calledOnce).toBe(true);
       });
@@ -47,7 +48,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         const setParentSpy = searchSourceStub.setParent;
         expect(setParentSpy.calledOnce).toBe(true);
@@ -62,7 +63,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         const setFieldSpy = searchSourceStub.setField;
         expect(setFieldSpy.firstCall.args[1].id).toEqual('DATA_VIEW_ID');
@@ -76,7 +77,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         const setVersionSpy = searchSourceStub.setField.withArgs('version');
         expect(setVersionSpy.calledOnce).toBe(true);
@@ -91,7 +92,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         const setSizeSpy = searchSourceStub.setField.withArgs('size');
         expect(setSizeSpy.calledOnce).toBe(true);
@@ -106,7 +107,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         const setQuerySpy = searchSourceStub.setField.withArgs('query');
         expect(setQuerySpy.calledOnce).toBe(true);
@@ -132,7 +133,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         const setSortSpy = searchSourceStub.setField.withArgs('sort');
         expect(setSortSpy.calledOnce).toBe(true);
@@ -178,7 +179,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(
         () => {
           fail('expected the promise to be rejected');
@@ -201,7 +202,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         false,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
         expect(anchorRow).toHaveProperty('isAnchor', true);
@@ -217,14 +218,11 @@ describe('context app', function () {
 
       const mockWarnings = [
         {
-          originalWarning: {
-            message: 'Data might be incomplete because your request timed out',
-            type: 'timed_out',
-          } as SearchResponseWarning,
+          originalWarning: searchResponseTimeoutWarningMock,
         },
       ];
 
-      const services = mockDiscoverServices;
+      const services = discoverServiceMock;
       services.data.search.showWarnings = jest.fn((adapter, callback) => {
         // @ts-expect-error for empty meta
         callback?.(mockWarnings[0].originalWarning, {});
@@ -263,7 +261,7 @@ describe('context app', function () {
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
         true,
-        mockDiscoverServices
+        discoverServiceMock
       ).then(() => {
         const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
         const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
