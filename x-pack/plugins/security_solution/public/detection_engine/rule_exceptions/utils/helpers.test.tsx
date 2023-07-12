@@ -51,6 +51,7 @@ import {
   ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
+import { AGENT_ID } from './highlighted_fields_config';
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
@@ -1528,6 +1529,7 @@ describe('Exception helpers', () => {
       'event.category': 'malware',
       'event.type': 'creation',
       'event.dataset': 'endpoint',
+      'kibana.alert.rule.uuid': '123',
       'kibana.alert.rule.exceptions_list': [
         {
           id: 'endpoint_list',
@@ -1714,17 +1716,18 @@ describe('Exception helpers', () => {
     describe('filterHighlightedFields', () => {
       const prefixesToExclude = ['agent', 'cloud'];
       it('should not filter any field if no prefixes passed ', () => {
-        const filteredFields = filterHighlightedFields(expectedHighlightedFields, []);
+        const filteredFields = filterHighlightedFields(expectedHighlightedFields, [], alertData);
         expect(filteredFields).toEqual(expectedHighlightedFields);
       });
       it('should not filter any field if no fields passed ', () => {
-        const filteredFields = filterHighlightedFields([], prefixesToExclude);
+        const filteredFields = filterHighlightedFields([], prefixesToExclude, alertData);
         expect(filteredFields).toEqual([]);
       });
       it('should filter out the passed prefixes successfully', () => {
         const filteredFields = filterHighlightedFields(
           expectedHighlightedFields,
-          prefixesToExclude
+          prefixesToExclude,
+          alertData
         );
         expect(filteredFields).not.toEqual(
           expect.arrayContaining([
@@ -1845,6 +1848,24 @@ describe('Exception helpers', () => {
           },
         ]);
       });
+      it('should return the process highlighted fields correctly when eventCategory is an array', () => {
+        const alertDataEventCategoryProcessArray = { ...alertData, 'event.category': ['process'] };
+        const res = getAlertHighlightedFields(alertDataEventCategoryProcessArray);
+        expect(res).not.toEqual(
+          expect.arrayContaining([
+            { id: 'file.name' },
+            { id: 'file.hash.sha256' },
+            { id: 'file.directory' },
+          ])
+        );
+        expect(res).toEqual(
+          expect.arrayContaining([
+            { id: 'process.name' },
+            { id: 'process.parent.name' },
+            { id: 'process.args' },
+          ])
+        );
+      });
       it('should return all highlighted fields even when the "kibana.alert.rule.type" is not in the alertData', () => {
         const alertDataWithoutEventCategory = { ...alertData, 'kibana.alert.rule.type': null };
         const res = getAlertHighlightedFields(alertDataWithoutEventCategory);
@@ -1855,6 +1876,22 @@ describe('Exception helpers', () => {
 
         const res = getAlertHighlightedFields(alertData);
         expect(res).toEqual(allHighlightFields);
+      });
+      it('should exclude the "agent.id" from highlighted fields when agent.type is not "endpoint"', () => {
+        jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
+
+        const alertDataWithoutAgentType = { ...alertData, agent: { ...alertData.agent, type: '' } };
+        const res = getAlertHighlightedFields(alertDataWithoutAgentType);
+
+        expect(res).toEqual(allHighlightFields.filter((field) => field.id !== AGENT_ID));
+      });
+      it('should exclude the "agent.id" from highlighted fields when "kibana.alert.rule.uuid" is not part of the alertData', () => {
+        jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
+
+        const alertDataWithoutRuleUUID = { ...alertData, 'kibana.alert.rule.uuid': '' };
+        const res = getAlertHighlightedFields(alertDataWithoutRuleUUID);
+
+        expect(res).toEqual(allHighlightFields.filter((field) => field.id !== AGENT_ID));
       });
     });
     describe('getPrepopulatedRuleExceptionWithHighlightFields', () => {
