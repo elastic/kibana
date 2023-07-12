@@ -9,7 +9,8 @@
     "browser": true,
     "requiredPlugins": [
       "data",
-      "contentManagement"
+      "contentManagement",
+      "expressions"
     ],
     "optionalPlugins": [
       "spaces",
