@@ -58,6 +58,8 @@ export const getPolicySettingsFormTestSubjects = (
     },
     ransomware: {
       card: ransomwareTestSubj(),
+      lockedCard: ransomwareTestSubj('locked'),
+      lockedCardTitle: ransomwareTestSubj('locked-title'),
       enableDisableSwitch: ransomwareTestSubj('enableDisableSwitch'),
       protectionPreventRadio: ransomwareTestSubj('protectionLevel-preventRadio'),
       protectionDetectRadio: ransomwareTestSubj('protectionLevel-detectRadio'),
@@ -67,6 +69,7 @@ export const getPolicySettingsFormTestSubjects = (
       notifyCustomMessageTooltipIcon: ransomwareTestSubj('notifyUser-tooltipIcon'),
       notifyCustomMessageTooltipInfo: ransomwareTestSubj('notifyUser-tooltipInfo'),
       osValuesContainer: ransomwareTestSubj('osValues'),
+      rulesCallout: ransomwareTestSubj('rulesCallout'),
     },
     memory: {
       card: memoryTestSubj(),

@@ -26,14 +26,14 @@ const RANSOMEWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.windows,
 ];
 
-const LOCKED_CARD_RAMSOMWARE_TITLE = i18n.translate(
+export const LOCKED_CARD_RAMSOMWARE_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.ransomware',
   {
     defaultMessage: 'Ransomware',
   }
 );
 
-type RansomwareProtectionCardProps = PolicyFormComponentCommonProps;
+export type RansomwareProtectionCardProps = PolicyFormComponentCommonProps;
 
 export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
@@ -48,7 +48,12 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
     );
 
     if (!isPlatinumPlus) {
-      return <SettingLockedCard title={LOCKED_CARD_RAMSOMWARE_TITLE} />;
+      return (
+        <SettingLockedCard
+          title={LOCKED_CARD_RAMSOMWARE_TITLE}
+          data-test-subj={getTestId('locked')}
+        />
+      );
     }
 
     return (
