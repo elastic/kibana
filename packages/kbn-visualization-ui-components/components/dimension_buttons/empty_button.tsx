@@ -33,6 +33,7 @@ export const EmptyDimensionButton = ({
         width: 100%;
         border-radius: ${euiThemeVars.euiBorderRadius} !important;
         border: ${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiBorderColor} !important;
+        padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
       `}
       color="text" // as far as I can tell all this currently adds is the correct active background color
       size="s"
@@ -40,13 +41,9 @@ export const EmptyDimensionButton = ({
       contentProps={{
         css: css`
           justify-content: flex-start;
+          gap: ${euiThemeVars.euiSizeS};
           padding: 0 !important;
           color: ${euiThemeVars.euiTextSubduedColor};
-          gap: 0;
-
-          .euiIcon {
-            margin-left: ${euiThemeVars.euiSizeS};
-          }
         `,
       }}
       aria-label={ariaLabel}

@@ -56,7 +56,7 @@ export class EventAnnotationPlugin
     dependencies: SetupDependencies
   ) {
     dependencies.visualizations.listingViewRegistry.add({
-      title: i18n.translate('eventAnnotation.listingViewTitle', {
+      title: i18n.translate('eventAnnotationsApplication.listingViewTitle', {
         defaultMessage: 'Annotation groups',
       }),
       id: 'annotations',

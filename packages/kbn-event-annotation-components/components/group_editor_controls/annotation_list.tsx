@@ -7,13 +7,18 @@
  */
 
 import { css } from '@emotion/react';
-import { DragContext, DragDrop, DropTargetSwapDuplicateCombine } from '@kbn/dom-drag-drop';
+import {
+  DragDrop,
+  DropTargetSwapDuplicateCombine,
+  ReorderProvider,
+  useDragDropContext,
+} from '@kbn/dom-drag-drop';
 import {
   DimensionButton,
   DimensionTrigger,
   EmptyDimensionButton,
 } from '@kbn/visualization-ui-components';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -34,8 +39,6 @@ export const AnnotationList = ({
   useEffect(() => {
     setNewAnnotationId(uuidv4());
   }, [annotations.length]);
-
-  const { dragging } = useContext(DragContext);
 
   const addAnnotationText = i18n.translate('eventAnnotation.annotationList.add', {
     defaultMessage: 'Add annotation',
@@ -60,45 +63,78 @@ export const AnnotationList = ({
     [annotations, newAnnotationId, selectAnnotation, updateAnnotations]
   );
 
+  const reorderAnnotations = useCallback(
+    (
+      sourceAnnotation: EventAnnotationConfig | undefined,
+      targetAnnotation: EventAnnotationConfig
+    ) => {
+      if (!sourceAnnotation || sourceAnnotation.id === targetAnnotation.id) {
+        return annotations;
+      }
+      const newAnnotations = annotations.filter((c) => c.id !== sourceAnnotation.id);
+      const targetPosition = newAnnotations.findIndex((c) => c.id === targetAnnotation.id);
+      const targetIndex = annotations.indexOf(sourceAnnotation);
+      const sourceIndex = annotations.indexOf(targetAnnotation);
+      newAnnotations.splice(
+        targetIndex < sourceIndex ? targetPosition + 1 : targetPosition,
+        0,
+        sourceAnnotation
+      );
+      return updateAnnotations(newAnnotations);
+    },
+    [annotations, updateAnnotations]
+  );
+
+  const [{ dragging }] = useDragDropContext();
+
   return (
     <div>
-      {annotations.map((annotation, index) => (
-        <div
-          key={index}
-          css={css`
-            margin-top: ${euiThemeVars.euiSizeS};
-            position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
-          `}
-        >
-          <DragDrop
-            order={[index]}
-            key={annotation.id}
-            value={{
-              id: annotation.id,
-              humanData: {
-                label: annotation.label,
-              },
-            }}
-            dragType="copy"
-            dropTypes={[]}
-            draggable
+      <ReorderProvider>
+        {annotations.map((annotation, index) => (
+          <div
+            key={index}
+            css={css`
+              margin-top: ${euiThemeVars.euiSizeS};
+              position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
+            `}
           >
-            <DimensionButton
-              groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
-                defaultMessage: 'Annotations',
-              })}
-              onClick={() => selectAnnotation(annotation)}
-              onRemoveClick={() =>
-                updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
-              }
-              accessorConfig={getAnnotationAccessor(annotation)}
-              label={annotation.label}
+            <DragDrop
+              order={[index]}
+              key={annotation.id}
+              value={{
+                id: annotation.id,
+                humanData: {
+                  label: annotation.label,
+                },
+              }}
+              dragType="move"
+              dropTypes={dragging && dragging.id !== annotation.id ? ['reorder'] : []}
+              draggable
+              reorderableGroup={annotations}
+              onDrop={(source) => {
+                const sourceAnnotation = source
+                  ? annotations.find(({ id }) => id === source.id)
+                  : undefined;
+                reorderAnnotations(sourceAnnotation, annotation);
+              }}
             >
-              <DimensionTrigger label={annotation.label} />
-            </DimensionButton>
-          </DragDrop>
-        </div>
-      ))}
+              <DimensionButton
+                groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
+                  defaultMessage: 'Annotations',
+                })}
+                onClick={() => selectAnnotation(annotation)}
+                onRemoveClick={() =>
+                  updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
+                }
+                accessorConfig={getAnnotationAccessor(annotation)}
+                label={annotation.label}
+              >
+                <DimensionTrigger label={annotation.label} />
+              </DimensionButton>
+            </DragDrop>
+          </div>
+        ))}
+      </ReorderProvider>
 
       <div
         css={css`
@@ -111,7 +147,7 @@ export const AnnotationList = ({
           getAdditionalClassesOnDroppable={
             DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
           }
-          dropTypes={dragging ? ['field_add'] : []}
+          dropTypes={dragging ? ['duplicate_compatible'] : []}
           value={{
             id: 'addAnnotation',
             humanData: {
