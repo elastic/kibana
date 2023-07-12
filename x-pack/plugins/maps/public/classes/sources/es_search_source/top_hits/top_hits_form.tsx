@@ -53,7 +53,7 @@ export class TopHitsForm extends Component<Props, State> {
 
   _onGroupByTimeseriesChange = (groupByTimeseries: boolean) => {
     this.props.onChange({ propName: 'groupByTimeseries', value: groupByTimeseries });
-  }
+  };
 
   _onTopHitsSplitFieldChange = (topHitsSplitField?: string) => {
     if (!topHitsSplitField) {
@@ -103,7 +103,7 @@ export class TopHitsForm extends Component<Props, State> {
           </EuiFormRow>
         )}
 
-        {!this.props.groupByTimeseries &&
+        {!this.props.groupByTimeseries && (
           <EuiFormRow
             label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
               defaultMessage: 'Entity',
@@ -124,17 +124,18 @@ export class TopHitsForm extends Component<Props, State> {
               compressed
             />
           </EuiFormRow>
-        }
+        )}
 
-        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && 
+        {(this.props.topHitsSplitField || this.props.groupByTimeseries) && (
           <EuiFormRow
-            label={this.props.groupByTimeseries
-              ? i18n.translate('xpack.maps.source.esSearch.topHitsTimeseriesSizeLabel', {
-                  defaultMessage: 'Documents per time series',
-                })
-              : i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
-                  defaultMessage: 'Documents per entity',
-                })
+            label={
+              this.props.groupByTimeseries
+                ? i18n.translate('xpack.maps.source.esSearch.topHitsTimeseriesSizeLabel', {
+                    defaultMessage: 'Documents per time series',
+                  })
+                : i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
+                    defaultMessage: 'Documents per entity',
+                  })
             }
             display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
           >
@@ -151,7 +152,7 @@ export class TopHitsForm extends Component<Props, State> {
               compressed
             />
           </EuiFormRow>
-        }
+        )}
 
         {(this.props.topHitsSplitField || this.props.groupByTimeseries) && (
           <EuiFormRow

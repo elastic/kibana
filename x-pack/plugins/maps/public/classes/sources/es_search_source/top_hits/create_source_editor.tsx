@@ -13,7 +13,12 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
-import { getGeoFields, getTermsFields, getSortFields, getIsTimeseries } from '../../../../index_pattern_util';
+import {
+  getGeoFields,
+  getTermsFields,
+  getSortFields,
+  getIsTimeseries,
+} from '../../../../index_pattern_util';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { TopHitsForm } from './top_hits_form';
 import { OnSourceChangeArgs } from '../../source';
@@ -87,8 +92,15 @@ export class CreateSourceEditor extends Component<Props, State> {
   };
 
   _previewLayer = () => {
-    const { indexPattern, geoFieldName, groupByTimeseries, sortField, sortOrder, topHitsSplitField, topHitsSize } =
-      this.state;
+    const {
+      indexPattern,
+      geoFieldName,
+      groupByTimeseries,
+      sortField,
+      sortOrder,
+      topHitsSplitField,
+      topHitsSize,
+    } = this.state;
 
     const tooltipProperties: string[] = [];
     if (groupByTimeseries) {

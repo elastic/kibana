@@ -128,9 +128,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       scalingType: isValidStringConfig(descriptor.scalingType)
         ? descriptor.scalingType!
         : SCALING_TYPES.MVT,
-      topHitsGroupByTimeseries: typeof normalizedDescriptor.topHitsGroupByTimeseries === 'boolean'
-        ? normalizedDescriptor.topHitsGroupByTimeseries
-        : false,
+      topHitsGroupByTimeseries:
+        typeof normalizedDescriptor.topHitsGroupByTimeseries === 'boolean'
+          ? normalizedDescriptor.topHitsGroupByTimeseries
+          : false,
       topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
         ? descriptor.topHitsSplitField!
         : '',
@@ -274,7 +275,11 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters
   ) {
-    const { topHitsGroupByTimeseries, topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
+    const {
+      topHitsGroupByTimeseries,
+      topHitsSplitField: topHitsSplitFieldName,
+      topHitsSize,
+    } = this._descriptor;
 
     if (!topHitsGroupByTimeseries && !topHitsSplitFieldName) {
       throw new Error('Cannot _getTopHits without topHitsSplitField');
@@ -325,15 +330,15 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     if (topHitsGroupByTimeseries) {
       searchSource.setField('aggs', {
         totalEntities: {
-          cardinality: { 
-            ...cardinalityAgg, 
-            field: '_tsid'
+          cardinality: {
+            ...cardinalityAgg,
+            field: '_tsid',
           },
         },
         entitySplit: {
           terms: {
             ...termsAgg,
-            field: '_tsid'
+            field: '_tsid',
           },
           aggs: {
             entityHits: {
