@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
 
 import { ApiKeyField } from '../../../../../components/api_key_field';
 import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
@@ -26,6 +25,51 @@ import { useBreadcrumbs, usePagination } from '../../../hooks';
 import { DefaultLayout } from '../../../layouts';
 import type { GetUninstallTokenResponse } from '../../../../../../common/types/rest_spec/uninstall_token';
 import { UninstallCommandFlyout } from '../../../components';
+
+import {
+  ACTIONS_TITLE,
+  CREATED_AT_TITLE,
+  GET_UNINSTALL_COMMAND_LABEL,
+  POLICY_ID_TITLE,
+  SEARCH_BY_POLICY_ID_PLACEHOLDER,
+  TOKEN_TITLE,
+} from './translations';
+
+const PolicyIdField = ({ policyId }: { policyId: string }) => (
+  <EuiText
+    size="s"
+    className="eui-textTruncate"
+    title={policyId}
+    data-test-subj="uninstallTokensPolicyIdField"
+  >
+    {policyId}
+  </EuiText>
+);
+
+const GetUninstallCommandButton = ({ onClick }: { onClick: () => void }) => (
+  <EuiToolTip content={GET_UNINSTALL_COMMAND_LABEL}>
+    <EuiButtonIcon
+      data-test-subj="uninstallTokensUninstallButton"
+      aria-label={GET_UNINSTALL_COMMAND_LABEL}
+      onClick={onClick}
+      iconType="minusInCircle"
+      color="danger"
+    />
+  </EuiToolTip>
+);
+
+const NoItemsMessage = ({ isLoading }: { isLoading: boolean }) =>
+  isLoading ? (
+    <FormattedMessage
+      id="xpack.fleet.uninstallTokenList.loadingTokensMessage"
+      defaultMessage="Loading uninstall tokens..."
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.uninstallTokenList.emptyMessage"
+      defaultMessage="No uninstall tokens found."
+    />
+  );
 
 export const UninstallTokenListPage = () => {
   useBreadcrumbs('uninstall_tokens');
@@ -43,6 +87,69 @@ export const UninstallTokenListPage = () => {
 
   const tokens = data?.items ?? [];
   const total = data?.total ?? 0;
+
+  const columns: Array<EuiBasicTableColumn<UninstallTokenMetadata>> = useMemo(
+    () => [
+      {
+        field: 'policy_id',
+        name: POLICY_ID_TITLE,
+        render: (policyId: string) => <PolicyIdField policyId={policyId} />,
+      },
+      {
+        field: 'created_at',
+        name: CREATED_AT_TITLE,
+        width: '130px',
+        render: (createdAt: string) =>
+          createdAt ? (
+            <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
+          ) : null,
+      },
+      {
+        field: 'id',
+        name: TOKEN_TITLE,
+        width: '300px',
+        render: (uninstallTokenId: string) => (
+          <ApiKeyField
+            apiKeyId={uninstallTokenId}
+            sendGetAPIKey={sendGetUninstallToken}
+            tokenGetter={(response: SendRequestResponse<GetUninstallTokenResponse>) =>
+              response.data?.item.token
+            }
+            length={32}
+          />
+        ),
+      },
+      {
+        field: 'actions',
+        name: ACTIONS_TITLE,
+        align: 'center',
+        width: '70px',
+        render: (_: any, { id }: UninstallTokenMetadata) => (
+          <GetUninstallCommandButton onClick={() => setTokenIdForFlyout(id)} />
+        ),
+      },
+    ],
+    []
+  );
+
+  const handleTablePagination = useCallback(
+    ({ page }: CriteriaWithPagination<UninstallTokenMetadata>) => {
+      setPagination((prevPagination) => ({
+        ...prevPagination,
+        currentPage: page.index + 1,
+        pageSize: page.size,
+      }));
+    },
+    [setPagination]
+  );
+
+  const handleSearch = useCallback(
+    (searchString: string): void => {
+      setPolicyIdSearch(searchString);
+      setPagination((prevPagination) => ({ ...prevPagination, currentPage: 1 }));
+    },
+    [setPagination]
+  );
 
   return (
     <DefaultLayout section="uninstall_tokens">
@@ -64,18 +171,10 @@ export const UninstallTokenListPage = () => {
       <EuiSpacer size="m" />
 
       <EuiFieldSearch
-        onSearch={(searchString) => {
-          setPolicyIdSearch(searchString);
-          setPagination((prevPagination) => ({
-            ...prevPagination,
-            currentPage: 1,
-          }));
-        }}
+        onSearch={handleSearch}
         incremental
         fullWidth
-        placeholder={i18n.translate('xpack.fleet.uninstallTokenList.searchByPolicyPlaceholder', {
-          defaultMessage: 'Search by policy ID',
-        })}
+        placeholder={SEARCH_BY_POLICY_ID_PLACEHOLDER}
         data-test-subj="uninstallTokensPolicyIdSearchInput"
       />
 
@@ -84,81 +183,7 @@ export const UninstallTokenListPage = () => {
       <EuiBasicTable<UninstallTokenMetadata>
         data-test-subj="uninstallTokenListTable"
         items={tokens}
-        columns={[
-          {
-            field: 'policy_id',
-            name: i18n.translate('xpack.fleet.uninstallTokenList.policyIdTitle', {
-              defaultMessage: 'Policy ID',
-            }),
-            render: (policyId: string) => (
-              <EuiText
-                size="s"
-                className="eui-textTruncate"
-                title={policyId}
-                data-test-subj="uninstallTokensPolicyIdField"
-              >
-                {policyId}
-              </EuiText>
-            ),
-          },
-          {
-            field: 'created_at',
-            name: i18n.translate('xpack.fleet.uninstallTokenList.createdAtTitle', {
-              defaultMessage: 'Created at',
-            }),
-            width: '130px',
-            render: (createdAt: string) =>
-              createdAt ? (
-                <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
-              ) : null,
-          },
-          {
-            field: 'id',
-            name: i18n.translate('xpack.fleet.uninstallTokenList.tokenTitle', {
-              defaultMessage: 'Token',
-            }),
-            width: '300px',
-            render: (uninstallTokenId: string) => (
-              <ApiKeyField
-                apiKeyId={uninstallTokenId}
-                sendGetAPIKey={sendGetUninstallToken}
-                tokenGetter={(response: SendRequestResponse<GetUninstallTokenResponse>) =>
-                  response.data?.item.token
-                }
-                length={32}
-              />
-            ),
-          },
-          {
-            field: 'actions',
-            name: i18n.translate('xpack.fleet.uninstallTokenList.actionsTitle', {
-              defaultMessage: 'Actions',
-            }),
-            align: 'center',
-            width: '70px',
-            render: (_: any, uninstallTokenMetadata: UninstallTokenMetadata) => {
-              return (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.fleet.uninstallTokenList.getUninstallCommandLabel',
-                    { defaultMessage: 'Get uninstall command' }
-                  )}
-                >
-                  <EuiButtonIcon
-                    data-test-subj="uninstallTokensUninstallButton"
-                    aria-label={i18n.translate(
-                      'xpack.fleet.uninstallTokenList.getUninstallCommandLabel',
-                      { defaultMessage: 'Get uninstall command' }
-                    )}
-                    onClick={() => setTokenIdForFlyout(uninstallTokenMetadata.id)}
-                    iconType="minusInCircle"
-                    color="danger"
-                  />
-                </EuiToolTip>
-              );
-            },
-          },
-        ]}
+        columns={columns}
         loading={isLoading}
         pagination={{
           pageIndex: pagination.currentPage - 1,
@@ -166,26 +191,8 @@ export const UninstallTokenListPage = () => {
           totalItemCount: total,
           pageSizeOptions,
         }}
-        onChange={({ page }: CriteriaWithPagination<UninstallTokenMetadata>) => {
-          setPagination((prevPagination) => ({
-            ...prevPagination,
-            currentPage: page.index + 1,
-            pageSize: page.size,
-          }));
-        }}
-        noItemsMessage={
-          isLoading ? (
-            <FormattedMessage
-              id="xpack.fleet.uninstallTokenList.loadingTokensMessage"
-              defaultMessage="Loading uninstall tokens..."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.uninstallTokenList.emptyMessage"
-              defaultMessage="No uninstall tokens found."
-            />
-          )
-        }
+        onChange={handleTablePagination}
+        noItemsMessage={<NoItemsMessage isLoading={isLoading} />}
         hasActions={true}
       />
 
