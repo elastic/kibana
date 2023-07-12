@@ -59,11 +59,11 @@ export const ReputationService = React.memo(({ protection }: { protection: Polic
     [policyDetailsConfig, dispatch]
   );
   return (
-    <>
+    <div data-test-subj={`${protection}ReputationServiceCard`}>
       <EuiSpacer size="m" />
-      <ConfigFormHeading data-test-subj={`${protection}ReputationServiceCard`}>
+      <ConfigFormHeading>
         <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj={`${protection}ReputationServiceLabel`}>
             <EuiText size="s">
               <h4>
                 <FormattedMessage
@@ -98,7 +98,7 @@ export const ReputationService = React.memo(({ protection }: { protection: Polic
           defaultMessage: 'Reputation service',
         })}
       />
-    </>
+    </div>
   );
 });
 

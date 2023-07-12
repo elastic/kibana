@@ -27,8 +27,24 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../../../common/comp
 jest.mock('../../../../../../common/hooks/use_license');
 jest.mock('../../../../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+jest.mock('../../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../../common/lib/kibana');
 
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        cloud: {
+          ...original.useKibana().services.cloud,
+          isCloudEnabled: true,
+        },
+      },
+    }),
+  };
+});
+
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 describe('Policy Form Layout', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
@@ -376,6 +392,23 @@ describe('Policy Form Layout', () => {
           'EuiPanel[data-test-subj="ransomwareProtectionsForm"]'
         );
         expect(ransomware).toHaveLength(1);
+      });
+
+      it('behavior protection card displays reputation service checkbox for cloud users', () => {
+        const reputationPanel = policyFormLayoutView.find(
+          'div[data-test-subj="behavior_protectionReputationServiceCard"]'
+        );
+        const reputationCheckbox = policyFormLayoutView.find(
+          'EuiCheckbox[data-test-subj="behavior_protectionReputationServiceCheckbox"]'
+        );
+
+        const reputationLabel = policyFormLayoutView.find(
+          'EuiFlexItem[data-test-subj="behavior_protectionReputationServiceLabel"]'
+        );
+
+        expect(reputationPanel).toHaveLength(1);
+        expect(reputationCheckbox).toHaveLength(1);
+        expect(reputationLabel).toHaveLength(1);
       });
     });
 
