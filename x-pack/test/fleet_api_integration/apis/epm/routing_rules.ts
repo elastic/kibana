@@ -22,8 +22,6 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  // TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
-
   describe('routing rules for fleet managed datastreams', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {

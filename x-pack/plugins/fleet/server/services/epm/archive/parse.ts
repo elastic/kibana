@@ -149,9 +149,10 @@ export async function generatePackageInfoFromArchiveBuffer(
   const paths: string[] = [];
   entries.forEach(({ path: bufferPath, buffer }) => {
     paths.push(bufferPath);
-    if (bufferPath.endsWith(MANIFEST_NAME) && buffer) {
-      manifestsAndRoutingRules[bufferPath] = buffer;
-    } else if (bufferPath.endsWith(DATASTREAM_ROUTING_RULES_NAME) && buffer) {
+    if (
+      buffer &&
+      (bufferPath.endsWith(MANIFEST_NAME) || bufferPath.endsWith(DATASTREAM_ROUTING_RULES_NAME))
+    ) {
       manifestsAndRoutingRules[bufferPath] = buffer;
     }
   });
@@ -173,9 +174,7 @@ export async function _generatePackageInfoFromPaths(
   const manifestsAndRoutingRules: AssetsBufferMap = {};
   await Promise.all(
     paths.map(async (filePath) => {
-      if (filePath.endsWith(MANIFEST_NAME)) {
-        manifestsAndRoutingRules[filePath] = await readFileAsync(filePath);
-      } else if (filePath.endsWith(DATASTREAM_ROUTING_RULES_NAME)) {
+      if (filePath.endsWith(MANIFEST_NAME) || filePath.endsWith(DATASTREAM_ROUTING_RULES_NAME)) {
         manifestsAndRoutingRules[filePath] = await readFileAsync(filePath);
       }
     })
