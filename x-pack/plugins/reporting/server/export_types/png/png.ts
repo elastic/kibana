@@ -81,8 +81,19 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
-        const screenshotFn = () =>
-          this.startDeps.reporting.getScreenshots({
+        return generatePngObservable(
+          () =>
+            this.startDeps.reporting.getScreenshots({
+              headers,
+              urls: [url],
+              browserTimezone: job.browserTimezone,
+              layout: {
+                ...job.layout,
+                id: 'preserve_layout',
+              },
+            }),
+          jobLogger,
+          {
             headers,
             urls: [url],
             browserTimezone: job.browserTimezone,
@@ -90,16 +101,8 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
               ...job.layout,
               id: 'preserve_layout',
             },
-          });
-        return generatePngObservable(screenshotFn, jobLogger, {
-          headers,
-          urls: [url],
-          browserTimezone: job.browserTimezone,
-          layout: {
-            ...job.layout,
-            id: 'preserve_layout',
-          },
-        });
+          }
+        );
       }),
       tap(({ buffer }) => stream.write(buffer)),
       map(({ metrics, warnings }) => ({

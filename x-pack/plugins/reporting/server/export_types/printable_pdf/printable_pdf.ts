@@ -77,6 +77,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         return getCustomLogo(uiSettingsClient, headers);
       }),
       Rx.mergeMap(({ headers, logo }) => {
+        // @ts-ignore relativeUrl issue from deprecated export type
         const urls = getFullUrls(this.getServerInfo(), this.config, job);
 
         const { browserTimezone, layout, title } = job;
