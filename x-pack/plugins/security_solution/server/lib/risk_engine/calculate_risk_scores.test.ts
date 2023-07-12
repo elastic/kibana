@@ -26,6 +26,7 @@ describe('calculateRiskScores()', () => {
       index: 'index',
       pageSize: 500,
       range: { start: 'now - 15d', end: 'now' },
+      runtimeMappings: {},
     };
   });
 
@@ -134,7 +135,7 @@ describe('calculateRiskScores()', () => {
     beforeEach(() => {
       // stub out a reasonable response
       (esClient.search as jest.Mock).mockResolvedValueOnce({
-        aggregations: calculateRiskScoreMock.createAggregationResponse(),
+        aggregations: calculateRiskScoreMock.buildAggregationResponse(),
       });
     });
 
@@ -184,14 +185,14 @@ describe('calculateRiskScores()', () => {
     beforeEach(() => {
       // stub out a rejected response
       (esClient.search as jest.Mock).mockRejectedValueOnce({
-        aggregations: calculateRiskScoreMock.createAggregationResponse(),
+        aggregations: calculateRiskScoreMock.buildAggregationResponse(),
       });
     });
 
     it('raises an error if elasticsearch client rejects', () => {
       expect.assertions(1);
       expect(() => calculateRiskScores(params)).rejects.toEqual({
-        aggregations: calculateRiskScoreMock.createAggregationResponse(),
+        aggregations: calculateRiskScoreMock.buildAggregationResponse(),
       });
     });
   });

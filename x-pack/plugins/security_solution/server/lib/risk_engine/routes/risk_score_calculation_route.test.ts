@@ -18,6 +18,7 @@ import {
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
 
 jest.mock('../get_risk_inputs_index');
 jest.mock('../risk_score_service');
@@ -36,7 +37,10 @@ describe('risk score calculation route', () => {
     ({ clients, context } = requestContextMock.createTools());
     mockRiskScoreService = riskScoreServiceMock.create();
 
-    (getRiskInputsIndex as jest.Mock).mockResolvedValue('default-dataview-index');
+    (getRiskInputsIndex as jest.Mock).mockResolvedValue({
+      index: 'default-dataview-index',
+      runtimeMappings: {},
+    });
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
@@ -58,9 +62,9 @@ describe('risk score calculation route', () => {
   };
 
   it('should return 200 when risk score calculation is successful', async () => {
-    mockRiskScoreService.calculateAndPersistScores.mockResolvedValue({
-      foo: true,
-    });
+    mockRiskScoreService.calculateAndPersistScores.mockResolvedValue(
+      calculateAndPersistRiskScoresMock.buildResponse()
+    );
     const request = buildRequest();
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -121,18 +125,19 @@ describe('risk score calculation route', () => {
       });
     });
 
-    it('rejects an unknown dataview', async () => {
+    it('uses an unknown dataview as index pattern', async () => {
       const request = buildRequest({ data_view_id: 'unknown-dataview' });
-      (getRiskInputsIndex as jest.Mock).mockResolvedValue(undefined);
+      (getRiskInputsIndex as jest.Mock).mockResolvedValue({
+        index: 'unknown-dataview',
+        runtimeMappings: {},
+      });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({
-        message:
-          'The specified dataview (unknown-dataview) was not found. Please use an existing dataview.',
-        status_code: 404,
-      });
+      expect(response.status).toEqual(200);
+      expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'unknown-dataview', runtimeMappings: {} })
+      );
     });
 
     it('rejects an invalid date range', async () => {

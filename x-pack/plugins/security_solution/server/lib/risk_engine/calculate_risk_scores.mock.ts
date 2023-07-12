@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { CalculateRiskScoreAggregations, RiskScoreBucket } from './types';
+import type {
+  CalculateRiskScoreAggregations,
+  CalculateScoresResponse,
+  RiskScoreBucket,
+} from './types';
 
-const createRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
+const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username', category: 'alert' },
   doc_count: 2,
   risk_details: {
@@ -41,21 +45,49 @@ const createRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ri
   ...overrides,
 });
 
-const createAggregationResponseMock = (
+const buildAggregationResponseMock = (
   overrides: Partial<CalculateRiskScoreAggregations> = {}
 ): CalculateRiskScoreAggregations => ({
   host: {
     after_key: { 'host.name': 'hostname' },
-    buckets: [createRiskScoreBucketMock(), createRiskScoreBucketMock()],
+    buckets: [buildRiskScoreBucketMock(), buildRiskScoreBucketMock()],
   },
   user: {
     after_key: { 'user.name': 'username' },
-    buckets: [createRiskScoreBucketMock(), createRiskScoreBucketMock()],
+    buckets: [buildRiskScoreBucketMock(), buildRiskScoreBucketMock()],
   },
   ...overrides,
 });
 
+const buildResponseMock = (
+  overrides: Partial<CalculateScoresResponse> = {}
+): CalculateScoresResponse => ({
+  after_keys: { host: { 'host.name': 'hostname' } },
+  scores: [
+    {
+      '@timestamp': '2021-08-19T20:55:59.000Z',
+      identifierField: 'host.name',
+      identifierValue: 'hostname',
+      level: 'Unknown',
+      totalScore: 20,
+      totalScoreNormalized: 30,
+      alertsScore: 30,
+      otherScore: 0,
+      notes: [],
+      riskiestInputs: [
+        {
+          id: '_id',
+          index: '_index',
+          riskScore: 30,
+        },
+      ],
+    },
+  ],
+  ...overrides,
+});
+
 export const calculateRiskScoreMock = {
-  createAggregationResponse: createAggregationResponseMock,
-  createRiskScoreBucket: createRiskScoreBucketMock,
+  buildResponse: buildResponseMock,
+  buildAggregationResponse: buildAggregationResponseMock,
+  buildRiskScoreBucket: buildRiskScoreBucketMock,
 };
