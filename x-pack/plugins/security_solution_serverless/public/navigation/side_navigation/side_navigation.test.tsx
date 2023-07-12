@@ -11,15 +11,14 @@ import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecuritySideNavigation } from './side_navigation';
 import { useSideNavItems } from './use_side_nav_items';
-import { ServicesProvider } from '../../common/services';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { ExternalPageName } from '../links/constants';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('./use_side_nav_items');
 jest.mock('../../common/services');
 
 const mockUseSideNavItems = useSideNavItems as jest.Mock;
-// const mockUseSideNavSelectedId = useSideNavSelectedId as jest.Mock;
 
 const mockSolutionSideNav = jest.fn((_props: unknown) => <div data-test-subj="solutionSideNav" />);
 jest.mock('@kbn/security-solution-side-nav', () => ({
@@ -49,8 +48,6 @@ const sideNavItems = [
   },
 ];
 
-const wrapper = ServicesProvider as React.JSXElementConstructor<unknown>;
-
 mockUseSideNavItems.mockReturnValue(sideNavItems);
 
 describe('SecuritySideNavigation', () => {
@@ -60,22 +57,28 @@ describe('SecuritySideNavigation', () => {
 
   it('should render loading when not items received', () => {
     mockUseSideNavItems.mockReturnValueOnce([]);
-    const component = render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
+    const component = render(<SecuritySideNavigation activeNodes={[]} />, {
+      wrapper: I18nProvider,
+    });
     expect(component.queryByTestId('sideNavLoader')).toBeInTheDocument();
   });
 
   it('should not render loading when items received', () => {
-    const component = render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
+    const component = render(<SecuritySideNavigation activeNodes={[]} />, {
+      wrapper: I18nProvider,
+    });
     expect(component.queryByTestId('sideNavLoader')).not.toBeInTheDocument();
   });
 
   it('should render the SideNav when items received', () => {
-    const component = render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
+    const component = render(<SecuritySideNavigation activeNodes={[]} />, {
+      wrapper: I18nProvider,
+    });
     expect(component.queryByTestId('solutionSideNav')).toBeInTheDocument();
   });
 
   it('should pass item props to the SolutionSideNav component', () => {
-    render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
+    render(<SecuritySideNavigation activeNodes={[]} />, { wrapper: I18nProvider });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -85,7 +88,7 @@ describe('SecuritySideNavigation', () => {
   });
 
   it('should have empty selectedId the SolutionSideNav component', () => {
-    render(<SecuritySideNavigation activeNodes={[]} />, { wrapper });
+    render(<SecuritySideNavigation activeNodes={[]} />, { wrapper: I18nProvider });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -96,7 +99,7 @@ describe('SecuritySideNavigation', () => {
 
   it('should have root external selectedId the SolutionSideNav component', () => {
     const activeNodes = [[{ id: 'dev_tools' }]] as ChromeProjectNavigationNode[][];
-    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper });
+    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper: I18nProvider });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -107,7 +110,7 @@ describe('SecuritySideNavigation', () => {
 
   it('should have external page selectedId the SolutionSideNav component', () => {
     const activeNodes = [[{ id: `ml:overview` }]] as ChromeProjectNavigationNode[][];
-    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper });
+    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper: I18nProvider });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -120,7 +123,7 @@ describe('SecuritySideNavigation', () => {
     const activeNodes = [
       [{ id: `${APP_UI_ID}:${SecurityPageName.alerts}` }],
     ] as ChromeProjectNavigationNode[][];
-    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper });
+    render(<SecuritySideNavigation activeNodes={activeNodes} />, { wrapper: I18nProvider });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -23,6 +23,7 @@ import type {
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { AppLinkItems } from '../../links/types';
 import { ExperimentalFeaturesService } from '../../experimental_features_service';
 import { applyIntersectionObserverMock } from '../intersection_observer_mock';
@@ -240,7 +241,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
         <QueryClientProvider client={queryClient}>
-          <ConsoleManager>{children}</ConsoleManager>
+          <NavigationProvider core={startServices}>
+            <ConsoleManager>{children}</ConsoleManager>
+          </NavigationProvider>
         </QueryClientProvider>
       </AppRootProvider>
     </KibanaContextProvider>

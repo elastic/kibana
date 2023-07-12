@@ -9,6 +9,7 @@ import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UserPrivilegesProvider } from '../../../../../../../common/components/user_privileges/user_privileges_context';
 import type { SecuritySolutionQueryClient } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
@@ -25,15 +26,18 @@ export type RenderContextProvidersProps = PropsWithChildren<{
 
 export const RenderContextProviders = memo<RenderContextProvidersProps>(
   ({ store, depsStart, queryClient, children }) => {
+    const services = useKibana().services;
     const {
       application: { capabilities },
-    } = useKibana().services;
+    } = services;
     return (
       <ReduxStoreProvider store={store}>
         <ReactQueryClientProvider queryClient={queryClient}>
           <SecuritySolutionStartDependenciesContext.Provider value={depsStart}>
             <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-              <CurrentLicense>{children}</CurrentLicense>
+              <NavigationProvider core={services}>
+                <CurrentLicense>{children}</CurrentLicense>
+              </NavigationProvider>
             </UserPrivilegesProvider>
           </SecuritySolutionStartDependenciesContext.Provider>
         </ReactQueryClientProvider>

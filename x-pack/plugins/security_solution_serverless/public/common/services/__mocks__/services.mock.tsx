@@ -10,8 +10,8 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
-import type { ProjectNavigationLink } from '../../navigation/links/types';
-import type { Services } from '../services';
+import type { ProjectNavigationLink } from '../../../navigation/links/types';
+import type { Services } from '..';
 
 export const mockProjectNavLinks = jest.fn((): ProjectNavigationLink[] => []);
 

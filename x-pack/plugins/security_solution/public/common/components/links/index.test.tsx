@@ -28,12 +28,17 @@ import {
   SecuritySolutionLinkButton,
 } from '.';
 import { SecurityPageName } from '../../../app/types';
+import {
+  mockGetAppUrl,
+  mockNavigateTo,
+} from '@kbn/security-solution-navigation/src/__mocks__/navigation.mocks';
 
-jest.mock('../link_to');
+jest.mock('@kbn/security-solution-navigation/src/navigation');
+jest.mock('../navigation/use_url_state_query_params');
 
 jest.mock('../../../overview/components/events_by_dataset');
 
-const mockNavigateTo = jest.fn();
+mockGetAppUrl.mockImplementation(({ path }) => path);
 jest.mock('../../lib/kibana', () => {
   return {
     useUiSetting$: jest.fn(),

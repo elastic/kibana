@@ -19,4 +19,14 @@ export const ServicesProvider: React.FC = ({ children }) => (
   </I18nProvider>
 );
 
+export const withServicesProvider = <T extends object>(Component: React.ComponentType<T>) => {
+  return function WithServicesProvider(props: T) {
+    return (
+      <ServicesProvider>
+        <Component {...props} />
+      </ServicesProvider>
+    );
+  };
+};
+
 export const useKibana = jest.fn(() => ({ services: mockServices }));
