@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { PackageDataStreamTypes } from '../../../../../../../common/types';
+import type { CustomPackageDatasetConfiguration } from '../../../install';
 
 export const generateDatastreamEntries = (
-  datasetNames: string[],
-  type: PackageDataStreamTypes,
+  datasets: CustomPackageDatasetConfiguration[],
   packageName: string
 ) => {
-  return datasetNames.map((name) => {
+  return datasets.map((dataset) => {
+    const { name, type } = dataset;
     return {
       type,
       dataset: `${packageName}.${name}`,

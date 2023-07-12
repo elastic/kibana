@@ -300,11 +300,14 @@ interface InstallRegistryPackageParams {
   authorizationHeader?: HTTPAuthorizationHeader | null;
 }
 
+export interface CustomPackageDatasetConfiguration {
+  name: string;
+  type: PackageDataStreamTypes;
+}
 interface InstallCustomPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  datasetNames: string[];
-  datasetType: PackageDataStreamTypes;
+  datasets: CustomPackageDatasetConfiguration[];
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
@@ -748,12 +751,11 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
     });
     return response;
   } else if (args.installSource === 'custom') {
-    const { pkgName, force, datasetNames, datasetType, spaceId, kibanaVersion } = args;
+    const { pkgName, force, datasets, spaceId, kibanaVersion } = args;
     const response = await installCustomPackage({
       savedObjectsClient,
       pkgName,
-      datasetNames,
-      datasetType,
+      datasets,
       esClient,
       spaceId,
       force,
@@ -775,8 +777,7 @@ export async function installCustomPackage(
     pkgName,
     force,
     authorizationHeader,
-    datasetNames,
-    datasetType,
+    datasets,
     kibanaVersion,
   } = args;
 
@@ -785,18 +786,17 @@ export async function installCustomPackage(
     format_version: CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
     name: pkgName,
     title: convertStringToTitle(pkgName),
-    description: generateDescription(datasetNames),
+    description: generateDescription(datasets.map((dataset) => dataset.name)),
     version: INITIAL_VERSION,
     owner: { github: authorizationHeader?.username ?? 'unknown' },
     type: 'integration' as const,
-    data_streams: generateDatastreamEntries(datasetNames, datasetType, pkgName),
+    data_streams: generateDatastreamEntries(datasets, pkgName),
   };
 
   const assets = createAssets({
     ...packageInfo,
     kibanaVersion,
-    datasetNames,
-    datasetType,
+    datasets,
   });
 
   const paths = cacheAssets(assets, pkgName, INITIAL_VERSION);

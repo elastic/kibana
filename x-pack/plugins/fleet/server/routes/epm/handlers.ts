@@ -417,14 +417,13 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const kibanaVersion = appContextService.getKibanaVersion();
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
-  const { integrationName, force, datasetNames, datasetType } = request.body;
+  const { integrationName, force, datasets } = request.body;
 
   const res = await installPackage({
     installSource: 'custom',
     savedObjectsClient,
     pkgName: integrationName,
-    datasetNames,
-    datasetType,
+    datasets,
     esClient,
     spaceId,
     force,

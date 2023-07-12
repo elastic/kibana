@@ -197,14 +197,18 @@ export const InstallPackageByUploadRequestSchema = {
 export const CreateCustomIntegrationRequestSchema = {
   body: schema.object({
     integrationName: schema.string(),
-    datasetType: schema.oneOf([
-      schema.literal('logs'),
-      schema.literal('metrics'),
-      schema.literal('traces'),
-      schema.literal('synthetics'),
-      schema.literal('profiling'),
-    ]),
-    datasetNames: schema.arrayOf(schema.string()),
+    datasets: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        type: schema.oneOf([
+          schema.literal('logs'),
+          schema.literal('metrics'),
+          schema.literal('traces'),
+          schema.literal('synthetics'),
+          schema.literal('profiling'),
+        ]),
+      })
+    ),
     force: schema.maybe(schema.boolean()),
   }),
 };
