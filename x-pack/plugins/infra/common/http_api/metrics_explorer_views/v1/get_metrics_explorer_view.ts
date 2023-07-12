@@ -12,4 +12,4 @@ export const getMetricsExplorerViewRequestParamsRT = rt.type({
   metricsExplorerViewId: rt.string,
 });
 
-export type GetMetricsExplorerViewResposePayload = rt.TypeOf<typeof metricsExplorerViewRT>;
+export type GetMetricsExplorerViewResponsePayload = rt.TypeOf<typeof metricsExplorerViewRT>;

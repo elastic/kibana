@@ -11,7 +11,7 @@ import {
   createMetricsExplorerViewRequestPayloadRT,
   FindMetricsExplorerViewResponsePayload,
   findMetricsExplorerViewResponsePayloadRT,
-  GetMetricsExplorerViewResposePayload,
+  GetMetricsExplorerViewResponsePayload,
   getMetricsExplorerViewUrl,
   metricsExplorerViewResponsePayloadRT,
   UpdateMetricsExplorerViewResponsePayload,
@@ -45,7 +45,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
 
   async getMetricsExplorerView(
     metricsExplorerViewId: string
-  ): Promise<GetMetricsExplorerViewResposePayload> {
+  ): Promise<GetMetricsExplorerViewResponsePayload> {
     const response = await this.http
       .get(getMetricsExplorerViewUrl(metricsExplorerViewId))
       .catch((error) => {

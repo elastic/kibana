@@ -10,7 +10,7 @@ import {
   FindMetricsExplorerViewResponsePayload,
   CreateMetricsExplorerViewResponsePayload,
   UpdateMetricsExplorerViewResponsePayload,
-  GetMetricsExplorerViewResposePayload,
+  GetMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api';
 import { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
 
@@ -28,7 +28,7 @@ export interface IMetricsExplorerViewsClient {
   findMetricsExplorerViews(): Promise<FindMetricsExplorerViewResponsePayload['data']>;
   getMetricsExplorerView(
     metricsExplorerViewId: string
-  ): Promise<GetMetricsExplorerViewResposePayload>;
+  ): Promise<GetMetricsExplorerViewResponsePayload>;
   createMetricsExplorerView(
     metricsExplorerViewAttributes: Partial<MetricsExplorerViewAttributes>
   ): Promise<CreateMetricsExplorerViewResponsePayload>;
