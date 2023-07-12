@@ -15,9 +15,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
-import type { HttpService } from '@kbn/core-http-server-internal';
+import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
+import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -29,20 +30,17 @@ describe('Routing versioned requests', () => {
   async function setupServer(cliArgs: Partial<CliArgs> = {}) {
     logger = loggingSystemMock.create();
     await server?.stop(); // stop the already started server
+    const serverConfig: Partial<HttpConfigType> = {
+      versioned: {
+        versionResolution: cliArgs.dev ? 'none' : cliArgs.serverless ? 'newest' : 'oldest',
+        strictClientVersionCheck: !cliArgs.serverless,
+      },
+    };
     server = createHttpServer({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
       configService: createConfigService({
-        // We manually sync the config in our mock at this point
-        server:
-          cliArgs.serverless === true
-            ? {
-                versioned: {
-                  versionResolution: 'newest',
-                  strictClientVersionCheck: false,
-                },
-              }
-            : undefined,
+        server: serverConfig,
       }),
     });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
@@ -199,6 +197,24 @@ describe('Routing versioned requests', () => {
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
+      )
+      .addVersion(
+        {
+          validate: { response: { 200: { body: schema.object({}, { unknowns: 'forbid' }) } } },
+          version: '2',
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '2' } });
+        }
+      )
+      .addVersion(
+        {
+          validate: { response: { 200: { body: schema.object({}, { unknowns: 'allow' }) } } },
+          version: '3',
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '3' } });
+        }
       );
 
     await server.start();
@@ -214,6 +230,32 @@ describe('Routing versioned requests', () => {
         message: expect.stringMatching(/Failed output validation/),
       })
     );
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '2')
+        .expect(500)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        message: expect.stringMatching(/Failed output validation/),
+      })
+    );
+
+    // This should pass response validation
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '3')
+        .expect(200)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        v: '3',
+      })
+    );
+
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
@@ -271,10 +313,7 @@ describe('Routing versioned requests', () => {
         path: '/my-path',
         access: 'public',
       })
-      .addVersion(
-        { version: '2023-10-31', validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      );
+      .addVersion({ version: '2023-10-31', validate: false }, async (ctx, req, res) => res.ok());
     await server.start();
 
     await expect(
@@ -362,5 +401,102 @@ describe('Routing versioned requests', () => {
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(error);
+  });
+
+  it('reserves the query parameter "apiVersion" for version negotiation', async () => {
+    await setupServer({ serverless: false, dev: false });
+    router.versioned.get({ path: '/my-path', access: 'public' }).addVersion(
+      {
+        validate: {
+          request: {
+            query: schema.object({ [ELASTIC_HTTP_VERSION_QUERY_PARAM]: schema.string() }),
+          },
+        },
+        version: '2023-04-04',
+      },
+      async (ctx, req, res) => {
+        return res.ok({ body: 'ok' });
+      }
+    );
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .query({ [ELASTIC_HTTP_VERSION_QUERY_PARAM]: '2023-04-04' })
+        .expect(400)
+        .then(({ body }) => body.message)
+    ).resolves.toEqual(
+      'Use of query parameter "apiVersion" is not allowed. Please specify the API version using the "elastic-api-version" header.'
+    );
+  });
+
+  describe('query parameter version negotiation', () => {
+    let publicHandler: jest.Mock;
+    let internalHandler: jest.Mock;
+    beforeEach(() => {
+      publicHandler = jest.fn(async (ctx: any, req: any, res: any) => {
+        return res.ok({ body: 'ok' });
+      });
+      internalHandler = jest.fn(async (ctx: any, req: any, res: any) => {
+        return res.ok({ body: 'ok' });
+      });
+      router.versioned
+        .get({ path: '/my-public', access: 'public', enableQueryVersion: true })
+        .addVersion(
+          {
+            validate: { request: { query: schema.object({ a: schema.number() }) } },
+            version: '2023-10-31',
+          },
+          publicHandler
+        );
+
+      router.versioned
+        .get({ path: '/my-internal', access: 'internal', enableQueryVersion: true })
+        .addVersion(
+          {
+            validate: { request: { query: schema.object({ a: schema.number() }) } },
+            version: '1',
+          },
+          internalHandler
+        );
+    });
+    it('finds version based on header', async () => {
+      await server.start();
+      await supertest
+        .get('/my-public')
+        .set('Elastic-Api-Version', '2023-10-31')
+        .query({ a: 1 })
+        .expect(200);
+      expect(publicHandler).toHaveBeenCalledTimes(1);
+      {
+        const [[_, req]] = publicHandler.mock.calls;
+        expect(req.query).toEqual({ a: 1 }); // does not contain apiVersion key
+      }
+      await supertest
+        .get('/my-internal')
+        .set('Elastic-Api-Version', '1')
+        .query({ a: 2 })
+        .expect(200);
+      expect(internalHandler).toHaveBeenCalledTimes(1);
+      {
+        const [[_, req]] = internalHandler.mock.calls;
+        expect(req.query).toEqual({ a: 2 }); // does not contain apiVersion key
+      }
+    });
+    it('finds version based on query param', async () => {
+      await server.start();
+      await supertest.get('/my-public').query({ apiVersion: '2023-10-31', a: 1 }).expect(200);
+      {
+        const [[_, req]] = publicHandler.mock.calls;
+        expect(req.query).toEqual({ a: 1 }); // does not contain apiVersion key
+      }
+      await supertest.get('/my-internal').query({ apiVersion: '1', a: 2 }).expect(200);
+      {
+        const [[_, req]] = internalHandler.mock.calls;
+        expect(req.query).toEqual({ a: 2 }); // does not contain apiVersion key
+      }
+    });
   });
 });

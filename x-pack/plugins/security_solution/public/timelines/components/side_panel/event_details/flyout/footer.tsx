@@ -26,11 +26,6 @@ import { OsqueryFlyout } from '../../../../../detections/components/osquery/osqu
 interface FlyoutFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   detailsEcsData: Ecs | null;
-  expandedEvent: {
-    eventId: string;
-    indexName: string;
-    refetch?: () => void;
-  };
   handleOnEventClosed: () => void;
   isHostIsolationPanelOpen: boolean;
   isReadOnly?: boolean;
@@ -52,7 +47,6 @@ export const FlyoutFooterComponent = React.memo(
   ({
     detailsData,
     detailsEcsData,
-    expandedEvent,
     handleOnEventClosed,
     isHostIsolationPanelOpen,
     isReadOnly,
@@ -162,7 +156,6 @@ export const FlyoutFooterComponent = React.memo(
                   onAddIsolationStatusClick={onAddIsolationStatusClick}
                   refetchFlyoutData={refetchFlyoutData}
                   refetch={refetchAll}
-                  indexName={expandedEvent.indexName}
                   scopeId={scopeId}
                   onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
                 />

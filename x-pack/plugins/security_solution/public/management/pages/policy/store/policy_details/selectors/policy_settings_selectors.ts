@@ -186,14 +186,6 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   }
 );
 
-export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
-  return uiPolicyConfig.windows.antivirus_registration.enabled;
-});
-
-export const isCredentialHardeningEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
-  return uiPolicyConfig.windows.attack_surface_reduction.credential_hardening.enabled;
-});
-
 /** is there an api call in flight */
 export const isLoading = (state: PolicyDetailsState) => state.isLoading;
 
