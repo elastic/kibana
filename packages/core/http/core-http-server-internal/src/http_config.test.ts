@@ -486,6 +486,29 @@ describe('cors', () => {
   });
 });
 
+describe('versioned', () => {
+  it('defaults version resolution "oldest" not in dev', () => {
+    expect(config.schema.validate({}, { dev: undefined })).toMatchObject({
+      versioned: { versionResolution: 'oldest' },
+    });
+    expect(config.schema.validate({}, { dev: false })).toMatchObject({
+      versioned: { versionResolution: 'oldest' },
+    });
+  });
+
+  it('does not allow "none" when not in dev', () => {
+    expect(() =>
+      config.schema.validate({ versioned: { versionResolution: 'none' } }, { dev: false })
+    ).toThrow(/failed validation/);
+  });
+
+  it('defaults version resolution "none" when in dev', () => {
+    expect(config.schema.validate({}, { dev: true })).toMatchObject({
+      versioned: { versionResolution: 'none' },
+    });
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
