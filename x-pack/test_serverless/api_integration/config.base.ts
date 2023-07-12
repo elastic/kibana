@@ -15,13 +15,14 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
     return {
       ...svlSharedConfig.getAll(),
-
       services,
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          `--xpack.alerting.enableFrameworkAlerts=true`,
+          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.observability.unsafe.thresholdRule.enabled=true',
         ],
       },
