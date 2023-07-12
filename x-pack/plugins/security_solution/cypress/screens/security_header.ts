@@ -70,7 +70,7 @@ export const EXCEPTIONS = '[data-test-subj="solutionSideNavPanelLink-exceptions"
 // other
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 
-export const KQL_INPUT = '[data-test-subj="queryInput"]';
+export const KQL_INPUT = `${GLOBAL_KQL_WRAPPER} [data-test-subj="queryInput"]`;
 
 export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
 

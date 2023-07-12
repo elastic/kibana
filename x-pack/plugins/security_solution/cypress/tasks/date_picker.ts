@@ -13,7 +13,6 @@ import {
   DATE_PICKER_END_DATE_POPOVER_BUTTON,
   DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE,
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GLOBAL_FILTERS_CONTAINER,
   SHOW_DATES_BUTTON,
   DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
   DATE_PICKER_SHOW_DATE_POPOVER_BUTTON,
@@ -21,6 +20,7 @@ import {
   DATE_PICKER_NOW_BUTTON,
   LOCAL_DATE_PICKER_APPLY_BUTTON,
   LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
+  DATE_PICKER_CONTAINER,
 } from '../screens/date_picker';
 
 export const setEndDate = (date: string) => {
@@ -42,8 +42,7 @@ export const setEndDateNow = () => {
 };
 
 export const setStartDate = (date: string) => {
-  cy.get(GLOBAL_FILTERS_CONTAINER);
-  cy.get('.euiSuperDatePicker');
+  cy.get(DATE_PICKER_CONTAINER).should('be.visible');
   cy.get('body').then(($container) => {
     if ($container.find(SHOW_DATES_BUTTON).length > 0) {
       cy.get(DATE_PICKER_SHOW_DATE_POPOVER_BUTTON).click({ force: true });
