@@ -45,6 +45,7 @@ export const BASE_SECURITY_CONVERSATIONS: Record<string, Conversation> = {
     apiConfig: {},
   },
   [TIMELINE_CONVERSATION_TITLE]: {
+    excludeFromLastConversationStorage: true,
     id: TIMELINE_CONVERSATION_TITLE,
     isDefault: true,
     messages: [],

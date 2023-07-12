@@ -54,9 +54,5 @@ export interface Conversation {
   replacements?: Record<string, string>;
   theme?: ConversationTheme;
   isDefault?: boolean;
-}
-
-export interface OpenAIConfig {
-  temperature: number;
-  model: string;
+  excludeFromLastConversationStorage?: boolean;
 }

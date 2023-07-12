@@ -28,6 +28,7 @@ import { Prompt } from '../assistant/types';
 import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
+  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
@@ -101,6 +102,7 @@ export interface UseAssistantContext {
   }) => EuiCommentProps[];
   http: HttpSetup;
   isSettingsModalVisible: boolean;
+  localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
@@ -111,6 +113,7 @@ export interface UseAssistantContext {
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -162,6 +165,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   useEffect(() => {
     setLocalStorageSystemPrompts(baseSystemPrompts);
   }, [baseSystemPrompts, setLocalStorageSystemPrompts]);
+
+  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
+    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
 
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
@@ -274,6 +280,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       showAssistantOverlay,
       title,
       unRegisterPromptContext,
+      localStorageLastConversationId,
+      setLastConversationId: setLocalStorageLastConversationId,
     }),
     [
       actionTypeRegistry,
@@ -291,6 +299,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       isSettingsModalVisible,
+      localStorageLastConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
       nameSpace,
@@ -301,6 +310,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setDefaultAllow,
       setDefaultAllowReplacement,
       setIsSettingsModalVisible,
+      setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
       setSelectedSettingsTab,
