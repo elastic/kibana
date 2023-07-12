@@ -72,7 +72,16 @@ export function LensEditConfigurationFlyout({
     }
   });
 
-  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
+  const framePublicAPI = useLensSelector((state) => {
+    const newState = {
+      ...state,
+      lens: {
+        ...state.lens,
+        activeData,
+      },
+    };
+    return selectFramePublicAPI(newState, datasourceMap);
+  });
   const { isLoading } = useLensSelector((state) => state.lens);
   if (isLoading) return null;
   const framePublicAPIEnhanced = {
@@ -81,7 +90,7 @@ export function LensEditConfigurationFlyout({
   };
 
   const layerPanelsProps = {
-    framePublicAPI: framePublicAPIEnhanced,
+    framePublicAPI,
     datasourceMap,
     visualizationMap,
     core: coreStart,
