@@ -8,8 +8,8 @@ import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import type { HostsState } from '../../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import { AlertStatus } from '../../pages/metrics/hosts/types';
-import { ALERT_STATUS_QUERY } from '../../pages/metrics/hosts/constants';
+import type { AlertStatus } from '../../pages/metrics/hosts/types';
+import { ALERT_STATUS_QUERY } from './constants';
 import { buildCombinedHostsFilter } from '../../utils/filters/build';
 import type { AlertsEsQuery } from '../../pages/metrics/hosts/hooks/use_alerts_query';
 

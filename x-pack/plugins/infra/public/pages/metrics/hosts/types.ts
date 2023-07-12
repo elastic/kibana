@@ -7,7 +7,8 @@
 
 import { Filter } from '@kbn/es-query';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { ALERT_STATUS_ALL, HOST_LIMIT_OPTIONS } from './constants';
+import { ALERT_STATUS_ALL } from '../../../common/alerts/constants';
+import { HOST_LIMIT_OPTIONS } from './constants';
 
 export type AlertStatus =
   | typeof ALERT_STATUS_ACTIVE

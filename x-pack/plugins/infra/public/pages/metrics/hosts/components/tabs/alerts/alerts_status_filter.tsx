@@ -8,7 +8,11 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ACTIVE_ALERTS, ALL_ALERTS, RECOVERED_ALERTS } from '../../../constants';
+import {
+  ACTIVE_ALERTS,
+  ALL_ALERTS,
+  RECOVERED_ALERTS,
+} from '../../../../../../common/alerts/constants';
 import { AlertStatus } from '../../../types';
 export interface AlertStatusFilterProps {
   status: AlertStatus;

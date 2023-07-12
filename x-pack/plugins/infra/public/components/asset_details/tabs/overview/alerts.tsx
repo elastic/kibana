@@ -10,14 +10,13 @@ import {
   getAlertSummaryTimeRange,
   useTimeBuckets,
 } from '@kbn/observability-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiPopover, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
-import type { AlertStatus } from '../../../../pages/metrics/hosts/types';
 import {
   DEFAULT_DATE_FORMAT,
   DEFAULT_INTERVAL,
@@ -32,8 +31,7 @@ import { LinkToAlertsRule } from '../../links/link_to_alerts';
 import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 import { useBoolean } from '../../../../hooks/use_boolean';
-
-const ALERT_STATUS: AlertStatus = 'all';
+import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 
 export const AlertsSummaryContent = ({
   nodeName,
@@ -51,7 +49,7 @@ export const AlertsSummaryContent = ({
       createAlertsEsQuery({
         dateRange,
         hostNodeNames: [nodeName],
-        status: ALERT_STATUS,
+        status: ALERT_STATUS_ALL,
       }),
     [nodeName, dateRange]
   );
