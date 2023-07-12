@@ -23,6 +23,7 @@ import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_a
 import { installPrebuiltRulesAndTimelines } from '../../utils/prebuilt_rules/install_prebuilt_rules_and_timelines';
 import { installPrebuiltRules } from '../../utils/prebuilt_rules/install_prebuilt_rules';
 import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
+import { upgradePrebuiltRules } from '../../utils/prebuilt_rules/upgrade_prebuilt_rules';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -372,7 +373,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(response.summary.total).toBe(1);
         });
 
-        it.only('should update outdated prebuilt rules when previous historical versions available', async () => {
+        it('should update outdated prebuilt rules when previous historical versions available', async () => {
           // Install all prebuilt detection rules
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRules(supertest);
@@ -384,15 +385,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // Check that the prebuilt rule status shows that one rule is outdated
           const statusResponse = await getPrebuiltRulesStatus(supertest);
-          console.log(statusResponse);
-          expect(statusResponse.stats.num_prebuilt_rules_to_install).toBe(1);
+          expect(statusResponse.stats.num_prebuilt_rules_to_upgrade).toBe(1);
 
-          // Call the install prebuilt rules again and check that the outdated rule was updated
-          const response = await installPrebuiltRules(supertest);
-          expect(response.summary.succeeded).toBe(0);
+          // Call the upgrade prebuilt rules endpoint and check that the outdated rule was updated
+          const response = await upgradePrebuiltRules(supertest);
+          expect(response.summary.succeeded).toBe(1);
+          expect(response.summary.total).toBe(1);
 
           const status = await getPrebuiltRulesStatus(supertest);
           expect(status.stats.num_prebuilt_rules_to_install).toBe(0);
+          expect(status.stats.num_prebuilt_rules_to_upgrade).toBe(0);
         });
       });
     });
