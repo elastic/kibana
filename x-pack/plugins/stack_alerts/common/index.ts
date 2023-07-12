@@ -14,4 +14,4 @@ export {
 export { STACK_ALERTS_FEATURE_ID } from './constants';
 
 export type { EsqlTable } from './esql_query_utils';
-export { transformDatatableToEsqlTable, toEsQueryHits } from './esql_query_utils';
+export { rowToDocument, transformDatatableToEsqlTable, toEsQueryHits } from './esql_query_utils';
