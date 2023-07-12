@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -27,9 +28,11 @@ import { Prompt } from '../assistant/types';
 import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
+  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
+import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -52,6 +55,7 @@ interface AssistantProviderProps {
   basePromptContexts?: PromptContextTemplate[];
   baseQuickPrompts?: QuickPrompt[];
   baseSystemPrompts?: Prompt[];
+  docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: ({
     currentConversation,
@@ -71,13 +75,14 @@ interface AssistantProviderProps {
   title?: string;
 }
 
-interface UseAssistantContext {
+export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
   baseAllow: string[];
   baseAllowReplacement: string[];
+  docLinks: Omit<DocLinksStart, 'links'>;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   basePromptContexts: PromptContextTemplate[];
@@ -96,14 +101,20 @@ interface UseAssistantContext {
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
+  isSettingsModalVisible: boolean;
+  localStorageLastConversationId: string | undefined;
   promptContexts: Record<string, PromptContext>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
+  selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   title: string;
@@ -119,6 +130,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseAllowReplacement,
   defaultAllow,
   defaultAllowReplacement,
+  docLinks,
   basePromptContexts = [],
   baseQuickPrompts = [],
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
@@ -153,6 +165,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   useEffect(() => {
     setLocalStorageSystemPrompts(baseSystemPrompts);
   }, [baseSystemPrompts, setLocalStorageSystemPrompts]);
+
+  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
+    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
 
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
@@ -193,6 +208,12 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(
     (showAssistant) => {}
   );
+
+  /**
+   * Settings State
+   */
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
   const [conversations, setConversationsInternal] = useState(getInitialConversations());
   const conversationIds = useMemo(() => Object.keys(conversations).sort(), [conversations]);
@@ -240,20 +261,27 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       conversations,
       defaultAllow: uniq(defaultAllow),
       defaultAllowReplacement: uniq(defaultAllowReplacement),
+      docLinks,
       getComments,
       http,
+      isSettingsModalVisible,
       promptContexts,
       nameSpace,
       registerPromptContext,
+      selectedSettingsTab,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
       setAllSystemPrompts: setLocalStorageSystemPrompts,
       setConversations: onConversationsUpdated,
       setDefaultAllow,
       setDefaultAllowReplacement,
+      setIsSettingsModalVisible,
+      setSelectedSettingsTab,
       setShowAssistantOverlay,
       showAssistantOverlay,
       title,
       unRegisterPromptContext,
+      localStorageLastConversationId,
+      setLastConversationId: setLocalStorageLastConversationId,
     }),
     [
       actionTypeRegistry,
@@ -267,18 +295,25 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       conversations,
       defaultAllow,
       defaultAllowReplacement,
+      docLinks,
       getComments,
       http,
+      isSettingsModalVisible,
+      localStorageLastConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
       nameSpace,
       onConversationsUpdated,
       promptContexts,
       registerPromptContext,
+      selectedSettingsTab,
       setDefaultAllow,
       setDefaultAllowReplacement,
+      setIsSettingsModalVisible,
+      setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
+      setSelectedSettingsTab,
       showAssistantOverlay,
       title,
       unRegisterPromptContext,
