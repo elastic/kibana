@@ -78,6 +78,7 @@ describe('es_query executor', () => {
     excludeHitsFromPreviousRun: true,
     aggType: 'count',
     groupBy: 'all',
+    esqlQuery: { esql: 'test-query' },
   };
 
   describe('executor', () => {
