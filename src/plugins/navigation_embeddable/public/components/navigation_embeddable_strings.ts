@@ -22,6 +22,10 @@ export const NavEmbeddableStrings = {
       i18n.translate('navigationEmbeddable.editor.editLinkTitle', {
         defaultMessage: 'Edit link',
       }),
+    getDeleteLinkTitle: () =>
+      i18n.translate('navigationEmbeddable.editor.deleteLinkTitle', {
+        defaultMessage: 'Delete link',
+      }),
     getCancelButtonLabel: () =>
       i18n.translate('navigationEmbeddable.editor.cancelButtonLabel', {
         defaultMessage: 'Close',
@@ -38,6 +42,10 @@ export const NavEmbeddableStrings = {
       getSaveButtonLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
           defaultMessage: 'Save',
+        }),
+      getLinkLoadingAriaLabel: () =>
+        i18n.translate('navigationEmbeddable.linkEditor.linkLoadingAriaLabel', {
+          defaultMessage: 'Loading link',
         }),
     },
     linkEditor: {

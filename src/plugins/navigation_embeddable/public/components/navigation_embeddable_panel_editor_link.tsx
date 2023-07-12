@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   EuiSkeletonTitle,
   DraggableProvidedDragHandleProps,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import {
@@ -25,6 +26,7 @@ import {
   NavigationEmbeddableLink,
 } from '../embeddable/types';
 import { fetchDashboard } from './dashboard_link/dashboard_link_tools';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 
 export const NavigationEmbeddablePanelEditorLink = ({
   link,
@@ -66,7 +68,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
           <EuiSkeletonTitle
             size="xxxs"
             isLoading={linkLabelLoading}
-            contentAriaLabel="Demo skeleton title"
+            contentAriaLabel={NavEmbeddableStrings.editor.panelEditor.getLinkLoadingAriaLabel()}
           >
             <div className="wrapText">{linkLabel}</div>
           </EuiSkeletonTitle>
@@ -74,16 +76,25 @@ export const NavigationEmbeddablePanelEditorLink = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none" responsive={false} className="navEmbeddable_hoverActions">
             <EuiFlexItem>
-              <EuiButtonIcon size="xs" iconType="pencil" aria-label="Edit" onClick={editLink} />
+              <EuiToolTip content={NavEmbeddableStrings.editor.getEditLinkTitle()}>
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="pencil"
+                  onClick={editLink}
+                  aria-label={NavEmbeddableStrings.editor.getEditLinkTitle()}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButtonIcon
-                size="xs"
-                iconType="trash"
-                aria-label="Delete"
-                color="danger"
-                onClick={deleteLink}
-              />
+              <EuiToolTip content={NavEmbeddableStrings.editor.getDeleteLinkTitle()}>
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="trash"
+                  aria-label={NavEmbeddableStrings.editor.getDeleteLinkTitle()}
+                  color="danger"
+                  onClick={deleteLink}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

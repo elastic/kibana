@@ -39,6 +39,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
       {...(link.destination === parentDashboardId
         ? {
             color: 'text',
+            onClick: undefined,
           }
         : {
             color: 'primary',

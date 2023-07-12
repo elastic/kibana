@@ -113,7 +113,7 @@ export const NavigationEmbeddablePanelEditor = ({
     (linkId: string) => {
       setOrderedLinks(
         orderedLinks.filter((link) => {
-          return link.id === linkId;
+          return link.id !== linkId;
         })
       );
     },
