@@ -10,10 +10,10 @@ import { Aggregators, Comparator } from '@kbn/observability-plugin/common/thresh
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/threshold/threshold_executor';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from './helpers/data_view';
-import { waitForAlertInIndex, waitForRuleStatus } from './helpers/alerting_wait_for_helpers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
+import { createDataView, deleteDataView } from '../helpers/data_view';
+import { waitForAlertInIndex, waitForRuleStatus } from '../helpers/alerting_wait_for_helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
 
-  describe('Threshold rule', () => {
+  describe('Threshold rule - AVG - PCT - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';

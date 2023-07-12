@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability API', function () {
     loadTestFile(require.resolve('./snapshot_telemetry'));
-    loadTestFile(require.resolve('./threshold_rule'));
+    loadTestFile(require.resolve('./threshold_rule/avg_pct_fired'));
+    loadTestFile(require.resolve('./threshold_rule/avg_pct_no_data'));
   });
 }
