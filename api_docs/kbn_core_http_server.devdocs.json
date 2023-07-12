@@ -7242,10 +7242,6 @@
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
               },
               {
-                "plugin": "stackConnectors",
-                "path": "x-pack/plugins/stack_connectors/server/routes/get_slack_api_channels.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/server.ts"
               },
