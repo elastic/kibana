@@ -20,7 +20,6 @@ import {
   tx,
   hostCount,
 } from './lens/formulas/host';
-import { LineChart, MetricChart } from './lens/visualization_types';
 
 export const hostLensFormulas = {
   cpuUsage,
@@ -36,11 +35,6 @@ export const hostLensFormulas = {
   memoryFree,
   rx,
   tx,
-};
-
-export const visualizationTypes = {
-  lineChart: LineChart,
-  metricChart: MetricChart,
 };
 
 export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';
