@@ -3004,6 +3004,20 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.InMemoryConnector.config",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Config"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -13369,6 +13369,18 @@
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
               },
               {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
                 "plugin": "@kbn/es-query",
                 "path": "packages/kbn-es-query/src/es_query/build_es_query.test.ts"
               },
@@ -21018,6 +21030,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
