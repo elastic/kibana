@@ -8,10 +8,20 @@
 import { SecurityPageName, LinkCategoryType } from '@kbn/security-solution-navigation';
 import { SERVER_APP_ID } from '@kbn/security-solution-plugin/common';
 import type { LinkItem } from '@kbn/security-solution-plugin/public';
-import { LazyIcons } from '../../../common/icons/lazy_icons';
 import { ExternalPageName, SecurityPagePath } from '../constants';
 import type { ProjectLinkCategory, ProjectNavigationLink } from '../types';
 import * as i18n from './translations';
+import {
+  IconLensLazy,
+  IconEndpointLazy,
+  IconSpacesLazy,
+  IconIndexManagementLazy,
+  IconDataConnectorLazy,
+  IconDevToolsLazy,
+  IconFleetLazy,
+  IconAuditbeatLazy,
+  IconSiemLazy,
+} from '../../../common/lazy_icons';
 
 // appLinks configures the Security Solution pages links
 export const mlAppLink: LinkItem = {
@@ -75,97 +85,97 @@ export const mlNavLinks: ProjectNavigationLink[] = [
   {
     id: ExternalPageName.mlOverview,
     title: i18n.OVERVIEW_TITLE,
-    landingIcon: LazyIcons.Lens,
+    landingIcon: IconLensLazy,
     description: i18n.OVERVIEW_DESC,
   },
   {
     id: ExternalPageName.mlNotifications,
     title: i18n.NOTIFICATIONS_TITLE,
-    landingIcon: LazyIcons.Endpoint,
+    landingIcon: IconEndpointLazy,
     description: i18n.NOTIFICATIONS_DESC,
   },
   {
     id: ExternalPageName.mlAnomalyDetection,
     title: i18n.ANOMALY_DETECTION_TITLE,
-    landingIcon: LazyIcons.Spaces,
+    landingIcon: IconSpacesLazy,
     description: i18n.ANOMALY_DETECTION_DESC,
   },
   {
     id: ExternalPageName.mlAnomalyExplorer,
     title: i18n.ANOMALY_EXPLORER_TITLE,
-    landingIcon: LazyIcons.IndexManagement,
+    landingIcon: IconIndexManagementLazy,
     description: i18n.ANOMALY_EXPLORER_DESC,
   },
   {
     id: ExternalPageName.mlSingleMetricViewer,
     title: i18n.SINGLE_METRIC_VIEWER_TITLE,
-    landingIcon: LazyIcons.DataConnector,
+    landingIcon: IconDataConnectorLazy,
     description: i18n.SINGLE_METRIC_VIEWER_DESC,
   },
   {
     id: ExternalPageName.mlSettings,
     title: i18n.SETTINGS_TITLE,
-    landingIcon: LazyIcons.DevTools,
+    landingIcon: IconDevToolsLazy,
     description: i18n.SETTINGS_DESC,
   },
   {
     id: ExternalPageName.mlDataFrameAnalytics,
     title: i18n.DATA_FRAME_ANALYTICS_TITLE,
-    landingIcon: LazyIcons.IndexManagement,
+    landingIcon: IconIndexManagementLazy,
     description: i18n.DATA_FRAME_ANALYTICS_DESC,
   },
   {
     id: ExternalPageName.mlResultExplorer,
     title: i18n.RESULT_EXPLORER_TITLE,
-    landingIcon: LazyIcons.Fleet,
+    landingIcon: IconFleetLazy,
     description: i18n.RESULT_EXPLORER_DESC,
   },
   {
     id: ExternalPageName.mlAnalyticsMap,
     title: i18n.ANALYTICS_MAP_TITLE,
-    landingIcon: LazyIcons.Auditbeat,
+    landingIcon: IconAuditbeatLazy,
     description: i18n.ANALYTICS_MAP_DESC,
   },
   {
     id: ExternalPageName.mlNodesOverview,
     title: i18n.NODES_OVERVIEW_TITLE,
-    landingIcon: LazyIcons.Siem,
+    landingIcon: IconSiemLazy,
     description: i18n.NODES_OVERVIEW_DESC,
   },
   {
     id: ExternalPageName.mlNodes,
     title: i18n.NODES_TITLE,
-    landingIcon: LazyIcons.Endpoint,
+    landingIcon: IconEndpointLazy,
     description: i18n.NODES_DESC,
   },
   {
     id: ExternalPageName.mlFileUpload,
     title: i18n.FILE_UPLOAD_TITLE,
-    landingIcon: LazyIcons.Endpoint,
+    landingIcon: IconEndpointLazy,
     description: i18n.FILE_UPLOAD_DESC,
   },
   {
     id: ExternalPageName.mlIndexDataVisualizer,
     title: i18n.INDEX_DATA_VISUALIZER_TITLE,
-    landingIcon: LazyIcons.Endpoint,
+    landingIcon: IconEndpointLazy,
     description: i18n.INDEX_DATA_VISUALIZER_DESC,
   },
   {
     id: ExternalPageName.mlExplainLogRateSpikes,
     title: i18n.EXPLAIN_LOG_RATE_SPIKES_TITLE,
-    landingIcon: LazyIcons.Endpoint,
+    landingIcon: IconEndpointLazy,
     description: i18n.EXPLAIN_LOG_RATE_SPIKES_DESC,
   },
   {
     id: ExternalPageName.mlLogPatternAnalysis,
     title: i18n.LOG_PATTERN_ANALYSIS_TITLE,
-    landingIcon: LazyIcons.Endpoint,
+    landingIcon: IconEndpointLazy,
     description: i18n.LOG_PATTERN_ANALYSIS_DESC,
   },
   {
     id: ExternalPageName.mlChangePointDetections,
     title: i18n.CHANGE_POINT_DETECTIONS_TITLE,
-    landingIcon: LazyIcons.Endpoint,
+    landingIcon: IconEndpointLazy,
     description: i18n.CHANGE_POINT_DETECTIONS_DESC,
   },
 ];
