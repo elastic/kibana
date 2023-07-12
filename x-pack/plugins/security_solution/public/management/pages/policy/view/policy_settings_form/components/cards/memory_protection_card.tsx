@@ -35,7 +35,7 @@ const MEMORY_PROTECTION_OS_VALUES: Immutable<MemoryProtectionOSes[]> = [
   PolicyOperatingSystem.linux,
 ];
 
-type MemoryProtectionCardProps = PolicyFormComponentCommonProps;
+export type MemoryProtectionCardProps = PolicyFormComponentCommonProps;
 
 export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {

@@ -75,6 +75,7 @@ export const getPolicySettingsFormTestSubjects = (
       protectionDetectRadio: memoryTestSubj('protectionLevel-detectRadio'),
       notifyUserCheckbox: memoryTestSubj('notifyUser-checkbox'),
       osValuesContainer: memoryTestSubj('osValues'),
+      rulesCallout: memoryTestSubj('rulesCallout'),
     },
     behaviour: {
       card: behaviourTestSubj(),
