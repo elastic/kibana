@@ -7,11 +7,12 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 
+import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
 import { Actions } from '../../../../common/types/domain';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import { CommentType } from '../../../../common/api';
-import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { CommentUI } from '../../../containers/types';
 import * as i18n from './translations';
@@ -25,7 +26,7 @@ import type { AttachmentType } from '../../../client/attachment_framework/types'
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 
 interface DeleteLabelTitle {
-  userAction: UserActionResponse<CommentUserAction>;
+  userAction: SnakeToCamelCase<CommentUserAction>;
   caseData: UserActionBuilderArgs['caseData'];
   externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
   persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
@@ -114,7 +115,7 @@ const getDeleteCommentUserAction = ({
   persistableStateAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
-  userAction: UserActionResponse<CommentUserAction>;
+  userAction: SnakeToCamelCase<CommentUserAction>;
 } & Pick<
   UserActionBuilderArgs,
   | 'handleOutlineComment'
@@ -164,7 +165,7 @@ const getCreateCommentUserAction = ({
   onShowAlertDetails,
   actionsNavigation,
 }: {
-  userAction: UserActionResponse<CommentUserAction>;
+  userAction: SnakeToCamelCase<CommentUserAction>;
   comment: CommentUI;
 } & Omit<
   UserActionBuilderArgs,
@@ -270,7 +271,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseConnectors,
 }) => ({
   build: () => {
-    const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
+    const commentUserAction = userAction as SnakeToCamelCase<CommentUserAction>;
 
     if (commentUserAction.action === Actions.delete) {
       return getDeleteCommentUserAction({

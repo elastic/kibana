@@ -9,16 +9,17 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import type { SnakeToCamelCase } from '../../../common/types';
 import type { ActionCategory, ConnectorUserAction } from '../../../common/types/domain';
 import { Actions } from '../../../common/types/domain';
 import { UserActionTimestamp } from './timestamp';
-import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
+import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 
 interface Props {
-  userAction: UserActionResponse<ConnectorUserAction>;
+  userAction: SnakeToCamelCase<ConnectorUserAction>;
   handleOutlineComment: (id: string) => void;
 }
 

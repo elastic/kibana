@@ -9,9 +9,10 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
+import type { SnakeToCamelCase } from '../../../common/types';
 import type { PushedUserAction } from '../../../common/types/domain';
 import { Actions } from '../../../common/types/domain';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 import type { CaseConnectors } from '../../containers/types';
@@ -57,7 +58,7 @@ const isFirstPush = (pushedAt: string, oldestPush: string | undefined) => {
   return dates.userActionDate.getTime() <= dates.connectorDate.getTime();
 };
 
-const getLabelTitle = (action: UserActionResponse<PushedUserAction>, firstPush: boolean) => {
+const getLabelTitle = (action: SnakeToCamelCase<PushedUserAction>, firstPush: boolean) => {
   const externalService = action.payload.externalService;
 
   return (
@@ -85,7 +86,7 @@ const getFooters = ({
   userAction,
   connectorInfo,
 }: {
-  userAction: UserActionResponse<PushedUserAction>;
+  userAction: SnakeToCamelCase<PushedUserAction>;
   connectorInfo: CaseConnectors[string];
 }): EuiCommentProps[] => {
   const footers: EuiCommentProps[] = [];
@@ -125,7 +126,7 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const pushedUserAction = userAction as UserActionResponse<PushedUserAction>;
+    const pushedUserAction = userAction as SnakeToCamelCase<PushedUserAction>;
     const connectorId = pushedUserAction.payload.externalService.connectorId;
     const connectorInfo = caseConnectors[connectorId];
 

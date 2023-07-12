@@ -27,7 +27,7 @@ import { TitleUserActionRt } from './title/v1';
 export { ActionsRt, ActionTypes, Actions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 
-export const UserActionCommonAttributesRt = rt.strict({
+const UserActionCommonAttributesRt = rt.strict({
   created_at: rt.string,
   created_by: UserRt,
   owner: rt.string,
@@ -105,7 +105,7 @@ const UserActionRt = rt.intersection([
 
 export const UserActionsRt = rt.array(UserActionRt);
 
-export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
+type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
 export type UserActionWithDeprecatedResponse<T> = T &
   rt.TypeOf<typeof CaseUserActionInjectedDeprecatedIdsRt>;
 
@@ -113,9 +113,14 @@ export type CaseUserActionWithoutReferenceIds = rt.TypeOf<
   typeof CaseUserActionWithoutReferenceIdsRt
 >;
 
+export type UserActionPayload = rt.TypeOf<typeof UserActionPayloadRt>;
 export type UserActionAttributes = rt.TypeOf<typeof UserActionAttributesRt>;
 export type UserActions = rt.TypeOf<typeof UserActionsRt>;
-export type UserAction = rt.TypeOf<typeof UserActionRt>;
+export type UserAction<T extends UserActionPayload = UserActionPayload> = Omit<
+  rt.TypeOf<typeof UserActionRt>,
+  'type' | 'payload'
+> &
+  T;
 
 /**
  * This defines the high level category for the user action. Whether the user add, removed, updated something
@@ -130,34 +135,28 @@ export type UserActionTypes = ActionTypeValues;
 /**
  * User actions
  */
-export type AssigneesUserAction = UserActionWithAttributes<rt.TypeOf<typeof AssigneesUserActionRt>>;
-export type CategoryUserAction = UserActionWithAttributes<rt.TypeOf<typeof CategoryUserActionRt>>;
-export type CommentUserAction = UserActionWithAttributes<rt.TypeOf<typeof CommentUserActionRt>>;
+export type AssigneesUserAction = UserAction<rt.TypeOf<typeof AssigneesUserActionRt>>;
+export type CategoryUserAction = UserAction<rt.TypeOf<typeof CategoryUserActionRt>>;
+export type CommentUserAction = UserAction<rt.TypeOf<typeof CommentUserActionRt>>;
 export type CommentUserActionPayloadWithoutIds = UserActionWithAttributes<
   rt.TypeOf<typeof CommentUserActionPayloadWithoutIdsRt>
 >;
-export type ConnectorUserAction = UserActionWithAttributes<rt.TypeOf<typeof ConnectorUserActionRt>>;
+export type ConnectorUserAction = UserAction<rt.TypeOf<typeof ConnectorUserActionRt>>;
 export type ConnectorUserActionWithoutConnectorId = UserActionWithAttributes<
   rt.TypeOf<typeof ConnectorUserActionWithoutConnectorIdRt>
 >;
-export type DeleteCaseUserAction = UserActionWithAttributes<
-  rt.TypeOf<typeof DeleteCaseUserActionRt>
->;
-export type DescriptionUserAction = UserActionWithAttributes<
-  rt.TypeOf<typeof DescriptionUserActionRt>
->;
-export type PushedUserAction = UserActionWithAttributes<rt.TypeOf<typeof PushedUserActionRt>>;
+export type DeleteCaseUserAction = UserAction<rt.TypeOf<typeof DeleteCaseUserActionRt>>;
+export type DescriptionUserAction = UserAction<rt.TypeOf<typeof DescriptionUserActionRt>>;
+export type PushedUserAction = UserAction<rt.TypeOf<typeof PushedUserActionRt>>;
 export type PushedUserActionWithoutConnectorId = UserActionWithAttributes<
   rt.TypeOf<typeof PushedUserActionWithoutConnectorIdRt>
 >;
-export type SettingsUserAction = UserActionWithAttributes<rt.TypeOf<typeof SettingsUserActionRt>>;
-export type SeverityUserAction = UserActionWithAttributes<rt.TypeOf<typeof SeverityUserActionRt>>;
-export type StatusUserAction = UserActionWithAttributes<rt.TypeOf<typeof StatusUserActionRt>>;
-export type TagsUserAction = UserActionWithAttributes<rt.TypeOf<typeof TagsUserActionRt>>;
-export type TitleUserAction = UserActionWithAttributes<rt.TypeOf<typeof TitleUserActionRt>>;
-export type CreateCaseUserAction = UserActionWithAttributes<
-  rt.TypeOf<typeof CreateCaseUserActionRt>
->;
+export type SettingsUserAction = UserAction<rt.TypeOf<typeof SettingsUserActionRt>>;
+export type SeverityUserAction = UserAction<rt.TypeOf<typeof SeverityUserActionRt>>;
+export type StatusUserAction = UserAction<rt.TypeOf<typeof StatusUserActionRt>>;
+export type TagsUserAction = UserAction<rt.TypeOf<typeof TagsUserActionRt>>;
+export type TitleUserAction = UserAction<rt.TypeOf<typeof TitleUserActionRt>>;
+export type CreateCaseUserAction = UserAction<rt.TypeOf<typeof CreateCaseUserActionRt>>;
 export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
   rt.TypeOf<typeof CreateCaseUserActionWithoutConnectorIdRt>
 >;

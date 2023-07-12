@@ -8,8 +8,6 @@
 import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ActionTypes } from '../../../common/types/domain';
-import type { UserActionWithResponse } from '../../../common/types/api';
-import type { SnakeToCamelCase } from '../../../common/types';
 import type {
   CaseUI,
   CaseConnectors,
@@ -77,7 +75,6 @@ export interface UserActionBuilderArgs {
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
 }
 
-export type UserActionResponse<T> = SnakeToCamelCase<UserActionWithResponse<T>>;
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {
   build: () => EuiCommentProps[];
 };

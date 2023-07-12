@@ -16,7 +16,7 @@ import { getName } from '../user_profiles/display_name';
 import type { Assignee } from '../user_profiles/types';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { createCommonUpdateUserActionBuilder } from './common';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { UserActionBuilder } from './types';
 import * as i18n from './translations';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 
@@ -127,7 +127,7 @@ const doesAssigneeMatchCreatedByUser = (
 };
 
 const getLabelTitle = (
-  userAction: UserActionResponse<AssigneesUserAction>,
+  userAction: SnakeToCamelCase<AssigneesUserAction>,
   userProfiles?: Map<string, UserProfileWithAvatar>
 ) => {
   const assignees = userAction.payload.assignees.map((assignee) => {
@@ -157,7 +157,7 @@ export const createAssigneesUserActionBuilder: UserActionBuilder = ({
   userProfiles,
 }) => ({
   build: () => {
-    const assigneesUserAction = userAction as UserActionResponse<AssigneesUserAction>;
+    const assigneesUserAction = userAction as SnakeToCamelCase<AssigneesUserAction>;
     const label = getLabelTitle(assigneesUserAction, userProfiles);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,

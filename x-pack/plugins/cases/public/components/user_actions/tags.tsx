@@ -8,14 +8,15 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import type { SnakeToCamelCase } from '../../../common/types';
 import type { TagsUserAction } from '../../../common/types/domain';
 import { Actions } from '../../../common/types/domain';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tags/tags';
 import * as i18n from './translations';
 
-const getLabelTitle = (userAction: UserActionResponse<TagsUserAction>) => {
+const getLabelTitle = (userAction: SnakeToCamelCase<TagsUserAction>) => {
   const tags = userAction.payload.tags ?? [];
 
   return (
@@ -37,7 +38,7 @@ export const createTagsUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const tagsUserAction = userAction as UserActionResponse<TagsUserAction>;
+    const tagsUserAction = userAction as SnakeToCamelCase<TagsUserAction>;
     const label = getLabelTitle(tagsUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
