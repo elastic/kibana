@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiSkeletonTitle,
+  DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
 
 import {
@@ -29,10 +30,12 @@ export const NavigationEmbeddablePanelEditorLink = ({
   link,
   editLink,
   deleteLink,
+  dragHandleProps,
 }: {
   editLink: () => void;
   deleteLink: () => void;
   link: NavigationEmbeddableLink;
+  dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
   const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
     let label = link.label;
@@ -46,6 +49,16 @@ export const NavigationEmbeddablePanelEditorLink = ({
   return (
     <EuiPanel hasBorder paddingSize="s" hasShadow={false} className="navEmbeddablePanelEditor">
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiPanel
+            color="transparent"
+            paddingSize="none"
+            {...dragHandleProps}
+            aria-label="Drag Handle"
+          >
+            <EuiIcon type="grab" />
+          </EuiPanel>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIcon type={NavigationLinkInfo[link.type].icon} color="text" />
         </EuiFlexItem>

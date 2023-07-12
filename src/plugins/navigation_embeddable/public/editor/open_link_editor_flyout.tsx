@@ -13,12 +13,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
-import { NavigationEmbeddableLinkList } from '../embeddable/types';
+import { NavigationEmbeddableLink } from '../embeddable/types';
 import { NavigationEmbeddableLinkEditor } from '../components/navigation_embeddable_link_editor';
 
 export interface LinkEditorProps {
-  idToEdit?: string;
-  links: NavigationEmbeddableLinkList;
+  link?: NavigationEmbeddableLink;
   parentDashboard?: DashboardContainer;
   ref: React.RefObject<HTMLDivElement>;
 }
@@ -28,10 +27,9 @@ export interface LinkEditorProps {
  */
 export async function openLinkEditorFlyout({
   ref,
-  links,
-  idToEdit,
+  link,
   parentDashboard,
-}: LinkEditorProps): Promise<NavigationEmbeddableLinkList | undefined> {
+}: LinkEditorProps): Promise<Omit<NavigationEmbeddableLink, 'order'> | undefined> {
   const unmountFlyout = async () => {
     if (ref.current) {
       ref.current.children[1].className = 'navEmbeddableLinkEditor out';
@@ -44,10 +42,10 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<NavigationEmbeddableLinkList | undefined>((resolve, reject) => {
-    const onSave = async (newLinks: NavigationEmbeddableLinkList) => {
+  return new Promise<Omit<NavigationEmbeddableLink, 'order'> | undefined>((resolve, reject) => {
+    const onSave = async (newLink: Omit<NavigationEmbeddableLink, 'order'>) => {
       // console.log('on save', newLinks);
-      resolve(newLinks);
+      resolve(newLink);
       await unmountFlyout();
     };
 
@@ -59,10 +57,9 @@ export async function openLinkEditorFlyout({
     ReactDOM.render(
       <KibanaThemeProvider theme$={coreServices.theme.theme$}>
         <NavigationEmbeddableLinkEditor
-          links={links}
+          link={link}
           onSave={onSave}
           onClose={onCancel}
-          idToEdit={idToEdit}
           parentDashboard={parentDashboard}
         />
       </KibanaThemeProvider>,

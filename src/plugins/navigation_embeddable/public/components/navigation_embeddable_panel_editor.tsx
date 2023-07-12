@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty, omit } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiText,
@@ -19,17 +18,24 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiDroppable,
+  EuiDraggable,
   EuiFlyoutBody,
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  // euiDragDropReorder,
+  EuiDragDropContext,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
-import { NavigationEmbeddableInput, NavigationEmbeddableLinkList } from '../embeddable/types';
+import {
+  NavigationEmbeddableInput,
+  NavigationEmbeddableLink,
+  NavigationEmbeddableLinkList,
+} from '../embeddable/types';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
 
 import './navigation_embeddable.scss';
@@ -46,26 +52,73 @@ export const NavigationEmbeddablePanelEditor = ({
   parentDashboard?: DashboardContainer;
 }) => {
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
+  // const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
+  const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
 
-  const addOrEditLink = useCallback(
-    async (linkToEditId?: string) => {
-      const newLinks = await openLinkEditorFlyout({
-        links,
+  useEffect(() => {
+    const { links: initialLinks } = initialInput;
+    if (!initialLinks) {
+      setOrderedLinks([]);
+      return;
+    }
+
+    const links = Object.keys(initialLinks)
+      .map((linkId) => {
+        return initialLinks[linkId];
+      })
+      .sort((linkA, linkB) => {
+        return linkA.order - linkB.order;
+      });
+    setOrderedLinks(links);
+  }, [initialInput]);
+
+  const onDragEnd = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const newList = euiDragDropReorder(orderedLinks, source.index, destination.index);
+        setOrderedLinks(newList);
+      }
+    },
+    [orderedLinks]
+  );
+
+  const addLink = useCallback(async () => {
+    const newLink = await openLinkEditorFlyout({
+      parentDashboard,
+      ref: editLinkFlyoutRef,
+    });
+    if (newLink) setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length }]);
+  }, [editLinkFlyoutRef, orderedLinks, parentDashboard]);
+
+  const editLink = useCallback(
+    async (linkToEdit: NavigationEmbeddableLink) => {
+      const newLink = await openLinkEditorFlyout({
+        link: linkToEdit,
         parentDashboard,
         ref: editLinkFlyoutRef,
-        idToEdit: linkToEditId, // if this is defined, then we are editing; otherwise, we are adding
       });
-      if (newLinks) setLinks(newLinks);
+      if (newLink) {
+        const newLinks = orderedLinks.map((link) => {
+          if (link.id === linkToEdit.id) {
+            return { ...newLink, order: linkToEdit.order };
+          }
+          return link;
+        });
+        setOrderedLinks(newLinks);
+      }
     },
-    [editLinkFlyoutRef, links, parentDashboard]
+    [editLinkFlyoutRef, orderedLinks, parentDashboard]
   );
 
   const deleteLink = useCallback(
     (linkId: string) => {
-      setLinks(omit(links, [linkId]));
+      setOrderedLinks(
+        orderedLinks.filter((link) => {
+          return link.id === linkId;
+        })
+      );
     },
-    [links, setLinks]
+    [orderedLinks]
   );
 
   return (
@@ -80,7 +133,7 @@ export const NavigationEmbeddablePanelEditor = ({
         <EuiForm fullWidth>
           <EuiFormRow>
             <>
-              {!links || Object.keys(links).length === 0 ? (
+              {orderedLinks.length === 0 ? (
                 <EuiPanel hasBorder={true}>
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
@@ -92,7 +145,7 @@ export const NavigationEmbeddablePanelEditor = ({
                   <EuiSpacer size="s" />
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
-                      <EuiButton onClick={() => addOrEditLink()} iconType="plusInCircle">
+                      <EuiButton onClick={addLink} iconType="plusInCircle">
                         {NavEmbeddableStrings.editor.getAddButtonLabel()}
                       </EuiButton>
                     </EuiFlexItem>
@@ -100,19 +153,30 @@ export const NavigationEmbeddablePanelEditor = ({
                 </EuiPanel>
               ) : (
                 <>
-                  {Object.keys(links).map((linkId) => {
-                    return (
-                      <div key={linkId}>
-                        <NavigationEmbeddablePanelEditorLink
-                          editLink={() => addOrEditLink(linkId)}
-                          link={links[linkId]}
-                          deleteLink={() => deleteLink(linkId)}
-                        />
-                        <EuiSpacer size="s" />
-                      </div>
-                    );
-                  })}
-                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={() => addOrEditLink()}>
+                  <EuiDragDropContext onDragEnd={onDragEnd}>
+                    <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA">
+                      {orderedLinks.map((link, idx) => (
+                        <EuiDraggable
+                          spacing="m"
+                          key={link.id}
+                          index={idx}
+                          draggableId={link.id}
+                          customDragHandle={true}
+                          hasInteractiveChildren={true}
+                        >
+                          {(provided) => (
+                            <NavigationEmbeddablePanelEditorLink
+                              link={link}
+                              editLink={() => editLink(link)}
+                              deleteLink={() => deleteLink(link.id)}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
+                          )}
+                        </EuiDraggable>
+                      ))}
+                    </EuiDroppable>
+                  </EuiDragDropContext>
+                  <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={addLink}>
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>
@@ -130,9 +194,12 @@ export const NavigationEmbeddablePanelEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={!links || isEmpty(links)}
+              disabled={orderedLinks.length === 0}
               onClick={() => {
-                onSave({ ...initialInput, links });
+                const newLinks = orderedLinks.reduce((prev, link, i) => {
+                  return { ...prev, [link.id]: { ...link, order: i } };
+                }, {} as NavigationEmbeddableLinkList);
+                onSave({ links: newLinks });
                 onClose();
               }}
             >

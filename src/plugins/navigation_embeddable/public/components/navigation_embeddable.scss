@@ -38,7 +38,7 @@
     transition: visibility $euiAnimSpeedNormal, opacity $euiAnimSpeedNormal;
   }
 
-  &:hover {
+  &:hover, &:focus-within {
     .navEmbeddable_hoverActions {
       opacity: 1;
       visibility: visible;

@@ -7,7 +7,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import {
   EuiForm,
@@ -33,34 +33,28 @@ import {
   NavigationLinkType,
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  NavigationEmbeddableLinkList,
+  NavigationEmbeddableLink,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';
 
 export const NavigationEmbeddableLinkEditor = ({
-  links,
+  link,
   onSave,
   onClose,
-  idToEdit,
   parentDashboard,
 }: {
-  idToEdit?: string;
   onClose: () => void;
-  links: NavigationEmbeddableLinkList;
+  link?: NavigationEmbeddableLink; // will only be defined if **editing** a link; otherwise, creating a new link
   parentDashboard?: DashboardContainer;
-  onSave: (newLinks: NavigationEmbeddableLinkList) => void;
+  onSave: (newLink: Omit<NavigationEmbeddableLink, 'order'>) => void;
 }) => {
-  const linkToEdit = useRef(idToEdit ? links[idToEdit] : undefined);
-
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(
-    linkToEdit.current?.type ?? DASHBOARD_LINK_TYPE
+    link?.type ?? DASHBOARD_LINK_TYPE
   );
-  const [linkLabel, setLinkLabel] = useState<string>();
-  const [linkDestination, setLinkDestination] = useState<string | undefined>(
-    linkToEdit.current?.destination
-  );
+  const [linkLabel, setLinkLabel] = useState<string | undefined>(link?.label);
+  const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
   const [linkLabelPlaceholder, setLinkLabelPlaceholder] = useState<string | undefined>();
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
@@ -97,9 +91,7 @@ export const NavigationEmbeddableLinkEditor = ({
             size="m"
             aria-label={NavEmbeddableStrings.editor.linkEditor.getGoBackAriaLabel()}
           >
-            <h2>
-              {linkToEdit.current ? 'Edit link' : NavEmbeddableStrings.editor.getAddButtonLabel()}
-            </h2>
+            <h2>{link ? 'Edit link' : NavEmbeddableStrings.editor.getAddButtonLabel()}</h2>
           </EuiTitle>
         </EuiButtonEmpty>
       </EuiFlyoutHeader>
@@ -110,8 +102,8 @@ export const NavigationEmbeddableLinkEditor = ({
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
-                if (linkToEdit.current?.type === id) {
-                  setLinkDestination(linkToEdit.current.destination);
+                if (link?.type === id) {
+                  setLinkDestination(link.destination);
                 } else {
                   setLinkDestination(undefined);
                   setLinkLabelPlaceholder(undefined);
@@ -126,13 +118,13 @@ export const NavigationEmbeddableLinkEditor = ({
               <DashboardLinkDestinationPicker
                 parentDashboard={parentDashboard}
                 setDestination={setLinkDestination}
-                initialSelection={linkToEdit.current?.destination}
+                initialSelection={link?.destination}
                 setPlaceholder={setLinkLabelPlaceholder}
               />
             ) : (
               <ExternalLinkDestinationPicker
                 setDestination={setLinkDestination}
-                initialSelection={linkToEdit.current?.destination}
+                initialSelection={link?.destination}
                 setPlaceholder={setLinkLabelPlaceholder}
               />
             )}
@@ -144,7 +136,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 linkLabelPlaceholder ||
                 NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
-              value={linkLabel ?? linkToEdit.current?.label}
+              value={linkLabel ?? ''}
               onChange={(e) => {
                 setLinkLabel(e.target.value);
               }}
@@ -173,22 +165,18 @@ export const NavigationEmbeddableLinkEditor = ({
               onClick={() => {
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety
                 if (linkDestination) {
-                  const linkId = idToEdit && linkToEdit ? idToEdit : uuidv4();
                   onSave({
-                    ...links,
-                    [linkId]: {
-                      order: 0,
-                      label: linkLabel,
-                      type: selectedLinkType,
-                      destination: linkDestination,
-                    },
+                    label: linkLabel,
+                    type: selectedLinkType,
+                    id: link?.id ?? uuidv4(),
+                    destination: linkDestination,
                   });
 
                   onClose();
                 }
               }}
             >
-              {linkToEdit.current ? 'Update link' : NavEmbeddableStrings.editor.getAddButtonLabel()}
+              {link ? 'Update link' : NavEmbeddableStrings.editor.getAddButtonLabel()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

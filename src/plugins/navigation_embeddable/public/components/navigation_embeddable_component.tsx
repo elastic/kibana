@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 
@@ -19,22 +19,31 @@ export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
   const links = navEmbeddable.select((state) => state.explicitInput.links);
+  const orderedLinks = useMemo(() => {
+    return Object.keys(links)
+      .map((linkId) => {
+        return links[linkId];
+      })
+      .sort((linkA, linkB) => {
+        return linkA.order - linkB.order;
+      });
+  }, [links]);
 
   /** TODO: Render this as a list **or** "tabs" as part of https://github.com/elastic/kibana/issues/154357 */
   return (
     <EuiPanel className="eui-yScroll">
-      {Object.keys(links).map((linkId) => {
+      {orderedLinks.map((link) => {
         return (
           <EuiPanel
-            id={`navigationLink--${linkId}`}
-            key={`${linkId}`}
+            id={`navigationLink--${link.id}`}
+            key={`${link.id}`}
             paddingSize="none"
             hasShadow={false}
           >
-            {links[linkId].type === DASHBOARD_LINK_TYPE ? (
-              <DashboardLinkComponent link={links[linkId]} />
+            {link.type === DASHBOARD_LINK_TYPE ? (
+              <DashboardLinkComponent link={link} />
             ) : (
-              <ExternalLinkComponent link={links[linkId]} />
+              <ExternalLinkComponent link={link} />
             )}
           </EuiPanel>
         );
