@@ -230,17 +230,14 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
    * This effect act as primary fetch: on initial search + triggered when id changes
    */
   useEffect(() => {
-    let stopAppStateSync: () => void;
     let cleanupCustomizations: () => void;
 
     const initialize = async () => {
       setHasESData(false);
       setHasUserDataView(false);
-      // 1. Start appState syncing with url
-      stopAppStateSync = stateContainer.appState.syncState();
-      // 2. Invoke customization callbacks and set service
+      // 1. Invoke customization callbacks and set service
       cleanupCustomizations = await setupCustomizationService();
-      // 3. Restore the previously selected data view for a new state
+      // 2. Restore the previously selected data view for a new state
       loadSavedSearch(
         !savedSearchId ? stateContainer.internalState.getState().dataView : undefined
       );
@@ -248,7 +245,6 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     initialize();
 
     return () => {
-      if (stopAppStateSync) stopAppStateSync();
       if (cleanupCustomizations) cleanupCustomizations();
     };
   }, [loadSavedSearch, savedSearchId, stateContainer, setupCustomizationService]);

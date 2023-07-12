@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -85,16 +86,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(azureDatasetSelectionTitle).to.be('[azure] activitylogs');
 
         // Go back to previous page selection
-        browser.goBack();
-        const backNavigationDatasetSelectionTitle =
-          await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
-        expect(backNavigationDatasetSelectionTitle).to.be('All log datasets');
+        await retry.try(async () => {
+          await browser.goBack();
+          const backNavigationDatasetSelectionTitle =
+            await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+          expect(backNavigationDatasetSelectionTitle).to.be('All log datasets');
+        });
 
         // Go forward to previous page selection
-        browser.goForward();
-        const forwardNavigationDatasetSelectionTitle =
-          await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
-        expect(forwardNavigationDatasetSelectionTitle).to.be('[azure] activitylogs');
+        await retry.try(async () => {
+          await browser.goForward();
+          const forwardNavigationDatasetSelectionTitle =
+            await PageObjects.discoverLogExplorer.getDatasetSelectorButtonText();
+          expect(forwardNavigationDatasetSelectionTitle).to.be('[azure] activitylogs');
+        });
       });
     });
   });

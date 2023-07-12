@@ -20,11 +20,7 @@ import {
   Query,
 } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import {
-  IKbnUrlStateStorage,
-  StopSyncStateFnType,
-  syncState,
-} from '@kbn/kibana-utils-plugin/public';
+import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { DiscoverServices } from '../../../build_services';
@@ -66,7 +62,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
   /**
    * Start syncing the state with the URL
    */
-  syncState: () => StopSyncStateFnType;
+  syncState: () => ISyncStateRef;
   /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
@@ -183,13 +179,11 @@ export const getDiscoverAppStateContainer = ({
 
   const startAppStateUrlSync = () => {
     addLog('[appState] start syncing state with URL');
-    const { start, stop } = syncState({
+    return syncState({
       storageKey: APP_STATE_URL_KEY,
       stateContainer: enhancedAppContainer,
       stateStorage,
     });
-    start();
-    return stop;
   };
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
@@ -217,9 +211,14 @@ export const getDiscoverAppStateContainer = ({
       stateStorage
     );
 
+    const { start, stop } = startAppStateUrlSync();
+    // current state need to be pushed to url
+    replaceUrlState({}).then(() => start());
+
     return () => {
       stopSyncingQueryAppStateWithStateContainer();
       stopSyncingGlobalStateWithUrl();
+      stop();
     };
   };
 
