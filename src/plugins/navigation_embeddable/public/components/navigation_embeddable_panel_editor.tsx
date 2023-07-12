@@ -51,6 +51,8 @@ export const NavigationEmbeddablePanelEditor = ({
   onSave: (input: Partial<NavigationEmbeddableInput>) => void;
   parentDashboard?: DashboardContainer;
 }) => {
+  // const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
+
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
 
@@ -163,6 +165,7 @@ export const NavigationEmbeddablePanelEditor = ({
                           {(provided) => (
                             <NavigationEmbeddablePanelEditorLink
                               link={link}
+                              parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}
                               deleteLink={() => deleteLink(link.id)}
                               dragHandleProps={provided.dragHandleProps}

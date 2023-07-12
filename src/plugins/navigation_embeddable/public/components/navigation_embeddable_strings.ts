@@ -47,6 +47,10 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.linkEditor.linkLoadingAriaLabel', {
           defaultMessage: 'Loading link',
         }),
+      getDragHandleAriaLabel: () =>
+        i18n.translate('navigationEmbeddable.editor.dragHandleAriaLabel', {
+          defaultMessage: 'Link drag handle',
+        }),
     },
     linkEditor: {
       getGoBackAriaLabel: () =>

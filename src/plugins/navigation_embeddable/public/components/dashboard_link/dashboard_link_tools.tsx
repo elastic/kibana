@@ -17,7 +17,7 @@ import { dashboardServices } from '../../services/kibana_services';
  * ----------------------------------
  */
 
-export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem> => {
+const fetchDashboard = async (dashboardId: string): Promise<DashboardItem> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
   const response = (await findDashboardsService.findByIds([dashboardId]))[0];
   if (response.status === 'error') {
@@ -25,6 +25,20 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
   }
   return response;
 };
+
+/**
+ * Memoized fetch dashboard will only refetch the dashboard information if the given `dashboardId` changed between
+ * calls; otherwise, it will use the cached dashboard, which may not take into account changes to the dashboard's title
+ * description, etc. Be mindful when choosing the memoized version.
+ */
+export const memoizedFetchDashboard = memoize(
+  async (dashboardId: string) => {
+    return await fetchDashboard(dashboardId);
+  },
+  (dashboardId) => {
+    return dashboardId;
+  }
+);
 
 /**
  * ----------------------------------

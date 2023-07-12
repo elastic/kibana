@@ -19,31 +19,41 @@ import {
   DraggableProvidedDragHandleProps,
   EuiToolTip,
 } from '@elastic/eui';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
   NavigationLinkInfo,
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
 } from '../embeddable/types';
-import { fetchDashboard } from './dashboard_link/dashboard_link_tools';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
 
 export const NavigationEmbeddablePanelEditorLink = ({
   link,
   editLink,
   deleteLink,
+  parentDashboard,
   dragHandleProps,
 }: {
   editLink: () => void;
   deleteLink: () => void;
   link: NavigationEmbeddableLink;
+  parentDashboard?: DashboardContainer;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
+  const parentDashboardTitle = parentDashboard?.select((state) => state.explicitInput.title);
+  const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
+
   const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
     let label = link.label;
     if (link.type === DASHBOARD_LINK_TYPE && !label) {
-      const dashboard = await fetchDashboard(link.destination);
-      label = dashboard.attributes.title;
+      if (parentDashboardId === link.destination) {
+        label = parentDashboardTitle;
+      } else {
+        const dashboard = await memoizedFetchDashboard(link.destination);
+        label = dashboard.attributes.title;
+      }
     }
     return label || link.destination;
   }, [link]);
@@ -56,7 +66,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
             color="transparent"
             paddingSize="none"
             {...dragHandleProps}
-            aria-label="Drag Handle"
+            aria-label={NavEmbeddableStrings.editor.panelEditor.getDragHandleAriaLabel()}
           >
             <EuiIcon type="grab" />
           </EuiPanel>

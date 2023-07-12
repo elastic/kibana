@@ -17,7 +17,7 @@ import {
   NavigationEmbeddableLink,
   NavigationLinkInfo,
 } from '../../embeddable/types';
-import { fetchDashboard } from './dashboard_link_tools';
+import { memoizedFetchDashboard } from './dashboard_link_tools';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
 export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
@@ -29,7 +29,13 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
 
   const { loading: loadingDestinationDashboard, value: destinationDashboard } =
     useAsync(async () => {
-      return await fetchDashboard(link.destination);
+      if (!link.label && link.id !== parentDashboardId) {
+        /**
+         * only fetch the dashboard if **absolutely** necessary; i.e. only if the dashboard link doesn't have
+         * some custom label, and if it's not the current dashboard (if it is, use `dashboardContainer` instead)
+         */
+        return await memoizedFetchDashboard(link.destination);
+      }
     }, [link, parentDashboardId]);
 
   return (
