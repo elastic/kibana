@@ -12,21 +12,16 @@ import { EuiPanel } from '@elastic/eui';
 
 import { DASHBOARD_LINK_TYPE } from '../embeddable/types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
-import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from './external_link/external_link_component';
+import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
+import { getOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
   const links = navEmbeddable.select((state) => state.explicitInput.links);
   const orderedLinks = useMemo(() => {
-    return Object.keys(links)
-      .map((linkId) => {
-        return links[linkId];
-      })
-      .sort((linkA, linkB) => {
-        return linkA.order - linkB.order;
-      });
+    return getOrderedLinkList(links);
   }, [links]);
 
   /** TODO: Render this as a list **or** "tabs" as part of https://github.com/elastic/kibana/issues/154357 */

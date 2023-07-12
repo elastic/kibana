@@ -36,6 +36,7 @@ import {
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
+import { getOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
 
 import './navigation_embeddable.scss';
@@ -60,15 +61,7 @@ export const NavigationEmbeddablePanelEditor = ({
       setOrderedLinks([]);
       return;
     }
-
-    const links = Object.keys(initialLinks)
-      .map((linkId) => {
-        return initialLinks[linkId];
-      })
-      .sort((linkA, linkB) => {
-        return linkA.order - linkB.order;
-      });
-    setOrderedLinks(links);
+    setOrderedLinks(getOrderedLinkList(initialLinks));
   }, [initialInput]);
 
   const onDragEnd = useCallback(
