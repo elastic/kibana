@@ -27,8 +27,10 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
   }
 };
 
-export const getWelcomeConversation = (isAssistantEnabled: boolean): Conversation => {
-  const conversation = BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
+export const getWelcomeConversation = (
+  conversation: Conversation,
+  isAssistantEnabled: boolean
+): Conversation => {
   const doesConversationHaveMessages = conversation.messages.length > 0;
 
   if (!isAssistantEnabled) {
@@ -45,8 +47,16 @@ export const getWelcomeConversation = (isAssistantEnabled: boolean): Conversatio
     return conversation;
   }
 
-  return {
-    ...conversation,
-    messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
-  };
+  return doesConversationHaveMessages
+    ? {
+        ...conversation,
+        messages: [
+          ...conversation.messages,
+          ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+        ],
+      }
+    : {
+        ...conversation,
+        messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+      };
 };

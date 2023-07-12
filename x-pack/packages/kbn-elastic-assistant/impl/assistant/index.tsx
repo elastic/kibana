@@ -102,7 +102,6 @@ const AssistantComponent: React.FC<Props> = ({
     data: connectors,
     isSuccess: areConnectorsFetched,
     refetch: refetchConnectors,
-    isLoading: isConnectorsLoading,
   } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
   const defaultProvider = useMemo(
@@ -116,20 +115,8 @@ const AssistantComponent: React.FC<Props> = ({
   const isWelcomeSetup = useMemo(() => (connectors?.length ?? 0) === 0, [connectors?.length]);
   const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
-  // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
-  // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
-  const welcomeConversation = useMemo(
-    () => getWelcomeConversation(isAssistantEnabled),
-    [isAssistantEnabled]
-  );
-
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    !isConnectorsLoading && isWelcomeSetup
-      ? welcomeConversation.id
-      : // if a conversationId has been provided, use that
-        // if not, check local storage
-        // last resort, go to welcome conversation
-        conversationId ?? localStorageLastConversationId ?? welcomeConversation.id
+    conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
   );
 
   const currentConversation = useMemo(
@@ -137,6 +124,13 @@ const AssistantComponent: React.FC<Props> = ({
       conversations[selectedConversationId] ??
       createConversation({ conversationId: selectedConversationId }),
     [conversations, createConversation, selectedConversationId]
+  );
+
+  // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
+  // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
+  const welcomeConversation = useMemo(
+    () => getWelcomeConversation(currentConversation, isAssistantEnabled),
+    [currentConversation, isAssistantEnabled]
   );
 
   // Remember last selection for reuse after keyboard shortcut is pressed.
