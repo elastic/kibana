@@ -45,11 +45,9 @@ const getIndexStats = async (
   logger: Logger
 ): Promise<IndexStats | {}> => {
   try {
-    const isIndexExists = await esClient.indices.exists({
-      index,
-    });
+    const lastDocTimestamp = await getLatestDocTimestamp(esClient, index);
 
-    if (isIndexExists) {
+    if (lastDocTimestamp) {
       const indexStats = await getIndexDocCount(esClient, index);
       return {
         doc_count: indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0,
@@ -59,7 +57,7 @@ const getIndexStats = async (
         size_in_bytes: indexStats._all.primaries?.store
           ? indexStats._all.primaries?.store.size_in_bytes
           : 0,
-        last_doc_timestamp: await getLatestDocTimestamp(esClient, index),
+        last_doc_timestamp: lastDocTimestamp,
       };
     }
 
@@ -84,21 +82,26 @@ export const getIndicesStats = async (
 
   const [, cloudDefendPluginStartDeps] = await coreServices;
 
-  const status = await getCloudDefendStatus({
-    logger,
-    esClient,
-    soClient,
-    agentPolicyService: cloudDefendPluginStartDeps.fleet.agentPolicyService,
-    agentService: cloudDefendPluginStartDeps.fleet.agentService,
-    packagePolicyService: cloudDefendPluginStartDeps.fleet.packagePolicyService,
-    packageService: cloudDefendPluginStartDeps.fleet.packageService,
-  });
+  const { status, latestPackageVersion, installedPackagePolicies, healthyAgents } =
+    await getCloudDefendStatus({
+      logger,
+      esClient,
+      soClient,
+      agentPolicyService: cloudDefendPluginStartDeps.fleet.agentPolicyService,
+      agentService: cloudDefendPluginStartDeps.fleet.agentService,
+      packagePolicyService: cloudDefendPluginStartDeps.fleet.packagePolicyService,
+      packageService: cloudDefendPluginStartDeps.fleet.packageService,
+    });
 
   return {
     alerts,
     file,
     process,
-    latestPackageVersion: status.latestPackageVersion,
-    packageStatus: status,
+    latestPackageVersion,
+    packageStatus: {
+      status,
+      installedPackagePolicies,
+      healthyAgents,
+    },
   };
 };
