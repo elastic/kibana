@@ -74,7 +74,10 @@ const UserActionsWithoutIdsRt = rt.union([
   PushedUserActionWithoutConnectorIdRt,
 ]);
 
-const CaseUserActionBasicRt = rt.intersection([UserActionPayloadRt, UserActionCommonAttributesRt]);
+export const CaseUserActionBasicRt = rt.intersection([
+  UserActionPayloadRt,
+  UserActionCommonAttributesRt,
+]);
 
 export const CaseUserActionWithoutReferenceIdsRt = rt.intersection([
   UserActionsWithoutIdsRt,

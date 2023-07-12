@@ -5,44 +5,40 @@
  * 2.0.
  */
 
+import { ConnectorTypes } from '../../../../api';
 import { ActionTypes } from '../action/v1';
-import { TitleUserActionPayloadRt, TitleUserActionRt } from './v1';
+import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './v1';
 
-describe('Title', () => {
-  describe('TitleUserActionPayloadRt', () => {
+describe('Create case', () => {
+  describe('CreateCaseUserActionRt', () => {
     const defaultRequest = {
-      title: 'sample title',
-    };
-
-    it('has expected attributes in request', () => {
-      const query = TitleUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = TitleUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-  });
-
-  describe('TitleUserActionRt', () => {
-    const defaultRequest = {
-      type: ActionTypes.title,
+      type: ActionTypes.create_case,
       payload: {
+        connector: {
+          id: 'jira-connector-id',
+          type: ConnectorTypes.jira,
+          name: 'jira-connector',
+          fields: {
+            issueType: 'bug',
+            priority: 'high',
+            parent: '2',
+          },
+        },
+        assignees: [{ uid: '1' }],
+        description: 'sample description',
+        status: 'open',
+        severity: 'low',
+        tags: ['one'],
         title: 'sample title',
+        settings: {
+          syncAlerts: false,
+        },
+        owner: 'cases',
       },
     };
 
     it('has expected attributes in request', () => {
-      const query = TitleUserActionRt.decode(defaultRequest);
+      const query = CreateCaseUserActionRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -50,8 +46,36 @@ describe('Title', () => {
       });
     });
 
+    it('empty category is decoded properly', () => {
+      const defaultRequestEmptyCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: null },
+      };
+
+      const query = CreateCaseUserActionRt.decode(defaultRequestEmptyCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequestEmptyCategory,
+      });
+    });
+
+    it('string category is decoded properly', () => {
+      const defaultRequestStringCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: 'sci-fi' },
+      };
+
+      const query = CreateCaseUserActionRt.decode(defaultRequestStringCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequestStringCategory,
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
-      const query = TitleUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = CreateCaseUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -60,7 +84,95 @@ describe('Title', () => {
     });
 
     it('removes foo:bar attributes from payload', () => {
-      const query = TitleUserActionRt.decode({
+      const query = CreateCaseUserActionRt.decode({
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, foo: 'bar' },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+  });
+
+  describe('CreateCaseUserActionWithoutConnectorIdRt', () => {
+    const defaultRequest = {
+      type: ActionTypes.create_case,
+      payload: {
+        connector: {
+          type: ConnectorTypes.jira,
+          name: 'jira-connector',
+          fields: {
+            issueType: 'bug',
+            priority: 'high',
+            parent: '2',
+          },
+        },
+        assignees: [{ uid: '1' }],
+        description: 'sample description',
+        status: 'open',
+        severity: 'low',
+        tags: ['one'],
+        title: 'sample title',
+        settings: {
+          syncAlerts: false,
+        },
+        owner: 'cases',
+      },
+    };
+
+    it('has expected attributes in request', () => {
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('empty category in request', () => {
+      const requestWithEmptyCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: null },
+      };
+
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(requestWithEmptyCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithEmptyCategory,
+      });
+    });
+
+    it('string category in request', () => {
+      const requestWithStringCategory = {
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, category: 'romance' },
+      };
+
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode(requestWithStringCategory);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: requestWithStringCategory,
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from payload', () => {
+      const query = CreateCaseUserActionWithoutConnectorIdRt.decode({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
