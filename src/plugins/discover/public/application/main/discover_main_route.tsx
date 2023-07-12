@@ -64,11 +64,10 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       services,
     })
   );
-  const { customizationService, isInitialized: isCustomizationServiceInitialized } =
-    useDiscoverCustomizationService({
-      customizationCallbacks,
-      stateContainer,
-    });
+  const { customizationService, setupCustomizationService } = useDiscoverCustomizationService({
+    customizationCallbacks,
+    stateContainer,
+  });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -132,10 +131,10 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
-      if (!isCustomizationServiceInitialized) return;
-
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
+      setShowNoDataPage(false);
+      setError(undefined);
       if (!nextDataView && !(await checkData())) {
         setLoading(false);
         return;
@@ -199,7 +198,6 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       }
     },
     [
-      isCustomizationServiceInitialized,
       checkData,
       stateContainer,
       savedSearchId,
@@ -215,36 +213,45 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   );
 
   const onDataViewCreated = useCallback(
-    async (nextDataView: unknown) => {
+    (nextDataView: unknown) => {
       if (nextDataView) {
-        setLoading(true);
-        setShowNoDataPage(false);
-        setError(undefined);
-        await loadSavedSearch(nextDataView as DataView);
+        return loadSavedSearch(nextDataView as DataView);
       }
     },
     [loadSavedSearch]
   );
 
-  // primary fetch: on initial search + triggered when id changes
+  /**
+   * Side effect to initialize discover applying customization and listeners in the correct order:
+   * 1. Start appState syncing with url
+   * 2. Initialize customization service
+   * 3. Restore the previously selected data view for a new state
+   *
+   * This effect act as primary fetch: on initial search + triggered when id changes
+   */
   useEffect(() => {
-    setLoading(true);
-    setHasESData(false);
-    setHasUserDataView(false);
-    setShowNoDataPage(false);
-    setError(undefined);
-    // restore the previously selected data view for a new state
-    loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
-  }, [
-    loadSavedSearch,
-    savedSearchId,
-    stateContainer,
-    setLoading,
-    setHasESData,
-    setHasUserDataView,
-    setShowNoDataPage,
-    setError,
-  ]);
+    let stopAppStateSync: () => void;
+    let cleanupCustomizations: () => void;
+
+    const initialize = async () => {
+      setHasESData(false);
+      setHasUserDataView(false);
+      // 1. Start appState syncing with url
+      stopAppStateSync = stateContainer.appState.syncState();
+      // 2. Invoke customization callbacks and set service
+      cleanupCustomizations = await setupCustomizationService();
+      // 3. Restore the previously selected data view for a new state
+      loadSavedSearch(
+        !savedSearchId ? stateContainer.internalState.getState().dataView : undefined
+      );
+    };
+    initialize();
+
+    return () => {
+      if (stopAppStateSync) stopAppStateSync();
+      if (cleanupCustomizations) cleanupCustomizations();
+    };
+  }, [loadSavedSearch, savedSearchId, stateContainer, setupCustomizationService]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({

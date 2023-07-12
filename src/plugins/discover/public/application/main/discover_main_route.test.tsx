@@ -22,6 +22,9 @@ import {
 } from '../../customizations/customization_service';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
+const mockSetupCustomizationService = () => {
+  mockCustomizationService = createCustomizationService();
+};
 
 jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
@@ -29,7 +32,7 @@ jest.mock('../../customizations', () => {
     ...originalModule,
     useDiscoverCustomizationService: () => ({
       customizationService: mockCustomizationService,
-      isInitialized: Boolean(mockCustomizationService),
+      setupCustomizationService: mockSetupCustomizationService,
     }),
   };
 });
@@ -43,10 +46,6 @@ jest.mock('./discover_main_app', () => {
 setScopedHistory(scopedHistoryMock.create());
 
 describe('DiscoverMainRoute', () => {
-  beforeEach(() => {
-    mockCustomizationService = createCustomizationService();
-  });
-
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
     const component = mountComponent(true, true);
 

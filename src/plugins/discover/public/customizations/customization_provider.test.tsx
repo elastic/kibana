@@ -23,15 +23,12 @@ import {
 } from './customization_service';
 
 describe('useDiscoverCustomizationService', () => {
-  it('should provide customization service', async () => {
-    let resolveCallback = (_: () => void) => {};
-    const promise = new Promise<() => void>((resolve) => {
-      resolveCallback = resolve;
-    });
+  it('should provide a customization service and a setup handler', async () => {
+    const cleanup = jest.fn();
     let service: DiscoverCustomizationService | undefined;
     const callback = jest.fn(({ customizations }) => {
       service = customizations;
-      return promise;
+      return cleanup;
     });
     const wrapper = renderHook(() =>
       useDiscoverCustomizationService({
@@ -39,25 +36,16 @@ describe('useDiscoverCustomizationService', () => {
         customizationCallbacks: [callback],
       })
     );
-    expect(wrapper.result.current.isInitialized).toBe(false);
     expect(wrapper.result.current.customizationService).toBeUndefined();
-    expect(callback).toHaveBeenCalledTimes(1);
-    const cleanup = jest.fn();
-    await act(async () => {
-      resolveCallback(cleanup);
-      await promise;
-    });
-    expect(wrapper.result.current.isInitialized).toBe(true);
+    expect(callback).toHaveBeenCalledTimes(0);
+
+    wrapper.result.current.setupCustomizationService();
+    await wrapper.waitForNextUpdate();
+
     expect(wrapper.result.current.customizationService).toBeDefined();
     expect(wrapper.result.current.customizationService).toBe(service);
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
-    wrapper.unmount();
-    await act(async () => {
-      await promise;
-    });
-    expect(callback).toHaveBeenCalledTimes(1);
-    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 });
 
