@@ -145,14 +145,14 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       name: (
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.aiops.logRateAnalysisResultsTable.logRateColumnTooltip', {
+          content={i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTooltip', {
             defaultMessage:
               'A visual representation of the impact of the field on the message rate difference',
           })}
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.logRateAnalysisResultsTable.logRateLabel"
+              id="xpack.aiops.logRateAnalysis.resultsTable.logRateLabel"
               defaultMessage="Log rate"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -175,7 +175,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnDocCount',
       width: NARROW_COLUMN_WIDTH,
       field: 'doc_count',
-      name: i18n.translate('xpack.aiops.logRateAnalysisResultsTable.docCountLabel', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountLabel', {
         defaultMessage: 'Doc count',
       }),
       sortable: true,
@@ -188,14 +188,14 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       name: (
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.aiops.logRateAnalysisResultsTable.pValueColumnTooltip', {
+          content={i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.pValueColumnTooltip', {
             defaultMessage:
               'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
           })}
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.logRateAnalysisResultsTable.pValueLabel"
+              id="xpack.aiops.logRateAnalysis.resultsTable.pValueLabel"
               defaultMessage="p-value"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -214,7 +214,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.logRateAnalysisResultsTable.impactLabelColumnTooltip',
+            'xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip',
             {
               defaultMessage: 'The level of impact of the field on the message rate difference.',
             }
@@ -222,7 +222,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.logRateAnalysisResultsTable.impactLabel"
+              id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
               defaultMessage="Impact"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -239,7 +239,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     },
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
-      name: i18n.translate('xpack.aiops.logRateAnalysisResultsTable.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
       actions: [
@@ -263,7 +263,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
           return (
             <EuiIconTip
               content={i18n.translate(
-                'xpack.aiops.logRateAnalysisResultsTable.uniqueColumnTooltip',
+                'xpack.aiops.logRateAnalysis.resultsTable.uniqueColumnTooltip',
                 {
                   defaultMessage: 'This field/value pair only appears in this group',
                 }

@@ -30,7 +30,7 @@ export const FieldFilterApplyButton: FC<FieldFilterApplyButtonProps> = ({
       disabled={disabled}
     >
       <FormattedMessage
-        id="xpack.aiops.logRateAnalysisPage.fieldFilterApplyButtonLabel"
+        id="xpack.aiops.logRateAnalysis.page.fieldFilterApplyButtonLabel"
         defaultMessage="Apply"
       />
     </EuiButton>

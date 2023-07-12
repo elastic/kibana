@@ -42,25 +42,25 @@ import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_r
 import { FieldFilterPopover } from './field_filter_popover';
 
 const groupResultsMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysisResultsTable.groupedSwitchLabel.groupResults',
+  'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResults',
   {
     defaultMessage: 'Smart grouping',
   }
 );
 const groupResultsHelpMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysisResultsTable.groupedSwitchLabel.groupResultsHelpMessage',
+  'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResultsHelpMessage',
   {
     defaultMessage: 'Items which are unique to a group are marked by an asterisk (*).',
   }
 );
 const groupResultsOffMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysisResultsTable.groupedSwitchLabel.groupResultsOff',
+  'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResultsOff',
   {
     defaultMessage: 'Off',
   }
 );
 const groupResultsOnMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysisResultsTable.groupedSwitchLabel.groupResultsOn',
+  'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResultsOn',
   {
     defaultMessage: 'On',
   }
@@ -350,7 +350,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
                 <p>
                   <EuiButton size="s" onClick={() => startHandler(true)}>
                     <FormattedMessage
-                      id="xpack.aiops.logRateAnalysisPage.tryToContinueAnalysisButtonText"
+                      id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
                       defaultMessage="Try to continue analysis"
                     />
                   </EuiButton>
@@ -374,7 +374,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           title={
             <h2>
               <FormattedMessage
-                id="xpack.aiops.logRateAnalysisPage.noResultsPromptTitle"
+                id="xpack.aiops.logRateAnalysis.page.noResultsPromptTitle"
                 defaultMessage="The analysis did not return any results."
               />
             </h2>
@@ -383,7 +383,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
           body={
             <p>
               <FormattedMessage
-                id="xpack.aiops.logRateAnalysisPage.noResultsPromptBody"
+                id="xpack.aiops.logRateAnalysis.page.noResultsPromptBody"
                 defaultMessage="Try to adjust the baseline and deviation time ranges and rerun the analysis. If you still get no results, there might be no statistically significant entities contributing to this spike in log rates."
               />
             </p>

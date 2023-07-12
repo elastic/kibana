@@ -17,21 +17,21 @@ import { getTableItemAsKQL } from './get_table_item_as_kql';
 import type { GroupTableItem, TableItemAction } from './types';
 
 const copyToClipboardButtonLabel = i18n.translate(
-  'xpack.aiops.logRateAnalysisResultsTable.linksMenu.copyToClipboardButtonLabel',
+  'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardButtonLabel',
   {
     defaultMessage: 'Copy to clipboard',
   }
 );
 
 const copyToClipboardSignificantTermMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysisResultsTable.linksMenu.copyToClipboardSignificantTermMessage',
+  'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantTermMessage',
   {
     defaultMessage: 'Copy field/value pair as KQL syntax to clipboard',
   }
 );
 
 const copyToClipboardGroupMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysisResultsTable.linksMenu.copyToClipboardGroupMessage',
+  'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardGroupMessage',
   {
     defaultMessage: 'Copy group items as KQL syntax to clipboard',
   }

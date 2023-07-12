@@ -37,7 +37,7 @@ export function getDocumentCountStatsSplitLabel(
   if (significantTerm) {
     return `${significantTerm?.fieldName}:${significantTerm?.fieldValue}`;
   } else if (group) {
-    return i18n.translate('xpack.aiops.logRateAnalysisPage.documentCountStatsSplitGroupLabel', {
+    return i18n.translate('xpack.aiops.logRateAnalysis.page.documentCountStatsSplitGroupLabel', {
       defaultMessage: 'Selected group',
     });
   }
@@ -170,7 +170,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           title={
             <h2>
               <FormattedMessage
-                id="xpack.aiops.logRateAnalysisPage.emptyPromptTitle"
+                id="xpack.aiops.logRateAnalysis.page.emptyPromptTitle"
                 defaultMessage="Click a spike in the histogram chart to start the analysis."
               />
             </h2>
@@ -179,7 +179,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           body={
             <p>
               <FormattedMessage
-                id="xpack.aiops.logRateAnalysisPage.emptyPromptBody"
+                id="xpack.aiops.logRateAnalysis.page.emptyPromptBody"
                 defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or drop."
               />
             </p>

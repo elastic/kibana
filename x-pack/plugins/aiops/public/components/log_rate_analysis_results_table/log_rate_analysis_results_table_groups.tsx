@@ -148,10 +148,10 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           onClick={() => toggleDetails(item)}
           aria-label={
             itemIdToExpandedRowMap[item.id]
-              ? i18n.translate('xpack.aiops.logRateAnalysisResultsTable.collapseAriaLabel', {
+              ? i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.collapseAriaLabel', {
                   defaultMessage: 'Collapse',
                 })
-              : i18n.translate('xpack.aiops.logRateAnalysisResultsTable.expandAriaLabel', {
+              : i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.expandAriaLabel', {
                   defaultMessage: 'Expand',
                 })
           }
@@ -167,7 +167,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.logRateAnalysisResultsTableGroups.groupColumnTooltip',
+            'xpack.aiops.logRateAnalysis.resultsTableGroups.groupColumnTooltip',
             {
               defaultMessage:
                 'Displays up to {maxItemCount} group items sorted by uniqueness and document count. Expand row to see all field/value pairs.',
@@ -177,7 +177,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.logRateAnalysisResultsTableGroups.groupLabel"
+              id="xpack.aiops.logRateAnalysis.resultsTableGroups.groupLabel"
               defaultMessage="Group"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -216,7 +216,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
               size="xs"
             >
               <FormattedMessage
-                id="xpack.aiops.logRateAnalysisResultsTableGroups.groupItemsInfo"
+                id="xpack.aiops.logRateAnalysis.resultsTableGroups.groupItemsInfo"
                 defaultMessage="Showing {valuesBadges} out of {count} items."
                 values={{
                   count: groupItemsSortedByUniqueness.length,
@@ -227,7 +227,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
                 <>
                   {' '}
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysisResultsTableGroups.groupUniqueItemsInfo"
+                    id="xpack.aiops.logRateAnalysis.resultsTableGroups.groupUniqueItemsInfo"
                     defaultMessage="{count, plural, one {# item} other {# items}} unique to this group."
                     values={{
                       count: uniqueItemsCount,
@@ -253,7 +253,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.logRateAnalysisResultsTableGroups.logRateColumnTooltip',
+            'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateColumnTooltip',
             {
               defaultMessage:
                 'A visual representation of the impact of the group on the message rate difference.',
@@ -262,7 +262,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.logRateAnalysisResultsTableGroups.logRateLabel"
+              id="xpack.aiops.logRateAnalysis.resultsTableGroups.logRateLabel"
               defaultMessage="Log rate"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -273,7 +273,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         <MiniHistogram
           chartData={histogram}
           isLoading={loading && histogram === undefined}
-          label={i18n.translate('xpack.aiops.logRateAnalysisResultsTableGroups.groupLabel', {
+          label={i18n.translate('xpack.aiops.logRateAnalysis.resultsTableGroups.groupLabel', {
             defaultMessage: 'Group',
           })}
           barColorOverride={barColorOverride}
@@ -287,7 +287,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnDocCount',
       width: NARROW_COLUMN_WIDTH,
       field: 'docCount',
-      name: i18n.translate('xpack.aiops.logRateAnalysisResultsTableGroups.docCountLabel', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTableGroups.docCountLabel', {
         defaultMessage: 'Doc count',
       }),
       sortable: true,
@@ -301,7 +301,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.logRateAnalysisResultsTableGroups.pValueColumnTooltip',
+            'xpack.aiops.logRateAnalysis.resultsTableGroups.pValueColumnTooltip',
             {
               defaultMessage:
                 'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
@@ -310,7 +310,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.logRateAnalysisResultsTableGroups.pValueLabel"
+              id="xpack.aiops.logRateAnalysis.resultsTableGroups.pValueLabel"
               defaultMessage="p-value"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -329,7 +329,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         <EuiToolTip
           position="top"
           content={i18n.translate(
-            'xpack.aiops.logRateAnalysisResultsTableGroups.impactLabelColumnTooltip',
+            'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
             {
               defaultMessage: 'The level of impact of the group on the message rate difference',
             }
@@ -337,7 +337,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         >
           <>
             <FormattedMessage
-              id="xpack.aiops.logRateAnalysisResultsTableGroups.impactLabel"
+              id="xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabel"
               defaultMessage="Impact"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
@@ -354,7 +354,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     },
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
-      name: i18n.translate('xpack.aiops.logRateAnalysisResultsTableGroups.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTableGroups.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
       actions: [

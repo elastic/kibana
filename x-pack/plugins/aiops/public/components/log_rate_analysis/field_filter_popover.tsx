@@ -105,7 +105,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
           color="text"
         >
           <FormattedMessage
-            id="xpack.aiops.logRateAnalysisPage.fieldFilterButtonLabel"
+            id="xpack.aiops.logRateAnalysis.page.fieldFilterButtonLabel"
             defaultMessage="Filter fields"
           />
         </EuiButton>
@@ -116,7 +116,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
       <EuiPopoverTitle>
         <EuiText size="xs" color="subdued" style={{ maxWidth: '400px' }}>
           <FormattedMessage
-            id="xpack.aiops.logRateAnalysisPage.fieldFilterHelpText"
+            id="xpack.aiops.logRateAnalysis.page.fieldFilterHelpText"
             defaultMessage="Deselect non-relevant fields to remove them from groups and click the Apply button to rerun the grouping.  Use the search bar to filter the list, then select/deselect multiple fields with the actions below."
           />
         </EuiText>
@@ -168,12 +168,12 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
               >
                 {fieldSearchText.length > 0 ? (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysisPage.fieldSelector.selectAllSearchedFields"
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllSearchedFields"
                     defaultMessage="Select filtered fields"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysisPage.fieldSelector.selectAllFields"
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllFields"
                     defaultMessage="Select all fields"
                   />
                 )}
@@ -189,12 +189,12 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
               >
                 {fieldSearchText.length > 0 ? (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysisPage.fieldSelector.deselectAllSearchedFields"
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllSearchedFields"
                     defaultMessage="Deselect filtered fields"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysisPage.fieldSelector.deselectAllFields"
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllFields"
                     defaultMessage="Deselect all fields"
                   />
                 )}
