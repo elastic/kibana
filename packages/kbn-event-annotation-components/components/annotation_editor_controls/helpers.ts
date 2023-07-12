@@ -24,14 +24,14 @@ export const defaultAnnotationColor = euiLightVars.euiColorAccent;
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
 
 export const defaultAnnotationLabel = i18n.translate(
-  'eventAnnotation.xyChart.defaultAnnotationLabel',
+  'eventAnnotationComponents.xyChart.defaultAnnotationLabel',
   {
     defaultMessage: 'Event',
   }
 );
 
 export const defaultRangeAnnotationLabel = i18n.translate(
-  'eventAnnotation.xyChart.defaultRangeAnnotationLabel',
+  'eventAnnotationComponents.xyChart.defaultRangeAnnotationLabel',
   {
     defaultMessage: 'Event range',
   }

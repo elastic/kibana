@@ -73,7 +73,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
           title={
             <h2>
               <FormattedMessage
-                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptTitle"
+                id="eventAnnotationComponents.eventAnnotationGroup.savedObjectFinder.emptyPromptTitle"
                 defaultMessage="Start by adding an annotation layer"
               />
             </h2>
@@ -82,7 +82,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription"
+                  id="eventAnnotationComponents.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription"
                   defaultMessage="There are currently no annotations available to select from the library. Create a new layer to add annotations."
                 />
               </p>
@@ -91,7 +91,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
           actions={
             <EuiButton onClick={() => onCreateNew()} size="s">
               <FormattedMessage
-                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyCTA"
+                id="eventAnnotationComponents.eventAnnotationGroup.savedObjectFinder.emptyCTA"
                 defaultMessage="Create annotation layer"
               />
             </EuiButton>
@@ -109,7 +109,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
       showFilter={false}
       noItemsMessage={
         <FormattedMessage
-          id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.notFoundLabel"
+          id="eventAnnotationComponents.eventAnnotationGroup.savedObjectFinder.notFoundLabel"
           defaultMessage="No matching annotation groups found."
         />
       }
@@ -127,7 +127,7 @@ const savedObjectMetaData = [
   {
     type: EVENT_ANNOTATION_GROUP_TYPE,
     getIconForSavedObject: () => 'annotation',
-    name: i18n.translate('eventAnnotation.eventAnnotationGroup.metadata.name', {
+    name: i18n.translate('eventAnnotationComponents.eventAnnotationGroup.metadata.name', {
       defaultMessage: 'Annotations Groups',
     }),
     includeFields: ['*'],

@@ -72,7 +72,7 @@ export const ConfigPanelQueryAnnotation = ({
         display="rowCompressed"
         className="lnsRowCompressedMargin"
         fullWidth
-        label={i18n.translate('eventAnnotation.xyChart.annotation.queryInput', {
+        label={i18n.translate('eventAnnotationComponents.xyChart.annotation.queryInput', {
           defaultMessage: 'Annotation query',
         })}
       >
@@ -94,7 +94,7 @@ export const ConfigPanelQueryAnnotation = ({
       <EuiFormRow
         display="rowCompressed"
         fullWidth
-        label={i18n.translate('eventAnnotation.xyChart.annotation.queryField', {
+        label={i18n.translate('eventAnnotationComponents.xyChart.annotation.queryField', {
           defaultMessage: 'Target date field',
         })}
       >

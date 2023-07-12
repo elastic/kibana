@@ -88,35 +88,38 @@ const AnnotationEditorControls = ({
   return (
     <>
       <DimensionEditorSection
-        title={i18n.translate('eventAnnotation.xyChart.placement', {
+        title={i18n.translate('eventAnnotationComponents.xyChart.placement', {
           defaultMessage: 'Placement',
         })}
       >
         <EuiFormRow
-          label={i18n.translate('eventAnnotation.xyChart.annotationDate.placementType', {
+          label={i18n.translate('eventAnnotationComponents.xyChart.annotationDate.placementType', {
             defaultMessage: 'Placement type',
           })}
           display="rowCompressed"
           fullWidth
         >
           <EuiButtonGroup
-            legend={i18n.translate('eventAnnotation.xyChart.annotationDate.placementType', {
-              defaultMessage: 'Placement type',
-            })}
+            legend={i18n.translate(
+              'eventAnnotationComponents.xyChart.annotationDate.placementType',
+              {
+                defaultMessage: 'Placement type',
+              }
+            )}
             data-test-subj="lns-xyAnnotation-placementType"
             name="placementType"
             buttonSize="compressed"
             options={[
               {
                 id: `lens_xyChart_annotation_manual`,
-                label: i18n.translate('eventAnnotation.xyChart.annotation.manual', {
+                label: i18n.translate('eventAnnotationComponents.xyChart.annotation.manual', {
                   defaultMessage: 'Static date',
                 }),
                 'data-test-subj': 'lnsXY_annotation_manual',
               },
               {
                 id: `lens_xyChart_annotation_query`,
-                label: i18n.translate('eventAnnotation.xyChart.annotation.query', {
+                label: i18n.translate('eventAnnotationComponents.xyChart.annotation.query', {
                   defaultMessage: 'Custom query',
                 }),
                 'data-test-subj': 'lnsXY_annotation_query',
@@ -183,7 +186,7 @@ const AnnotationEditorControls = ({
         )}
       </DimensionEditorSection>
       <DimensionEditorSection
-        title={i18n.translate('eventAnnotation.xyChart.appearance', {
+        title={i18n.translate('eventAnnotationComponents.xyChart.appearance', {
           defaultMessage: 'Appearance',
         })}
       >
@@ -276,14 +279,14 @@ const AnnotationEditorControls = ({
         )}
         {isRange && (
           <EuiFormRow
-            label={i18n.translate('eventAnnotation.xyChart.fillStyle', {
+            label={i18n.translate('eventAnnotationComponents.xyChart.fillStyle', {
               defaultMessage: 'Fill',
             })}
             display="columnCompressed"
             fullWidth
           >
             <EuiButtonGroup
-              legend={i18n.translate('eventAnnotation.xyChart.fillStyle', {
+              legend={i18n.translate('eventAnnotationComponents.xyChart.fillStyle', {
                 defaultMessage: 'Fill',
               })}
               data-test-subj="lns-xyAnnotation-fillStyle"
@@ -292,14 +295,14 @@ const AnnotationEditorControls = ({
               options={[
                 {
                   id: `lens_xyChart_fillStyle_inside`,
-                  label: i18n.translate('eventAnnotation.xyChart.fillStyle.inside', {
+                  label: i18n.translate('eventAnnotationComponents.xyChart.fillStyle.inside', {
                     defaultMessage: 'Inside',
                   }),
                   'data-test-subj': 'lnsXY_fillStyle_inside',
                 },
                 {
                   id: `lens_xyChart_fillStyle_outside`,
-                  label: i18n.translate('eventAnnotation.xyChart.fillStyle.outside', {
+                  label: i18n.translate('eventAnnotationComponents.xyChart.fillStyle.outside', {
                     defaultMessage: 'Outside',
                   }),
                   'data-test-subj': 'lnsXY_fillStyle_inside',
@@ -324,12 +327,12 @@ const AnnotationEditorControls = ({
           showAlpha={isRange}
           setConfig={update}
           disableHelpTooltip
-          label={i18n.translate('eventAnnotation.xyChart.lineColor.label', {
+          label={i18n.translate('eventAnnotationComponents.xyChart.lineColor.label', {
             defaultMessage: 'Color',
           })}
         />
         <ConfigPanelGenericSwitch
-          label={i18n.translate('eventAnnotation.xyChart.annotation.hide', {
+          label={i18n.translate('eventAnnotationComponents.xyChart.annotation.hide', {
             defaultMessage: 'Hide annotation',
           })}
           data-test-subj="lns-annotations-hide-annotation"
@@ -339,7 +342,7 @@ const AnnotationEditorControls = ({
       </DimensionEditorSection>
       {isQueryBased && currentAnnotation && (
         <DimensionEditorSection
-          title={i18n.translate('eventAnnotation.xyChart.tooltip', {
+          title={i18n.translate('eventAnnotationComponents.xyChart.tooltip', {
             defaultMessage: 'Tooltip',
           })}
         >
@@ -347,7 +350,7 @@ const AnnotationEditorControls = ({
             display="rowCompressed"
             className="lnsRowCompressedMargin"
             fullWidth
-            label={i18n.translate('eventAnnotation.xyChart.annotation.tooltip', {
+            label={i18n.translate('eventAnnotationComponents.xyChart.annotation.tooltip', {
               defaultMessage: 'Show additional fields',
             })}
           >

@@ -35,7 +35,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
 
   return {
     field: 'dataView',
-    name: i18n.translate('eventAnnotation.tableList.dataView', {
+    name: i18n.translate('eventAnnotationComponents.tableList.dataView', {
       defaultMessage: 'Data view',
     }),
     sortable: false,
@@ -146,7 +146,7 @@ export const EventAnnotationGroupTableList = ({
     <>
       <TableListViewTable<EventAnnotationGroupContent>
         refreshListBouncer={refreshListBouncer}
-        tableCaption={i18n.translate('eventAnnotation.tableList.listTitle', {
+        tableCaption={i18n.translate('eventAnnotationComponents.tableList.listTitle', {
           defaultMessage: 'Annotation Library',
         })}
         findItems={fetchItems}
@@ -166,7 +166,7 @@ export const EventAnnotationGroupTableList = ({
               <EuiTitle>
                 <h2>
                   <FormattedMessage
-                    id="eventAnnotation.tableList.emptyPrompt.title"
+                    id="eventAnnotationComponents.tableList.emptyPrompt.title"
                     defaultMessage="Create your first annotation in Lens"
                   />
                 </h2>
@@ -175,7 +175,7 @@ export const EventAnnotationGroupTableList = ({
             body={
               <p>
                 <FormattedMessage
-                  id="eventAnnotation.tableList.emptyPrompt.body"
+                  id="eventAnnotationComponents.tableList.emptyPrompt.body"
                   defaultMessage="You can create and save annotations for use across multiple visualization in the
                     Lens visualization editor."
                 />
@@ -184,7 +184,7 @@ export const EventAnnotationGroupTableList = ({
             actions={
               <EuiButton onClick={navigateToLens}>
                 <FormattedMessage
-                  id="eventAnnotation.tableList.emptyPrompt.cta"
+                  id="eventAnnotationComponents.tableList.emptyPrompt.cta"
                   defaultMessage="Create new annotation in Lens"
                 />
               </EuiButton>
@@ -192,10 +192,10 @@ export const EventAnnotationGroupTableList = ({
             iconType="flag"
           />
         }
-        entityName={i18n.translate('eventAnnotation.tableList.entityName', {
+        entityName={i18n.translate('eventAnnotationComponents.tableList.entityName', {
           defaultMessage: 'annotation group',
         })}
-        entityNamePlural={i18n.translate('eventAnnotation.tableList.entityNamePlural', {
+        entityNamePlural={i18n.translate('eventAnnotationComponents.tableList.entityNamePlural', {
           defaultMessage: 'annotation groups',
         })}
         onClickTitle={editItem}

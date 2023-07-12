@@ -42,7 +42,7 @@ export const ConfigPanelApplyAsRangeSwitch = ({
         data-test-subj="lns-xyAnnotation-rangeSwitch"
         label={
           <EuiText size="xs">
-            {i18n.translate('eventAnnotation.xyChart.applyAsRange', {
+            {i18n.translate('eventAnnotationComponents.xyChart.applyAsRange', {
               defaultMessage: 'Apply as range',
             })}
           </EuiText>

@@ -51,7 +51,7 @@ export const createCopiedAnnotation = (
 };
 
 export const defaultAnnotationLabel = i18n.translate(
-  'eventAnnotation.manualAnnotation.defaultAnnotationLabel',
+  'eventAnnotationCommon.manualAnnotation.defaultAnnotationLabel',
   {
     defaultMessage: 'Event',
   }

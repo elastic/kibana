@@ -40,7 +40,7 @@ export const AnnotationList = ({
     setNewAnnotationId(uuidv4());
   }, [annotations.length]);
 
-  const addAnnotationText = i18n.translate('eventAnnotation.annotationList.add', {
+  const addAnnotationText = i18n.translate('eventAnnotationComponents.annotationList.add', {
     defaultMessage: 'Add annotation',
   });
 
@@ -119,7 +119,7 @@ export const AnnotationList = ({
               }}
             >
               <DimensionButton
-                groupLabel={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
+                groupLabel={i18n.translate('eventAnnotationComponents.groupEditor.addAnnotation', {
                   defaultMessage: 'Annotations',
                 })}
                 onClick={() => selectAnnotation(annotation)}
