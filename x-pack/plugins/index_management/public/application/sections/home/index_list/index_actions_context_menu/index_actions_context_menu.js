@@ -191,7 +191,7 @@ export class IndexActionsContextMenu extends Component {
           },
         });
       }
-    } else {
+    } else if (!allOpen && enableIndexActions) {
       items.push({
         'data-test-subj': 'openIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.openIndexLabel', {
