@@ -17,7 +17,7 @@ const generateMapping = (fieldsCount: number, numberOfMappedFieldsPerIndex: numb
       type: 'date',
     },
   };
-  const ids = [...Array(fieldsCount).keys()];
+  const ids = [...Array(fieldsCount - 1).keys()];
   const sampledIds = sampleSize(ids, numberOfMappedFieldsPerIndex);
   for (const i of sampledIds) {
     properties[`fake_field_${i}`] = {
