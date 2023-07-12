@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { AssistantTitle } from './assistant_title';
 import { UpgradeButtons } from '../upgrade/upgrade_buttons';
 import { getMessageFromRawResponse, getWelcomeConversation } from './helpers';
@@ -46,7 +47,6 @@ import * as i18n from './translations';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { AssistantSettingsButton } from './settings/assistant_settings_button';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 
@@ -113,7 +113,10 @@ const AssistantComponent: React.FC<Props> = ({
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
     isAssistantEnabled
-      ? conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
+      ? // if a conversationId has been provided, use that
+        // if not, check local storage
+        // last resort, go to welcome conversation
+        conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
       : WELCOME_CONVERSATION_TITLE
   );
 
@@ -126,13 +129,9 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
-    if (
-      currentConversation.id === WELCOME_CONVERSATION_TITLE &&
-      currentConversation.apiConfig.connectorId != null
-    ) {
-      return false;
-    }
-    return (connectors?.length ?? 0) === 0;
+    return currentConversation.apiConfig.connectorId != null
+      ? false
+      : (connectors?.length ?? 0) === 0;
   }, [connectors?.length, currentConversation]);
   const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
@@ -534,7 +533,7 @@ const AssistantComponent: React.FC<Props> = ({
       <EuiModalBody>
         {comments}
 
-        {!isWelcomeSetup && showMissingConnectorCallout && (
+        {!isDisabled && showMissingConnectorCallout && (
           <>
             <EuiSpacer />
             <EuiFlexGroup justifyContent="spaceAround">

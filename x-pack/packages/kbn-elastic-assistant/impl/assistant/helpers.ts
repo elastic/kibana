@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { BASE_CONVERSATIONS, Conversation } from '../..';
+import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { enterpriseMessaging } from './use_conversation/sample_conversations';
+import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (rawResponse: string): Message => {
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
@@ -49,9 +48,6 @@ export const getWelcomeConversation = (
 
   return {
     ...conversation,
-    messages: [
-      ...conversation.messages,
-      ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
-    ],
+    messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
   };
 };
