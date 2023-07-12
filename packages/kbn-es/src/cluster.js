@@ -17,13 +17,15 @@ const { downloadSnapshot, installSnapshot, installSource, installArchive } = req
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
   log: defaultLog,
-  parseEsDockerLog,
+  // parseEsDockerLog,
   parseEsLog,
   extractConfigFiles,
   NativeRealm,
   parseTimeoutToMs,
   verifyDockerInstalled,
   resolveDockerCmd,
+  maybeCreateDockerNetwork,
+  setupServerlessVolumes,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -35,6 +37,7 @@ const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
 
 /** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
 /** @typedef {import('./utils').DockerOptions} DockerOptions */
+/** @typedef {import('./utils').ServerlessOptions}ServerlessrOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -576,8 +579,16 @@ exports.Cluster = class Cluster {
 
   /**
    * Run an Elasticsearch Serverless Docker cluster
+   *
+   * @param {ServerlessOptions} options
    */
-  async runServerless() {}
+  async runServerless(options = {}) {
+    // const dockerCmd = resolveDockerCmd(options);
+    // await this._execDocker(dockerCmd);
+    await verifyDockerInstalled(this._log);
+    await maybeCreateDockerNetwork(this._log);
+    await setupServerlessVolumes(this._log, options);
+  }
 
   /**
    * Common logic for starting Docker containers
@@ -591,9 +602,6 @@ exports.Cluster = class Cluster {
       throw new Error('ES has already been started');
     }
 
-    this._log.info(chalk.bold('Verifying docker installed'));
-    await verifyDockerInstalled(this._log);
-
     this._log.info('docker %s', dockerCmd.join(' '));
 
     // iterate over for serverless?
@@ -606,23 +614,23 @@ exports.Cluster = class Cluster {
 
     // const reportSent = false;
     // parse and forward es stdout to the log
-    this._process.stdout.on('data', (data) => {
-      const chunk = data.toString();
-      const lines = parseEsDockerLog(chunk);
-      lines.forEach((line) => {
-        // if (!reportSent && line.message.includes('publish_address')) {
-        //   reportSent = true;
-        //   reportTime(startTime, 'ready', {
-        //     success: true,
-        //   });
-        // }
+    // this._process.stdout.on('data', (data) => {
+    //   const chunk = data.toString();
+    //   const lines = parseEsDockerLog(chunk);
+    //   lines.forEach((line) => {
+    //     // if (!reportSent && line.message.includes('publish_address')) {
+    //     //   reportSent = true;
+    //     //   reportTime(startTime, 'ready', {
+    //     //     success: true,
+    //     //   });
+    //     // }
 
-        // if (stdioTarget) {
-        //   stdioTarget.write(chunk);
-        // } else {
-        this._log.info(line.formattedMessage);
-        // }
-      });
-    });
+    //     // if (stdioTarget) {
+    //     //   stdioTarget.write(chunk);
+    //     // } else {
+    //     this._log.info(line.formattedMessage);
+    //     // }
+    //   });
+    // });
   }
 };

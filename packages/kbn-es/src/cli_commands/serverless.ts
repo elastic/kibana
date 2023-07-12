@@ -27,6 +27,7 @@ export const serverless: Command = {
 
       --tag               Image tag of ES Serverless to run from ${DEFAULT_DOCKER_REGISTRY} [default: ${DEFAULT_TAG}]
       --image             Full path of ES Serverless image to run [default: ${DEFAULT_IMG}]. Has precedence over tag.
+      --clean             Remove existing file system object store
       -E                  Additional key=value settings to pass to Elasticsearch
 
     Examples:
@@ -50,6 +51,7 @@ export const serverless: Command = {
       },
 
       string: ['tag'],
+      boolean: ['clean'],
 
       default: defaults,
     });

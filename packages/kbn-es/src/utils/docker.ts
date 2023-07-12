@@ -7,9 +7,14 @@
  */
 import chalk from 'chalk';
 import execa from 'execa';
+import fs from 'fs';
+import Fsp from 'fs/promises';
+import { resolve } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import { getDataPath } from '@kbn/utils';
+
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 
@@ -22,6 +27,7 @@ export interface DockerOptions extends EsClusterExecOptions {
 export interface ServerlessOptions extends EsClusterExecOptions {
   tag?: string;
   image?: string;
+  clean?: boolean;
 }
 
 const DEFAULT_DOCKER_BASE_CMD = 'run --name es01 -p 9200:9200 -p 9300:9300 -d --rm';
@@ -61,6 +67,23 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
   if (p?.exitCode === 0) {
     log.indent(4, () => log.info('Created new network.'));
   }
+}
+
+/**
+ * Setup local volumes for Serverless ES
+ */
+export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
+  log.info(chalk.bold('Checking local volume for Serverless ES object store'));
+  const volumePath = resolve(getDataPath(), 'stateless');
+
+  if (options.clean && fs.existsSync(volumePath)) {
+    log.indent(4, () => log.info('Cleaning existing object store.'));
+    await Fsp.rm(volumePath, { recursive: true, force: true });
+  }
+
+  await Fsp.mkdir(volumePath, { recursive: true });
+  // Permissions are set separately due to default umask
+  await Fsp.chmod(volumePath, 0o766);
 }
 
 const resolveDockerImage = ({ version, image }: DockerOptions) => {
