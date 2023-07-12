@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiTitle, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -16,7 +16,7 @@ import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../../kibana_services';
-import { getTermsFields, getSortFields, getSourceFields } from '../../../../index_pattern_util';
+import { getTermsFields, getIsTimeseries, getSortFields, getSourceFields } from '../../../../index_pattern_util';
 import { ESDocField } from '../../../fields/es_doc_field';
 import { OnSourceChangeArgs } from '../../source';
 import { TopHitsForm } from './top_hits_form';
@@ -25,6 +25,7 @@ import { IField } from '../../../fields/field';
 
 interface Props {
   filterByMapBounds: boolean;
+  groupByTimeseries: boolean;
   indexPatternId: string;
   onChange: (args: OnSourceChangeArgs) => void;
   tooltipFields: IField[];
@@ -36,6 +37,8 @@ interface Props {
 }
 
 interface State {
+  isLoading: boolean;
+  isTimeseries: boolean;
   loadError?: string;
   sourceFields: IField[];
   termFields: DataViewField[];
@@ -46,6 +49,8 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
   private _isMounted = false;
 
   state: State = {
+    isLoading: false,
+    isTimeseries: false,
     sourceFields: [],
     termFields: [],
     sortFields: [],
@@ -61,12 +66,15 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
   }
 
   async loadFields() {
+    this.setState({ isLoading: true });
+
     let indexPattern;
     try {
       indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({
+          isLoading: false,
           loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
         });
       }
@@ -87,6 +95,8 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
     });
 
     this.setState({
+      isLoading: false,
+      isTimeseries: getIsTimeseries(indexPattern),
       sourceFields,
       termFields: getTermsFields(indexPattern.fields),
       sortFields: getSortFields(indexPattern.fields),
@@ -115,11 +125,13 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
 
           <EuiSpacer size="m" />
 
-          <TooltipSelector
-            tooltipFields={this.props.tooltipFields}
-            onChange={this._onTooltipPropertiesChange}
-            fields={this.state.sourceFields}
-          />
+          <EuiSkeletonText lines={3} size="s" isLoading={this.state.isLoading}>
+            <TooltipSelector
+              tooltipFields={this.props.tooltipFields}
+              onChange={this._onTooltipPropertiesChange}
+              fields={this.state.sourceFields}
+            />
+          </EuiSkeletonText>
         </EuiPanel>
         <EuiSpacer size="s" />
 
@@ -135,17 +147,21 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
 
           <EuiSpacer size="m" />
 
-          <TopHitsForm
-            indexPatternId={this.props.indexPatternId}
-            isColumnCompressed={true}
-            onChange={this.props.onChange}
-            sortField={this.props.sortField}
-            sortFields={this.state.sortFields}
-            sortOrder={this.props.sortOrder}
-            termFields={this.state.termFields}
-            topHitsSplitField={this.props.topHitsSplitField}
-            topHitsSize={this.props.topHitsSize}
-          />
+          <EuiSkeletonText lines={3} size="s" isLoading={this.state.isLoading}>
+            <TopHitsForm
+              groupByTimeseries={this.props.groupByTimeseries}
+              indexPatternId={this.props.indexPatternId}
+              isColumnCompressed={true}
+              isTimeseries={this.state.isTimeseries}
+              onChange={this.props.onChange}
+              sortField={this.props.sortField}
+              sortFields={this.state.sortFields}
+              sortOrder={this.props.sortOrder}
+              termFields={this.state.termFields}
+              topHitsSplitField={this.props.topHitsSplitField}
+              topHitsSize={this.props.topHitsSize}
+            />
+          </EuiSkeletonText>
 
           <EuiFormRow>
             <EuiSwitch

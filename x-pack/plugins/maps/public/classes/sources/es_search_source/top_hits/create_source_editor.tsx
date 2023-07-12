@@ -104,7 +104,7 @@ export class CreateSourceEditor extends Component<Props, State> {
 
     const tooltipProperties: string[] = [];
     if (groupByTimeseries) {
-      const timeSeriesDimensionFieldNames = indexPattern.fields
+      const timeSeriesDimensionFieldNames = (indexPattern?.fields ?? [])
         .filter((field) => {
           return field.timeSeriesDimension;
         })
@@ -131,7 +131,7 @@ export class CreateSourceEditor extends Component<Props, State> {
             sortOrder,
             tooltipProperties,
             topHitsGroupByTimeseries: groupByTimeseries,
-            topHitsSplitField,
+            topHitsSplitField: topHitsSplitField ? topHitsSplitField : undefined,
             topHitsSize,
           }
         : null;

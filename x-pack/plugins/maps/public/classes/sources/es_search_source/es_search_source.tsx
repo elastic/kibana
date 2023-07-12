@@ -48,6 +48,7 @@ import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import {
+  AbstractESSourceDescriptor,
   DataRequestMeta,
   ESSearchSourceDescriptor,
   Timeslice,
@@ -106,7 +107,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   protected readonly _tooltipFields: ESDocField[];
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
-    const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
+    const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor) as AbstractESSourceDescriptor & Partial<ESSearchSourceDescriptor>;
     if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESSearchSourceDescriptor without a geoField');
     }
@@ -166,6 +167,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       return (
         <TopHitsUpdateSourceEditor
           source={this}
+          groupByTimeseries={this._descriptor.topHitsGroupByTimeseries}
           indexPatternId={this.getIndexPatternId()}
           onChange={sourceEditorArgs.onChange}
           tooltipFields={this._tooltipFields}
