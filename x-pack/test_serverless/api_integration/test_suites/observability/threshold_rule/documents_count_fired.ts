@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
 
-  describe('Threshold rule - AVG - PCT - FIRED', () => {
+  describe('Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
@@ -77,12 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 aggType: Aggregators.CUSTOM,
                 comparator: Comparator.GT,
-                threshold: [0.5],
-                timeSize: 5,
+                threshold: [2],
+                timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [
-                  { name: 'A', field: 'system.cpu.user.pct', aggType: Aggregators.AVERAGE },
-                ],
+                customMetrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
               },
             ],
             alertOnNoData: true,
@@ -165,10 +163,10 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 aggType: 'custom',
                 comparator: '>',
-                threshold: [0.5],
-                timeSize: 5,
+                threshold: [2],
+                timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [{ name: 'A', field: 'system.cpu.user.pct', aggType: 'avg' }],
+                customMetrics: [{ name: 'A', filter: '', aggType: 'count' }],
               },
             ],
             alertOnNoData: true,
