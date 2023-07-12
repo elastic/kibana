@@ -71,27 +71,27 @@ describe('SystemPrompt', () => {
     });
   });
 
-  describe('when conversation is undefined', () => {
+  describe('when conversation is undefined and default prompt is used', () => {
     const conversation = undefined;
 
     beforeEach(() => {
       render(<SystemPrompt conversation={conversation} />);
     });
 
-    it('renders the system prompt select', () => {
-      expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
+    it('does render the system prompt fallback text', () => {
+      expect(screen.getByTestId('systemPromptText')).toBeInTheDocument();
     });
 
-    it('does NOT render the system prompt text', () => {
-      expect(screen.queryByTestId('systemPromptText')).not.toBeInTheDocument();
+    it('does NOT render the system prompt select', () => {
+      expect(screen.queryByTestId('selectSystemPrompt')).not.toBeInTheDocument();
     });
 
-    it('does NOT render the edit button', () => {
-      expect(screen.queryByTestId('edit')).not.toBeInTheDocument();
+    it('does render the edit button', () => {
+      expect(screen.getByTestId('edit')).toBeInTheDocument();
     });
 
-    it('does NOT render the clear button', () => {
-      expect(screen.queryByTestId('clear')).not.toBeInTheDocument();
+    it('does render the clear button', () => {
+      expect(screen.getByTestId('clear')).toBeInTheDocument();
     });
   });
 
@@ -117,7 +117,8 @@ describe('SystemPrompt', () => {
     });
   });
 
-  describe('when a new prompt is saved', () => {
+  // TODO: To be implemented as part of the global settings tests instead of within the SystemPrompt component
+  describe.skip('when a new prompt is saved', () => {
     it('should save new prompt correctly', async () => {
       const customPromptName = 'custom prompt';
       const customPromptText = 'custom prompt text';
@@ -418,18 +419,6 @@ describe('SystemPrompt', () => {
     userEvent.click(screen.getByTestId('edit'));
 
     expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
-  });
-
-  it('clears the selected system prompt when the clear button is clicked', () => {
-    const apiConfig = {
-      apiConfig: { defaultSystemPromptId: undefined },
-      conversationId: 'Default',
-    };
-    render(<SystemPrompt conversation={BASE_CONVERSATION} />);
-
-    userEvent.click(screen.getByTestId('clear'));
-
-    expect(mockUseConversation.setApiConfig).toHaveBeenCalledWith(apiConfig);
   });
 
   it('shows the system prompt select when system prompt text is clicked', () => {

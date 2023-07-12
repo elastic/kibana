@@ -16,7 +16,6 @@ import {
   EuiToolTip,
   EuiSwitchEvent,
   EuiSwitch,
-  EuiCallOut,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalBody,
@@ -29,20 +28,18 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/c
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { AssistantTitle } from './assistant_title';
 import { UpgradeButtons } from '../upgrade/upgrade_buttons';
-import { getMessageFromRawResponse } from './helpers';
+import { getMessageFromRawResponse, getWelcomeConversation } from './helpers';
 
-import { ConversationSettingsPopover } from './conversation_settings_popover/conversation_settings_popover';
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
-import { SettingsPopover } from '../data_anonymization/settings/settings_popover';
 import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails } from './use_conversation/helpers';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
-import { ConversationSelector } from './conversation_selector';
+import { ConversationSelector } from './conversations/conversation_selector';
 import { PromptEditor } from './prompt_editor';
 import { getCombinedMessage } from './prompt/helpers';
 import * as i18n from './translations';
@@ -50,7 +47,8 @@ import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { BASE_CONVERSATIONS, enterpriseMessaging } from './use_conversation/sample_conversations';
+import { AssistantSettingsButton } from './settings/assistant_settings_button';
+import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 
 export interface Props {
   conversationId?: string;
@@ -97,46 +95,7 @@ const AssistantComponent: React.FC<Props> = ({
     useConversation();
   const { isLoading, sendMessages } = useSendMessages();
 
-  const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
-  const currentConversation = useMemo(
-    () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
-    [conversationId, conversations, createConversation, selectedConversationId]
-  );
-
-  // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
-  // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
-  const welcomeConversation = useMemo(() => {
-    const conversation =
-      conversations[selectedConversationId] ?? BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
-    const doesConversationHaveMessages = conversation.messages.length > 0;
-    if (!isAssistantEnabled) {
-      if (
-        !doesConversationHaveMessages ||
-        conversation.messages[conversation.messages.length - 1].content !==
-          enterpriseMessaging[0].content
-      ) {
-        return {
-          ...conversation,
-          messages: [...conversation.messages, ...enterpriseMessaging],
-        };
-      }
-      return conversation;
-    }
-
-    return doesConversationHaveMessages
-      ? {
-          ...conversation,
-          messages: [
-            ...conversation.messages,
-            ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
-          ],
-        }
-      : {
-          ...conversation,
-          messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
-        };
-  }, [conversations, isAssistantEnabled, selectedConversationId]);
-
+  // Connector details
   const {
     data: connectors,
     isSuccess: areConnectorsFetched,
@@ -150,20 +109,36 @@ const AssistantComponent: React.FC<Props> = ({
     [connectors]
   );
 
+  // Welcome setup state
+  const isWelcomeSetup = useMemo(() => (connectors?.length ?? 0) === 0, [connectors?.length]);
+  const isDisabled = isWelcomeSetup || !isAssistantEnabled;
+
+  // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
+  // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
+  const welcomeConversation = useMemo(
+    () => getWelcomeConversation(isAssistantEnabled),
+    [isAssistantEnabled]
+  );
+
+  const [selectedConversationId, setSelectedConversationId] = useState<string>(
+    isWelcomeSetup ? welcomeConversation.id : conversationId
+  );
+  const currentConversation = useMemo(
+    () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
+    [conversationId, conversations, createConversation, selectedConversationId]
+  );
+
   // Remember last selection for reuse after keyboard shortcut is pressed.
   // Clear it if there is no connectors
   useEffect(() => {
     if (areConnectorsFetched && !connectors?.length) {
-      return setLastConversationId('');
+      return setLastConversationId(WELCOME_CONVERSATION_TITLE);
     }
 
     if (!currentConversation.excludeFromLastConversationStorage) {
       setLastConversationId(currentConversation.id);
     }
   }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
-
-  const isWelcomeSetup = (connectors?.length ?? 0) === 0;
-  const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     actionTypeRegistry,
@@ -479,10 +454,10 @@ const AssistantComponent: React.FC<Props> = ({
                 `}
               >
                 <ConversationSelector
-                  conversationId={selectedConversationId}
                   defaultConnectorId={defaultConnectorId}
                   defaultProvider={defaultProvider}
-                  onSelectionChange={(id) => setSelectedConversationId(id)}
+                  selectedConversationId={selectedConversationId}
+                  setSelectedConversationId={setSelectedConversationId}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                   isDisabled={isDisabled}
                 />
@@ -511,26 +486,17 @@ const AssistantComponent: React.FC<Props> = ({
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <SettingsPopover isDisabled={currentConversation.replacements == null} />
+                      <AssistantSettingsButton
+                        isDisabled={isDisabled}
+                        selectedConversation={currentConversation}
+                        setSelectedConversationId={setSelectedConversationId}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin={'m'} />
-            {!isWelcomeSetup && showMissingConnectorCallout && (
-              <>
-                <EuiCallOut
-                  color="danger"
-                  iconType="controlsVertical"
-                  size="m"
-                  title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
-                >
-                  <p>{i18n.MISSING_CONNECTOR_CALLOUT_DESCRIPTION}</p>
-                </EuiCallOut>
-                <EuiSpacer size={'s'} />
-              </>
-            )}
           </>
         )}
 
@@ -550,7 +516,20 @@ const AssistantComponent: React.FC<Props> = ({
           </>
         )}
       </EuiModalHeader>
-      <EuiModalBody>{comments}</EuiModalBody>
+      <EuiModalBody>
+        {comments}
+
+        {!isWelcomeSetup && showMissingConnectorCallout && (
+          <>
+            <EuiSpacer />
+            <EuiFlexGroup justifyContent="spaceAround">
+              <EuiFlexItem grow={false}>
+                <ConnectorMissingCallout />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </EuiModalBody>
       <EuiModalFooter
         css={css`
           align-items: flex-start;
@@ -639,15 +618,6 @@ const AssistantComponent: React.FC<Props> = ({
                     isLoading={isLoading}
                   />
                 </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <ConversationSettingsPopover
-                  actionTypeRegistry={actionTypeRegistry}
-                  conversation={currentConversation}
-                  isDisabled={isDisabled}
-                  http={http}
-                  allSystemPrompts={allSystemPrompts}
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
