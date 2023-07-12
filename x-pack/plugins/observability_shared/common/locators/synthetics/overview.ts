@@ -45,7 +45,7 @@ async function navigate({
   };
 }
 
-export const uptimeOverviewNavigatorParams = {
+export const uptimeOverviewLocator = {
   id: uptimeOverviewLocatorID,
   getLocation: navigate,
 };

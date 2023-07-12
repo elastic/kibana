@@ -6,10 +6,10 @@
  */
 
 import { RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB, RULES_PATH } from './rule_details';
-import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
+import { getRuleDetailsPath, ObservabilityRuleDetailsLocator } from './rule_details';
 
 describe('RuleDetailsLocator', () => {
-  const locator = new RuleDetailsLocatorDefinition();
+  const locator = new ObservabilityRuleDetailsLocator();
   const mockedRuleId = '389d3318-7e10-4996-bb45-128e1607fb7e';
 
   it('should return correct url when only ruleId is provided', async () => {

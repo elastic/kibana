@@ -15,7 +15,7 @@ async function navigate() {
   };
 }
 
-export const syntheticsSettingsNavigatorParams = {
+export const syntheticsSettingsLocator = {
   id: syntheticsSettingsLocatorID,
   getLocation: navigate,
 };

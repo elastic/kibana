@@ -9,7 +9,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { OBSERVABILITY_APP_BASE_PATH } from '../../constants';
 
-const SLOS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/slos`;
+const SLOS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/slos` as const;
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -20,10 +20,10 @@ export type SloDetailsParams = {
 export interface SloDetailsLocatorParams extends SloDetailsParams, SerializableRecord {}
 
 export const getSloDetailsPath = (sloId: string) => {
-  return `/${SLOS_PATH}/${encodeURI(sloId)}`;
+  return `${SLOS_PATH}/${encodeURI(sloId)}`;
 };
 
-export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
+export class ObservabilitySloDetailsLocator implements LocatorDefinition<SloDetailsLocatorParams> {
   public readonly id = sloDetailsLocatorID;
 
   public readonly getLocation = async ({ sloId = '' }: SloDetailsLocatorParams) => {

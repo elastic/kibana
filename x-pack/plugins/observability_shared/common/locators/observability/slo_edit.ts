@@ -31,13 +31,13 @@ interface CreateSLOForm {
 
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 
-const SLOS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/slos`;
+const SLOS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/slos` as const;
 
 export type SloEditParams = RecursivePartial<CreateSLOForm>;
 
 export interface SloEditLocatorParams extends SloEditParams, SerializableRecord {}
 
-export class SloEditLocatorDefinition implements LocatorDefinition<SloEditLocatorParams> {
+export class ObservabilitySloEditLocator implements LocatorDefinition<SloEditLocatorParams> {
   public readonly id = sloEditLocatorID;
 
   public readonly getLocation = async (slo: SloEditLocatorParams) => {

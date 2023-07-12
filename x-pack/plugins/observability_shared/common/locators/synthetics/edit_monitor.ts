@@ -15,7 +15,7 @@ async function navigate({ configId }: { configId: string }) {
   };
 }
 
-export const editMonitorNavigatorParams = {
+export const syntheticsEditMonitorLocator = {
   id: syntheticsEditMonitorLocatorID,
   getLocation: navigate,
 };

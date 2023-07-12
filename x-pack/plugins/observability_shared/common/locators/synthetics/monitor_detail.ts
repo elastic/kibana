@@ -16,7 +16,7 @@ async function navigate({ configId, locationId }: { configId: string; locationId
   };
 }
 
-export const monitorDetailNavigatorParams = {
+export const syntheticsMonitorDetailLocator = {
   id: syntheticsMonitorDetailLocatorID,
   getLocation: navigate,
 };

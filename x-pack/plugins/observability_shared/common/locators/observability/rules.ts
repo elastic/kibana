@@ -26,7 +26,7 @@ export type RulesParams = {
 
 export interface RulesLocatorParams extends RulesParams, SerializableRecord {}
 
-export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
+export class ObservabilityRulesLocator implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;
 
   public readonly getLocation = async ({

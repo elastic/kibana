@@ -6,7 +6,8 @@
  */
 
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { SloEditLocatorDefinition } from './slo_edit';
+import { OBSERVABILITY_APP_BASE_PATH } from '../../constants';
+import { ObservabilitySloEditLocator } from './slo_edit';
 
 const now = '2022-12-29T10:11:12.000Z';
 
@@ -52,18 +53,18 @@ const baseSlo: SLOWithSummaryResponse = {
 };
 
 describe('SloEditLocator', () => {
-  const locator = new SloEditLocatorDefinition();
+  const locator = new ObservabilitySloEditLocator();
 
   it('should return correct url when empty params are provided', async () => {
     const location = await locator.getLocation({});
     expect(location.app).toEqual('observability');
-    expect(location.path).toEqual('/slos/create?_a=()');
+    expect(location.path).toEqual(`${OBSERVABILITY_APP_BASE_PATH}/slos/create?_a=()`);
   });
 
   it('should return correct url when slo is provided', async () => {
     const location = await locator.getLocation(baseSlo);
     expect(location.path).toEqual(
-      "/slos/edit/foo?_a=(budgetingMethod:occurrences,createdAt:'2022-12-29T10:11:12.000Z',description:'some%20description%20useful',enabled:!t,id:foo,indicator:(params:(filter:'baz:%20foo%20and%20bar%20%3E%202',good:'http_status:%202xx',index:some-index,timestampField:custom_timestamp,total:'a%20query'),type:sli.kql.custom),name:'super%20important%20level%20service',objective:(target:0.98),revision:1,settings:(frequency:'1m',syncDelay:'1m'),summary:(errorBudget:(consumed:0.064,initial:0.02,isEstimated:!f,remaining:0.936),sliValue:0.99872,status:HEALTHY),tags:!(k8s,production,critical),timeWindow:(duration:'30d',type:rolling),updatedAt:'2022-12-29T10:11:12.000Z')"
+      `${OBSERVABILITY_APP_BASE_PATH}/slos/edit/foo?_a=(budgetingMethod:occurrences,createdAt:'2022-12-29T10:11:12.000Z',description:'some%20description%20useful',enabled:!t,id:foo,indicator:(params:(filter:'baz:%20foo%20and%20bar%20%3E%202',good:'http_status:%202xx',index:some-index,timestampField:custom_timestamp,total:'a%20query'),type:sli.kql.custom),name:'super%20important%20level%20service',objective:(target:0.98),revision:1,settings:(frequency:'1m',syncDelay:'1m'),summary:(errorBudget:(consumed:0.064,initial:0.02,isEstimated:!f,remaining:0.936),sliValue:0.99872,status:HEALTHY),tags:!(k8s,production,critical),timeWindow:(duration:'30d',type:rolling),updatedAt:'2022-12-29T10:11:12.000Z')`
     );
   });
 });

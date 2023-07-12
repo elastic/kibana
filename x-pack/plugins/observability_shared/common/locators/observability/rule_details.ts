@@ -34,7 +34,9 @@ export const getRuleDetailsPath = (ruleId: string) => {
   return `${RULES_PATH}/${encodeURI(ruleId)}`;
 };
 
-export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetailsLocatorParams> {
+export class ObservabilityRuleDetailsLocator
+  implements LocatorDefinition<RuleDetailsLocatorParams>
+{
   public readonly id = ruleDetailsLocatorID;
 
   public readonly getLocation = async (params: RuleDetailsLocatorParams) => {

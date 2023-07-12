@@ -51,7 +51,6 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
-import { locators } from './apps/locators';
 import { setStartServices } from './kibana_services';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 
@@ -108,10 +107,6 @@ export class UptimePlugin
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
-    locators.forEach((locator) => {
-      plugins.share.url.locators.create(locator);
-    });
-
     registerSyntheticsRoutesWithNavigation(core, plugins);
 
     const appKeywords = [

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SloDetailsLocatorDefinition, getSloDetailsPath } from './slo_details';
+import { ObservabilitySloDetailsLocator, getSloDetailsPath } from './slo_details';
 
 describe('SloDetailsLocator', () => {
-  const locator = new SloDetailsLocatorDefinition();
+  const locator = new ObservabilitySloDetailsLocator();
 
   it('should return correct url when empty params are provided', async () => {
     const location = await locator.getLocation({});

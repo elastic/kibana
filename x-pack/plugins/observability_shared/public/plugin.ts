@@ -15,11 +15,15 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-import { AlertsLocatorDefinition } from '../common/locators/observability/alerts';
-import { RulesLocatorDefinition } from '../common/locators/observability/rules';
-import { RuleDetailsLocatorDefinition } from '../common/locators/observability/rule_details';
-import { SloDetailsLocatorDefinition } from '../common/locators/observability/slo_details';
-import { SloEditLocatorDefinition } from '../common/locators/observability/slo_edit';
+import { ObservabilityAlertsLocator } from '../common/locators/observability/alerts';
+import { ObservabilityRulesLocator } from '../common/locators/observability/rules';
+import { ObservabilityRuleDetailsLocator } from '../common/locators/observability/rule_details';
+import { ObservabilitySloDetailsLocator } from '../common/locators/observability/slo_details';
+import { ObservabilitySloEditLocator } from '../common/locators/observability/slo_edit';
+import { syntheticsEditMonitorLocator } from '../common/locators/synthetics/edit_monitor';
+import { syntheticsMonitorDetailLocator } from '../common/locators/synthetics/monitor_detail';
+import { syntheticsSettingsLocator } from '../common/locators/synthetics/settings';
+import { uptimeOverviewLocator } from '../common/locators/synthetics/overview';
 
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
@@ -44,15 +48,16 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public setup(_: CoreSetup, plugins: ObservabilitySharedSetup) {
-    plugins.share.url.locators.create(new AlertsLocatorDefinition());
+    plugins.share.url.locators.create(new ObservabilityAlertsLocator());
+    plugins.share.url.locators.create(new ObservabilityRulesLocator());
+    plugins.share.url.locators.create(new ObservabilityRuleDetailsLocator());
+    plugins.share.url.locators.create(new ObservabilitySloDetailsLocator());
+    plugins.share.url.locators.create(new ObservabilitySloEditLocator());
 
-    plugins.share.url.locators.create(new RulesLocatorDefinition());
-
-    plugins.share.url.locators.create(new RuleDetailsLocatorDefinition());
-
-    plugins.share.url.locators.create(new SloDetailsLocatorDefinition());
-
-    plugins.share.url.locators.create(new SloEditLocatorDefinition());
+    plugins.share.url.locators.create(syntheticsEditMonitorLocator);
+    plugins.share.url.locators.create(syntheticsMonitorDetailLocator);
+    plugins.share.url.locators.create(syntheticsSettingsLocator);
+    plugins.share.url.locators.create(uptimeOverviewLocator);
 
     return {
       navigation: {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RulesLocatorDefinition, RULES_PATH } from './rules';
+import { ObservabilityRulesLocator, RULES_PATH } from './rules';
 
 describe('RulesLocator', () => {
-  const locator = new RulesLocatorDefinition();
+  const locator = new ObservabilityRulesLocator();
 
   it('should return correct url when empty params are provided', async () => {
     const location = await locator.getLocation({});

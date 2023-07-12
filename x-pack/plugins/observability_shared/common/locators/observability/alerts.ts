@@ -35,7 +35,7 @@ function fromQuery(query: Record<string, any>) {
   return stringify(encodedQuery, { sort: false, encode: false });
 }
 
-export class AlertsLocatorDefinition implements LocatorDefinition<AlertsLocatorParams> {
+export class ObservabilityAlertsLocator implements LocatorDefinition<AlertsLocatorParams> {
   public readonly id = alertsLocatorID;
 
   public readonly getLocation = async ({

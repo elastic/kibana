@@ -131,17 +131,17 @@ export type { AlertStatus, AlertStatusFilter } from './types';
 /* LOCATORS */
 
 // Observability
-export { AlertsLocatorDefinition, alertsLocatorID } from './locators/observability/alerts';
+export { ObservabilityAlertsLocator, alertsLocatorID } from './locators/observability/alerts';
 export {
-  RuleDetailsLocatorDefinition,
+  ObservabilityRuleDetailsLocator,
   ruleDetailsLocatorID,
 } from './locators/observability/rule_details';
-export { RulesLocatorDefinition, rulesLocatorID } from './locators/observability/rules';
+export { ObservabilityRulesLocator, rulesLocatorID } from './locators/observability/rules';
 export {
-  SloDetailsLocatorDefinition,
+  ObservabilitySloDetailsLocator,
   sloDetailsLocatorID,
 } from './locators/observability/slo_details';
-export { SloEditLocatorDefinition, sloEditLocatorID } from './locators/observability/slo_edit';
+export { ObservabilitySloEditLocator, sloEditLocatorID } from './locators/observability/slo_edit';
 
 export type { AlertsLocatorParams } from './locators/observability/alerts';
 export type { RulesParams } from './locators/observability/rules';
