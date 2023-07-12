@@ -31,12 +31,16 @@ export class NavigationEmbeddableServerPlugin implements Plugin<object, object> 
       hidden: false,
       hiddenFromHttpApis: true,
       namespaceType: 'multiple',
+      management: {
+        icon: 'link',
+        defaultSearchField: 'title',
+      },
       mappings: {
         dynamic: false,
         properties: {
           title: { type: 'text' },
           description: { type: 'text' },
-          linksJSON: { type: 'text' },
+          linksJSON: { type: 'text', index: false },
         },
       },
     });

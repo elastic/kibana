@@ -12,13 +12,10 @@ import useAsync from 'react-use/lib/useAsync';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  DASHBOARD_LINK_TYPE,
-  NavigationEmbeddableLink,
-  NavigationLinkInfo,
-} from '../../embeddable/types';
+import { NavigationLinkInfo } from '../../embeddable/types';
 import { fetchDashboard } from './dashboard_link_tools';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
+import { DASHBOARD_LINK_TYPE, NavigationEmbeddableLink } from '../../../common/types';
 
 export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   const navEmbeddable = useNavigationEmbeddable();

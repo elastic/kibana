@@ -13,8 +13,10 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import { navigationEmbeddableReducers } from './navigation_embeddable_reducers';
-import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from './types';
+import { NavigationEmbeddableReduxState } from './types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
+import { NavigationEmbeddableInput } from '../../common';
+import { navigationEmbeddableClient } from '../content_management';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -79,6 +81,11 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.setInitializationFinished();
   }
+
+  public runSaveToLibrary = async ({ title, description }: { title: string; description?: string }) => {
+    const { id } = await navigationEmbeddableClient.create({ data: { title, description } });
+    return id;
+  };
 
   public async reload() {}
 

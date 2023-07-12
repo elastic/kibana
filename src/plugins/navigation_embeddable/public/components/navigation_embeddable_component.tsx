@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { DASHBOARD_LINK_TYPE } from '../embeddable/types';
+import { DASHBOARD_LINK_TYPE } from '../../common/types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from './external_link/external_link_component';

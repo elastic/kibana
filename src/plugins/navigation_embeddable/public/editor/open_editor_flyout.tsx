@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
-import { NavigationEmbeddableInput } from '../embeddable/types';
+import { NavigationEmbeddableInput } from '../../common';
 import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
 
 /**

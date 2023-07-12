@@ -31,6 +31,10 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
           defaultMessage: 'Save',
         }),
+      getTitleInputLabel: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.titleInputLabel', {
+          defaultMessage: 'Title',
+        }),
     },
     linkEditor: {
       getGoBackAriaLabel: () =>

@@ -48,7 +48,7 @@ export class NavigationEmbeddablePlugin
     core.getStartServices().then(([_, deps]) => {
       plugins.embeddable.registerEmbeddableFactory(
         NAVIGATION_EMBEDDABLE_TYPE,
-        new NavigationEmbeddableFactoryDefinition()
+        new NavigationEmbeddableFactoryDefinition(deps.embeddable)
       );
 
       plugins.contentManagement.registry.register({

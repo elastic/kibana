@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
+export type { NavigationEmbeddableInput } from './types';
+
 export { CONTENT_ID, LATEST_VERSION } from './constants';

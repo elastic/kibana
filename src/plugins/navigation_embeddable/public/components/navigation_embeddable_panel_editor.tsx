@@ -27,16 +27,17 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSwitch,
+  EuiFieldText,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
   NavigationEmbeddableInput,
   NavigationEmbeddableLink,
-  NavigationLinkInfo,
-} from '../embeddable/types';
+} from '../../common/types';
+import { NavigationLinkInfo } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
@@ -56,6 +57,8 @@ export const NavigationEmbeddablePanelEditor = ({
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
   const [links, setLinks] = useState(initialInput.links);
+  const [saveToLibrary, setSaveToLibrary] = useState(false);
+  const [libraryTitle, setLibraryTitle] = useState<string | undefined>();
 
   /**
    * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
@@ -153,6 +156,26 @@ export const NavigationEmbeddablePanelEditor = ({
               )}
             </>
           </EuiFormRow>
+          <EuiFormRow>
+            <EuiSwitch
+              label="Save to library"
+              checked={saveToLibrary}
+              compressed
+              onChange={(e) => setSaveToLibrary(e.target.checked)}
+            />
+          </EuiFormRow>
+          {saveToLibrary ? (
+            <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getTitleInputLabel()}>
+              <EuiFieldText
+                id="titleInput"
+                name="title"
+                type="text"
+                value={libraryTitle ?? ''}
+                onChange={(e) => setLibraryTitle(e.target.value)}
+                required={saveToLibrary}
+              />
+            </EuiFormRow>
+          ) : null}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -164,6 +187,7 @@ export const NavigationEmbeddablePanelEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              type="submit"
               disabled={!links || isEmpty(links)}
               onClick={() => {
                 onSave({ ...initialInput, links });
