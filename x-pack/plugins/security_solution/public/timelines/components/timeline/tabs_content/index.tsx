@@ -400,15 +400,15 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     setActiveTab(TimelineTabs.securityAssistant);
   }, [setActiveTab]);
 
+  const setDiscoverAsActiveTab = useCallback(() => {
+    setActiveTab(TimelineTabs.discover);
+  }, [setActiveTab]);
+
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {
       setQueryAsActiveTab();
     }
   }, [activeTab, graphEventId, setQueryAsActiveTab]);
-
-  const setDiscoverAsActiveTab = useCallback(() => {
-    setActiveTab(TimelineTabs.discover);
-  }, [setActiveTab]);
 
   return (
     <>

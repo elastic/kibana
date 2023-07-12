@@ -155,7 +155,6 @@ export function DiscoverMainRoute({
           useAppState,
         });
         if (mode === 'standalone') {
-          console.log('Setting breadcrumbs : ', { mode });
           if (currentSavedSearch?.id) {
             chrome.recentlyAccessed.add(
               getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -214,6 +213,7 @@ export function DiscoverMainRoute({
       core.theme,
       basePath,
       toastNotifications,
+      mode,
     ]
   );
 

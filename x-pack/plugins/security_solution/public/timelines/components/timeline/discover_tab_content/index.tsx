@@ -5,48 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
+import styled from 'styled-components';
+import { useGetStatefulQueryBar } from '../../../../common/hooks/use_get_stateful_query_bar';
 import { useKibana } from '../../../../common/lib/kibana';
+
+const EmbeddedDiscoverContainer = styled.div`
+  width: 100%;
+  overflow: scroll;
+`;
 
 export const DiscoverTabContent = () => {
   const history = useHistory();
   const {
-    services: {
-      unifiedSearch,
-      navigation: {
-        ui: { createTopNavWithCustomContext },
-      },
-      discoverDataService,
-      discover,
-      discoverFilterManager,
-    },
+    services: { customDataService: discoverDataService, discover, discoverFilterManager },
   } = useKibana();
-
-  const {
-    ui: { getCustomSearchBar },
-  } = unifiedSearch;
 
   const { useDiscoverMainRoute } = discover;
 
-  const CustomStatefulTopMenu = useMemo(() => {
-    const CustomSearchBar = getCustomSearchBar({
-      data: discoverDataService,
-    });
-
-    const customUnifiedSearch = {
-      ...unifiedSearch,
-      ui: {
-        ...unifiedSearch.ui,
-        SearchBar: CustomSearchBar,
-        AggregateQuerySearchBar: CustomSearchBar,
-      },
-    };
-
-    return createTopNavWithCustomContext(customUnifiedSearch);
-  }, [discoverDataService, getCustomSearchBar, createTopNavWithCustomContext, unifiedSearch]);
+  const { CustomStatefulTopNavKqlQueryBar } = useGetStatefulQueryBar();
 
   const getDiscoverLayout = useDiscoverMainRoute({
     services: {
@@ -61,7 +40,7 @@ export const DiscoverTabContent = () => {
     ({ customizations, stateContainer }) => {
       customizations.set({
         id: 'search_bar',
-        CustomQueryBar: CustomStatefulTopMenu,
+        CustomQueryBar: CustomStatefulTopNavKqlQueryBar,
       });
 
       customizations.set({
@@ -69,18 +48,13 @@ export const DiscoverTabContent = () => {
         showBreadcrumbs: false,
       });
     },
-    [CustomStatefulTopMenu]
+    [CustomStatefulTopNavKqlQueryBar]
   );
 
   return (
-    <div
-      css={css`
-        width: 100%;
-        overflow: scroll;
-      `}
-    >
+    <EmbeddedDiscoverContainer>
       <DiscoverMainRoute isDev={false} customizationCallbacks={[customizationCallback]} />
-    </div>
+    </EmbeddedDiscoverContainer>
   );
 };
 

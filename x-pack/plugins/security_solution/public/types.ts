@@ -160,7 +160,7 @@ export type StartServices = CoreStart &
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     telemetry: TelemetryClientStart;
     discoverFilterManager: FilterManager;
-    discoverDataService: DataPublicPluginStart;
+    customDataService: DataPublicPluginStart;
   };
 
 export interface PluginSetup {

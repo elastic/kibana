@@ -169,7 +169,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       const filterManager = new FilterManager(core.uiSettings);
 
-      const discoverDataService: DataPublicPluginStart = {
+      // used for creating a custom stateful KQL Query Bar
+      const customDataService: DataPublicPluginStart = {
         ...startPlugins.data,
         query: {
           ...query,
@@ -193,7 +194,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         telemetry: this.telemetry.start(),
         discoverFilterManager: filterManager,
-        discoverDataService,
+        customDataService,
       };
       return services;
     };
