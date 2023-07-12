@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('install_prebuilt_rules_from_mock_assets', () => {
+  describe('install and upgrade prebuilt rules with mock rule assets', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es);
