@@ -15,9 +15,17 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'settings',
+    'discover',
+    'timePicker',
+    'header',
+    'dashboard',
+  ]);
   const queryBar = getService('queryBar');
   const security = getService('security');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('async search with scripted fields', function () {
     this.tags(['skipFirefox']);
@@ -74,6 +82,31 @@ export default function ({ getService, getPageObjects }) {
         );
         log.debug(shardMessage);
         expect(shardMessage).to.be('1 of 3 shards failed');
+      });
+    });
+
+    it('query should show failed shards badge on dashboard', async function () {
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'global_discover_all',
+        'global_dashboard_all',
+      ]);
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('logsta*');
+
+      await PageObjects.discover.saveSearch('search with warning');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('search with warning');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.tryForTime(20000, async function () {
+        // wait for shards failed message
+        await testSubjects.existOrFail('savedSearchEmbeddableWarningsCallout_trigger');
       });
     });
 

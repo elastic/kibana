@@ -7,7 +7,6 @@
  */
 
 import { lastValueFrom, Subscription } from 'rxjs';
-import { css } from '@emotion/react';
 import {
   onlyDisabledFiltersChanged,
   Filter,
@@ -45,6 +44,7 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { DiscoverServices } from '../build_services';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { SavedSearchEmbeddableBadge } from './saved_search_embeddable_badge';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -66,7 +66,6 @@ import { getValidViewMode } from '../application/main/utils/get_valid_view_mode'
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getSearchResponseInterceptedWarnings } from '../utils/get_search_response_intercepted_warnings';
-import { WarningsCallout } from '../components/common/warnings_callout';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -592,22 +591,9 @@ export class SavedSearchEmbeddable
               <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
                 <>
                   <SavedSearchEmbeddableComponent {...props} />
-                  {!!props.searchProps.interceptedWarnings?.length && (
-                    <div
-                      css={css({
-                        position: 'absolute',
-                        zIndex: 2,
-                        left: 0,
-                        bottom: 0,
-                      })}
-                    >
-                      <WarningsCallout
-                        variant="badge"
-                        interceptedWarnings={props.searchProps.interceptedWarnings}
-                        data-test-subj="savedSearchEmbeddableWarningsCallout"
-                      />
-                    </div>
-                  )}
+                  <SavedSearchEmbeddableBadge
+                    interceptedWarnings={props.searchProps.interceptedWarnings}
+                  />
                 </>
               </CellActionsProvider>
             </KibanaContextProvider>
