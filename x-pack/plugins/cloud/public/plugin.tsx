@@ -26,6 +26,9 @@ export interface CloudConfigType {
   organization_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  serverless?: {
+    projectId: string;
+  };
 }
 
 interface CloudUrls {
@@ -39,12 +42,14 @@ interface CloudUrls {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
+  private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: FC[] = [];
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
+    this.isServerlessEnabled = !!this.config.serverless?.projectId;
     this.logger = initializerContext.logger.get();
   }
 
@@ -77,6 +82,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      isServerlessEnabled: this.isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.projectId,
+      },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
       },
@@ -111,6 +120,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       deploymentUrl,
       profileUrl,
       organizationUrl,
+      isServerlessEnabled: this.isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.projectId,
+      },
     };
   }
 

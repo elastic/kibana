@@ -29,6 +29,11 @@ const configSchema = schema.object({
   profile_url: schema.maybe(schema.string()),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
+  serverless: schema.maybe(
+    schema.object({
+      projectId: schema.string(),
+    })
+  ),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -44,6 +49,9 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     profile_url: true,
     trial_end_date: true,
     is_elastic_staff_owned: true,
+    serverless: {
+      projectId: true,
+    },
   },
   schema: configSchema,
 };
