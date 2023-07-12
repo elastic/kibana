@@ -5,154 +5,88 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { SecurityPageName } from '../../../app/types';
-import type { NavigationLink } from '../../links/types';
-import { TestProviders } from '../../mock';
-import { LandingLinksImages, LandingImageCards } from './landing_links_images';
-import * as telemetry from '../../lib/telemetry';
+import { render } from '@testing-library/react';
+import { SecurityPageName } from '../constants';
+import { mockNavigateTo, mockGetAppUrl } from '../__mocks__/navigation.mocks';
+import { LandingLinksImages } from './landing_links_images';
+import { BETA } from './beta_badge';
 
-const BETA = 'Beta';
-const DEFAULT_NAV_ITEM: NavigationLink = {
+jest.mock('../navigation');
+
+mockGetAppUrl.mockImplementation(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`);
+const mockOnLinkClick = jest.fn();
+
+const DEFAULT_NAV_ITEM = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
   landingImage: 'TEST_IMAGE.png',
 };
 
-const BETA_NAV_ITEM: NavigationLink = {
-  id: SecurityPageName.kubernetes,
-  title: 'TEST LABEL',
-  description: 'TEST DESCRIPTION',
-  landingImage: 'TEST_IMAGE.png',
-  isBeta: true,
-};
-
-jest.mock('../../lib/kibana/kibana_react', () => {
-  return {
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          getUrlForApp: jest.fn(),
-          navigateToApp: jest.fn(),
-          navigateToUrl: jest.fn(),
-        },
-      },
-    }),
-  };
-});
-
-const spyTrack = jest.spyOn(telemetry, 'track');
-
 describe('LandingLinksImages', () => {
-  it('renders', () => {
+  it('should render', () => {
     const title = 'test label';
 
-    const { queryByText } = render(
-      <TestProviders>
-        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, title }]} />
-      </TestProviders>
-    );
+    const { queryByText } = render(<LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, title }]} />);
 
     expect(queryByText(title)).toBeInTheDocument();
   });
 
-  it('renders landingImage', () => {
+  it('should render landingImage', () => {
     const landingImage = 'test_image.jpeg';
     const title = 'TEST_LABEL';
 
     const { getByTestId } = render(
-      <TestProviders>
-        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
-      </TestProviders>
+      <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
     );
 
     expect(getByTestId('LandingLinksImage')).toHaveAttribute('src', landingImage);
   });
 
-  it('renders beta tag when isBeta is true', () => {
+  it('should render beta tag when isBeta is true', () => {
     const { queryByText } = render(
-      <TestProviders>
-        <LandingLinksImages items={[BETA_NAV_ITEM]} />
-      </TestProviders>
+      <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, isBeta: true }]} />
     );
-
     expect(queryByText(BETA)).toBeInTheDocument();
   });
 
-  it('does not render beta tag when isBeta is false', () => {
-    const { queryByText } = render(
-      <TestProviders>
-        <LandingLinksImages items={[DEFAULT_NAV_ITEM]} />
-      </TestProviders>
-    );
-
+  it('should not render beta tag when isBeta is false', () => {
+    const { queryByText } = render(<LandingLinksImages items={[DEFAULT_NAV_ITEM]} />);
     expect(queryByText(BETA)).not.toBeInTheDocument();
   });
-});
 
-describe('LandingImageCards', () => {
-  it('renders', () => {
-    const title = 'test label';
-
-    const { queryByText } = render(
-      <TestProviders>
-        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, title }]} />
-      </TestProviders>
-    );
-
-    expect(queryByText(title)).toBeInTheDocument();
-  });
-
-  it('renders landingImage', () => {
-    const landingImage = 'test_image.jpeg';
-    const title = 'TEST_LABEL';
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', landingImage);
-  });
-
-  it('sends telemetry', () => {
-    const landingImage = 'test_image.jpeg';
-    const title = 'TEST LABEL';
+  it('should navigate link', () => {
+    const id = SecurityPageName.administration;
+    const title = 'test label 2';
 
     const { getByText } = render(
-      <TestProviders>
-        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
-      </TestProviders>
+      <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, id, title }]} />
     );
 
     getByText(title).click();
 
-    expect(spyTrack).toHaveBeenCalledWith(
-      telemetry.METRIC_TYPE.CLICK,
-      `${telemetry.TELEMETRY_EVENT.LANDING_CARD}${DEFAULT_NAV_ITEM.id}`
-    );
+    expect(mockGetAppUrl).toHaveBeenCalledWith({
+      deepLinkId: SecurityPageName.administration,
+      absolute: false,
+      path: '',
+    });
+    expect(mockNavigateTo).toHaveBeenCalledWith({ url: '/administration' });
   });
 
-  it('renders beta tag when isBeta is true', () => {
-    const { queryByText } = render(
-      <TestProviders>
-        <LandingImageCards items={[BETA_NAV_ITEM]} />
-      </TestProviders>
+  it('should call onLinkClick', () => {
+    const id = SecurityPageName.administration;
+    const title = 'myTestLabel';
+
+    const { getByText } = render(
+      <LandingLinksImages
+        items={[{ ...DEFAULT_NAV_ITEM, id, title }]}
+        onLinkClick={mockOnLinkClick}
+      />
     );
 
-    expect(queryByText(BETA)).toBeInTheDocument();
-  });
+    getByText(title).click();
 
-  it('does not render beta tag when isBeta is false', () => {
-    const { queryByText } = render(
-      <TestProviders>
-        <LandingImageCards items={[DEFAULT_NAV_ITEM]} />
-      </TestProviders>
-    );
-
-    expect(queryByText(BETA)).not.toBeInTheDocument();
+    expect(mockOnLinkClick).toHaveBeenCalledWith(id);
   });
 });

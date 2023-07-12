@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { SecurityPageName } from '../constants';
 import { mockNavigateTo, mockGetAppUrl } from '../__mocks__/navigation.mocks';
-import { LandingLinksIcons } from './landing_links_icons';
+import { LandingLinksImageCards } from './landing_links_images_cards';
 import { BETA } from './beta_badge';
 
 jest.mock('../navigation');
@@ -21,37 +21,41 @@ const DEFAULT_NAV_ITEM = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
-  landingIcon: 'myTestIcon',
+  landingImage: 'TEST_IMAGE.png',
 };
 
-describe('LandingLinksIcons', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should render items', () => {
-    const id = SecurityPageName.administration;
-    const title = 'test label 2';
-    const description = 'description 2';
+describe('LandingLinksImageCards', () => {
+  it('should render', () => {
+    const title = 'test label';
 
     const { queryByText } = render(
-      <LandingLinksIcons
-        items={[DEFAULT_NAV_ITEM, { ...DEFAULT_NAV_ITEM, id, title, description }]}
-      />
+      <LandingLinksImageCards items={[{ ...DEFAULT_NAV_ITEM, title }]} />
     );
 
-    expect(queryByText(DEFAULT_NAV_ITEM.title)).toBeInTheDocument();
-    expect(queryByText(DEFAULT_NAV_ITEM.description)).toBeInTheDocument();
     expect(queryByText(title)).toBeInTheDocument();
-    expect(queryByText(description)).toBeInTheDocument();
   });
 
-  it('should render beta', () => {
-    const { queryByText } = render(
-      <LandingLinksIcons items={[{ ...DEFAULT_NAV_ITEM, isBeta: true }]} />
+  it('should render landingImage', () => {
+    const landingImage = 'test_image.jpeg';
+    const title = 'TEST_LABEL';
+
+    const { getByTestId } = render(
+      <LandingLinksImageCards items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
     );
-    expect(queryByText(DEFAULT_NAV_ITEM.title)).toBeInTheDocument();
+
+    expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', landingImage);
+  });
+
+  it('should render beta tag when isBeta is true', () => {
+    const { queryByText } = render(
+      <LandingLinksImageCards items={[{ ...DEFAULT_NAV_ITEM, isBeta: true }]} />
+    );
     expect(queryByText(BETA)).toBeInTheDocument();
+  });
+
+  it('should not render beta tag when isBeta is false', () => {
+    const { queryByText } = render(<LandingLinksImageCards items={[DEFAULT_NAV_ITEM]} />);
+    expect(queryByText(BETA)).not.toBeInTheDocument();
   });
 
   it('should navigate link', () => {
@@ -59,7 +63,7 @@ describe('LandingLinksIcons', () => {
     const title = 'test label 2';
 
     const { getByText } = render(
-      <LandingLinksIcons items={[{ ...DEFAULT_NAV_ITEM, id, title }]} />
+      <LandingLinksImageCards items={[{ ...DEFAULT_NAV_ITEM, id, title }]} />
     );
 
     getByText(title).click();
@@ -77,7 +81,7 @@ describe('LandingLinksIcons', () => {
     const title = 'myTestLabel';
 
     const { getByText } = render(
-      <LandingLinksIcons
+      <LandingLinksImageCards
         items={[{ ...DEFAULT_NAV_ITEM, id, title }]}
         onLinkClick={mockOnLinkClick}
       />

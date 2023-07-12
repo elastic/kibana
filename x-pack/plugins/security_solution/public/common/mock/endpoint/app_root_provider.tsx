@@ -16,6 +16,7 @@ import type { Store } from 'redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { MockAssistantProvider } from '../mock_assistant_provider';
 import { RouteCapture } from '../../components/endpoint/route_capture';
 import type { StartPlugins } from '../../../types';
@@ -29,35 +30,30 @@ export const AppRootProvider = memo<{
   coreStart: CoreStart;
   depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
   children: ReactNode | ReactNode[];
-}>(
-  ({
-    store,
-    history,
-    coreStart: { http, notifications, uiSettings, application },
-    depsStart: { data },
-    children,
-  }) => {
-    const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
-    const services = useMemo(
-      () => ({ http, notifications, application, data }),
-      [application, data, http, notifications]
-    );
-    return (
-      <Provider store={store}>
-        <I18nProvider>
-          <KibanaContextProvider services={services}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <MockAssistantProvider>
+}>(({ store, history, coreStart, depsStart: { data }, children }) => {
+  const { http, notifications, uiSettings, application } = coreStart;
+  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const services = useMemo(
+    () => ({ http, notifications, application, data }),
+    [application, data, http, notifications]
+  );
+  return (
+    <Provider store={store}>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <EuiThemeProvider darkMode={isDarkMode}>
+            <MockAssistantProvider>
+              <NavigationProvider core={coreStart}>
                 <Router history={history}>
                   <RouteCapture>{children}</RouteCapture>
                 </Router>
-              </MockAssistantProvider>
-            </EuiThemeProvider>
-          </KibanaContextProvider>
-        </I18nProvider>
-      </Provider>
-    );
-  }
-);
+              </NavigationProvider>
+            </MockAssistantProvider>
+          </EuiThemeProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </Provider>
+  );
+});
 
 AppRootProvider.displayName = 'AppRootProvider';

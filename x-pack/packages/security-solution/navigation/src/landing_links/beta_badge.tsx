@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 
-export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
+export const BETA = i18n.translate('securitySolutionPackages.beta.label', {
   defaultMessage: 'Beta',
 });
 
