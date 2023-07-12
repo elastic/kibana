@@ -12,10 +12,13 @@ import React, {
   useContext,
   useState,
   useRef,
+  useEffect,
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import { generateNavEvents, NavEvent } from './nav_events';
 import { generatePath } from './path';
+
+type Entry<T> = { [K in keyof T]: [K, T[K]] }[keyof T];
 
 export interface WizardContext<T, StepKey extends string> {
   setCurrentStep: (step: StepKey) => void;
@@ -35,12 +38,20 @@ export interface WizardContext<T, StepKey extends string> {
   };
 }
 
-export function createWizardContext<T, StepKey extends string>({
+export function createWizardContext<
+  T,
+  StepKey extends string,
+  InitialStepKey extends StepKey
+>({
   initialState,
+  initialStep,
   steps,
+  basePath,
 }: {
   initialState: T;
+  initialStep: InitialStepKey;
   steps: Record<StepKey, ComponentType>;
+  basePath: string;
 }) {
   const context = createContext<WizardContext<T, StepKey>>({
     setCurrentStep: () => {},
@@ -55,11 +66,44 @@ export function createWizardContext<T, StepKey extends string>({
     }),
   });
 
+  const stepRoute = (stepKey: StepKey) =>
+    stepKey === initialStep ? basePath : `${basePath}/${stepKey}`;
+
+  const routes = Object.entries(steps).reduce((acc, pair) => {
+    const [key, value] = pair as Entry<Record<StepKey, ComponentType>>;
+    return {
+      ...acc,
+      [stepRoute(key)]: {
+        exact: true,
+        handler: () =>
+          Page({
+            step: key,
+            Component: value,
+          }),
+      },
+    };
+  }, {});
+
+  function Page({
+    step,
+    Component,
+  }: {
+    step: StepKey;
+    Component: ComponentType;
+  }) {
+    const { setCurrentStep } = useWizard();
+    useEffect(() => {
+      setCurrentStep(step);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [step]);
+
+    return <Component />;
+  }
+
   function Provider({
     children,
     onChangeStep,
     transitionDuration,
-    basePath,
   }: {
     children: ReactNode;
     onChangeStep?: (stepChangeEvent: {
@@ -68,7 +112,6 @@ export function createWizardContext<T, StepKey extends string>({
       StepComponent: ComponentType;
     }) => void;
     transitionDuration?: number;
-    basePath: string;
   }) {
     const history = useHistory();
     const [step, setStep] = useState<StepKey>();
@@ -113,7 +156,7 @@ export function createWizardContext<T, StepKey extends string>({
             if (stepKey === step) {
               return;
             }
-            const stepUrl = `${basePath}/${stepKey}`;
+            const stepUrl = stepRoute(stepKey);
 
             if (transitionDuration) {
               setTimeout(() => {
@@ -162,5 +205,5 @@ export function createWizardContext<T, StepKey extends string>({
     return useContext(context);
   }
 
-  return { context, Provider, useWizard };
+  return { context, Provider, useWizard, routes };
 }

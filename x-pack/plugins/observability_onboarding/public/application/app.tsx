@@ -25,13 +25,13 @@ import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { customLogsRoutes } from '../components/app/custom_logs/wizard';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
 import { baseRoutes, routes } from '../routes';
-import { customLogsRoutes } from '../routes/custom_logs';
 import { CustomLogs } from '../routes/templates/custom_logs';
 
 export type BreadcrumbTitle<

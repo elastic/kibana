@@ -58,9 +58,15 @@ const steps: Record<CustomLogsSteps, ComponentType<{}>> = {
   inspect: Inspect,
 };
 
-const { Provider, useWizard } = createWizardContext({
+const {
+  Provider,
+  useWizard,
+  routes: customLogsRoutes,
+} = createWizardContext({
   initialState,
+  initialStep: 'selectLogs',
   steps,
+  basePath: '/customLogs',
 });
 
-export { Provider, useWizard };
+export { Provider, useWizard, customLogsRoutes };

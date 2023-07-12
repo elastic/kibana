@@ -8,8 +8,8 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { customLogsRoutes } from '../components/app/custom_logs/wizard';
 import { Home } from '../components/app/home';
-import { customLogsRoutes } from './custom_logs';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<
   typeof routes[T]['params']

@@ -61,7 +61,6 @@ function AnimatedTransitionsWizard({ children }: Props) {
     <WizardProvider
       transitionDuration={TRANSITION_DURATION}
       onChangeStep={onChangeStep}
-      basePath="/customLogs"
     >
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
