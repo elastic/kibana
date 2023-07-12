@@ -63,7 +63,7 @@ export interface Props {
  * quick prompts for common actions, settings, and prompt context providers.
  */
 const AssistantComponent: React.FC<Props> = ({
-  conversationId = WELCOME_CONVERSATION_TITLE,
+  conversationId,
   isAssistantEnabled,
   promptContextId = '',
   shouldRefocusPrompt = false,
@@ -80,9 +80,11 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     promptContexts,
     setLastConversationId,
+    localStorageLastConversationId,
     title,
     allSystemPrompts,
   } = useAssistantContext();
+
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
   >({});
@@ -100,6 +102,7 @@ const AssistantComponent: React.FC<Props> = ({
     data: connectors,
     isSuccess: areConnectorsFetched,
     refetch: refetchConnectors,
+    isLoading: isConnectorsLoading,
   } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
   const defaultProvider = useMemo(
@@ -121,11 +124,19 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    isWelcomeSetup ? welcomeConversation.id : conversationId
+    !isConnectorsLoading && isWelcomeSetup
+      ? welcomeConversation.id
+      : // if a conversationId has been provided, use that
+        // if not, check local storage
+        // last resort, go to welcome conversation
+        conversationId ?? localStorageLastConversationId ?? welcomeConversation.id
   );
+
   const currentConversation = useMemo(
-    () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
-    [conversationId, conversations, createConversation, selectedConversationId]
+    () =>
+      conversations[selectedConversationId] ??
+      createConversation({ conversationId: selectedConversationId }),
+    [conversations, createConversation, selectedConversationId]
   );
 
   // Remember last selection for reuse after keyboard shortcut is pressed.
