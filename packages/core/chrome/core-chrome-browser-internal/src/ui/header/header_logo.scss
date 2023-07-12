@@ -1,3 +1,9 @@
+.chrHeaderLogo {
+  display: flex;
+  align-items: center;
+  padding-inline: $euiSizeS;
+}
+
 .chrHeaderLogo__mark {
   margin-left: $euiSizeS;
   fill: $euiColorGhost;
