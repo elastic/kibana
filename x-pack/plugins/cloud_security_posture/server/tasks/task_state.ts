@@ -16,6 +16,8 @@ export type TaskHealthStatus = TypeOf<typeof taskHealthStatus>;
 
 export const stateSchemaByVersion = {
   1: {
+    // A task that was created < 8.10 will go through this "up" migration
+    // to ensure it matches the v1 schema.
     up: (state: Record<string, unknown>) => ({
       runs: state.runs || 0,
       health_status: state.health_status || 'ok',
