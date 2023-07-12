@@ -17,6 +17,7 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { RecoveredActionGroupId } from '../common';
+import { rawRuleSchema } from './raw_rule_schema';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -436,17 +437,17 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "alerting:test": Object {
-                    "createTaskRunner": [Function],
-                    "timeout": "20m",
-                    "title": "Test",
-                  },
-                },
-              ]
-          `);
+      expect(taskManager.registerTaskDefinitions.mock.calls[0]).toEqual([
+        {
+          'alerting:test': {
+            createTaskRunner: expect.any(Function),
+            paramsSchema: expect.any(Object),
+            indirectParamsSchema: rawRuleSchema,
+            timeout: '20m',
+            title: 'Test',
+          },
+        },
+      ]);
     });
 
     test('shallow clones the given rule type', () => {
