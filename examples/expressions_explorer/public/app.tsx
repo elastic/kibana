@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { AppMountParameters, IUiSettingsClient } from '@kbn/core/public';
+import { AppMountParameters, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -35,12 +35,21 @@ interface Props {
   actions: UiActionsStart;
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;
+  theme: ThemeServiceStart;
 }
 
-const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings, settings }: Props) => {
+const ExpressionsExplorer = ({
+  expressions,
+  inspector,
+  actions,
+  uiSettings,
+  settings,
+  theme,
+}: Props) => {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,
+    theme,
   });
   return (
     <KibanaReactContextProvider>

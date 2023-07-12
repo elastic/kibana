@@ -48,7 +48,6 @@ export const DimensionTrigger = ({
       color={color}
       css={css`
         width: 100%;
-        padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
         word-break: break-word;
         font-weight: ${euiThemeVars.euiFontWeightRegular};
       `}
