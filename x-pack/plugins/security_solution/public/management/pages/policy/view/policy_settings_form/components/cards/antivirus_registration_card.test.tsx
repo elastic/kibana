@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { getPolicySettingsFormTestSubjects } from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AntivirusRegistrationCardProps } from './antivirus_registration_card';
 import {
   NOT_REGISTERED_LABEL,
@@ -25,10 +25,6 @@ describe('Policy Form Antivirus Registration Card', () => {
   let formProps: AntivirusRegistrationCardProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-
-  const expectIsViewOnly = (ele: HTMLElement): void => {
-    expect(ele.querySelectorAll('button,input,select,textarea')).toHaveLength(0);
-  };
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();

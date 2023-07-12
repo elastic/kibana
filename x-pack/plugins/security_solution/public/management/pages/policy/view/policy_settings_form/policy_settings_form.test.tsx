@@ -41,7 +41,7 @@ describe('Endpoint Policy Settings Form', () => {
     ['ransomware', testSubj.ransomware.card],
     ['memory', testSubj.memory.card],
     ['behaviour', testSubj.behaviour.card],
-    ['attack surface', testSubj.attachSurface.card],
+    ['attack surface', testSubj.attackSurface.card],
     ['windows events', testSubj.windowsEvents.card],
     ['mac events', testSubj.macEvents.card],
     ['linux events', testSubj.linuxEvents.card],

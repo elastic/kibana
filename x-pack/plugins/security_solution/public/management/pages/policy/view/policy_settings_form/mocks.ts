@@ -38,6 +38,7 @@ export const getPolicySettingsFormTestSubjects = (
   const macEventsTestSubj = genTestSubj.withPrefix('macEvents');
   const linuxEventsTestSubj = genTestSubj.withPrefix('linuxEvents');
   const antivirusTestSubj = genTestSubj.withPrefix('antivirusRegistration');
+  const attackSurfaceTestSubj = genTestSubj.withPrefix('attackSurface');
 
   const testSubj = {
     form: genTestSubj(),
@@ -82,10 +83,13 @@ export const getPolicySettingsFormTestSubjects = (
       notifyUserCheckbox: behaviourTestSubj('notifyUser-checkbox'),
       osValuesContainer: behaviourTestSubj('osValues'),
     },
-    attachSurface: {
-      card: genTestSubj('attackSurface'),
-      enableDisableSwitch: genTestSubj('attachSurface-enableDisableSwitch'),
-      osValuesContainer: genTestSubj('attackSurface-osValues'),
+    attackSurface: {
+      card: attackSurfaceTestSubj(),
+      lockedCard: attackSurfaceTestSubj('locked'),
+      lockedCardTitle: attackSurfaceTestSubj('locked-title'),
+      enableDisableSwitch: attackSurfaceTestSubj('enableDisableSwitch'),
+      osValues: attackSurfaceTestSubj('osValues'),
+      viewModeValue: attackSurfaceTestSubj('valueLabel'),
     },
 
     windowsEvents: {
@@ -117,4 +121,8 @@ export const getPolicySettingsFormTestSubjects = (
   };
 
   return testSubj;
+};
+
+export const expectIsViewOnly = (ele: HTMLElement): void => {
+  expect(ele.querySelectorAll('button,input,select,textarea')).toHaveLength(0);
 };
