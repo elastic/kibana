@@ -34,20 +34,24 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart, IUiSettingsClient, ToastInput, ToastOptions } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UserAvatar } from '@kbn/user-profile-components';
 
-import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';
+import type { AuthenticatedUser } from '../../../common';
 import {
   canUserChangeDetails,
   canUserChangePassword,
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
-import type { UserSettingsData } from '../../../common/model/user_profile';
+import type {
+  DarkModeValue,
+  UserProfileAvatarData,
+  UserSettingsData,
+} from '../../../common/model/user_profile';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
@@ -60,14 +64,18 @@ import { FormLabel } from '../../components/form_label';
 import { FormRow, OptionalText } from '../../components/form_row';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';
 import { isUserReserved } from '../../management/users/user_utils';
+import { getUseUpdateUserProfile } from './use_update_user_profile';
 import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
+
+export interface UserProfileData {
+  avatar?: UserProfileAvatarData;
+  userSettings?: UserSettingsData;
+  [key: string]: unknown;
+}
 
 export interface UserProfileProps {
   user: AuthenticatedUser;
-  data?: {
-    avatar?: UserProfileAvatarData;
-    userSettings?: UserSettingsData;
-  };
+  data?: UserProfileData;
 }
 
 export interface UserDetailsEditorProps {
@@ -96,7 +104,7 @@ export interface UserProfileFormValues {
       imageUrl: string;
     };
     userSettings: {
-      darkMode: string;
+      darkMode: DarkModeValue;
     };
   };
   avatarType: 'initials' | 'image';
@@ -815,6 +823,11 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
   const { services } = useKibana<CoreStart>();
   const { userProfiles, users } = useSecurityApiClients();
 
+  const { update, showSuccessNotification } = getUseUpdateUserProfile({
+    apiClient: userProfiles,
+    notifications: services.notifications,
+  })({ notificationSuccess: { enabled: false } });
+
   const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
     user: {
       full_name: user.full_name || '',
@@ -855,7 +868,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       // Update profile only if it's available for the current user.
       if (values.data) {
         submitActions.push(
-          userProfiles.update(
+          update(
             values.avatarType === 'image'
               ? values.data
               : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
@@ -878,59 +891,13 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         return;
       }
 
+      resetInitialValues(values);
+
       let isRefreshRequired = false;
       if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
         isRefreshRequired = true;
       }
-
-      resetInitialValues(values);
-
-      let successToastInput: ToastInput = {
-        title: i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
-          defaultMessage: 'Profile updated',
-        }),
-      };
-
-      let successToastOptions: ToastOptions = {};
-
-      if (isRefreshRequired) {
-        successToastOptions = {
-          toastLifeTimeMs: 1000 * 60 * 5,
-        };
-
-        successToastInput = {
-          ...successToastInput,
-          text: toMountPoint(
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <p>
-                  {i18n.translate(
-                    'xpack.security.accountManagement.userProfile.requiresPageReloadToastDescription',
-                    {
-                      defaultMessage:
-                        'One or more settings require you to reload the page to take effect.',
-                    }
-                  )}
-                </p>
-                <EuiButton
-                  size="s"
-                  onClick={() => window.location.reload()}
-                  data-test-subj="windowReloadButton"
-                >
-                  {i18n.translate(
-                    'xpack.security.accountManagement.userProfile.requiresPageReloadToastButtonLabel',
-                    {
-                      defaultMessage: 'Reload page',
-                    }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        };
-      }
-
-      services.notifications.toasts.addSuccess(successToastInput, successToastOptions);
+      showSuccessNotification({ isRefreshRequired });
     },
     initialValues,
     enableReinitialize: true,
