@@ -258,8 +258,7 @@ describe('useUserProfileForm', () => {
       );
 
       const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
-      expect(overrideMsg).toHaveLength(1);
-      expect(overrideMsg.getElement().props.content).toEqual('');
+      expect(overrideMsg).toHaveLength(0);
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
       expect(themeMenu).toHaveLength(1);

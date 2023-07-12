@@ -174,7 +174,7 @@ function UserSettingsEditor({
     icon: string;
   }
 
-  const themeKeyPadMenuItem = ({ id, label, icon }: ThemeKeyPadItem) => {
+  const themeItem = ({ id, label, icon }: ThemeKeyPadItem) => {
     return (
       <EuiKeyPadMenuItem
         name={id}
@@ -186,6 +186,67 @@ function UserSettingsEditor({
       >
         <EuiIcon type={icon} size="l" />
       </EuiKeyPadMenuItem>
+    );
+  };
+
+  const themeMenu = (themeOverridden: boolean) => {
+    const themeKeyPadMenu = (
+      <EuiKeyPadMenu
+        aria-label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
+          {
+            defaultMessage: 'Elastic theme',
+          }
+        )}
+        data-test-subj="themeMenu"
+        checkable={{
+          legend: (
+            <FormLabel for="data.userSettings.darkMode">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.userSettings.theme"
+                defaultMessage="Mode"
+              />
+            </FormLabel>
+          ),
+        }}
+      >
+        {themeItem({
+          id: '',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
+            defaultMessage: 'Space default',
+          }),
+          icon: 'spaces',
+        })}
+        {themeItem({
+          id: 'light',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.lightModeButton', {
+            defaultMessage: 'Light',
+          }),
+          icon: 'sun',
+        })}
+        {themeItem({
+          id: 'dark',
+          label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
+            defaultMessage: 'Dark',
+          }),
+          icon: 'moon',
+        })}
+      </EuiKeyPadMenu>
+    );
+    return themeOverridden ? (
+      <EuiToolTip
+        data-test-subj="themeOverrideTooltip"
+        content={
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.overriddenMessage"
+            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+          />
+        }
+      >
+        {themeKeyPadMenu}
+      </EuiToolTip>
+    ) : (
+      themeKeyPadMenu
     );
   };
 
@@ -208,70 +269,8 @@ function UserSettingsEditor({
         />
       }
     >
-      <FormRow
-        name="data.userSettings.darkMode"
-        label={
-          <FormLabel for="data.userSettings.darkMode">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.userSettings.theme"
-              defaultMessage="Mode"
-            />
-          </FormLabel>
-        }
-        fullWidth
-      >
-        <EuiToolTip
-          data-test-subj="themeOverrideTooltip"
-          content={
-            isThemeOverridden ? (
-              <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.overriddenMessage"
-                defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              />
-            ) : (
-              ''
-            )
-          }
-        >
-          <EuiKeyPadMenu
-            aria-label={i18n.translate(
-              'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
-              {
-                defaultMessage: 'Elastic theme',
-              }
-            )}
-            data-test-subj="themeMenu"
-            checkable={true}
-          >
-            {themeKeyPadMenuItem({
-              id: '',
-              label: i18n.translate(
-                'xpack.security.accountManagement.userProfile.defaultModeButton',
-                {
-                  defaultMessage: 'Space default',
-                }
-              ),
-              icon: 'spaces',
-            })}
-            {themeKeyPadMenuItem({
-              id: 'light',
-              label: i18n.translate(
-                'xpack.security.accountManagement.userProfile.lightModeButton',
-                {
-                  defaultMessage: 'Light',
-                }
-              ),
-              icon: 'sun',
-            })}
-            {themeKeyPadMenuItem({
-              id: 'dark',
-              label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
-                defaultMessage: 'Dark',
-              }),
-              icon: 'moon',
-            })}
-          </EuiKeyPadMenu>
-        </EuiToolTip>
+      <FormRow name="data.userSettings.darkMode" fullWidth>
+        {themeMenu(isThemeOverridden)}
       </FormRow>
     </EuiDescribedFormGroup>
   );
