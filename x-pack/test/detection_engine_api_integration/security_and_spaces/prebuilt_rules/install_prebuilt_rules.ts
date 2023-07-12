@@ -97,21 +97,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(response.rules_updated).toBe(0);
         });
 
-        it('should not install prebuilt rules if they are up to date', async () => {
-          // Install all prebuilt detection rules
-          await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          await installPrebuiltRulesAndTimelines(supertest);
-
-          // Check that all prebuilt rules were installed
-          const statusResponse = await getPrebuiltRulesAndTimelinesStatus(supertest);
-          expect(statusResponse.rules_not_installed).toBe(0);
-
-          // Call the install prebuilt rules again and check that no rules were installed
-          const response = await installPrebuiltRulesAndTimelines(supertest);
-          expect(response.rules_installed).toBe(0);
-          expect(response.rules_updated).toBe(0);
-        });
-
         it('should update outdated prebuilt rules', async () => {
           // Install all prebuilt detection rules
           const ruleAssetSavedObjects = getRuleAssetSavedObjects();
@@ -132,6 +117,22 @@ export default ({ getService }: FtrProviderContext): void => {
           const response = await installPrebuiltRulesAndTimelines(supertest);
           expect(response.rules_installed).toBe(0);
           expect(response.rules_updated).toBe(1);
+        });
+
+        it('should not install prebuilt rules if they are up to date', async () => {
+          // Install all prebuilt detection rules
+          await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+          await installPrebuiltRulesAndTimelines(supertest);
+
+          // Check that all prebuilt rules were installed
+          const statusResponse = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          expect(statusResponse.rules_not_installed).toBe(0);
+          expect(statusResponse.rules_not_updated).toBe(0);
+
+          // Call the install prebuilt rules again and check that no rules were installed
+          const response = await installPrebuiltRulesAndTimelines(supertest);
+          expect(response.rules_installed).toBe(0);
+          expect(response.rules_updated).toBe(0);
         });
       });
 
@@ -177,6 +178,29 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(response.summary.succeeded).toBe(1);
         });
 
+        it('should update outdated prebuilt rules', async () => {
+          // Install all prebuilt detection rules
+          const ruleAssetSavedObjects = getRuleAssetSavedObjects();
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
+          await installPrebuiltRules(supertest);
+
+          // Clear previous rule assets
+          await deleteAllPrebuiltRuleAssets(es);
+          // Increment the version of one of the installed rules and create the new rule assets
+          ruleAssetSavedObjects[0]['security-rule'].version += 1;
+          await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
+
+          // Check that one prebuilt rule status shows that one rule is outdated
+          const statusResponse = await getPrebuiltRulesStatus(supertest);
+          expect(statusResponse.stats.num_prebuilt_rules_to_install).toBe(0);
+          expect(statusResponse.stats.num_prebuilt_rules_to_upgrade).toBe(1);
+
+          // Call the install prebuilt rules again and check that the outdated rule was updated
+          const response = await upgradePrebuiltRules(supertest);
+          expect(response.summary.succeeded).toBe(1);
+          expect(response.summary.skipped).toBe(0);
+        });
+
         it('should not install prebuilt rules if they are up to date', async () => {
           // Install all prebuilt detection rules
           await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
@@ -185,11 +209,17 @@ export default ({ getService }: FtrProviderContext): void => {
           // Check that all prebuilt rules were installed
           const statusResponse = await getPrebuiltRulesStatus(supertest);
           expect(statusResponse.stats.num_prebuilt_rules_to_install).toBe(0);
+          expect(statusResponse.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
           // Call the install prebuilt rules again and check that no rules were installed
-          const response = await installPrebuiltRules(supertest);
-          expect(response.summary.succeeded).toBe(0);
-          expect(response.summary.skipped).toBe(0);
+          const installResponse = await installPrebuiltRules(supertest);
+          expect(installResponse.summary.succeeded).toBe(0);
+          expect(installResponse.summary.skipped).toBe(0);
+
+          // Call the upgrade prebuilt rules endpoint and check that no rules were updated
+          const upgradeResponse = await upgradePrebuiltRules(supertest);
+          expect(upgradeResponse.summary.succeeded).toBe(0);
+          expect(upgradeResponse.summary.skipped).toBe(0);
         });
       });
     });
@@ -261,7 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const statusResponse = await getPrebuiltRulesAndTimelinesStatus(supertest);
           expect(statusResponse.rules_not_installed).toBe(1);
 
-          // Call the install prebuilt rules again and check that the missing rule was installed
+          // Call the install prebuilt rules endpoint again and check that the missing rule was installed
           const response = await installPrebuiltRulesAndTimelines(supertest);
           expect(response.rules_installed).toBe(1);
           expect(response.rules_updated).toBe(0);
@@ -285,6 +315,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const response = await installPrebuiltRulesAndTimelines(supertest);
           expect(response.rules_installed).toBe(0);
           expect(response.rules_updated).toBe(1);
+
+          const _statusResponse = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          expect(_statusResponse.rules_not_installed).toBe(0);
+          expect(_statusResponse.rules_not_updated).toBe(0);
         });
 
         it('should update outdated prebuilt rules when previous historical versions unavailable', async () => {
@@ -303,11 +337,16 @@ export default ({ getService }: FtrProviderContext): void => {
           // Check that one prebuilt rule status shows that one rule is outdated
           const statusResponse = await getPrebuiltRulesAndTimelinesStatus(supertest);
           expect(statusResponse.rules_not_updated).toBe(1);
+          expect(statusResponse.rules_not_installed).toBe(0);
 
           // Call the install prebuilt rules again and check that the outdated rule was updated
           const response = await installPrebuiltRulesAndTimelines(supertest);
           expect(response.rules_installed).toBe(0);
           expect(response.rules_updated).toBe(1);
+
+          const _statusResponse = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          expect(_statusResponse.rules_not_updated).toBe(0);
+          expect(_statusResponse.rules_not_installed).toBe(0);
         });
       });
 
@@ -321,18 +360,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('should install correct prebuilt rule versions', async () => {
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          await installPrebuiltRules(supertest);
-
-          // Get installed rules
-          const { body: rulesResponse } = await supertest
-            .get(DETECTION_ENGINE_RULES_URL_FIND)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(200);
+          const response = await installPrebuiltRules(supertest);
 
           // Check that all prebuilt rules were actually installed and their versions match the latest
-          expect(rulesResponse.total).toBe(RULES_COUNT);
-          expect(rulesResponse.data).toEqual(
+          expect(response.summary.succeeded).toBe(RULES_COUNT);
+          expect(response.results.created).toEqual(
             expect.arrayContaining([
               expect.objectContaining({ rule_id: 'rule-1', version: 2 }),
               expect.objectContaining({ rule_id: 'rule-2', version: 3 }),
@@ -367,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const statusResponse = await getPrebuiltRulesStatus(supertest);
           expect(statusResponse.stats.num_prebuilt_rules_to_install).toBe(1);
 
-          // Call the install prebuilt rules again and check that the missing rule was installed
+          // Call the install prebuilt rules endpoint again and check that the missing rule was installed
           const response = await installPrebuiltRules(supertest);
           expect(response.summary.succeeded).toBe(1);
           expect(response.summary.total).toBe(1);
@@ -386,6 +418,34 @@ export default ({ getService }: FtrProviderContext): void => {
           // Check that the prebuilt rule status shows that one rule is outdated
           const statusResponse = await getPrebuiltRulesStatus(supertest);
           expect(statusResponse.stats.num_prebuilt_rules_to_upgrade).toBe(1);
+
+          // Call the upgrade prebuilt rules endpoint and check that the outdated rule was updated
+          const response = await upgradePrebuiltRules(supertest);
+          expect(response.summary.succeeded).toBe(1);
+          expect(response.summary.total).toBe(1);
+
+          const status = await getPrebuiltRulesStatus(supertest);
+          expect(status.stats.num_prebuilt_rules_to_install).toBe(0);
+          expect(status.stats.num_prebuilt_rules_to_upgrade).toBe(0);
+        });
+
+        it('should update outdated prebuilt rules when previous historical versions unavailable', async () => {
+          // Install all prebuilt detection rules
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+          await installPrebuiltRules(supertest);
+
+          // Clear previous rule assets
+          await deleteAllPrebuiltRuleAssets(es);
+
+          // Add a new rule version
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 3 }),
+          ]);
+
+          // Check that the prebuilt rule status shows that one rule is outdated
+          const statusResponse = await getPrebuiltRulesStatus(supertest);
+          expect(statusResponse.stats.num_prebuilt_rules_to_upgrade).toBe(1);
+          expect(statusResponse.stats.num_prebuilt_rules_to_install).toBe(0);
 
           // Call the upgrade prebuilt rules endpoint and check that the outdated rule was updated
           const response = await upgradePrebuiltRules(supertest);
