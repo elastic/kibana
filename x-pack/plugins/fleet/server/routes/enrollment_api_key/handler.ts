@@ -24,7 +24,8 @@ import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
 
-import { ENROLLMENT_API_KEY_MAPPINGS, FLEET_ENROLLMENT_API_PREFIX } from '../../constants';
+import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
+import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
 import { validateKuery } from '../utils/filter_utils';
 
