@@ -84,6 +84,7 @@ export const getPolicySettingsFormTestSubjects = (
       protectionDetectRadio: behaviourTestSubj('protectionLevel-detectRadio'),
       notifyUserCheckbox: behaviourTestSubj('notifyUser-checkbox'),
       osValuesContainer: behaviourTestSubj('osValues'),
+      rulesCallout: behaviourTestSubj('rulesCallout'),
     },
     attackSurface: {
       card: attackSurfaceTestSubj(),
@@ -126,5 +127,5 @@ export const getPolicySettingsFormTestSubjects = (
 };
 
 export const expectIsViewOnly = (ele: HTMLElement): void => {
-  expect(ele.querySelectorAll('button,input,select,textarea')).toHaveLength(0);
+  expect(ele.querySelectorAll('button:not(.euiLink),input,select,textarea')).toHaveLength(0);
 };

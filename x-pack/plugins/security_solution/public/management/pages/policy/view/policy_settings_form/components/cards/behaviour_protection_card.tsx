@@ -83,6 +83,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           mode={mode}
           protection={protection}
           osList={BEHAVIOUR_OS_VALUES}
+          data-test-subj={getTestId('protectionLevel')}
         />
 
         <NotifyUserOption
@@ -91,6 +92,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           mode={mode}
           protection={protection}
           osList={BEHAVIOUR_OS_VALUES}
+          data-test-subj={getTestId('notifyUser')}
         />
 
         <EuiSpacer size="m" />

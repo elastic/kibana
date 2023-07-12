@@ -13,11 +13,11 @@ import type { PolicyFormComponentCommonProps } from '../types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import type {
   ImmutableArray,
-  UIPolicyConfig,
   PolicyConfig,
+  UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import type { LinuxPolicyProtection, MacPolicyProtection, PolicyProtection } from '../../../types';
 
 export interface ProtectionSettingCardSwitchProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
@@ -47,14 +47,14 @@ export const ProtectionSettingCardSwitch = React.memo(
   }: ProtectionSettingCardSwitchProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
-    const selected = policy && policy.windows[protection].mode;
+    const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
     const switchLabel = i18n.translate(
       'xpack.securitySolution.endpoint.policy.details.protectionsEnabled',
       {
         defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
         values: {
           protectionLabel,
-          mode: selected !== ProtectionModes.off,
+          mode: selected,
         },
       }
     );
@@ -128,7 +128,7 @@ export const ProtectionSettingCardSwitch = React.memo(
     return (
       <EuiSwitch
         label={switchLabel}
-        checked={selected !== ProtectionModes.off}
+        checked={selected}
         onChange={handleSwitchChange}
         disabled={!isEditMode}
         data-test-subj={dataTestSubj}

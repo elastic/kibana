@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPolicySettingsFormTestSubjects } from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -15,6 +15,8 @@ import { BehaviourProtectionCard, LOCKED_CARD_BEHAVIOR_TITLE } from './behaviour
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
+import { set } from 'lodash';
+import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
 
 jest.mock('../../../../../../../common/hooks/use_license');
 
@@ -42,9 +44,20 @@ describe('Policy Behaviour Protection Card', () => {
       (renderResult = mockedContext.render(<BehaviourProtectionCard {...formProps} />));
   });
 
-  it.todo('should render the card');
+  it('should render the card with expected components', () => {
+    const { getByTestId } = render();
 
-  it.todo('should show supported OS values');
+    expect(getByTestId(testSubj.enableDisableSwitch));
+    expect(getByTestId(testSubj.protectionPreventRadio));
+    expect(getByTestId(testSubj.notifyUserCheckbox));
+    expect(getByTestId(testSubj.rulesCallout));
+  });
+
+  it('should show supported OS values', () => {
+    const { getByTestId } = render();
+
+    expect(getByTestId(testSubj.osValuesContainer)).toHaveTextContent('Windows, Mac, Linux');
+  });
 
   describe('and license is lower than Platinum', () => {
     beforeEach(() => {
@@ -68,6 +81,67 @@ describe('Policy Behaviour Protection Card', () => {
   });
 
   describe('and displayed in View mode', () => {
-    // FIXME:PT implement
+    beforeEach(() => {
+      formProps.mode = 'view';
+    });
+
+    it('should display correctly when overall card is enabled', () => {
+      const { getByTestId } = render();
+
+      expectIsViewOnly(getByTestId(testSubj.card));
+
+      expect(getByTestId(testSubj.card)).toHaveTextContent(
+        'Type' +
+          'Malicious behavior' +
+          'Operating system' +
+          'Windows, Mac, Linux ' +
+          'Malicious behavior protections enabled' +
+          'Protection level' +
+          'Prevent' +
+          'User notification' +
+          'Agent version 7.15+' +
+          'Notify user' +
+          'Notification message' +
+          '—' +
+          'View related detection rules.'
+      );
+    });
+
+    it('should display correctly when overall card is disabled', () => {
+      set(formProps.policy, 'windows.behavior_protection.mode', ProtectionModes.off);
+      const { getByTestId } = render();
+
+      expectIsViewOnly(getByTestId(testSubj.card));
+
+      expect(getByTestId(testSubj.card)).toHaveTextContent(
+        'Type' +
+          'Malicious behavior' +
+          'Operating system' +
+          'Windows, Mac, Linux ' +
+          'Malicious behavior protections disabled' +
+          'Protection level' +
+          'Prevent' +
+          'User notification' +
+          'Agent version 7.15+' +
+          'Notify user' +
+          'Notification message' +
+          '—' +
+          'View related detection rules.'
+      );
+    });
+
+    it('should display user notification disabled', () => {
+      set(formProps.policy, 'windows.popup.behavior_protection.enabled', false);
+
+      const { getByTestId } = render();
+
+      expectIsViewOnly(getByTestId(testSubj.card));
+
+      expect(getByTestId(testSubj.card)).toHaveTextContent(
+        'TypeMalicious behaviorOperating systemWindows, Mac, Linux Malicious behavior protections enabledProtection ' +
+          "levelPreventUser notificationAgent version 7.15+Don't notify userView related detection rules. Prebuilt rules " +
+          'are tagged “Elastic” on the Detection Rules page.'
+      );
+    });
   });
 });
