@@ -57,6 +57,35 @@ export interface CalculateScoresResponse {
   };
 }
 
+export enum RiskEngineStatus {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  DISABLED = 'DISABLED',
+  ENABLED = 'ENABLED',
+}
+
+export interface GetRiskEngineStatusResponse {
+  legacy_transform_engine_status: RiskEngineStatus;
+  risk_engine_status: RiskEngineStatus;
+}
+
+export interface InitStep {
+  type: string;
+  success: boolean;
+  error?: string;
+}
+export interface InitRiskEngineResponse {
+  success: boolean;
+  steps: InitStep[];
+}
+
+export interface GetRiskEngineEnableResponse {
+  success: boolean;
+}
+
+export interface GetRiskEngineDisableResponse {
+  success: boolean;
+}
+
 export interface SimpleRiskInput {
   id: string;
   index: string;
