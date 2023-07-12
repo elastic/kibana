@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/server';
@@ -92,16 +91,77 @@ export function getRuleType(
   const actionVariableContextConditionsLabel = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionVariableContextConditionsLabel',
     {
-      defaultMessage: 'A string describing the threshold comparator and threshold',
+      defaultMessage: 'A string describing the threshold comparator and threshold.',
     }
   );
 
-  const ruleParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
-    (propKey: string) => {
-      return {
-        name: propKey,
-        description: propKey,
-      };
+  const actionVariableContextIndexLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextIndexLabel',
+    {
+      defaultMessage: 'The index label.',
+    }
+  );
+
+  const actionVariableContextTimeFieldLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTimeFieldLabel',
+    {
+      defaultMessage: 'The time field label.',
+    }
+  );
+
+  const actionVariableContextAggTypeLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextAggTypeLabel',
+    {
+      defaultMessage: 'The agg type label.',
+    }
+  );
+
+  const actionVariableContextAggFieldLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextAggFieldLabel',
+    {
+      defaultMessage: 'The agg field label.',
+    }
+  );
+
+  const actionVariableContextGroupByLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextGroupByLabel',
+    {
+      defaultMessage: 'The groupBy label.',
+    }
+  );
+
+  const actionVariableContextTermFieldLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTermFieldLabel',
+    {
+      defaultMessage: 'The term field label.',
+    }
+  );
+
+  const actionVariableContextFilterKueryLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextFilterKueryLabel',
+    {
+      defaultMessage: 'The filter kuery label.',
+    }
+  );
+
+  const actionVariableContextTermSizeLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTermSizeLabel',
+    {
+      defaultMessage: 'The term size label.',
+    }
+  );
+
+  const actionVariableContextTimeWindowSizeLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTimeWindowSizeLabel',
+    {
+      defaultMessage: 'The time window size label.',
+    }
+  );
+
+  const actionVariableContextTimeWindowUnitLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextTimeWindowUnitLabel',
+    {
+      defaultMessage: 'The time window unit label.',
     }
   );
 
@@ -125,7 +185,16 @@ export function getRuleType(
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-        ...ruleParamsVariables,
+        { name: 'index', description: actionVariableContextIndexLabel },
+        { name: 'timeField', description: actionVariableContextTimeFieldLabel },
+        { name: 'aggType', description: actionVariableContextAggTypeLabel },
+        { name: 'aggField', description: actionVariableContextAggFieldLabel },
+        { name: 'groupBy', description: actionVariableContextGroupByLabel },
+        { name: 'termField', description: actionVariableContextTermFieldLabel },
+        { name: 'filterKuery', description: actionVariableContextFilterKueryLabel },
+        { name: 'termSize', description: actionVariableContextTermSizeLabel },
+        { name: 'timeWindowSize', description: actionVariableContextTimeWindowSizeLabel },
+        { name: 'timeWindowUnit', description: actionVariableContextTimeWindowUnitLabel },
       ],
     },
     minimumLicenseRequired: 'basic',

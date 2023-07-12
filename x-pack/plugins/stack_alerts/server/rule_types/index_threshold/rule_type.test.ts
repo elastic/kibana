@@ -68,7 +68,7 @@ describe('ruleType', () => {
             "name": "value",
           },
           Object {
-            "description": "A string describing the threshold comparator and threshold",
+            "description": "A string describing the threshold comparator and threshold.",
             "name": "conditions",
           },
         ],
@@ -82,43 +82,43 @@ describe('ruleType', () => {
             "name": "thresholdComparator",
           },
           Object {
-            "description": "index",
+            "description": "The index label.",
             "name": "index",
           },
           Object {
-            "description": "timeField",
+            "description": "The time field label.",
             "name": "timeField",
           },
           Object {
-            "description": "aggType",
+            "description": "The agg type label.",
             "name": "aggType",
           },
           Object {
-            "description": "aggField",
+            "description": "The agg field label.",
             "name": "aggField",
           },
           Object {
-            "description": "groupBy",
+            "description": "The groupBy label.",
             "name": "groupBy",
           },
           Object {
-            "description": "termField",
+            "description": "The term field label.",
             "name": "termField",
           },
           Object {
-            "description": "filterKuery",
+            "description": "The filter kuery label.",
             "name": "filterKuery",
           },
           Object {
-            "description": "termSize",
+            "description": "The term size label.",
             "name": "termSize",
           },
           Object {
-            "description": "timeWindowSize",
+            "description": "The time window size label.",
             "name": "timeWindowSize",
           },
           Object {
-            "description": "timeWindowUnit",
+            "description": "The time window unit label.",
             "name": "timeWindowUnit",
           },
         ],
