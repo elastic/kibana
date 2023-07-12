@@ -623,7 +623,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     );
 
     if (systemActionAsPreconfiguredInConfig) {
-      throw new Error('Setting system action types in preconfigured connectors is not allowed');
+      throw new Error('Setting system action types in preconfigured connectors are not allowed');
     }
   };
 
