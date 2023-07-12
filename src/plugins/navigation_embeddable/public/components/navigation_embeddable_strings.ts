@@ -14,6 +14,14 @@ export const NavEmbeddableStrings = {
       i18n.translate('navigationEmbeddable.editor.addButtonLabel', {
         defaultMessage: 'Add link',
       }),
+    getUpdateButtonLabel: () =>
+      i18n.translate('navigationEmbeddable.editor.updateButtonLabel', {
+        defaultMessage: 'Update link',
+      }),
+    getEditLinkTitle: () =>
+      i18n.translate('navigationEmbeddable.editor.editLinkTitle', {
+        defaultMessage: 'Edit link',
+      }),
     getCancelButtonLabel: () =>
       i18n.translate('navigationEmbeddable.editor.cancelButtonLabel', {
         defaultMessage: 'Close',

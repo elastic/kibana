@@ -3,11 +3,11 @@
 .navEmbeddableLinkEditor {
   @include euiFlyout;
 
-  &.in { 
+  &.in {
     animation: euiFlyoutOpenAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
   }
 
-  &.out { 
+  &.out {
     animation: euiFlyoutCloseAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
   }
 

@@ -92,7 +92,11 @@ export const NavigationEmbeddableLinkEditor = ({
             size="m"
             aria-label={NavEmbeddableStrings.editor.linkEditor.getGoBackAriaLabel()}
           >
-            <h2>{link ? 'Edit link' : NavEmbeddableStrings.editor.getAddButtonLabel()}</h2>
+            <h2>
+              {link
+                ? NavEmbeddableStrings.editor.getEditLinkTitle()
+                : NavEmbeddableStrings.editor.getAddButtonLabel()}
+            </h2>
           </EuiTitle>
         </EuiButtonEmpty>
       </EuiFlyoutHeader>
@@ -177,7 +181,9 @@ export const NavigationEmbeddableLinkEditor = ({
                 }
               }}
             >
-              {link ? 'Update link' : NavEmbeddableStrings.editor.getAddButtonLabel()}
+              {link
+                ? NavEmbeddableStrings.editor.getUpdateButtonLabel()
+                : NavEmbeddableStrings.editor.getAddButtonLabel()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
