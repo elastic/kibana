@@ -664,8 +664,8 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
-      'error.grouping_key': 'error-key-foo',
-      'error.grouping_name': 'error-name-foo',
+      errorGroupingKey: 'error-key-foo',
+      errorGroupingName: 'error-name-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -677,8 +677,8 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
-      'error.grouping_key': 'error-key-foo-2',
-      'error.grouping_name': 'error-name-foo2',
+      errorGroupingKey: 'error-key-foo-2',
+      errorGroupingName: 'error-name-foo2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -690,8 +690,8 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
-      'error.grouping_key': 'error-key-bar',
-      'error.grouping_name': 'error-name-bar',
+      errorGroupingKey: 'error-key-bar',
+      errorGroupingName: 'error-name-bar',
     });
   });
 });
