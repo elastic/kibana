@@ -129,10 +129,13 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
-    return currentConversation.apiConfig.connectorId != null
+    // if any conversation has a connector id, we're not in welcome set up
+    return Object.keys(conversations).some(
+      (conversation) => conversations[conversation].apiConfig.connectorId != null
+    )
       ? false
       : (connectors?.length ?? 0) === 0;
-  }, [connectors?.length, currentConversation]);
+  }, [connectors?.length, conversations]);
   const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
@@ -583,8 +586,8 @@ const AssistantComponent: React.FC<Props> = ({
               onPromptSubmit={handleSendMessage}
               ref={promptTextAreaRef}
               handlePromptChange={setPromptTextPreview}
-              value={isDisabled ? '' : suggestedUserPrompt ?? ''}
-              isDisabled={isDisabled}
+              value={isSendingDisabled ? '' : suggestedUserPrompt ?? ''}
+              isDisabled={isSendingDisabled}
             />
           </EuiFlexItem>
 
@@ -608,7 +611,7 @@ const AssistantComponent: React.FC<Props> = ({
                   <EuiButtonIcon
                     display="base"
                     iconType="cross"
-                    isDisabled={isDisabled}
+                    isDisabled={isSendingDisabled}
                     aria-label={i18n.CLEAR_CHAT}
                     color="danger"
                     onClick={() => {
