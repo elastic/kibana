@@ -21,7 +21,7 @@ export class Integration {
   private constructor(integration: Integration) {
     this.id = integration.id;
     this.name = integration.name;
-    this.title = integration.title;
+    this.title = integration.title ?? integration.name;
     this.description = integration.description;
     this.icons = integration.icons;
     this.status = integration.status;

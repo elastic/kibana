@@ -59,23 +59,15 @@ export const buildIntegrationsTree = ({
       const isLastIntegration = pos === integrations.length - 1;
 
       integrationsTree.items.push({
-        name: title ?? name,
-        icon: (
-          <PackageIcon
-            packageName={name}
-            version={version}
-            size="m"
-            icons={icons}
-            tryApi={!icons}
-          />
-        ),
+        name: title,
+        icon: <PackageIcon packageName={name} version={version} size="m" icons={icons} tryApi />,
         panel: integration.id,
         ...(isLastIntegration && { buttonRef: spyRef }),
       });
 
       integrationsTree.panels.push({
         id: integration.id,
-        title: title ?? name,
+        title,
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
         items: datasets.map((dataset) => ({
           name: dataset.title,
