@@ -9,11 +9,11 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { RecursivePartial } from '@elastic/charts';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { CreateSLOForm } from '../pages/slo_edit/types';
 import { sloEditLocatorID } from '../../common';
 import { SLO_CREATE_PATH, SLOS_PATH } from '../routes/paths';
 
-export type SloEditParams = RecursivePartial<SLOWithSummaryResponse>;
+export type SloEditParams = RecursivePartial<CreateSLOForm>;
 
 export interface SloEditLocatorParams extends SloEditParams, SerializableRecord {}
 
@@ -29,7 +29,7 @@ export class SloEditLocatorDefinition implements LocatorDefinition<SloEditLocato
           ...slo,
         },
         { useHash: false, storeInHashQuery: false },
-        slo.id ? `${SLOS_PATH}/edit/${encodeURI(slo.id)}` : `${SLO_CREATE_PATH}`
+        slo.id ? `${SLOS_PATH}/edit/${encodeURI(String(slo.id))}` : SLO_CREATE_PATH
       ),
       state: {},
     };

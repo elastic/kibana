@@ -54,6 +54,7 @@ import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public'
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
