@@ -176,3 +176,9 @@ export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]
 export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
+
+export const RULE_EXECUTION_STATUS_BADGE = '[data-test-subj="ruleExecutionStatus"]';
+
+export const EXECUTION_STATUS_FILTER_BUTTON = '[data-test-subj="executionStatusFilterButton"]';
+
+export const EXECUTION_STATUS_FILTER_OPTION = '[data-test-subj="executionStatusFilterOption"]';

@@ -1106,6 +1106,7 @@ paths:
                       type: string
                     referencedByCount:
                       type: integer
+                maxItems: 1000
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
@@ -3337,6 +3338,8 @@ components:
         cases:
           type: array
           description: An array containing one or more case objects.
+          maxItems: 100
+          minItems: 1
           items:
             type: object
             required:
