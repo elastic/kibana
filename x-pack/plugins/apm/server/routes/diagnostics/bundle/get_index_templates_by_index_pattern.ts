@@ -27,16 +27,11 @@ export async function getIndexTemplatesByIndexPattern({
     apmIndices.transaction,
   ]);
 
-  try {
-    return await Promise.all(
-      indexPatterns.map(async (indexPattern) =>
-        getSimulatedIndexTemplateForIndexPattern({ indexPattern, esClient })
-      )
-    );
-  } catch (e) {
-    console.error(e);
-    return [];
-  }
+  return await Promise.all(
+    indexPatterns.map(async (indexPattern) =>
+      getSimulatedIndexTemplateForIndexPattern({ indexPattern, esClient })
+    )
+  );
 }
 
 async function getSimulatedIndexTemplateForIndexPattern({

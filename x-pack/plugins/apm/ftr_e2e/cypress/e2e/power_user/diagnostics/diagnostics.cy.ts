@@ -7,11 +7,8 @@
 
 describe('Diagnostics', () => {
   describe('when no data is loaded', () => {
-    beforeEach(() => {
+    it('can display summary tab for superuser', () => {
       cy.loginAs({ username: 'elastic', password: 'changeme' });
-    });
-
-    it('can display summary tab', () => {
       cy.visitKibana('/app/apm/diagnostics');
 
       // integration package
@@ -38,24 +35,29 @@ describe('Diagnostics', () => {
         'OK'
       );
     });
+
+    it('can display documents tab for "viewer" user', () => {
+      cy.loginAs({ username: 'viewer', password: 'changeme' });
+      cy.visitKibana('/app/apm/diagnostics');
+      cy.get('[data-test-subj="documents-tab"]').click();
+
+      cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
+        'have.length',
+        8
+      );
+    });
   });
 
   describe('when importing a file', () => {
-    beforeEach(() => {
-      cy.loginAs({ username: 'elastic', password: 'changeme' });
-      cy.visitKibana('/app/apm/diagnostics/import-export');
-      cy.get('#file-picker').selectFile(
-        './cypress/e2e/power_user/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
-      );
-    });
-
     it('shows the remove button', () => {
+      importBundleAs({ username: 'elastic' });
       cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should(
         'exist'
       );
     });
 
     it('can display summary tab', () => {
+      importBundleAs({ username: 'elastic' });
       cy.get('[data-test-subj="summary-tab"]').click();
 
       // integration package
@@ -89,16 +91,19 @@ describe('Diagnostics', () => {
     });
 
     it('can display index template tab', () => {
+      importBundleAs({ username: 'elastic' });
       cy.get('[data-test-subj="index-templates-tab"]').click();
       cy.get('.euiTableRow').should('have.length', 19);
     });
 
     it('can display data streams tab', () => {
+      importBundleAs({ username: 'elastic' });
       cy.get('[data-test-subj="data-streams-tab"]').click();
       cy.get('.euiTableRow').should('have.length', 8);
     });
 
     it('can display indices tab', () => {
+      importBundleAs({ username: 'elastic' });
       cy.get('[data-test-subj="indices-tab"]').click();
 
       cy.get('[data-test-subj="indicedWithProblems"] .euiTableRow').should(
@@ -113,6 +118,7 @@ describe('Diagnostics', () => {
     });
 
     it('can display documents tab', () => {
+      importBundleAs({ username: 'viewer' });
       cy.get('[data-test-subj="documents-tab"]').click();
 
       cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
@@ -122,3 +128,15 @@ describe('Diagnostics', () => {
     });
   });
 });
+
+function importBundleAs({
+  username,
+}: {
+  username: 'elastic' | 'viewer' | 'editor';
+}) {
+  cy.loginAs({ username, password: 'changeme' });
+  cy.visitKibana('/app/apm/diagnostics/import-export');
+  cy.get('#file-picker').selectFile(
+    './cypress/e2e/power_user/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
+  );
+}
