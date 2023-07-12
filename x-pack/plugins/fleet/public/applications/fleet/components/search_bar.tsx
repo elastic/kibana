@@ -73,24 +73,43 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const _fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
+        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
           pattern: indexPattern,
         });
-        const fields = (_fields || []).filter((field) => {
-          if (!fieldPrefix || field.name.startsWith(fieldPrefix)) {
-            for (const hiddenField of HIDDEN_FIELDS) {
-              if (field.name.startsWith(hiddenField)) {
-                return false;
-              }
-            }
-            return true;
-          }
-        });
-        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
-          acc[curr.name] = curr;
-          return acc;
-        }, {});
-        const newDataView = await data.dataViews.create({ title: indexPattern, fields: fieldsMap });
+        // In the case when indexPattern is not passed and all the indices are fetched, filter only the fields starting with fieldPrefix
+        const _fields =
+          fields.length && fieldPrefix && indexPattern === INDEX_NAME
+            ? fields.filter((field) => field.name.startsWith(fieldPrefix))
+            : fields;
+        // Remove hidden fields
+        const filteredFields =
+          _fields.length && fieldPrefix
+            ? _fields
+                .filter((field) => {
+                  if (HIDDEN_FIELDS.includes(field.name)) {
+                    return false;
+                  }
+                  return true;
+                })
+                // Concatenate the fields with the prefix if needed
+                .map((field) => {
+                  return !field.name.startsWith(fieldPrefix)
+                    ? { ...field, name: `${fieldPrefix}.${field.name}` }
+                    : field;
+                })
+            : fields;
+
+        const fieldsMap = filteredFields.reduce(
+          (acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+            acc[curr.name] = curr;
+            return acc;
+          },
+          {}
+        );
+        const newDataView = await data.dataViews.create(
+          { title: indexPattern, fields: fieldsMap },
+          true // skipFetchField: if it is not set, the passed fields are ignored and get refetched again
+        );
         setDataView(newDataView);
       } catch (err) {
         setDataView(undefined);
