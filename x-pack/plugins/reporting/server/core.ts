@@ -160,6 +160,7 @@ export class ReportingCore {
     );
     this.exportTypesRegistry.register(this.pdfV1Export);
     this.exportTypesRegistry.register(this.pngV1Export);
+    // @ts-ignore known issue with csv searchsource immediate
     this.exportTypesRegistry.register(this.csvSearchSourceImmediateExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
@@ -211,13 +212,7 @@ export class ReportingCore {
 
     const reportingStart = this.getContract();
     const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
-    this.csvSearchSourceExport.start(exportTypeStartDeps);
-    this.csvV2ExportType.start(exportTypeStartDeps);
-    this.pdfExport.start(exportTypeStartDeps);
-    this.pngExport.start(exportTypeStartDeps);
 
-    const reportingStart = this.getContract();
-    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
     this.csvSearchSourceExport.start(exportTypeStartDeps);
     this.csvV2ExportType.start(exportTypeStartDeps);
     this.csvSearchSourceImmediateExport.start(exportTypeStartDeps);
