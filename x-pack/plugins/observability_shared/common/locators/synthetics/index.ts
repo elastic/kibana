@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LocatorPublic } from '@kbn/share-plugin/public';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { uptimeOverviewNavigatorParams } from './overview';
 import { monitorDetailNavigatorParams } from './monitor_detail';

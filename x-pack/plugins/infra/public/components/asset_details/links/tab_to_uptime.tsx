@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiTab, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
+import { uptimeOverviewLocatorID } from '@kbn/observability-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import type { Tab } from '../types';

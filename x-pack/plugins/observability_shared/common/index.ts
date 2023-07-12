@@ -126,6 +126,11 @@ export {
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
 
+export type { AlertStatus, AlertStatusFilter } from './types';
+
+/* LOCATORS */
+
+// Observability
 export { AlertsLocatorDefinition, alertsLocatorID } from './locators/observability/alerts';
 export {
   RuleDetailsLocatorDefinition,
@@ -142,4 +147,8 @@ export type { AlertsLocatorParams } from './locators/observability/alerts';
 export type { RulesParams } from './locators/observability/rules';
 export type { SloEditLocatorParams } from './locators/observability/slo_edit';
 
-export type { AlertStatus, AlertStatusFilter } from './types';
+// Synthetics
+export { syntheticsEditMonitorLocatorID } from './locators/synthetics/edit_monitor';
+export { syntheticsMonitorDetailLocatorID } from './locators/synthetics/monitor_detail';
+export { syntheticsSettingsLocatorID } from './locators/synthetics/settings';
+export { uptimeOverviewLocatorID } from './locators/synthetics/overview';
