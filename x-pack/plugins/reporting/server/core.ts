@@ -117,7 +117,6 @@ export class ReportingCore {
   private pdfV1Export: PdfV1ExportType;
   private pngExport: PngExportType;
   private pngV1Export: PngV1ExportType;
-
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -190,9 +189,10 @@ export class ReportingCore {
 
     this.csvSearchSourceExport.setup(setupDeps);
     this.csvV2ExportType.setup(setupDeps);
-    this.pdfExport.setup(setupDeps);
     this.csvSearchSourceImmediateExport.setup(setupDeps);
+    this.pdfExport.setup(setupDeps);
     this.pdfV1Export.setup(setupDeps);
+    this.pngExport.setup(setupDeps);
     this.pngV1Export.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
@@ -208,14 +208,15 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+    
     const reportingStart = this.getContract();
     const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
     this.csvSearchSourceExport.start(exportTypeStartDeps);
     this.csvV2ExportType.start(exportTypeStartDeps);
-    this.pdfExport.start(exportTypeStartDeps);
-    this.pngExport.start(exportTypeStartDeps);
     this.csvSearchSourceImmediateExport.start(exportTypeStartDeps);
+    this.pdfExport.start(exportTypeStartDeps);
     this.pdfV1Export.start(exportTypeStartDeps);
+    this.pngExport.start(exportTypeStartDeps);
     this.pngV1Export.start(exportTypeStartDeps);
 
     await this.assertKibanaIsAvailable();
