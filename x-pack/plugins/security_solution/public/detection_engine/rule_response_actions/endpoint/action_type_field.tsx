@@ -62,7 +62,6 @@ const ActionTypeFieldComponent = ({
       }),
     [data.responseActions, endpointPrivileges]
   );
-  console.log({ fieldOptions });
 
   return (
     <UseField
