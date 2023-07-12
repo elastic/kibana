@@ -21,7 +21,7 @@ import {
 import type {
   CreateMetricsExplorerViewAttributesRequestPayload,
   FindMetricsExplorerViewResponsePayload,
-  GetMetricsExplorerViewResposePayload,
+  GetMetricsExplorerViewResponsePayload,
   MetricsExplorerViewRequestQuery,
   UpdateMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api/latest';
@@ -77,7 +77,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   public async get(
     metricsExplorerViewId: string,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<GetMetricsExplorerViewResposePayload> {
+  ): Promise<GetMetricsExplorerViewResponsePayload> {
     this.logger.debug(`Trying to load metrics explorer view with id ${metricsExplorerViewId} ...`);
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;

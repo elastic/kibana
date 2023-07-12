@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core/server';
 import type {
   FindMetricsExplorerViewResponsePayload,
-  GetMetricsExplorerViewResposePayload,
+  GetMetricsExplorerViewResponsePayload,
   MetricsExplorerViewRequestQuery,
   UpdateMetricsExplorerViewAttributesRequestPayload,
   UpdateMetricsExplorerViewResponsePayload,
@@ -39,7 +39,7 @@ export interface IMetricsExplorerViewsClient {
   get(
     metricsExplorerViewId: string,
     query: MetricsExplorerViewRequestQuery
-  ): Promise<GetMetricsExplorerViewResposePayload>;
+  ): Promise<GetMetricsExplorerViewResponsePayload>;
   update(
     metricsExplorerViewId: string | null,
     metricsExplorerViewAttributes: UpdateMetricsExplorerViewAttributesRequestPayload,
