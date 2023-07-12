@@ -33,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('clickLineChart');
     await PageObjects.visualize.clickLineChart();
     await PageObjects.visualize.clickNewSearch();
-    await PageObjects.timePicker.setDefaultAbsoluteRange();
     log.debug('Bucket = X-axis');
     await PageObjects.visEditor.clickBucket('X-axis');
     log.debug('Aggregation = Date Histogram');
@@ -64,7 +63,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('point series', function describeIndexTests() {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await initChart();
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     describe('secondary value axis', function () {
@@ -158,7 +162,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('Bucket = X-axis');
         await PageObjects.visEditor.clickBucket('X-axis');
         log.debug('Aggregation = Terms');
