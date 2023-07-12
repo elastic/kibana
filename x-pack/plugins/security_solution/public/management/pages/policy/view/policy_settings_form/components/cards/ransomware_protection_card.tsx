@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
 import { NotifyUserOption } from '../notify_user_option';
-import { DetectPreventProtectionLevel } from '../detect_prevent_protection_lavel';
+import { DetectPreventProtectionLevel } from '../detect_prevent_protection_level';
 import { SettingCard } from '../setting_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import type { Immutable } from '../../../../../../../../common/endpoint/types';

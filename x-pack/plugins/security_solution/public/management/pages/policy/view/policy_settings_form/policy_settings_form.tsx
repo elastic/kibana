@@ -77,7 +77,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 });
 PolicySettingsForm.displayName = 'PolicySettingsForm';
 
-export const FormSectionTitle = memo(({ children }) => {
+const FormSectionTitle = memo(({ children }) => {
   return (
     <EuiText size="xs" color="subdued">
       <h4>{children}</h4>

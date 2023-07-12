@@ -41,7 +41,6 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelPro
     const isEditMode = mode === 'edit';
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    // FIXME:PT remove this. Make it module global const
     const radios: Immutable<
       Array<{
         id: ProtectionModes;
@@ -170,10 +169,8 @@ const ProtectionRadio = React.memo(
       onChange({ isValid: true, updatedPolicy: newPayload });
     }, [isPlatinumPlus, onChange, osList, policy, protection, protectionMode]);
 
-    // FIXME:PT Why is this className being used below? can it be removed?
     return (
       <EuiRadio
-        className="policyDetailsProtectionRadio"
         label={label}
         id={radioButtonId}
         checked={selected === protectionMode}

@@ -10,6 +10,6 @@ import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 export interface PolicyFormComponentCommonProps {
   policy: PolicyConfig;
   onChange: (options: { isValid: boolean; updatedPolicy: PolicyConfig }) => void;
-  mode?: 'edit' | 'view';
+  mode: 'edit' | 'view';
   'data-test-subj'?: string;
 }
