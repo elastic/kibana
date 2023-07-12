@@ -31,6 +31,7 @@ export const renderApp = (elem: Element, dependencies: AppDependencies) => {
       services={{
         uiSettings: dependencies.services.uiSettings,
         settings: dependencies.services.settings,
+        theme: dependencies.core.theme,
       }}
     >
       <AppProviders appDependencies={dependencies}>
