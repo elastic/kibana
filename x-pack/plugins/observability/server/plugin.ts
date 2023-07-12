@@ -23,6 +23,7 @@ import {
 } from '@kbn/cases-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { AlertsLocatorDefinition } from '@kbn/observability-shared-plugin/public/locators/observability/alerts';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
@@ -75,6 +76,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
     const config = this.initContext.config.get<ObservabilityConfig>();
+
+    const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -173,6 +176,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const savedObjectTypes = config.compositeSlo.enabled
       ? [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE]
       : [SO_SLO_TYPE];
+
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {

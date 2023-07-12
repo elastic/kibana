@@ -31,12 +31,12 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import type { AlertsLocatorParams } from '../../../../common';
 import { getRuleExecutor } from './executor';
 import { createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO, StoredSLO } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { AlertsLocatorParams } from '@kbn/observability-shared-plugin/public';
 import {
   BurnRateAlertState,
   BurnRateAlertContext,

@@ -14,8 +14,9 @@ import {
   IRuleDataService,
 } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/public';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { sloFeatureId, AlertsLocatorParams, observabilityFeatureId } from '../../../common';
+import { sloFeatureId, observabilityFeatureId } from '../../../common';
 import { ObservabilityConfig } from '../..';
 import {
   SLO_RULE_REGISTRATION_CONTEXT,

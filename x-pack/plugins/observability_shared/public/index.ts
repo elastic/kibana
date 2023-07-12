@@ -81,6 +81,9 @@ export { ruleDetailsLocatorID } from './locators/observability/rule_details';
 export { rulesLocatorID } from './locators/observability/rules';
 export { sloDetailsLocatorID } from './locators/observability/slo_details';
 export { sloEditLocatorID } from './locators/observability/slo_edit';
+
+export type { AlertsLocatorParams } from './locators/observability/alerts';
+export type { RulesParams } from './locators/observability/rules';
 export type { SloEditLocatorParams } from './locators/observability/slo_edit';
 
 export type { AlertStatus, AlertStatusFilter } from './types';

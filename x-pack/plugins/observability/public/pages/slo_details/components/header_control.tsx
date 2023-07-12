@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rulesLocatorID, RulesParams } from '@kbn/observability-shared-plugin/public';
 
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
@@ -17,14 +18,13 @@ import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
-import { rulesLocatorID, sloFeatureId } from '../../../../common';
+import { sloFeatureId } from '../../../../common';
 import { paths } from '../../../routes/paths';
 import {
   transformSloResponseToCreateSloForm,
   transformCreateSLOFormToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
-import type { RulesParams } from '../../../locators/rules';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;

@@ -19,7 +19,8 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { memoize, last, upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/public';
+import { getAlertUrl } from '../../../../common';
 import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
 import { Duration, SLO, toDurationUnit } from '../../../domain/models';
 import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';

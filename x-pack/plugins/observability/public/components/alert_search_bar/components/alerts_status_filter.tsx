@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { AlertStatus } from '@kbn/observability-shared-plugin/public';
 import { ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS } from '../constants';
 import { AlertStatusFilterProps } from '../types';
-import { AlertStatus } from '../../../../common/typings';
 
 const options: EuiButtonGroupOptionProps[] = [
   {

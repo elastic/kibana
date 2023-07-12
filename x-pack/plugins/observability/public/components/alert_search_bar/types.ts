@@ -7,10 +7,10 @@
 
 import { ReactElement } from 'react';
 import { ToastsStart } from '@kbn/core-notifications-browser';
+import { AlertStatus } from '@kbn/observability-shared-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { BoolQuery, Query } from '@kbn/es-query';
-import { AlertStatus } from '../../../common/typings';
 
 export interface AlertStatusFilterProps {
   status: AlertStatus;
