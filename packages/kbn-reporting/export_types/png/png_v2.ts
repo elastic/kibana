@@ -32,7 +32,7 @@ import {
   PngScreenshotResult,
   ScreenshotOptions,
 } from '@kbn/screenshotting-plugin/server';
-import { decryptJobHeaders, generatePngObservable } from '../common';
+import { decryptJobHeaders, generatePngObservable } from '@kbn/reporting-export-types-common';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
