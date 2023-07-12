@@ -31,6 +31,9 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/features-plugin",
     "@kbn/ml-plugin",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/security-solution-navigation",
+    "@kbn/default-nav-ml",
+    "@kbn/default-nav-devtools"
   ]
 }
