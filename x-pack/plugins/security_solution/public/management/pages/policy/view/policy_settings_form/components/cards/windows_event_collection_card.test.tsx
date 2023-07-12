@@ -15,13 +15,13 @@ import { createAppRootMockRenderer } from '../../../../../../../common/mock/endp
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
 import { set } from 'lodash';
-import type { MacEventCollectionCardProps } from './mac_event_collection_card';
-import { MacEventCollectionCard } from './mac_event_collection_card';
+import type { WindowsEventCollectionCardProps } from './windows_event_collection_card';
+import { WindowsEventCollectionCard } from './windows_event_collection_card';
 
-describe('Policy Mac Event Collection Card', () => {
-  const testSubj = getPolicySettingsFormTestSubjects('test').macEvents;
+describe('Policy Windows Event Collection Card', () => {
+  const testSubj = getPolicySettingsFormTestSubjects('test').windowsEvents;
 
-  let formProps: MacEventCollectionCardProps;
+  let formProps: WindowsEventCollectionCardProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
 
@@ -36,7 +36,8 @@ describe('Policy Mac Event Collection Card', () => {
       'data-test-subj': testSubj.card,
     };
 
-    render = () => (renderResult = mockedContext.render(<MacEventCollectionCard {...formProps} />));
+    render = () =>
+      (renderResult = mockedContext.render(<WindowsEventCollectionCard {...formProps} />));
   });
 
   it('should render card with expected content', () => {
@@ -44,11 +45,18 @@ describe('Policy Mac Event Collection Card', () => {
 
     expect(
       getByTestId(testSubj.optionsContainer).querySelectorAll('input[type="checkbox"]')
-    ).toHaveLength(3);
+    ).toHaveLength(8);
+    expect(getByTestId(testSubj.credentialsCheckbox)).toBeChecked();
+    expect(getByTestId(testSubj.dllCheckbox)).toBeChecked();
+    expect(getByTestId(testSubj.dnsCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
-    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(matchExactTextContent('Mac'));
+    expect(getByTestId(testSubj.registryCheckbox)).toBeChecked();
+    expect(getByTestId(testSubj.securityCheckbox)).toBeChecked();
+    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(
+      matchExactTextContent('Windows')
+    );
   });
 
   describe('and is displayed in View mode', () => {
@@ -66,18 +74,23 @@ describe('Policy Mac Event Collection Card', () => {
           'Type' +
             'Event collection' +
             'Operating system' +
-            'Mac ' +
-            '3 / 3 event collections enabled' +
+            'Windows 8 / 8 event collections enabled' +
             'Events' +
+            'Credential Access' +
+            'DLL and Driver Load' +
+            'DNS' +
             'File' +
+            'Network' +
             'Process' +
-            'Network'
+            'Registry' +
+            'Security'
         )
       );
     });
 
-    it('should render card with expected content when certain events are un-checked', () => {
-      set(formProps.policy, 'mac.events.file', false);
+    it('should render card with expected content when some events are un-checked', () => {
+      set(formProps.policy, 'windows.events.file', false);
+      set(formProps.policy, 'windows.events.dns', false);
       render();
 
       const card = renderResult.getByTestId(testSubj.card);
@@ -88,11 +101,15 @@ describe('Policy Mac Event Collection Card', () => {
           'Type' +
             'Event collection' +
             'Operating system' +
-            'Mac ' +
-            '2 / 3 event collections enabled' +
+            'Windows ' +
+            '6 / 8 event collections enabled' +
             'Events' +
+            'Credential Access' +
+            'DLL and Driver Load' +
+            'Network' +
             'Process' +
-            'Network'
+            'Registry' +
+            'Security'
         )
       );
     });

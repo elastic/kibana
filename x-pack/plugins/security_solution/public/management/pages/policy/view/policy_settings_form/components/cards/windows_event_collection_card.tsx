@@ -84,7 +84,7 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.WINDOWS>> = [
   },
 ];
 
-type WindowsEventCollectionCardProps = PolicyFormComponentCommonProps;
+export type WindowsEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const WindowsEventCollectionCard = memo<WindowsEventCollectionCardProps>((props) => {
   return (
