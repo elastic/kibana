@@ -10,7 +10,7 @@ import { ObserverCodec } from '../ping/observer';
 import { ErrorStateCodec } from '../ping/error_state';
 import { AgentType, MonitorType, PingErrorType, UrlType } from '..';
 
-export const OverviewPingCode = t.intersection([
+export const OverviewPingCodec = t.intersection([
   t.interface({
     '@timestamp': t.string,
     summary: t.partial({
@@ -35,7 +35,7 @@ export const OverviewStatusMetaDataCodec = t.interface({
   status: t.string,
   location: t.string,
   timestamp: t.string,
-  ping: OverviewPingCode,
+  ping: OverviewPingCodec,
 });
 
 export const OverviewPendingStatusMetaDataCodec = t.intersection([
@@ -47,7 +47,7 @@ export const OverviewPendingStatusMetaDataCodec = t.intersection([
   }),
   t.partial({
     timestamp: t.string,
-    ping: OverviewPingCode,
+    ping: OverviewPingCodec,
   }),
 ]);
 
@@ -74,7 +74,7 @@ export const OverviewStatusStateCodec = t.intersection([
   }),
 ]);
 
-export type OverviewPing = t.TypeOf<typeof OverviewPingCode>;
+export type OverviewPing = t.TypeOf<typeof OverviewPingCodec>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusStateCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
