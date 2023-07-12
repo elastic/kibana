@@ -32,6 +32,11 @@
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/rule-data-utils",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/slo-schema",
   ],
   "exclude": ["target/**/*"]
 }
