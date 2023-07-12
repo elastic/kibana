@@ -51,8 +51,6 @@ export const NavigationEmbeddablePanelEditor = ({
   onSave: (input: Partial<NavigationEmbeddableInput>) => void;
   parentDashboard?: DashboardContainer;
 }) => {
-  // const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
-
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
 

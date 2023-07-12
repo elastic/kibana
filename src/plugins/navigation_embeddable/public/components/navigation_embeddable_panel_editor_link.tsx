@@ -26,8 +26,8 @@ import {
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
 } from '../embeddable/types';
+import { fetchDashboard } from './dashboard_link/dashboard_link_tools';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
 
 export const NavigationEmbeddablePanelEditorLink = ({
   link,
@@ -51,7 +51,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
       if (parentDashboardId === link.destination) {
         label = parentDashboardTitle;
       } else {
-        const dashboard = await memoizedFetchDashboard(link.destination);
+        const dashboard = await fetchDashboard(link.destination);
         label = dashboard.attributes.title;
       }
     }

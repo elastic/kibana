@@ -17,7 +17,7 @@ import {
   NavigationEmbeddableLink,
   NavigationLinkInfo,
 } from '../../embeddable/types';
-import { memoizedFetchDashboard } from './dashboard_link_tools';
+import { fetchDashboard } from './dashboard_link_tools';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
 export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
@@ -34,7 +34,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
          * only fetch the dashboard if **absolutely** necessary; i.e. only if the dashboard link doesn't have
          * some custom label, and if it's not the current dashboard (if it is, use `dashboardContainer` instead)
          */
-        return await memoizedFetchDashboard(link.destination);
+        return await fetchDashboard(link.destination);
       }
     }, [link, parentDashboardId]);
 
