@@ -97,6 +97,8 @@ import {
 } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter } from './connector_adapters/types';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -113,6 +115,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
+  registerConnectorAdapter(adapter: ConnectorAdapter): void;
   registerType<
     Params extends RuleTypeParams = RuleTypeParams,
     ExtractedParams extends RuleTypeParams = RuleTypeParams,
@@ -205,6 +208,7 @@ export class AlertingPlugin {
   private inMemoryMetrics: InMemoryMetrics;
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
+  private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -350,6 +354,9 @@ export class AlertingPlugin {
     });
 
     return {
+      registerConnectorAdapter: (adapter: ConnectorAdapter) => {
+        this.connectorAdapterRegistry.register(adapter);
+      },
       registerType: <
         Params extends RuleTypeParams = never,
         ExtractedParams extends RuleTypeParams = never,

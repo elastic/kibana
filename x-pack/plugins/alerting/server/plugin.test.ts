@@ -232,6 +232,27 @@ describe('Alerting Plugin', () => {
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });
     });
+
+    describe('registerConnectorAdapter()', () => {
+      let setup: PluginSetupContract;
+
+      beforeEach(async () => {
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+          generateAlertingConfig()
+        );
+
+        plugin = new AlertingPlugin(context);
+        setup = await plugin.setup(setupMocks, mockPlugins);
+      });
+
+      it('should register a connector adapter', () => {
+        const adapter = { connectorTypeId: '.test' };
+        setup.registerConnectorAdapter(adapter);
+
+        // @ts-expect-error: private properties cannot be accessed
+        expect(plugin.connectorAdapterRegistry.get('.test')).toEqual(adapter);
+      });
+    });
   });
 
   describe('start()', () => {

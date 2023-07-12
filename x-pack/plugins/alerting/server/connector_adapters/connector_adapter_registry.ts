@@ -27,7 +27,7 @@ export class ConnectorAdapterRegistry {
     if (!this.connectorAdapters.has(connectorTypeId)) {
       throw Boom.badRequest(
         i18n.translate(
-          'xpack.actions.connectorAdapterRegistry.get.missingConnectorAdapterErrorMessage',
+          'xpack.alerting.connectorAdapterRegistry.get.missingConnectorAdapterErrorMessage',
           {
             defaultMessage: 'Connector adapter "{connectorTypeId}" is not registered.',
             values: {
