@@ -17,11 +17,9 @@ import {
   EuiSwitchEvent,
   EuiSwitch,
   EuiCallOut,
-  EuiIcon,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalBody,
-  EuiModalHeaderTitle,
 } from '@elastic/eui';
 
 import { createPortal } from 'react-dom';
@@ -29,6 +27,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { AssistantTitle } from './assistant_title';
 import { UpgradeButtons } from '../upgrade/upgrade_buttons';
 import { getMessageFromRawResponse } from './helpers';
 
@@ -78,9 +77,11 @@ const AssistantComponent: React.FC<Props> = ({
     conversations,
     defaultAllow,
     defaultAllowReplacement,
+    docLinks,
     getComments,
     http,
     promptContexts,
+    setLastConversationId,
     title,
     allSystemPrompts,
   } = useAssistantContext();
@@ -136,7 +137,11 @@ const AssistantComponent: React.FC<Props> = ({
         };
   }, [conversations, isAssistantEnabled, selectedConversationId]);
 
-  const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
+  const {
+    data: connectors,
+    isSuccess: areConnectorsFetched,
+    refetch: refetchConnectors,
+  } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
   const defaultProvider = useMemo(
     () =>
@@ -144,6 +149,18 @@ const AssistantComponent: React.FC<Props> = ({
         ?.config?.apiProvider,
     [connectors]
   );
+
+  // Remember last selection for reuse after keyboard shortcut is pressed.
+  // Clear it if there is no connectors
+  useEffect(() => {
+    if (areConnectorsFetched && !connectors?.length) {
+      return setLastConversationId('');
+    }
+
+    if (!currentConversation.excludeFromLastConversationStorage) {
+      setLastConversationId(currentConversation.id);
+    }
+  }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
 
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
   const isDisabled = isWelcomeSetup || !isAssistantEnabled;
@@ -175,9 +192,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
-  const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>(
-    augmentMessageCodeBlocks(currentConversation)
-  );
+  const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
     setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
@@ -365,17 +380,13 @@ const AssistantComponent: React.FC<Props> = ({
     setShowMissingConnectorCallout(!connectorExists);
   }, [connectors, currentConversation]);
 
-  const CodeBlockPortals = useMemo(
+  const createCodeBlockPortals = useCallback(
     () =>
-      messageCodeBlocks.map((codeBlocks: CodeBlockDetails[]) => {
+      messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[]) => {
         return codeBlocks.map((codeBlock: CodeBlockDetails) => {
-          const element: Element = codeBlock.controlContainer as Element;
-
-          return codeBlock.controlContainer != null ? (
-            createPortal(codeBlock.button, element)
-          ) : (
-            <></>
-          );
+          const getElement = codeBlock.getControlContainer;
+          const element = getElement?.();
+          return element ? createPortal(codeBlock.button, element) : <></>;
         });
       }),
     [messageCodeBlocks]
@@ -458,14 +469,7 @@ const AssistantComponent: React.FC<Props> = ({
               justifyContent={'spaceBetween'}
             >
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle>
-                  <EuiFlexGroup alignItems={'center'}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type={currentTitle.titleIcon} size="xl" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{currentTitle.title}</EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiModalHeaderTitle>
+                <AssistantTitle currentTitle={currentTitle} docLinks={docLinks} />
               </EuiFlexItem>
 
               <EuiFlexItem
@@ -531,7 +535,7 @@ const AssistantComponent: React.FC<Props> = ({
         )}
 
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-        {CodeBlockPortals}
+        {createCodeBlockPortals()}
 
         {!isDisabled && (
           <>
