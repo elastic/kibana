@@ -11,7 +11,7 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { OBSERVABILITY_APP_BASE_PATH } from '../../constants';
 
-export const observabilityRulesLocatorID = 'RULES_LOCATOR';
+export const rulesLocatorID = 'RULES_LOCATOR';
 
 export const RULES_PATH = `${OBSERVABILITY_APP_BASE_PATH}/rules`;
 
@@ -27,7 +27,7 @@ export type RulesParams = {
 export interface RulesLocatorParams extends RulesParams, SerializableRecord {}
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
-  public readonly id = observabilityRulesLocatorID;
+  public readonly id = rulesLocatorID;
 
   public readonly getLocation = async ({
     lastResponse = [],

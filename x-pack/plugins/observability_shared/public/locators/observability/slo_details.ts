@@ -10,7 +10,7 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { OBSERVABILITY_APP_BASE_PATH } from '../../constants';
 
 const SLOS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/slos`;
-export const observabilitySloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
+export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SloDetailsParams = {
@@ -24,7 +24,7 @@ export const getSloDetailsPath = (sloId: string) => {
 };
 
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
-  public readonly id = observabilitySloDetailsLocatorID;
+  public readonly id = sloDetailsLocatorID;
 
   public readonly getLocation = async ({ sloId = '' }: SloDetailsLocatorParams) => {
     return {

@@ -29,7 +29,7 @@ interface CreateSLOForm {
   };
 }
 
-export const observabilitySloEditLocatorID = 'SLO_EDIT_LOCATOR';
+export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 
 const SLOS_PATH = `${OBSERVABILITY_APP_BASE_PATH}/slos`;
 
@@ -38,7 +38,7 @@ export type SloEditParams = RecursivePartial<CreateSLOForm>;
 export interface SloEditLocatorParams extends SloEditParams, SerializableRecord {}
 
 export class SloEditLocatorDefinition implements LocatorDefinition<SloEditLocatorParams> {
-  public readonly id = observabilitySloEditLocatorID;
+  public readonly id = sloEditLocatorID;
 
   public readonly getLocation = async (slo: SloEditLocatorParams) => {
     return {
