@@ -10,7 +10,6 @@ import { ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES, ALERT_REASON } from '@kbn/
 import { isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
-  AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
@@ -36,7 +35,6 @@ import {
   AdditionalContext,
   getAlertDetailsUrl,
   getContextForRecoveredAlerts,
-  getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
@@ -56,10 +54,25 @@ export type MetricThresholdRuleTypeState = RuleTypeState & {
   filterQuery?: string;
 };
 export type MetricThresholdAlertState = AlertState; // no specific instance state used
-export type MetricThresholdAlertContext = AlertContext; // no specific instance state used
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type MetricThresholdAlertContext = {
+  alertDetailsUrl: string;
+  alertState: string;
+  group: string;
+  groupByKeys?: object;
+  metric: Record<string, unknown>;
+  originalAlertState?: string;
+  originalAlertStateWasALERT?: boolean;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  originalAlertStateWasNO_DATA?: boolean;
+  reason?: string;
+  timestamp: string; // ISO string
+  threshold?: Record<string, unknown>;
+  value?: Record<string, unknown> | null;
+};
 
-export const FIRED_ACTIONS_ID = 'metrics.threshold.fired';
-export const NO_DATA_ACTIONS_ID = 'metrics.threshold.nodata';
+export const FIRED_ACTIONS_ID = 'threshold.fired';
+export const NO_DATA_ACTIONS_ID = 'threshold.nodata';
 
 type MetricThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
@@ -120,7 +133,7 @@ export const createMetricThresholdExecutor = ({
     });
 
     // TODO: check if we need to use "savedObjectsClient"=> https://github.com/elastic/kibana/issues/159340
-    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, dataViews } = services;
+    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, searchSourceClient } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (
       id,
@@ -138,9 +151,8 @@ export const createMetricThresholdExecutor = ({
           ...flattenAdditionalContext(additionalContext),
         },
       });
-    // TODO: check if we need to use "sourceId"
+
     const { alertOnNoData, alertOnGroupDisappear: _alertOnGroupDisappear } = params as {
-      sourceId?: string;
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
@@ -165,7 +177,6 @@ export const createMetricThresholdExecutor = ({
           reason,
           timestamp,
           value: null,
-          viewInAppUrl: getViewInMetricsAppUrl(basePath, spaceId),
         });
 
         return {
@@ -188,9 +199,9 @@ export const createMetricThresholdExecutor = ({
       alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
         ? state.missingGroups
         : [];
-    // TODO: check the DATA VIEW
-    const defaultDataView = await dataViews.getDefaultDataView();
-    const dataView = defaultDataView?.getIndexPattern();
+
+    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
+    const dataView = initialSearchSource.getField('index')!.getIndexPattern();
     if (!dataView) {
       throw new Error('No matched data view');
     }
@@ -340,7 +351,6 @@ export const createMetricThresholdExecutor = ({
             }
             return formatAlertResult(evaluation).currentValue;
           }),
-          viewInAppUrl: getViewInMetricsAppUrl(basePath, spaceId),
           ...additionalContext,
         });
       }
@@ -374,7 +384,6 @@ export const createMetricThresholdExecutor = ({
         }),
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-        viewInAppUrl: getViewInMetricsAppUrl(basePath, spaceId),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
@@ -399,14 +408,14 @@ export const createMetricThresholdExecutor = ({
   };
 
 export const FIRED_ACTIONS = {
-  id: 'metrics.threshold.fired',
+  id: 'threshold.fired',
   name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.fired', {
     defaultMessage: 'Alert',
   }),
 };
 
 export const NO_DATA_ACTIONS = {
-  id: 'metrics.threshold.nodata',
+  id: 'threshold.nodata',
   name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.nodata', {
     defaultMessage: 'No Data',
   }),

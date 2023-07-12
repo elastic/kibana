@@ -24,7 +24,8 @@ export function KeyValueList({ rows, prependString = '' }: Props) {
                 {row.label}:
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end', overflowWrap: 'anywhere' }}>
-                {`${prependString}row.value`}
+                {prependString}
+                {row.value}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

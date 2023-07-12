@@ -21,6 +21,7 @@ import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import { getNormalizedSeverity } from '../helpers';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
 
@@ -84,14 +85,20 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const createInstallButtonColumn = (
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
-  loadingRules: RuleSignatureId[]
+  loadingRules: RuleSignatureId[],
+  isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (ruleId: RuleSignatureId) => {
     const isRuleInstalling = loadingRules.includes(ruleId);
+    const isInstallButtonDisabled = isRuleInstalling || isDisabled;
     return (
-      <EuiButtonEmpty size="s" disabled={isRuleInstalling} onClick={() => installOneRule(ruleId)}>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isInstallButtonDisabled}
+        onClick={() => installOneRule(ruleId)}
+      >
         {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -105,9 +112,11 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules },
+    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { installOneRule },
   } = useAddPrebuiltRulesTableContext();
+
+  const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
   return useMemo(
     () => [
@@ -130,12 +139,14 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: true,
+        sortable: ({ severity }: RuleInstallationInfoForReview) => getNormalizedSeverity(severity),
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createInstallButtonColumn(installOneRule, loadingRules)] : []),
+      ...(hasCRUDPermissions
+        ? [createInstallButtonColumn(installOneRule, loadingRules, isDisabled)]
+        : []),
     ],
-    [hasCRUDPermissions, installOneRule, loadingRules, showRelatedIntegrations]
+    [hasCRUDPermissions, installOneRule, loadingRules, isDisabled, showRelatedIntegrations]
   );
 };

@@ -34,6 +34,7 @@ export function registerTopNFunctionsSearchRoute({
   router.get(
     {
       path: paths.TopNFunctions,
+      options: { tags: ['access:profiling'] },
       validate: {
         query: querySchema,
       },
@@ -51,16 +52,13 @@ export function registerTopNFunctionsSearchRoute({
           kuery,
         });
 
-        const t0 = Date.now();
         const { stackTraceEvents, stackTraces, executables, stackFrames, samplingRate } =
           await searchStackTraces({
             client: profilingElasticsearchClient,
             filter,
             sampleSize: targetSampleSize,
           });
-        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
 
-        const t1 = Date.now();
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
             stackTraceEvents,
@@ -72,15 +70,17 @@ export function registerTopNFunctionsSearchRoute({
             samplingRate
           );
         });
-        logger.info(`creating topN functions took ${Date.now() - t1} ms`);
-
-        logger.info('returning payload response to client');
 
         return response.ok({
           body: topNFunctions,
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching TopN functions',
+        });
       }
     }
   );

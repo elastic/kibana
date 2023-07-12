@@ -6,12 +6,15 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { invariant } from '../../../../../common/utils/invariant';
 import type { ConfigType } from '../../../../config';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
+  SecuritySolutionPluginCoreStartDependencies,
   SecuritySolutionPluginSetupDependencies,
+  SecuritySolutionPluginStartDependencies,
 } from '../../../../plugin_contract';
 
 import type { IDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client_interface';
@@ -36,24 +39,53 @@ import type {
 
 export const createRuleMonitoringService = (
   config: ConfigType,
-  logger: Logger,
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  plugins: SecuritySolutionPluginSetupDependencies
+  logger: Logger
 ): IRuleMonitoringService => {
+  let coreSetup: SecuritySolutionPluginCoreSetupDependencies | null = null;
+  let pluginsSetup: SecuritySolutionPluginSetupDependencies | null = null;
+  let coreStart: SecuritySolutionPluginCoreStartDependencies | null = null;
+
   return {
-    registerEventLogProvider: () => {
+    setup: (
+      core: SecuritySolutionPluginCoreSetupDependencies,
+      plugins: SecuritySolutionPluginSetupDependencies
+    ): void => {
+      coreSetup = core;
+      pluginsSetup = plugins;
+
       registerEventLogProvider(plugins.eventLog);
+    },
+
+    start: (
+      core: SecuritySolutionPluginCoreStartDependencies,
+      plugins: SecuritySolutionPluginStartDependencies
+    ): void => {
+      coreStart = core;
     },
 
     createDetectionEngineHealthClient: (
       params: DetectionEngineHealthClientParams
     ): IDetectionEngineHealthClient => {
+      invariant(coreStart, 'Dependencies of RuleMonitoringService are not initialized');
+
       const { rulesClient, eventLogClient, currentSpaceId } = params;
+      const { savedObjects } = coreStart;
+
       const ruleObjectsHealthClient = createRuleObjectsHealthClient(rulesClient);
       const eventLogHealthClient = createEventLogHealthClient(eventLogClient);
+
+      // Create an importer that can import saved objects on behalf of the internal Kibana user.
+      // This is important because we want to let users with access to Security Solution
+      // to be able to install our internal assets like rule monitoring dashboard without
+      // the need to configure the additional `Saved Objects Management: All` privilege.
+      const savedObjectsRepository = savedObjects.createInternalRepository();
+      const savedObjectsClient = new SavedObjectsClient(savedObjectsRepository);
+      const savedObjectsImporter = savedObjects.createImporter(savedObjectsClient);
+
       return createDetectionEngineHealthClient(
         ruleObjectsHealthClient,
         eventLogHealthClient,
+        savedObjectsImporter,
         logger,
         currentSpaceId
       );
@@ -75,6 +107,8 @@ export const createRuleMonitoringService = (
         async () => {
           const { savedObjectsClient, context, ruleMonitoringService, ruleResultService } = params;
 
+          invariant(coreSetup, 'Dependencies of RuleMonitoringService are not initialized');
+          invariant(pluginsSetup, 'Dependencies of RuleMonitoringService are not initialized');
           invariant(ruleMonitoringService, 'ruleMonitoringService required for detection rules');
           invariant(ruleResultService, 'ruleResultService required for detection rules');
 
@@ -83,11 +117,11 @@ export const createRuleMonitoringService = (
           const ruleExecutionSettings = await fetchRuleExecutionSettings(
             config,
             childLogger,
-            core,
+            coreSetup,
             savedObjectsClient
           );
 
-          const eventLogWriter = createEventLogWriter(plugins.eventLog);
+          const eventLogWriter = createEventLogWriter(pluginsSetup.eventLog);
 
           return createRuleExecutionLogClientForExecutors(
             ruleExecutionSettings,

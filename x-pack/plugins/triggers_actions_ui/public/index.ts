@@ -148,3 +148,5 @@ export const getNotifyWhenOptions = async () => {
 };
 
 export { transformRule } from './application/lib/rule_api/common_transformations';
+
+export { validateActionFilterQuery } from './application/lib/value_validators';

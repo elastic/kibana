@@ -28,6 +28,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/core-http-server",
     "@kbn/security-plugin",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

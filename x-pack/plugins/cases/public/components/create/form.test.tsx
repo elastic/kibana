@@ -118,6 +118,7 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="categories-list"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeFalsy();
   });
 
@@ -133,6 +134,7 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="categories-list"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeTruthy();
   });
 

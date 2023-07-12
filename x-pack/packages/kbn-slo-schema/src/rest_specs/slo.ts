@@ -12,8 +12,10 @@ import {
   historicalSummarySchema,
   indicatorSchema,
   indicatorTypesArraySchema,
+  indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  histogramIndicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
   previewDataSchema,
@@ -22,6 +24,10 @@ import {
   summarySchema,
   tagsSchema,
   timeWindowSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  apmTransactionDurationIndicatorSchema,
+  durationType,
+  timeWindowTypeSchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -140,6 +146,28 @@ const getSLODiagnosisParamsSchema = t.type({
   path: t.type({ id: t.string }),
 });
 
+const getSLOBurnRatesResponseSchema = t.type({
+  burnRates: t.array(
+    t.type({
+      name: t.string,
+      burnRate: t.number,
+      sli: t.number,
+    })
+  ),
+});
+
+const getSLOBurnRatesParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+  body: t.type({
+    windows: t.array(
+      t.type({
+        name: t.string,
+        duration: durationType,
+      })
+    ),
+  }),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -163,12 +191,17 @@ type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryRe
 type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
-type GetPreviewDataResponse = t.TypeOf<typeof getPreviewDataResponseSchema>;
+type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
 
-type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
-
+type GetSLOBurnRatesResponse = t.OutputOf<typeof getSLOBurnRatesResponseSchema>;
+type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
+type TimeWindow = t.OutputOf<typeof timeWindowTypeSchema>;
+type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;
 type Indicator = t.OutputOf<typeof indicatorSchema>;
+type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
+type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
+type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
 export {
@@ -188,6 +221,8 @@ export {
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
   updateSLOResponseSchema,
+  getSLOBurnRatesParamsSchema,
+  getSLOBurnRatesResponseSchema,
 };
 export type {
   BudgetingMethod,
@@ -208,7 +243,13 @@ export type {
   UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+  GetSLOBurnRatesResponse,
+  IndicatorType,
   Indicator,
   MetricCustomIndicator,
+  HistogramIndicator,
   KQLCustomIndicator,
+  TimeWindow,
 };

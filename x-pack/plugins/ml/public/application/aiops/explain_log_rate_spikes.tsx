@@ -20,7 +20,7 @@ import { MlPageHeader } from '../components/page_header';
 export const ExplainLogRateSpikesPage: FC = () => {
   const { services } = useMlKibana();
 
-  const { currentDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
+  const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
   return (
     <>

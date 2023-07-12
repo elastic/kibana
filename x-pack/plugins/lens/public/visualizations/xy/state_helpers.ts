@@ -83,7 +83,7 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isAnnotationsLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
-  if (isDataLayer(layer) && layer.splitAccessor) {
+  if (isDataLayer(layer) && layer.splitAccessor && !layer.collapseFn) {
     return null;
   }
   return (

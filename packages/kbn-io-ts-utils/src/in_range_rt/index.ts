@@ -16,11 +16,15 @@ export interface InRangeBrand {
 export type InRange = rt.Branded<number, InRangeBrand>;
 
 export const inRangeRt = (start: number, end: number) =>
-  rt.brand(
-    rt.number, // codec
-    (n): n is InRange => n >= start && n <= end,
-    // refinement of the number type
-    'InRange' // name of this codec
+  new rt.Type<number, number>(
+    'InRange',
+    (input: unknown): input is number =>
+      typeof input === 'number' && input >= start && input <= end,
+    (input: unknown, context: rt.Context) =>
+      typeof input === 'number' && input >= start && input <= end
+        ? rt.success(input)
+        : rt.failure(input, context),
+    rt.identity
   );
 
 export const inRangeFromStringRt = (start: number, end: number) => {

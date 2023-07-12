@@ -10,10 +10,8 @@ import { pick } from 'lodash';
 import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EuiCallOut } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
-import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -22,6 +20,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
+import { timeSeriesDataViewWarning } from '../../../application/utils/time_series_dataview_check';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
@@ -68,23 +67,10 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
 }) => {
   if (!dataView) return null;
 
-  if (!dataView.isTimeBased()) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
-          values: { dataViewTitle: dataView.getName() },
-        })}
-        color="danger"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationDescription', {
-            defaultMessage: 'Log rate spike analysis only runs over time-based indices.',
-          })}
-        </p>
-      </EuiCallOut>
-    );
+  const warning = timeSeriesDataViewWarning(dataView, 'explain_log_rate_spikes');
+
+  if (warning !== null) {
+    return <>{warning}</>;
   }
 
   const datePickerDeps = {

@@ -48,7 +48,6 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
       defaultMessage: 'Circle',
     }),
     icon: IconCircle,
-    canFill: true,
   },
 
   {
@@ -106,6 +105,5 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
     }),
     icon: IconTriangle,
     shouldRotate: true,
-    canFill: true,
   },
 ];

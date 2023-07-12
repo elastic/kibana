@@ -234,6 +234,19 @@ export const useCasesColumns = ({
     });
   }
 
+  columns.push({
+    field: 'category',
+    name: i18n.CATEGORY,
+    sortable: true,
+    render: (category: CaseUI['category']) => {
+      if (category != null) {
+        return <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>;
+      }
+      return getEmptyTagValue();
+    },
+    width: '100px',
+  });
+
   if (filterStatus === CaseStatuses.closed) {
     columns.push({
       field: 'closedAt',
@@ -330,6 +343,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
+    width: '90px',
   });
 
   if (isSelectorView) {

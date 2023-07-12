@@ -219,6 +219,12 @@ describe('When using EPM `get` services', () => {
           version: '1.0.0',
           title: 'Profiler Collector',
         } as any,
+        {
+          id: 'fleet_server',
+          name: 'fleet_server',
+          version: '1.0.0',
+          title: 'Fleet Server',
+        } as any,
       ]);
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
       MockRegistry.fetchInfo.mockResolvedValue({} as any);
@@ -310,6 +316,7 @@ owner: elastic`,
             },
           },
         },
+        { id: 'fleet_server', name: 'fleet_server', title: 'Fleet Server', version: '1.0.0' },
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
     });
@@ -393,6 +400,34 @@ owner: elastic`,
         savedObjectsClient: soClient,
       });
       expect(packages.find((item) => item.id === 'profiler_collector')).toBeUndefined();
+    });
+
+    it('should hide fleet_server if internal.fleetServerStandalone', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          fleetServerStandalone: true,
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'fleet_server',
+            attributes: {
+              name: 'fleet_server',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      const packages = await getPackages({
+        savedObjectsClient: soClient,
+      });
+      expect(packages.find((item) => item.id === 'fleet_server')).toBeUndefined();
     });
   });
 

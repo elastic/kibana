@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   ActionConnectorFieldsProps,
+  ConfigFieldSchema,
   SecretsFieldSchema,
   SimpleConnectorForm,
   useKibana,
@@ -15,6 +16,8 @@ import {
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as i18n from './translations';
 
 const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => [
@@ -33,18 +36,31 @@ const getSecretsFormSchema = (docLinks: DocLinksStart): SecretsFieldSchema[] => 
   },
 ];
 
-const SlackActionFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const NO_SCHEMA: ConfigFieldSchema[] = [];
+
+export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
+  readOnly,
+  isEdit,
+}) => {
   const { docLinks } = useKibana().services;
 
   return (
     <SimpleConnectorForm
       isEdit={isEdit}
       readOnly={readOnly}
-      configFormSchema={[]}
+      configFormSchema={NO_SCHEMA}
       secretsFormSchema={getSecretsFormSchema(docLinks)}
     />
   );
 };
+
+export const simpleConnectorQueryClient = new QueryClient();
+
+const SlackActionFields: React.FC<ActionConnectorFieldsProps> = (props) => (
+  <QueryClientProvider client={simpleConnectorQueryClient}>
+    <SlackActionFieldsComponents {...props} />
+  </QueryClientProvider>
+);
 
 // eslint-disable-next-line import/no-default-export
 export { SlackActionFields as default };

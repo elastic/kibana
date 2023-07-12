@@ -31,6 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
+    'sampleRecurringTaskWithInvalidIndirectParam',
+    'sampleOneTimeTaskWithInvalidIndirectParam',
+    'sampleTaskWithParamsSchema',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -105,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',
         'alerting:xpack.synthetics.alerts.monitorStatus',
+        'alerting:xpack.synthetics.alerts.tls',
         'alerting:xpack.uptime.alerts.durationAnomaly',
         'alerting:xpack.uptime.alerts.monitorStatus',
         'alerting:xpack.uptime.alerts.tls',

@@ -7,8 +7,8 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { getCollectorPolicy } from './fleet_policies';
-import { getApmPolicy } from './get_apm_policy';
 
 export interface SetupDataCollectionInstructions {
   collector: {
@@ -18,34 +18,30 @@ export interface SetupDataCollectionInstructions {
   symbolizer: {
     host?: string;
   };
+  profilerAgent: {
+    version: string;
+  };
 }
 
 export async function getSetupInstructions({
   packagePolicyClient,
   soClient,
+  apmServerHost,
 }: {
   packagePolicyClient: PackagePolicyClient;
   soClient: SavedObjectsClientContract;
+  apmServerHost?: string;
 }): Promise<SetupDataCollectionInstructions> {
-  const [collectorPolicy, apmPolicy] = await Promise.all([
-    getCollectorPolicy({ packagePolicyClient, soClient }),
-    getApmPolicy({ packagePolicyClient, soClient }),
-  ]);
+  const profilerAgent = await fetchFindLatestPackageOrThrow('profiler_agent', { prerelease: true });
+  const collectorPolicy = await getCollectorPolicy({ packagePolicyClient, soClient });
 
   if (!collectorPolicy) {
     throw new Error('Could not find Collector policy');
   }
 
-  if (!apmPolicy) {
-    throw new Error('Could not find APM policy');
-  }
-
   const collectorVars = collectorPolicy.inputs[0].vars;
-  const apmServerVars = apmPolicy.inputs[0].vars;
-
-  const apmHost: string | undefined = apmServerVars?.host?.value;
-  const symbolizerHost = apmHost?.replace(/\.apm\./, '.symbols.');
-  const collectorHost = apmHost?.replace(/\.apm\./, '.profiling.')?.replace('https://', '');
+  const symbolizerHost = apmServerHost?.replace(/\.apm\./, '.symbols.');
+  const collectorHost = apmServerHost?.replace(/\.apm\./, '.profiling.')?.replace('https://', '');
 
   return {
     collector: {
@@ -54,6 +50,9 @@ export async function getSetupInstructions({
     },
     symbolizer: {
       host: symbolizerHost,
+    },
+    profilerAgent: {
+      version: profilerAgent.version,
     },
   };
 }

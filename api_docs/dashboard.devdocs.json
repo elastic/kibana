@@ -344,7 +344,7 @@
             "signature": [
               "((result: ",
               "LoadDashboardReturn",
-              ") => boolean) | undefined"
+              ") => \"valid\" | \"invalid\" | \"redirected\") | undefined"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
@@ -367,6 +367,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardCreationOptions.isEmbeddedExternally",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEmbeddedExternally",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1824,14 +1838,6 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
           " | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
@@ -1840,7 +1846,15 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; executionContext?: ",
+          "[] | undefined; refreshInterval?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.RefreshInterval",
+            "text": "RefreshInterval"
+          },
+          " | undefined; executionContext?: ",
           {
             "pluginId": "@kbn/core-execution-context-common",
             "scope": "common",

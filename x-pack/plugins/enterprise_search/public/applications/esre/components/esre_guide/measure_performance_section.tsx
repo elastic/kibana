@@ -6,10 +6,24 @@
  */
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
+import { generatePath } from 'react-router-dom';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSteps,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { ANALYTICS_PLUGIN } from '../../../../../common/constants';
+import { docLinks } from '../../../shared/doc_links';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
@@ -19,7 +33,23 @@ const steps: EuiContainedStepProps[] = [
     children: (
       <FormattedMessage
         id="xpack.enterpriseSearch.esre.measurePerformanceSection.step1.description"
-        defaultMessage="Visit Behavioral Analytics and create your first collection"
+        defaultMessage="Visit {behavioralAnalytics} and create your first collection."
+        values={{
+          behavioralAnalytics: (
+            <EuiLinkTo
+              data-telemetry-id="entSearch-esre-measurePerformance-behavioralAnalyticsLink"
+              to={generatePath(ANALYTICS_PLUGIN.URL)}
+              shouldNotCreateHref
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.esre.measurePerformanceSection.step1.behavioralAnalyticsLinkText',
+                {
+                  defaultMessage: 'Behavioral Analytics',
+                }
+              )}
+            </EuiLinkTo>
+          ),
+        }}
       />
     ),
     status: 'incomplete',
@@ -69,7 +99,24 @@ export const MeasurePerformanceSection: React.FC = () => (
             <p>
               <FormattedMessage
                 id="xpack.enterpriseSearch.esre.measurePerformanceSection.description"
-                defaultMessage="Use Behavioral Analytics dashboards and tools to visualize user behavior and measure the impact of your changes."
+                defaultMessage="Use {behavioralAnalytics} dashboards and tools to visualize user behavior and measure the impact of your changes."
+                values={{
+                  behavioralAnalytics: (
+                    <EuiLink
+                      data-telemetry-id="entSearch-esre-measurePerformance-behavioralAnalyticsDocsLink"
+                      target="_blank"
+                      href={docLinks.behavioralAnalytics}
+                      external
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.esre.measurePerformanceSection.behavioralAnalyticsLinkText',
+                        {
+                          defaultMessage: 'Behavioral Analytics',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
               />
             </p>
           </EuiText>

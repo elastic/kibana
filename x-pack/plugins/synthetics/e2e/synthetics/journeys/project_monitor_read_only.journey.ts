@@ -94,6 +94,9 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
         status: {
           enabled: !(originalMonitorConfiguration?.alert?.status?.enabled as boolean),
         },
+        tls: {
+          enabled: originalMonitorConfiguration?.alert?.tls?.enabled as boolean,
+        },
       },
       enabled: !originalMonitorConfiguration?.enabled,
     });

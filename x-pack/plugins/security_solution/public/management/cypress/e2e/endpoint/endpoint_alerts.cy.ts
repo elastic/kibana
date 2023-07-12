@@ -42,7 +42,7 @@ describe('Endpoint generated alerts', () => {
 
   after(() => {
     if (createdHost) {
-      cy.task('destroyEndpointHost', createdHost).then(() => {});
+      cy.task('destroyEndpointHost', createdHost);
     }
 
     if (indexedPolicy) {
@@ -73,6 +73,9 @@ describe('Endpoint generated alerts', () => {
         parameters: {
           command: executeMaliciousCommand,
         },
+      },
+      headers: {
+        'Elastic-Api-Version': '2023-10-31',
       },
     })
       .then((response) => waitForActionToComplete(response.body.data.id))

@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { Vulnerabilities } from '../vulnerabilities';
@@ -33,64 +33,77 @@ export const Findings = () => {
     history.push({ pathname: findingsNavigation.findings_default.path });
   };
 
+  const isResourcesVulnerabilitiesPage = matchPath(location.pathname, {
+    path: findingsNavigation.resource_vulnerabilities.path,
+  })?.isExact;
+
+  const isResourcesFindingsPage = matchPath(location.pathname, {
+    path: findingsNavigation.resource_findings.path,
+  })?.isExact;
+
+  const showHeader = !isResourcesVulnerabilitiesPage && !isResourcesFindingsPage;
+
   const isVulnerabilitiesTabSelected = (pathname: string) => {
     return (
       pathname === findingsNavigation.vulnerabilities.path ||
-      pathname === findingsNavigation.vulnerabilities_by_resource.path ||
-      pathname === findingsNavigation.resource_vulnerabilities.path
+      pathname === findingsNavigation.vulnerabilities_by_resource.path
     );
   };
 
   return (
     <>
-      <EuiTitle size="l">
-        <h1>
-          <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
-        </h1>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiTabs size="l">
-        <EuiTab
-          key="vuln_mgmt"
-          onClick={navigateToVulnerabilitiesTab}
-          isSelected={isVulnerabilitiesTabSelected(location.pathname)}
-        >
-          <EuiFlexGroup responsive={false} alignItems="center" direction="row" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.csp.findings.tabs.vulnerabilities"
-                defaultMessage="Vulnerabilities"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                css={css`
-                  display: block;
-                `}
-                label="Beta"
-                tooltipContent={
+      {showHeader && (
+        <>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
+            </h1>
+          </EuiTitle>
+          <EuiSpacer />
+          <EuiTabs size="l">
+            <EuiTab
+              key="vuln_mgmt"
+              onClick={navigateToVulnerabilitiesTab}
+              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <EuiFlexGroup responsive={false} alignItems="center" direction="row" gutterSize="s">
+                <EuiFlexItem grow={false}>
                   <FormattedMessage
-                    id="xpack.csp.findings.betaLabel"
-                    defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features."
+                    id="xpack.csp.findings.tabs.vulnerabilities"
+                    defaultMessage="Vulnerabilities"
                   />
-                }
-                tooltipPosition="bottom"
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    css={css`
+                      display: block;
+                    `}
+                    label="Beta"
+                    tooltipContent={
+                      <FormattedMessage
+                        id="xpack.csp.findings.betaLabel"
+                        defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features."
+                      />
+                    }
+                    tooltipPosition="bottom"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTab>
+            <EuiTab
+              key="configurations"
+              onClick={navigateToConfigurationsTab}
+              isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
+            >
+              <FormattedMessage
+                id="xpack.csp.findings.tabs.misconfigurations"
+                defaultMessage="Misconfigurations"
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTab>
-        <EuiTab
-          key="configurations"
-          onClick={navigateToConfigurationsTab}
-          isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
-        >
-          <FormattedMessage
-            id="xpack.csp.findings.tabs.misconfigurations"
-            defaultMessage="Misconfigurations"
-          />
-        </EuiTab>
-      </EuiTabs>
-      <Switch>
+            </EuiTab>
+          </EuiTabs>
+        </>
+      )}
+      <Routes>
         <Route
           exact
           path={cloudPosturePages.findings.path}
@@ -112,7 +125,7 @@ export const Findings = () => {
         />
         {/* Redirect to default findings page if no match */}
         <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
-      </Switch>
+      </Routes>
     </>
   );
 };

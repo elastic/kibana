@@ -53,7 +53,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
 }) => {
   const timefilter = useTimefilter();
   const { from, to } = getTimeFilterRange(timefilter);
-  const { currentDataView: dataView } = useDataSource();
+  const { selectedDataView: dataView } = useDataSource();
 
   const jobPrefixValidator = useMemo(
     () =>
@@ -194,12 +194,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
         {!useFullIndexData && (
           <>
             <EuiSpacer size="m" />
-            <TimeRangePicker
-              setTimeRange={(value) => {
-                setTimeRange(value);
-              }}
-              timeRange={timeRange}
-            />
+            <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
           </>
         )}
         <EuiSpacer size="l" />

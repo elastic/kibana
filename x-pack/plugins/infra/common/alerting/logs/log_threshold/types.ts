@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import { persistedLogViewReferenceRT } from '../../../log_views';
+import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';

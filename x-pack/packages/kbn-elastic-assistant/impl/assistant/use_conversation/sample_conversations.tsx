@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Conversation } from '../../assistant_context/types';
+import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from '../../content/prompts/welcome/translations';
 import {
   DEFAULT_CONVERSATION_TITLE,
@@ -126,12 +126,19 @@ export const BASE_CONVERSATIONS: Record<string, Conversation> = {
           stream: true,
         },
       },
-      // {
-      //   role: 'assistant',
-      //   content: i18n.WELCOME_NO_CONNECTOR_PRIVILEGES,
-      //   timestamp: '',
-      // },
     ],
     apiConfig: {},
   },
 };
+
+export const enterpriseMessaging: Message[] = [
+  {
+    role: 'assistant',
+    content: i18n.ENTERPRISE,
+    timestamp: '',
+    presentation: {
+      delay: 2 * 1000,
+      stream: true,
+    },
+  },
+];

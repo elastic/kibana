@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -14,12 +17,22 @@ import {
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
+import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
+import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
 
 export interface AddPrebuiltRulesTableState {
   /**
    * Rules available to be installed
    */
   rules: RuleInstallationInfoForReview[];
+  /**
+   * Rules to display in table after applying filters
+   */
+  filteredRules: RuleInstallationInfoForReview[];
+  /**
+   * Currently selected table filter
+   */
+  filterOptions: AddPrebuiltRulesTableFilterOptions;
   /**
    * All unique tags for all rules
    */
@@ -36,6 +49,11 @@ export interface AddPrebuiltRulesTableState {
    * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
   isRefetching: boolean;
+  /**
+   * Is true when installing security_detection_rules
+   * package in background
+   */
+  isUpgradingSecurityPackages: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -55,6 +73,7 @@ export interface AddPrebuiltRulesTableActions {
   installOneRule: (ruleId: RuleSignatureId) => void;
   installAllRules: () => void;
   installSelectedRules: () => void;
+  setFilterOptions: Dispatch<SetStateAction<AddPrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleInstallationInfoForReview[]) => void;
 }
 
@@ -75,6 +94,15 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
 
+  const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
+    filter: '',
+    tags: [],
+  });
+
+  const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
+
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+
   const {
     data: { rules, stats: { tags } } = {
       rules: [],
@@ -88,6 +116,12 @@ export const AddPrebuiltRulesTableContextProvider = ({
   } = usePrebuiltRulesInstallReview({
     refetchInterval: 60000, // Refetch available rules for installation every minute
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+    // Fetch rules to install only after background installation of security_detection_rules package is complete
+    enabled: Boolean(
+      !isUpgradingSecurityPackages &&
+        prebuiltRulesStatus &&
+        prebuiltRulesStatus.num_prebuilt_rules_total_in_package > 0
+    ),
   });
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
@@ -135,6 +169,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const actions = useMemo(
     () => ({
+      setFilterOptions,
       installAllRules,
       installOneRule,
       installSelectedRules,
@@ -144,15 +179,20 @@ export const AddPrebuiltRulesTableContextProvider = ({
     [installAllRules, installOneRule, installSelectedRules, refetch]
   );
 
+  const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
+
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
     return {
       state: {
         rules,
+        filteredRules,
+        filterOptions,
         tags,
         isFetched,
         isLoading,
         loadingRules,
         isRefetching,
+        isUpgradingSecurityPackages,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -160,11 +200,14 @@ export const AddPrebuiltRulesTableContextProvider = ({
     };
   }, [
     rules,
+    filteredRules,
+    filterOptions,
     tags,
     isFetched,
     isLoading,
     loadingRules,
     isRefetching,
+    isUpgradingSecurityPackages,
     selectedRules,
     dataUpdatedAt,
     actions,
