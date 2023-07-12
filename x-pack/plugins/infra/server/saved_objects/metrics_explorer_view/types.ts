@@ -55,7 +55,7 @@ const metricExplorerViewsSavedObjectStateRT = rt.type({
   options: metricsExplorerSavedObjectOptionsRT,
 });
 
-const metricsExplorerViewASavedObjectAtttributesRT = rt.intersection([
+const metricsExplorerViewSavedObjectAttributesRT = rt.intersection([
   metricExplorerViewsSavedObjectStateRT,
   rt.type({
     name: nonEmptyStringRt,
@@ -66,7 +66,7 @@ const metricsExplorerViewASavedObjectAtttributesRT = rt.intersection([
 export const metricsExplorerViewSavedObjectRT = rt.intersection([
   rt.type({
     id: rt.string,
-    attributes: metricsExplorerViewASavedObjectAtttributesRT,
+    attributes: metricsExplorerViewSavedObjectAttributesRT,
   }),
   rt.partial({
     version: rt.string,
