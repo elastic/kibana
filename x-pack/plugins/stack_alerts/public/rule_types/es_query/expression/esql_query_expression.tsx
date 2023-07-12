@@ -14,11 +14,13 @@ import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
-import { rowToDocument, toEsResult, useTriggerUiActionServices } from '../util';
+import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
+import { toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
@@ -62,8 +64,7 @@ export const EsqlQueryExpression: React.FC<
   };
   useEffect(() => {
     setDefaultExpressionValues();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const onTestQuery = useCallback(async () => {
     const window = `${timeWindowSize}${timeWindowUnit}`;
@@ -78,36 +79,38 @@ export const EsqlQueryExpression: React.FC<
     }
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    const table = await fetchFieldsFromESQL(esqlQuery, expressions, {
+    const table: Datatable = await fetchFieldsFromESQL(esqlQuery, expressions, {
       from: new Date(now - timeWindow).toISOString(),
       to: new Date(now).toISOString(),
     });
-    return table
-      ? {
-          testResults: parseAggregationResults({
-            isCountAgg: false,
-            isGroupAgg: true,
-            esResult: {
-              took: 0,
-              timed_out: false,
-              _shards: { failed: 0, successful: 0, total: 0 },
-              hits: { hits: [] },
-              aggregations: toEsResult(table),
-            },
-          }),
-          isGrouped: false,
-          timeWindow: window,
-          rawResults: {
-            cols: table.columns.map((col) => ({
-              id: col.id,
-              field: col.id,
-              name: col.name,
-              actions: false,
-            })),
-            rows: table.rows.slice(0, 5).map((row) => rowToDocument(table.columns, row)),
+    if (table) {
+      const esqlTable = transformDatatableToEsqlTable(table);
+      const hits = toEsQueryHits(esqlTable);
+      return {
+        testResults: parseAggregationResults({
+          isCountAgg: true,
+          isGroupAgg: false,
+          esResult: {
+            took: 0,
+            timed_out: false,
+            _shards: { failed: 0, successful: 0, total: 0 },
+            hits,
           },
-        }
-      : emptyResult;
+        }),
+        isGrouped: false,
+        timeWindow: window,
+        rawResults: {
+          cols: esqlTable.columns.map((col) => ({
+            id: col.name,
+            field: col.name,
+            name: col.name,
+            actions: false,
+          })),
+          rows: hits.hits.slice(0, 5),
+        },
+      };
+    }
+    return emptyResult;
   }, [timeWindowSize, timeWindowUnit, currentRuleParams, esqlQuery, expressions]);
 
   return (

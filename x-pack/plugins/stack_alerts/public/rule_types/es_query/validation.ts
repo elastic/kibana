@@ -250,8 +250,7 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
    * It's important to report searchSource rule related errors only into errors.searchConfiguration prop.
    * For example errors.index is a mistake to report searchSource rule related errors. It will lead to issues.
    */
-  const isSearchSource = isSearchSourceRule(ruleParams);
-  if (isSearchSource) {
+  if (isSearchSourceRule(ruleParams)) {
     validationResult.errors = {
       ...validationResult.errors,
       ...validateSearchSourceParams(ruleParams),
@@ -259,8 +258,7 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
     return validationResult;
   }
 
-  const isEsqlQuery = isEsqlQueryRule(ruleParams);
-  if (isEsqlQuery) {
+  if (isEsqlQueryRule(ruleParams)) {
     validationResult.errors = {
       ...validationResult.errors,
       ...validateEsqlQueryParams(ruleParams),
