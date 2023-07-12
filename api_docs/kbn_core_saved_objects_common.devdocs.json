@@ -2344,14 +2344,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/common/search/search_source/extract_references.ts"
           },
           {
