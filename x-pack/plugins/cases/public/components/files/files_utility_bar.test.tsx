@@ -16,6 +16,7 @@ import { FilesUtilityBar } from './files_utility_bar';
 const defaultProps = {
   caseId: 'foobar',
   onSearch: jest.fn(),
+  onSearchType: jest.fn(),
 };
 
 describe('FilesUtilityBar', () => {

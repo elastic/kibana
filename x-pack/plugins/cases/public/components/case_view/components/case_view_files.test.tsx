@@ -65,14 +65,14 @@ describe('Case View Page files tab', () => {
     await waitFor(() =>
       expect(useGetCaseFilesMock).toHaveBeenCalledWith({
         caseId: basicCase.id,
-        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page + 1,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
         perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
       })
     );
   });
 
   it('changing perPage value triggers calls to useGetCaseFiles', async () => {
-    const targetPagination = 50;
+    const targetPagination = 10;
 
     appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
@@ -108,6 +108,7 @@ describe('Case View Page files tab', () => {
         page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
         perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
         searchTerm: 'Foobar',
+        searchByType: [],
       })
     );
   });

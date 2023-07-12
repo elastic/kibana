@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
+import { TypeFilterPanel } from '@kbn/content-management-table-list-view-table/src/components/type_filter_panel';
 import { AddFile } from './add_file';
 
 import * as i18n from './translations';
@@ -14,9 +15,10 @@ import * as i18n from './translations';
 interface FilesUtilityBarProps {
   caseId: string;
   onSearch: (newSearch: string) => void;
+  onSearchType: (newSearch: string[]) => void;
 }
 
-export const FilesUtilityBar = ({ caseId, onSearch }: FilesUtilityBarProps) => {
+export const FilesUtilityBar = ({ caseId, onSearch, onSearchType }: FilesUtilityBarProps) => {
   return (
     <EuiFlexGroup alignItems="center">
       <AddFile caseId={caseId} />
@@ -29,6 +31,7 @@ export const FilesUtilityBar = ({ caseId, onSearch }: FilesUtilityBarProps) => {
           data-test-subj="cases-files-search"
         />
       </EuiFlexItem>
+      <TypeFilterPanel onSearch={onSearchType} />
     </EuiFlexGroup>
   );
 };

@@ -57,13 +57,25 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
   );
 
   const onSearchChange = useCallback(
-    (newSearch) => {
+    (newSearch: string) => {
       const trimSearch = newSearch.trim();
       if (!isEqual(trimSearch, filteringOptions.searchTerm)) {
         setFilteringOptions({
           ...filteringOptions,
           searchTerm: trimSearch,
         });
+      }
+    },
+    [filteringOptions]
+  );
+
+  const onSearchTypeChange = useCallback(
+    (newSearch: string[]) => {
+      if (!isEqual(newSearch, filteringOptions.searchByType)) {
+        setFilteringOptions((prevOptions) => ({
+          ...prevOptions,
+          searchByType: newSearch,
+        }));
       }
     },
     [filteringOptions]
@@ -86,7 +98,11 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />
         <EuiFlexGroup>
           <EuiFlexItem>
-            <FilesUtilityBar caseId={caseData.id} onSearch={onSearchChange} />
+            <FilesUtilityBar
+              caseId={caseData.id}
+              onSearch={onSearchChange}
+              onSearchType={onSearchTypeChange}
+            />
             <FilesTable
               caseId={caseData.id}
               isLoading={isLoading}
