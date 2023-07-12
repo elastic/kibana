@@ -22,11 +22,21 @@ journey('OverviewScrolling', async ({ page, params }) => {
   const retry: RetryService = params.getService('retry');
 
   const listOfRequests: string[] = [];
+  const expected = [
+    'http://localhost:5620/internal/synthetics/service/enablement',
+    'http://localhost:5620/internal/uptime/dynamic_settings',
+    'http://localhost:5620/internal/synthetics/monitor/filters',
+    'http://localhost:5620/internal/uptime/service/locations',
+    'http://localhost:5620/internal/synthetics/overview?sortField=status&sortOrder=asc&',
+    'http://localhost:5620/internal/synthetics/overview_status?&scopeStatusByLocation=true',
+    'http://localhost:5620/internal/synthetics/service/monitors?perPage=10&page=1&sortOrder=asc&sortField=name.keyword&',
+    'http://localhost:5620/internal/synthetics/enable_default_alerting',
+  ];
 
   before(async () => {
     page.on('request', (request) => {
       const url = request.url();
-      if (url.includes('/synthetics/') || url.includes('/uptime/')) {
+      if (url.includes('/internal/synthetics/') || url.includes('/internal/uptime/')) {
         listOfRequests.push(request.url());
       }
     });
@@ -67,7 +77,7 @@ journey('OverviewScrolling', async ({ page, params }) => {
     assertUnique('/service/monitors');
     assertUnique('/monitor/filters');
 
-    expect(listOfRequests.length).toBe(16);
+    expect(listOfRequests).toEqual(expected);
   });
 
   step('scroll until you see showing all monitors', async () => {
