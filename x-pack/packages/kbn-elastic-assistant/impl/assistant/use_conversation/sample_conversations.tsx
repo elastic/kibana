@@ -126,11 +126,6 @@ export const BASE_CONVERSATIONS: Record<string, Conversation> = {
           stream: true,
         },
       },
-      // {
-      //   role: 'assistant',
-      //   content: i18n.WELCOME_NO_CONNECTOR_PRIVILEGES,
-      //   timestamp: '',
-      // },
     ],
     apiConfig: {},
   },
