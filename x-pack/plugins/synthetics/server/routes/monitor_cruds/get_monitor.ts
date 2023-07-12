@@ -149,6 +149,7 @@ function getOverviewConfigsPerLocation(
     configId,
     location,
     name: attributes[ConfigKey.NAME],
+    schedule: attributes[ConfigKey.SCHEDULE].number,
     tags: attributes[ConfigKey.TAGS],
     isEnabled: attributes[ConfigKey.ENABLED],
     type: attributes[ConfigKey.MONITOR_TYPE],
