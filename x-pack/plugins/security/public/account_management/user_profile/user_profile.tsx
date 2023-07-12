@@ -6,6 +6,8 @@
  */
 
 import {
+  EuiBadge,
+  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -21,6 +23,7 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiPageTemplate_Deprecated as EuiPageTemplate,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -67,6 +70,20 @@ export interface UserProfileProps {
   };
 }
 
+export interface UserDetailsEditorProps {
+  user: AuthenticatedUser;
+}
+
+export interface UserSettingsEditorProps {
+  formik: ReturnType<typeof useUserProfileForm>;
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
+}
+
+export interface UserRoleProps {
+  user: AuthenticatedUser;
+}
+
 export interface UserProfileFormValues {
   user: {
     full_name: string;
@@ -85,7 +102,7 @@ export interface UserProfileFormValues {
   avatarType: 'initials' | 'image';
 }
 
-function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
+const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) => {
   const { services } = useKibana<CoreStart>();
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
@@ -142,17 +159,13 @@ function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
       </FormRow>
     </EuiDescribedFormGroup>
   );
-}
+};
 
-function UserSettingsEditor({
+const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
   formik,
   isThemeOverridden,
   isOverriddenThemeDarkMode,
-}: {
-  formik: ReturnType<typeof useUserProfileForm>;
-  isThemeOverridden: boolean;
-  isOverriddenThemeDarkMode: boolean;
-}) {
+}) => {
   if (!formik.values.data) {
     return null;
   }
@@ -262,7 +275,7 @@ function UserSettingsEditor({
       </FormRow>
     </EuiDescribedFormGroup>
   );
-}
+};
 
 function UserAvatarEditor({
   user,
@@ -557,6 +570,68 @@ function UserPasswordEditor({
   );
 }
 
+const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const [firstRole] = user.roles;
+  const remainingRoles = user.roles.slice(1);
+
+  const renderMoreRoles = () => {
+    const button = (
+      <EuiButtonEmpty size="xs" onClick={onButtonClick} data-test-subj="userRolesExpand">
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.rolesCountLabel"
+          defaultMessage="+{count} more"
+          values={{ count: remainingRoles.length }}
+        />
+      </EuiButtonEmpty>
+    );
+    return (
+      <EuiPopover
+        panelPaddingSize="s"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        data-test-subj="userRolesPopover"
+      >
+        <EuiBadgeGroup
+          gutterSize="xs"
+          data-test-subj="remainingRoles"
+          style={{
+            maxWidth: '200px',
+          }}
+        >
+          {remainingRoles.map((role) => (
+            <EuiBadge color="hollow" key={role}>
+              {role}
+            </EuiBadge>
+          ))}
+        </EuiBadgeGroup>
+      </EuiPopover>
+    );
+  };
+
+  return (
+    <>
+      <div
+        style={{
+          maxWidth: euiTheme.breakpoint.m / 6,
+          display: 'inline-block',
+        }}
+      >
+        <EuiBadge key={firstRole} color="hollow" data-test-subj={`role${firstRole}`}>
+          {firstRole}
+        </EuiBadge>
+      </div>
+      {remainingRoles.length ? renderMoreRoles() : null}
+    </>
+  );
+};
+
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
@@ -581,7 +656,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Username"
         />
       ),
-      description: user.username as string | undefined,
+      description: user.username as string | undefined | JSX.Element,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -627,6 +702,27 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       testSubj: 'email',
     });
   }
+
+  rightSideItems.push({
+    title: (
+      <FormattedMessage
+        id="xpack.security.accountManagement.userProfile.rolesLabel"
+        defaultMessage="{roles, plural,
+            one {Role}
+            other {Roles}
+          }"
+        values={{ roles: user.roles.length }}
+      />
+    ),
+    description: <UserRoles user={user} />,
+    helpText: (
+      <FormattedMessage
+        id="xpack.security.accountManagement.userProfile.rolesHelpText"
+        defaultMessage="Roles control access and permissions across the Elastic Stack."
+      />
+    ),
+    testSubj: 'userRoles',
+  });
 
   return (
     <>

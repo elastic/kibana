@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
+import { CONNECTORS_INDEX, CURRENT_CONNECTORS_JOB_INDEX } from '../..';
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 
 import {
@@ -99,7 +99,7 @@ export const startConnectorSync = async (
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   } else {
     throw new Error(ErrorCode.RESOURCE_NOT_FOUND);
