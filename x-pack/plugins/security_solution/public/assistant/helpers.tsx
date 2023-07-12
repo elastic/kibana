@@ -13,6 +13,7 @@ import React from 'react';
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
 import { SendToTimelineButton } from './send_to_timeline';
+import { INVESTIGATE_IN_TIMELINE } from '../actions/add_to_timeline/constants';
 
 export const LOCAL_STORAGE_KEY = `securityAssistant`;
 
@@ -48,6 +49,8 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
   return getFieldsAsCsv(allFields);
 };
 
+const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = ['kql', 'dsl', 'eql'];
+
 /**
  * Augments the messages in a conversation with code block details, including
  * the start and end indices of the code block in the message, the type of the
@@ -60,38 +63,43 @@ export const augmentMessageCodeBlocks = (
 ): CodeBlockDetails[][] => {
   const cbd = currentConversation.messages.map(({ content }) => analyzeMarkdown(content));
 
-  return cbd.map((codeBlocks, messageIndex) =>
-    codeBlocks.map((codeBlock, codeBlockIndex) => ({
-      ...codeBlock,
-      controlContainer: document.querySelectorAll(
-        `.message-${messageIndex} .euiCodeBlock__controls`
-      )[codeBlockIndex],
-      button: (
-        <SendToTimelineButton
-          asEmptyButton={true}
-          dataProviders={[
-            {
-              id: 'assistant-data-provider',
-              name: `Assistant Query from conversation ${currentConversation.id}`,
-              enabled: true,
-              excluded: false,
-              queryType: codeBlock.type,
-              kqlQuery: codeBlock.content ?? '',
-              queryMatch: {
-                field: 'host.name',
-                operator: ':',
-                value: 'test',
+  const output = cbd.map((codeBlocks, messageIndex) =>
+    codeBlocks.map((codeBlock, codeBlockIndex) => {
+      return {
+        ...codeBlock,
+        getControlContainer: () =>
+          document.querySelectorAll(`.message-${messageIndex} .euiCodeBlock__controls`)[
+            codeBlockIndex
+          ],
+        button: sendToTimelineEligibleQueryTypes.includes(codeBlock.type) ? (
+          <SendToTimelineButton
+            asEmptyButton={true}
+            dataProviders={[
+              {
+                id: 'assistant-data-provider',
+                name: `Assistant Query from conversation ${currentConversation.id}`,
+                enabled: true,
+                excluded: false,
+                queryType: codeBlock.type,
+                kqlQuery: codeBlock.content ?? '',
+                queryMatch: {
+                  field: 'host.name',
+                  operator: ':',
+                  value: 'test',
+                },
+                and: [],
               },
-              and: [],
-            },
-          ]}
-          keepDataView={true}
-        >
-          <EuiToolTip position="right" content={'Add to timeline'}>
-            <EuiIcon type="timeline" />
-          </EuiToolTip>
-        </SendToTimelineButton>
-      ),
-    }))
+            ]}
+            keepDataView={true}
+          >
+            <EuiToolTip position="right" content={INVESTIGATE_IN_TIMELINE}>
+              <EuiIcon type="timeline" />
+            </EuiToolTip>
+          </SendToTimelineButton>
+        ) : null,
+      };
+    })
   );
+
+  return output;
 };

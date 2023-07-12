@@ -17,7 +17,6 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import {
   GetSummarizedAlertsFnOpts,
   parseDuration,
-  RawRule,
   CombinedSummarizedAlerts,
   ThrottledActions,
 } from '../types';
@@ -84,7 +83,7 @@ export class ExecutionHandler<
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
   private ruleRunMetricsStore: RuleRunMetricsStore;
-  private apiKey: RawRule['apiKey'];
+  private apiKey: string | null;
   private ruleConsumer: string;
   private executionId: string;
   private ruleLabel: string;

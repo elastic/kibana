@@ -92,12 +92,12 @@ export class AlertingEventLogger {
     this.ruleContext = context;
   }
 
-  public start() {
+  public start(runDate: Date) {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.startTime = new Date();
+    this.startTime = runDate;
 
     const context = {
       ...this.ruleContext,
