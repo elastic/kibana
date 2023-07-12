@@ -13,6 +13,16 @@ import { Props, SelectSystemPrompt } from '.';
 import { TEST_IDS } from '../../../constants';
 
 const props: Props = {
+  allSystemPrompts: [
+    {
+      id: 'default-system-prompt',
+      content: 'default',
+      name: 'default',
+      promptType: 'system',
+      isDefault: true,
+      isNewConversationDefault: true,
+    },
+  ],
   conversation: undefined,
   selectedPrompt: undefined,
 };
