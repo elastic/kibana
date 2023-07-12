@@ -30,8 +30,15 @@ import {
   getFullRedirectAppUrl,
   ExportType,
 } from '@kbn/reporting-common';
+import {
+  PdfScreenshotOptions,
+  PdfScreenshotResult,
+  ScreenshotOptions,
+} from '@kbn/screenshotting-plugin/server';
 import { generatePdfObservable } from './lib/generate_pdf';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
+
+export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
@@ -66,6 +73,19 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       forceNow: new Date().toISOString(),
     };
   };
+
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
+    return Rx.defer(async () => this.startDeps.screenshotting).pipe(() => {
+      return this.startDeps.screenshotting.getScreenshots({
+        ...options,
+        urls: options.urls.map((url) =>
+          typeof url === 'string'
+            ? url
+            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+        ),
+      } as ScreenshotOptions);
+    });
+  }
 
   /**
    *
@@ -115,7 +135,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
           this.config,
           this.getServerInfo(),
           () =>
-            this.startDeps.reporting.getScreenshots({
+            this.getScreenshots({
               format: 'pdf',
               title,
               logo,

@@ -25,6 +25,5 @@
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
-    "@kbn/reporting-plugin",
   ]
 }
