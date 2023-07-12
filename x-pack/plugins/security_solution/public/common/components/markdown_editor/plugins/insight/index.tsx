@@ -40,7 +40,7 @@ import { useForm, FormProvider, useController } from 'react-hook-form';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
-import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
+import { useInsightDataProviders } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
 import {
@@ -54,6 +54,7 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
+import type { Providers } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
@@ -293,7 +294,7 @@ const InsightEditorComponent = ({
     }
   }, [sourcererDataView, fieldFormats]);
 
-  const [providers, setProviders] = useState<Array<Provider | Provider[] | null>>([[]]);
+  const [providers, setProviders] = useState<Providers>([[]]);
   const dateRangeChoices = useMemo(() => {
     const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
       DEFAULT_TIMEPICKER_QUICK_RANGES
@@ -391,7 +392,6 @@ const InsightEditorComponent = ({
   const disableSubmit = useMemo(() => {
     const labelOrEmpty = labelController.field.value ?? '';
     const flattenedProviders = providers.flat();
-    // console.log(flattenedProviders, 'flattenedProviders');
     return (
       labelOrEmpty.trim() === '' ||
       flattenedProviders.length === 0 ||
