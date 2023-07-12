@@ -150,7 +150,7 @@ describe('filter to provider conversion', () => {
     const result = filtersToInsightProviders(combined);
     const [first, second] = result;
     expect(result.length).toBe(2);
-    expect(first.length).toBe(1);
-    expect(second.length).toBe(2);
+    expect(Array.isArray(first) && first.length).toBe(1);
+    expect(Array.isArray(second) && second.length).toBe(2);
   });
 });

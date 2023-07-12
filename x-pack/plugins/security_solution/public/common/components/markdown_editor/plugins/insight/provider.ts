@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { flatten } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import {
   FILTERS,
@@ -25,6 +24,8 @@ export interface Provider {
   value: string | number | boolean;
   valueType?: string;
 }
+
+export type Providers = Array<Provider | Provider[] | null>;
 
 const buildPrimitiveProvider = (filter: Filter): Provider => {
   const field = filter.meta?.key ?? '';
@@ -80,36 +81,49 @@ const nonCombinedToProvider = (filters: Filter[]): Provider[] => {
   });
 };
 
+const emptyProviders: Providers = [];
+
 /**
  * This function takes an array of Filter types and returns a 2d array
  * of an intermediate data structure called a Provider, which can map from
  * Filter <-> DataProvider. Items in each inner array of the Provider[][]
  * return value are AND'ed together, items in the outer arrays are OR'ed.
  */
-export const filtersToInsightProviders = (filters: Filter[]): Provider[][] => {
+export const filtersToInsightProviders = (filters: Filter[]): Providers => {
   const hasCombined = filters.some(isCombinedFilter);
   if (hasCombined === false) {
-    return [nonCombinedToProvider(filters)];
+    const topLevelAnd = [nonCombinedToProvider(filters)];
+    return topLevelAnd;
   } else {
-    const combinedFilterToProviders: Provider[][] = filters.reduce(
-      (outerFilters: Provider[][], filter) => {
+    const combinedFilterToProviders: Providers = filters.reduce(
+      (outerFilters, filter, currentIndex) => {
         if (isCombinedFilter(filter)) {
           const innerFilters = filter.meta.params;
           if (filter.meta.relation === BooleanRelation.OR) {
+            const multipleNestedOrs = filters.length > 1;
             const oredFilters = innerFilters.map((f) => {
-              const oredFilter = filtersToInsightProviders([f]);
-              return flatten(oredFilter);
+              const [oredFilter] = filtersToInsightProviders([f]);
+              return oredFilter;
             });
-            return [...outerFilters, ...oredFilters];
+            if (multipleNestedOrs) {
+              return [...outerFilters, ...oredFilters, null];
+            } else {
+              return [...outerFilters, ...oredFilters];
+            }
           } else {
-            const innerFiltersToProviders = filtersToInsightProviders(innerFilters);
-            return [...outerFilters, ...innerFiltersToProviders];
+            // AND
+            const [innerFiltersToProviders] = filtersToInsightProviders(innerFilters);
+            if (innerFiltersToProviders !== null) {
+              outerFilters[currentIndex] = innerFiltersToProviders;
+            }
+            return outerFilters;
           }
         } else {
-          return [...outerFilters, [buildPrimitiveProvider(filter)]];
+          const flattenedFilters = [...outerFilters, buildPrimitiveProvider(filter)];
+          return flattenedFilters;
         }
       },
-      []
+      emptyProviders
     );
     return combinedFilterToProviders;
   }

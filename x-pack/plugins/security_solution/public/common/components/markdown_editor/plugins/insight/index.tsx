@@ -293,7 +293,7 @@ const InsightEditorComponent = ({
     }
   }, [sourcererDataView, fieldFormats]);
 
-  const [providers, setProviders] = useState<Provider[][]>([[]]);
+  const [providers, setProviders] = useState<Array<Provider | Provider[] | null>>([[]]);
   const dateRangeChoices = useMemo(() => {
     const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
       DEFAULT_TIMEPICKER_QUICK_RANGES
@@ -391,12 +391,13 @@ const InsightEditorComponent = ({
   const disableSubmit = useMemo(() => {
     const labelOrEmpty = labelController.field.value ?? '';
     const flattenedProviders = providers.flat();
+    // console.log(flattenedProviders, 'flattenedProviders');
     return (
       labelOrEmpty.trim() === '' ||
       flattenedProviders.length === 0 ||
-      flattenedProviders.some(
-        (provider) => !isProviderValid(provider, dataView?.getFieldByName(provider.field))
-      )
+      flattenedProviders.some((provider) => {
+        return provider && !isProviderValid(provider, dataView?.getFieldByName(provider.field));
+      })
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
@@ -485,7 +486,7 @@ const InsightEditorComponent = ({
                   filters={filtersStub}
                   onChange={onChange}
                   dataView={dataView}
-                  maxDepth={2}
+                  maxDepth={1}
                 />
               ) : (
                 <></>
