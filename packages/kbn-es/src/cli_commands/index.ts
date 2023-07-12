@@ -11,6 +11,7 @@ import { source } from './source';
 import { archive } from './archive';
 import { buildSnapshots } from './build_snapshots';
 import { docker } from './docker';
+import { serverless } from './serverless';
 
 export const commands = {
   snapshot,
@@ -18,4 +19,5 @@ export const commands = {
   archive,
   build_snapshots: buildSnapshots,
   docker,
+  serverless,
 };

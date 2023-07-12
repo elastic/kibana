@@ -16,12 +16,16 @@ export interface DockerOptions extends EsClusterExecOptions {
   version?: string;
   image?: string;
   dockerCmd?: string;
-  serverless?: boolean;
+}
+
+export interface ServerlessOptions extends EsClusterExecOptions {
+  tag?: string;
+  image?: string;
 }
 
 const DEFAULT_DOCKER_BASE_CMD = 'run --name es01 -p 9200:9200 -p 9300:9300 -d --rm';
-const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co/elasticsearch/elasticsearch';
-export const DEFAULT_DOCKER_IMG = `${DEFAULT_DOCKER_REGISTRY}:${pkg.version}-SNAPSHOT`;
+export const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co';
+export const DEFAULT_DOCKER_IMG = `${DEFAULT_DOCKER_REGISTRY}/elasticsearch/elasticsearch:${pkg.version}-SNAPSHOT`;
 export const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_IMG}`;
 
 /**
@@ -37,6 +41,25 @@ export async function verifyDockerInstalled(log: ToolingLog) {
   log.indent(4, () => {
     log.info(stdout);
   });
+}
+
+/**
+ * Setup elastic Docker network if needed
+ */
+export async function maybeCreateDockerNetwork(log: ToolingLog) {
+  log.indent(4);
+
+  const p = await execa('docker', ['network', 'create', 'elastic']).catch(({ message }) => {
+    if (message.includes('network with name elastic already exists')) {
+      log.info('Using existing elastic Docker network.');
+    } else {
+      throw createCliError(message);
+    }
+  });
+
+  if (p?.exitCode === 0) {
+    log.info('Created elastic Docker network.');
+  }
 }
 
 const resolveDockerImage = ({ version, image }: DockerOptions) => {
