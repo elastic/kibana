@@ -142,7 +142,7 @@ const AlertsSectionTitle = () => {
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
-          panelPaddingSize="s"
+          repositionOnScroll={true}
           anchorPosition="upCenter"
         >
           <AlertsTooltipContent />
