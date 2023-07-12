@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFieldText,
   EuiFieldPassword,
@@ -21,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
 
-const AWSSetupInfoContent = () => (
+type SetupFormatGCP = 'google_cloud_shell' | 'manual';
+const GCPSetupInfoContent = () => (
   <>
     <EuiSpacer size="l" />
     <EuiTitle size="s">
@@ -37,7 +38,7 @@ const AWSSetupInfoContent = () => (
       <FormattedMessage
         id="xpack.csp.eksIntegration.setupInfoContent"
         defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-    method of providing the AWS credentials this integration will use. You can follow these
+    method of providing the GCP credentials this integration will use. You can follow these
     step-by-step instructions to generate the necessary credentials."
       />
     </EuiText>
@@ -63,68 +64,10 @@ const DocsLink = (
   </EuiText>
 );
 
-const AssumeRoleDescription = (
-  <div>
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.eksIntegration.assumeRoleDescription"
-        defaultMessage="An IAM role Amazon Resource Name (ARN) is an IAM identity that you can create in your AWS
-      account. When creating an IAM role, users can define the role’s permissions. Roles do not have
-      standard long-term credentials such as passwords or access keys."
-      />
-    </EuiText>
-  </div>
-);
-
-const DirectAccessKeysDescription = (
-  <div>
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.eksIntegration.directAccessKeysDescription"
-        defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user."
-      />
-    </EuiText>
-  </div>
-);
-
-const TemporaryKeysDescription = (
-  <div>
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.eksIntegration.temporaryKeysDescription"
-        defaultMessage="You can configure temporary security credentials in AWS to last for a specified duration. They
-      consist of an access key ID, a secret access key, and a security token, which is typically
-      found using GetSessionToken."
-      />
-    </EuiText>
-  </div>
-);
-
-const SharedCredentialsDescription = (
-  <div>
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.eksIntegration.sharedCredentialsDescription"
-        defaultMessage="If you use different AWS credentials for different tools or applications, you can use profiles
-      to define multiple access keys in the same configuration file."
-      />
-    </EuiText>
-  </div>
-);
-
-const AWS_FIELD_LABEL = {
-  access_key_id: i18n.translate('xpack.csp.eksIntegration.accessKeyIdLabel', {
-    defaultMessage: 'Access Key ID',
-  }),
-  secret_access_key: i18n.translate('xpack.csp.eksIntegration.secretAccessKeyLabel', {
-    defaultMessage: 'Secret Access Key',
-  }),
-};
-
-interface GcpOption {
+interface GcpFields {
   fields: Record<string, { label: string; type?: 'password' | 'text' }>;
 }
-const options: GcpOption = {
+const gcpField: GcpFields = {
   fields: {
     project_id: {
       label: i18n.translate('xpack.csp.gcpIntegration.projectidLabel', {
@@ -144,27 +87,26 @@ const options: GcpOption = {
   },
 };
 
-const varsFake = {
-  project_id: {
-    value: 'ALPHA',
-    type: 'text',
+const getSetupFormatOptions = (): Array<{
+  id: SetupFormatGCP;
+  label: string;
+  disabled: boolean;
+}> => [
+  {
+    id: 'google_cloud_shell',
+    label: 'Google Cloud Shell',
+    disabled: true,
   },
-  credentials_file: {
-    value: 'BETA',
-    type: 'text',
+  {
+    id: 'manual',
+    label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.manual', {
+      defaultMessage: 'Manual',
+    }),
+    disabled: false,
   },
-  credentials_json: {
-    value: 'GAMMA',
-    type: 'text',
-  },
-};
+];
 
-export type AwsCredentialsType = keyof typeof options;
-export const DEFAULT_EKS_VARS_GROUP: AwsCredentialsType = 'assume_role';
-const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
-  id: value as AwsCredentialsType,
-  label: options[value as keyof typeof options].label,
-}));
+export type AwsCredentialsType = keyof typeof gcpField;
 
 interface Props {
   newPolicy: NewPackagePolicy;
@@ -175,8 +117,8 @@ interface Props {
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
 }
 
-const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpOption[keyof GcpOption]) =>
-  Object.entries(/*input.streams[0].vars*/ varsFake|| {})
+const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields[keyof GcpFields]) =>
+  Object.entries(input.streams[0].vars || {})
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
       const field = fields[id];
@@ -188,56 +130,70 @@ const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpOption[keyo
       } as const;
     });
 
-const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | undefined =>
-  input.streams[0].vars?.['aws.credentials.type'].value;
-
 export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value so we default to the first option.
   // const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
-  const group = options;
-  console.log('group', group);
-  console.log('group fields', group.fields);
-  console.log('INPUT', input);
-  const fields = getInputVarsFields(input, group.fields);
-  console.log('fields', fields);
-
+  //   const group = gcpField;
+  const fields = getInputVarsFields(input, gcpField.fields);
+  const [radioIdSelected, setRadioIdSelected] = useState('manual');
+  const onChange = (id: string) => {
+    setRadioIdSelected(id);
+  };
   return (
     <>
-      <AWSSetupInfoContent />
+      <GCPSetupInfoContent />
       <EuiSpacer size="l" />
-      GCP ADD HERE
+      <GcpSetupAccessSelector
+        type={radioIdSelected}
+        onChange={(optionId) =>
+          updatePolicy(
+            getPosturePolicy(newPolicy, input.type, {
+              'aws.credentials.type': { value: optionId },
+            })
+          )
+        }
+      />
+      <RadioGroup
+        size="m"
+        options={getSetupFormatOptions()}
+        idSelected={radioIdSelected}
+        onChange={(id) => onChange(id)}
+      />
+      <EuiSpacer size="l" />
       <GcpInputVarFields
         fields={fields}
         onChange={(key, value) =>
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
         }
       />
+      <EuiSpacer size="s" />
+      {DocsLink}
       <EuiSpacer />
     </>
   );
 };
 
-// const AwsCredentialTypeSelector = ({
-//   type,
-//   onChange,
-// }: {
-//   onChange(type: AwsCredentialsType): void;
-//   type: AwsCredentialsType;
-// }) => (
-//   <RadioGroup
-//     size="s"
-//     options={[...AWS_CREDENTIALS_OPTIONS]}
-//     idSelected={type}
-//     onChange={(id) => onChange(id as AwsCredentialsType)}
-//   />
-// );
+const GcpSetupAccessSelector = ({
+  type,
+  onChange,
+}: {
+  onChange(type: AwsCredentialsType): void;
+  type: string;
+}) => (
+  <RadioGroup
+    size="s"
+    options={getSetupFormatOptions()}
+    idSelected={type}
+    onChange={(id) => onChange(id as AwsCredentialsType)}
+  />
+);
 
 const GcpInputVarFields = ({
   fields,
   onChange,
 }: {
-  fields: Array<GcpOption[keyof GcpOption]['fields'] & { value: string; id: string }>;
+  fields: Array<GcpFields[keyof GcpFields]['fields'] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
 }) => (
   <div>
@@ -266,4 +222,3 @@ const GcpInputVarFields = ({
     ))}
   </div>
 );
-
