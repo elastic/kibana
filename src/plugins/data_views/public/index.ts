@@ -19,7 +19,7 @@ export type {
   DataViewSpec,
   FieldSpec,
   DataViewAttributes,
-  SavedObjectsClientCommon,
+  PersistenceAPI,
   RuntimeField,
 } from '../common';
 export {
@@ -48,7 +48,6 @@ export type {
 export { DataViewsApiClient, DataViewsService, DataView } from './data_views';
 export type { DataViewListItem } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
-export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
 /*
  * Plugin setup
