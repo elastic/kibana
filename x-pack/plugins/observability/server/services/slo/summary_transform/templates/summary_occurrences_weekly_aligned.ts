@@ -83,29 +83,6 @@ export const SUMMARY_OCCURRENCES_WEEKLY_ALIGNED: TransformPutTransformRequest = 
       },
     },
     aggregations: {
-      _totalEventsEstimated: {
-        bucket_script: {
-          buckets_path: {
-            totalEvents: 'totalEvents',
-          },
-          script: {
-            source: `
-                Date d = new Date(); 
-                Instant instant = Instant.ofEpochMilli(d.getTime());
-            
-                LocalDateTime now = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
-                LocalDateTime startOfWeek = now
-                  .with(DayOfWeek.MONDAY)
-                  .withHour(0)
-                  .withMinute(0)
-                  .withSecond(0);
-                long elapsedDuration = Duration.between(startOfWeek, now).toMinutes();
-                long weekDuration = 7 * 24 * 60;
-                return Math.ceil(params.totalEvents / elapsedDuration * weekDuration);
-            `,
-          },
-        },
-      },
       _objectiveTarget: {
         max: {
           field: 'slo.objective.target',
@@ -142,13 +119,11 @@ export const SUMMARY_OCCURRENCES_WEEKLY_ALIGNED: TransformPutTransformRequest = 
       errorBudgetConsumed: {
         bucket_script: {
           buckets_path: {
-            goodEvents: 'goodEvents',
-            totalEvents: 'totalEvents',
-            totalEventsEstimated: '_totalEventsEstimated',
+            sliValue: 'sliValue',
             errorBudgetInitial: 'errorBudgetInitial',
           },
           script:
-            'if (params.totalEvents == 0) { return 0 } else { return (params.totalEvents - params.goodEvents) / (params.totalEventsEstimated * params.errorBudgetInitial) }',
+            'if (params.sliValue == -1) { return 0 } else { return (1 - params.sliValue) / params.errorBudgetInitial }',
         },
       },
       errorBudgetRemaining: {
