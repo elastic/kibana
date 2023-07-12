@@ -2430,7 +2430,11 @@ paths:
           $ref: '#/components/responses/error'
       operationId: get-package-policies
       security: []
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
+        - $ref: '#/components/parameters/format'
     parameters: []
     post:
       summary: Create package policy
@@ -2463,6 +2467,7 @@ paths:
               $ref: '#/components/schemas/package_policy_request'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
   /package_policies/_bulk_get:
     post:
       summary: Bulk get package policies
@@ -2501,7 +2506,8 @@ paths:
           $ref: '#/components/responses/error'
       operationId: bulk-get-package-policies
       security: []
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/format'
   /package_policies/delete:
     post:
       summary: Delete package policy
@@ -2627,6 +2633,12 @@ paths:
         '400':
           $ref: '#/components/responses/error'
   /package_policies/{packagePolicyId}:
+    parameters:
+      - schema:
+          type: string
+        name: packagePolicyId
+        in: path
+        required: true
     get:
       summary: Get package policy by ID
       tags:
@@ -2646,12 +2658,8 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-package-policy
-    parameters:
-      - schema:
-          type: string
-        name: packagePolicyId
-        in: path
-        required: true
+      parameters:
+        - $ref: '#/components/parameters/format'
     put:
       summary: Update package policy by ID
       tags:
@@ -2681,6 +2689,7 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
     delete:
       summary: Delete package policy by ID
       tags:
@@ -3392,6 +3401,16 @@ components:
       required: false
       schema:
         type: boolean
+    format:
+      name: format
+      in: query
+      description: Simplified or legacy format for package inputs
+      required: false
+      schema:
+        type: string
+        enum:
+          - simplified
+          - legacy
   responses:
     error:
       description: Generic Error
@@ -4263,8 +4282,10 @@ components:
             revision:
               type: number
             inputs:
-              type: array
-              items: {}
+              oneOf:
+                - type: array
+                  items: {}
+                - type: object
           required:
             - id
             - revision

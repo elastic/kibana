@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DragContext } from '@kbn/dom-drag-drop';
+import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -182,8 +182,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
-  const dragDropContext = useContext(DragContext);
-  const draggingFieldName = dragDropContext.dragging?.id;
+  const [{ dragging }] = useDragDropContext();
+  const draggingFieldName = dragging?.id;
 
   const onDropFieldToTable = useMemo(() => {
     if (!draggingFieldName || currentColumns.includes(draggingFieldName)) {
