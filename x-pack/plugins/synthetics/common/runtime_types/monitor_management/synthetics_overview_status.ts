@@ -10,20 +10,24 @@ import { ObserverCodec } from '../ping/observer';
 import { ErrorStateCodec } from '../ping/error_state';
 import { AgentType, MonitorType, PingErrorType, UrlType } from '..';
 
-export const OverviewPingCode = t.interface({
-  '@timestamp': t.string,
-  summary: t.partial({
-    down: t.number,
-    up: t.number,
+export const OverviewPingCode = t.intersection([
+  t.interface({
+    '@timestamp': t.string,
+    summary: t.partial({
+      down: t.number,
+      up: t.number,
+    }),
+    monitor: MonitorType,
+    observer: ObserverCodec,
+    config_id: t.string,
+    agent: AgentType,
+    url: UrlType,
+    state: ErrorStateCodec,
   }),
-  monitor: MonitorType,
-  observer: ObserverCodec,
-  config_id: t.string,
-  error: PingErrorType,
-  agent: AgentType,
-  url: UrlType,
-  state: ErrorStateCodec,
-});
+  t.partial({
+    error: PingErrorType,
+  }),
+]);
 
 export const OverviewStatusMetaDataCodec = t.interface({
   monitorQueryId: t.string,
