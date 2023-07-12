@@ -18,6 +18,7 @@ import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
@@ -152,7 +153,7 @@ function validateParams(anyParams: unknown): string | undefined {
     }
   }
 
-  if (searchType === 'searchSource' || searchType === 'esqlQuery') {
+  if (isSearchSourceRule(searchType) || isEsqlQueryRule(searchType)) {
     return;
   }
 

@@ -5,36 +5,16 @@
  * 2.0.
  */
 
-import { entries } from 'lodash';
 import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView, DataViewsContract, getTime } from '@kbn/data-plugin/common';
-import { parseAggregationResults, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlyEsqlQueryRuleParams } from '../types';
 import { getSmallerDataViewSpec } from './fetch_search_source_query';
-
-export type EsqlDocument = Record<string, string | null>;
-
-export interface EsqlHit {
-  _id: string;
-  _index: string;
-  _source: EsqlDocument;
-}
-
-export interface EsqlResultColumn {
-  name: string;
-  type: 'date' | 'keyword';
-}
-
-export type EsqlResultRow = Array<string | null>;
-
-export interface EsqlTable {
-  columns: EsqlResultColumn[];
-  values: EsqlResultRow[];
-}
+import { EsqlTable, toEsQueryHits } from '../../../../common';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -89,14 +69,13 @@ export async function fetchEsqlQuery({
     link,
     numMatches: Number(2),
     parsedResults: parseAggregationResults({
-      isCountAgg: false,
-      isGroupAgg: true,
+      isCountAgg: true,
+      isGroupAgg: false,
       esResult: {
         took: 0,
         timed_out: false,
         _shards: { failed: 0, successful: 0, total: 0 },
-        hits: { hits: [] },
-        aggregations: toEsResult(response),
+        hits: toEsQueryHits(response),
       },
       resultLimit: alertLimit,
     }),
@@ -144,48 +123,6 @@ const getEsqlQuery = (index: DataView, params: OnlyEsqlQueryRuleParams, alertLim
     dateStart,
     dateEnd,
   };
-};
-
-const toEsResult = (results: EsqlTable) => {
-  const documentsGrouping = results.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
-    const document = rowToDocument(results.columns, row);
-    const hit = {
-      _id: UngroupedGroupId,
-      _index: '',
-      _source: document,
-    };
-    if (acc[UngroupedGroupId]) {
-      acc[UngroupedGroupId].push(hit);
-    } else {
-      acc[UngroupedGroupId] = [hit];
-    }
-
-    return acc;
-  }, {});
-
-  return {
-    groupAgg: {
-      buckets: entries(documentsGrouping).map(([key, value]) => {
-        return {
-          key,
-          doc_count: value.length,
-          topHitsAgg: {
-            hits: {
-              hits: value,
-            },
-          },
-        };
-      }),
-    },
-  };
-};
-
-const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
-  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
-    acc[column.name] = row[i];
-
-    return acc;
-  }, {});
 };
 
 export const generateLink = async (

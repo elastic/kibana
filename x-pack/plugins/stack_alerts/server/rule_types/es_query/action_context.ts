@@ -100,7 +100,7 @@ export function getContextConditionsDescription({
 }: GetContextConditionsDescriptionOpts) {
   return isEsqlQueryRule(searchType)
     ? i18n.translate('xpack.stackAlerts.esQuery.esqlAlertTypeContextConditionsDescription', {
-        defaultMessage: 'Query{negation}documents{groupCondition}',
+        defaultMessage: 'Query{negation} documents{groupCondition}',
         values: {
           groupCondition: group ? ` for group "${group}"` : '',
           negation: isRecovered ? ' did NOT match' : ' matched',
