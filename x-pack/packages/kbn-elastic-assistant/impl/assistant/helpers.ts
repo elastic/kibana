@@ -47,16 +47,11 @@ export const getWelcomeConversation = (
     return conversation;
   }
 
-  return doesConversationHaveMessages
-    ? {
-        ...conversation,
-        messages: [
-          ...conversation.messages,
-          ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
-        ],
-      }
-    : {
-        ...conversation,
-        messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
-      };
+  return {
+    ...conversation,
+    messages: [
+      ...conversation.messages,
+      ...BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+    ],
+  };
 };

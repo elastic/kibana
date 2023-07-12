@@ -111,12 +111,10 @@ const AssistantComponent: React.FC<Props> = ({
     [connectors]
   );
 
-  // Welcome setup state
-  const isWelcomeSetup = useMemo(() => (connectors?.length ?? 0) === 0, [connectors?.length]);
-  const isDisabled = isWelcomeSetup || !isAssistantEnabled;
-
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
+    isAssistantEnabled
+      ? conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
+      : WELCOME_CONVERSATION_TITLE
   );
 
   const currentConversation = useMemo(
@@ -125,6 +123,18 @@ const AssistantComponent: React.FC<Props> = ({
       createConversation({ conversationId: selectedConversationId }),
     [conversations, createConversation, selectedConversationId]
   );
+
+  // Welcome setup state
+  const isWelcomeSetup = useMemo(() => {
+    if (
+      currentConversation.id === WELCOME_CONVERSATION_TITLE &&
+      currentConversation.apiConfig.connectorId != null
+    ) {
+      return false;
+    }
+    return (connectors?.length ?? 0) === 0;
+  }, [connectors?.length, currentConversation]);
+  const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
