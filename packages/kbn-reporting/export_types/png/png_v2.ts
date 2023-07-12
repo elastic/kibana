@@ -27,7 +27,7 @@ import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
-import { decryptJobHeaders, generatePngObservable } from '../common';
+import { decryptJobHeaders, generatePngObservable } from '@kbn/reporting-export-types-common';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 /*
