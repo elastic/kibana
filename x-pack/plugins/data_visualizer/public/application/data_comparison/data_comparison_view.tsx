@@ -17,7 +17,6 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import {
-  Comparators,
   EuiButtonIcon,
   EuiBasicTableColumn,
   EuiTableFieldDataColumnType,
@@ -295,7 +294,7 @@ export const DataComparisonView = ({
   }, [result.data, showDataComparisonedOnly]);
 
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<Feature>(
-    filteredData ?? [],
+    filteredData,
     'driftDetected',
     'desc'
   );
@@ -365,15 +364,13 @@ export const DataComparisonView = ({
       </ProgressControls>
       {result.error ? <EuiEmptyPrompt color="danger" body={<p>{result.error}</p>} /> : null}
 
-      {filteredData ? (
-        <DataComparisonOverviewTable
-          data={filteredData}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
-          setPageIndex={setPageIndex}
-        />
-      ) : null}
+      <DataComparisonOverviewTable
+        data={filteredData}
+        onTableChange={onTableChange}
+        pagination={pagination}
+        sorting={sorting}
+        setPageIndex={setPageIndex}
+      />
     </div>
   );
 };
@@ -394,33 +391,6 @@ export const DataComparisonOverviewTable = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
-
-  const features = useMemo(() => {
-    const { pageIndex, pageSize } = pagination;
-    const {
-      sort: { field: sortField, direction: sortDirection },
-    } = sorting;
-    if (data.length === 0) return [];
-
-    const items = sortField
-      ? [...data].sort(Comparators.property(sortField, Comparators.default(sortDirection)))
-      : data;
-    let pageOfItems = [];
-
-    if (!pageIndex && !pageSize) {
-      pageOfItems = items;
-    } else {
-      const startIndex = pageIndex * pageSize;
-      pageOfItems = items.slice(startIndex, Math.min(startIndex + pageSize, data.length));
-    }
-    return pageOfItems;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, pagination.pageIndex, pagination.pageSize, sorting.sort.direction, sorting.sort.field]);
-
-  // if data is an empty array return
-  if (features.length === 0) {
-    return null;
-  }
 
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -604,7 +574,7 @@ export const DataComparisonOverviewTable = ({
           defaultMessage: 'Data comparison overview',
         }
       )}
-      items={features}
+      items={data}
       rowHeader="featureName"
       columns={columns}
       rowProps={getRowProps}
