@@ -7,8 +7,5 @@
  */
 
 export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
-export {
-  KibanaContextProvider,
-  withKibanaContextProvider,
-  type KibanaContextProviderProps,
-} from './provider';
+export { KibanaContextProvider, type KibanaContextProviderProps } from './provider';
+export type { EuiTheme } from './types';

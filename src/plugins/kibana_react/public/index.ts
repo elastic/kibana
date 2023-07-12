@@ -86,7 +86,8 @@ export type { ToMountPointOptions } from './util';
 /** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
 export { RedirectAppLinks } from './app_links';
 
-export { wrapWithTheme, KibanaThemeProvider, useKibanaTheme } from './theme';
+/** @deprecated Use `wrapWithTheme`, `KibanaThemeProvider` from `@kbn/react-kibana-context`  */
+export { wrapWithTheme, KibanaThemeProvider } from '@kbn/react-kibana-context';
 
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {

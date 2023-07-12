@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
+
 // To avoid a circular dependency with the deprecation of `CoreThemeProvider`,
 // we need to define the theme type here.
 //
@@ -14,3 +16,5 @@ export interface Theme {
   /** is dark mode enabled or not */
   readonly darkMode: boolean;
 }
+
+export type EuiTheme = UseEuiTheme;
