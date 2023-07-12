@@ -107,7 +107,12 @@ export const getPolicySettingsFormTestSubjects = (
     },
     linuxEvents: {
       card: linuxEventsTestSubj(),
+      osValueContainer: linuxEventsTestSubj('osValueContainer'),
       fileCheckbox: linuxEventsTestSubj('file'),
+      networkCheckbox: linuxEventsTestSubj('network'),
+      processCheckbox: linuxEventsTestSubj('process'),
+      sessionDataCheckbox: linuxEventsTestSubj('session_data'),
+      captureTerminalCheckbox: linuxEventsTestSubj('tty_io'),
     },
     antivirusRegistration: {
       card: antivirusTestSubj(),
@@ -128,4 +133,8 @@ export const getPolicySettingsFormTestSubjects = (
 
 export const expectIsViewOnly = (ele: HTMLElement): void => {
   expect(ele.querySelectorAll('button:not(.euiLink),input,select,textarea')).toHaveLength(0);
+};
+
+export const matchExactTextContent = (text: string): RegExp => {
+  return new RegExp(`^${text}$`);
 };

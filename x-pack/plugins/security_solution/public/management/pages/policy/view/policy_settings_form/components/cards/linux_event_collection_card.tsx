@@ -102,7 +102,7 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
   },
 ];
 
-type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
+export type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>((props) => {
   const supplementalOptions = useMemo(() => {
