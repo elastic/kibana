@@ -19,7 +19,17 @@ export enum SUB_ACTION {
   DASHBOARD = 'getDashboard',
   TEST = 'test',
 }
+
 export enum OpenAiProviderType {
   OpenAi = 'OpenAI',
   AzureAi = 'Azure OpenAI',
 }
+
+export const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions' as const;
+export const OPENAI_LEGACY_COMPLETION_URL = 'https://api.openai.com/v1/completions' as const;
+export const AZURE_OPENAI_CHAT_URL =
+  'https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/chat/completions?api-version={api-version}' as const;
+export const AZURE_OPENAI_COMPLETIONS_URL =
+  'https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/completions?api-version={api-version}' as const;
+export const AZURE_OPENAI_COMPLETIONS_EXTENSIONS_URL =
+  'https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/extensions/chat/completions?api-version={api-version}' as const;

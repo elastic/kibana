@@ -12,18 +12,27 @@ import {
   GenAiRunActionParamsSchema,
   GenAiRunActionResponseSchema,
   GenAiDashboardActionParamsSchema,
+  GenAiExecuteActionParamsSchema,
+  GenAiStreamingResponseSchema,
 } from '../../../common/gen_ai/schema';
 import type {
   GenAiConfig,
   GenAiSecrets,
   GenAiRunActionParams,
   GenAiRunActionResponse,
+  GenAiExecuteActionParams,
 } from '../../../common/gen_ai/types';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/gen_ai/constants';
+import { SUB_ACTION } from '../../../common/gen_ai/constants';
 import {
   GenAiDashboardActionParams,
   GenAiDashboardActionResponse,
 } from '../../../common/gen_ai/types';
+import {
+  getAxiosOptions,
+  getRequestWithStreamOption,
+  pipeStreamingResponse,
+  sanitizeRequest,
+} from './lib/utils';
 
 export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets> {
   private url;
@@ -49,8 +58,8 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
 
     this.registerSubAction({
       name: SUB_ACTION.TEST,
-      method: 'runApi',
-      schema: GenAiRunActionParamsSchema,
+      method: 'executeApi',
+      schema: GenAiExecuteActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -71,19 +80,32 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
   }
 
   public async runApi({ body }: GenAiRunActionParams): Promise<GenAiRunActionResponse> {
+    const sanitizedBody = sanitizeRequest(this.provider, this.url, body);
+    const axiosOptions = getAxiosOptions(this.provider, this.key, false);
     const response = await this.request({
       url: this.url,
       method: 'post',
       responseSchema: GenAiRunActionResponseSchema,
-      data: body,
-      headers: {
-        ...(this.provider === OpenAiProviderType.OpenAi
-          ? { Authorization: `Bearer ${this.key}` }
-          : { ['api-key']: this.key }),
-        ['content-type']: 'application/json',
-      },
+      data: sanitizedBody,
+      ...axiosOptions,
     });
     return response.data;
+  }
+
+  public async executeApi({
+    body,
+    stream,
+  }: GenAiExecuteActionParams): Promise<GenAiRunActionResponse> {
+    const executeBody = getRequestWithStreamOption(this.provider, this.url, body, stream);
+    const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+    const response = await this.request({
+      url: this.url,
+      method: 'post',
+      responseSchema: stream ? GenAiStreamingResponseSchema : GenAiRunActionResponseSchema,
+      data: executeBody,
+      ...axiosOptions,
+    });
+    return stream ? pipeStreamingResponse(response) : response.data;
   }
 
   public async getDashboard({
