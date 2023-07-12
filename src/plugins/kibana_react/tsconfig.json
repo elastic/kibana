@@ -14,7 +14,6 @@
     "@kbn/i18n-react",
     "@kbn/react-kibana-context",
     "@kbn/react-kibana-mount",
-    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",
