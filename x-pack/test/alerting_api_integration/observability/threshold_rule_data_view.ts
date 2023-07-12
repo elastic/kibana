@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     const searchRule = () =>
-      es.search<{ references: unknown }>({
+      es.search<{ references: unknown; alert: { params: any } }>({
         index: '.kibana*',
         query: {
           bool: {
@@ -122,6 +122,10 @@ export default function ({ getService }: FtrProviderContext) {
             id: 'data-view-id',
           },
         ]);
+        expect(alertHitsV1[0]?._source?.alert?.params?.searchConfiguration).to.eql({
+          query: { query: '', language: 'kuery' },
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        });
         expect(alertHitsV1[0].fields).to.eql(alertHitsV2[0].fields);
         expect(alertHitsV1[0]?._source?.references ?? true).to.eql(
           alertHitsV2[0]?._source?.references ?? false
