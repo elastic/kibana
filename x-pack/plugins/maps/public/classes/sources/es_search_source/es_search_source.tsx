@@ -84,6 +84,7 @@ type ESSearchSourceSyncMeta = Pick<
   | 'sortField'
   | 'sortOrder'
   | 'scalingType'
+  | 'topHitsGroupByTimeseries'
   | 'topHitsSplitField'
   | 'topHitsSize'
 >;
@@ -826,6 +827,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       sortField: this._descriptor.sortField,
       sortOrder: this._descriptor.sortOrder,
       scalingType: this._descriptor.scalingType,
+      topHitsGroupByTimeseries: this._descriptor.topHitsGroupByTimeseries,
       topHitsSplitField: this._descriptor.topHitsSplitField,
       topHitsSize: this._descriptor.topHitsSize,
     };
