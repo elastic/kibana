@@ -124,9 +124,7 @@ exports[`WarningsCallout renders "empty_prompt" correctly 1`] = `
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <button
-                    data-test-subj="test-button"
-                  >
+                  <button>
                     test1
                   </button>
                 </div>
@@ -165,9 +163,7 @@ exports[`WarningsCallout renders "empty_prompt" correctly 1`] = `
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <button
-                    data-test-subj="test-button"
-                  >
+                  <button>
                     test2
                   </button>
                 </div>
@@ -206,9 +202,7 @@ exports[`WarningsCallout renders "empty_prompt" correctly 1`] = `
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
-                  <button
-                    data-test-subj="test-button"
-                  >
+                  <button>
                     test3
                   </button>
                 </div>
@@ -328,9 +322,9 @@ Array [
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
-            <span>
+            <button>
               test1
-            </span>
+            </button>
           </div>
         </div>
       </div>
@@ -403,9 +397,9 @@ Array [
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
-            <span>
+            <button>
               test2
-            </span>
+            </button>
           </div>
         </div>
       </div>
@@ -478,9 +472,9 @@ Array [
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
-            <span>
+            <button>
               test3
-            </span>
+            </button>
           </div>
         </div>
       </div>

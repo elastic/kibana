@@ -13,10 +13,7 @@ import { searchResponseWarningsMock } from '../../../__mocks__/search_response_w
 
 const interceptedWarnings = searchResponseWarningsMock.map((originalWarning, index) => ({
   originalWarning,
-  action:
-    originalWarning.type === 'shard_failure' ? (
-      <button data-test-subj="test-button">{`test${index}`}</button>
-    ) : undefined,
+  action: originalWarning.type === 'shard_failure' ? <button>{`test${index}`}</button> : undefined,
 }));
 
 describe('WarningsCallout', () => {
