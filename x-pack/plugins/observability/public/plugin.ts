@@ -223,6 +223,8 @@ export class Plugin
       new SloDetailsLocatorDefinition()
     );
 
+    const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
+
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
@@ -349,6 +351,7 @@ export class Plugin
       rulesLocator,
       ruleDetailsLocator,
       sloDetailsLocator,
+      sloEditLocator,
       getCoPilotService: () => this.coPilotService!,
     };
   }
