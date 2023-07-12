@@ -6,7 +6,15 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiFormRow, EuiTitle, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiTitle,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -16,7 +24,12 @@ import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../../kibana_services';
-import { getTermsFields, getIsTimeseries, getSortFields, getSourceFields } from '../../../../index_pattern_util';
+import {
+  getTermsFields,
+  getIsTimeseries,
+  getSortFields,
+  getSourceFields,
+} from '../../../../index_pattern_util';
 import { ESDocField } from '../../../fields/es_doc_field';
 import { OnSourceChangeArgs } from '../../source';
 import { TopHitsForm } from './top_hits_form';
