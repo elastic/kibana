@@ -9,7 +9,6 @@ post:
     To use key-based authentication, create an API key in Kibana and use it in the header of the API call.
     To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically.
     In both cases, the API key is subsequently used for authorization when the rule runs.
-    NOTE: If an API key with different privileges subsequently updates the rule, its behavior might change.
   tags:
     - alerting
   parameters:
