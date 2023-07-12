@@ -56,22 +56,22 @@ describe('getFieldMetaOptions', () => {
     colorCategory: 'palette_0',
     field: {
       name: 'machine.os.keyword',
-      origin: 'source'
+      origin: 'source',
     },
     fieldMetaOptions: {
       isEnabled: false,
     },
-    type: 'CATEGORICAL'
+    type: 'CATEGORICAL',
   };
 
   test('should not automatically enable fieldMeta when field does support field meta from local', () => {
     const property = new DynamicStyleProperty(
-      dynamicColorOptions, 
+      dynamicColorOptions,
       VECTOR_STYLES.FILL_COLOR,
       {
         supportsFieldMetaFromLocalData: () => {
           return true;
-        }
+        },
       } as unknown as IField,
       {} as unknown as IVectorLayer,
       () => {
@@ -85,12 +85,12 @@ describe('getFieldMetaOptions', () => {
 
   test('should automatically enable fieldMeta when field does not support field meta from local', () => {
     const property = new DynamicStyleProperty(
-      dynamicColorOptions, 
+      dynamicColorOptions,
       VECTOR_STYLES.FILL_COLOR,
       {
         supportsFieldMetaFromLocalData: () => {
           return false;
-        }
+        },
       } as unknown as IField,
       {} as unknown as IVectorLayer,
       () => {
