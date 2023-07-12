@@ -184,6 +184,7 @@ export const UninstallTokenListPage = () => {
         data-test-subj="uninstallTokenListTable"
         items={tokens}
         columns={columns}
+        itemId="id"
         loading={isLoading}
         pagination={{
           pageIndex: pagination.currentPage - 1,
