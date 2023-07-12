@@ -36,6 +36,7 @@ import {
   NavigationEmbeddableLink,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+import { NavigationEmbeddableUnorderedLink } from '../editor/open_link_editor_flyout';
 import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';
 
@@ -46,16 +47,16 @@ export const NavigationEmbeddableLinkEditor = ({
   parentDashboard,
 }: {
   onClose: () => void;
-  link?: NavigationEmbeddableLink; // will only be defined if **editing** a link; otherwise, creating a new link
   parentDashboard?: DashboardContainer;
+  link?: NavigationEmbeddableUnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
   onSave: (newLink: Omit<NavigationEmbeddableLink, 'order'>) => void;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
   );
   const [linkLabel, setLinkLabel] = useState<string | undefined>(link?.label);
-  const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
   const [linkLabelPlaceholder, setLinkLabelPlaceholder] = useState<string | undefined>();
+  const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {

@@ -23,13 +23,19 @@ export interface LinkEditorProps {
 }
 
 /**
+ * This editor has no context about other links, so it cannot determine order; order will be determined
+ * by the **caller** (i.e. the panel editor, which contains the context about **all links**)
+ */
+export type NavigationEmbeddableUnorderedLink = Omit<NavigationEmbeddableLink, 'order'>;
+
+/**
  * @throws in case user cancels
  */
 export async function openLinkEditorFlyout({
   ref,
   link,
   parentDashboard,
-}: LinkEditorProps): Promise<Omit<NavigationEmbeddableLink, 'order'> | undefined> {
+}: LinkEditorProps): Promise<NavigationEmbeddableUnorderedLink | undefined> {
   const unmountFlyout = async () => {
     if (ref.current) {
       ref.current.children[1].className = 'navEmbeddableLinkEditor out';
@@ -42,9 +48,8 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<Omit<NavigationEmbeddableLink, 'order'> | undefined>((resolve, reject) => {
-    const onSave = async (newLink: Omit<NavigationEmbeddableLink, 'order'>) => {
-      // console.log('on save', newLinks);
+  return new Promise<NavigationEmbeddableUnorderedLink | undefined>((resolve, reject) => {
+    const onSave = async (newLink: NavigationEmbeddableUnorderedLink) => {
       resolve(newLink);
       await unmountFlyout();
     };

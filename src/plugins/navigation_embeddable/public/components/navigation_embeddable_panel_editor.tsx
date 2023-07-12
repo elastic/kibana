@@ -52,7 +52,6 @@ export const NavigationEmbeddablePanelEditor = ({
   parentDashboard?: DashboardContainer;
 }) => {
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  // const [links, setLinks] = useState<NavigationEmbeddableLinkList>(initialInput?.links ?? {});
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
 
   useEffect(() => {
