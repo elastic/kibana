@@ -40,7 +40,16 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       procs,
       config,
       installDir: options.installDir,
-      extraKbnOpts: options.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+      extraKbnOpts: options.installDir
+        ? []
+        : [
+            '--dev',
+            '--no-dev-config',
+            '--no-dev-credentials',
+            config.get('serverless')
+              ? '--server.versioned.versionResolution=newest'
+              : '--server.versioned.versionResolution=oldest',
+          ],
     });
 
     reportTime(runStartTime, 'ready', {
