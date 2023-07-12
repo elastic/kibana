@@ -10,6 +10,7 @@ import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   BudgetingMethod,
+  HistogramIndicator,
   IndicatorType,
   KQLCustomIndicator,
   MetricCustomIndicator,
@@ -22,6 +23,7 @@ import {
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
+  INDICATOR_HISTOGRAM,
 } from '../../utils/slo/labels';
 import { CreateSLOForm } from './types';
 
@@ -36,6 +38,10 @@ export const SLI_OPTIONS: Array<{
   {
     value: 'sli.metric.custom',
     text: INDICATOR_CUSTOM_METRIC,
+  },
+  {
+    value: 'sli.histogram.custom',
+    text: INDICATOR_HISTOGRAM,
   },
   {
     value: 'sli.apm.transactionDuration',
@@ -115,6 +121,23 @@ export const CUSTOM_METRIC_DEFAULT_VALUES: MetricCustomIndicator = {
     good: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
     total: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
     timestampField: '',
+  },
+};
+
+export const HISTOGRAM_DEFAULT_VALUES: HistogramIndicator = {
+  type: 'sli.histogram.custom' as const,
+  params: {
+    index: '',
+    timestampField: '',
+    filter: '',
+    good: {
+      field: '',
+      aggregation: 'value_count' as const,
+    },
+    total: {
+      field: '',
+      aggregation: 'value_count' as const,
+    },
   },
 };
 

@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useUserData } from '../../../../detections/components/user_info';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
@@ -21,26 +22,14 @@ export const RulesTableToolbar = React.memo(() => {
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
+  const [{ loading, canUserCRUD }] = useUserData();
+
   const installedTotal =
     (ruleManagementFilters?.rules_summary.custom_count ?? 0) +
     (ruleManagementFilters?.rules_summary.prebuilt_installed_count ?? 0);
   const updateTotal = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
 
-  const ruleUpdateTab = useMemo(
-    () => ({
-      [AllRulesTabs.updates]: {
-        id: AllRulesTabs.updates,
-        name: i18n.RULE_UPDATES_TAB,
-        disabled: false,
-        href: `/rules/${AllRulesTabs.updates}`,
-        isBeta: updateTotal > 0,
-        betaOptions: {
-          text: `${updateTotal}`,
-        },
-      },
-    }),
-    [updateTotal]
-  );
+  const shouldDisplayRuleUpdatesTab = !loading && canUserCRUD && updateTotal > 0;
 
   const ruleTabs = useMemo(
     () => ({
@@ -64,9 +53,22 @@ export const RulesTableToolbar = React.memo(() => {
           text: `${installedTotal}`,
         },
       },
-      ...(updateTotal > 0 ? ruleUpdateTab : {}),
+      ...(shouldDisplayRuleUpdatesTab
+        ? {
+            [AllRulesTabs.updates]: {
+              id: AllRulesTabs.updates,
+              name: i18n.RULE_UPDATES_TAB,
+              disabled: false,
+              href: `/rules/${AllRulesTabs.updates}`,
+              isBeta: updateTotal > 0,
+              betaOptions: {
+                text: `${updateTotal}`,
+              },
+            },
+          }
+        : {}),
     }),
-    [installedTotal, ruleUpdateTab, updateTotal]
+    [installedTotal, updateTotal, shouldDisplayRuleUpdatesTab]
   );
 
   return <TabNavigation navTabs={ruleTabs} />;
