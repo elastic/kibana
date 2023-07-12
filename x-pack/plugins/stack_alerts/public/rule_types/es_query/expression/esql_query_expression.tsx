@@ -14,7 +14,6 @@ import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
@@ -79,7 +78,7 @@ export const EsqlQueryExpression: React.FC<
     }
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    const table: Datatable = await fetchFieldsFromESQL(esqlQuery, expressions, {
+    const table = await fetchFieldsFromESQL(esqlQuery, expressions, {
       from: new Date(now - timeWindow).toISOString(),
       to: new Date(now).toISOString(),
     });
