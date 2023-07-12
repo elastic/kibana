@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiLoadingSpinner,
-  EuiBottomBar,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +20,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
@@ -159,7 +159,7 @@ export const PolicyFormLayout = React.memo(() => {
       )}
       <PolicyDetailsForm />
       <EuiSpacer size="xxl" />
-      <EuiBottomBar paddingSize="s">
+      <KibanaPageTemplate.BottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -190,7 +190,7 @@ export const PolicyFormLayout = React.memo(() => {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </EuiBottomBar>
+      </KibanaPageTemplate.BottomBar>
     </>
   );
 });
