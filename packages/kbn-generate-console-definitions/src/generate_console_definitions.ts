@@ -67,7 +67,7 @@ const generateBodyParams = (
 };
 
 const DEFAULT_STACK_ENDPOINT_AVAILABILITY = true;
-const DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY = false;
+const DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY = true;
 
 const generateAvailability = (endpoint: SpecificationTypes.Endpoint): AutocompleteAvailability => {
   const availability: AutocompleteAvailability = {
