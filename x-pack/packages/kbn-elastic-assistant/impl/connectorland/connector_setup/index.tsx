@@ -30,10 +30,8 @@ import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { WELCOME_CONVERSATION_TITLE } from '../../assistant/use_conversation/translations';
 
-const MESSAGE_INDEX_BEFORE_CONNECTOR = 2;
-
 const ConnectorButtonWrapper = styled.div`
-  margin-top: 20px;
+  margin-bottom: 10px;
 `;
 
 const SkipEuiText = styled(EuiText)`
@@ -90,24 +88,40 @@ export const useConnectorSetup = ({
   );
 
   // User constants
-  const userName = conversation.theme?.user?.name ?? i18n.CONNECTOR_SETUP_USER_YOU;
-  const assistantName = conversation.theme?.assistant?.name ?? i18n.CONNECTOR_SETUP_USER_ASSISTANT;
+  const userName = useMemo(
+    () => conversation.theme?.user?.name ?? i18n.CONNECTOR_SETUP_USER_YOU,
+    [conversation.theme?.user?.name]
+  );
+  const assistantName = useMemo(
+    () => conversation.theme?.assistant?.name ?? i18n.CONNECTOR_SETUP_USER_ASSISTANT,
+    [conversation.theme?.assistant?.name]
+  );
+  const lastConversationMessageIndex = useMemo(
+    () => conversation.messages.length - 1,
+    [conversation.messages.length]
+  );
 
   const [currentMessageIndex, setCurrentMessageIndex] = useState(
     // If connector is configured or conversation has already been replayed show all messages immediately
     isConnectorConfigured || conversationHasNoPresentationData(conversation)
-      ? MESSAGE_INDEX_BEFORE_CONNECTOR
+      ? lastConversationMessageIndex
       : 0
   );
 
+  const streamingTimeoutRef = useRef<number | undefined>(undefined);
+
   // Once streaming of previous message is complete, proceed to next message
   const onHandleMessageStreamingComplete = useCallback(() => {
-    const timeoutId = setTimeout(() => {
+    if (currentMessageIndex === lastConversationMessageIndex) {
+      clearTimeout(streamingTimeoutRef.current);
+      return;
+    }
+    streamingTimeoutRef.current = window.setTimeout(() => {
       bottomRef.current?.scrollIntoView({ block: 'end' });
       return setCurrentMessageIndex(currentMessageIndex + 1);
     }, conversation.messages[currentMessageIndex]?.presentation?.delay ?? 0);
-    return () => clearTimeout(timeoutId);
-  }, [conversation.messages, currentMessageIndex]);
+    return () => clearTimeout(streamingTimeoutRef.current);
+  }, [conversation.messages, currentMessageIndex, lastConversationMessageIndex]);
 
   // Show button to add connector after last message has finished streaming
   const onHandleLastMessageStreamingComplete = useCallback(() => {
@@ -119,8 +133,8 @@ export const useConnectorSetup = ({
 
   // Show button to add connector after last message has finished streaming
   const handleSkipSetup = useCallback(() => {
-    setCurrentMessageIndex(MESSAGE_INDEX_BEFORE_CONNECTOR);
-  }, [setCurrentMessageIndex]);
+    setCurrentMessageIndex(lastConversationMessageIndex);
+  }, [lastConversationMessageIndex]);
 
   // Create EuiCommentProps[] from conversation messages
   const commentBody = useCallback(
@@ -194,12 +208,9 @@ export const useConnectorSetup = ({
     comments,
     prompt: (
       <div data-test-subj="prompt">
-        {(showAddConnectorButton || isConnectorConfigured) && (
+        {showAddConnectorButton && (
           <ConnectorButtonWrapper>
-            <ConnectorButton
-              setIsConnectorModalVisible={setIsConnectorModalVisible}
-              connectorAdded={isConnectorConfigured}
-            />
+            <ConnectorButton setIsConnectorModalVisible={setIsConnectorModalVisible} />
           </ConnectorButtonWrapper>
         )}
         {!showAddConnectorButton && (

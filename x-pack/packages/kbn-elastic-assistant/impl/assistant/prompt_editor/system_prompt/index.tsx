@@ -6,14 +6,13 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 import { useAssistantContext } from '../../../assistant_context';
-import { Conversation } from '../../../..';
+import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import { SelectSystemPrompt } from './select_system_prompt';
-import { useConversation } from '../../use_conversation';
 
 interface Props {
   conversation: Conversation | undefined;
@@ -21,26 +20,24 @@ interface Props {
 
 const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
   const { allSystemPrompts } = useAssistantContext();
-  const { setApiConfig } = useConversation();
 
-  const selectedPrompt = useMemo(
-    () => allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId),
-    [allSystemPrompts, conversation]
+  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | undefined>(
+    allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId) ??
+      allSystemPrompts?.[0]
   );
+
+  useEffect(() => {
+    setSelectedPrompt(
+      allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId) ??
+        allSystemPrompts?.[0]
+    );
+  }, [allSystemPrompts, conversation]);
 
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
 
   const handleClearSystemPrompt = useCallback(() => {
-    if (conversation) {
-      setApiConfig({
-        conversationId: conversation.id,
-        apiConfig: {
-          ...conversation.apiConfig,
-          defaultSystemPromptId: undefined,
-        },
-      });
-    }
-  }, [conversation, setApiConfig]);
+    setSelectedPrompt(undefined);
+  }, []);
 
   const handleEditSystemPrompt = useCallback(() => setIsEditing(true), []);
 
@@ -48,6 +45,7 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
     <div>
       {selectedPrompt == null || isEditing ? (
         <SelectSystemPrompt
+          allSystemPrompts={allSystemPrompts}
           clearSelectedSystemPrompt={handleClearSystemPrompt}
           conversation={conversation}
           data-test-subj="systemPrompt"
