@@ -94,7 +94,7 @@ export interface Tab {
   'data-test-subj': string;
 }
 
-export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
 
 export interface AssetDetailsProps {
   node: HostNodeRow;
