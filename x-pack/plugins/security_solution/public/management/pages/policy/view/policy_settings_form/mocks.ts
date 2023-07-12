@@ -54,6 +54,7 @@ export const getPolicySettingsFormTestSubjects = (
       notifyCustomMessageTooltipIcon: malwareTestSubj('notifyUser-tooltipIcon'),
       notifyCustomMessageTooltipInfo: malwareTestSubj('notifyUser-tooltipInfo'),
       osValuesContainer: malwareTestSubj('osValues'),
+      rulesCallout: malwareTestSubj('rulesCallout'),
     },
     ransomware: {
       card: ransomwareTestSubj(),
