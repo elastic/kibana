@@ -10,19 +10,10 @@ import dedent from 'dedent';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
-// import execa from 'execa';
 import { Cluster } from '../cluster';
-import { parseTimeoutToMs } from '../utils';
+import { parseTimeoutToMs, DEFAULT_DOCKER_CMD, DEFAULT_DOCKER_IMG } from '../utils';
 import { Command } from './types';
-
-// TODO: remove
-const DEFAULT_DOCKER_BASE_CMD = 'run -p 9200:9200 -p 9300:9300 -dt --rm';
-// const DEFAULT_DOCKER_BASE_CMD = 'run -p 9200:9200 -p 9300:9300 -t';
-const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co/elasticsearch/elasticsearch';
-const DEFAULT_DOCKER_IMG = `${DEFAULT_DOCKER_REGISTRY}:${pkg.version}-SNAPSHOT`;
-const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_IMG}`;
 
 /*
 rm -rf /tmp/objectstore ; mkdir /tmp/objectstore ; chmod a+rw -R /tmp/objectstore
@@ -36,38 +27,6 @@ docker run --rm -d --name es02 --net elastic -p 9202:9202 -p 9302:9302 -e ES_JAV
 docker run --rm -d --name es03 --net elastic -p 9203:9203 -p 9303:9303 -e ES_JAVA_OPTS="-Xms1g -Xmx1g" -e node.name=es03 -e cluster.initial_master_nodes=es01,es02,es03 -e discovery.seed_hosts=es01,es02 -e node.roles='["master"]' -e xpack.security.enabled=false -e cluster.name=stateless -e stateless.enabled=true -e stateless.object_store.type=fs -e stateless.object_store.bucket=stateless -e path.repo=/objectstore -v /tmp/objectstore:/objectstore:z docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
 
 */
-
-/*
-0. verify docker is installed
-1. determine if serverless
-2a. not serverless => run command
-2b. serverless => run cluster
-
-*/
-
-const resolveDockerImage = ({ version, image }: { version?: string; image?: string }) => {
-  if (image) {
-    return image;
-  } else if (version) {
-    return `${DEFAULT_DOCKER_REGISTRY}:${version}-SNAPSHOT`;
-  }
-
-  return DEFAULT_DOCKER_IMG;
-};
-
-const resolveDockerCmd = (options: Record<string, any>) => {
-  let cmd;
-
-  if (options.dockerCmd) {
-    cmd = options.dockerCmd;
-  } else {
-    const img = resolveDockerImage(options);
-
-    cmd = `${DEFAULT_DOCKER_BASE_CMD} ${img}`;
-  }
-
-  return cmd.split(' ');
-};
 
 export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',
@@ -105,7 +64,7 @@ export const docker: Command = {
 
       es docker --version ${version}
       es docker --image docker.elastic.co/elasticsearch/elasticsearch:8.10.0-759b2cb2-SNAPSHOT-amd64
-      es docker -D 'start -a 4e79be040f6aca5c433f73faa60fe245791482c2a1abda9417a505ec552cb9a5' 
+      es docker -D 'start 4e79be040f6aca5c433f73faa60fe245791482c2a1abda9417a505ec552cb9a5' 
     `;
   },
   run: async (defaults = {}) => {
@@ -138,13 +97,11 @@ export const docker: Command = {
     });
 
     const cluster = new Cluster({ ssl: options.ssl });
-    await cluster.verifyDockerInstalled();
-    await cluster.run('docker', {
+    await cluster.runDocker({
       reportTime,
       startTime: runStartTime,
       ...options,
       readyTimeout: parseTimeoutToMs(options.readyTimeout),
-      dockerCmd: resolveDockerCmd(options),
     });
   },
 };

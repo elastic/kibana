@@ -22,6 +22,8 @@ const {
   extractConfigFiles,
   NativeRealm,
   parseTimeoutToMs,
+  verifyDockerInstalled,
+  resolveDockerCmd,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -32,6 +34,7 @@ const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-util
 const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
 
 /** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
+/** @typedef {import('./utils').DockerOptions} DockerOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -190,23 +193,6 @@ exports.Cluster = class Cluster {
   }
 
   /**
-   * Verify that Docker is installed locally
-   * @returns {Promise<void>}
-   */
-  async verifyDockerInstalled() {
-    this._log.info(chalk.bold('Verifying docker installed'));
-    const { stdout } = await execa('docker', ['--version']).catch((error) => {
-      throw createCliError(
-        `Docker not found locally. Install it from: https://www.docker.com\n\n${error.message}`
-      );
-    });
-
-    this._log.indent(4, () => {
-      this._log.info(stdout);
-    });
-  }
-
-  /**
    * Starts ES and returns resolved promise once started
    *
    * @param {String} installPath
@@ -330,7 +316,6 @@ exports.Cluster = class Cluster {
    */
   _exec(installPath, opts = {}) {
     const {
-      dockerCmd,
       skipNativeRealmSetup = false,
       reportTime = () => {},
       startTime,
@@ -339,8 +324,6 @@ exports.Cluster = class Cluster {
       writeLogsToPath,
       ...options
     } = opts;
-
-    const isDocker = installPath === 'docker';
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -403,31 +386,18 @@ exports.Cluster = class Cluster {
     const esJavaOpts = this.javaOptions(options);
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
-    if (isDocker) {
-      this._log.info('%s %s', installPath, dockerCmd.join(' '));
+    this._log.info('%s %s', ES_BIN, args.join(' '));
 
-      this._process = execa(installPath, dockerCmd, {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-
-      // TODO: handle detached with inherit does not properly detach
-      // TODO: better way to do this? attach to docker process?
-      // this._process.stdout = process.stdout;
-      // this._process.stderr = process.stderr;
-    } else {
-      this._log.info('%s %s', ES_BIN, args.join(' '));
-
-      this._process = execa(ES_BIN, args, {
-        cwd: installPath,
-        env: {
-          ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
-          ...process.env,
-          JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-          ES_JAVA_OPTS: esJavaOpts,
-        },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-    }
+    this._process = execa(ES_BIN, args, {
+      cwd: installPath,
+      env: {
+        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+        ...process.env,
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+        ES_JAVA_OPTS: esJavaOpts,
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
 
     this._setupPromise = Promise.all([
       // parse log output to find http port
@@ -478,7 +448,7 @@ exports.Cluster = class Cluster {
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
       const chunk = data.toString();
-      const lines = isDocker ? parseEsDockerLog(chunk) : parseEsLog(chunk);
+      const lines = parseEsLog(chunk);
       lines.forEach((line) => {
         if (!reportSent && line.message.includes('publish_address')) {
           reportSent = true;
@@ -517,7 +487,7 @@ exports.Cluster = class Cluster {
         });
     }
 
-    // observe the exit code of the process and reflect in _outcome promies
+    // observe the exit code of the process and reflect in _outcome promises
     const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
     this._outcome = exitCode.then((code) => {
       if (this._stopCalled) {
@@ -591,5 +561,68 @@ exports.Cluster = class Cluster {
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
     return esJavaOpts.trim();
+  }
+
+  /**
+   * Run an Elasticsearch Docker container
+   *
+   * @param {DockerOptions} options
+   */
+  async runDocker(options = {}) {
+    const dockerCmd = resolveDockerCmd(options);
+
+    await this._execDocker(dockerCmd);
+  }
+
+  /**
+   * Run an Elasticsearch Serverless Docker cluster
+   */
+  async runServerless() {}
+
+  /**
+   * Common logic for starting Docker containers
+   *
+   * @private
+   * @param {String[]} dockerCmd
+   * @returns {Promise<void>}
+   */
+  async _execDocker(dockerCmd) {
+    if (this._process || this._outcome) {
+      throw new Error('ES has already been started');
+    }
+
+    this._log.info(chalk.bold('Verifying docker installed'));
+    await verifyDockerInstalled(this._log);
+
+    this._log.info('docker %s', dockerCmd.join(' '));
+
+    // iterate over for serverless?
+    this._process = await execa('docker', dockerCmd);
+
+    // TODO: handle detached with inherit does not properly detach
+    // TODO: better way to do this? attach to docker process?
+    // this._process.stdout = process.stdout;
+    // this._process.stderr = process.stderr;
+
+    // const reportSent = false;
+    // parse and forward es stdout to the log
+    this._process.stdout.on('data', (data) => {
+      const chunk = data.toString();
+      const lines = parseEsDockerLog(chunk);
+      lines.forEach((line) => {
+        // if (!reportSent && line.message.includes('publish_address')) {
+        //   reportSent = true;
+        //   reportTime(startTime, 'ready', {
+        //     success: true,
+        //   });
+        // }
+
+        // if (stdioTarget) {
+        //   stdioTarget.write(chunk);
+        // } else {
+        this._log.info(line.formattedMessage);
+        // }
+      });
+    });
   }
 };
