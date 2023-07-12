@@ -82,7 +82,13 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
     this.setInitializationFinished();
   }
 
-  public runSaveToLibrary = async ({ title, description }: { title: string; description?: string }) => {
+  public runSaveToLibrary = async ({
+    title,
+    description,
+  }: {
+    title: string;
+    description?: string;
+  }) => {
     const { id } = await navigationEmbeddableClient.create({ data: { title, description } });
     return id;
   };
