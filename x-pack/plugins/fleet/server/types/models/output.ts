@@ -155,7 +155,7 @@ export const KafkaSchema = {
   ),
   compression_level: schema.conditional(
     schema.siblingRef('compression'),
-    schema.literal(kafkaCompressionType.Gzip),
+    schema.string({ validate: (val) => (val === kafkaCompressionType.Gzip ? undefined : 'never') }),
     schema.number(),
     schema.never()
   ),
