@@ -45,7 +45,7 @@ const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string)
   },
 ];
 
-const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+const getLogRateAnalysisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
   getBreadcrumbWithUrlForApp('EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
@@ -114,24 +114,24 @@ export const dataVizIndexOrSearchRouteFactory = (
   breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
-export const explainLogRateSpikesIndexOrSearchRouteFactory = (
+export const logRateAnalysisIndexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_view_explain_log_rate_spikes',
-  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
+  id: 'data_view_log_rate_analysis',
+  path: createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT),
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath={createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES)}
+      nextStepPath={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS)}
       deps={deps}
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getLogRateAnalysisBreadcrumbs(navigateToPath, basePath),
 });
 
 export const logCategorizationIndexOrSearchRouteFactory = (

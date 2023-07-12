@@ -248,13 +248,13 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         items: [
           {
             id: 'explainlogratespikes',
-            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
-              defaultMessage: 'Explain Log Rate Spikes',
+            pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.logRateAnalysisLinkText', {
+              defaultMessage: 'Log Rate Analysis',
             }),
             disabled: disableLinks,
-            testSubj: 'mlMainTab explainLogRateSpikes',
-            relatedRouteIds: ['explain_log_rate_spikes'],
+            testSubj: 'mlMainTab logRateAnalysis',
+            relatedRouteIds: ['log_rate_analysis'],
           },
           {
             id: 'logCategorization',

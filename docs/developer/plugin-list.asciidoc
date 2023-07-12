@@ -149,7 +149,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -427,7 +427,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/aiops/README.md[aiops]
-|The plugin provides APIs and components for AIOps features, including the “Explain log rate spikes” UI, maintained by the ML team.
+|The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
