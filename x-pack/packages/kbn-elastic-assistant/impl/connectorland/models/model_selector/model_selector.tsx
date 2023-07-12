@@ -12,8 +12,7 @@ import * as i18n from './translations';
 
 export const MODEL_GPT_3_5_TURBO = 'gpt-3.5-turbo';
 export const MODEL_GPT_4 = 'gpt-4';
-export const MODEL_GPT_4_32K = 'gpt-4-32k';
-const DEFAULT_MODELS = [MODEL_GPT_3_5_TURBO, MODEL_GPT_4, MODEL_GPT_4_32K];
+const DEFAULT_MODELS = [MODEL_GPT_3_5_TURBO, MODEL_GPT_4];
 
 interface Props {
   onModelSelectionChange?: (model?: string) => void;
