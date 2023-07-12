@@ -27,6 +27,19 @@ const integrationStatusRT = rt.keyof({
 
 export const integrationRT = rt.type({
   name: rt.string,
+  title: rt.union([rt.string, rt.undefined]),
+  description: rt.union([rt.string, rt.undefined]),
+  icons: rt.union([
+    rt.array(
+      rt.type({
+        src: rt.string,
+        title: rt.string,
+        size: rt.string,
+        type: rt.string,
+      })
+    ),
+    rt.undefined,
+  ]),
   status: integrationStatusRT,
   version: rt.string,
   dataStreams: rt.array(datasetRT),
