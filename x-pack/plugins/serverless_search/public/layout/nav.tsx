@@ -114,7 +114,6 @@ const navigationTree: NavigationTreeDefinition = {
         defaultMessage: 'Project settings',
       }),
       icon: 'gear',
-      defaultIsCollapsed: true,
       breadcrumbStatus: 'hidden',
       children: [
         {
