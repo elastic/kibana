@@ -24,6 +24,8 @@ import type {
   RegistryStream,
   RegistryVarsEntry,
   PackageSpecManifest,
+  RegistryDataStreamRoutingRules,
+  RegistryDataStreamLifecycle,
 } from '../../../../common/types';
 import {
   RegistryInputKeys,
@@ -157,18 +159,18 @@ export async function generatePackageInfoFromArchiveBuffer(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
-  const manifestsAndRoutingRules: AssetsBufferMap = {};
+  const assetsMap: AssetsBufferMap = {};
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach(({ path: bufferPath, buffer }) => {
     paths.push(bufferPath);
     if (buffer && filterAssetPathForParseAndVerifyArchive(bufferPath)) {
-      manifestsAndRoutingRules[bufferPath] = buffer;
+      assetsMap[bufferPath] = buffer;
     }
   });
 
   return {
-    packageInfo: parseAndVerifyArchive(paths, manifestsAndRoutingRules),
+    packageInfo: parseAndVerifyArchive(paths, assetsMap),
     paths,
   };
 }
@@ -181,16 +183,16 @@ export async function _generatePackageInfoFromPaths(
   paths: string[],
   topLevelDir: string
 ): Promise<ArchivePackage> {
-  const manifestsAndRoutingRules: AssetsBufferMap = {};
+  const assetsMap: AssetsBufferMap = {};
   await Promise.all(
     paths.map(async (filePath) => {
       if (filterAssetPathForParseAndVerifyArchive(filePath)) {
-        manifestsAndRoutingRules[filePath] = await readFileAsync(filePath);
+        assetsMap[filePath] = await readFileAsync(filePath);
       }
     })
   );
 
-  return parseAndVerifyArchive(paths, manifestsAndRoutingRules, topLevelDir);
+  return parseAndVerifyArchive(paths, assetsMap, topLevelDir);
 }
 
 export function parseAndVerifyArchive(
@@ -343,9 +345,9 @@ export function parseAndVerifyDataStreams(opts: {
     }
 
     // Routing rules
-    const routingRulesFiles = path.posix.join(fullDataStreamPath, DATASTREAM_ROUTING_RULES_NAME);
-    const routingRulesBuffer = assetsMap[routingRulesFiles];
-    let dataStreamRoutingRules: any;
+    const routingRulesPath = path.posix.join(fullDataStreamPath, DATASTREAM_ROUTING_RULES_NAME);
+    const routingRulesBuffer = assetsMap[routingRulesPath];
+    let dataStreamRoutingRules: RegistryDataStreamRoutingRules[] | undefined;
     if (routingRulesBuffer) {
       try {
         dataStreamRoutingRules = yaml.safeLoad(routingRulesBuffer.toString());
@@ -356,6 +358,18 @@ export function parseAndVerifyDataStreams(opts: {
       }
     }
     // Lifecycle
+    const lifecyclePath = path.posix.join(fullDataStreamPath, DATASTREAM_ROUTING_RULES_NAME);
+    const lifecyleBuffer = assetsMap[lifecyclePath];
+    let dataStreamLifecyle: RegistryDataStreamLifecycle | undefined;
+    if (lifecyleBuffer) {
+      try {
+        dataStreamLifecyle = yaml.safeLoad(lifecyleBuffer.toString());
+      } catch (error) {
+        throw new PackageInvalidArchiveError(
+          `Could not parse lifecycle for data stream '${dataStreamPath}': ${error}.`
+        );
+      }
+    }
 
     const {
       title: dataStreamTitle,
@@ -394,6 +408,10 @@ export function parseAndVerifyDataStreams(opts: {
 
     if (dataStreamRoutingRules) {
       dataStreamObject.routing_rules = dataStreamRoutingRules;
+    }
+
+    if (dataStreamLifecyle) {
+      dataStreamObject.lifecycle = dataStreamLifecyle;
     }
 
     if (ingestPipeline) {

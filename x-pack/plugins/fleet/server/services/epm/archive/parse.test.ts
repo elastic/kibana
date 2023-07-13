@@ -610,6 +610,41 @@ describe('parseAndVerifyDataStreams', () => {
       },
     ]);
   });
+
+  it('should parse lifecycle', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+          'input-only-0.1.0/data_stream/stream1/lifecycle.yml': Buffer.from(
+            `data_retention: "7d"`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        elasticsearch: {},
+        lifecycle: { data_retention: '7d' },
+      },
+    ]);
+  });
 });
 
 describe('parseAndVerifyStreams', () => {

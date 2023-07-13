@@ -24,12 +24,7 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
 import type { ArchiveEntry } from '.';
-import {
-  DATASTREAM_ROUTING_RULES_NAME,
-  filterAssetPathForParseAndVerifyArchive,
-  MANIFEST_NAME,
-  parseAndVerifyArchive,
-} from './parse';
+import { filterAssetPathForParseAndVerifyArchive, parseAndVerifyArchive } from './parse';
 
 const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
@@ -212,7 +207,7 @@ export const getEsPackage = async (
     return undefined;
   }
 
-  const manifestsAndRoutingRules: Record<string, Buffer> = {};
+  const assetsMap: Record<string, Buffer> = {};
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
   const paths: string[] = [];
   entries.forEach(({ path, buffer }) => {
@@ -222,13 +217,13 @@ export const getEsPackage = async (
     }
     paths.push(path);
     if (buffer && filterAssetPathForParseAndVerifyArchive(path)) {
-      manifestsAndRoutingRules[path] = buffer;
+      assetsMap[path] = buffer;
     }
   });
   // // Add asset references to cache
   setArchiveFilelist({ name: pkgName, version: pkgVersion }, paths);
 
-  const packageInfo = parseAndVerifyArchive(paths, manifestsAndRoutingRules);
+  const packageInfo = parseAndVerifyArchive(paths, assetsMap);
   setPackageInfo({ name: pkgName, version: pkgVersion, packageInfo });
 
   return {
