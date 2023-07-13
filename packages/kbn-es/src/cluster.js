@@ -604,7 +604,7 @@ exports.Cluster = class Cluster {
         'discovery.seed_hosts=es02,es03',
 
         '--env',
-        `node.roles='["master","index"]'`,
+        'node.roles=["master","index"]',
 
         '--env',
         'xpack.searchable.snapshot.shared_cache.size=1gb',
@@ -625,7 +625,7 @@ exports.Cluster = class Cluster {
         'discovery.seed_hosts=es01,es03',
 
         '--env',
-        `node.roles='["master","search"]'`,
+        'node.roles=["master","search"]',
 
         '--env',
         'xpack.searchable.snapshot.shared_cache.size=1gb',
@@ -646,7 +646,7 @@ exports.Cluster = class Cluster {
         'discovery.seed_hosts=es01,es02',
 
         '--env',
-        `node.roles='["master"]'`,
+        'node.roles=["master"]',
       ].concat(volumeCmd),
       image,
       name: 'es03',
