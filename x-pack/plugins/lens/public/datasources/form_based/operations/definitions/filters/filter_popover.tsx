@@ -14,7 +14,6 @@ import type { Query } from '@kbn/es-query';
 // import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
 import { IndexPattern } from '../../../../../types';
 import { FilterValue, defaultLabel } from '.';
@@ -76,7 +75,6 @@ export const FilterPopover = ({
         }}
         appName={LENS_APP_NAME}
         services={useKibana<LensAppServices>().services}
-        QueryStringInput={QueryStringInput}
       />
       <EuiSpacer size="s" />
       <LabelInput

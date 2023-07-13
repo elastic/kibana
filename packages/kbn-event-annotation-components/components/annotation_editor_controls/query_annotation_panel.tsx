@@ -20,7 +20,6 @@ import {
   type QueryInputServices,
 } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 
 export const defaultQuery: Query = {
@@ -86,7 +85,6 @@ export const ConfigPanelQueryAnnotation = ({
           }}
           dataView={dataView}
           appName={appName}
-          QueryStringInput={QueryStringInput}
           queryInputServices={queryInputServices}
         />
       </EuiFormRow>

@@ -10,9 +10,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
-import type {
-  UnifiedSearchPublicPluginStart,
-  QueryStringInputComponentType,
+import {
+  type UnifiedSearchPublicPluginStart,
+  QueryStringInput,
 } from '@kbn/unified-search-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -44,7 +44,6 @@ export const QueryInput = ({
   ['data-test-subj']: dataTestSubj,
   placeholder,
   appName,
-  QueryStringInput,
   services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews },
 }: {
   value: Query;
@@ -56,7 +55,6 @@ export const QueryInput = ({
   'data-test-subj'?: string;
   placeholder?: string;
   appName: string;
-  QueryStringInput: QueryStringInputComponentType;
   services: QueryInputServices;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });

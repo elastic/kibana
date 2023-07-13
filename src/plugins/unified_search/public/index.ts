@@ -9,7 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
 export type { IndexPatternSelectProps } from './index_pattern_select';
-export type { QueryStringInputProps, QueryStringInputComponentType } from './query_string_input';
+export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
 export type {
