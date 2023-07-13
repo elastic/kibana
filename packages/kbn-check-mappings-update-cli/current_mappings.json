@@ -616,6 +616,30 @@
       }
     }
   },
+  "tag": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -871,30 +895,6 @@
       "events": {
         "type": "date_range",
         "format": "epoch_millis||strict_date_optional_time"
-      }
-    }
-  },
-  "tag": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
       }
     }
   },
@@ -2259,6 +2259,14 @@
       }
     }
   },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
+  },
   "ml-job": {
     "properties": {
       "job_id": {
@@ -2796,6 +2804,9 @@
               },
               "value": {
                 "type": "text"
+              },
+              "relation": {
+                "type": "keyword"
               }
             }
           },
@@ -2932,14 +2943,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
-      }
-    }
-  },
   "metrics-explorer-view": {
     "dynamic": false,
     "properties": {}
@@ -2976,18 +2979,6 @@
       }
     }
   },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
   "apm-indices": {
     "dynamic": false,
     "properties": {}
@@ -3019,5 +3010,17 @@
         "type": "text"
       }
     }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
   }
 }
