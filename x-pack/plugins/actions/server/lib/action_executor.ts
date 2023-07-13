@@ -183,10 +183,6 @@ export class ActionExecutor {
           });
         }
 
-        if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
-          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-        }
-
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
 
