@@ -40,11 +40,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     activeNodes$: serverless.getActiveNavigationNodes$(),
   };
 
-  return (
-    <Context.Provider {...{ value }} {...dependencies}>
-      {children}
-    </Context.Provider>
-  );
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 /**
