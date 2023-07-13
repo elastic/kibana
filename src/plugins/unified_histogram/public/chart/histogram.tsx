@@ -40,6 +40,7 @@ export interface HistogramProps {
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
   isPlainRecord?: boolean;
+  hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   lensAttributesContext: LensAttributesContext;
@@ -58,6 +59,7 @@ export function Histogram({
   hits,
   chart: { timeInterval },
   isPlainRecord,
+  hasLensSuggestions,
   getTimeRange,
   refetch$,
   lensAttributesContext: attributesContext,
@@ -109,9 +111,10 @@ export function Histogram({
       }
 
       const adapterTables = adapters?.tables?.tables;
-      const totalHits = isPlainRecord
-        ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
-        : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
+      const totalHits =
+        isPlainRecord && hasLensSuggestions
+          ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
+          : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
