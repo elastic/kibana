@@ -15,9 +15,10 @@ import { type ControlGroupTelemetry, CONTROL_GROUP_TYPE } from '@kbn/controls-pl
 
 import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
-import { type LatestTaskStateSchema } from './task_state';
+import { emptyState, type LatestTaskStateSchema } from './task_state';
 
-// TODO: Merge with LatestTaskStateSchema
+// TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
+// LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).
 export interface DashboardCollectorData {
   panels: {
     total: number;
@@ -131,8 +132,8 @@ export async function collectDashboardTelemetry(taskManager: TaskManagerStartCon
 
   if (latestTaskState !== null) {
     const state = latestTaskState[0].state as LatestTaskStateSchema;
-    return state.telemetry || getEmptyDashboardData();
+    return state.telemetry;
   }
 
-  return getEmptyDashboardData();
+  return emptyState.telemetry;
 }

@@ -21,57 +21,53 @@ export const stateSchemaByVersion = {
     // to ensure it matches the v1 schema.
     up: (state: Record<string, any>) => ({
       runs: typeof state.runs === 'number' ? state.runs : 0,
-      telemetry: state.telemetry
-        ? {
-            panels: {
-              total: state.telemetry.panels?.total || 0,
-              by_reference: state.telemetry.panels?.by_reference || 0,
-              by_value: state.telemetry.panels?.by_value || 0,
-              by_type: state.telemetry.panels?.by_type || {},
-            },
-            controls: {
-              total: state.telemetry.controls?.total || 0,
-              chaining_system: state.telemetry.controls?.chaining_system || {},
-              label_position: state.telemetry.controls?.label_position || {},
-              ignore_settings: state.telemetry.controls?.ignore_settings || {},
-              by_type: state.telemetry.controls?.by_type || {},
-            },
-          }
-        : undefined,
+      telemetry: {
+        panels: {
+          total: state.telemetry?.panels?.total || 0,
+          by_reference: state.telemetry?.panels?.by_reference || 0,
+          by_value: state.telemetry?.panels?.by_value || 0,
+          by_type: state.telemetry?.panels?.by_type || {},
+        },
+        controls: {
+          total: state.telemetry?.controls?.total || 0,
+          chaining_system: state.telemetry?.controls?.chaining_system || {},
+          label_position: state.telemetry?.controls?.label_position || {},
+          ignore_settings: state.telemetry?.controls?.ignore_settings || {},
+          by_type: state.telemetry?.controls?.by_type || {},
+        },
+      },
     }),
     schema: schema.object({
       runs: schema.number(),
-      telemetry: schema.maybe(
-        schema.object({
-          panels: schema.object({
-            total: schema.number(),
-            by_reference: schema.number(),
-            by_value: schema.number(),
-            by_type: schema.recordOf(
-              schema.string(),
-              schema.object({
-                total: schema.number(),
-                by_reference: schema.number(),
-                by_value: schema.number(),
-                details: schema.recordOf(schema.string(), schema.number()),
-              })
-            ),
-          }),
-          controls: schema.object({
-            total: schema.number(),
-            chaining_system: schema.recordOf(schema.string(), schema.number()),
-            label_position: schema.recordOf(schema.string(), schema.number()),
-            ignore_settings: schema.recordOf(schema.string(), schema.number()),
-            by_type: schema.recordOf(
-              schema.string(),
-              schema.object({
-                total: schema.number(),
-                details: schema.recordOf(schema.string(), schema.number()),
-              })
-            ),
-          }),
-        })
-      ),
+      telemetry: schema.object({
+        panels: schema.object({
+          total: schema.number(),
+          by_reference: schema.number(),
+          by_value: schema.number(),
+          by_type: schema.recordOf(
+            schema.string(),
+            schema.object({
+              total: schema.number(),
+              by_reference: schema.number(),
+              by_value: schema.number(),
+              details: schema.recordOf(schema.string(), schema.number()),
+            })
+          ),
+        }),
+        controls: schema.object({
+          total: schema.number(),
+          chaining_system: schema.recordOf(schema.string(), schema.number()),
+          label_position: schema.recordOf(schema.string(), schema.number()),
+          ignore_settings: schema.recordOf(schema.string(), schema.number()),
+          by_type: schema.recordOf(
+            schema.string(),
+            schema.object({
+              total: schema.number(),
+              details: schema.recordOf(schema.string(), schema.number()),
+            })
+          ),
+        }),
+      }),
     }),
   },
 };
@@ -81,5 +77,19 @@ export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
   runs: 0,
-  telemetry: undefined,
+  telemetry: {
+    panels: {
+      total: 0,
+      by_reference: 0,
+      by_value: 0,
+      by_type: {},
+    },
+    controls: {
+      total: 0,
+      chaining_system: {},
+      ignore_settings: {},
+      label_position: {},
+      by_type: {},
+    },
+  },
 };

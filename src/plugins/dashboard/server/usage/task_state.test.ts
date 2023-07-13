@@ -17,7 +17,21 @@ describe('telemetry task state', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "runs": 0,
-          "telemetry": undefined,
+          "telemetry": Object {
+            "controls": Object {
+              "by_type": Object {},
+              "chaining_system": Object {},
+              "ignore_settings": Object {},
+              "label_position": Object {},
+              "total": 0,
+            },
+            "panels": Object {
+              "by_reference": 0,
+              "by_type": Object {},
+              "by_value": 0,
+              "total": 0,
+            },
+          },
         }
       `);
     });
@@ -52,7 +66,21 @@ describe('telemetry task state', () => {
       expect(result).toMatchInlineSnapshot(`
         Object {
           "runs": 0,
-          "telemetry": undefined,
+          "telemetry": Object {
+            "controls": Object {
+              "by_type": Object {},
+              "chaining_system": Object {},
+              "ignore_settings": Object {},
+              "label_position": Object {},
+              "total": 0,
+            },
+            "panels": Object {
+              "by_reference": 0,
+              "by_type": Object {},
+              "by_value": 0,
+              "total": 0,
+            },
+          },
         }
       `);
     });
