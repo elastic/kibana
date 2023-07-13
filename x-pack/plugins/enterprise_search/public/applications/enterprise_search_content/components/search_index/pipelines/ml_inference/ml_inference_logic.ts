@@ -93,7 +93,6 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
   pipelineName: '',
   sourceField: '',
-  fieldMappings: [],
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
