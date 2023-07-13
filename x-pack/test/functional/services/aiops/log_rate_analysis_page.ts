@@ -135,11 +135,11 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async assertAnalysisSectionExists() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`aiopsLogRateAnalysisAnalysis`);
+        await testSubjects.existOrFail(`aiopsLogRateAnalysisResults`);
       });
     },
 
-    async assertSpikeAnalysisGroupSwitchExists(checked: boolean) {
+    async assertLogRateAnalysisResultsGroupSwitchExists(checked: boolean) {
       await retry.tryForTime(5000, async () => {
         await testSubjects.existOrFail(
           `aiopsLogRateAnalysisGroupSwitch${checked ? ' checked' : ''}`
@@ -147,7 +147,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       });
     },
 
-    async clickSpikeAnalysisGroupSwitchOn() {
+    async clickLogRateAnalysisResultsGroupSwitchOn() {
       await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsLogRateAnalysisGroupSwitchOn');
 
       await retry.tryForTime(30 * 1000, async () => {

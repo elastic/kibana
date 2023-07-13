@@ -150,13 +150,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logRateAnalysisPage.assertAnalysisComplete();
 
       // The group switch should be disabled by default
-      await aiops.logRateAnalysisPage.assertSpikeAnalysisGroupSwitchExists(false);
+      await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
 
       if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
         // Enabled grouping
-        await aiops.logRateAnalysisPage.clickSpikeAnalysisGroupSwitchOn();
+        await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
 
-        await aiops.logRateAnalysisResultsGroupsTable.assertSpikeAnalysisTableExists();
+        await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
 
         const analysisGroupsTable =
           await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();

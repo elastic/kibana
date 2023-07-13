@@ -29,9 +29,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
+    loadTestFile(require.resolve('./log_rate_analysis'));
     loadTestFile(require.resolve('./change_point_detection'));
     loadTestFile(require.resolve('./log_pattern_analysis'));
     loadTestFile(require.resolve('./log_pattern_analysis_in_discover'));
-    loadTestFile(require.resolve('./log_rate_analysis'));
   });
 }

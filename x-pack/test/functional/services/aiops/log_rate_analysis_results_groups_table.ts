@@ -16,25 +16,25 @@ export function LogRateAnalysisResultsGroupsTableProvider({ getService }: FtrPro
   const browser = getService('browser');
 
   return new (class AnalysisTable {
-    public async assertSpikeAnalysisTableExists() {
-      await testSubjects.existOrFail(`aiopsSpikeAnalysisGroupsTable`);
+    public async assertLogRateAnalysisResultsTableExists() {
+      await testSubjects.existOrFail(`aiopsLogRateAnalysisResultsGroupsTable`);
     }
 
     public async assertExpandRowButtonExists() {
-      await testSubjects.existOrFail('aiopsSpikeAnalysisGroupsTableRowExpansionButton');
+      await testSubjects.existOrFail('aiopsLogRateAnalysisResultsGroupsTableRowExpansionButton');
     }
 
     public async expandRow() {
-      await testSubjects.click('aiopsSpikeAnalysisGroupsTableRowExpansionButton');
+      await testSubjects.click('aiopsLogRateAnalysisResultsGroupsTableRowExpansionButton');
       await testSubjects.existOrFail('aiopsLogRateAnalysisResultsTable');
     }
 
     public async parseAnalysisTable() {
-      const table = await testSubjects.find('~aiopsSpikeAnalysisGroupsTable');
+      const table = await testSubjects.find('~aiopsLogRateAnalysisResultsGroupsTable');
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('~aiopsSpikeAnalysisGroupsTableRow').toArray()) {
+      for (const tr of $.findTestSubjects('~aiopsLogRateAnalysisResultsGroupsTableRow').toArray()) {
         const $tr = $(tr);
 
         const rowObject: {
@@ -42,12 +42,12 @@ export function LogRateAnalysisResultsGroupsTableProvider({ getService }: FtrPro
           docCount: string;
         } = {
           group: $tr
-            .findTestSubject('aiopsSpikeAnalysisGroupsTableColumnGroup')
+            .findTestSubject('aiopsLogRateAnalysisResultsGroupsTableColumnGroup')
             .find('.euiTableCellContent')
             .text()
             .trim(),
           docCount: $tr
-            .findTestSubject('aiopsSpikeAnalysisGroupsTableColumnDocCount')
+            .findTestSubject('aiopsLogRateAnalysisResultsGroupsTableColumnDocCount')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -60,7 +60,7 @@ export function LogRateAnalysisResultsGroupsTableProvider({ getService }: FtrPro
     }
 
     public rowSelector(rowId: string, subSelector?: string) {
-      const row = `~aiopsSpikeAnalysisGroupsTable > ~row-${rowId}`;
+      const row = `~aiopsLogRateAnalysisResultsGroupsTable > ~row-${rowId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
