@@ -97,8 +97,8 @@ Object {
   "bar": "pre-val1-mid-val2-post",
   "elasticsearch": Object {
     "requestHeadersWhitelist": Array [
-      "val1",
-      "val2",
+      "\${KBN_ENV_VAR1}",
+      "\${KBN_ENV_VAR2}",
     ],
   },
   "foo": 1,
