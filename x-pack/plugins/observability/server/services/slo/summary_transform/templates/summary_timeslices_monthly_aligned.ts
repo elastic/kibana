@@ -94,7 +94,6 @@ export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = 
             sliceDurationInSeconds: '_sliceDurationInSeconds',
           },
           script: {
-            params: {},
             source: `
               Date d = new Date(); 
               Instant instant = Instant.ofEpochMilli(d.getTime());
@@ -105,9 +104,9 @@ export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = 
                 .withMinute(0)
                 .withSecond(0);
               LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
-              int sliceDurationInMinutes = params.sliceDurationInSeconds * 60;
+              double sliceDurationInMinutes = params.sliceDurationInSeconds / 60;
               
-              return Duration.between(startOfMonth, startOfNextMonth).toMinutes() / sliceDurationInMinutes;
+              return Math.ceil(Duration.between(startOfMonth, startOfNextMonth).toMinutes() / sliceDurationInMinutes);
             `,
           },
         },
