@@ -400,7 +400,7 @@ beta:[] Enables the Agent explorer view.
 Set the price per Gb-second for your AWS Lambda functions.
 
 [[apm-aws-request]]`observability:apmAWSLambdaRequestCostPerMillion`::
-??
+Set the AWS Lambda cost per million requests.
 
 [[apm-continuous-rollups]]`observability:apmEnableContinuousRollups`::
 beta:[] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution.
