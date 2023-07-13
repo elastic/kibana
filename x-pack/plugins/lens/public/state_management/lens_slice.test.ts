@@ -10,7 +10,6 @@ import type { Query } from '@kbn/es-query';
 import {
   switchDatasource,
   switchAndCleanDatasource,
-  updateStateFromSuggestion,
   switchVisualization,
   setState,
   updateState,
@@ -269,28 +268,6 @@ describe('lensSlice', () => {
         expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toStrictEqual(
           {}
         );
-      });
-    });
-
-    describe('update the state from the suggestion', () => {
-      it('should switch active datasource and initialize new state', () => {
-        store.dispatch(
-          updateStateFromSuggestion({
-            newDatasourceId: 'testDatasource2',
-            visualizationId: 'testVis',
-            visualizationState: ['col1', 'col2'],
-            datasourceState: {},
-            dataViews: { indexPatterns: {} } as DataViewsState,
-          })
-        );
-        expect(store.getState().lens.activeDatasourceId).toEqual('testDatasource2');
-        expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(false);
-        expect(store.getState().lens.datasourceStates.testDatasource2.state).toStrictEqual({});
-        expect(store.getState().lens.visualization).toStrictEqual({
-          activeId: 'testVis',
-          state: ['col1', 'col2'],
-        });
-        expect(store.getState().lens.dataViews).toEqual({ indexPatterns: {} });
       });
     });
 
