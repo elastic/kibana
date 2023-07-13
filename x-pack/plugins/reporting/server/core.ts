@@ -107,7 +107,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private csvSearchSourceExport: CsvSearchSourceExportType;
-  private csvV2ExportType: CsvV2ExportType;
+  private csvV2Export: CsvV2ExportType;
   private pdfExport: PdfExportType;
   private pngExport: PngExportType;
 
@@ -134,8 +134,8 @@ export class ReportingCore {
     );
     this.exportTypesRegistry.register(this.csvSearchSourceExport);
 
-    this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.csvV2ExportType);
+    this.csvV2Export = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.csvV2Export);
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
@@ -150,8 +150,6 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
-      getScreenshots: this.getScreenshots.bind(this),
-      getSpaceId: this.getSpaceId.bind(this),
     });
 
     this.executing = new Set();
@@ -169,7 +167,7 @@ export class ReportingCore {
     this.pluginSetupDeps = setupDeps; // cache
 
     this.csvSearchSourceExport.setup(setupDeps);
-    this.csvV2ExportType.setup(setupDeps);
+    this.csvV2Export.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
     this.pngExport.setup(setupDeps);
 
@@ -187,12 +185,10 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    const reportingStart = this.getContract();
-    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
-    this.csvSearchSourceExport.start(exportTypeStartDeps);
-    this.csvV2ExportType.start(exportTypeStartDeps);
-    this.pdfExport.start(exportTypeStartDeps);
-    this.pngExport.start(exportTypeStartDeps);
+    this.csvSearchSourceExport.start({ ...startDeps });
+    this.csvV2Export.start({ ...startDeps });
+    this.pdfExport.start({ ...startDeps });
+    this.pngExport.start({ ...startDeps });
 
     await this.assertKibanaIsAvailable();
 

@@ -12,15 +12,14 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { ReportingRequestHandlerContext, setFieldFormats } from '@kbn/reporting-common';
 import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
 import { registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
-import { setFieldFormats } from './services';
 import type {
-  ReportingRequestHandlerContext,
   ReportingSetup,
   ReportingSetupDeps,
   ReportingStart,
@@ -93,8 +92,6 @@ export class ReportingPlugin
   public start(core: CoreStart, plugins: ReportingStartDeps) {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
-    // use fieldFormats plugin for csv formats
-    setFieldFormats(plugins.fieldFormats);
     const reportingCore = this.reportingCore!;
 
     // async background start
@@ -112,6 +109,9 @@ export class ReportingPlugin
         store,
         ...plugins,
       });
+
+      // use fieldFormats plugin for csv formats
+      setFieldFormats(plugins.fieldFormats);
 
       // Note: this must be called after ReportingCore.pluginStart
       await store.start();

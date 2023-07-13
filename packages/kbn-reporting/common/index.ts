@@ -20,6 +20,7 @@ export {
   getCustomLogo,
   getTracker,
   ExportType,
+  setFieldFormats,
 } from './export_types';
 export type {
   BaseParams,

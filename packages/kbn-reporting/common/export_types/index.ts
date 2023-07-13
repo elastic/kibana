@@ -9,7 +9,7 @@
 export { getTracker } from './pdf_tracker';
 export { cryptoFactory } from './crypto';
 export { decryptJobHeaders } from './decrypt_job_headers';
-export { getFieldFormats } from './services';
+export { getFieldFormats, setFieldFormats } from './services';
 export { getFullRedirectAppUrl } from './get_full_redirect_app_url';
 export { getCustomLogo } from './get_custom_logo';
 export { ExportType } from './export_type';
