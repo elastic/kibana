@@ -17,6 +17,7 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
+  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
   e2e: {
     baseUrl: 'http://localhost:5620/app/security/get_started',
     experimentalRunAllSpecs: true,
