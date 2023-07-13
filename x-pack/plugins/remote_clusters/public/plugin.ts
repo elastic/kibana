@@ -74,9 +74,14 @@ export class RemoteClustersUIPlugin
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled, cloudBaseUrl, executionContext, canUseAPIKeyTrustModel: this.canUseApiKeyTrustModel },
+            {
+              isCloudEnabled,
+              cloudBaseUrl,
+              executionContext,
+              canUseAPIKeyTrustModel: this.canUseApiKeyTrustModel,
+            },
             history,
-            theme$,
+            theme$
           );
 
           return () => {

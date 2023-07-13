@@ -206,7 +206,7 @@ export class RemoteClusterList extends Component {
 
     return (
       <EuiPageBody data-test-subj="remote-clusters-list">
-        <EuiPageSection paddingSize='none'>
+        <EuiPageSection paddingSize="none">
           <EuiPageHeader
             bottomBorder
             pageTitle={

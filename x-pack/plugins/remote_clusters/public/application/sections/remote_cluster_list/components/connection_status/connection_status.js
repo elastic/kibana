@@ -24,15 +24,17 @@ export function ConnectionStatus({ isConnected, mode }) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiBadge color={isConnected ? 'success' : 'danger'} data-test-subj="remoteClustersConnectionStatusBadge">
+        <EuiBadge
+          color={isConnected ? 'success' : 'danger'}
+          data-test-subj="remoteClustersConnectionStatusBadge"
+        >
           {isConnected
             ? i18n.translate('xpack.remoteClusters.connectedStatus.connectedAriaLabel', {
-              defaultMessage: 'Connected',
-            })
+                defaultMessage: 'Connected',
+              })
             : i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedAriaLabel', {
-              defaultMessage: 'Not connected',
-            })
-          }
+                defaultMessage: 'Not connected',
+              })}
         </EuiBadge>
       </EuiFlexItem>
 
