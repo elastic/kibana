@@ -464,7 +464,6 @@ export const getMockGetResponse = (
       ...mockTimestampFields,
     } as SavedObjectsRawDocSource,
   } as estypes.GetResponse<SavedObjectsRawDocSource>;
-  console.log(`result`, JSON.stringify(result));
   return result;
 };
 
@@ -539,7 +538,6 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
   objNamespaces?: string[]
 ) => {
   const { mockGetResponseAsNotFound, originId } = internalOptions;
-  console.log('options.namespace?', options?.namespace);
   const mockGetResponse =
     mockGetResponseAsNotFound ?? // ATM, only using this as { found: 'false' } nock out a not found response from getting the doc
     getMockGetResponse(registry, { type, id, originId }, objNamespaces ?? options?.namespace);

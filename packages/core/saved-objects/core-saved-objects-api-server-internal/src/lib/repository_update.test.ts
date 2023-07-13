@@ -107,7 +107,6 @@ describe('SavedObjectsRepository', () => {
   // ZDT IMPLEMENTATIONS
   const mockMigrationVersion = { foo: '2.3.4' };
   const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => {
-    console.log('In test mockMigrateDocument, doc:', JSON.stringify(doc));
     const response = {
       ...doc,
       attributes: {
@@ -124,7 +123,6 @@ describe('SavedObjectsRepository', () => {
         },
       ],
     };
-    console.log('In test mockMigrateDocument, response', JSON.stringify(response));
     return response;
   };
   // ZDT IMPLEMENTATIONS: Using client.index || client.create to handle SOR.update REQUIRES refactoring

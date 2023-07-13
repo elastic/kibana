@@ -150,7 +150,6 @@ export const performUpdate = async <T>(
       preflightGetDocForUpdateResult.rawDocSource!,
       { migrationVersionCompatibility }
     );
-    console.log('document from source pre migrating it:', document);
     try {
       migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
     } catch (migrateStorageDocError) {
