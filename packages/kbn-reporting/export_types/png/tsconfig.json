@@ -20,5 +20,6 @@
     "@kbn/reporting-common",
     "@kbn/utility-types",
     "@kbn/screenshotting-plugin",
+    "@kbn/reporting-export-types-common",
   ]
 }
