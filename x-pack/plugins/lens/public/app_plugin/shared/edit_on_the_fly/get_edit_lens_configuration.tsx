@@ -18,9 +18,10 @@ import {
   LensRootStore,
   LensAppState,
   LensState,
+  loadInitial,
 } from '../../../state_management';
 import { getPreloadedState } from '../../../state_management/lens_slice';
-
+import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
   LensEditConfigurationFlyout,
@@ -55,6 +56,7 @@ export function getEditLensConfiguration(
     wrapInFlyout,
     datasourceId,
     adaptersTables,
+    panelId,
   }: EditLensConfigurationProps) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
@@ -89,6 +91,14 @@ export function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
       lens: getPreloadedState(storeDeps) as LensAppState,
     } as unknown as PreloadedState<LensState>);
+    lensStore.dispatch(
+      loadInitial({
+        initialInput: {
+          attributes,
+          id: panelId ?? generateId(),
+        },
+      })
+    );
 
     const getWrapper = (children: JSX.Element) => {
       if (wrapInFlyout) {

@@ -874,7 +874,7 @@ Below is an example of a rule that takes advantage of templating:
         "from": "example@elastic.co",
         "to": ["destination@elastic.co"],
         "subject": "A notification about {{context.server}}",
-        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alertInstanceId}} was created by the rule {{alertId}} {{alertName}}."
+        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alert.id}} was created by the rule {{rule.id}} {{rule.name}}."
       }
     }
   ]
