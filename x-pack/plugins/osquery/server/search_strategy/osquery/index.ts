@@ -39,7 +39,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
         })
       ).pipe(
         mergeMap((exists) => {
-          const requestWithOptionalTypes = {
+          const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             kql: request.kql,
             ...('pagination' in request ? { pagination: request.pagination } : {}),
@@ -48,7 +48,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('agentId' in request ? { agentId: request.agentId } : {}),
             componentTemplateExists: exists,
           } as StrategyRequestType<T>;
-          const dsl = queryFactory.buildDsl(requestWithOptionalTypes);
+          const dsl = queryFactory.buildDsl(strictRequest);
           // use internal user for searching .fleet* indices
           es =
             dsl.index?.includes('fleet') || dsl.index?.includes('logs-osquery_manager.action')
@@ -57,7 +57,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
           return es.search(
             {
-              ...requestWithOptionalTypes,
+              ...strictRequest,
               params: dsl,
             },
             options,
