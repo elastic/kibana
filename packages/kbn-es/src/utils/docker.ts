@@ -73,17 +73,30 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  log.info(chalk.bold('Checking local volume for Serverless ES object store'));
   const volumePath = resolve(getDataPath(), 'stateless');
 
+  log.info(chalk.bold(`Checking for local Serverless ES object store at ${volumePath}`));
+  log.indent(4);
+
   if (options.clean && fs.existsSync(volumePath)) {
-    log.indent(4, () => log.info('Cleaning existing object store.'));
+    log.info('Cleaning existing object store.');
     await Fsp.rm(volumePath, { recursive: true, force: true });
   }
 
-  await Fsp.mkdir(volumePath, { recursive: true });
-  // Permissions are set separately due to default umask
-  await Fsp.chmod(volumePath, 0o766);
+  if (options.clean || !fs.existsSync(volumePath)) {
+    await Fsp.mkdir(volumePath, { recursive: true }).then(() =>
+      log.info('Created new object store.')
+    );
+  } else {
+    log.info('Using existing object store.');
+  }
+
+  // Permissions are set separately from mkdir due to default umask
+  await Fsp.chmod(volumePath, 0o766).then(() =>
+    log.info('Setup object store permissions (chmod 766).')
+  );
+
+  log.indent(-4);
 }
 
 const resolveDockerImage = ({ version, image }: DockerOptions) => {
