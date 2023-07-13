@@ -6,7 +6,7 @@
  */
 
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { BaseParams, BasePayload } from '../base';
+import type { BaseParams, BasePayload } from '@kbn/reporting-common';
 
 interface BaseParamsPDF {
   layout: LayoutParams;

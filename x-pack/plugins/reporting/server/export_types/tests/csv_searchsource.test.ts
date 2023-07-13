@@ -19,9 +19,8 @@ jest.mock('@kbn/generate-csv', () => ({
 import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../..';
 import { CancellationToken } from '@kbn/reporting-common';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { createMockConfigSchema } from '../../test_helpers';
 import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
@@ -31,7 +30,6 @@ const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
 const headers = { sid: 'cooltestheaders' };
 let encryptedHeaders: string;
-let mockReportingCore: ReportingCore;
 let stream: jest.Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
 
@@ -52,8 +50,6 @@ beforeAll(async () => {
   const mockCoreStart = coreMock.createStart();
   const context = coreMock.createPluginInitializerContext(configType);
 
-  mockReportingCore = await createMockReportingCore(configType);
-
   mockCsvSearchSourceExportType = new CsvSearchSourceExportType(
     mockCoreSetup,
     configType,
@@ -72,7 +68,6 @@ beforeAll(async () => {
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     screenshotting: createMockScreenshottingStart(),
-    reporting: mockReportingCore.getContract(),
   });
 });
 

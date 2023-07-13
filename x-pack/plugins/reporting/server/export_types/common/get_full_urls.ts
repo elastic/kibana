@@ -11,10 +11,10 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
+import { TaskPayloadPNG } from '../../../common/types/export_types/png';
+import { TaskPayloadPDF } from '../../../common/types/export_types/printable_pdf';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
-import { TaskPayloadPNG } from '../png/types';
-import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 

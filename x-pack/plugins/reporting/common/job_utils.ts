@@ -12,7 +12,7 @@ import {
   PDF_JOB_TYPE_V2,
   PNG_JOB_TYPE_V2,
   CSV_JOB_TYPE_DEPRECATED,
-} from './constants';
+} from '@kbn/reporting-common';
 
 // TODO: Remove this code once everyone is using the new PDF format, then we can also remove the legacy
 // export type entirely

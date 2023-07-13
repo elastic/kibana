@@ -8,6 +8,8 @@
 
 import * as jobTypes from './export_types/job_types';
 
+export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
+
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
@@ -19,12 +21,16 @@ export const PLUGIN_ID = 'reporting';
 
 export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
 
+export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
+export const CSV_JOB_TYPE_DEPRECATED = 'csv';
+
 export const USES_HEADLESS_JOB_TYPES = [
   PDF_JOB_TYPE,
   PNG_JOB_TYPE,
   PDF_JOB_TYPE_V2,
   PNG_JOB_TYPE_V2,
 ];
+export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
 // Re-export type definitions here for convenience.
 export * from './export_types/report_types';

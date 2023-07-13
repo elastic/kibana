@@ -8,12 +8,4 @@
 /**
  * Common types that are documented in the Public API
  */
-export type {
-  BaseParams,
-  BaseParamsV2,
-  BasePayload,
-  BasePayloadV2,
-  JobAppParamsPDF,
-  JobAppParamsPDFV2,
-  LocatorParams,
-} from './types';
+export type { JobAppParamsPDF, LocatorParams } from './types';

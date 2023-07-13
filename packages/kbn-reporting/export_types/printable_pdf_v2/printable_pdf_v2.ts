@@ -22,6 +22,7 @@ import {
   REPORTING_TRANSACTION_TYPE,
   CancellationToken,
   TaskRunResult,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import {
   decryptJobHeaders,
@@ -33,8 +34,6 @@ import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshott
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 import { generatePdfObservable } from './lib/generate_pdf';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
-
-export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;

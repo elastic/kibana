@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEPRECATED_JOB_TYPES } from '../../common/constants';
+import { DEPRECATED_JOB_TYPES } from '@kbn/reporting-common';
 import { ExportTypesHandler } from './get_export_type_handler';
 import {
   AvailableTotal,

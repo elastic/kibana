@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { JobId } from '@kbn/reporting-common/export_types';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { JobId } from './base';
 
 type DownloadLink = string;
 export type DownloadReportFn = (jobId: JobId) => DownloadLink;

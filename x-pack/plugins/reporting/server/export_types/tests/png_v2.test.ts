@@ -16,6 +16,7 @@ import { cryptoFactory } from '@kbn/reporting-common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { generatePngObservable } from '../common';
 import { PngExportType } from '@kbn/reporting-export-types-png';
+import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png/types';
 
 jest.mock('../common/generate_png');
 
@@ -65,7 +66,6 @@ beforeEach(async () => {
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: {} as unknown as ScreenshottingStart,
     esClient: elasticsearchServiceMock.createClusterClient(),
-    reporting: mockReportingCore.getContract(),
   });
 });
 

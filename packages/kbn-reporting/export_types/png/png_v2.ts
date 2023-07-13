@@ -22,6 +22,7 @@ import {
   getFullRedirectAppUrl,
   ExportType,
   LocatorParams,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
@@ -31,8 +32,6 @@ import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshott
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { decryptJobHeaders, generatePngObservable } from '@kbn/reporting-export-types-common';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
-
-export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;

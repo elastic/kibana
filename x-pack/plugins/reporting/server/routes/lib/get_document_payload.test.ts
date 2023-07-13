@@ -6,12 +6,12 @@
  */
 
 import { Readable } from 'stream';
-import { CSV_JOB_TYPE, PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
 import { ContentStream, getContentStream, statuses } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { jobsQueryFactory } from './jobs_query';
 import { getDocumentPayloadFactory } from './get_document_payload';
+import { PDF_JOB_TYPE, CSV_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-common';
 
 jest.mock('../../lib/content_stream');
 jest.mock('./jobs_query');

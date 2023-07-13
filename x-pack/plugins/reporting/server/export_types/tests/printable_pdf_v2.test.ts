@@ -12,12 +12,11 @@ import { CancellationToken } from '@kbn/reporting-common';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { PdfExportType, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf';
 import type { LocatorParams } from '../../../common/types';
-import type { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { cryptoFactory } from '@kbn/reporting-common';
 import { generatePdfObservable } from '@kbn/reporting-export-types-pdf/lib/generate_pdf';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { createMockConfigSchema } from '../../test_helpers';
 
 let content: string;
 let mockPdfExportType: PdfExportType;
@@ -50,7 +49,6 @@ beforeEach(async () => {
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
-  const mockReportingCore = await createMockReportingCore(createMockConfigSchema());
 
   mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
 
@@ -62,7 +60,6 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: {} as unknown as ScreenshottingStart,
-    reporting: mockReportingCore.getContract(),
   });
 });
 

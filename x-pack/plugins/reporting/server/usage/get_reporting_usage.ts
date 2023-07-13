@@ -7,8 +7,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { get, pick } from 'lodash';
-import type { GetLicense } from '.';
 import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
+import type { GetLicense } from '.';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
 import {
   FIELD_EXECUTION_TIME_MS,
