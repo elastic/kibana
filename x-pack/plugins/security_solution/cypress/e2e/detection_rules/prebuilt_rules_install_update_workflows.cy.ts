@@ -95,10 +95,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should install rules from the Fleet package when user clicks on CTA', () => {
-      /* Retrieve how many rules were installed from the Fleet package */
-      cy.wait('@installPackage', {
-        timeout: 60000,
-      }).then(() => {
+      const getRulesAndAssertNumberInstalled = () => {
         getRuleAssets().then((response) => {
           const ruleIds = response.body.hits.hits.map(
             (hit: { _source: { ['security-rule']: Rule } }) => hit._source['security-rule'].rule_id
@@ -112,6 +109,29 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             .should('be.visible')
             .should('have.text', `${numberOfRulesToInstall} rules installed successfully.`);
         });
+      };
+      /* Retrieve how many rules were installed from the Fleet package */
+      cy.wait('@installPackage', {
+        timeout: 60000,
+      }).then(({ response: bulkResponse }) => {
+        cy.wrap(bulkResponse?.statusCode).should('eql', 200);
+
+        const packages = bulkResponse?.body.items.map(
+          ({ name, result }: BulkInstallPackageInfo) => ({
+            name,
+            installSource: result.installSource,
+          })
+        );
+
+        const packagesBulkInstalled = packages.map(({ name }: { name: string }) => name);
+
+        if (!packagesBulkInstalled.includes('security_detection_engine')) {
+          cy.wait('@installPackage').then(() => {
+            getRulesAndAssertNumberInstalled();
+          });
+        } else {
+          getRulesAndAssertNumberInstalled();
+        }
       });
     });
   });
