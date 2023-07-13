@@ -30,10 +30,50 @@ export interface ServerlessOptions extends EsClusterExecOptions {
   clean?: boolean;
 }
 
+interface RunServerlessEsNodeArgs {
+  params: string[];
+  name: string;
+  image: string;
+}
+
 const DEFAULT_DOCKER_BASE_CMD = 'run --name es01 -p 9200:9200 -p 9300:9300 -d --rm';
 export const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co';
 export const DEFAULT_DOCKER_IMG = `${DEFAULT_DOCKER_REGISTRY}/elasticsearch/elasticsearch:${pkg.version}-SNAPSHOT`;
 export const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_IMG}`;
+const SHARED_SERVERLESS_PARAMS = [
+  'run',
+
+  // '--rm',
+
+  '--detach',
+
+  '--net',
+  'elastic',
+
+  '--env',
+  'ES_JAVA_OPTS="-Xms1g -Xmx1g"',
+
+  '--env',
+  'cluster.initial_master_nodes=es01,es02,es03',
+
+  '--env',
+  'xpack.security.enabled=false',
+
+  '--env',
+  'cluster.name=stateless',
+
+  '--env',
+  'stateless.enabled=true',
+
+  '--env',
+  'stateless.object_store.type=fs',
+
+  '--env',
+  'stateless.object_store.bucket=stateless',
+
+  '--env',
+  'path.repo=/objectstore',
+];
 
 /**
  * Verify that Docker is installed locally
@@ -98,6 +138,36 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   await Fsp.chmod(volumePath, 0o766).then(() =>
     log.info('Setup object store permissions (chmod 766).')
   );
+
+  log.indent(-4);
+
+  return getDataPath();
+}
+
+export async function runServerlessEsNode(
+  log: ToolingLog,
+  { params, name, image }: RunServerlessEsNodeArgs
+) {
+  const fullCmd = SHARED_SERVERLESS_PARAMS.concat(
+    params,
+    ['--name', name, '--env', `node.name=${name}`],
+    image
+  );
+
+  log.info(chalk.bold('Running Serverless ES node.'));
+  log.indent(4);
+  log.info('docker %s', fullCmd.join(' '));
+
+  const { stdout } = await execa('docker', fullCmd);
+
+  log.info(`Serverless ES node is running.
+  Container Name: ${name}
+  Container Id:   ${stdout}
+
+  View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${name}`)}
+  Shell access:         ${chalk.bold(`docker exec -it ${name} /bin/bash`)}
+  Kill container:       ${chalk.bold(`docker kill ${stdout}`)}
+`);
 
   log.indent(-4);
 }

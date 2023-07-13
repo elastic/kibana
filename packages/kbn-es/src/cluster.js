@@ -26,6 +26,7 @@ const {
   resolveDockerCmd,
   maybeCreateDockerNetwork,
   setupServerlessVolumes,
+  runServerlessEsNode,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -587,7 +588,56 @@ exports.Cluster = class Cluster {
     // await this._execDocker(dockerCmd);
     await verifyDockerInstalled(this._log);
     await maybeCreateDockerNetwork(this._log);
-    await setupServerlessVolumes(this._log, options);
+    const volumeParentPath = await setupServerlessVolumes(this._log, options);
+    const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
+    const image = 'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest';
+
+    await runServerlessEsNode(this._log, {
+      params: [
+        '-p',
+        '9200:9200',
+        '-p',
+        '9300:9300',
+        '--env',
+        'discovery.seed_hosts=es02,es03',
+        '--env',
+        `node.roles='["master","index"]'`,
+        '--env',
+        'xpack.searchable.snapshot.shared_cache.size=1gb',
+      ].concat(volumeCmd),
+      image,
+      name: 'es01',
+    });
+    await runServerlessEsNode(this._log, {
+      params: [
+        '-p',
+        '9202:9202',
+        '-p',
+        '9302:9302',
+        '--env',
+        'discovery.seed_hosts=es01,es03',
+        '--env',
+        `node.roles='["master","search"]'`,
+        '--env',
+        'xpack.searchable.snapshot.shared_cache.size=1gb',
+      ].concat(volumeCmd),
+      image,
+      name: 'es02',
+    });
+    await runServerlessEsNode(this._log, {
+      params: [
+        '-p',
+        '9203:9203',
+        '-p',
+        '9303:9303',
+        '--env',
+        'discovery.seed_hosts=es01,es02',
+        '--env',
+        `node.roles='["master"]'`,
+      ].concat(volumeCmd),
+      image,
+      name: 'es03',
+    });
   }
 
   /**

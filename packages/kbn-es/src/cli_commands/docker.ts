@@ -17,11 +17,11 @@ import { Command } from './types';
 
 /*
 
-docker run --rm -d --name es01 --net elastic -p 9200:9200 -p 9300:9300 -e ES_JAVA_OPTS="-Xms1g -Xmx1g" -e node.name=es01 -e cluster.initial_master_nodes=es01,es02,es03 -e discovery.seed_hosts=es02,es03 -e node.roles='["master","index"]' -e xpack.security.enabled=false -e cluster.name=stateless -e stateless.enabled=true -e xpack.searchable.snapshot.shared_cache.size=1gb -e stateless.object_store.type=fs -e stateless.object_store.bucket=stateless -e path.repo=/objectstore -v ./data:/objectstore:z docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
+-p 9200:9200 -p 9300:9300 -e discovery.seed_hosts=es02,es03 -e node.roles='["master","index"]' -e xpack.searchable.snapshot.shared_cache.size=1gb   
 
-docker run --rm -d --name es02 --net elastic -p 9202:9202 -p 9302:9302 -e ES_JAVA_OPTS="-Xms1g -Xmx1g" -e node.name=es02 -e cluster.initial_master_nodes=es01,es02,es03 -e discovery.seed_hosts=es01,es03 -e node.roles='["master","search"]' -e xpack.security.enabled=false -e cluster.name=stateless -e stateless.enabled=true -e xpack.searchable.snapshot.shared_cache.size=1gb -e stateless.object_store.type=fs -e stateless.object_store.bucket=stateless -e path.repo=/objectstore -v ./data:/objectstore:z docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
+-p 9202:9202 -p 9302:9302 -e discovery.seed_hosts=es01,es03 -e node.roles='["master","search"]' -e xpack.searchable.snapshot.shared_cache.size=1gb   
 
-docker run --rm -d --name es03 --net elastic -p 9203:9203 -p 9303:9303 -e ES_JAVA_OPTS="-Xms1g -Xmx1g" -e node.name=es03 -e cluster.initial_master_nodes=es01,es02,es03 -e discovery.seed_hosts=es01,es02 -e node.roles='["master"]' -e xpack.security.enabled=false -e cluster.name=stateless -e stateless.enabled=true -e stateless.object_store.type=fs -e stateless.object_store.bucket=stateless -e path.repo=/objectstore -v ./data:/objectstore:z docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
+-p 9203:9203 -p 9303:9303 -e discovery.seed_hosts=es01,es02 -e node.roles='["master"]'   
 
 */
 
