@@ -44,7 +44,10 @@ import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
 import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
 
+export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';
+
+export { useGetSecuritySolutionLinkProps, withSecuritySolutionLink };
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 

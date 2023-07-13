@@ -28,32 +28,16 @@ import {
   SecuritySolutionLinkButton,
 } from '.';
 import { SecurityPageName } from '../../../app/types';
-import {
-  mockGetAppUrl,
-  mockNavigateTo,
-} from '@kbn/security-solution-navigation/src/__mocks__/navigation.mocks';
+import { mockGetAppUrl, mockNavigateTo } from '@kbn/security-solution-navigation/mocks/navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 jest.mock('../navigation/use_url_state_query_params');
 
 jest.mock('../../../overview/components/events_by_dataset');
 
+jest.mock('../../lib/kibana');
+
 mockGetAppUrl.mockImplementation(({ path }) => path);
-jest.mock('../../lib/kibana', () => {
-  return {
-    useUiSetting$: jest.fn(),
-    useKibana: () => ({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-        },
-      },
-    }),
-    useNavigateTo: () => ({
-      navigateTo: mockNavigateTo,
-    }),
-  };
-});
 
 describe('Custom Links', () => {
   const hostName = 'Host Name';

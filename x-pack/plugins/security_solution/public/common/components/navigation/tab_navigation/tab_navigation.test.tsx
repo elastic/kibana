@@ -11,12 +11,13 @@ import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { TabNavigationComponent } from './tab_navigation';
 import type { TabNavigationProps } from './types';
-import { mockGetUrlForApp } from '@kbn/security-solution-navigation/src/__mocks__/context.mocks';
+import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
+
+jest.mock('@kbn/security-solution-navigation/src/context');
 
 mockGetUrlForApp.mockImplementation(
   (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path}`
 );
-jest.mock('@kbn/security-solution-navigation/src/context');
 
 const mockUseRouteSpy = jest.fn();
 jest.mock('../../../utils/route/use_route_spy', () => ({
