@@ -21,11 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 
-import {
-  ENROLLMENT_API_KEYS_INDEX,
-  SO_SEARCH_LIMIT,
-  FLEET_ENROLLMENT_API_PREFIX,
-} from '../../../constants';
+import { ENROLLMENT_API_KEYS_INDEX, SO_SEARCH_LIMIT } from '../../../constants';
 import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
@@ -307,7 +303,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               setSearch(newSearch);
             }}
             indexPattern={ENROLLMENT_API_KEYS_INDEX}
-            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
