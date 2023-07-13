@@ -6,11 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 
 export const TitleUserActionPayloadRt = rt.strict({ title: rt.string });
 
 export const TitleUserActionRt = rt.strict({
-  type: rt.literal(ActionTypes.title),
+  type: rt.literal(UserActionActionTypes.title),
   payload: TitleUserActionPayloadRt,
 });

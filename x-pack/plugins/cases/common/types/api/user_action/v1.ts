@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { paginationSchema } from '../../../schema';
 import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
-import { ActionTypes } from '../../domain/user_action/action/v1';
+import { UserActionActionTypes } from '../../domain/user_action/action/v1';
 import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
 import {
   CaseUserActionInjectedDeprecatedIdsRt,
@@ -50,26 +50,25 @@ export type CaseUserActionDeprecatedResponse = rt.TypeOf<typeof CaseUserActionDe
  * Find User Actions API
  */
 
-const AdditionalFilterTypes = {
+const UserActionAdditionalFindRequestFilterTypes = {
   action: 'action',
   alert: 'alert',
   user: 'user',
   attachment: 'attachment',
 } as const;
 
-const FindTypes = {
-  ...ActionTypes,
-  ...AdditionalFilterTypes,
+const UserActionFindRequestTypes = {
+  ...UserActionActionTypes,
+  ...UserActionAdditionalFindRequestFilterTypes,
 } as const;
 
-const FindTypeFieldRt = rt.keyof(FindTypes);
-
-export type FindTypeField = rt.TypeOf<typeof FindTypeFieldRt>;
+const UserActionFindRequestTypesRt = rt.keyof(UserActionFindRequestTypes);
+export type UserActionFindRequestTypes = rt.TypeOf<typeof UserActionFindRequestTypesRt>;
 
 export const UserActionFindRequestRt = rt.intersection([
   rt.exact(
     rt.partial({
-      types: rt.array(FindTypeFieldRt),
+      types: rt.array(UserActionFindRequestTypesRt),
       sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
     })
   ),

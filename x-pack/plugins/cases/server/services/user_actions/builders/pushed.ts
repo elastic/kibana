@@ -6,7 +6,7 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
@@ -19,7 +19,7 @@ export class PushedUserActionBuilder extends UserActionBuilder {
       action,
       valueKey: 'externalService',
       value: this.extractConnectorIdFromExternalService(args.payload.externalService),
-      type: ActionTypes.pushed,
+      type: UserActionActionTypes.pushed,
       connectorId: args.payload.externalService.connector_id,
     });
 

@@ -7,7 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ActionTypes } from '../../../common/types/domain';
+import { UserActionActionTypes } from '../../../common/types/domain';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   CASE_REF_NAME,
@@ -111,10 +111,10 @@ export abstract class UserActionBuilder {
       references: [
         ...this.createCaseReferences(caseId),
         ...this.createCommentReferences(attachmentId ?? null),
-        ...(type === ActionTypes.connector
+        ...(type === UserActionActionTypes.connector
           ? this.createConnectorReference(connectorId ?? null)
           : []),
-        ...(type === ActionTypes.pushed
+        ...(type === UserActionActionTypes.pushed
           ? this.createConnectorPushReference(connectorId ?? null)
           : []),
       ],

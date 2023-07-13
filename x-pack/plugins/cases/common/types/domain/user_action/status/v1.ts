@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 import { CaseStatusRt } from '../../../../api';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 
 export const StatusUserActionPayloadRt = rt.strict({ status: CaseStatusRt });
 
 export const StatusUserActionRt = rt.strict({
-  type: rt.literal(ActionTypes.status),
+  type: rt.literal(UserActionActionTypes.status),
   payload: StatusUserActionPayloadRt,
 });

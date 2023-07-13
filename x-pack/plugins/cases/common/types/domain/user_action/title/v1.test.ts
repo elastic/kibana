@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 import { TitleUserActionPayloadRt, TitleUserActionRt } from './v1';
 
 describe('Title', () => {
@@ -35,7 +35,7 @@ describe('Title', () => {
 
   describe('TitleUserActionRt', () => {
     const defaultRequest = {
-      type: ActionTypes.title,
+      type: UserActionActionTypes.title,
       payload: {
         title: 'sample title',
       },

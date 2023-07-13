@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypes } from '../../../../common/types/domain';
+import { UserActionActionTypes } from '../../../../common/types/domain';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { addSeverityToCreateUserAction } from './severity';
 
@@ -21,7 +21,7 @@ describe('severity migration', () => {
         username: 'elastic',
       },
       payload: {},
-      type: ActionTypes.create_case,
+      type: UserActionActionTypes.create_case,
     },
   };
 
@@ -48,8 +48,8 @@ describe('severity migration', () => {
   });
 
   it('does NOT add the severity field to the create_case user action', () => {
-    Object.keys(ActionTypes)
-      .filter((type) => type !== ActionTypes.create_case)
+    Object.keys(UserActionActionTypes)
+      .filter((type) => type !== UserActionActionTypes.create_case)
       .forEach((type) => {
         const migratedUserAction = addSeverityToCreateUserAction({
           ...userAction,

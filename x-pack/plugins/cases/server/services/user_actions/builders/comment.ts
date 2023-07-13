@@ -9,7 +9,7 @@ import { uniqBy } from 'lodash';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
 import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';
@@ -35,7 +35,7 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       action,
       valueKey: 'comment',
       value: { ...transformedFields, ...extractedAttributes },
-      type: ActionTypes.comment,
+      type: UserActionActionTypes.comment,
     });
 
     const parameters = {

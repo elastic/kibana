@@ -6,7 +6,7 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
@@ -18,7 +18,7 @@ export class DescriptionUserActionBuilder extends UserActionBuilder {
       ...args,
       action,
       valueKey: 'description',
-      type: ActionTypes.description,
+      type: UserActionActionTypes.description,
       value: args.payload.description,
     });
 

@@ -12,7 +12,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { Actions, ActionTypes } from '../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../common/types/domain';
 import type {
   Case,
   CommentAttributes,
@@ -188,7 +188,7 @@ export class CaseCommentModel {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
     await this.params.services.userActionService.creator.createUserAction({
-      type: ActionTypes.comment,
+      type: UserActionActionTypes.comment,
       action: Actions.update,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,
@@ -398,7 +398,7 @@ export class CaseCommentModel {
     req: CommentRequest
   ) {
     await this.params.services.userActionService.creator.createUserAction({
-      type: ActionTypes.comment,
+      type: UserActionActionTypes.comment,
       action: Actions.create,
       caseId: this.caseInfo.id,
       attachmentId: comment.id,

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 import { AssigneesUserActionPayloadRt } from '../assignees/v1';
 import { CategoryUserActionPayloadRt } from '../category/v1';
 import {
@@ -19,7 +19,7 @@ import { TagsUserActionPayloadRt } from '../tags/v1';
 import { TitleUserActionPayloadRt } from '../title/v1';
 
 const CommonFieldsRt = rt.strict({
-  type: rt.literal(ActionTypes.create_case),
+  type: rt.literal(UserActionActionTypes.create_case),
 });
 
 const CommonPayloadAttributesRt = rt.strict({

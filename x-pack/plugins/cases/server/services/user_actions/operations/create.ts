@@ -8,7 +8,7 @@
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
 import type { ActionCategory, UserActionTypes } from '../../../../common/types/domain';
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
@@ -36,7 +36,9 @@ import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
 
 export class UserActionPersister {
-  private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
+  private static readonly userActionFieldsAllowed: Set<string> = new Set(
+    Object.keys(UserActionActionTypes)
+  );
 
   private readonly builderFactory: BuilderFactory;
   private readonly auditLogger: UserActionAuditLogger;
@@ -100,19 +102,19 @@ export class UserActionPersister {
     if (!UserActionPersister.userActionFieldsAllowed.has(field)) {
       return [];
     } else if (
-      field === ActionTypes.assignees &&
+      field === UserActionActionTypes.assignees &&
       isAssigneesArray(originalValue) &&
       isAssigneesArray(newValue)
     ) {
       return this.buildAssigneesUserActions({ ...params, originalValue, newValue });
     } else if (
-      field === ActionTypes.tags &&
+      field === UserActionActionTypes.tags &&
       isStringArray(originalValue) &&
       isStringArray(newValue)
     ) {
       return this.buildTagsUserActions({ ...params, originalValue, newValue });
     } else if (isUserActionType(field) && newValue !== undefined) {
-      const userActionBuilder = this.builderFactory.getBuilder(ActionTypes[field]);
+      const userActionBuilder = this.builderFactory.getBuilder(UserActionActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
         caseId,
         owner,
@@ -127,21 +129,22 @@ export class UserActionPersister {
   }
 
   private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
-    const createPayload: CreatePayloadFunction<CaseUserProfile, typeof ActionTypes.assignees> = (
-      items: CaseAssignees
-    ) => ({ assignees: items });
+    const createPayload: CreatePayloadFunction<
+      CaseUserProfile,
+      typeof UserActionActionTypes.assignees
+    > = (items: CaseAssignees) => ({ assignees: items });
 
-    return this.buildAddDeleteUserActions(params, createPayload, ActionTypes.assignees);
+    return this.buildAddDeleteUserActions(params, createPayload, UserActionActionTypes.assignees);
   }
 
   private buildTagsUserActions(params: TypedUserActionDiffedItems<string>) {
-    const createPayload: CreatePayloadFunction<string, typeof ActionTypes.tags> = (
+    const createPayload: CreatePayloadFunction<string, typeof UserActionActionTypes.tags> = (
       items: string[]
     ) => ({
       tags: items,
     });
 
-    return this.buildAddDeleteUserActions(params, createPayload, ActionTypes.tags);
+    return this.buildAddDeleteUserActions(params, createPayload, UserActionActionTypes.tags);
   }
 
   private buildAddDeleteUserActions<Item, ActionType extends UserActionTypes>(
@@ -249,7 +252,7 @@ export class UserActionPersister {
     }
 
     const userActions = attachments.reduce<UserActionEvent[]>((acc, attachment) => {
-      const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.comment);
+      const userActionBuilder = this.builderFactory.getBuilder(UserActionActionTypes.comment);
       const commentUserAction = userActionBuilder?.build({
         action,
         caseId,

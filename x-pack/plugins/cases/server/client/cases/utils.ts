@@ -10,7 +10,7 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { ActionTypes } from '../../../common/types/domain';
+import { UserActionActionTypes } from '../../../common/types/domain';
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
@@ -249,7 +249,7 @@ export const formatComments = ({
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
-      .filter((action) => action.type === ActionTypes.comment)
+      .filter((action) => action.type === UserActionActionTypes.comment)
       .map((action) => action.comment_id)
   );
 

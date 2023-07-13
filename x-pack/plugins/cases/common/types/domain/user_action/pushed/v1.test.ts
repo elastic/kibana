@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 import {
   PushedUserActionPayloadWithoutConnectorIdRt,
   PushedUserActionPayloadRt,
@@ -112,7 +112,7 @@ describe('Pushed', () => {
 
   describe('PushedUserActionWithoutConnectorIdRt', () => {
     const defaultRequest = {
-      type: ActionTypes.pushed,
+      type: UserActionActionTypes.pushed,
       payload: {
         externalService: {
           connector_name: 'My SN connector',
@@ -162,7 +162,7 @@ describe('Pushed', () => {
 
   describe('PushedUserActionRt', () => {
     const defaultRequest = {
-      type: ActionTypes.pushed,
+      type: UserActionActionTypes.pushed,
       payload: {
         externalService: {
           connector_id: 'servicenow-1',

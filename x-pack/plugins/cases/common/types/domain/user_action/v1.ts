@@ -24,7 +24,7 @@ import { StatusUserActionRt } from './status/v1';
 import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
 
-export { ActionsRt, ActionTypes, Actions } from './action/v1';
+export { ActionsRt, UserActionActionTypes, Actions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 
 const UserActionCommonAttributesRt = rt.strict({

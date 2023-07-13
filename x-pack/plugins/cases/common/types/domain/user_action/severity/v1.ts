@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 import { CaseSeverityRt } from '../../../../api';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 
 export const SeverityUserActionPayloadRt = rt.strict({ severity: CaseSeverityRt });
 
 export const SeverityUserActionRt = rt.strict({
-  type: rt.literal(ActionTypes.severity),
+  type: rt.literal(UserActionActionTypes.severity),
   payload: SeverityUserActionPayloadRt,
 });

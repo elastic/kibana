@@ -41,7 +41,7 @@ import {
 } from './test_utils';
 import { comment } from '../../mocks';
 import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
-import { Actions, ActionTypes } from '../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../common/types/domain';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -101,7 +101,7 @@ describe('CaseUserActionService', () => {
           await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
-            type: ActionTypes.create_case,
+            type: UserActionActionTypes.create_case,
           });
 
           expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -153,7 +153,7 @@ describe('CaseUserActionService', () => {
           await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
-            type: ActionTypes.create_case,
+            type: UserActionActionTypes.create_case,
           });
 
           expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -187,7 +187,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
-              type: ActionTypes.status,
+              type: UserActionActionTypes.status,
             });
 
             expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -212,7 +212,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
-              type: ActionTypes.status,
+              type: UserActionActionTypes.status,
             });
 
             expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -247,7 +247,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
-              type: ActionTypes.severity,
+              type: UserActionActionTypes.severity,
             });
 
             expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -272,7 +272,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
-              type: ActionTypes.severity,
+              type: UserActionActionTypes.severity,
             });
 
             expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -307,7 +307,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
-              type: ActionTypes.pushed,
+              type: UserActionActionTypes.pushed,
             });
 
             expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -351,7 +351,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
-              type: ActionTypes.pushed,
+              type: UserActionActionTypes.pushed,
             });
 
             expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -387,7 +387,7 @@ describe('CaseUserActionService', () => {
             async (action) => {
               await service.creator.createUserAction({
                 ...commonArgs,
-                type: ActionTypes.comment,
+                type: UserActionActionTypes.comment,
                 action,
                 attachmentId: 'test-id',
                 payload: { attachment: comment },
@@ -428,7 +428,7 @@ describe('CaseUserActionService', () => {
             async (action) => {
               await service.creator.createUserAction({
                 ...commonArgs,
-                type: ActionTypes.comment,
+                type: UserActionActionTypes.comment,
                 action,
                 attachmentId: 'test-id',
                 payload: { attachment: comment },

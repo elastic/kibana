@@ -8,7 +8,7 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { FindTypeField } from '../../../../common/types/api';
+import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import { CommentType, decodeOrThrow } from '../../../../common/api';
@@ -29,7 +29,7 @@ import type {
 import { bulkDecodeSOAttributes } from '../../utils';
 import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
 import type { UserActionTypes } from '../../../../common/types/domain';
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -86,7 +86,7 @@ export class UserActionFinder {
     return combineFilters(filters, NodeBuilderOperators.or);
   }
 
-  private static buildFilterType(type: FindTypeField): KueryNode | undefined {
+  private static buildFilterType(type: UserActionFindRequestTypes): KueryNode | undefined {
     switch (type) {
       case 'action':
         return UserActionFinder.buildActionFilter();
@@ -113,7 +113,7 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [ActionTypes.comment],
+          filters: [UserActionActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -133,7 +133,7 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [ActionTypes.comment],
+          filters: [UserActionActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -153,7 +153,7 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [ActionTypes.comment],
+          filters: [UserActionActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -196,7 +196,7 @@ export class UserActionFinder {
       });
 
       const statusChangeFilter = buildFilter({
-        filters: ActionTypes.status,
+        filters: UserActionActionTypes.status,
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,

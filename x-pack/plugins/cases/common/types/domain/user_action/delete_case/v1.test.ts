@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 import { DeleteCaseUserActionRt } from './v1';
 
 describe('Delete_case', () => {
   describe('DeleteCaseUserActionRt', () => {
     const defaultRequest = {
-      type: ActionTypes.delete_case,
+      type: UserActionActionTypes.delete_case,
       payload: {},
     };
 

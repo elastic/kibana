@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import {
-  ActionTypes,
+  UserActionActionTypes,
   CaseUserActionsDeprecatedResponse,
   CommentType,
 } from '@kbn/cases-plugin/common/api';
@@ -1372,7 +1372,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           const userActionsWithoutCreateAction = userActions.filter(
-            (userAction) => userAction.type !== ActionTypes.create_case
+            (userAction) => userAction.type !== UserActionActionTypes.create_case
           );
 
           for (const userAction of userActionsWithoutCreateAction) {
@@ -1451,7 +1451,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           const userActionsWithoutCreateAction = userActions.filter(
-            (userAction) => userAction.type !== ActionTypes.create_case
+            (userAction) => userAction.type !== UserActionActionTypes.create_case
           );
 
           for (const userAction of userActionsWithoutCreateAction) {

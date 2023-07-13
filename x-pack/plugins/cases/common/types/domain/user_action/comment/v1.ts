@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CommentRequestRt, CommentRequestWithoutRefsRt } from '../../../../api';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 
 export const CommentUserActionPayloadRt = rt.strict({ comment: CommentRequestRt });
 export const CommentUserActionPayloadWithoutIdsRt = rt.strict({
@@ -15,11 +15,11 @@ export const CommentUserActionPayloadWithoutIdsRt = rt.strict({
 });
 
 export const CommentUserActionRt = rt.strict({
-  type: rt.literal(ActionTypes.comment),
+  type: rt.literal(UserActionActionTypes.comment),
   payload: CommentUserActionPayloadRt,
 });
 
 export const CommentUserActionWithoutIdsRt = rt.strict({
-  type: rt.literal(ActionTypes.comment),
+  type: rt.literal(UserActionActionTypes.comment),
   payload: CommentUserActionPayloadWithoutIdsRt,
 });

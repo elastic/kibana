@@ -14,7 +14,7 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { ActionTypes } from '../../../common/types/domain';
+import { UserActionActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -78,7 +78,7 @@ export class CaseUserActionService {
       }
 
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case],
+        filters: [UserActionActionTypes.connector, UserActionActionTypes.create_case],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -246,10 +246,10 @@ export class CaseUserActionService {
 
       const connectorsFilter = buildFilter({
         filters: [
-          ActionTypes.comment,
-          ActionTypes.description,
-          ActionTypes.tags,
-          ActionTypes.title,
+          UserActionActionTypes.comment,
+          UserActionActionTypes.description,
+          UserActionActionTypes.tags,
+          UserActionActionTypes.title,
         ],
         field: 'type',
         operator: 'or',
@@ -295,7 +295,11 @@ export class CaseUserActionService {
       this.context.log.debug(`Attempting to find connector information for case id: ${caseId}`);
 
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case, ActionTypes.pushed],
+        filters: [
+          UserActionActionTypes.connector,
+          UserActionActionTypes.create_case,
+          UserActionActionTypes.pushed,
+        ],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -446,7 +450,7 @@ export class CaseUserActionService {
                             changeConnector: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.connector,
+                                  UserActionActionTypes.connector,
                               },
                             },
                             // If the case was initialized with a connector, the fields could exist in the create_case
@@ -454,14 +458,14 @@ export class CaseUserActionService {
                             createCase: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.create_case,
+                                  UserActionActionTypes.create_case,
                               },
                             },
                             // Also grab the most recent push occurrence for the connector
                             pushInfo: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.pushed,
+                                  UserActionActionTypes.pushed,
                               },
                             },
                           },
@@ -587,7 +591,7 @@ export class CaseUserActionService {
     try {
       this.context.log.debug(`Attempting to count connectors for case id ${caseId}`);
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case],
+        filters: [UserActionActionTypes.connector, UserActionActionTypes.create_case],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,

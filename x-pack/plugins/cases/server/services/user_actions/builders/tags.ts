@@ -7,7 +7,7 @@
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import type { ActionCategory } from '../../../../common/types/domain';
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { getPastTenseVerb } from './audit_logger_utils';
@@ -21,7 +21,7 @@ export class TagsUserActionBuilder extends UserActionBuilder {
       action: args.action ?? Actions.add,
       valueKey: 'tags',
       value: args.payload.tags,
-      type: ActionTypes.tags,
+      type: UserActionActionTypes.tags,
     });
 
     const verb = getPastTenseVerb(action);

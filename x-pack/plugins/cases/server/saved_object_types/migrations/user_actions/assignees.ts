@@ -7,12 +7,12 @@
 
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import type { CreateCaseUserAction } from '../../../../common/types/domain';
-import { ActionTypes } from '../../../../common/types/domain';
+import { UserActionActionTypes } from '../../../../common/types/domain';
 
 export const addAssigneesToCreateUserAction = (
   doc: SavedObjectUnsanitizedDoc<CreateCaseUserAction>
 ): SavedObjectSanitizedDoc<CreateCaseUserAction> => {
-  if (doc.attributes.type !== ActionTypes.create_case) {
+  if (doc.attributes.type !== UserActionActionTypes.create_case) {
     return { ...doc, references: doc.references ?? [] };
   }
 

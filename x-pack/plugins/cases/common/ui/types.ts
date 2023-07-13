@@ -35,7 +35,7 @@ import type { SnakeToCamelCase } from '../types';
 import type { UserAction } from '../types/domain';
 import type {
   CaseUserActionStatsResponse,
-  FindTypeField as UserActionFindTypeField,
+  UserActionFindRequestTypes,
   UserActionFindResponse,
 } from '../types/api';
 
@@ -69,7 +69,7 @@ export const SeverityAll = 'all' as const;
 export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 export const UserActionTypeAll = 'all' as const;
-export type CaseUserActionTypeWithAll = UserActionFindTypeField | typeof UserActionTypeAll;
+export type CaseUserActionTypeWithAll = UserActionFindRequestTypes | typeof UserActionTypeAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.

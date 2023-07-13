@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 import { SettingsRt } from '../../../../api';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 
 export const SettingsUserActionPayloadRt = rt.strict({ settings: SettingsRt });
 
 export const SettingsUserActionRt = rt.strict({
-  type: rt.literal(ActionTypes.settings),
+  type: rt.literal(UserActionActionTypes.settings),
   payload: SettingsUserActionPayloadRt,
 });

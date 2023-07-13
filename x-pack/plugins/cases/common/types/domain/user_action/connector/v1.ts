@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseConnectorRt, CaseUserActionConnectorRt } from '../../../../api';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 
 export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.strict({
   connector: CaseUserActionConnectorRt,
@@ -18,11 +18,11 @@ export const ConnectorUserActionPayloadRt = rt.strict({
 });
 
 export const ConnectorUserActionWithoutConnectorIdRt = rt.strict({
-  type: rt.literal(ActionTypes.connector),
+  type: rt.literal(UserActionActionTypes.connector),
   payload: ConnectorUserActionPayloadWithoutConnectorIdRt,
 });
 
 export const ConnectorUserActionRt = rt.strict({
-  type: rt.literal(ActionTypes.connector),
+  type: rt.literal(UserActionActionTypes.connector),
   payload: ConnectorUserActionPayloadRt,
 });

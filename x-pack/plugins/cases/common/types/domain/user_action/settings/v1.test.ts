@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 import { SettingsUserActionPayloadRt, SettingsUserActionRt } from './v1';
 
 describe('Settings', () => {
@@ -40,7 +40,7 @@ describe('Settings', () => {
 
   describe('SettingsUserActionRt', () => {
     const defaultRequest = {
-      type: ActionTypes.settings,
+      type: UserActionActionTypes.settings,
       payload: {
         settings: { syncAlerts: true },
       },

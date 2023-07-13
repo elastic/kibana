@@ -7,7 +7,7 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { ActionTypes } from '../../../common/types/domain';
+import type { UserActionActionTypes } from '../../../common/types/domain';
 import type {
   CaseUI,
   CaseConnectors,
@@ -43,7 +43,10 @@ export interface UserActionTreeProps {
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
-export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, UnsupportedUserActionTypes>;
+export type SupportedUserActionTypes = keyof Omit<
+  typeof UserActionActionTypes,
+  UnsupportedUserActionTypes
+>;
 
 export interface UserActionBuilderArgs {
   appId?: string;

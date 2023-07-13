@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
@@ -19,7 +19,7 @@ export class TitleUserActionBuilder extends UserActionBuilder {
       action,
       valueKey: 'title',
       value: args.payload.title,
-      type: ActionTypes.title,
+      type: UserActionActionTypes.title,
     });
 
     const getMessage = (id?: string) =>

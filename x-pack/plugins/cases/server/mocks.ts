@@ -20,7 +20,7 @@ import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
 import type { UserActionAttributes } from '../common/types/domain';
-import { Actions, ActionTypes } from '../common/types/domain';
+import { Actions, UserActionActionTypes } from '../common/types/domain';
 
 const lensPersistableState = {
   attributes: {
@@ -547,7 +547,7 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-1',
     attributes: {
-      type: ActionTypes.description,
+      type: UserActionActionTypes.description,
       action: Actions.update,
       payload: { description: 'test' },
       created_at: '2019-11-25T21:55:00.177Z',
@@ -573,7 +573,7 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-2',
     attributes: {
-      type: ActionTypes.comment,
+      type: UserActionActionTypes.comment,
       action: Actions.update,
       payload: {
         comment: {
@@ -606,7 +606,7 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-3',
     attributes: {
-      type: ActionTypes.comment,
+      type: UserActionActionTypes.comment,
       action: Actions.update,
       payload: {
         comment: {

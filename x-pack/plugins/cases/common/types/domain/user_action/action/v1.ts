@@ -11,7 +11,7 @@ import * as rt from 'io-ts';
  * These values are used in a number of places including to define the accepted values in the
  * user_actions/_find api. These values should not be removed only new values can be added.
  */
-export const ActionTypes = {
+export const UserActionActionTypes = {
   assignees: 'assignees',
   comment: 'comment',
   connector: 'connector',
@@ -27,8 +27,8 @@ export const ActionTypes = {
   category: 'category',
 } as const;
 
-type ActionTypeKeys = keyof typeof ActionTypes;
-export type ActionTypeValues = typeof ActionTypes[ActionTypeKeys];
+type ActionTypeKeys = keyof typeof UserActionActionTypes;
+export type ActionTypeValues = typeof UserActionActionTypes[ActionTypeKeys];
 
 export const Actions = {
   add: 'add',

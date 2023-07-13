@@ -13,7 +13,7 @@ import type {
   UserActions,
   UserActionTypes,
 } from '../../common/types/domain';
-import { Actions, ActionTypes } from '../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
 
 import type {
@@ -637,29 +637,29 @@ export const getUserAction = (
   };
 
   switch (type) {
-    case ActionTypes.comment:
+    case UserActionActionTypes.comment:
       return {
         ...commonProperties,
-        type: ActionTypes.comment,
+        type: UserActionActionTypes.comment,
         payload: {
           comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
         },
         commentId: basicCommentId,
         ...overrides,
       };
-    case ActionTypes.connector:
+    case UserActionActionTypes.connector:
       return {
         ...commonProperties,
-        type: ActionTypes.connector,
+        type: UserActionActionTypes.connector,
         payload: {
           connector: { ...getJiraConnector() },
         },
         ...overrides,
       };
-    case ActionTypes.create_case:
+    case UserActionActionTypes.create_case:
       return {
         ...commonProperties,
-        type: ActionTypes.create_case,
+        type: UserActionActionTypes.create_case,
         payload: {
           description: 'a desc',
           connector: { ...getJiraConnector() },
@@ -673,62 +673,62 @@ export const getUserAction = (
         },
         ...overrides,
       };
-    case ActionTypes.delete_case:
+    case UserActionActionTypes.delete_case:
       return {
         ...commonProperties,
-        type: ActionTypes.delete_case,
+        type: UserActionActionTypes.delete_case,
         payload: {},
         ...overrides,
       };
-    case ActionTypes.description:
+    case UserActionActionTypes.description:
       return {
         ...commonProperties,
-        type: ActionTypes.description,
+        type: UserActionActionTypes.description,
         payload: { description: 'a desc' },
         ...overrides,
       };
-    case ActionTypes.pushed:
+    case UserActionActionTypes.pushed:
       return {
         ...commonProperties,
         createdAt: basicPushedAt,
-        type: ActionTypes.pushed,
+        type: UserActionActionTypes.pushed,
         payload: {
           externalService,
         },
         ...overrides,
       };
-    case ActionTypes.settings:
+    case UserActionActionTypes.settings:
       return {
         ...commonProperties,
-        type: ActionTypes.settings,
+        type: UserActionActionTypes.settings,
         payload: { settings: { syncAlerts: true } },
         ...overrides,
       };
-    case ActionTypes.status:
+    case UserActionActionTypes.status:
       return {
         ...commonProperties,
-        type: ActionTypes.status,
+        type: UserActionActionTypes.status,
         payload: { status: CaseStatuses.open },
         ...overrides,
       };
-    case ActionTypes.tags:
+    case UserActionActionTypes.tags:
       return {
         ...commonProperties,
-        type: ActionTypes.tags,
+        type: UserActionActionTypes.tags,
         payload: { tags: ['a tag'] },
         ...overrides,
       };
-    case ActionTypes.title:
+    case UserActionActionTypes.title:
       return {
         ...commonProperties,
-        type: ActionTypes.title,
+        type: UserActionActionTypes.title,
         payload: { title: 'a title' },
         ...overrides,
       };
-    case ActionTypes.assignees:
+    case UserActionActionTypes.assignees:
       return {
         ...commonProperties,
-        type: ActionTypes.assignees,
+        type: UserActionActionTypes.assignees,
         payload: {
           assignees: [
             // These values map to uids in x-pack/plugins/cases/public/containers/user_profiles/api.mock.ts
@@ -820,10 +820,10 @@ export const jiraFields = { fields: { issueType: '10006', priority: null, parent
 export const getAlertUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionActionTypes.comment, Actions.create),
   id: 'alert-action-id',
   commentId: 'alert-comment-id',
-  type: ActionTypes.comment,
+  type: UserActionActionTypes.comment,
   payload: {
     comment: {
       type: CommentType.alert,
@@ -842,10 +842,10 @@ export const getAlertUserAction = (
 export const getMultipleAlertsUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionActionTypes.comment, Actions.create),
   id: 'alert-action-id',
   commentId: 'alert-comment-id',
-  type: ActionTypes.comment,
+  type: UserActionActionTypes.comment,
   payload: {
     comment: {
       type: CommentType.alert,
@@ -864,9 +864,9 @@ export const getMultipleAlertsUserAction = (
 export const getHostIsolationUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionActionTypes.comment, Actions.create),
   id: 'isolate-action-id',
-  type: ActionTypes.comment,
+  type: UserActionActionTypes.comment,
   commentId: 'isolate-comment-id',
   payload: {
     comment: {
@@ -957,9 +957,9 @@ export const basicCaseClosed: CaseUI = {
 export const getExternalReferenceUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionActionTypes.comment, Actions.create),
   id: 'external-reference-action-id',
-  type: ActionTypes.comment,
+  type: UserActionActionTypes.comment,
   commentId: 'external-reference-comment-id',
   payload: {
     comment: {
@@ -990,9 +990,9 @@ export const getExternalReferenceAttachment = (
 export const getPersistableStateUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionActionTypes.comment, Actions.create),
   id: 'persistable-state-action-id',
-  type: ActionTypes.comment,
+  type: UserActionActionTypes.comment,
   commentId: 'persistable-state-comment-id',
   payload: {
     comment: {

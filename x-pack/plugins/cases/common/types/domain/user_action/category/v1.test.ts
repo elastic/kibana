@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 import { CategoryUserActionPayloadRt, CategoryUserActionRt } from './v1';
 
 describe('Category', () => {
@@ -35,7 +35,7 @@ describe('Category', () => {
 
   describe('CategoryUserActionRt', () => {
     const defaultRequest = {
-      type: ActionTypes.category,
+      type: UserActionActionTypes.category,
       payload: {
         category: 'foobar',
       },

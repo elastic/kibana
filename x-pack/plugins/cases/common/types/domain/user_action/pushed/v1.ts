@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseExternalServiceBasicRt, CaseUserActionExternalServiceRt } from '../../../../api';
-import { ActionTypes } from '../action/v1';
+import { UserActionActionTypes } from '../action/v1';
 
 export const PushedUserActionPayloadWithoutConnectorIdRt = rt.strict({
   externalService: CaseUserActionExternalServiceRt,
@@ -18,11 +18,11 @@ export const PushedUserActionPayloadRt = rt.strict({
 });
 
 export const PushedUserActionWithoutConnectorIdRt = rt.strict({
-  type: rt.literal(ActionTypes.pushed),
+  type: rt.literal(UserActionActionTypes.pushed),
   payload: PushedUserActionPayloadWithoutConnectorIdRt,
 });
 
 export const PushedUserActionRt = rt.strict({
-  type: rt.literal(ActionTypes.pushed),
+  type: rt.literal(UserActionActionTypes.pushed),
   payload: PushedUserActionPayloadRt,
 });

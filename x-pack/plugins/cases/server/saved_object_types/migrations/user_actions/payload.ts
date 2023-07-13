@@ -16,7 +16,7 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import type { UserActionTypes } from '../../../../common/types/domain';
-import { Actions, ActionTypes } from '../../../../common/types/domain';
+import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import { CaseStatuses, CommentType } from '../../../../common/api';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
@@ -76,15 +76,15 @@ export function payloadMigration(
 
 export const getUserActionType = (fields: string[], action: string): string => {
   if (fields.length > 1 && action === Actions.create) {
-    return ActionTypes.create_case;
+    return UserActionActionTypes.create_case;
   }
 
   if (fields.length > 1 && action === Actions.delete) {
-    return ActionTypes.delete_case;
+    return UserActionActionTypes.delete_case;
   }
 
   const field = fields[0] as UserActionTypes;
-  return ActionTypes[field] ?? '';
+  return UserActionActionTypes[field] ?? '';
 };
 
 export const getPayload = (
@@ -114,13 +114,13 @@ export const getPayload = (
   return {
     ...payload,
     ...(payload.connector == null &&
-      (type === ActionTypes.create_case || type === ActionTypes.connector) && {
+      (type === UserActionActionTypes.create_case || type === UserActionActionTypes.connector) && {
         connector: noneConnector,
       }),
     ...(isEmpty(payload.status) &&
-      type === ActionTypes.create_case && { status: CaseStatuses.open }),
-    ...(type === ActionTypes.create_case && isEmpty(payload.owner) && { owner }),
-    ...(type === ActionTypes.create_case &&
+      type === UserActionActionTypes.create_case && { status: CaseStatuses.open }),
+    ...(type === UserActionActionTypes.create_case && isEmpty(payload.owner) && { owner }),
+    ...(type === UserActionActionTypes.create_case &&
       isEmpty(payload.settings) && { settings: { syncAlerts: true } }),
   };
 };
