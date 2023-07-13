@@ -46,11 +46,19 @@ function NavigationGroupInternalComp<
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
   const navigationContext = useNavigation();
-  const { children, defaultIsCollapsed, ...node } = props;
-  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode({
-    ...node,
-    isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
-  });
+
+  const { children, node } = useMemo(() => {
+    const { children: _children, defaultIsCollapsed, ...rest } = props;
+    return {
+      children: _children,
+      node: {
+        ...rest,
+        isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
+      },
+    };
+  }, [props]);
+
+  const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
 
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 

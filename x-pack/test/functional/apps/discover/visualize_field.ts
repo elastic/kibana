@@ -171,6 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.discover.chooseLensChart('Bar vertical stacked');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
       expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
