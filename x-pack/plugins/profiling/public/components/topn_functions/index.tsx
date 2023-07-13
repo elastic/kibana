@@ -23,6 +23,7 @@ import { GridOnScrollProps } from 'react-window';
 import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
+import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
 import { TotalSamplesStat } from './total_samples_stat';
 import { getFunctionsRows, IFunctionRow } from './utils';
@@ -115,9 +116,20 @@ export const TopNFunctionsGrid = forwardRef(
         {
           id: TopNFunctionSortField.Samples,
           initialWidth: isDifferentialView ? 100 : 200,
-          displayAsText: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
-            defaultMessage: 'Samples (estd.)',
-          }),
+          schema: 'samples',
+          display: (
+            <LabelWithHint
+              label={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
+                defaultMessage: 'Samples',
+              })}
+              hint={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel.hint', {
+                defaultMessage: 'Estimated values',
+              })}
+              labelSize="s"
+              labelStyle={{ fontWeight: 700 }}
+              iconSize="s"
+            />
+          ),
         },
         {
           id: TopNFunctionSortField.SelfCPU,
@@ -161,16 +173,38 @@ export const TopNFunctionsGrid = forwardRef(
           {
             id: TopNFunctionSortField.AnnualizedCo2,
             initialWidth: isDifferentialView ? 100 : 200,
-            displayAsText: i18n.translate('xpack.profiling.functionsView.annualizedCo2', {
-              defaultMessage: 'Annualized CO2',
-            }),
+            schema: 'numeric',
+            display: (
+              <LabelWithHint
+                label={i18n.translate('xpack.profiling.functionsView.annualizedCo2', {
+                  defaultMessage: 'Annualized CO2',
+                })}
+                hint={i18n.translate('xpack.profiling.functionsView.annualizedCo2.hint', {
+                  defaultMessage:
+                    'Indicates the CO2 emission of the function and any functions called by it.',
+                })}
+                labelSize="s"
+                labelStyle={{ fontWeight: 700 }}
+                iconSize="s"
+              />
+            ),
           },
           {
             id: TopNFunctionSortField.AnnualizedDollarCost,
             initialWidth: isDifferentialView ? 100 : 200,
-            displayAsText: i18n.translate('xpack.profiling.functionsView.annualizedDollarCost', {
-              defaultMessage: `Annualized dollar cost`,
-            }),
+            display: (
+              <LabelWithHint
+                label={i18n.translate('xpack.profiling.functionsView.annualizedDollarCost', {
+                  defaultMessage: `Annualized dollar cost`,
+                })}
+                hint={i18n.translate('xpack.profiling.functionsView.annualizedDollarCost.hint', {
+                  defaultMessage: `Indicates the Dollar cost of the function and any functions called by it.`,
+                })}
+                labelSize="s"
+                labelStyle={{ fontWeight: 700 }}
+                iconSize="s"
+              />
+            ),
           }
         );
 
@@ -261,6 +295,29 @@ export const TopNFunctionsGrid = forwardRef(
           virtualizationOptions={{
             onScroll,
           }}
+          schemaDetectors={[
+            {
+              type: 'samples',
+              comparator: (a, b, direction) => {
+                const aNumber = parseFloat(a.replace(/,/g, ''));
+                const bNumber = parseFloat(b.replace(/,/g, ''));
+
+                if (aNumber < bNumber) {
+                  return direction === 'desc' ? 1 : -1;
+                }
+                if (aNumber > bNumber) {
+                  return direction === 'desc' ? -1 : 1;
+                }
+                return 0;
+              },
+              detector: (a) => {
+                return 1;
+              },
+              icon: '',
+              sortTextAsc: 'Low-High',
+              sortTextDesc: 'High-Low',
+            },
+          ]}
         />
         {selectedRow && (
           <FrameInformationTooltip

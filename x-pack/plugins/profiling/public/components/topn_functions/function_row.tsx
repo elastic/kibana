@@ -82,6 +82,7 @@ export function FunctionRow({
   }
 
   if (columnId === TopNFunctionSortField.Samples) {
+    setCellProps({ css: { textAlign: 'right' } });
     return (
       <SampleStat
         samples={functionRow.samples}
