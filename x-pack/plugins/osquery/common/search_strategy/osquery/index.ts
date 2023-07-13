@@ -17,7 +17,7 @@ import type {
 import type { AgentsStrategyResponse, AgentsRequestOptions } from './agents';
 import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
-import type { DocValueFields, SortField, PaginationInputPaginated } from '../common';
+import type { SortField, PaginationInputPaginated } from '../common';
 
 export * from './actions';
 export * from './agents';
@@ -35,7 +35,6 @@ export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   kql?: string;
-  docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
   componentTemplateExists?: boolean;
 }
