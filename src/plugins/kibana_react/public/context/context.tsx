@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { KibanaContextProvider as ContextProvider } from '@kbn/react-kibana-context';
 import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
@@ -54,10 +55,19 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
       () => createKibanaReactContext({ ...services, ...oldValue.services, ...newServices }),
       [services, oldValue, newServices]
     );
-    return createElement(context.Provider, {
+
+    const newProvider = createElement(context.Provider, {
       value: newValue,
       children,
     });
+
+    if (newValue.services.theme) {
+      return (
+        <ContextProvider theme$={newValue.services.theme.theme$}>{newProvider}</ContextProvider>
+      );
+    }
+
+    return newProvider;
   };
 
   return {

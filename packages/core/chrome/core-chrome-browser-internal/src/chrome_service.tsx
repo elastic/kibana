@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -127,6 +127,8 @@ export class ChromeService {
     customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
+
+    setEuiDevProviderWarning('error');
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []

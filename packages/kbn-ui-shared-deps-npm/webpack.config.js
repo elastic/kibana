@@ -29,7 +29,7 @@ module.exports = (_, argv) => {
     externals: {
       module: 'module',
     },
-    mode: process.env.NODE_ENV || 'development',
+    mode: 'production',
     entry: {
       'kbn-ui-shared-deps-npm': [
         // polyfill code

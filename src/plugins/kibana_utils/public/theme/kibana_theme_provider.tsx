@@ -5,51 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EuiProvider, EuiProviderProps } from '@elastic/eui';
-import createCache from '@emotion/cache';
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-
-import type { CoreTheme } from '@kbn/core/public';
-import { getColorMode } from './utils';
-
-interface KibanaThemeProviderProps {
-  theme$: Observable<CoreTheme>;
-  modify?: EuiProviderProps<{}>['modify'];
-}
-
-const defaultTheme: CoreTheme = {
-  darkMode: false,
-};
-
-const globalCache = createCache({
-  key: 'eui',
-  container: document.querySelector(`meta[name="eui-global"]`) as HTMLElement,
-});
-const emotionCache = createCache({
-  key: 'css',
-  container: document.querySelector(`meta[name="emotion"]`) as HTMLElement,
-});
-emotionCache.compat = true;
-
-/**
- * Copied from the `kibana_react` plugin, to avoid cyclical dependency
- */
-export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => {
-  const theme = useObservable(theme$, defaultTheme);
-  const colorMode = useMemo(() => getColorMode(theme), [theme]);
-  return (
-    <EuiProvider
-      colorMode={colorMode}
-      cache={{ default: emotionCache, global: globalCache }}
-      globalStyles={false}
-      utilityClasses={false}
-      modify={modify}
-    >
-      {children}
-    </EuiProvider>
-  );
-};
+export {
+  /** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context */
+  KibanaThemeProvider,
+} from '@kbn/react-kibana-context';

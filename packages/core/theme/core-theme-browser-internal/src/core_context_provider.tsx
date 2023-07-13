@@ -7,34 +7,30 @@
  */
 
 import React, { FC } from 'react';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreThemeProvider } from './core_theme_provider';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context';
+import { ThemeServiceStart } from '@kbn/core-theme-browser/src/types';
 
 interface CoreContextProviderProps {
-  theme: ThemeServiceStart;
   i18n: I18nStart;
+  theme: ThemeServiceStart;
   globalStyles?: boolean;
 }
 
 /**
- * utility component exposing all the context providers required by core when integrating with react
+ * Utility component exposing all the context providers required by Kibana when integrating with React.
  **/
 export const CoreContextProvider: FC<CoreContextProviderProps> = ({
   i18n,
-  theme,
   children,
+  theme,
   globalStyles = false,
 }) => {
-  // `globalStyles` and `utilityClasses` default values are inverted from that of `EuiProvider`.
-  // Default to `false` (does not add EUI global styles) because more instances use that value.
-  // A value of `true` (does add EUI global styles) will have `EuiProvider` use its default value.
-  const includeGlobalStyles = globalStyles === false ? false : undefined;
   return (
     <i18n.Context>
-      <CoreThemeProvider theme$={theme.theme$} globalStyles={includeGlobalStyles}>
+      <KibanaThemeProvider theme$={theme.theme$} {...{ globalStyles }}>
         {children}
-      </CoreThemeProvider>
+      </KibanaThemeProvider>
     </i18n.Context>
   );
 };
