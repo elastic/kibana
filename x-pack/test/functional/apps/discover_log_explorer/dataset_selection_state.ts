@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discoverLogExplorer']);
 
   describe('DatasetSelection initialization and update', () => {
