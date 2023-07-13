@@ -50,12 +50,12 @@ export interface EncryptedSavedObjectTypeRegistration {
  * Interface for writing/reading versioned ESO type metada
  * to/from hidden saved objects
  */
-interface EncryptedSavedObjectVersionedMetadata {
-  readonly type: string;
-  readonly modelVersion: string;
-  readonly attributesToEncrypt: string[];
-  readonly attributesToExcludeFromAAD: string[];
-}
+// interface EncryptedSavedObjectVersionedMetadata {
+//   readonly type: string;
+//   readonly modelVersion: string;
+//   readonly attributesToEncrypt: string[];
+//   readonly attributesToExcludeFromAAD: string[];
+// }
 
 /**
  * Uniquely identifies saved object.
