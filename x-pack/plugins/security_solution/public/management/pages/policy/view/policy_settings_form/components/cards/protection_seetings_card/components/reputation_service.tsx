@@ -17,15 +17,30 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { SettingCardHeader } from './setting_card';
-import type { PolicyProtection } from '../../../types';
-import type { PolicyFormComponentCommonProps } from '../types';
-import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { useKibana } from '../../../../../../../../../common/lib/kibana';
+import { useTestIdGenerator } from '../../../../../../../../hooks/use_test_id_generator';
+import { SettingCardHeader } from '../../../setting_card';
+import type { PolicyProtection } from '../../../../../../types';
+import type { PolicyFormComponentCommonProps } from '../../../../types';
+import { ProtectionModes } from '../../../../../../../../../../common/endpoint/types';
 
 interface ReputationServiceProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
 }
+
+const USE_REPUTATION_SERVICE_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetail.useReputationService',
+  {
+    defaultMessage: 'Use reputation service',
+  }
+);
+
+const DO_NOT_USE_REPUTATION_SERVICE_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetail.doNotUseReputationService',
+  {
+    defaultMessage: "Don't use reputation service",
+  }
+);
 
 export const ReputationService = React.memo(
   ({
@@ -37,14 +52,15 @@ export const ReputationService = React.memo(
   }: ReputationServiceProps) => {
     const isEditMode = mode === 'edit';
 
+    const { cloud } = useKibana().services;
+    const isCloud = cloud?.isCloudEnabled ?? false;
+
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const protectionTurnedOn = policy.windows.behavior_protection.mode !== ProtectionModes.off;
 
     const checkboxChecked =
       policy.windows.behavior_protection.reputation_service && protectionTurnedOn;
-
-    const checkboxDisabled = !isEditMode || !protectionTurnedOn;
 
     const handleChange = useCallback(
       (event) => {
@@ -57,6 +73,15 @@ export const ReputationService = React.memo(
       },
       [policy, onChange]
     );
+
+    const checkboxLabel = checkboxChecked
+      ? USE_REPUTATION_SERVICE_CHECKBOX_LABEL
+      : DO_NOT_USE_REPUTATION_SERVICE_CHECKBOX_LABEL;
+
+    if (!isCloud) {
+      return null;
+    }
+
     return (
       <div data-test-subj={getTestId()}>
         <EuiSpacer size="m" />
@@ -87,16 +112,23 @@ export const ReputationService = React.memo(
           </EuiFlexGroup>
         </SettingCardHeader>
         <EuiSpacer size="s" />
-        <EuiCheckbox
-          data-test-subj={getTestId('checkbox')}
-          id={`${protection}ReputationServiceCheckbox}`}
-          onChange={handleChange}
-          checked={checkboxChecked}
-          disabled={checkboxDisabled}
-          label={i18n.translate('xpack.securitySolution.endpoint.policyDetail.reputationService', {
-            defaultMessage: 'Reputation service',
-          })}
-        />
+        {isEditMode ? (
+          <EuiCheckbox
+            data-test-subj={getTestId('checkbox')}
+            id={`${protection}ReputationServiceCheckbox}`}
+            onChange={handleChange}
+            checked={checkboxChecked}
+            disabled={!protectionTurnedOn}
+            label={i18n.translate(
+              'xpack.securitySolution.endpoint.policyDetail.reputationService',
+              {
+                defaultMessage: 'Reputation service',
+              }
+            )}
+          />
+        ) : (
+          <>{checkboxLabel}</>
+        )}
       </div>
     );
   }
