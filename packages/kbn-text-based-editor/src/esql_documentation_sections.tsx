@@ -199,6 +199,57 @@ FROM employees
       ),
     },
     {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.enrich', {
+        defaultMessage: 'ENRICH',
+      }),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.enrich.markdown',
+            {
+              defaultMessage: `### ENRICH
+You can use \`ENRICH\` to add data from your existing indices to incoming records. It’s similar to [ingest enrich](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html), but it works at query time.
+
+\`\`\`
+ROW language_code = "1"
+| ENRICH languages_policy
+\`\`\`
+
+\`ENRICH\` requires an [enrich policy](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html#enrich-policy) to be executed. The enrich policy defines a match field (a key field) and a set of enrich fields.
+
+\`ENRICH\` will look for records in the [enrich index](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html#enrich-index) based on the match field value. The matching key in the input dataset can be defined using \`ON <field-name>\`; if it’s not specified, the match will be performed on a field with the same name as the match field defined in the enrich policy.
+
+\`\`\`
+ROW a = "1"
+| ENRICH languages_policy ON a
+\`\`\`
+
+You can specify which attributes (between those defined as enrich fields in the policy) have to be added to the result, using \`WITH <field1>, <field2>...\` syntax.
+
+\`\`\`
+ROW a = "1"
+| ENRICH languages_policy ON a WITH language_name
+\`\`\`
+
+Attributes can also be renamed using \`WITH new_name=<field1>\`
+
+\`\`\`
+ROW a = "1"
+| ENRICH languages_policy ON a WITH name = language_name
+\`\`\`
+
+By default (if no \`WITH\` is defined), \`ENRICH\` will add all the enrich fields defined in the enrich policy to the result.
+
+In case of name collisions, the newly created fields will override the existing fields.
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.eval', {
         defaultMessage: 'EVAL',
       }),
