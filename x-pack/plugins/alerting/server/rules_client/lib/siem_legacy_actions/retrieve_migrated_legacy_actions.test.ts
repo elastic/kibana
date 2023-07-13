@@ -69,7 +69,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).not.toHaveBeenCalled();
@@ -92,7 +93,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).not.toHaveBeenCalled();
@@ -116,7 +118,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).not.toHaveBeenCalled();
@@ -146,7 +149,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).toHaveBeenCalledWith(expect.any(Object), { id: '456' });
@@ -192,7 +196,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).toHaveBeenCalledWith(expect.any(Object), { id: '456' });
@@ -237,7 +242,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).toHaveBeenCalledWith(expect.any(Object), { id: '456' });

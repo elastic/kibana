@@ -114,7 +114,7 @@ export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = asyn
       const legacyActionsReferences =
         legacyRuleActionsSO.saved_objects[0].references.filter(({ type }) => type === 'action') ??
         [];
-      validateLegacyActions(legacyActions, legacyActionsReferences);
+      await validateLegacyActions(legacyActions, legacyActionsReferences);
 
       // Delete legacy actions only after the validation
       await deleteLegacyActions();
