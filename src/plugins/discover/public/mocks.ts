@@ -26,7 +26,7 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     locator: sharePluginMock.createLocator(),
     customize: jest.fn(),
-    useDiscoverMainRoute: jest.fn(),
+    DiscoverContainer: jest.fn(),
   };
   return startContract;
 };
