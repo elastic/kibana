@@ -528,16 +528,7 @@ FROM employees
 | SORT hired, languages.long
 \`\`\`
 
-The following aggregation functions are supported:
-
-* \`AVG\`
-* \`COUNT\`
-* \`COUNT_DISTINCT\`
-* \`MAX\`
-* \`MEDIAN\`
-* \`MEDIAN_ABSOLUTE_DEVIATION\`
-* \`MIN\`
-* \`SUM\`
+Refer to **Aggregation functions** for a list of functions that can be used with \`STATS ... BY\`.
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1823,6 +1814,284 @@ Returning:
 \`\`\`
 
 Alias: TO_VER
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+  ],
+};
+
+export const aggregationFunctions = {
+  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.aggregationFunctions', {
+    defaultMessage: 'Aggregation functions',
+  }),
+  description: i18n.translate(
+    'textBasedEditor.query.textBasedLanguagesEditor.aggregationFunctionsDocumentationESQLDescription',
+    {
+      defaultMessage: `These functions can by used with STATS...BY:`,
+    }
+  ),
+  items: [
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.avgFunction',
+        {
+          defaultMessage: 'AVG',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.avgFunction.markdown',
+            {
+              defaultMessage: `### AVG
+The average of a numeric field.
+
+\`\`\`
+FROM employees
+| STATS AVG(height)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.countFunction',
+        {
+          defaultMessage: 'COUNT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.countFunction.markdown',
+            {
+              defaultMessage: `### COUNT
+Counts field values.
+
+\`\`\`
+FROM employees
+| STATS COUNT(height)
+\`\`\`
+
+Can take any field type as input and the result is always a \`long\` no matter the input type.
+
+NOTE: There isn’t yet a \`COUNT(*)\`. Please count a single valued field if you need a count of rows.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.countDistinctFunction',
+        {
+          defaultMessage: 'COUNT_DISTINCT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.countDistinctFunction.markdown',
+            {
+              defaultMessage: `### COUNT_DISTINCT
+  The approximate number of distinct values.
+
+  \`\`\`
+  FROM hosts
+  | STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
+  \`\`\`
+
+  The \`COUNT_DISTINCT\` function is approximate, based on the HyperLogLog++ algorithm. Refer to the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#_counts_are_approximate) for more information. The precision is configurable, using an optional second parameter:
+
+  \`\`\`
+  FROM hosts
+  | STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
+  \`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.maxFunction',
+        {
+          defaultMessage: 'MAX',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.maxFunction.markdown',
+            {
+              defaultMessage: `### MAX
+The maximum value of a numeric field.
+
+\`\`\`
+FROM employees
+| STATS MAX(languages)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.medianFunction',
+        {
+          defaultMessage: 'MEDIAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.medianFunction.markdown',
+            {
+              defaultMessage: `### MEDIAN
+The value that is greater than half of all values and less than half of all values, also known as the 50% percentile.
+
+\`\`\`
+FROM employees
+| STATS MEDIAN(salary)
+\`\`\`
+
+NOTE: Like \`PERCENTILE\`, \`MEDIAN\` is usually approximate, based on the TDigest algorithm. \`MEDIAN\` is also non-deterministic. This means you can get slightly different results using the same data.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.medianAbsoluteDeviationFunction',
+        {
+          defaultMessage: 'MEDIAN_ABSOLUTE_DEVIATION',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.medianAbsoluteDeviationFunction.markdown',
+            {
+              defaultMessage: `### MEDIAN_ABSOLUTE_DEVIATION
+The median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.
+
+It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable X, the median absolute deviation is \`median(|median(X) - Xi|)\`.
+
+\`\`\`
+FROM employees
+| STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
+\`\`\`
+
+NOTE: Like \`PERCENTILE\`, \`MEDIAN_ABSOLUTE_DEVIATION\` is usually approximate, based on the TDigest algorithm. \`MEDIAN_ABSOLUTE_DEVIATION\` is also non-deterministic. This means you can get slightly different results using the same data.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.minFunction',
+        {
+          defaultMessage: 'MIN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.minFunction.markdown',
+            {
+              defaultMessage: `### MIN
+The minimum value of a numeric field.
+
+\`\`\`
+FROM employees
+| STATS MIN(languages)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.percentileFunction',
+        {
+          defaultMessage: 'PERCENTILE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.percentileFunction.markdown',
+            {
+              defaultMessage: `### PERCENTILE
+The value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the \`MEDIAN\`.
+
+\`\`\`
+FROM employees
+| STATS p0 = PERCENTILE(salary,  0)
+     , p50 = PERCENTILE(salary, 50)
+     , p99 = PERCENTILE(salary, 99)
+\`\`\`
+
+NOTE: \`PERCENTILE\` is usually approximate, based on the TDigest algorithm. \`PERCENTILE\` is also non-deterministic. This means you can get slightly different results using the same data.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.sumFunction',
+        {
+          defaultMessage: 'SUM',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.sumFunction.markdown',
+            {
+              defaultMessage: `### SUM
+The sum of a numeric field.
+
+\`\`\`
+FROM employees
+| STATS SUM(languages)
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
