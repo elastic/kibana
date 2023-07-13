@@ -64,55 +64,34 @@ export const ProtectionSettingCardSwitch = React.memo(
         const newPayload = cloneDeep(policy);
 
         if (event.target.checked === false) {
-          for (const os of osList) {
-            if (os === 'windows') {
-              newPayload[os][protection].mode = ProtectionModes.off;
-            } else if (os === 'mac') {
-              newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.off;
-            } else if (os === 'linux') {
-              newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.off;
-            }
-            if (isPlatinumPlus) {
-              if (os === 'windows') {
-                newPayload[os].popup[protection].enabled = event.target.checked;
-              } else if (os === 'mac') {
-                newPayload[os].popup[protection as MacPolicyProtection].enabled =
-                  event.target.checked;
-              } else if (os === 'linux') {
-                newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
-                  event.target.checked;
-              }
-              if (protection === 'behavior_protection') {
-                newPayload.windows.behavior_protection.reputation_service = false;
-                newPayload.mac.behavior_protection.reputation_service = false;
-                newPayload.linux.behavior_protection.reputation_service = false;
-              }
+          newPayload.windows[protection].mode = ProtectionModes.off;
+          newPayload.mac[protection as MacPolicyProtection].mode = ProtectionModes.off;
+          newPayload.linux[protection as LinuxPolicyProtection].mode = ProtectionModes.off;
+
+          if (isPlatinumPlus) {
+            newPayload.windows.popup[protection].enabled = false;
+            newPayload.mac.popup[protection as MacPolicyProtection].enabled = false;
+            newPayload.linux.popup[protection as LinuxPolicyProtection].enabled = false;
+
+            if (protection === 'behavior_protection') {
+              newPayload.windows.behavior_protection.reputation_service = false;
+              newPayload.mac.behavior_protection.reputation_service = false;
+              newPayload.linux.behavior_protection.reputation_service = false;
             }
           }
         } else {
-          for (const os of osList) {
-            if (os === 'windows') {
-              newPayload[os][protection].mode = ProtectionModes.prevent;
-            } else if (os === 'mac') {
-              newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.prevent;
-            } else if (os === 'linux') {
-              newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
-            }
-            if (isPlatinumPlus) {
-              if (protection === 'behavior_protection') {
-                newPayload.windows.behavior_protection.reputation_service = false;
-                newPayload.mac.behavior_protection.reputation_service = false;
-                newPayload.linux.behavior_protection.reputation_service = false;
-              }
-              if (os === 'windows') {
-                newPayload[os].popup[protection].enabled = event.target.checked;
-              } else if (os === 'mac') {
-                newPayload[os].popup[protection as MacPolicyProtection].enabled =
-                  event.target.checked;
-              } else if (os === 'linux') {
-                newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
-                  event.target.checked;
-              }
+          newPayload.windows[protection].mode = ProtectionModes.prevent;
+          newPayload.mac[protection as MacPolicyProtection].mode = ProtectionModes.prevent;
+          newPayload.linux[protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
+
+          if (isPlatinumPlus) {
+            newPayload.windows.popup[protection].enabled = true;
+            newPayload.mac.popup[protection as MacPolicyProtection].enabled = true;
+            newPayload.linux.popup[protection as LinuxPolicyProtection].enabled = true;
+            if (protection === 'behavior_protection') {
+              newPayload.windows.behavior_protection.reputation_service = false;
+              newPayload.mac.behavior_protection.reputation_service = false;
+              newPayload.linux.behavior_protection.reputation_service = false;
             }
           }
         }
