@@ -47,8 +47,8 @@ const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string)
 
 const getLogRateAnalysisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('LOG_RATE_ANALYSIS', navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
       defaultMessage: 'Select Data View',

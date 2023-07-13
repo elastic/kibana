@@ -71,7 +71,7 @@ export const defineLogRateAnalysisRoute = (
 ) => {
   router.versioned
     .post({
-      path: API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES,
+      path: API_ENDPOINT.LOG_RATE_ANALYSIS,
       access: 'internal',
     })
     .addVersion(
