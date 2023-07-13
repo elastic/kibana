@@ -34,6 +34,7 @@ export function DashboardEditingToolbar() {
   const { euiTheme } = useEuiTheme();
 
   const dashboard = useDashboardAPI();
+  const fullScreenMode = dashboard.select((state) => state.componentState.fullScreenMode);
 
   const stateTransferService = getStateTransfer();
 
@@ -120,7 +121,8 @@ export function DashboardEditingToolbar() {
   return (
     <div
       css={css`
-        padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+        padding: ${fullScreenMode ? euiTheme.size.s : 0} ${euiTheme.size.s} ${euiTheme.size.s}
+          ${euiTheme.size.s};
       `}
     >
       <Toolbar>
