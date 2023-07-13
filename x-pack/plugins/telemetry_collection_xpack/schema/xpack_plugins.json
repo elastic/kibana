@@ -5498,6 +5498,12 @@
               "container_image_name": {
                 "type": "keyword"
               },
+              "container_image_tag": {
+                "type": "keyword"
+              },
+              "cloud_provider": {
+                "type": "keyword"
+              },
               "pod_name": {
                 "type": "keyword"
               },

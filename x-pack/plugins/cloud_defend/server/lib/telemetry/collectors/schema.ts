@@ -64,6 +64,8 @@ export const cloudDefendUsageSchema: MakeSchemaFrom<CloudDefendUsage> = {
     items: {
       account_id: { type: 'keyword' },
       container_image_name: { type: 'keyword' },
+      container_image_tag: { type: 'keyword' },
+      cloud_provider: { type: 'keyword' },
       pod_name: { type: 'keyword' },
       process_doc_count: { type: 'long' },
       file_doc_count: { type: 'long' },
@@ -88,12 +90,44 @@ export const cloudDefendUsageSchema: MakeSchemaFrom<CloudDefendUsage> = {
     type: 'array',
     items: {
       package_policy_id: { type: 'keyword' },
-      policy_yaml: { type: 'keyword' },
-      policy_json: { type: 'keyword' }, // in DBT BQ land, this will be stored as a JSON type so we can run analytic queries on cloud_defend policy behavior
       package_version: { type: 'keyword' },
       agent_policy_id: { type: 'keyword' },
       created_at: { type: 'date' },
       agent_count: { type: 'long' },
+      policy_yaml_stats: {
+        policy_yaml: { type: 'keyword' },
+        policy_json: { type: 'keyword' }, // in DBT BQ land, this will be stored as a JSON type so we can run analytic queries on cloud_defend policy behavior
+        selector_counts: {
+          file: { type: 'long' },
+          process: { type: 'long' },
+        },
+        response_counts: {
+          file: { type: 'long' },
+          process: { type: 'long' },
+        },
+        conditions_in_use: {
+          containerImageFullName: { type: 'long' },
+          containerImageName: { type: 'long' },
+          containerImageTag: { type: 'long' },
+          ignoreVolumeFiles: { type: 'long' },
+          ignoreVolumeMounts: { type: 'long' },
+          kubernetesClusterId: { type: 'long' },
+          kubernetesClusterName: { type: 'long' },
+          kubernetesNamespace: { type: 'long' },
+          kubernetesPodLabel: { type: 'long' },
+          kubernetesPodName: { type: 'long' },
+          operation: { type: 'long' },
+          processExecutable: { type: 'long' },
+          processName: { type: 'long' },
+          sessionLeaderInteractive: { type: 'long' },
+          targetFilePath: { type: 'long' },
+        },
+        actions_in_use: {
+          log: { type: 'long' },
+          alert: { type: 'long' },
+          block: { type: 'long' },
+        },
+      },
     },
   },
 };

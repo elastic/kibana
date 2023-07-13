@@ -14,13 +14,16 @@ import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import {
   validateStringValuesForCondition,
-  getSelectorsAndResponsesFromYaml,
   validateMaxSelectorsAndResponses,
   validateBlockRestrictions,
 } from '../../common/utils';
-import { getInputFromPolicy } from '../../../common/utils/helpers';
+import {
+  getInputFromPolicy,
+  getSelectorsAndResponsesFromYaml,
+} from '../../../common/utils/helpers';
 import * as i18n from './translations';
-import { ViewDeps, SelectorConditionsMap, SelectorCondition } from '../../types';
+import { ViewDeps, SelectorConditionsMap } from '../../types';
+import { SelectorCondition } from '../../../common';
 
 const { editor } = monaco;
 
