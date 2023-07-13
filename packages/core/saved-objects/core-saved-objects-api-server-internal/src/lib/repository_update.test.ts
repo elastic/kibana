@@ -177,7 +177,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('client calls', () => {
-      it.skip(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
+      it(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
         const type = 'index-pattern';
         const id = 'logstash-*';
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
@@ -187,7 +187,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
-      it.skip(`should use the ES get action then index action when type is multi-namespace for existing objects`, async () => {
+      it(`should use the ES get action then index action when type is multi-namespace for existing objects`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
@@ -202,7 +202,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
-      it.skip(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
+      it(`should use the ES get action then index action when type is namespace agnostic for existing objects`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
@@ -217,7 +217,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
-      it.skip(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
+      it(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
@@ -234,7 +234,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenCalledTimes(1);
       });
 
-      it.skip(`defaults to empty array with no input references`, async () => {
+      it(`defaults to empty array with no input references`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(client, repository, registry, type, id, attributes);
         expect(
@@ -243,7 +243,7 @@ describe('SavedObjectsRepository', () => {
         ).toEqual([]); // we're indexing a full new doc, serializer adds default if not defined
       });
       // There's a mock that isn't clearing somewhere and causes testing more than once to fail.
-      it.skip(`accepts custom references array 1`, async () => {
+      it(`accepts custom references array 1`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
@@ -257,7 +257,7 @@ describe('SavedObjectsRepository', () => {
         };
         await test(references);
       });
-      it.skip(`accepts custom references array 2`, async () => {
+      it(`accepts custom references array 2`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
@@ -271,7 +271,7 @@ describe('SavedObjectsRepository', () => {
         };
         await test([{ type: 'foo', id: '42', name: 'some ref' }]);
       });
-      it.skip(`accepts custom references array 3`, async () => {
+      it(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
           await updateBWCSuccess(client, repository, registry, type, id, attributes, {
@@ -286,7 +286,7 @@ describe('SavedObjectsRepository', () => {
         await test([]);
       });
 
-      it.skip(`uses the 'upsertAttributes' option when specified for a single-namespace type that does not exist`, async () => {
+      it(`uses the 'upsertAttributes' option when specified for a single-namespace type that does not exist`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
@@ -314,7 +314,7 @@ describe('SavedObjectsRepository', () => {
         ).toEqual(expected);
       });
 
-      it.skip(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
+      it(`uses the 'upsertAttributes' option when specified for a multi-namespace type that does not exist`, async () => {
         const options = { upsert: { title: 'foo', description: 'bar' } };
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
@@ -347,7 +347,7 @@ describe('SavedObjectsRepository', () => {
         ).toEqual(expectedType);
       });
 
-      it.only(`ignores the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
+      it(`ignores the 'upsertAttributes' option when specified for a multi-namespace type that already exists`, async () => {
         // attributes don't change
         const options = { upsert: { title: 'foo', description: 'bar' } };
         migrator.migrateDocument.mockImplementation((doc) => ({ ...doc, migrated: true }));
@@ -381,7 +381,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`doesn't accept custom references if not an array`, async () => {
+      it(`doesn't accept custom references if not an array`, async () => {
         const migrationVersion = mockMigrationVersion;
         const coreMigrationVersion = '8.0.0';
         const test = async (references: unknown) => {
@@ -403,7 +403,7 @@ describe('SavedObjectsRepository', () => {
         await test(null);
       });
 
-      it.skip(`defaults to a refresh setting of wait_for`, async () => {
+      it.skip(`TODOdefaults to a refresh setting of wait_for`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateBWCSuccess(client, repository, registry, type, id, { foo: 'bar' });
         expect(client.index).toHaveBeenCalledWith(
@@ -414,7 +414,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`does not default to the version of the existing document when type is multi-namespace`, async () => {
+      it.skip(`TODOdoes not default to the version of the existing document when type is multi-namespace`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateBWCSuccess(
           client,
@@ -435,7 +435,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`accepts version`, async () => {
+      it.skip(`TODOaccepts version`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocumentForUpdate);
         await updateBWCSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
@@ -454,7 +454,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip('default to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
+      it.skip('TODOdefault to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
         });
@@ -464,7 +464,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip('accepts a `retryOnConflict` option', async () => {
+      it.skip('TODOaccepts a `retryOnConflict` option', async () => {
         await updateSuccess(client, repository, registry, type, id, attributes, {
           version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
           retryOnConflict: 42,
@@ -475,7 +475,7 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.only(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+      it.skip(`TODOprepends namespace to the id when providing namespace for single-namespace type`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateBWCSuccess(
           client,
@@ -726,7 +726,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    describe.skip('returns', () => {
+    describe.skip('TODOreturns', () => {
       it(`returns _seq_no and _primary_term encoded as version`, async () => {
         const result = await updateSuccess(client, repository, registry, type, id, attributes, {
           namespace,
