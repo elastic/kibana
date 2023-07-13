@@ -1972,6 +1972,34 @@ Alias: TO_VER
         />
       ),
     },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.trimFunction',
+        {
+          defaultMessage: 'TRIM',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.trimFunction.markdown',
+            {
+              defaultMessage: `### TRIM
+Removes leading and trailing whitespaces from strings.
+
+\`\`\`
+ROW message = "   some text  ",  color = " red "
+| EVAL message = TRIM(message)
+| EVAL color = TRIM(color)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
   ],
 };
 
