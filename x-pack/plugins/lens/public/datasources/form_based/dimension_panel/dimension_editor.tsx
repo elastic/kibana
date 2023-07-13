@@ -276,7 +276,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   // changes from the static value operation (which has to be a function)
   // Note: it forced a rerender at this point to avoid UI glitches in async updates (another hack upstream)
   // TODO: revisit this once we get rid of updateDatasourceAsync upstream
-  const moveDefinetelyToStaticValueAndUpdate = (
+  const moveDefinitelyToStaticValueAndUpdate = (
     setter:
       | FormBasedLayer
       | ((prevLayer: FormBasedLayer) => FormBasedLayer)
@@ -927,7 +927,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         layer={state.layers[layerId]}
         activeData={props.activeData}
         paramEditorUpdater={
-          temporaryStaticValue ? moveDefinetelyToStaticValueAndUpdate : setStateWrapper
+          temporaryStaticValue ? moveDefinitelyToStaticValueAndUpdate : setStateWrapper
         }
         columnId={columnId}
         currentColumn={state.layers[layerId].columns[columnId]}
