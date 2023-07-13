@@ -475,10 +475,20 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`TODOprepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({ id: expect.stringMatching(`${namespace}:${type}:${id}`) }),
+      it.only(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+        await updateBWCSuccess(
+          client,
+          repository,
+          registry,
+          NAMESPACE_AGNOSTIC_TYPE,
+          id,
+          attributes
+        );
+        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({ id: expect.stringMatching(`${namespace}:${type}:${id}`) }), // namespace expected: globalType
           expect.anything()
         );
       });
