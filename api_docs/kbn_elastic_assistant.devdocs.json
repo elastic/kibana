@@ -460,7 +460,7 @@
             "signature": [
               "{ connectorId?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
               "OpenAiProviderType",
-              " | undefined; }"
+              " | undefined; model?: string | undefined; }"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
