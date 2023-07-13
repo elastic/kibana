@@ -611,7 +611,7 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
-    lifecycle: any;
+    lifecycle?: any;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];
