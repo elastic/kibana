@@ -411,13 +411,21 @@ ROW a=[1,2,3], b="b", j=["a","b"]
             'textBasedEditor.query.textBasedLanguagesEditor.documentation.rename.markdown',
             {
               defaultMessage: `### RENAME
-Use \`RENAME\` to rename a column. If a column with the new name already exists, it will be replaced by the new column.
-              
+Use \`RENAME\` to rename a column using the following syntax:
+
+\`\`\`
+RENAME <new-name> = <old-name>
+\`\`\`
+
+For example:
+
 \`\`\`
 FROM employees
 | KEEP first_name, last_name, still_hired
 | RENAME employed = still_hired
 \`\`\`
+
+If a column with the new name already exists, it will be replaced by the new column.
 
 Multiple columns can be renamed with a single \`RENAME\` command:
 
