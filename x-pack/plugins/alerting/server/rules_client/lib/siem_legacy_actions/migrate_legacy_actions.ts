@@ -115,7 +115,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
     );
     throw Boom.badRequest(
       i18n.translate('xpack.alerting.rulesClient.validateLegacyActions.errorSummary', {
-        defaultMessage: 'Failed to migrate legacy actions for SIEM rule ${ruleId}: ${errorMessage}',
+        defaultMessage: 'Failed to migrate legacy actions for SIEM rule {ruleId}: {errorMessage}',
         values: {
           ruleId,
           errorMessage: e.message,
