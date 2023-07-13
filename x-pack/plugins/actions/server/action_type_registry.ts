@@ -169,10 +169,6 @@ export class ActionTypeRegistry {
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
           defaultMessage:
             'Kibana privilege authorization is only supported for system action types',
-          values: {
-            connectorTypeId: actionType.id,
-            ids: actionType.supportedFeatureIds.join(','),
-          },
         })
       );
     }
