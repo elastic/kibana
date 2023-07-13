@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
@@ -63,6 +63,7 @@ export const AlertsSummaryContent = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
       <AlertFlyout
         filter={`${findInventoryFields(nodeType).name}: "${nodeName}"`}

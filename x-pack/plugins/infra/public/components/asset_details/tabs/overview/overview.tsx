@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { css } from '@emotion/react';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
@@ -95,14 +96,25 @@ export const Overview = ({
         ) : (
           <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
         )}
+        <SectionSeparator />
       </EuiFlexItem>
-      <EuiHorizontalRule margin="xs" />
-      <AlertsSummaryContent
-        nodeName={nodeName}
-        nodeType={nodeType}
-        dateRange={dateRange ?? DEFAULT_DATE_RANGE}
-      />
-      <EuiHorizontalRule margin="xs" />
+      <EuiFlexItem grow={false}>
+        <AlertsSummaryContent
+          nodeName={nodeName}
+          nodeType={nodeType}
+          dateRange={dateRange ?? DEFAULT_DATE_RANGE}
+        />
+        <SectionSeparator />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const SectionSeparator = () => (
+  <EuiHorizontalRule
+    margin="m"
+    css={css`
+      margin-bottom: 0;
+    `}
+  />
+);
