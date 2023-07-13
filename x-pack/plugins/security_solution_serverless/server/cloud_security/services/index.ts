@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { usageReportingService } from './usage_reporting_service';
+export { securityUsageReportingService } from './usage_reporting_service';
