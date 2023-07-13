@@ -44,7 +44,6 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
 
       if (transformAlreadyInstalled) {
         this.logger.info(`SLO summary transform: ${transformId} already installed - skipping`);
-        await this.startTransform(transformId);
         continue;
       }
 

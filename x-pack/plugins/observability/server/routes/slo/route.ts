@@ -21,6 +21,7 @@ import {
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
+  DefaultResourceInstaller,
   DefaultSummaryClient,
   DefaultTransformManager,
   DeleteSLO,
@@ -35,6 +36,7 @@ import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diag
 import { GetPreviewData } from '../../services/slo/get_preview_data';
 import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
 import { ManageSLO } from '../../services/slo/manage_slo';
+import { DefaultSummaryTransformInstaller } from '../../services/slo/summary_transform/summary_transform_installer';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
@@ -73,7 +75,18 @@ const createSLORoute = createObservabilityServerRoute({
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const esInternalClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
+
+    const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, logger);
+    const sloSummaryInstaller = new DefaultSummaryTransformInstaller(esInternalClient, logger);
+    try {
+      await sloResourceInstaller.ensureCommonResourcesInstalled();
+      await sloSummaryInstaller.installAndStart();
+    } catch (error) {
+      logger.error('Failed to install SLO common resources and summary transforms', { error });
+      throw error;
+    }
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);

@@ -20,7 +20,6 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.repository.save(slo, { throwOnConflict: true });
-
     let sloTransformId;
     try {
       sloTransformId = await this.transformManager.install(slo);

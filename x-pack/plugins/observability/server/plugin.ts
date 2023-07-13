@@ -10,9 +10,9 @@ import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   CoreSetup,
-  CoreStart,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
@@ -26,14 +26,13 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import {
-  kubernetesGuideId,
-  kubernetesGuideConfig,
-} from '../common/guided_onboarding/kubernetes_guide_config';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
+import {
+  kubernetesGuideConfig,
+  kubernetesGuideId,
+} from '../common/guided_onboarding/kubernetes_guide_config';
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import {
   AnnotationsAPI,
@@ -47,8 +46,6 @@ import { registerRoutes } from './routes/register_routes';
 import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
 import { OpenAIService } from './services/openai';
-import { DefaultResourceInstaller } from './services/slo';
-import { DefaultSummaryTransformInstaller } from './services/slo/summary_transform/summary_transform_installer';
 import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -289,19 +286,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     };
   }
 
-  public start(core: CoreStart, plugins: PluginStart) {
-    const esClient = core.elasticsearch.client.asInternalUser;
-    const sloResourceInstaller = new DefaultResourceInstaller(esClient, this.logger);
-    const sloSummaryInstaller = new DefaultSummaryTransformInstaller(esClient, this.logger);
-
-    sloResourceInstaller
-      .ensureCommonResourcesInstalled()
-      .then(() => sloSummaryInstaller.installAndStart())
-      .catch((err) => {
-        this.logger.error('Failed to install SLO common resources and summary transforms');
-        this.logger.error(err);
-      });
-  }
+  public start() {}
 
   public stop() {}
 }
