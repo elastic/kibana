@@ -1259,6 +1259,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@bufbuild/protobuf@^1.0.0":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-1.2.1.tgz#f8b1fbbe79726a4eafa9772ddde147b57f85d177"
+  integrity sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==
+
 "@cbor-extract/cbor-extract-darwin-arm64@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-darwin-arm64/-/cbor-extract-darwin-arm64-2.0.0.tgz#cf0667e4c22111c9d45e16c29964892b12460a76"
@@ -11661,6 +11666,11 @@ btoa-lite@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/btoa-lite/-/btoa-lite-1.0.0.tgz#337766da15801210fdd956c22e9c6891ab9d0337"
   integrity sha1-M3dm2hWAEhD92VbCLpxokaudAzc=
+
+buffer-builder@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/buffer-builder/-/buffer-builder-0.2.0.tgz#3322cd307d8296dab1f604618593b261a3fade8f"
+  integrity sha512-7VPMEPuYznPSoR21NE1zvd2Xna6c/CloiZCfcMXR1Jny6PjX0N4Nsa38zcBFo/FMK+BlA+FLKbJCQ0i2yxp+Xg==
 
 buffer-crc32@^0.2.1, buffer-crc32@^0.2.13, buffer-crc32@~0.2.3:
   version "0.2.13"
@@ -25635,6 +25645,13 @@ rxjs@^7.0.0, rxjs@^7.5.5:
   dependencies:
     tslib "^2.1.0"
 
+rxjs@^7.4.0:
+  version "7.5.7"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.7.tgz#2ec0d57fdc89ece220d2e702730ae8f1e49def39"
+  integrity sha512-z9MzKh/UcOqB3i20H6rtrlaE/CgjLOvheWK/9ILrbhROGTweAi1BaFsTT9FbwZi5Trr1qNRs+MXkhmR06awzQA==
+  dependencies:
+    tslib "^2.1.0"
+
 safe-buffer@5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
@@ -25693,6 +25710,67 @@ sane@^4.0.3:
     micromatch "^3.1.4"
     minimist "^1.1.1"
     walker "~1.0.5"
+
+sass-embedded-darwin-arm64@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-darwin-arm64/-/sass-embedded-darwin-arm64-1.63.6.tgz#e9cd5b0dc31cf301be0ee8c76ce9873b447b8c39"
+  integrity sha512-eUz2p3fXkLVXvnonm7WyWX0fV1lhfP2ZE/NXYDJhCKlAs1KfSxmZ8udFsfHp+LM+/zWJmrv///8fyt8whewwvA==
+
+sass-embedded-darwin-x64@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-darwin-x64/-/sass-embedded-darwin-x64-1.63.6.tgz#87ecb49b5026142264148638a0b775cb65eed1b5"
+  integrity sha512-1XavKT4nATq34JqkG5EZDtcD7How5u3Sm+wEhs7TCWhKBtPIOu6AaZwFWR95v3GFGlUG4wIdO0ymODMse7LJ4w==
+
+sass-embedded-linux-arm64@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-linux-arm64/-/sass-embedded-linux-arm64-1.63.6.tgz#1602aedc509a958c0ce2be125618a0e6ef8681fd"
+  integrity sha512-/Dm5jj/Ev0GHeMKP1OC9SuNa1NDl8ms3JO+Z+ex3jt3Lu5YwpRmAQi0qv+9nfwWHbbPP6kibg/xoWZ1v2vKCwg==
+
+sass-embedded-linux-arm@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-linux-arm/-/sass-embedded-linux-arm-1.63.6.tgz#0fd79831c37d050d10f14d655d1240d5ce25fe85"
+  integrity sha512-GOlY0Tt1YZgAM68C12IYBaDEf5EopTr8AEOVm3Z/hxWQK6mJioE5Fas4WF6L3P4MGcTDX1Zh3SiA0UVuKQ0aJg==
+
+sass-embedded-linux-ia32@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-linux-ia32/-/sass-embedded-linux-ia32-1.63.6.tgz#f4730607de825aa6cef8895a72d0fd18ada57a7b"
+  integrity sha512-vkTebjg00LOhckxhx9JOhLIV7YUc4MbO7wCSJrf8yWR1/BfB2UhuDyxXWz11/0KuBdEdTcvkzGaLHKEYjfDbLQ==
+
+sass-embedded-linux-x64@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-linux-x64/-/sass-embedded-linux-x64-1.63.6.tgz#4bff8dacbe0a0a03e12be9132ae76810cb6b3dd3"
+  integrity sha512-Q1LhLleJTUbDkrJzxpmSWAp3/HtW7Owq9WpFP0vClExBaRztLh5lnYJQ1BQVNyrjar2ItTATss2XLMuyKNvs8A==
+
+sass-embedded-win32-ia32@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-win32-ia32/-/sass-embedded-win32-ia32-1.63.6.tgz#cb35b1c6e36914bee1de93335c97c51b74ac4e56"
+  integrity sha512-hzGO7KMzz0r9Y2ZA2CYrqBJNlRIBJfMG8LP9CUp6wnzjNhrggGAtf6g25jFN4Uhm9QwEjuOMEMR2K6kRPgB1EA==
+
+sass-embedded-win32-x64@1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded-win32-x64/-/sass-embedded-win32-x64-1.63.6.tgz#03e1f3b66b4b198d97881a15e05c9aeb6d9e2ca5"
+  integrity sha512-p/EX94skwwPT21hl9xirdKw9jvrQDs28pdE2S0C68K60N16OmNNUKbp2tDuTclf+qkq9cmWhRAezRNip1zZ7cA==
+
+sass-embedded@^1.63.6:
+  version "1.63.6"
+  resolved "https://registry.yarnpkg.com/sass-embedded/-/sass-embedded-1.63.6.tgz#cabdf560d41fa56c91a77f409ebdb70a93f88771"
+  integrity sha512-Vt6sHVNHzvpDJchIsHQyXXjGifwCnMNBGpDJLpb2jT1/ESTPyNBrikGjVmIQCHZBGT86cUxxKCUfHPCqrerDaA==
+  dependencies:
+    "@bufbuild/protobuf" "^1.0.0"
+    buffer-builder "^0.2.0"
+    immutable "^4.0.0"
+    rxjs "^7.4.0"
+    supports-color "^8.1.1"
+    varint "^6.0.0"
+  optionalDependencies:
+    sass-embedded-darwin-arm64 "1.63.6"
+    sass-embedded-darwin-x64 "1.63.6"
+    sass-embedded-linux-arm "1.63.6"
+    sass-embedded-linux-arm64 "1.63.6"
+    sass-embedded-linux-ia32 "1.63.6"
+    sass-embedded-linux-x64 "1.63.6"
+    sass-embedded-win32-ia32 "1.63.6"
+    sass-embedded-win32-x64 "1.63.6"
 
 sass-loader@^10.4.1:
   version "10.4.1"
@@ -28576,6 +28654,11 @@ variable-diff@1.1.0:
   dependencies:
     chalk "^1.1.1"
     object-assign "^4.0.1"
+
+varint@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/varint/-/varint-6.0.0.tgz#9881eb0ce8feaea6512439d19ddf84bf551661d0"
+  integrity sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==
 
 vary@~1.1.2:
   version "1.1.2"

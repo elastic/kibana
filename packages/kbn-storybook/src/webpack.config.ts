@@ -115,7 +115,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
                     resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                   )};\n${content}`;
                 },
-                implementation: require('sass'),
+                implementation: require('sass-embedded'),
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
                   quietDeps: true,

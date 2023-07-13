@@ -187,7 +187,7 @@ export function getWebpackConfig(
                       )};\n${content}`;
                     },
                     webpackImporter: false,
-                    implementation: require('sass'),
+                    implementation: require('sass-embedded'),
                     sassOptions: {
                       outputStyle: worker.dist ? 'compressed' : 'expanded',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],

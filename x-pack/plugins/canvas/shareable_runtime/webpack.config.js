@@ -110,7 +110,7 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              implementation: require('sass'),
+              implementation: require('sass-embedded'),
               sourceMap: !isProd,
             },
           },
@@ -147,7 +147,7 @@ module.exports = {
                   path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                 )};\n${content}`;
               },
-              implementation: require('sass'),
+              implementation: require('sass-embedded'),
               webpackImporter: false,
               sassOptions: {
                 outputStyle: 'nested',
