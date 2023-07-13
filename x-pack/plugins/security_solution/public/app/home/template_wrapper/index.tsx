@@ -34,17 +34,16 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   Omit<KibanaPageTemplateProps, 'ref'> & {
     $isShowingTimelineOverlay?: boolean;
     $addBottomPadding?: boolean;
-    euiTheme: EuiThemeComputed;
+    theme: EuiThemeComputed; // using computed EUI theme to be consistent with user profile theming
   }
 >`
   .kbnSolutionNav {
-    background-color: ${({ euiTheme }) => euiTheme.colors.emptyShade};
+    background-color: ${({ theme }) => theme.colors.emptyShade};
   }
 
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
-    background: ${({ euiTheme }) =>
-      euiTheme.colors.emptyShade}; // Override bottom bar black background
+    background: ${({ theme }) => theme.colors.emptyShade}; // Override bottom bar black background
     color: inherit; // Necessary to override the bottom bar 'white text'
     transform: ${(
       { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
@@ -85,7 +84,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
         ref={flyoutRef}
       >
         <StyledKibanaPageTemplate
-          euiTheme={euiTheme}
+          theme={euiTheme}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
           paddingSize="none"
           solutionNav={solutionNavProps}

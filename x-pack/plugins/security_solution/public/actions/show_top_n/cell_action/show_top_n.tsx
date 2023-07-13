@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
@@ -74,13 +75,15 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
             ...services,
           }}
         >
-          <EuiThemeProvider darkMode={services.uiSettings.get(DEFAULT_DARK_MODE)}>
-            <Provider store={store}>
-              <Router history={history}>
-                <TopNAction onClose={onClose} context={context} casesService={services.cases} />
-              </Router>
-            </Provider>
-          </EuiThemeProvider>
+          <NavigationProvider core={services}>
+            <EuiThemeProvider darkMode={services.uiSettings.get(DEFAULT_DARK_MODE)}>
+              <Provider store={store}>
+                <Router history={history}>
+                  <TopNAction onClose={onClose} context={context} casesService={services.cases} />
+                </Router>
+              </Provider>
+            </EuiThemeProvider>
+          </NavigationProvider>
         </KibanaContextProvider>
       );
 

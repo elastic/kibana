@@ -200,7 +200,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
           }
 
           return (
-            <>
+            <React.Fragment key={categoryIndex}>
               {categoryIndex !== 0 && <EuiSpacer size="s" />}
               {categoryItems.map((item) => (
                 <SolutionSideNavItem
@@ -213,7 +213,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
                 />
               ))}
               <EuiSpacer size="s" />
-            </>
+            </React.Fragment>
           );
         })}
       </>
