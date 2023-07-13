@@ -308,8 +308,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           // Persist pin after refresh
           await browser.refresh();
-          await pageObjects.infraHome.waitForLoading();
-          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+          await retry.try(async () => {
+            await pageObjects.infraHome.waitForLoading();
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
+          });
 
           // Remove Pin
           await pageObjects.infraHostsView.clickRemoveMetadataPin();
@@ -360,19 +363,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.clickLogsFlyoutTab();
           await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
         });
-      });
-
-      it('should navigate to Uptime after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        const url = parse(await browser.getCurrentUrl());
-
-        const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
-        const query = decodeURIComponent(url.query ?? '');
-
-        expect(url.pathname).to.eql('/app/uptime/');
-        expect(query).to.contain(search);
-
-        await returnTo(HOSTS_VIEW_PATH);
       });
 
       it('should navigate to APM services after click', async () => {

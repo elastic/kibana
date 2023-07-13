@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
+import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (rawResponse: string): Message => {
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
@@ -22,4 +24,28 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
       timestamp: dateTimeString,
     };
   }
+};
+
+export const getWelcomeConversation = (
+  conversation: Conversation,
+  isAssistantEnabled: boolean
+): Conversation => {
+  if (!isAssistantEnabled) {
+    if (
+      conversation.messages.length === 0 ||
+      conversation.messages[conversation.messages.length - 1].content !==
+        enterpriseMessaging[0].content
+    ) {
+      return {
+        ...conversation,
+        messages: [...conversation.messages, ...enterpriseMessaging],
+      };
+    }
+    return conversation;
+  }
+
+  return {
+    ...conversation,
+    messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
+  };
 };
