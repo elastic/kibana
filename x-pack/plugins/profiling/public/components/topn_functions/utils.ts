@@ -28,12 +28,16 @@ export interface IFunctionRow {
   samples: number;
   selfCPU: number;
   totalCPU: number;
+  selfCPUPerc: number;
+  totalCPUPerc: number;
   impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
     selfCPU: number;
     totalCPU: number;
+    selfCPUPerc: number;
+    totalCPUPerc: number;
   };
 }
 
@@ -61,20 +65,21 @@ export function getFunctionsRows({
   return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
     const comparisonRow = comparisonDataById?.[topN.Id];
 
+    const totalSamples = topN.CountExclusive;
+
     const topNCountExclusiveScaled = scaleValue({
-      value: topN.CountExclusive,
+      value: totalSamples,
       scaleFactor: baselineScaleFactor,
     });
 
-    const totalCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-    const selfCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
-    const totalSamples = topN.CountExclusive;
+    const totalCPUPerc = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
+    const selfCPUPerc = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
 
     const impactEstimates =
       totalSeconds > 0
         ? calculateImpactEstimates({
-            countExclusive: selfCPU,
-            countInclusive: totalCPU,
+            countExclusive: topN.CountExclusive,
+            countInclusive: topN.CountInclusive,
             totalSamples,
             totalSeconds,
           })
@@ -90,10 +95,13 @@ export function getFunctionsRows({
         return {
           rank: topN.Rank - comparisonRow.Rank,
           samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-          selfCPU:
-            selfCPU - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-          totalCPU:
-            totalCPU - (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+          selfCPU: comparisonRow.CountExclusive,
+          selfCPUPerc:
+            selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+          totalCPU: comparisonRow.CountInclusive,
+          totalCPUPerc:
+            totalCPUPerc -
+            (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
         };
       }
     }
@@ -102,8 +110,10 @@ export function getFunctionsRows({
       rank: topN.Rank,
       frame: topN.Frame,
       samples: topNCountExclusiveScaled,
-      selfCPU,
-      totalCPU,
+      selfCPU: topN.CountExclusive,
+      selfCPUPerc,
+      totalCPU: topN.CountInclusive,
+      totalCPUPerc,
       impactEstimates,
       diff: calculateDiff(),
     };

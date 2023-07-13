@@ -238,14 +238,14 @@ export const TopNFunctionsGrid = forwardRef(
           aria-label="TopN functions"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={500}
+          rowCount={100}
           renderCellValue={RenderCellValue}
           inMemory={{ level: 'sorting' }}
           sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
           leadingControlColumns={leadingControlColumns}
           pagination={{
             pageIndex,
-            pageSize: 100,
+            pageSize: 50,
             // Left it empty on purpose as it is a required property on the pagination
             onChangeItemsPerPage: () => {},
             onChangePage,
@@ -278,8 +278,8 @@ export const TopNFunctionsGrid = forwardRef(
               sourceFileName: selectedRow.frame.SourceFilename,
               sourceLine: selectedRow.frame.SourceLine,
             }}
-            totalSeconds={totalSeconds ?? 0}
-            totalSamples={selectedRow.samples}
+            totalSeconds={totalSeconds}
+            totalSamples={totalCount}
             samplingRate={topNFunctions?.SamplingRate ?? 1.0}
           />
         )}

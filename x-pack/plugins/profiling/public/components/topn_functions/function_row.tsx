@@ -92,11 +92,11 @@ export function FunctionRow({
   }
 
   if (columnId === TopNFunctionSortField.SelfCPU) {
-    return <CPUStat cpu={functionRow.selfCPU} diffCPU={functionRow.diff?.selfCPU} />;
+    return <CPUStat cpu={functionRow.selfCPUPerc} diffCPU={functionRow.diff?.selfCPUPerc} />;
   }
 
   if (columnId === TopNFunctionSortField.TotalCPU) {
-    return <CPUStat cpu={functionRow.totalCPU} diffCPU={functionRow.diff?.totalCPU} />;
+    return <CPUStat cpu={functionRow.totalCPUPerc} diffCPU={functionRow.diff?.totalCPUPerc} />;
   }
 
   if (
