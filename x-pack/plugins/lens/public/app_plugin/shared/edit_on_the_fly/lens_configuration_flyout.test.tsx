@@ -145,7 +145,7 @@ describe('LensEditConfigurationFlyout', () => {
     expect(instance.find(VisualizationToolbar).exists()).toBe(true);
     expect(instance.find(VisualizationToolbar).prop('framePublicAPI')).toMatchInlineSnapshot(`
       Object {
-        "activeData": undefined,
+        "activeData": Object {},
         "dataViews": Object {
           "indexPatternRefs": Array [],
           "indexPatterns": Object {},

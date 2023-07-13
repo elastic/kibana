@@ -84,10 +84,6 @@ export function LensEditConfigurationFlyout({
   });
   const { isLoading } = useLensSelector((state) => state.lens);
   if (isLoading) return null;
-  const framePublicAPIEnhanced = {
-    ...framePublicAPI,
-    activeData,
-  };
 
   const layerPanelsProps = {
     framePublicAPI,
