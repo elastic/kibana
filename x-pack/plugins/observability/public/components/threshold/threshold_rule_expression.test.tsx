@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useKibana } from '../../../utils/kibana_react';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-
-import Expressions from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
-import { Comparator } from '../../../../common/threshold_rule/types';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-jest.mock('../../../utils/kibana_react');
+import { Comparator } from '../../../common/threshold_rule/types';
+import { MetricsExplorerMetric } from '../../../common/threshold_rule/metrics_explorer';
+import { useKibana } from '../../utils/kibana_react';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import Expressions from './threshold_rule_expression';
+
+jest.mock('../../utils/kibana_react');
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -105,5 +105,45 @@ describe('Expression', () => {
         aggType: 'cardinality',
       },
     ]);
+  });
+
+  it('should show the error message', async () => {
+    const currentOptions = {
+      groupBy: 'host.hostname',
+      filterQuery: 'foo',
+      metrics: [
+        { aggregation: 'avg', field: 'system.load.1' },
+        { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
+      ] as MetricsExplorerMetric[],
+    };
+    const errorMessage = 'Error in searchSource create';
+    const kibanaMock = kibanaStartMock.startContract();
+    useKibanaMock.mockReturnValue({
+      ...kibanaMock,
+      services: {
+        ...kibanaMock.services,
+        data: {
+          dataViews: {
+            create: jest.fn(),
+          },
+          query: {
+            timefilter: {
+              timefilter: jest.fn(),
+            },
+          },
+          search: {
+            searchSource: {
+              create: jest.fn(() => {
+                throw new Error(errorMessage);
+              }),
+            },
+          },
+        },
+      },
+    });
+    const { wrapper } = await setup(currentOptions);
+    expect(wrapper.find(`[data-test-subj="thresholdRuleExpressionError"]`).first().text()).toBe(
+      errorMessage
+    );
   });
 });
