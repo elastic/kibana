@@ -17,8 +17,6 @@ import { fetchEsqlOptions } from './validators';
 
 interface EsqlFieldsSelectProps {
   field: FieldHook;
-
-  //  query: string | undefined;
   getFormData: () => DefineStepRule;
 }
 

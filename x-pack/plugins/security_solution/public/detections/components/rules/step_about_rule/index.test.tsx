@@ -101,6 +101,7 @@ describe('StepAboutRuleComponent', () => {
         timestampOverride={stepAboutDefaultValue.timestampOverride}
         isLoading={false}
         form={aboutStepForm}
+        getDefineFormData={jest.fn()}
       />
     );
   };

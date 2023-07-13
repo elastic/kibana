@@ -62,6 +62,7 @@ const fetchEsqlFields = (esqlQuery: string) => {
   });
 };
 
+// TODO: implement filter by type
 export const fetchEsqlOptions = async (esqlQuery: string) => {
   try {
     const data = await fetchEsqlFields(esqlQuery);

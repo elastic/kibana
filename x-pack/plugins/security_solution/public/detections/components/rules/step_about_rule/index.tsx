@@ -13,8 +13,12 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
-import type { RuleStepProps, AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
+import type {
+  RuleStepProps,
+  AboutStepRule,
+  DefineStepRule,
+} from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
@@ -34,6 +38,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../../detection_engine/rule_management/logic/use_rule_indices';
+import { EsqlAutocomplete } from '../esql_autocomplete';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -44,6 +49,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   dataViewId: string | undefined;
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
+  getDefineFormData: () => DefineStepRule;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -73,10 +79,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isUpdateView = false,
   isLoading,
   form,
+  getDefineFormData,
 }) => {
   const { data } = useKibana().services;
 
   const isThreatMatchRuleValue = useMemo(() => isThreatMatchRule(ruleType), [ruleType]);
+  const isEsqlRuleValue = useMemo(() => isEsqlRule(ruleType), [ruleType]);
 
   const { ruleIndices } = useRuleIndices(machineLearningJobId, index);
 
@@ -307,18 +315,29 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               </>
             )}
             <EuiSpacer size="l" />
-            <UseField
-              path="ruleNameOverride"
-              component={AutocompleteField}
-              componentProps={{
-                dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
-                fieldType: 'string',
-                idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPattern,
-                isDisabled: isLoading || indexPatternLoading,
-                placeholder: '',
-              }}
-            />
+            {isEsqlRuleValue ? (
+              <UseField
+                path="ruleNameOverride"
+                component={EsqlAutocomplete}
+                componentProps={{
+                  getFormData: getDefineFormData,
+                }}
+              />
+            ) : (
+              <UseField
+                path="ruleNameOverride"
+                component={AutocompleteField}
+                componentProps={{
+                  dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
+                  fieldType: 'string',
+                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
+                  indices: indexPattern,
+                  isDisabled: isLoading || indexPatternLoading,
+                  placeholder: '',
+                }}
+              />
+            )}
+
             <EuiSpacer size="l" />
             <UseField
               path="timestampOverride"

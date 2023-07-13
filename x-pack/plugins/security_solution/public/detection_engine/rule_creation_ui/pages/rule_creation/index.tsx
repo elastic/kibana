@@ -599,6 +599,7 @@ const CreateRulePageComponent: React.FC = () => {
             timestampOverride={aboutStepData.timestampOverride}
             isLoading={isCreateRuleLoading || loading}
             form={aboutStepForm}
+            getDefineFormData={defineStepForm.getFormData}
           />
 
           <NextStep
@@ -622,6 +623,7 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       loading,
       memoAboutStepReadOnly,
+      defineStepForm.getFormData,
     ]
   );
   const memoAboutStepExtraAction = useMemo(

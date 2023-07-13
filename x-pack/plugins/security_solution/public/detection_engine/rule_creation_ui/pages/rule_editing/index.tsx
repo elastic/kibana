@@ -147,6 +147,13 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
+  const esqlQuery = useMemo(
+    () =>
+      typeof defineStepData.queryBar.query.query === 'string' && isEsqlRule(defineStepData.ruleType)
+        ? defineStepData.queryBar.query.query
+        : undefined,
+    [defineStepData.queryBar.query.query, defineStepData.ruleType]
+  );
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
   const memoizedIndex = useMemo(
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
@@ -284,6 +291,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   dataViewId={defineStepData.dataViewId}
                   timestampOverride={aboutStepData.timestampOverride}
                   form={aboutStepForm}
+                  getDefineFormData={defineStepForm.getFormData}
                   key="aboutStep"
                 />
               )}
