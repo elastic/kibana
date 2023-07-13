@@ -51,3 +51,21 @@ export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocu
     { interval: 500, timeout: 12000 }
   );
 };
+
+export const refreshIndex = (index: string) => {
+  cy.waitUntil(
+    () =>
+      rootRequest({
+        method: 'POST',
+        url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_refresh`,
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+        failOnStatusCode: false,
+      }).then((response) => {
+        if (response.status !== 200) {
+          return false;
+        }
+        return true;
+      }),
+    { interval: 500, timeout: 12000 }
+  );
+};
