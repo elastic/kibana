@@ -312,6 +312,46 @@ ROW a = "12 15.5 15.6 true"
       ),
     },
     {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.keep', {
+        defaultMessage: 'KEEP',
+      }),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.keep.markdown',
+            {
+              defaultMessage: `### KEEP
+The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
+
+To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
+              
+\`\`\`
+FROM employees
+| KEEP first_name, last_name, height
+\`\`\`
+
+Rather than specify each column by name, you can use wildcards to return all columns with a name that matches a pattern:
+
+\`\`\`
+FROM employees
+| KEEP h*
+\`\`\`
+
+The asterisk wildcard (\`*\`) by itself translates to all columns that do not match the other arguments. This query will first return all columns with a name that starts with an h, followed by all other columns:
+
+\`\`\`
+FROM employees
+| KEEP h*, *
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.limit', {
         defaultMessage: 'LIMIT',
       }),
@@ -352,46 +392,6 @@ The \`MV_EXPAND\` processing command expands multivalued fields into one row per
 \`\`\`
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
-\`\`\`
-            `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.keep', {
-        defaultMessage: 'KEEP',
-      }),
-      description: (
-        <Markdown
-          markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentation.keep.markdown',
-            {
-              defaultMessage: `### KEEP
-The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
-
-To limit the columns that are returned, use a comma-separated list of column names. The columns are returned in the specified order:
-              
-\`\`\`
-FROM employees
-| KEEP first_name, last_name, height
-\`\`\`
-
-Rather than specify each column by name, you can use wildcards to return all columns with a name that matches a pattern:
-
-\`\`\`
-FROM employees
-| KEEP h*
-\`\`\`
-
-The asterisk wildcard (\`*\`) by itself translates to all columns that do not match the other arguments. This query will first return all columns with a name that starts with an h, followed by all other columns:
-
-\`\`\`
-FROM employees
-| KEEP h*, *
 \`\`\`
             `,
               description:
