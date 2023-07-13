@@ -101,7 +101,8 @@ function extractParentPaths(key: string) {
 export const findActiveNodes = (
   currentPathname: string,
   navTree: Record<string, ChromeProjectNavigationNode>,
-  location?: Location
+  location?: Location,
+  prepend: (path: string) => string = (path) => path
 ): ChromeProjectNavigationNode[][] => {
   const activeNodes: ChromeProjectNavigationNode[][] = [];
   const matches: string[][] = [];
@@ -113,7 +114,7 @@ export const findActiveNodes = (
 
   Object.entries(navTree).forEach(([key, node]) => {
     if (node.getIsActive && location) {
-      const isActive = node.getIsActive(location);
+      const isActive = node.getIsActive({ pathNameSerialized: currentPathname, location, prepend });
       if (isActive) {
         const keysWithParents = extractParentPaths(key);
         activeNodes.push(keysWithParents.map(activeNodeFromKey));

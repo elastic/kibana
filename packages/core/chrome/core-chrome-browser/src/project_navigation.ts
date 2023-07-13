@@ -47,6 +47,15 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub';
 
+export type GetIsActiveFn = (params: {
+  /** The current path name including the basePath + hash value but **without** any query params */
+  pathNameSerialized: string;
+  /** The history Location */
+  location: Location;
+  /** Utiliy function to prepend a path with the basePath */
+  prepend: (path: string) => string;
+}) => boolean;
+
 /** @public */
 export interface ChromeProjectNavigationNode {
   /** Optional id, if not passed a "link" must be provided. */
@@ -72,7 +81,7 @@ export interface ChromeProjectNavigationNode {
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
-  getIsActive?: (location: Location) => boolean;
+  getIsActive?: GetIsActiveFn;
 
   /**
    * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
@@ -139,7 +148,7 @@ export interface NodeDefinition<
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
-  getIsActive?: (location: Location) => boolean;
+  getIsActive?: GetIsActiveFn;
 
   /**
    * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
