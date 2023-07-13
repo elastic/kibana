@@ -13,7 +13,8 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
+  EuiPageBody,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -95,20 +96,20 @@ export class RemoteClusterEdit extends Component {
 
     if (isLoading) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
           <SectionLoading>
             <FormattedMessage
               id="xpack.remoteClusters.edit.loadingLabel"
               defaultMessage="Loading remote cluster…"
             />
           </SectionLoading>
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
     if (!cluster) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
           <EuiEmptyPrompt
             iconType="warning"
             title={
@@ -142,7 +143,7 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
@@ -150,7 +151,7 @@ export class RemoteClusterEdit extends Component {
 
     if (isConfiguredByNode) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="primary">
+        <EuiPageSection verticalPosition="center" horizontalPosition="center" color="primary">
           <EuiEmptyPrompt
             iconType="iInCircle"
             title={
@@ -179,50 +180,52 @@ export class RemoteClusterEdit extends Component {
               </EuiButton>
             }
           />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
     return (
-      <>
-        <RemoteClusterPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.remoteClusters.editTitle"
-              defaultMessage="Edit remote cluster"
-            />
-          }
-        />
-
-        {hasDeprecatedProxySetting ? (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.remoteClusters.edit.deprecatedSettingsTitle"
-                  defaultMessage="Proceed with caution"
-                />
-              }
-              color="warning"
-              iconType="help"
-            >
+      <EuiPageBody data-test-subj="remote-clusters-edit">
+        <EuiPageSection paddingSize='none'>
+          <RemoteClusterPageTitle
+            title={
               <FormattedMessage
-                id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
-                defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+                id="xpack.remoteClusters.editTitle"
+                defaultMessage="Edit remote cluster"
               />
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        ) : null}
+            }
+          />
 
-        <RemoteClusterForm
-          cluster={cluster}
-          isSaving={isEditingCluster}
-          saveError={getEditClusterError}
-          save={this.save}
-          cancel={this.cancel}
-        />
-      </>
+          {hasDeprecatedProxySetting ? (
+            <>
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.remoteClusters.edit.deprecatedSettingsTitle"
+                    defaultMessage="Proceed with caution"
+                  />
+                }
+                color="warning"
+                iconType="help"
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
+                  defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+                />
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          ) : null}
+
+          <RemoteClusterForm
+            cluster={cluster}
+            isSaving={isEditingCluster}
+            saveError={getEditClusterError}
+            save={this.save}
+            cancel={this.cancel}
+          />
+        </EuiPageSection>
+      </EuiPageBody>
     );
   }
 }

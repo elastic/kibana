@@ -15,9 +15,10 @@ import {
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiPageHeader,
+  EuiPageSection,
+  EuiPageBody,
 } from '@elastic/eui';
 
 import { remoteClustersUrl } from '../../services/documentation';
@@ -90,7 +91,7 @@ export class RemoteClusterList extends Component {
 
   renderNoPermission() {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           iconType="warning"
           title={
@@ -110,7 +111,7 @@ export class RemoteClusterList extends Component {
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -120,7 +121,7 @@ export class RemoteClusterList extends Component {
     const { statusCode, error: errorString } = error.body;
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           iconType="warning"
           title={
@@ -137,13 +138,13 @@ export class RemoteClusterList extends Component {
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   renderEmpty() {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
         <EuiEmptyPrompt
           data-test-subj="remoteClusterListEmptyPrompt"
           iconType="managementApp"
@@ -178,13 +179,13 @@ export class RemoteClusterList extends Component {
             </EuiButton>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   renderLoading() {
     return (
-      <EuiPageContent
+      <EuiPageSection
         verticalPosition="center"
         horizontalPosition="center"
         color="subdued"
@@ -196,7 +197,7 @@ export class RemoteClusterList extends Component {
             defaultMessage="Loading remote clusters…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -204,35 +205,37 @@ export class RemoteClusterList extends Component {
     const { clusters } = this.props;
 
     return (
-      <>
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterListTitle"
-              defaultMessage="Remote Clusters"
-            />
-          }
-          rightSideItems={[
-            <EuiButtonEmpty
-              href={remoteClustersUrl}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
+      <EuiPageBody data-test-subj="remote-clusters-list">
+        <EuiPageSection paddingSize='none'>
+          <EuiPageHeader
+            bottomBorder
+            pageTitle={
               <FormattedMessage
-                id="xpack.remoteClusters.remoteClustersDocsLinkText"
-                defaultMessage="Remote Clusters docs"
+                id="xpack.remoteClusters.remoteClusterListTitle"
+                defaultMessage="Remote Clusters"
               />
-            </EuiButtonEmpty>,
-          ]}
-        />
+            }
+            rightSideItems={[
+              <EuiButtonEmpty
+                href={remoteClustersUrl}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClustersDocsLinkText"
+                  defaultMessage="Remote Clusters docs"
+                />
+              </EuiButtonEmpty>,
+            ]}
+          />
 
-        <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-        <RemoteClusterTable clusters={clusters} />
-        <DetailPanel />
-      </>
+          <RemoteClusterTable clusters={clusters} />
+          <DetailPanel />
+        </EuiPageSection>
+      </EuiPageBody>
     );
   }
 

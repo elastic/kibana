@@ -8,6 +8,10 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiPageSection,
+  EuiPageBody,
+} from '@elastic/eui';
 
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
@@ -56,29 +60,31 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <>
-        <RemoteClusterPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.remoteClusters.addTitle"
-              defaultMessage="Add remote cluster"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClustersDescription"
-              defaultMessage="Add a remote cluster that connects to seed nodes or to a single proxy address."
-            />
-          }
-        />
+      <EuiPageBody data-test-subj="remote-clusters-add">
+        <EuiPageSection paddingSize='none'>
+          <RemoteClusterPageTitle
+            title={
+              <FormattedMessage
+                id="xpack.remoteClusters.addTitle"
+                defaultMessage="Add remote cluster"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClustersDescription"
+                defaultMessage="Add a remote cluster that connects to seed nodes or to a single proxy address."
+              />
+            }
+          />
 
-        <RemoteClusterForm
-          isSaving={isAddingCluster}
-          saveError={addClusterError}
-          save={this.save}
-          cancel={this.cancel}
-        />
-      </>
+          <RemoteClusterForm
+            isSaving={isAddingCluster}
+            saveError={addClusterError}
+            save={this.save}
+            cancel={this.cancel}
+          />
+        </EuiPageSection>
+      </EuiPageBody>
     );
   }
 }
