@@ -2478,6 +2478,7 @@ describe('Embedding excluded AAD fields POC', () => {
     expect(mockSavedObjectsRepo.bulkCreate).toHaveBeenCalledTimes(1);
     expect(mockSavedObjectsRepo.bulkCreate).toHaveBeenLastCalledWith([metadataSO], {
       overwrite: true,
+      managed: true,
     });
 
     // Encrypt type as Kibana V2 would encrypt it

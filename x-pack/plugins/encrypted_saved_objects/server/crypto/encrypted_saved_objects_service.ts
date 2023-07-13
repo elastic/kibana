@@ -117,6 +117,28 @@ interface EncryptedSavedObjectsServiceOptions {
 }
 
 /**
+ * Describes parts of an encrypted attribute string
+ */
+interface EncrpytedAttributeParts {
+  /**
+   * The string header containing the model version
+   */
+  modelVersion?: string;
+
+  /**
+   * The attribute value as an encrypted string
+   */
+  encryptedData: string;
+}
+
+/**
+ * Parameters for decrypt iterator
+ */
+interface DecryptIteratorParameters extends DecryptParameters {
+  typeDefinition?: EncryptedSavedObjectAttributesDefinition;
+}
+
+/**
  * Utility function that gives array representation of the saved object descriptor respecting
  * optional `namespace` property.
  * @param descriptor Saved Object descriptor to turn into array.
@@ -161,7 +183,10 @@ export class EncryptedSavedObjectsService {
     type: string,
     modelVersion: string
   ): Promise<EncryptedSavedObjectAttributesDefinition | undefined> {
-    if (!this.internalSoRepository) return undefined;
+    if (!this.internalSoRepository)
+      throw new Error(
+        `The saved objects repository of the encrypted saved objects service is undefined.`
+      );
 
     const id = type + modelVersion;
     if (this.versionedAttributeDefinitions.has(id)) this.versionedAttributeDefinitions.get(id);
@@ -186,8 +211,11 @@ export class EncryptedSavedObjectsService {
       // Cache the versioned definition
       this.versionedAttributeDefinitions.set(id, metadataAttributesDef);
       return metadataAttributesDef;
-    } catch (e) {
-      return undefined;
+    } catch (error) {
+      throw new Error(
+        `Failed to get versioned encryption attribute definition for ${type} - ${modelVersion}.`,
+        { cause: error }
+      );
     }
   }
 
@@ -231,25 +259,32 @@ export class EncryptedSavedObjectsService {
       VERSIONED_ENCYRPTION_DEFINITION_TYPE,
     ]);
 
-    const versionedEsoMetadata = new Array<SavedObjectsBulkCreateObject>();
-
-    this.typeDefinitions.forEach((versionedType) => {
-      if (versionedType.modelVersion) {
-        const attributes: EncryptedSavedObjectVersionedMetadata = {
-          type: versionedType.type,
-          modelVersion: versionedType.modelVersion,
-          attributesToEncrypt: [...versionedType.attributesToEncrypt.values()],
-          attributesToExcludeFromAAD: versionedType.getAttributesToExcludeFromAAD(),
-        };
-        const id = versionedType.type + versionedType.modelVersion; // forcing the ID in this POC
-        versionedEsoMetadata.push({ id, type: VERSIONED_ENCYRPTION_DEFINITION_TYPE, attributes });
-      }
+    const versionedEsoMetadata: SavedObjectsBulkCreateObject[] = [
+      ...this.typeDefinitions.values(),
+    ].flatMap((versionedType) => {
+      return versionedType.modelVersion
+        ? [
+            {
+              id: versionedType.type + versionedType.modelVersion,
+              type: VERSIONED_ENCYRPTION_DEFINITION_TYPE,
+              attributes: {
+                type: versionedType.type,
+                modelVersion: versionedType.modelVersion,
+                attributesToEncrypt: [...versionedType.attributesToEncrypt.values()],
+                attributesToExcludeFromAAD: versionedType.getAttributesToExcludeFromAAD(),
+              },
+            },
+          ]
+        : [];
     });
 
     // What is the risk of not awaiting this call?
     // Where could we call this function where we can await it?
     // This function (initializeVersionedMetadata) is being called from ESO plugin start.
-    await this.internalSoRepository.bulkCreate(versionedEsoMetadata, { overwrite: true });
+    await this.internalSoRepository.bulkCreate(versionedEsoMetadata, {
+      overwrite: true,
+      managed: true,
+    });
   }
 
   /**
@@ -364,49 +399,34 @@ export class EncryptedSavedObjectsService {
     };
   }
 
-  // Embedding excluded AAD fields POC
-  // The private members are helpers for the POC that embed and exctract
-  // the AAD exclusions to/from the encrypted data strings
-  // This POC is NOT a suggested solution - it duplicates the ADD meta data in
-  // each encrpyted attribute. Ideally, we should store it only once.
-  // private createEncryptionHeader(attributesToExcludeFromAAD: string[] | undefined): string {
-  //   if (!attributesToExcludeFromAAD || attributesToExcludeFromAAD.length === 0) return '';
-  //   return attributesToExcludeFromAAD
-  //     .join(ENCRPYPTED_HEADER_DELIMITER)
-  //     .concat(ENCRPYPTED_HEADER_EOH);
-  // }
-
   // Embedding excluded AAD fields POC v2
   // The header now only needs to contain the version (to simulate the model version
   // that would be written to the raw SO doc)
   private createModelVersionHeader(modelVersion?: string): string {
-    if (!modelVersion) return '';
-    return modelVersion.concat(ENCRPYPTED_HEADER_EOH);
+    return modelVersion ? modelVersion.concat(ENCRPYPTED_HEADER_EOH) : '';
   }
-  private extractModelVersionFromHeader(encryptionString: string): {
-    modelVersion: string | undefined;
-    encryptedData: string;
-  } {
-    const parts = encryptionString.split(ENCRPYPTED_HEADER_EOH);
-    if (parts.length <= 1) return { modelVersion: undefined, encryptedData: encryptionString };
-    return {
-      modelVersion: parts[0],
-      encryptedData: parts[1],
-    };
+
+  private extractModelVersionFromHeader(encryptionString: string): EncrpytedAttributeParts {
+    const [modelVersion, encryptedData] = encryptionString.split(ENCRPYPTED_HEADER_EOH);
+    return modelVersion && encryptedData
+      ? { modelVersion, encryptedData }
+      : { encryptedData: encryptionString };
   }
 
   private *attributesToEncryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: CommonParameters,
-    modelVersion?: string
+    params?: CommonParameters
   ): Iterator<[unknown, string], T, string> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return attributes;
     }
     let encryptionAAD: string | undefined;
-    const encryptionHeader = this.createModelVersionHeader(modelVersion);
+
+    const encryptionHeader = this.createModelVersionHeader(
+      this.typeDefinitions.get(descriptor.type)?.modelVersion
+    );
 
     const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
@@ -420,9 +440,10 @@ export class EncryptedSavedObjectsService {
           // Here we prefix the encrypted data with the version string that was registered in this instance
           // This will not be necessary in the real implementation, as the model version would be available
           // from the raw SO soc.
-          encryptedAttributes[attributeName] = encryptionHeader.concat(
-            (yield [attributeValue, encryptionAAD])!
-          );
+          encryptedAttributes[attributeName] = `${encryptionHeader}${yield [
+            attributeValue,
+            encryptionAAD,
+          ]}`;
         } catch (err) {
           this.options.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
@@ -474,13 +495,8 @@ export class EncryptedSavedObjectsService {
   ): Promise<T> {
     // Embedding excluded AAD fields POC v2
     // Determine if there is a model version, and pass it into the iterator
-    const esoDef = this.typeDefinitions.get(descriptor.type);
-    const iterator = this.attributesToEncryptIterator<T>(
-      descriptor,
-      attributes,
-      params,
-      esoDef?.modelVersion
-    );
+    // const esoDef = this.typeDefinitions.get(descriptor.type);
+    const iterator = this.attributesToEncryptIterator<T>(descriptor, attributes, params);
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
@@ -582,7 +598,10 @@ export class EncryptedSavedObjectsService {
     }
 
     const decrypters = this.getDecrypters(params?.omitPrimaryEncryptionKey);
-    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params, metadata);
+    const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, {
+      ...params,
+      typeDefinition: metadata,
+    });
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
@@ -674,17 +693,15 @@ export class EncryptedSavedObjectsService {
   private *attributesToDecryptIterator<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: DecryptParameters,
-    typeDefinition?: EncryptedSavedObjectAttributesDefinition
+    params?: DecryptIteratorParameters
   ): Iterator<[string, string[]], T, EncryptOutput> {
     // Embedding excluded AAD fields POC v2
     // Check for a type definition coming in, if there isn't one, it's
     // safe to load the one we registered in this version of the software.
-    if (!typeDefinition) {
-      typeDefinition = this.typeDefinitions.get(descriptor.type);
-      if (typeDefinition === undefined) {
-        return attributes;
-      }
+
+    const typeDefinition = params?.typeDefinition ?? this.typeDefinitions.get(descriptor.type);
+    if (typeDefinition === undefined) {
+      return attributes;
     }
 
     const encryptionAADs: string[] = [];

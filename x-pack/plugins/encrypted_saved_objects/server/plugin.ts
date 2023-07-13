@@ -138,9 +138,11 @@ export class EncryptedSavedObjectsPlugin
 
   public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
-    // initializeVersionedMetadata contains an un-awaited async call to SO repo bulk save
-    // What is a more appropriate way of doing this?
-    this.esoService.initializeVersionedMetadata(savedObjects);
+
+    this.esoService.initializeVersionedMetadata(savedObjects).catch((err) => {
+      this.logger.fatal(`Failed to ....: ${err.message ?? err}`);
+    });
+
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),
