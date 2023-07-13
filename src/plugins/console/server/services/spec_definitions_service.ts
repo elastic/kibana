@@ -34,7 +34,6 @@ export class SpecDefinitionsService {
 
   private readonly globalRules: Record<string, any> = {};
   private readonly endpoints: Record<string, any> = {};
-  private readonly extensionSpecFilePaths: string[] = [];
 
   private hasLoadedSpec = false;
 
@@ -87,16 +86,6 @@ export class SpecDefinitionsService {
     };
   }
 
-  public addExtensionSpecFilePath(path: string) {
-    this.extensionSpecFilePaths.push(path);
-  }
-
-  public setup() {
-    return {
-      addExtensionSpecFilePath: this.addExtensionSpecFilePath.bind(this),
-    };
-  }
-
   public start({ endpointsAvailability }: SpecDefinitionsDependencies) {
     if (!this.hasLoadedSpec) {
       this.loadJsonSpec(endpointsAvailability);
@@ -134,9 +123,6 @@ export class SpecDefinitionsService {
 
   private loadJsonSpec(endpointsAvailability: string) {
     const result = this.loadJSONSpecInDir(AUTOCOMPLETE_DEFINITIONS_FOLDER);
-    this.extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
-      merge(result, this.loadJSONSpecInDir(extensionSpecFilePath));
-    });
 
     Object.keys(result).forEach((endpoint) => {
       const description = result[endpoint];

@@ -76,10 +76,6 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       },
       kibanaVersion,
     });
-
-    return {
-      ...this.specDefinitionsService.setup(),
-    };
   }
 
   start() {
