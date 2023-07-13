@@ -218,6 +218,75 @@ describe('Agent actions', () => {
         });
       }
     });
+
+    it('should sign UNENROLL and UPGRADE actions', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const newActions: NewAgentAction[] = (['UNENROLL', 'UPGRADE'] as AgentActionType[]).map(
+        (actionType, i) => {
+          const actionId = `action${i + 1}`;
+          return {
+            id: actionId,
+            type: actionType,
+            agents: [actionId],
+          };
+        }
+      );
+
+      await bulkCreateAgentActions(esClient, newActions);
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            expect.arrayContaining([
+              expect.objectContaining({
+                signed: {
+                  data: expect.any(String),
+                  signature: expect.any(String),
+                },
+              }),
+            ]),
+          ]),
+        })
+      );
+    });
+
+    it('should not sign actions other than UNENROLL and UPGRADE', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const newActions: NewAgentAction[] = (
+        [
+          'SETTINGS',
+          'POLICY_REASSIGN',
+          'CANCEL',
+          'FORCE_UNENROLL',
+          'UPDATE_TAGS',
+          'REQUEST_DIAGNOSTICS',
+          'POLICY_CHANGE',
+          'INPUT_ACTION',
+        ] as AgentActionType[]
+      ).map((actionType, i) => {
+        const actionId = `action${i + 1}`;
+        return {
+          id: actionId,
+          type: actionType,
+          agents: [actionId],
+        };
+      });
+
+      await bulkCreateAgentActions(esClient, newActions);
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            expect.arrayContaining([
+              expect.not.objectContaining({
+                signed: {
+                  data: expect.any(String),
+                  signature: expect.any(String),
+                },
+              }),
+            ]),
+          ]),
+        })
+      );
+    });
   });
 
   describe('bulkCreateAgentActionResults', () => {
