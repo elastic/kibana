@@ -89,7 +89,10 @@ export interface ConfigSchema {
   };
   compositeSlo: { enabled: boolean };
   aiAssistant?: {
-    enabled?: boolean;
+    enabled: boolean;
+    feedback: {
+      enabled: boolean;
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -327,6 +330,7 @@ export class Plugin
     this.coPilotService = createCoPilotService({
       enabled: !!config.aiAssistant?.enabled,
       http: coreSetup.http,
+      trackingEnabled: !!config.aiAssistant?.feedback.enabled,
     });
 
     return {

@@ -26,6 +26,7 @@ import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { ObservabilityAlertsLocator } from '@kbn/observability-shared-plugin/common';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   kubernetesGuideId,
   kubernetesGuideConfig,
@@ -57,6 +58,7 @@ interface PluginSetup {
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
 }
 
 interface PluginStart {
@@ -250,7 +252,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
+        config,
         dependencies: {
+          pluginsSetup: {
+            ...plugins,
+            core,
+          },
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
           getOpenAIClient: () => openAIService?.client,
