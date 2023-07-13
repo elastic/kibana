@@ -16,7 +16,7 @@ import {
   AUTOCOMPLETE_DEFINITIONS_FOLDER,
   ENDPOINTS_SUBFOLDER,
   GLOBALS_SUBFOLDER,
-  OVERRIDES_SUBFOLDER
+  OVERRIDES_SUBFOLDER,
 } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
 import type { EndpointDefinition, GlobalDefinition } from '../../common/types';
