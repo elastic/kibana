@@ -23,14 +23,22 @@
       "lens",
       "observabilityShared",
       "ruleRegistry",
-      "triggersActionsUi",
       "security",
       "share",
+      "triggersActionsUi",
       "unifiedSearch",
       "visualizations"
     ],
     "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
-    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "stackAlerts", "spaces"],
+    "requiredBundles": [
+      "data",
+      "cloudChat",
+      "kibanaReact",
+      "kibanaUtils",
+      "spaces",
+      "stackAlerts",
+      "unifiedSearch"
+    ],
     "extraPublicDirs": ["common"]
   }
 }
