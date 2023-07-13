@@ -49,7 +49,7 @@ export const DashboardLinkDestinationPicker = ({
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
     return await memoizedFetchDashboards({
       search: searchString,
-      currentDashboardId: parentDashboardId,
+      parentDashboardId,
       selectedDashboardId: initialSelection,
     });
   }, [searchString, parentDashboardId]);

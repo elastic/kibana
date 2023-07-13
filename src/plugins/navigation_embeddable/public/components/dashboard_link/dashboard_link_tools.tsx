@@ -49,14 +49,14 @@ export const memoizedFetchDashboard = memoize(
 interface FetchDashboardsProps {
   size?: number;
   search?: string;
-  currentDashboardId?: string;
+  parentDashboardId?: string;
   selectedDashboardId?: string;
 }
 
 const fetchDashboards = async ({
   search = '',
   size = 10,
-  currentDashboardId,
+  parentDashboardId,
   selectedDashboardId,
 }: FetchDashboardsProps): Promise<DashboardItem[]> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
@@ -70,17 +70,17 @@ const fetchDashboards = async ({
 
   /** If there is no search string... */
   if (isEmpty(search)) {
-    /** ... filter out both the current and parent dashboard from the list ... */
+    /** ... filter out both the parent and selected dashboard from the list ... */
     dashboardList = filter(dashboardList, (dash) => {
-      return dash.id !== currentDashboardId && dash.id !== selectedDashboardId;
+      return dash.id !== parentDashboardId && dash.id !== selectedDashboardId;
     });
 
     /** ... so that we can force them to the top of the list as necessary. */
-    if (currentDashboardId) {
-      dashboardList.unshift(await fetchDashboard(currentDashboardId));
+    if (parentDashboardId) {
+      dashboardList.unshift(await fetchDashboard(parentDashboardId));
     }
 
-    if (selectedDashboardId !== currentDashboardId && selectedDashboardId) {
+    if (selectedDashboardId && selectedDashboardId !== parentDashboardId) {
       dashboardList.unshift(await fetchDashboard(selectedDashboardId));
     }
   }
@@ -94,15 +94,15 @@ const fetchDashboards = async ({
 };
 
 export const memoizedFetchDashboards = memoize(
-  async ({ search, size, currentDashboardId, selectedDashboardId }: FetchDashboardsProps) => {
+  async ({ search, size, parentDashboardId, selectedDashboardId }: FetchDashboardsProps) => {
     return await fetchDashboards({
       search,
       size,
-      currentDashboardId,
+      parentDashboardId,
       selectedDashboardId,
     });
   },
-  ({ search, size, currentDashboardId, selectedDashboardId }) => {
-    return [search, size, currentDashboardId, selectedDashboardId].join('|');
+  ({ search, size, parentDashboardId, selectedDashboardId }) => {
+    return [search, size, parentDashboardId, selectedDashboardId].join('|');
   }
 );
