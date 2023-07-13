@@ -19,6 +19,7 @@ jest.mock('../../../context', () => ({
       },
       application: { capabilities: { navLinks: { integrations: true } } },
       uiSettings: { get: jest.fn() },
+      theme: { theme$: jest.fn() },
     },
   }),
 }));

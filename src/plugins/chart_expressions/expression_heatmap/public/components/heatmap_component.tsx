@@ -95,8 +95,8 @@ function shiftAndNormalizeStops(
       if (params.range === 'percent') {
         result = min + ((max - min) * value) / 100;
       }
-      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-      if (Number.isNaN(result)) {
+      // a division by zero safeguard
+      if (!Number.isFinite(result)) {
         return 1;
       }
       return Number(result.toFixed(2));
