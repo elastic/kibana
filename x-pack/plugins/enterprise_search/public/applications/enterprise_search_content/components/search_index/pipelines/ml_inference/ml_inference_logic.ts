@@ -298,7 +298,7 @@ export const MLInferenceLogic = kea<
             targetField: getMlInferencePrefixedFieldName(configuration.destinationField),
           },
         ],
-        pipelineDefinition: mlInferencePipeline || {},
+        pipelineDefinition: mlInferencePipeline!,
         pipelineName: configuration.pipelineName,
       });
     },
