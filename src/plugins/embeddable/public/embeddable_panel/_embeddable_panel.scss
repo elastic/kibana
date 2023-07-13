@@ -112,6 +112,10 @@
 
 }
 
+.embPanel__optionsMenuPopover-loading {
+  width: $euiSizeS * 32;
+}
+
 .embPanel__optionsMenuPopover-notification::after {
   position: absolute;
   top: 0;

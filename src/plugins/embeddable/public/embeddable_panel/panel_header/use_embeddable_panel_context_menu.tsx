@@ -6,16 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { Subscription } from 'rxjs';
-import useMountedState from 'react-use/lib/useMountedState';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMount, useMountedState } from 'react-use/lib';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
   EuiContextMenu,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
   EuiPopover,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
@@ -48,6 +51,7 @@ export const useEmbeddablePanelContextMenu = ({
   getActions: EmbeddablePanelProps['getActions'];
   actionPredicate?: (actionId: string) => boolean;
 }) => {
+  const [menuPanelsLoading, setMenuPanelsLoading] = useState(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuActions, setContextMenuActions] = useState<Array<Action<object>>>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
@@ -56,6 +60,10 @@ export const useEmbeddablePanelContextMenu = ({
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
 
   const mounted = useMountedState();
+
+  useMount(() => {
+    updatePanelActions();
+  });
 
   const getAllPanelActions = useCallback(async () => {
     const regularActions = await (async () => {
@@ -88,48 +96,17 @@ export const useEmbeddablePanelContextMenu = ({
     const newActions = await getAllPanelActions();
     if (!mounted()) return;
     setContextMenuActions(newActions);
-  }, [getAllPanelActions, mounted]);
-
-  /**
-   * On embeddable creation get all actions then subscribe to all
-   * input updates to refresh them
-   */
-  useEffect(() => {
-    let subscription: Subscription;
-
-    updatePanelActions().then(() => {
-      if (mounted()) {
-        /**
-         * since any piece of state could theoretically change which actions are available we need to
-         * recalculate them on any input change or any parent input change.
-         */
-        subscription = embeddable.getInput$().subscribe(() => updatePanelActions());
-        if (embeddable.parent) {
-          subscription.add(embeddable.parent.getInput$().subscribe(() => updatePanelActions()));
-        }
-      }
+    const panels = await buildContextMenuForActions({
+      actions: newActions.map((action) => ({
+        action,
+        context: { embeddable },
+        trigger: contextMenuTrigger,
+      })),
+      closeMenu: () => setIsContextMenuOpen(false),
     });
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [embeddable, getAllPanelActions, updatePanelActions, mounted]);
-
-  /**
-   * When actions are updated, build and set panels
-   */
-  useEffect(() => {
-    (async () => {
-      const panels = await buildContextMenuForActions({
-        actions: contextMenuActions.map((action) => ({
-          action,
-          context: { embeddable },
-          trigger: contextMenuTrigger,
-        })),
-        closeMenu: () => setIsContextMenuOpen(false),
-      });
-      if (mounted()) setContextMenuPanels(panels);
-    })();
-  }, [contextMenuActions, embeddable, mounted]);
+    if (!mounted()) return;
+    setContextMenuPanels(panels);
+  }, [embeddable, getAllPanelActions, mounted]);
 
   const showNotification = useMemo(
     () => contextMenuActions.some((action) => action.showNotification),
@@ -147,9 +124,14 @@ export const useEmbeddablePanelContextMenu = ({
       color="text"
       className="embPanel__optionsMenuButton"
       onClick={() => {
+        const wasOpen = isContextMenuOpen;
+        setIsContextMenuOpen((isOpen) => !isOpen);
+        if (wasOpen) return;
+
+        setMenuPanelsLoading(true);
         updatePanelActions().then(() => {
           if (!mounted()) return;
-          setIsContextMenuOpen((isOpen) => !isOpen);
+          setMenuPanelsLoading(false);
         });
       }}
       data-test-subj="embeddablePanelToggleMenuIcon"
@@ -171,7 +153,20 @@ export const useEmbeddablePanelContextMenu = ({
         isContextMenuOpen ? 'embeddablePanelContextMenuOpen' : 'embeddablePanelContextMenuClosed'
       }
     >
-      <EuiContextMenu initialPanelId="mainMenu" panels={contextMenuPanels} />
+      {menuPanelsLoading ? (
+        <EuiContextMenuPanel
+          className="embPanel__optionsMenuPopover-loading"
+          title={i18n.translate('embeddablePanel.contextMenu.loadingTitle', {
+            defaultMessage: 'Options',
+          })}
+        >
+          <EuiContextMenuItem>
+            <EuiSkeletonText />
+          </EuiContextMenuItem>
+        </EuiContextMenuPanel>
+      ) : (
+        <EuiContextMenu initialPanelId="mainMenu" panels={contextMenuPanels} />
+      )}
     </EuiPopover>
   );
 
