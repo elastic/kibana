@@ -567,38 +567,28 @@ const CreateRulePageComponent: React.FC = () => {
     () => (
       <>
         <EuiHorizontalRule margin="m" />
-        {
-          // TODO: https://github.com/elastic/kibana/issues/161456
-          // The About step page contains EuiRnage component which does not work properly within memoized parents.
-          // In this case we memoize the StepAboutRule and initially this component is offscreen since the Define step page is default.
-          // The About step page is not displayed due to `style.display ='none'` and this breaks EuiRange.
-          // EUI team suggested not to memoize EuiRange/EuiDualRange: https://github.com/elastic/eui/issues/6846
-          // Related ticket: https://github.com/elastic/kibana/issues/160561
-          // NOTE: We should remove this workaround once EUI team fixed EuiRange.
-          activeStep !== RuleStep.aboutRule ? null : (
-            <div
-              style={{
-                display: activeStep === RuleStep.aboutRule ? undefined : 'none',
-              }}
-            >
-              <StepAboutRule
-                ruleType={defineStepData.ruleType}
-                machineLearningJobId={defineStepData.machineLearningJobId}
-                index={defineStepData.index}
-                dataViewId={defineStepData.dataViewId}
-                timestampOverride={aboutStepData.timestampOverride}
-                isLoading={isCreateRuleLoading || loading}
-                form={aboutStepForm}
-              />
+        <div
+          style={{
+            display: activeStep === RuleStep.aboutRule ? undefined : 'none',
+          }}
+        >
+          <StepAboutRule
+            ruleType={defineStepData.ruleType}
+            machineLearningJobId={defineStepData.machineLearningJobId}
+            index={defineStepData.index}
+            dataViewId={defineStepData.dataViewId}
+            timestampOverride={aboutStepData.timestampOverride}
+            isLoading={isCreateRuleLoading || loading}
+            isActive={activeStep === RuleStep.aboutRule}
+            form={aboutStepForm}
+          />
 
-              <NextStep
-                dataTestSubj="about-continue"
-                onClick={aboutRuleNextStep}
-                isDisabled={isCreateRuleLoading}
-              />
-            </div>
-          )
-        }
+          <NextStep
+            dataTestSubj="about-continue"
+            onClick={aboutRuleNextStep}
+            isDisabled={isCreateRuleLoading}
+          />
+        </div>
         {memoAboutStepReadOnly}
       </>
     ),
