@@ -813,8 +813,14 @@ export class ActionsClient {
     return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
+  /**
+   * Return all available action types
+   * expect system action types
+   */
   public async listTypes(featureId?: string): Promise<ActionType[]> {
-    return this.actionTypeRegistry.list(featureId);
+    return this.actionTypeRegistry
+      .list(featureId)
+      .filter((actionType) => !Boolean(actionType.isSystemActionType));
   }
 
   public isActionTypeEnabled(
