@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiComboBox,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
@@ -87,6 +88,8 @@ const gcpField: GcpFields = {
   },
 };
 
+const jsonOptionsHolder = [{ label: 'Option A' }, { label: 'Option B' }];
+
 const getSetupFormatOptions = (): Array<{
   id: SetupFormatGCP;
   label: string;
@@ -137,9 +140,7 @@ export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   //   const group = gcpField;
   const fields = getInputVarsFields(input, gcpField.fields);
   const [radioIdSelected, setRadioIdSelected] = useState('manual');
-  const onChange = (id: string) => {
-    setRadioIdSelected(id);
-  };
+
   return (
     <>
       <GCPSetupInfoContent />
@@ -153,12 +154,6 @@ export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
             })
           )
         }
-      />
-      <RadioGroup
-        size="m"
-        options={getSetupFormatOptions()}
-        idSelected={radioIdSelected}
-        onChange={(id) => onChange(id)}
       />
       <EuiSpacer size="l" />
       <GcpInputVarFields
@@ -200,6 +195,17 @@ const GcpInputVarFields = ({
     {fields.map((field) => (
       <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
         <>
+          {field.id === 'credentials_file' && (
+            <EuiComboBox
+              id={field.id}
+              placeholder="Select Credentials File"
+              singleSelection={{ asPlainText: true }}
+              options={jsonOptionsHolder}
+              fullWidth
+              selectedOptions={jsonOptionsHolder.filter((o) => o.label === field.value)}
+              onChange={(event) => onChange(field.id, event[0].label)}
+            />
+          )}
           {field.type === 'password' && (
             <EuiFieldPassword
               id={field.id}
@@ -209,7 +215,7 @@ const GcpInputVarFields = ({
               onChange={(event) => onChange(field.id, event.target.value)}
             />
           )}
-          {field.type === 'text' && (
+          {field.type === 'text' && field.id !== 'credentials_file' && (
             <EuiFieldText
               id={field.id}
               fullWidth
