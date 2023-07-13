@@ -15,6 +15,7 @@ import {
   EuiSideNavItemType,
   EuiText,
 } from '@elastic/eui';
+import classnames from 'classnames';
 import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
 import { navigationStyles as styles } from '../../styles';
 import { useNavigation as useServices } from '../../services';
@@ -30,7 +31,11 @@ const navigationNodeToEuiItem = (
   const href = item.deepLink?.url ?? item.href;
   const id = item.path ? item.path.join('.') : item.id;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
-  const dataTestSubj = `nav-item-${id}`;
+  const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
+  const dataTestSubj = classnames(`nav-item-${id}`, {
+    [`nav-item-deepLinkId-${item.deepLink?.id}`]: !!item.deepLink,
+    [`nav-item-isActive`]: isSelected,
+  });
 
   const getRenderItem = (): RenderItem | undefined => {
     if (!isExternal || item.renderItem) {
@@ -45,8 +50,6 @@ const navigationNodeToEuiItem = (
       </div>
     );
   };
-
-  const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
 
   return {
     id,

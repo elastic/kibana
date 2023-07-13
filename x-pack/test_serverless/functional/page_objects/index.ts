@@ -9,6 +9,7 @@
 import { pageObjects as xpackFunctionalPageObjects } from '../../../test/functional/page_objects';
 
 import { SvlCommonPageProvider } from './svl_common_page';
+import { SvlCommonNavigationProvider } from './svl_common_navigation';
 import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
@@ -18,6 +19,7 @@ export const pageObjects = {
   ...xpackFunctionalPageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
+  svlCommonNavigation: SvlCommonNavigationProvider,
   svlObltOnboardingPage: SvlObltOnboardingPageProvider,
   svlObltOverviewPage: SvlObltOverviewPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,
