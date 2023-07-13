@@ -38,7 +38,7 @@ import {
   DataComparisonField,
   TimeRange,
 } from './types';
-import { computeChi2PValue, loadCriticalValuesIntoCache } from './data_comparison_utils';
+import { computeChi2PValue } from './data_comparison_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataComparisonField['type'] => {
   switch (kibanaType) {
@@ -597,7 +597,6 @@ export const useFetchDataComparisonResult = ({
             })
           );
 
-          await loadCriticalValuesIntoCache();
           setResult({
             data: processDataComparisonResult(data),
             status: FETCH_STATUS.SUCCESS,

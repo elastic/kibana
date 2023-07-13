@@ -5,48 +5,8 @@
  * 2.0.
  */
 
-import fs from 'fs';
+import { CRITICAL_VALUES_TABLE, SIGNIFICANCE_LEVELS } from './constants';
 import { Histogram } from './types';
-
-const DATA_DRIFT_CACHE: {
-  loaded: boolean;
-  CRITICAL_VALUES_TABLE: number[][];
-  SIGNIFICANCE_LEVELS: number[];
-} = {
-  loaded: false,
-  CRITICAL_VALUES_TABLE: [],
-  SIGNIFICANCE_LEVELS: [],
-};
-const readFile = async (path: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf-8', (err, content) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(content);
-      }
-    });
-  });
-};
-
-async function parseJsonFile<T>(path: string): Promise<T | undefined> {
-  try {
-    const file = await readFile(path);
-    return JSON.parse(file);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`Couldn't read json file: ${path}`);
-  }
-}
-
-export const loadCriticalValuesIntoCache = async () => {
-  if (!DATA_DRIFT_CACHE.loaded) {
-    DATA_DRIFT_CACHE.SIGNIFICANCE_LEVELS =
-      (await parseJsonFile('./critical_values/significance_levels.json')) ?? [];
-    DATA_DRIFT_CACHE.CRITICAL_VALUES_TABLE =
-      (await parseJsonFile('./critical_values/critical_values_table.json')) ?? [];
-  }
-};
 
 const criticalTableLookup = (chi2Statistic: number, df: number) => {
   if (df < 1) return 1;
@@ -56,21 +16,17 @@ const criticalTableLookup = (chi2Statistic: number, df: number) => {
   const rowIndex: number = df - 1;
 
   // Get the column index
-  let minDiff: number = Math.abs(
-    DATA_DRIFT_CACHE.CRITICAL_VALUES_TABLE[rowIndex][0] - chi2Statistic
-  );
+  let minDiff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][0] - chi2Statistic);
   let columnIndex: number = 0;
-  for (let j = 1; j < DATA_DRIFT_CACHE.CRITICAL_VALUES_TABLE[rowIndex].length; j++) {
-    const diff: number = Math.abs(
-      DATA_DRIFT_CACHE.CRITICAL_VALUES_TABLE[rowIndex][j] - chi2Statistic
-    );
+  for (let j = 1; j < CRITICAL_VALUES_TABLE[rowIndex].length; j++) {
+    const diff: number = Math.abs(CRITICAL_VALUES_TABLE[rowIndex][j] - chi2Statistic);
     if (diff < minDiff) {
       minDiff = diff;
       columnIndex = j;
     }
   }
 
-  const significanceLevel: number = DATA_DRIFT_CACHE.SIGNIFICANCE_LEVELS[columnIndex];
+  const significanceLevel: number = SIGNIFICANCE_LEVELS[columnIndex];
   return significanceLevel;
 };
 
