@@ -308,8 +308,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           // Persist pin after refresh
           await browser.refresh();
-          await pageObjects.infraHome.waitForLoading();
-          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+          await retry.try(async () => {
+            await pageObjects.infraHome.waitForLoading();
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
+          });
 
           // Remove Pin
           await pageObjects.infraHostsView.clickRemoveMetadataPin();

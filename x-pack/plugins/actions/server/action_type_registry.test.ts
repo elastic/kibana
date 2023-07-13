@@ -15,6 +15,7 @@ import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { rawConnectorSchema } from './raw_connector_schema';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -82,17 +83,18 @@ describe('actionTypeRegistry', () => {
       });
       expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actions:my-action-type": Object {
-            "createTaskRunner": [Function],
-            "maxAttempts": 3,
-            "title": "My action type",
+      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toEqual(
+        expect.objectContaining([
+          {
+            'actions:my-action-type': {
+              createTaskRunner: expect.any(Function),
+              maxAttempts: 3,
+              title: 'My action type',
+              indirectParamsSchema: rawConnectorSchema,
+            },
           },
-        },
-      ]
-    `);
+        ])
+      );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
         'Connector: My action type',
         'gold'

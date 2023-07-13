@@ -44,6 +44,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-test/jest-preset.js',
   'packages/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
+  'x-pack/plugins/security_solution/scripts/endpoint/endpoint_agent_runner/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
   // Required to match the name in the docs.elastic.dev repo.

@@ -128,6 +128,7 @@ test('successfully executes', async () => {
       secrets: {
         baz: true,
       },
+      isMissingSecrets: false,
     },
     references: [],
   };
@@ -270,6 +271,7 @@ test('successfully executes when http_request source is specified', async () => 
       secrets: {
         baz: true,
       },
+      isMissingSecrets: false,
     },
     references: [],
   };
@@ -421,6 +423,7 @@ test('successfully executes when saved_object source is specified', async () => 
       secrets: {
         baz: true,
       },
+      isMissingSecrets: false,
     },
     references: [],
   };
@@ -899,9 +902,9 @@ test('successfully executes as a task', async () => {
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}) },
-      secrets: { schema: schema.object({}) },
-      params: { schema: schema.object({}) },
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
     },
     executor: jest.fn(),
   };
@@ -911,6 +914,7 @@ test('successfully executes as a task', async () => {
     attributes: {
       name: '1',
       actionTypeId: 'test',
+      isMissingSecrets: false,
       config: {
         bar: true,
       },
@@ -960,6 +964,9 @@ test('provides empty config when config and / or secrets is empty', async () => 
     attributes: {
       name: '1',
       actionTypeId: 'test',
+      isMissingSecrets: false,
+      config: {},
+      secrets: {},
     },
     references: [],
   };
@@ -1010,7 +1017,7 @@ test('throws an error when config is invalid', async () => {
   });
 });
 
-test('throws an error when connector is invalid', async () => {
+test('returns an error when connector is invalid', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
@@ -1032,6 +1039,8 @@ test('throws an error when connector is invalid', async () => {
     attributes: {
       name: '1',
       actionTypeId: 'test',
+      isMissingSecrets: false,
+      secrets: {},
     },
     references: [],
   };
@@ -1153,6 +1162,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
       secrets: {
         baz: true,
       },
+      isMissingSecrets: false,
     },
     references: [],
   };
@@ -1827,6 +1837,67 @@ test('writes usage data to event log for gen ai events', async () => {
   });
 });
 
+test('does not fetches actionInfo if passed as param', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.boolean() }) },
+      secrets: { schema: schema.object({ baz: schema.boolean() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
+    executor: jest.fn(),
+  };
+
+  const mockAction = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+      isMissingSecrets: false,
+    },
+    references: [],
+  };
+
+  const mockActionInfo = {
+    actionTypeId: mockAction.attributes.actionTypeId,
+    name: mockAction.attributes.name,
+    config: mockAction.attributes.config,
+    secrets: mockAction.attributes.secrets,
+    actionId: mockAction.id,
+    rawAction: mockAction.attributes,
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({
+    ...executeParams,
+    actionInfo: mockActionInfo,
+  });
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+  expect(actionType.executor).toHaveBeenCalledWith(
+    expect.objectContaining({
+      actionId: '1',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+      params: { foo: true },
+    })
+  );
+});
+
 function setupActionExecutorMock(actionTypeId = 'test') {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
@@ -1852,6 +1923,7 @@ function setupActionExecutorMock(actionTypeId = 'test') {
       secrets: {
         baz: true,
       },
+      isMissingSecrets: false,
     },
     references: [],
   };
