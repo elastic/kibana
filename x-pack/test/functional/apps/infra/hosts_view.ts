@@ -266,10 +266,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      describe('Overview Tab', () => {
+        it('should render 4 metrics trend tiles', async () => {
+          const hosts = await pageObjects.infraHostsView.getAllKPITiles();
+          expect(hosts.length).to.equal(5);
+        });
+
+        [
+          { metric: 'cpuUsage', value: '13.9%' },
+          { metric: 'normalizedLoad1m', value: '18.8%' },
+          { metric: 'memoryUsage', value: '94.9%' },
+          { metric: 'diskSpaceUsage', value: 'N/A' },
+        ].forEach(({ metric, value }) => {
+          it(`${metric} tile should show ${value}`, async () => {
+            await retry.try(async () => {
+              const tileValue = await pageObjects.infraHostsView.getAssetDetailsKPITileValue(
+                metric
+              );
+              expect(tileValue).to.eql(value);
+            });
+          });
+        });
+        it('should navigate to metadata tab', async () => {
+          await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.metadataTableExist();
+        });
+      });
+
       describe('Metadata Tab', () => {
-        it('should render metadata tab, add and remove filter', async () => {
+        it('should render metadata tab, pin/unpin row, add and remove filter', async () => {
+          await pageObjects.infraHostsView.clickMetadataFlyoutTab();
+
           const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
           expect(metadataTab).to.contain('Metadata');
+          await pageObjects.infraHostsView.metadataTableExist();
+
+          // Add Pin
+          await pageObjects.infraHostsView.clickAddMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+
+          // Persist pin after refresh
+          await browser.refresh();
+          await retry.try(async () => {
+            await pageObjects.infraHome.waitForLoading();
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
+          });
+
+          // Remove Pin
+          await pageObjects.infraHostsView.clickRemoveMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
 
           await pageObjects.infraHostsView.clickAddMetadataFilter();
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -287,6 +334,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.infraHostsView.getRemoveFilterExist();
           expect(removeFilterShouldNotExist).to.be(false);
         });
+      });
+
+      it('should render metadata tab, pin and unpin table row', async () => {
+        const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+        expect(metadataTab).to.contain('Metadata');
       });
 
       describe('Processes Tab', () => {
@@ -313,32 +365,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should navigate to Uptime after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        const url = parse(await browser.getCurrentUrl());
-
-        const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
-        const query = decodeURIComponent(url.query ?? '');
-
-        expect(url.pathname).to.eql('/app/uptime/');
-        expect(query).to.contain(search);
-
-        await returnTo(HOSTS_VIEW_PATH);
-      });
-
       it('should navigate to APM services after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
         const url = parse(await browser.getCurrentUrl());
 
         const query = decodeURIComponent(url.query ?? '');
 
-        const environment = 'environment=ENVIRONMENT_ALL';
         const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
         const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
         const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
 
         expect(url.pathname).to.eql('/app/apm/services');
-        expect(query).to.contain(environment);
         expect(query).to.contain(kuery);
         expect(query).to.contain(rangeFrom);
         expect(query).to.contain(rangeTo);

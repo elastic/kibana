@@ -14,6 +14,7 @@ export type {
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpMenuLink,
   ChromeHelpExtension,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,

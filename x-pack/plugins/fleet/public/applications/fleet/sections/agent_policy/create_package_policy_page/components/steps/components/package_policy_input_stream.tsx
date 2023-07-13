@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { uniq } from 'lodash';
@@ -31,7 +31,6 @@ import {
   getRegistryDataStreamAssetBaseName,
   mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
-import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
 
 import type {
   NewPackagePolicy,
@@ -48,7 +47,6 @@ import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
-import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
@@ -148,22 +146,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           ({ name: varName }) => inputStreamValidationResults?.vars?.[varName]?.length
         ).length,
       [advancedVars, inputStreamValidationResults?.vars]
-    );
-
-    const setNewExperimentalDataFeatures = useCallback(
-      (newFeatures: ExperimentalDataStreamFeature[]) => {
-        if (!packagePolicy.package) {
-          return;
-        }
-
-        updatePackagePolicy({
-          package: {
-            ...packagePolicy.package,
-            experimental_data_stream_features: newFeatures,
-          },
-        });
-      },
-      [updatePackagePolicy, packagePolicy]
     );
 
     const { data: dataStreamsData } = useQuery(['datastreams'], () => sendGetDataStreams(), {
@@ -356,16 +338,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             />
                           </EuiFlexItem>
                         </>
-                      )}
-                      {/* Experimental index/datastream settings e.g. synthetic source */}
-                      {isExperimentalDataStreamSettingsEnabled && (
-                        <ExperimentDatastreamSettings
-                          registryDataStream={packageInputStream.data_stream}
-                          experimentalDataFeatures={
-                            packagePolicy.package?.experimental_data_stream_features
-                          }
-                          setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
-                        />
                       )}
                     </>
                   ) : null}

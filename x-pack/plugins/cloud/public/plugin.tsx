@@ -22,6 +22,7 @@ export interface CloudConfigType {
   base_url?: string;
   profile_url?: string;
   deployment_url?: string;
+  billing_url?: string;
   organization_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
@@ -30,6 +31,7 @@ export interface CloudConfigType {
 interface CloudUrls {
   deploymentUrl?: string;
   profileUrl?: string;
+  billingUrl?: string;
   organizationUrl?: string;
   snapshotsUrl?: string;
 }
@@ -99,15 +101,23 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       );
     };
 
-    const { deploymentUrl, profileUrl, organizationUrl } = this.getCloudUrls();
+    const { deploymentUrl, profileUrl, billingUrl, organizationUrl } = this.getCloudUrls();
+
+    let decodedId: DecodedCloudId | undefined;
+    if (this.config.id) {
+      decodedId = decodeCloudId(this.config.id, this.logger);
+    }
 
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
       cloudId: this.config.id,
+      billingUrl,
       deploymentUrl,
       profileUrl,
       organizationUrl,
+      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      kibanaUrl: decodedId?.kibanaUrl,
     };
   }
 
@@ -116,6 +126,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private getCloudUrls(): CloudUrls {
     const {
       profile_url: profileUrl,
+      billing_url: billingUrl,
       organization_url: organizationUrl,
       deployment_url: deploymentUrl,
       base_url: baseUrl,
@@ -123,12 +134,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
+    const fullCloudBillingUrl = getFullCloudUrl(baseUrl, billingUrl);
     const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
       deploymentUrl: fullCloudDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
+      billingUrl: fullCloudBillingUrl,
       organizationUrl: fullCloudOrganizationUrl,
       snapshotsUrl: fullCloudSnapshotsUrl,
     };

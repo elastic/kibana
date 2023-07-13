@@ -96,6 +96,11 @@ export const configSchema = schema.object({
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
+   * Artifacts Configuration for package policy update concurrency
+   */
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
+
+  /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
    * when upgrading rules. If not provided, the latest compatible package will be installed,
    * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package

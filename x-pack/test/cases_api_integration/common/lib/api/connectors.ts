@@ -11,7 +11,6 @@ import http from 'http';
 import type SuperTest from 'supertest';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  Configuration,
   CaseConnector,
   ConnectorTypes,
   CasePostRequest,
@@ -22,6 +21,7 @@ import {
 import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import { Configuration } from '@kbn/cases-plugin/common/types/domain';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getPostCaseRequest } from '../mock';

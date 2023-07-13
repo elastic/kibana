@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import styled from 'styled-components';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
@@ -27,10 +26,6 @@ import {
 } from './translations';
 import { RenderRuleName } from '../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-
-const StyledEuiIcon = styled(EuiIcon)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
-`;
 
 export interface DescriptionProps {
   /**
@@ -66,10 +61,8 @@ export const Description: VFC<DescriptionProps> = ({ expanded = false }) => {
             isDraggable={false}
             linkValue={ruleId}
             value={VIEW_RULE_TEXT}
-          >
-            {VIEW_RULE_TEXT}
-            <StyledEuiIcon type="popout" size="m" />
-          </RenderRuleName>
+            openInNewTab
+          />
         </EuiFlexItem>
       ),
     [ruleName, ruleId, scopeId, eventId]

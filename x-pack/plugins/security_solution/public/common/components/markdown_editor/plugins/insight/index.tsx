@@ -55,6 +55,7 @@ import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
+import { isProviderValid } from './helpers';
 import * as i18n from './translations';
 
 interface InsightComponentProps {
@@ -388,9 +389,16 @@ const InsightEditorComponent = ({
     [relativeTimerangeController.field]
   );
   const disableSubmit = useMemo(() => {
-    const labelOrEmpty = labelController.field.value ? labelController.field.value : '';
-    return labelOrEmpty.trim() === '' || providers.length === 0;
-  }, [labelController.field.value, providers]);
+    const labelOrEmpty = labelController.field.value ?? '';
+    const flattenedProviders = providers.flat();
+    return (
+      labelOrEmpty.trim() === '' ||
+      flattenedProviders.length === 0 ||
+      flattenedProviders.some(
+        (provider) => !isProviderValid(provider, dataView?.getFieldByName(provider.field))
+      )
+    );
+  }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
     const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
