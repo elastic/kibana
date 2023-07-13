@@ -29,7 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
+import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
 import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer';
 import { formatFieldValue, getShouldShowFieldHandler } from '@kbn/unified-discover';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/src/types';

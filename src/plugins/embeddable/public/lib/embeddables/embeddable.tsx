@@ -277,6 +277,11 @@ export abstract class Embeddable<
     }
   }
 
+  /**
+   * Call this **only** when your embeddable has encountered a non-recoverable error; recoverable errors
+   * should be handled by the individual embeddable types
+   * @param e The fatal, unrecoverable Error that was thrown
+   */
   protected onFatalError(e: Error) {
     this.fatalError = e;
     this.outputSubject.error(e);

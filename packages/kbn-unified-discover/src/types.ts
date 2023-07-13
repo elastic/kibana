@@ -7,6 +7,7 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -39,6 +40,8 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DiscoverContextAppLocator } from './context/types';
 import type { DiscoverSingleDocLocator } from './doc/types';
 import type { DiscoverAppLocator } from './main/types';
@@ -79,6 +82,7 @@ export interface HistoryLocationState {
 export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
+  analytics: AnalyticsServiceStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -86,7 +90,7 @@ export interface DiscoverServices {
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: () => History<HistoryLocationState>;
-  theme: ChartsPluginStart['theme'];
+  theme: CoreStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
@@ -114,6 +118,8 @@ export interface DiscoverServices {
   charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
+  uiActions: UiActionsStart;
 }

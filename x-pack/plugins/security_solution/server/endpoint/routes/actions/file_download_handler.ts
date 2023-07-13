@@ -25,18 +25,29 @@ export const registerActionFileDownloadRoutes = (
 ) => {
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
+      // NOTE:
+      // Because this API is used in the browser via `href` (ex. on link to download a file),
+      // we need to enable setting the version number via query params
+      enableQueryVersion: true,
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
-      validate: EndpointActionFileDownloadSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      getActionFileDownloadRouteHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionFileDownloadSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        getActionFileDownloadRouteHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionFileDownloadRouteHandler = (
@@ -50,7 +61,7 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const fleetFiles = await endpointContext.service.getFleetFilesClient('from-host');
+    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const { action_id: actionId, file_id: fileId } = req.params;
 

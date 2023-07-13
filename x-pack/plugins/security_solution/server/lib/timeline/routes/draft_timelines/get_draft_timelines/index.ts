@@ -20,7 +20,7 @@ import { getDraftTimelineSchema } from '../../../schemas/draft_timelines';
 
 export const getDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(

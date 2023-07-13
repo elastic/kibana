@@ -40,6 +40,7 @@ describe('Bulk Investigate in Timeline', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
@@ -69,6 +70,7 @@ describe('Bulk Investigate in Timeline', () => {
 
   context('Host -> Events Viewer', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
@@ -99,6 +101,7 @@ describe('Bulk Investigate in Timeline', () => {
 
   context('Host -> Sessions Viewer', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openSessions();
       waitsForEventsToBeLoaded();

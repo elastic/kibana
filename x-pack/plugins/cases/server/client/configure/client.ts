@@ -14,24 +14,26 @@ import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
-  Configurations,
+  Configuration,
   ConfigurationAttributes,
+  Configurations,
+} from '../../../common/types/domain';
+import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
-  Configuration,
-  ConnectorMappings,
   GetConfigurationFindRequest,
-  ConnectorMappingResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import {
-  ConfigurationsRt,
   ConfigurationPatchRequestRt,
+  ConfigurationRequestRt,
   GetConfigurationFindRequestRt,
-  ConfigurationRt,
-  FindActionConnectorResponseRt,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
-import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+} from '../../../common/types/api';
+import type { ConnectorMappings, ConnectorMappingResponse } from '../../../common/api';
+import { FindActionConnectorResponseRt, decodeWithExcessOrThrow } from '../../../common/api';
+import {
+  MAX_CONCURRENT_SEARCHES,
+  MAX_SUPPORTED_CONNECTORS_RETURNED,
+} from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
@@ -42,12 +44,8 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import type {
-  ICasesConfigurePatch,
-  ICasesConfigureRequest,
-  ICasesConfigureResponse,
-} from '../typedoc_interfaces';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 
 /**
  * Defines the internal helper functions.
@@ -67,7 +65,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigurationFindRequest): Promise<ICasesConfigureResponse | {}>;
+  get(params: GetConfigurationFindRequest): Promise<Configurations>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -81,13 +79,13 @@ export interface ConfigureSubClient {
    */
   update(
     configurationId: string,
-    configurations: ICasesConfigurePatch
-  ): Promise<ICasesConfigureResponse>;
+    configurations: ConfigurationPatchRequest
+  ): Promise<Configuration>;
 
   /**
    * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
    */
-  create(configuration: ICasesConfigureRequest): Promise<ICasesConfigureResponse>;
+  create(configuration: ConfigurationRequest): Promise<Configuration>;
 }
 
 /**
@@ -138,6 +136,7 @@ export async function get(
     logger,
     authorization,
   } = clientArgs;
+
   try {
     const queryParams = decodeWithExcessOrThrow(GetConfigurationFindRequestRt)(params);
 
@@ -211,9 +210,9 @@ export async function getConnectors({
       return types;
     }, {} as Record<string, ActionType>);
 
-    const res = (await actionsClient.getAll()).filter((action) =>
-      isConnectorSupported(action, actionTypes)
-    );
+    const res = (await actionsClient.getAll())
+      .filter((action) => isConnectorSupported(action, actionTypes))
+      .slice(0, MAX_SUPPORTED_CONNECTORS_RETURNED);
 
     return decodeOrThrow(FindActionConnectorResponseRt)(res);
   } catch (error) {
@@ -339,7 +338,7 @@ export async function update(
 }
 
 async function create(
-  configuration: ConfigurationRequest,
+  configRequest: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<Configuration> {
@@ -350,7 +349,11 @@ async function create(
     user,
     authorization,
   } = clientArgs;
+
   try {
+    const validatedConfigurationRequest =
+      decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+
     let error = null;
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -364,7 +367,7 @@ async function create(
       );
 
     const filter = combineAuthorizedAndOwnerFilter(
-      configuration.owner,
+      validatedConfigurationRequest.owner,
       authorizationFilter,
       Operations.createConfiguration.savedObjectType
     );
@@ -399,7 +402,7 @@ async function create(
 
     await authorization.ensureAuthorized({
       operation: Operations.createConfiguration,
-      entities: [{ owner: configuration.owner, id: savedObjectID }],
+      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
     });
 
     const creationDate = new Date().toISOString();
@@ -408,22 +411,22 @@ async function create(
     try {
       mappings = (
         await casesClientInternal.configuration.createMappings({
-          connector: configuration.connector,
-          owner: configuration.owner,
+          connector: validatedConfigurationRequest.connector,
+          owner: validatedConfigurationRequest.owner,
           refresh: false,
         })
       ).mappings;
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
-        : `Error creating mapping for ${configuration.connector.name}`;
+        : `Error creating mapping for ${validatedConfigurationRequest.connector.name}`;
     }
 
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,
       attributes: {
-        ...configuration,
-        connector: configuration.connector,
+        ...validatedConfigurationRequest,
+        connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,
         updated_at: null,

@@ -16,6 +16,8 @@ import type {
   MainHistoryLocationState,
 } from '@kbn/unified-discover/src/main/types';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
+import { addProfile } from './customizations';
+
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
 export class DiscoverAppLocatorDefinitionCommon
@@ -45,6 +47,7 @@ export class DiscoverAppLocatorDefinitionCommon
       hideAggregatedPreview,
       breakdownField,
       isAlertResults,
+      profile,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -82,12 +85,24 @@ export class DiscoverAppLocatorDefinitionCommon
     if (dataViewSpec) state.dataViewSpec = dataViewSpec;
     if (isAlertResults) state.isAlertResults = isAlertResults;
 
-    let path = `#/${savedSearchPath}`;
-    path = this.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = this.setStateToKbnUrl('_a', appState, { useHash }, path);
+    let path = '#/';
+
+    if (profile) {
+      path = addProfile(path, profile);
+    }
+
+    path = `${path}${savedSearchPath}`;
 
     if (searchSessionId) {
-      path = `${path}&searchSessionId=${searchSessionId}`;
+      path = `${path}?searchSessionId=${searchSessionId}`;
+    }
+
+    if (Object.keys(queryState).length) {
+      path = this.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
+    }
+
+    if (Object.keys(appState).length) {
+      path = this.setStateToKbnUrl('_a', appState, { useHash }, path);
     }
 
     return {

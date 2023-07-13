@@ -10,7 +10,7 @@ import './table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
+import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
 import { getShouldShowFieldHandler } from '@kbn/unified-discover';
 import { formatFieldValue, DataTableRecord } from '@kbn/unified-discover';
 import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer/src';

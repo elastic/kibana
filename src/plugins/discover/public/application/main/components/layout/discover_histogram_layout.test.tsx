@@ -43,6 +43,8 @@ function getStateContainer(savedSearch?: SavedSearch) {
     hideChart: false,
   });
 
+  stateContainer.internalState.transitions.setDataView(dataViewMock);
+
   return stateContainer;
 }
 
@@ -139,7 +141,9 @@ const mountComponent = async ({
 
   // wait for lazy modules
   await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-  component.update();
+  await act(async () => {
+    component.update();
+  });
 
   return { component, stateContainer };
 };

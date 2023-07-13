@@ -21,10 +21,10 @@ import { HOSTS_URL } from '../../../urls/navigation';
 describe('Toggle full screen', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();

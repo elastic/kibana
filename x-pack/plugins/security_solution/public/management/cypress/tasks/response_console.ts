@@ -6,12 +6,13 @@
  */
 
 import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
-import { closeAllToasts } from './close_all_toasts';
+import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
+import { loadPage } from './common';
 import Chainable = Cypress.Chainable;
 
 export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
-  cy.visit(APP_ENDPOINTS_PATH);
+  loadPage(APP_ENDPOINTS_PATH);
   closeAllToasts();
   cy.contains(endpointHostname).should('exist');
 };

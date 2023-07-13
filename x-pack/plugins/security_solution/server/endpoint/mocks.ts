@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { AwaitedProperties } from '@kbn/utility-types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -23,6 +22,7 @@ import type {
   SavedObjectsClientContract,
   RequestHandler,
   IRouter,
+  RouteMethod,
 } from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -35,16 +35,18 @@ import {
   createMockAgentService,
   createMockPackageService,
   createMessageSigningServiceMock,
-  createFleetFilesClientMock,
+  createFleetFromHostFilesClientMock,
+  createFleetToHostFilesClientMock,
+  createFleetActionsClientMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
-import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
+import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import type { VersionedRouteConfig, AddVersionOpts } from '@kbn/core-http-server';
 import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
-import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import type {
   EndpointAppContextService,
@@ -54,13 +56,13 @@ import type {
 import type { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import type { EndpointAppContext } from './types';
-import type { SecuritySolutionRequestHandlerContext } from '../types';
 import {
   allowedExperimentalValues,
   parseExperimentalConfigValue,
 } from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
+import type { SecuritySolutionRequestHandlerContextMock } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
 
@@ -82,7 +84,7 @@ export const createMockEndpointAppContext = (
     config: () => Promise.resolve(config),
     serverConfig: config,
     service: createMockEndpointAppContextService(mockManifestManager),
-    experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental).features,
   };
 };
 
@@ -94,7 +96,9 @@ export const createMockEndpointAppContextService = (
 ): jest.Mocked<EndpointAppContextService> => {
   const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
   const casesClientMock = createCasesClientMock();
-  const fleetFilesClientMock = createFleetFilesClientMock();
+  const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
+  const fleetToHostFilesClientMock = createFleetToHostFilesClientMock();
+  const fleetActionsClientMock = createFleetActionsClientMock();
 
   return {
     start: jest.fn(),
@@ -108,12 +112,14 @@ export const createMockEndpointAppContextService = (
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getActionCreateService: jest.fn().mockReturnValue(createActionCreateServiceMock()),
-    getFleetFilesClient: jest.fn(async (_) => fleetFilesClientMock),
+    getFleetFromHostFilesClient: jest.fn(async () => fleetFromHostFilesClientMock),
+    getFleetToHostFilesClient: jest.fn(async () => fleetToHostFilesClientMock),
     setup: jest.fn(),
     getLicenseService: jest.fn(),
     getFeatureUsageService: jest.fn(),
     getExceptionListsClient: jest.fn(),
     getMessageSigningService: jest.fn(),
+    getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -176,13 +182,17 @@ export const createMockEndpointAppContextServiceStartContract =
     );
 
     const casesMock = casesPluginMock.createStartContract();
+    const fleetActionsClientMock = createFleetActionsClientMock();
 
     return {
       endpointMetadataService,
       endpointFleetServicesFactory,
       logger,
       fleetAuthzService: createFleetAuthzServiceMock(),
-      createFleetFilesClient: jest.fn((..._) => createFleetFilesClientMock()),
+      createFleetFilesClient: {
+        fromHost: jest.fn((..._) => createFleetFromHostFilesClientMock()),
+        toHost: jest.fn((..._) => createFleetToHostFilesClientMock()),
+      },
       manifestManager: getManifestManagerMock(),
       security,
       alerting: alertsMock.createStart(),
@@ -199,6 +209,7 @@ export const createMockEndpointAppContextServiceStartContract =
       experimentalFeatures: createMockConfig().experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
       actionCreateService: undefined,
+      createFleetActionsClient: jest.fn((_) => fleetActionsClientMock),
     };
   };
 
@@ -208,29 +219,23 @@ export const createFleetAuthzServiceMock = (): jest.Mocked<FleetStartContract['a
   };
 };
 
-export const createMockMetadataRequestContext = () => {
-  return {
-    endpointAppContextService: createMockEndpointAppContextService(),
-    logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    requestHandlerContext: xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<
-      AwaitedProperties<SecuritySolutionRequestHandlerContext>
-    >,
-  };
-};
-
 export function createRouteHandlerContext(
   dataClient: ScopedClusterClientMock,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
-) {
+): SecuritySolutionRequestHandlerContextMock {
   const context = requestContextMock.create(createMockClients(), overrides);
+
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
+
   return context;
 }
 
+type RouterMethod = Extract<keyof IRouter, RouteMethod>;
+
 export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
-  routerMock: ReturnType<typeof httpServiceMock.createRouter>;
+  routerMock: RouterMock;
   scopedEsClusterClientMock: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   savedObjectClientMock: ReturnType<typeof savedObjectsClientMock.create>;
   endpointAppContextMock: EndpointAppContext;
@@ -239,15 +244,15 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   getEsClientMock: (type?: 'internalUser' | 'currentUser') => ElasticsearchClientMock;
   createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => KibanaRequest<P, Q, B>;
   /** Retrieves the handler that was registered with the `router` for a given `method` and `path` */
-  getRegisteredRouteHandler: (
-    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
-    path: string
-  ) => RequestHandler;
+  getRegisteredRouteHandler: (method: RouterMethod, path: string) => RequestHandler;
   /** Retrieves the route handler configuration that was registered with the router */
-  getRegisteredRouteConfig: (
-    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
-    path: string
-  ) => RouteConfig<any, any, any, any>;
+  getRegisteredRouteConfig: (method: RouterMethod, path: string) => RouteConfig<any, any, any, any>;
+  /** Get a registered versioned route */
+  getRegisteredVersionedRoute: (
+    method: RouterMethod,
+    path: string,
+    version: string
+  ) => RegisteredVersionedRoute;
 }
 
 /**
@@ -321,5 +326,33 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 
     getRegisteredRouteHandler,
     getRegisteredRouteConfig,
+
+    getRegisteredVersionedRoute: getRegisteredVersionedRouteMock.bind(null, routerMock),
+  };
+};
+
+interface RegisteredVersionedRoute {
+  routeConfig: VersionedRouteConfig<RouterMethod>;
+  versionConfig: AddVersionOpts<any, any, any>;
+  routeHandler: RequestHandler<any, any, any, any, any>;
+}
+
+export const getRegisteredVersionedRouteMock = (
+  routerMock: RouterMock,
+  method: RouterMethod,
+  path: string,
+  version: string
+): RegisteredVersionedRoute => {
+  const route = routerMock.versioned.getRoute(method, path);
+  const routeVersion = route.versions[version];
+
+  if (!routeVersion) {
+    throw new Error(`Handler for [${method}][${path}] with version [${version}] no found!`);
+  }
+
+  return {
+    routeConfig: route.config,
+    versionConfig: routeVersion.config,
+    routeHandler: routeVersion.handler,
   };
 };

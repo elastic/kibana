@@ -52,10 +52,11 @@ const defaultHeaders = [
 describe('Fields Browser', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   context('Fields Browser rendering', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
@@ -122,6 +123,7 @@ describe('Fields Browser', () => {
 
   context('Editing the timeline', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();

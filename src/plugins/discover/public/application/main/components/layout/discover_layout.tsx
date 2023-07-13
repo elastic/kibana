@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -22,8 +22,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { VIEW_MODE, SIDEBAR_CLOSED_KEY } from '@kbn/unified-discover';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DragContext } from '@kbn/dom-drag-drop';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer';
+import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -52,11 +52,10 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export interface DiscoverLayoutProps {
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
 }
 
-export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutProps) {
+export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -178,8 +177,8 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
-  const dragDropContext = useContext(DragContext);
-  const draggingFieldName = dragDropContext.dragging?.id;
+  const [{ dragging }] = useDragDropContext();
+  const draggingFieldName = dragging?.id;
 
   const onDropFieldToTable = useMemo(() => {
     if (!draggingFieldName || currentColumns.includes(draggingFieldName)) {
@@ -260,7 +259,6 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
       <TopNavMemoized
         onOpenInspector={onOpenInspector}
         query={query}
-        navigateTo={navigateTo}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}
@@ -286,9 +284,7 @@ export function DiscoverLayout({ navigateTo, stateContainer }: DiscoverLayoutPro
               selectedDataView={dataView}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
-              useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
-              viewMode={viewMode}
               onDataViewCreated={stateContainer.actions.onDataViewCreated}
               availableFields$={stateContainer.dataState.data$.availableFields$}
             />

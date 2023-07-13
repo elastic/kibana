@@ -74,10 +74,6 @@ const AlertUsersMetricsRt = rt.strict({
 
 export const SingleCaseMetricsRequestRt = rt.strict({
   /**
-   * The ID of the case.
-   */
-  caseId: rt.string,
-  /**
    * The metrics to retrieve.
    */
   features: rt.array(rt.string),

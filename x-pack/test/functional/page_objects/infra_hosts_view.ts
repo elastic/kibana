@@ -24,24 +24,52 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-button');
     },
 
+    async clickHostCheckbox(id: string, os: string) {
+      return testSubjects.click(`checkboxSelectRow-${id}-${os}`);
+    },
+
+    async clickSelectedHostsButton() {
+      return testSubjects.click('hostsViewTableSelectHostsFilterButton');
+    },
+
+    async clickSelectedHostsAddFilterButton() {
+      return testSubjects.click('hostsViewTableAddFilterButton');
+    },
+
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async clickMetadataFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-metadata');
     },
 
     async clickProcessesFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-processes');
     },
 
+    async clickShowAllMetadataOverviewTab() {
+      return testSubjects.click('infraMetadataSummaryShowAllMetadataButton');
+    },
+
+    async clickLogsFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-logs');
+    },
+
     async clickProcessesTableExpandButton() {
       return testSubjects.click('infraProcessRowButton');
     },
 
-    async clickFlyoutUptimeLink() {
-      return testSubjects.click('hostsView-flyout-uptime-link');
-    },
-
     async clickFlyoutApmServicesLink() {
       return testSubjects.click('hostsView-flyout-apm-services-link');
+    },
+
+    async clickAddMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableAddPin');
+    },
+
+    async clickRemoveMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableRemovePin');
     },
 
     async clickAddMetadataFilter() {
@@ -50,6 +78,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async clickRemoveMetadataFilter() {
       return testSubjects.click('hostsView-flyout-metadata-remove-filter');
+    },
+
+    async getBetaBadgeExists() {
+      return testSubjects.exists('infra-beta-badge');
     },
 
     async getHostsLandingPageDisabled() {
@@ -65,13 +97,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getHostsLandingPageEnableButton() {
-      const container = await testSubjects.find('hostsView-enable-feature-button');
-      return container;
+      return testSubjects.find('hostsView-enable-feature-button');
     },
 
     async clickEnableHostViewButton() {
-      return await testSubjects.click('hostsView-enable-feature-button');
+      return testSubjects.click('hostsView-enable-feature-button');
     },
+
+    // Table
 
     async getHostsTable() {
       return testSubjects.find('hostsView-table');
@@ -91,16 +124,19 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const cells = await row.findAllByCssSelector('[data-test-subj*="hostsView-tableRow-"]');
 
       // Retrieve content for each cell
-      const [title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory] = await Promise.all(
-        cells.map((cell) => this.getHostsCellContent(cell))
-      );
+      const [title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx] =
+        await Promise.all(cells.map((cell) => this.getHostsCellContent(cell)));
 
-      return { title, os, cpuUsage, diskLatency, rx, tx, memoryTotal, memory };
+      return { title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx };
     },
 
     async getHostsCellContent(cell: WebElementWrapper) {
       const cellContent = await cell.findByClassName('euiTableCellContent');
       return cellContent.getVisibleText();
+    },
+
+    async selectedHostsButtonExist() {
+      return testSubjects.exists('hostsViewTableSelectHostsFilterButton');
     },
 
     async getMetricsTrendContainer() {
@@ -127,7 +163,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickAndValidateMetriChartActionOptions() {
-      const element = await testSubjects.find('hostsView-metricChart-diskIOWrite');
+      const element = await testSubjects.find('hostsView-metricChart-tx');
       await element.moveMouseTo();
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
@@ -156,14 +192,29 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Flyout Tabs
+    async getAssetDetailsKPITileValue(type: string) {
+      const container = await testSubjects.find('assetDetailsKPIGrid');
+      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const div = await element.findByClassName('echMetricText__value');
+      return div.getAttribute('title');
+    },
+
     getMetadataTab() {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
+    },
+
+    metadataTableExist() {
+      return testSubjects.exists('infraMetadataTable');
     },
 
     async getMetadataTabName() {
       const tabElement = await this.getMetadataTab();
       const tabTitle = await tabElement.findByClassName('euiTab__content');
       return tabTitle.getVisibleText();
+    },
+
+    async getRemovePinExist() {
+      return testSubjects.exists('infraMetadataEmbeddableRemovePin');
     },
 
     async getAppliedFilter() {
@@ -210,6 +261,13 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const container = await testSubjects.find('hostsView-logs');
 
       return container.findAllByCssSelector('[data-test-subj*=streamEntry]');
+    },
+
+    async getLogsTableColumnHeaders() {
+      const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
+        '~logColumnHeader'
+      );
+      return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
     },
 
     // Alerts Tab
@@ -285,16 +343,16 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Sorting
-    getDiskLatencyHeader() {
-      return testSubjects.find('tableHeaderCell_diskLatency_4');
+    getCpuUsageHeader() {
+      return testSubjects.find('tableHeaderCell_cpu_2');
     },
 
     getTitleHeader() {
       return testSubjects.find('tableHeaderCell_title_1');
     },
 
-    async sortByDiskLatency() {
-      const diskLatency = await this.getDiskLatencyHeader();
+    async sortByCpuUsage() {
+      const diskLatency = await this.getCpuUsageHeader();
       const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
       await button.click();
     },

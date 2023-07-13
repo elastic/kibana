@@ -44,7 +44,7 @@ const getDefaultQuery = ({
 
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
-    <EuiButtonEmpty iconType={'arrowLeft'}>
+    <EuiButtonEmpty iconType="arrowLeft" flush="both">
       <FormattedMessage
         id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
         defaultMessage="Back to resources"
@@ -190,8 +190,9 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={resourceFindings.isFetching}
       />
+      <BackToResourcesButton />
+      <EuiSpacer size="xs" />
       <PageTitle>
-        <BackToResourcesButton />
         <PageTitleText
           title={
             <CloudPosturePageTitle
@@ -209,6 +210,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           }
         />
       </PageTitle>
+      <EuiSpacer />
       {resourceFindings.data && (
         <CspInlineDescriptionList
           listItems={getResourceFindingSharedValues({

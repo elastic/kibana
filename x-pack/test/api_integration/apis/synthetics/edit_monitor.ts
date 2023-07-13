@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { ConfigKey, HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const saveMonitor = async (monitor: MonitorFields) => {
       const res = await supertest
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(monitor)
         .expect(200);
@@ -45,7 +45,10 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -111,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const editResponse = await supertest
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
         .set('kbn-xsrf', 'true')
         .send(modifiedMonitor)
         .expect(200);
@@ -178,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       const editResponse = await supertest
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
         .set('kbn-xsrf', 'true')
         .send(modifiedMonitor)
         .expect(200);
@@ -201,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
       const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
       const editResponse = await supertest
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + invalidMonitorId)
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson)
         .expect(404);
@@ -210,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+      const { id: monitorId, ...savedMonitor } = await saveMonitor(
         httpMonitorJson as MonitorFields
       );
 
@@ -218,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
       const toUpdate = { ...savedMonitor, 'check.request.headers': null };
 
       const apiResponse = await supertest
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
         .set('kbn-xsrf', 'true')
         .send(toUpdate);
 
@@ -226,14 +229,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if monitor type is invalid', async () => {
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+      const { id: monitorId, ...savedMonitor } = await saveMonitor(
         httpMonitorJson as MonitorFields
       );
 
       const toUpdate = { ...savedMonitor, type: 'invalid-data-steam' };
 
       const apiResponse = await supertest
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
         .set('kbn-xsrf', 'true')
         .send(toUpdate);
 
@@ -276,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       const editResponse = await supertest
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
         .set('kbn-xsrf', 'true')
         .send(modifiedMonitor)
         .expect(200);
@@ -293,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
           secretKeys
         )
       );
-      expect(editResponse.body.attributes).not.to.have.keys('unknownkey');
+      expect(editResponse.body).not.to.have.keys('unknownkey');
     });
 
     it('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {
@@ -308,6 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             label: 'Europe West',
             isServiceManaged: true,
           },
+          { id: testPolicyId, label: 'Private location', isServiceManaged: false },
         ],
       };
 
@@ -341,14 +345,11 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = id;
         const toUpdate = {
           ...savedMonitor,
-          locations: [
-            ...savedMonitor.locations,
-            { id: testPolicyId, label: 'Private location', isServiceManaged: false },
-          ],
+          name: '!@#$%^&*()_++[\\-\\]- wow',
           urls: 'https://google.com',
         };
         await supertestWithoutAuth
-          .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+          .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(toUpdate)
@@ -357,13 +358,14 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not updated
-        expect(response.body.attributes.urls).eql(newMonitor.urls);
-        expect(response.body.attributes.locations).eql(newMonitor.locations);
+        expect(response.body.urls).not.eql(toUpdate.urls);
+        expect(response.body.urls).eql(newMonitor.urls);
+        expect(response.body.locations).eql(newMonitor.locations);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
         await supertest
-          .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .set('kbn-xsrf', 'true')
           .expect(200);
       }
@@ -392,7 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
         const response = await supertest
-          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .set('kbn-xsrf', 'true')
           .send(newMonitor)
           .expect(200);
@@ -404,7 +406,7 @@ export default function ({ getService }: FtrProviderContext) {
           urls: 'https://google.com',
         };
         await supertest
-          .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .set('kbn-xsrf', 'true')
           .send(toUpdate)
           .expect(200);
@@ -412,7 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
         const updatedResponse = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated
-        expect(updatedResponse.body.attributes.urls).eql(toUpdate.urls);
+        expect(updatedResponse.body.urls).eql(toUpdate.urls);
 
         // update a second time, ensures AAD was not corrupted
         const toUpdate2 = {
@@ -421,7 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .set('kbn-xsrf', 'true')
           .send(toUpdate2)
           .expect(200);
@@ -429,10 +431,10 @@ export default function ({ getService }: FtrProviderContext) {
         const updatedResponse2 = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated
-        expect(updatedResponse2.body.attributes.urls).eql(toUpdate2.urls);
+        expect(updatedResponse2.body.urls).eql(toUpdate2.urls);
       } finally {
         await supertest
-          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
       }

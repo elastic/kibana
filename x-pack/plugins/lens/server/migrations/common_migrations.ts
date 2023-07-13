@@ -571,3 +571,70 @@ export const commonMigratePartitionMetrics = (attributes: LensDocShape860<unknow
     layers: Array<{ metrics: string[] }>;
   }>;
 };
+
+export const commonMigrateMetricFormatter = (attributes: LensDocShape860<unknown>) => {
+  if (attributes.visualizationType !== 'lnsMetric') {
+    return attributes as LensDocShape860<unknown>;
+  }
+  if (!attributes.state.datasourceStates.formBased) {
+    return attributes as LensDocShape860<unknown>;
+  }
+
+  type LayersType = LensDocShape860['state']['datasourceStates']['formBased']['layers'];
+
+  const updatedLayersWithCompactFormatters: LayersType = {};
+  for (const [layerId, layer] of Object.entries(
+    attributes.state.datasourceStates.formBased.layers
+  )) {
+    const newColumns: Record<string, Record<string, unknown>> = {};
+    for (const [id, column] of Object.entries(layer.columns)) {
+      const params = column.params as {
+        format?: { id: string; params: Record<string, string | boolean> };
+      };
+      if (column.isBucketed) {
+        newColumns[id] = column;
+      } else {
+        // When value formatting is set to Default, assume nothing
+        // Bytes and bits are already compact
+        if (!params?.format || ['bytes', 'bits'].includes(params.format.id)) {
+          newColumns[id] = column;
+        } else {
+          // Metric only support numeric values
+          // suffix is not taken into account as it wasn't possible in metric visualization before this version
+          newColumns[id] = {
+            ...column,
+            params: {
+              ...params,
+              format: {
+                ...params?.format,
+                id: params?.format.id || 'number',
+                params: {
+                  ...params?.format?.params,
+                  compact: true,
+                },
+              },
+            },
+          };
+        }
+      }
+    }
+    updatedLayersWithCompactFormatters[layerId] = {
+      ...layer,
+      columns: newColumns,
+    };
+  }
+
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      datasourceStates: {
+        ...attributes.state.datasourceStates,
+        formBased: {
+          ...attributes.state.datasourceStates.formBased,
+          layers: updatedLayersWithCompactFormatters,
+        },
+      },
+    },
+  };
+};

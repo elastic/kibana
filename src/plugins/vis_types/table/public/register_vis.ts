@@ -14,10 +14,15 @@ import { tableVisTypeDefinition } from './table_vis_type';
 
 export const registerTableVis = async (
   core: CoreSetup<TablePluginStartDependencies>,
-  { expressions, visualizations }: TablePluginSetupDependencies
+  { expressions, visualizations }: TablePluginSetupDependencies,
+  readOnly: boolean
 ) => {
   const [coreStart, { usageCollection }] = await core.getStartServices();
   expressions.registerFunction(createTableVisFn);
   expressions.registerRenderer(getTableVisRenderer(coreStart, usageCollection));
-  visualizations.createBaseVisualization(tableVisTypeDefinition);
+  visualizations.createBaseVisualization({
+    ...tableVisTypeDefinition,
+    disableCreate: readOnly,
+    disableEdit: readOnly,
+  });
 };

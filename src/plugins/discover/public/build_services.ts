@@ -13,6 +13,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '@kbn/unified-discover';
 import type { DiscoverContextAppLocator } from '@kbn/unified-discover/src/context/types';
 import type { DiscoverSingleDocLocator } from '@kbn/unified-discover/src/doc/types';
+
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverAppLocator } from '../common';
@@ -31,13 +32,14 @@ export const buildServices = memoize(function (
   return {
     application: core.application,
     addBasePath: core.http.basePath.prepend,
+    analytics: core.analytics,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,
     data: plugins.data,
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
-    theme: plugins.charts.theme,
+    theme: core.theme,
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
@@ -68,7 +70,9 @@ export const buildServices = memoize(function (
     charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
+    savedSearch: plugins.savedSearch,
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
+    uiActions: plugins.uiActions,
   };
 });

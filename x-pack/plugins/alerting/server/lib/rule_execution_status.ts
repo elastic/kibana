@@ -11,6 +11,8 @@ import {
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
+  RawRule,
+  Rule,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
@@ -137,9 +139,18 @@ export function ruleExecutionStatusFromRaw(
   return executionStatus;
 }
 
-export const getRuleExecutionStatusPending = (lastExecutionDate: string) => ({
-  status: 'pending' as RuleExecutionStatuses,
+export const getRuleExecutionStatusPendingAttributes = (
+  lastExecutionDate: string
+): RawRule['executionStatus'] => ({
+  status: 'pending',
   lastExecutionDate,
   error: null,
   warning: null,
+});
+
+export const getRuleExecutionStatusPending = (
+  lastExecutionDate: string
+): Rule['executionStatus'] => ({
+  status: 'pending',
+  lastExecutionDate: new Date(lastExecutionDate),
 });

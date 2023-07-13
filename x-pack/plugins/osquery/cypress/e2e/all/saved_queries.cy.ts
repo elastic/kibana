@@ -76,8 +76,8 @@ describe('ALL - Saved queries', () => {
           },
         },
       }).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
     });
 
@@ -93,7 +93,7 @@ describe('ALL - Saved queries', () => {
 
     it('checks result type on prebuilt saved query', () => {
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+        props: { index: 1, item: { id: 'users_elastic' } },
       }).click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
@@ -102,7 +102,7 @@ describe('ALL - Saved queries', () => {
 
     it('user can run prebuilt saved query and add to case', () => {
       cy.react('PlayButtonComponent', {
-        props: { savedQuery: { attributes: { id: 'users_elastic' } } },
+        props: { savedQuery: { id: 'users_elastic' } },
       }).click();
 
       selectAllAgents();
@@ -114,7 +114,7 @@ describe('ALL - Saved queries', () => {
 
     it('user cant delete prebuilt saved query', () => {
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+        props: { index: 1, item: { id: 'users_elastic' } },
       }).click();
       cy.contains('Delete query').should('not.exist');
       navigateTo('/app/osquery/saved_queries');
@@ -124,7 +124,7 @@ describe('ALL - Saved queries', () => {
       findFormFieldByRowsLabelAndType('ID', 'query-to-delete');
       cy.contains('Save query').click();
       cy.react('CustomItemAction', {
-        props: { index: 1, item: { attributes: { id: 'query-to-delete' } } },
+        props: { index: 1, item: { id: 'query-to-delete' } },
       }).click();
       deleteAndConfirm('query');
     });

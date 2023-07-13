@@ -94,6 +94,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Used when navigating to particular alert results
    */
   isAlertResults?: boolean;
+  /**
+   * The Discover profile to use
+   */
+  profile?: string;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;

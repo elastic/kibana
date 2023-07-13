@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
+
 import {
   CommentAttributesBasicRt,
   CommentType,
@@ -28,8 +30,8 @@ import {
   BulkCreateCommentRequestRt,
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
-  FindCommentsArgsRt,
 } from '.';
+import { MAX_COMMENT_LENGTH, MAX_BULK_CREATE_ATTACHMENTS } from '../../../constants';
 
 describe('Comments', () => {
   describe('CommentAttributesBasicRt', () => {
@@ -324,6 +326,7 @@ describe('Comments', () => {
       type: CommentType.user,
       owner: 'cases',
     };
+
     it('has expected attributes in request', () => {
       const query = CommentRequestRt.decode(defaultRequest);
 
@@ -339,6 +342,68 @@ describe('Comments', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    describe('errors', () => {
+      describe('commentType: user', () => {
+        it('throws error when comment is too long', () => {
+          const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
+
+          expect(
+            PathReporter.report(
+              CommentRequestRt.decode({ ...defaultRequest, comment: longComment })
+            )
+          ).toContain('The length of the comment is too long. The maximum length is 30000.');
+        });
+
+        it('throws error when comment is empty', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...defaultRequest, comment: '' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
+
+        it('throws error when comment string of empty characters', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...defaultRequest, comment: '   ' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
+      });
+
+      describe('commentType: action', () => {
+        const request = {
+          type: CommentType.actions,
+          actions: {
+            targets: [
+              {
+                hostname: 'host1',
+                endpointId: '001',
+              },
+            ],
+            type: 'isolate',
+          },
+          owner: 'cases',
+        };
+
+        it('throws error when comment is too long', () => {
+          const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
+
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...request, comment: longComment }))
+          ).toContain('The length of the comment is too long. The maximum length is 30000.');
+        });
+
+        it('throws error when comment is empty', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...request, comment: '' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
+
+        it('throws error when comment string of empty characters', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...request, comment: '   ' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
       });
     });
   });
@@ -750,35 +815,6 @@ describe('Comments', () => {
     });
   });
 
-  describe('FindCommentsArgsRt', () => {
-    const defaultRequest = {
-      caseID: 'basic-case-id',
-      queryParams: {
-        page: 1,
-        perPage: 10,
-        sortOrder: 'asc',
-      },
-    };
-
-    it('has expected attributes in request', () => {
-      const query = FindCommentsArgsRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = FindCommentsArgsRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-  });
-
   describe('BulkCreateCommentRequestRt', () => {
     const defaultRequest = [
       {
@@ -805,6 +841,27 @@ describe('Comments', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    describe('errors', () => {
+      it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, () => {
+        const comment = {
+          comment: 'Solve this fast!',
+          type: CommentType.user,
+          owner: 'cases',
+        };
+        const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
+
+        expect(PathReporter.report(BulkCreateCommentRequestRt.decode(attachments))).toContain(
+          `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
+        );
+      });
+
+      it(`no errors when empty array of attachments`, () => {
+        expect(PathReporter.report(BulkCreateCommentRequestRt.decode([]))).toStrictEqual([
+          'No errors!',
+        ]);
       });
     });
   });

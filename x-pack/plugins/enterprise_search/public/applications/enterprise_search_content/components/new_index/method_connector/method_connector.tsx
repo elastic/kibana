@@ -47,7 +47,7 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
 
   const isNative =
     Boolean(NATIVE_CONNECTORS.find((connector) => connector.serviceType === serviceType)) &&
-    (isCloud || hasPlatinumLicense);
+    isCloud;
   const isBeta = Boolean(
     BETA_CONNECTORS.find((connector) => connector.serviceType === serviceType)
   );

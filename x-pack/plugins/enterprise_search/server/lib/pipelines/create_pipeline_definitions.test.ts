@@ -62,10 +62,11 @@ describe('formatMlPipelineBody util function', () => {
             {
               append: {
                 field: '_source._ingest.inference_errors',
+                allow_duplicates: false,
                 value: [
                   {
                     pipeline: pipelineName,
-                    message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+                    message: `Processor 'inference' in pipeline '${pipelineName}' failed for field '${sourceField}' with message '{{ _ingest.on_failure_message }}'`,
                     timestamp: '{{{ _ingest.timestamp }}}',
                   },
                 ],

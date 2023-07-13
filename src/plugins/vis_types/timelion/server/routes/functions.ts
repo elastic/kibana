@@ -13,7 +13,7 @@ import { LoadFunctions } from '../lib/load_functions';
 export function functionsRoute(router: IRouter, { functions }: { functions: LoadFunctions }) {
   router.get(
     {
-      path: '/api/timelion/functions',
+      path: '/internal/timelion/functions',
       validate: false,
     },
     async (context, request, response) => {

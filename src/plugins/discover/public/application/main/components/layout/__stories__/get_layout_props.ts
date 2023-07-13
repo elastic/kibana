@@ -15,6 +15,7 @@ import { createHashHistory } from 'history';
 import { buildDataTableRecordList } from '@kbn/unified-discover';
 import { esHits } from '@kbn/unified-discover/src/__mocks__/es_hits';
 import { services } from '@kbn/unified-discover/src/__mocks__/__storybook_mocks__/with_discover_services';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -23,7 +24,6 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../../services/discover_data_state_container';
-import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../discover_layout';
 import {
   DiscoverStateContainer,
@@ -84,7 +84,6 @@ const getCommonProps = () => {
   const savedSearchMock = {} as unknown as SavedSearch;
   return {
     inspectorAdapters: { requests: new RequestAdapter() },
-    navigateTo: action('navigate to somewhere nice'),
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
     resetSavedSearch: action('reset the saved search the query'),

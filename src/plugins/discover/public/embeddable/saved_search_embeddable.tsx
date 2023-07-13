@@ -38,9 +38,10 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { buildDataTableRecord, VIEW_MODE } from '@kbn/unified-discover';
 import type { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
 import { DiscoverServices } from '@kbn/unified-discover/src';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -257,7 +258,7 @@ export class SavedSearchEmbeddable
         this.searchProps!.isLoading = false;
         this.searchProps!.isPlainRecord = true;
         this.searchProps!.showTimeCol = false;
-        this.searchProps!.isSortEnabled = false;
+        this.searchProps!.isSortEnabled = true;
         return;
       }
 
@@ -398,6 +399,7 @@ export class SavedSearchEmbeddable
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
       },
+      cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
 
     const timeRangeSearchSource = searchSource.create();
@@ -555,17 +557,23 @@ export class SavedSearchEmbeddable
       return;
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
+    const query = this.savedSearch.searchSource.getField('query');
+
     const props = {
       savedSearch: this.savedSearch,
       searchProps,
       useLegacyTable,
+      query,
     };
     if (searchProps.services) {
+      const { getTriggerCompatibleActions } = searchProps.services.uiActions;
       ReactDOM.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
-              <SavedSearchEmbeddableComponent {...props} />
+              <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
+                <SavedSearchEmbeddableComponent {...props} />
+              </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>
         </I18nProvider>,

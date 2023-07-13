@@ -6,23 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useRef } from 'react';
+import { debounce } from 'lodash';
+import React, { FC, useState, useRef, useMemo, useEffect } from 'react';
 
-import {
-  EuiFieldNumber,
-  EuiText,
-  EuiInputPopover,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiInputPopover } from '@elastic/eui';
 
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { RangeSliderPopover, EuiDualRangeRef } from './range_slider_popover';
 
+import { ControlError } from '../../control_group/component/control_error_component';
+import { RangeValue } from '../../../common/range_slider/types';
+import { RangeSliderButton } from './range_slider_button';
 import './range_slider.scss';
-
-const INVALID_CLASS = 'rangeSliderAnchor__fieldNumber--invalid';
 
 export const RangeSliderControl: FC = () => {
   const rangeRef = useRef<EuiDualRangeRef>(null);
@@ -30,93 +25,38 @@ export const RangeSliderControl: FC = () => {
 
   const rangeSlider = useRangeSlider();
 
-  const min = rangeSlider.select((state) => state.componentState.min);
-  const max = rangeSlider.select((state) => state.componentState.max);
-  const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
-  const id = rangeSlider.select((state) => state.explicitInput.id);
-  const value = rangeSlider.select((state) => state.explicitInput.value) ?? ['', ''];
-  const isLoading = rangeSlider.select((state) => state.output.loading);
+  const error = rangeSlider.select((state) => state.componentState.error);
+  const value = rangeSlider.select((state) => state.explicitInput.value);
+  const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
 
-  const hasAvailableRange = min !== '' && max !== '';
-
-  const hasLowerBoundSelection = value[0] !== '';
-  const hasUpperBoundSelection = value[1] !== '';
-
-  const lowerBoundValue = parseFloat(value[0]);
-  const upperBoundValue = parseFloat(value[1]);
-  const minValue = parseFloat(min);
-  const maxValue = parseFloat(max);
-
-  // EuiDualRange can only handle integers as min/max
-  const roundedMin = hasAvailableRange ? Math.floor(minValue) : minValue;
-  const roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
-
-  const button = (
-    <button
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      className="rangeSliderAnchor__button"
-      data-test-subj={`range-slider-control-${id}`}
-    >
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            controlOnly
-            fullWidth
-            className={`rangeSliderAnchor__fieldNumber ${
-              hasLowerBoundSelection && isInvalid ? INVALID_CLASS : ''
-            }`}
-            value={hasLowerBoundSelection ? lowerBoundValue : ''}
-            onChange={(event) => {
-              rangeSlider.dispatch.setSelectedRange([
-                event.target.value,
-                isNaN(upperBoundValue) ? '' : String(upperBoundValue),
-              ]);
-            }}
-            disabled={isLoading}
-            placeholder={`${hasAvailableRange ? roundedMin : ''}`}
-            isInvalid={isInvalid}
-            data-test-subj="rangeSlider__lowerBoundFieldNumber"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText className="rangeSliderAnchor__delimiter" size="s" color="subdued">
-            →
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            controlOnly
-            fullWidth
-            className={`rangeSliderAnchor__fieldNumber ${
-              hasUpperBoundSelection && isInvalid ? INVALID_CLASS : ''
-            }`}
-            value={hasUpperBoundSelection ? upperBoundValue : ''}
-            onChange={(event) => {
-              rangeSlider.dispatch.setSelectedRange([
-                isNaN(lowerBoundValue) ? '' : String(lowerBoundValue),
-                event.target.value,
-              ]);
-            }}
-            disabled={isLoading}
-            placeholder={`${hasAvailableRange ? roundedMax : ''}`}
-            isInvalid={isInvalid}
-            data-test-subj="rangeSlider__upperBoundFieldNumber"
-          />
-        </EuiFlexItem>
-        {isLoading ? (
-          <EuiFlexItem
-            grow={false}
-            className="rangeSliderAnchor__spinner"
-            data-test-subj="range-slider-loading-spinner"
-          >
-            <EuiLoadingSpinner />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </button>
+  const debouncedOnChange = useMemo(
+    () =>
+      debounce((newRange: RangeValue) => {
+        rangeSlider.dispatch.setSelectedRange(newRange);
+      }, 750),
+    [rangeSlider.dispatch]
   );
 
-  return (
+  useEffect(() => {
+    debouncedOnChange(displayedValue);
+  }, [debouncedOnChange, displayedValue]);
+
+  useEffect(() => {
+    setDisplayedValue(value ?? ['', '']);
+  }, [value]);
+
+  const button = (
+    <RangeSliderButton
+      value={displayedValue}
+      onChange={setDisplayedValue}
+      isPopoverOpen={isPopoverOpen}
+      setIsPopoverOpen={setIsPopoverOpen}
+    />
+  );
+
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiInputPopover
       input={button}
       isOpen={isPopoverOpen}
@@ -125,7 +65,9 @@ export const RangeSliderControl: FC = () => {
       className="rangeSlider__popoverOverride"
       anchorClassName="rangeSlider__anchorOverride"
       panelClassName="rangeSlider__panelOverride"
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+      }}
       anchorPosition="downCenter"
       attachToAnchor={false}
       disableFocusTrap
@@ -133,7 +75,7 @@ export const RangeSliderControl: FC = () => {
         rangeRef.current?.onResize(width);
       }}
     >
-      <RangeSliderPopover rangeRef={rangeRef} />
+      <RangeSliderPopover rangeRef={rangeRef} value={displayedValue} onChange={setDisplayedValue} />
     </EuiInputPopover>
   );
 };

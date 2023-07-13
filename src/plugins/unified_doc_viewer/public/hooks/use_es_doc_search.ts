@@ -8,6 +8,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
@@ -24,10 +25,11 @@ export function useEsDocSearch({
   index,
   dataView,
   requestSource,
+  textBasedHits,
 }: DocProps): [ElasticRequestState, SearchHit | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<SearchHit | null>(null);
-  const { data, uiSettings } = useUnifiedDocViewerServices();
+  const { data, uiSettings, analytics } = useUnifiedDocViewerServices();
 
   // TODO: Use a const instead of hard-coding this value
   const useNewFieldsApi = useMemo(
@@ -36,6 +38,7 @@ export function useEsDocSearch({
   );
 
   const requestData = useCallback(async () => {
+    const singleDocFetchingStartTime = window.performance.now();
     try {
       const result = await lastValueFrom(
         data.search.search({
@@ -64,11 +67,27 @@ export function useEsDocSearch({
         setStatus(ElasticRequestState.Error);
       }
     }
-  }, [id, index, dataView, data.search, useNewFieldsApi, requestSource]);
+
+    if (analytics) {
+      const singleDocFetchingDuration = window.performance.now() - singleDocFetchingStartTime;
+      reportPerformanceMetricEvent(analytics, {
+        eventName: 'discoverSingleDocFetch',
+        duration: singleDocFetchingDuration,
+      });
+    }
+  }, [analytics, data.search, dataView, id, index, useNewFieldsApi, requestSource]);
 
   useEffect(() => {
-    requestData();
-  }, [requestData]);
+    if (textBasedHits) {
+      const selectedHit = textBasedHits?.find((r) => r.id === id);
+      if (selectedHit) {
+        setStatus(ElasticRequestState.Found);
+        setHit(selectedHit);
+      }
+    } else {
+      requestData();
+    }
+  }, [id, requestData, textBasedHits]);
 
   return [status, hit, requestData];
 }

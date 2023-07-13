@@ -8,19 +8,17 @@
 import { useState, useEffect } from 'react';
 
 import {
-  isClassificationEvaluateResponse,
-  ResultsSearchQuery,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common/analytics';
-import { isKeywordAndTextType } from '../../../../common/fields';
-import { RocCurveItem } from '../../../../../../../common/types/data_frame_analytics';
-
-import {
   getDependentVar,
   getPredictionFieldName,
-  loadEvalData,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsConfig,
+  type RocCurveItem,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+
+import { isClassificationEvaluateResponse, ResultsSearchQuery } from '../../../../common/analytics';
+import { loadEvalData } from '../../../../common';
 
 import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';
 
@@ -66,7 +64,7 @@ export const useRocCurve = (
       const errors: string[] = [];
 
       try {
-        requiresKeyword = isKeywordAndTextType(dependentVariable);
+        requiresKeyword = newJobCapsServiceAnalytics.isKeywordAndTextType(dependentVariable);
       } catch (e) {
         // Additional error handling due to missing field type is handled by loadEvalData
         console.error('Unable to load new field types', e); // eslint-disable-line no-console

@@ -32,12 +32,12 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
 
   before(() => {
     loadPack().then((data) => {
-      packId = data.id;
-      packName = data.attributes.name;
+      packId = data.saved_object_id;
+      packName = data.name;
     });
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
-      savedQueryName = data.attributes.id;
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
     loadLiveQuery().then((data) => {
       liveQueryQuery = data.queries?.[0].query;
@@ -59,7 +59,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains(savedQueryName);
     cy.contains('Add saved query').should('be.disabled');
     cy.react('PlayButtonComponent', {
-      props: { savedQuery: { attributes: { id: savedQueryName } } },
+      props: { savedQuery: { id: savedQueryName } },
     })
       .should('not.be.disabled')
       .click();
@@ -105,7 +105,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.getBySel('tablePagination-50-rows').click();
     cy.contains('Add pack').should('be.disabled');
     cy.react('ActiveStateSwitchComponent', {
-      props: { item: { attributes: { name: packName } } },
+      props: { item: { name: packName } },
     })
       .find('button')
       .should('be.disabled');

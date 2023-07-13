@@ -8,8 +8,7 @@
 import './_classification_exploration.scss';
 
 import React, { FC, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiButtonEmpty,
   EuiDataGrid,
@@ -20,6 +19,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  getDependentVar,
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { useCurrentThemeVars, useMlKibana } from '../../../../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
@@ -27,8 +35,6 @@ import { VegaChart } from '../../../../../components/vega_chart';
 import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
 
 import { ErrorCallout } from '../error_callout';
-import { DataFrameAnalyticsConfig, getDependentVar } from '../../../../common';
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';

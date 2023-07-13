@@ -17,8 +17,8 @@ import {
   CaseSeverity,
   decodeWithExcessOrThrow,
 } from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -40,19 +40,9 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     authorization: auth,
   } = clientArgs;
 
-  const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
-
-  if (query.title.length > MAX_TITLE_LENGTH) {
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
-    );
-  }
-
-  if (query.tags.some(isInvalidTag)) {
-    throw Boom.badRequest('A tag must contain at least one non-space character');
-  }
-
   try {
+    const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+
     const savedObjectID = SavedObjectsUtils.generateId();
 
     await auth.ensureAuthorized({
@@ -99,6 +89,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
         ...query,
         severity: query.severity ?? CaseSeverity.LOW,
         assignees: query.assignees ?? [],
+        category: query.category ?? null,
       },
       owner: newCase.attributes.owner,
     });

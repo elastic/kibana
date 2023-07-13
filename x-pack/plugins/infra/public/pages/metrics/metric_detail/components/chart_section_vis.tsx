@@ -14,11 +14,12 @@ import {
   niceTimeFormatter,
   Position,
   Settings,
-  TooltipValue,
   BrushEndListener,
+  TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -45,7 +46,7 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useIsDarkMode();
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
@@ -75,9 +76,9 @@ export const ChartSectionVis = ({
     },
     [onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
   );
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+      ({ value }) => moment(value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };
@@ -131,8 +132,8 @@ export const ChartSectionVis = ({
                 stack={stacked}
               />
             ))}
+          <Tooltip {...tooltipProps} />
           <Settings
-            tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
             theme={getChartTheme(isDarkMode)}
             showLegend

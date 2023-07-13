@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, ChangeEvent } from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -20,28 +20,45 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
+
+import { KibanaLogic } from '../../../shared/kibana';
+
+import {
+  AccessControlIndexSelector,
+  AccessControlSelectorOption,
+} from './components/access_control_index_selector/access_control_index_selector';
 import { DocumentList } from './components/document_list/document_list';
 import { DocumentsLogic, DEFAULT_PAGINATION } from './documents_logic';
-
 import { IndexNameLogic } from './index_name_logic';
-
-import './documents.scss';
 import { IndexViewLogic } from './index_view_logic';
+import './documents.scss';
 
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
-  const { ingestionMethod } = useValues(IndexViewLogic);
+  const { ingestionMethod, hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
   const { simplifiedMapping } = useValues(DocumentsLogic);
   const { makeRequest, makeMappingRequest, setSearchQuery } = useActions(DocumentsLogic);
+  const { productFeatures } = useValues(KibanaLogic);
+
+  const [selectedIndexType, setSelectedIndexType] =
+    useState<AccessControlSelectorOption['value']>('content-index');
+  const indexToShow =
+    selectedIndexType === 'content-index'
+      ? indexName
+      : indexName.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX);
+
+  const shouldShowAccessControlSwitcher =
+    hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
 
   useEffect(() => {
     makeRequest({
-      indexName,
+      indexName: indexToShow,
       pagination: DEFAULT_PAGINATION,
       query: '',
     });
-    makeMappingRequest({ indexName });
-  }, [indexName]);
+    makeMappingRequest({ indexName: indexToShow });
+  }, [indexToShow, indexName]);
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
@@ -58,6 +75,14 @@ export const SearchIndexDocuments: React.FC = () => {
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
+            {shouldShowAccessControlSwitcher && (
+              <EuiFlexItem grow={false}>
+                <AccessControlIndexSelector
+                  onChange={setSelectedIndexType}
+                  valueOfSelected={selectedIndexType}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiFieldSearch
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-searchDocuments`}

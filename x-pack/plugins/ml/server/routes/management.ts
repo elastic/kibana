@@ -139,7 +139,7 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
                     state: modelStatsMapped[id].deployment_stats?.state ?? '',
                     type: [
                       m.model_type,
-                      ...Object.keys(m.inference_config),
+                      ...Object.keys(m.inference_config!),
                       ...(m.tags.includes(BUILT_IN_MODEL_TAG) ? [BUILT_IN_MODEL_TYPE] : []),
                     ],
                     spaces: modelSpaces.trainedModels[id] ?? [],

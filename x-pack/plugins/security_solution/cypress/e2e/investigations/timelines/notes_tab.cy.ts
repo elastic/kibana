@@ -32,7 +32,7 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-const text = 'elastic';
+const text = 'system_indices_superuser';
 const link = 'https://www.elastic.co/';
 
 describe('Timeline notes tab', () => {
@@ -52,10 +52,12 @@ describe('Timeline notes tab', () => {
   });
 
   beforeEach(function () {
+    login();
     visitWithoutDateRange(TIMELINES_URL);
-    openTimelineById(this?.timelineId as string)
-      .then(() => goToNotesTab())
-      .then(() => cy.wait(1000));
+    openTimelineById(this?.timelineId as string);
+    goToNotesTab();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
   });
 
   it('should render mockdown', () => {

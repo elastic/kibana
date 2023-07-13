@@ -17,6 +17,7 @@ export interface DiscoverContextAppLocatorParams extends SerializableRecord {
   columns?: string[];
   filters?: Filter[];
   referrer: string; // discover main view url
+  profile?: string;
 }
 
 export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;

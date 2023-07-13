@@ -6,8 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
@@ -117,7 +117,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
       <EuiSpacer size="l" />
 
-      <Switch>
+      <Routes>
         <Route
           exact
           path={[`/${Section.DataStreams}`, `/${Section.DataStreams}/:dataStreamName?`]}
@@ -137,7 +137,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           ]}
           component={ComponentTemplateList}
         />
-      </Switch>
+      </Routes>
     </>
   );
 };

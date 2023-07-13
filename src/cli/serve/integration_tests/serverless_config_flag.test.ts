@@ -51,7 +51,7 @@ describe('cli serverless project type', () => {
       expect(error).toBe(undefined);
 
       expect(stdout.toString('utf8')).toContain(
-        'FATAL CLI ERROR Error: invalid --serverless value, must be one of es, oblt, security'
+        'FATAL CLI ERROR Error: invalid --serverless value, must be one of es, oblt, security'
       );
 
       expect(status).toBe(1);
@@ -60,10 +60,10 @@ describe('cli serverless project type', () => {
   );
 
   it.each(['es', 'oblt', 'security'])(
-    'writes the serverless project type %s in config/serverless.recent.yml',
+    'writes the serverless project type %s in config/serverless.recent.dev.yml',
     async (mode) => {
       // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
-      child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
+      child = spawn(process.execPath, ['scripts/kibana', '--dev', `--serverless=${mode}`], {
         cwd: REPO_ROOT,
       });
 
@@ -72,7 +72,7 @@ describe('cli serverless project type', () => {
       expect(found).not.toContain('FATAL');
 
       expect(
-        readFileSync(resolve(getConfigDirectory(), 'serverless.recent.yml'), 'utf-8')
+        readFileSync(resolve(getConfigDirectory(), 'serverless.recent.dev.yml'), 'utf-8')
       ).toContain(`serverless: ${mode}\n`);
     }
   );

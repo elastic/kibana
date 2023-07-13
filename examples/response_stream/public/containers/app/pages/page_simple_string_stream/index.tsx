@@ -34,7 +34,7 @@ export const PageSimpleStringStream: FC = () => {
   const { dispatch, errors, start, cancel, data, isRunning } = useFetchStream<
     ApiSimpleStringStream,
     typeof basePath
-  >(`${basePath}/internal/response_stream/simple_string_stream`, {
+  >(`${basePath}/internal/response_stream/simple_string_stream`, '1', {
     compressResponse,
     timeout: 500,
   });

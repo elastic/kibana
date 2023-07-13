@@ -15,6 +15,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -35,7 +36,6 @@ import {
   AdditionalContext,
   createScopedLogger,
   flattenAdditionalContext,
-  getAlertUrl,
   getContextForRecoveredAlerts,
   getViewInInventoryAppUrl,
   UNGROUPED_FACTORY_KEY,
@@ -162,8 +162,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       }
       const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-      const [, , { logViews }] = await libs.getStartServices();
-      const logQueryFields: LogQueryFields | undefined = await logViews
+      const [, { logsShared }] = await libs.getStartServices();
+      const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
         .getClient(savedObjectsClient, esClient)
         .getResolvedLogView({
           type: 'log-view-reference',

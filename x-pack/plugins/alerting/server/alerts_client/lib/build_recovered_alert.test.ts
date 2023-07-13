@@ -34,6 +34,10 @@ const alertRule: AlertRule = {
 };
 const existingActiveAlert = {
   '@timestamp': '2023-03-28T12:27:28.159Z',
+  event: {
+    action: 'active',
+    kind: 'signal',
+  },
   kibana: {
     alert: {
       action_group: 'default',
@@ -41,6 +45,7 @@ const existingActiveAlert = {
         us: '0',
       },
       flapping: false,
+      flapping_history: [true, false],
       instance: {
         id: 'alert-A',
       },
@@ -48,34 +53,16 @@ const existingActiveAlert = {
       start: '2023-03-28T12:27:28.159Z',
       rule,
       status: 'active',
+      time_range: {
+        gte: '2023-03-28T12:27:28.159Z',
+      },
       uuid: 'abcdefg',
+      workflow_status: 'open',
     },
     space_ids: ['default'],
+    version: '8.8.1',
   },
-};
-
-const existingRecoveredAlert = {
-  '@timestamp': '2023-03-28T12:27:28.159Z',
-  kibana: {
-    alert: {
-      action_group: 'default',
-      duration: {
-        us: '0',
-      },
-      end: '2023-03-28T12:27:28.159Z',
-      flapping: false,
-      flapping_history: [true, false, false],
-      instance: {
-        id: 'alert-A',
-      },
-      maintenance_window_ids: ['maint-x'],
-      start: '2023-03-27T12:27:28.159Z',
-      rule,
-      status: 'recovered',
-      uuid: 'abcdefg',
-    },
-    space_ids: ['default'],
-  },
+  tags: ['rule-', '-tags'],
 };
 
 describe('buildRecoveredAlert', () => {
@@ -92,9 +79,14 @@ describe('buildRecoveredAlert', () => {
         rule: alertRule,
         recoveryActionGroup: 'recovered',
         timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
+      event: {
+        action: 'close',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'recovered',
@@ -103,6 +95,7 @@ describe('buildRecoveredAlert', () => {
           },
           end: '2023-03-30T12:27:28.159Z',
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -110,10 +103,17 @@ describe('buildRecoveredAlert', () => {
           start: '2023-03-28T12:27:28.159Z',
           rule,
           status: 'recovered',
+          time_range: {
+            lte: '2023-03-30T12:27:28.159Z',
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
     });
   });
 
@@ -144,9 +144,14 @@ describe('buildRecoveredAlert', () => {
           },
         },
         timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
+      event: {
+        action: 'close',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
           action_group: 'NoLongerActive',
@@ -155,6 +160,7 @@ describe('buildRecoveredAlert', () => {
           },
           end: '2023-03-30T12:27:28.159Z',
           flapping: false,
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
@@ -168,49 +174,295 @@ describe('buildRecoveredAlert', () => {
             },
           },
           status: 'recovered',
+          time_range: {
+            lte: '2023-03-30T12:27:28.159Z',
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      tags: ['rule-', '-tags'],
     });
   });
 
-  test('should update already recovered alert document with updated flapping history but not maintenance window ids', () => {
+  test('should update active alert document with updated payload if specified', () => {
     const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
-    legacyAlert.scheduleActions('default');
-    legacyAlert.setFlappingHistory([false, false, true, true]);
+    legacyAlert
+      .scheduleActions('default')
+      .replaceState({ end: '2023-03-30T12:27:28.159Z', duration: '36000000' });
     legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
 
     expect(
-      buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-        alert: existingRecoveredAlert,
+      buildRecoveredAlert<
+        { count: number; url: string; kibana?: { alert?: { nested_field?: number } } },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        alert: {
+          ...existingActiveAlert,
+          count: 1,
+          url: `https://url1`,
+        },
         legacyAlert,
-        rule: alertRule,
-        recoveryActionGroup: 'recovered',
+        recoveryActionGroup: 'NoLongerActive',
+        payload: {
+          count: 2,
+          url: `https://url2`,
+          kibana: { alert: { nested_field: 2 } },
+        },
+        rule: {
+          kibana: {
+            alert: {
+              rule: {
+                ...rule,
+                name: 'updated-rule-name',
+                parameters: {
+                  bar: false,
+                },
+              },
+            },
+            space_ids: ['default'],
+          },
+        },
         timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
       })
     ).toEqual({
       '@timestamp': '2023-03-29T12:27:28.159Z',
+      count: 2,
+      event: {
+        action: 'close',
+        kind: 'signal',
+      },
       kibana: {
         alert: {
-          action_group: 'recovered',
+          action_group: 'NoLongerActive',
           duration: {
-            us: '0',
+            us: '36000000',
           },
-          end: '2023-03-28T12:27:28.159Z',
+          end: '2023-03-30T12:27:28.159Z',
           flapping: false,
-          flapping_history: [false, false, true, true],
+          flapping_history: [],
           instance: {
             id: 'alert-A',
           },
-          maintenance_window_ids: ['maint-x'],
-          start: '2023-03-27T12:27:28.159Z',
-          rule,
+          maintenance_window_ids: ['maint-1', 'maint-321'],
+          nested_field: 2,
+          start: '2023-03-28T12:27:28.159Z',
+          rule: {
+            ...rule,
+            name: 'updated-rule-name',
+            parameters: {
+              bar: false,
+            },
+          },
           status: 'recovered',
+          time_range: {
+            lte: '2023-03-30T12:27:28.159Z',
+            gte: '2023-03-28T12:27:28.159Z',
+          },
           uuid: 'abcdefg',
+          workflow_status: 'open',
         },
         space_ids: ['default'],
+        version: '8.9.0',
       },
+      url: `https://url2`,
+      tags: ['rule-', '-tags'],
+    });
+  });
+
+  test('should merge and de-dupe tags from existing alert, reported recovery payload and rule tags', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert
+      .scheduleActions('default')
+      .replaceState({ end: '2023-03-30T12:27:28.159Z', duration: '36000000' });
+    legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+
+    expect(
+      buildRecoveredAlert<
+        {
+          count: number;
+          url: string;
+          kibana?: { alert?: { nested_field?: number } };
+          tags?: string[];
+        },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        alert: {
+          ...existingActiveAlert,
+          tags: ['active-alert-tag', 'rule-'],
+          count: 1,
+          url: `https://url1`,
+        },
+        legacyAlert,
+        recoveryActionGroup: 'NoLongerActive',
+        payload: {
+          count: 2,
+          url: `https://url2`,
+          kibana: { alert: { nested_field: 2 } },
+          tags: ['-tags', 'reported-recovery-tag'],
+        },
+        rule: {
+          kibana: {
+            alert: {
+              rule: {
+                ...rule,
+                name: 'updated-rule-name',
+                parameters: {
+                  bar: false,
+                },
+              },
+            },
+            space_ids: ['default'],
+          },
+        },
+        timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-29T12:27:28.159Z',
+      count: 2,
+      event: {
+        action: 'close',
+        kind: 'signal',
+      },
+      kibana: {
+        alert: {
+          action_group: 'NoLongerActive',
+          duration: {
+            us: '36000000',
+          },
+          end: '2023-03-30T12:27:28.159Z',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: ['maint-1', 'maint-321'],
+          nested_field: 2,
+          start: '2023-03-28T12:27:28.159Z',
+          rule: {
+            ...rule,
+            name: 'updated-rule-name',
+            parameters: {
+              bar: false,
+            },
+          },
+          status: 'recovered',
+          time_range: {
+            lte: '2023-03-30T12:27:28.159Z',
+            gte: '2023-03-28T12:27:28.159Z',
+          },
+          uuid: 'abcdefg',
+          workflow_status: 'open',
+        },
+        space_ids: ['default'],
+        version: '8.9.0',
+      },
+      url: `https://url2`,
+      tags: ['-tags', 'reported-recovery-tag', 'active-alert-tag', 'rule-'],
+    });
+  });
+
+  test('should update active alert document with updated payload if specified but not overwrite any framework fields', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert
+      .scheduleActions('default')
+      .replaceState({ end: '2023-03-30T12:27:28.159Z', duration: '36000000' });
+    legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+
+    expect(
+      buildRecoveredAlert<
+        {
+          count: number;
+          url: string;
+          kibana?: { alert?: { action_group: string; nested_field?: number } };
+        },
+        {},
+        {},
+        'default',
+        'recovered'
+      >({
+        alert: {
+          ...existingActiveAlert,
+          count: 1,
+          url: `https://url1`,
+        },
+        legacyAlert,
+        recoveryActionGroup: 'NoLongerActive',
+        payload: {
+          count: 2,
+          url: `https://url2`,
+          kibana: { alert: { action_group: 'bad action group', nested_field: 2 } },
+        },
+        rule: {
+          kibana: {
+            alert: {
+              rule: {
+                ...rule,
+                name: 'updated-rule-name',
+                parameters: {
+                  bar: false,
+                },
+              },
+            },
+            space_ids: ['default'],
+          },
+        },
+        timestamp: '2023-03-29T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      '@timestamp': '2023-03-29T12:27:28.159Z',
+      count: 2,
+      event: {
+        action: 'close',
+        kind: 'signal',
+      },
+      kibana: {
+        alert: {
+          action_group: 'NoLongerActive',
+          duration: {
+            us: '36000000',
+          },
+          end: '2023-03-30T12:27:28.159Z',
+          flapping: false,
+          flapping_history: [],
+          instance: {
+            id: 'alert-A',
+          },
+          maintenance_window_ids: ['maint-1', 'maint-321'],
+          nested_field: 2,
+          start: '2023-03-28T12:27:28.159Z',
+          rule: {
+            ...rule,
+            name: 'updated-rule-name',
+            parameters: {
+              bar: false,
+            },
+          },
+          status: 'recovered',
+          time_range: {
+            lte: '2023-03-30T12:27:28.159Z',
+            gte: '2023-03-28T12:27:28.159Z',
+          },
+          uuid: 'abcdefg',
+          workflow_status: 'open',
+        },
+        space_ids: ['default'],
+        version: '8.9.0',
+      },
+      url: `https://url2`,
+      tags: ['rule-', '-tags'],
     });
   });
 });

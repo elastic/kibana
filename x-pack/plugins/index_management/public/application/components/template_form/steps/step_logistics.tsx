@@ -195,7 +195,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle>
-              <h2>
+              <h2 data-test-subj="stepTitle">
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
                   defaultMessage="Logistics"

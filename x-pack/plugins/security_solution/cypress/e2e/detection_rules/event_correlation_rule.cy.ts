@@ -65,9 +65,13 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 describe('EQL rules', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
     deleteAlertsAndRules();
   });
+
   describe('Detection rules, EQL', () => {
     const rule = getEqlRule();
     const expectedUrls = rule.references?.join('');
@@ -111,7 +115,7 @@ describe('EQL rules', () => {
         });
         getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       });
-      cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click();
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
@@ -155,6 +159,7 @@ describe('EQL rules', () => {
     });
 
     it('Creates and enables a new EQL rule with a sequence', function () {
+      login();
       visit(RULE_CREATION);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);

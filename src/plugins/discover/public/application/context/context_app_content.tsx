@@ -15,6 +15,7 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '@kbn/unified-discover';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer';
 import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
@@ -75,7 +76,7 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
-  const { uiSettings: config } = useDiscoverServices();
+  const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
@@ -145,28 +146,30 @@ export function ContextAppContent({
       )}
       {!isLegacy && (
         <div className="dscDocsGrid">
-          <DiscoverGridMemoized
-            ariaLabelledBy="surDocumentsAriaLabel"
-            columns={columns}
-            rows={rows}
-            dataView={dataView}
-            expandedDoc={expandedDoc}
-            isLoading={isAnchorLoading}
-            sampleSize={0}
-            sort={sort as SortOrder[]}
-            isSortEnabled={false}
-            showTimeCol={showTimeCol}
-            useNewFieldsApi={useNewFieldsApi}
-            isPaginationEnabled={false}
-            controlColumnIds={controlColumnIds}
-            setExpandedDoc={setExpandedDoc}
-            onFilter={addFilter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-            onSetColumns={onSetColumns}
-            DocumentView={DiscoverGridFlyout}
-            services={services}
-          />
+          <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
+            <DiscoverGridMemoized
+              ariaLabelledBy="surDocumentsAriaLabel"
+              columns={columns}
+              rows={rows}
+              dataView={dataView}
+              expandedDoc={expandedDoc}
+              isLoading={isAnchorLoading}
+              sampleSize={0}
+              sort={sort as SortOrder[]}
+              isSortEnabled={false}
+              showTimeCol={showTimeCol}
+              useNewFieldsApi={useNewFieldsApi}
+              isPaginationEnabled={false}
+              controlColumnIds={controlColumnIds}
+              setExpandedDoc={setExpandedDoc}
+              onFilter={addFilter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              onSetColumns={onSetColumns}
+              DocumentView={DiscoverGridFlyout}
+              services={services}
+            />
+          </CellActionsProvider>
         </div>
       )}
       <EuiHorizontalRule margin="xs" />

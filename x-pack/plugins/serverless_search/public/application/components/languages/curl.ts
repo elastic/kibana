@@ -24,7 +24,7 @@ export const curlDefinition: LanguageDefinition = {
   configureClient: ({ apiKey, url }) => `export ES_URL="${url}"
 export API_KEY="${apiKey}"`,
   docLink: docLinks.apiIntro,
-  iconType: 'cURL.svg',
+  iconType: 'curl.svg',
   id: Languages.CURL,
   ingestData: `curl -X POST "\$\{ES_URL\}/_bulk?pretty" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
@@ -43,6 +43,13 @@ export API_KEY="${apiKey}"`,
 { "index" : { "_index" : "books" } }
 {"name": "The Handmaid'"'"'s Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
 '`,
+  ingestDataIndex: ({ apiKey, url, indexName }) => `curl -X POST ${url}/_bulk?pretty \\
+  -H "Authorization: ApiKey ${apiKey}" \\
+  -H "Content-Type: application/json" \\
+  -d'
+{ "index" : { "_index" : "${indexName ?? 'index_name'}" } }
+{"name": "foo", "title": "bar" }
+`,
   installClient: `# if cURL is not already installed on your system
 # then install it with the package manager of your choice
 

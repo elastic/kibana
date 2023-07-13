@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import { JobMapNodeTypes } from '../../../common/constants/data_frame_analytics';
-import {
+import type {
+  JobMapNodeTypes,
   MapElements,
   AnalyticsMapNodeElement,
   AnalyticsMapEdgeElement,
-} from '../../../common/types/data_frame_analytics';
-export type {
-  MapElements,
-  AnalyticsMapReturnType,
-  AnalyticsMapNodeElement,
-  AnalyticsMapEdgeElement,
-} from '../../../common/types/data_frame_analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 interface AnalyticsMapArg {
   analyticsId: string;

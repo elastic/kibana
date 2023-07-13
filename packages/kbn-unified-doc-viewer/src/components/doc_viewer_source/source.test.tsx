@@ -7,14 +7,16 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { DocViewerSource } from './source';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord, EsHitRecord } from '@kbn/unified-discover';
 import { ElasticRequestState, JsonCodeEditorCommon } from '../..';
-import { DocViewerSource } from './source';
+import { of } from 'rxjs';
 
 const mockDataView = {
   getComputedFields: () => [],
@@ -33,6 +35,9 @@ const services = {
   },
   data: {
     dataViewService: mockDataViewService,
+  },
+  theme: {
+    theme$: of({ darkMode: false }),
   },
 };
 
@@ -63,7 +68,7 @@ describe('Source Viewer component', () => {
           width={123}
           hasLineNumbers={true}
           useDocExplorer={false}
-          requestState={ElasticRequestState.Error}
+          requestState={ElasticRequestState.Loading}
           hit={null}
           onRefresh={() => {}}
         />

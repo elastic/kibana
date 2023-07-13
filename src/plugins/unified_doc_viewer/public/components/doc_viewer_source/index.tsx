@@ -10,12 +10,14 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { DocViewerSource } from '@kbn/unified-doc-viewer';
+import { DataTableRecord } from '@kbn/unified-discover';
 import { useEsDocSearch } from '../../hooks';
 
 export interface SourceViewerProps {
   id: string;
   index: string;
   dataView: DataView;
+  textBasedHits?: DataTableRecord[];
   hasLineNumbers: boolean;
   width?: number;
   useNewFieldsApi: boolean;
@@ -29,11 +31,13 @@ export default function ({ id, index, dataView, useNewFieldsApi, ...props }: Sou
     id,
     index,
     dataView,
+    textBasedHits,
     requestSource: useNewFieldsApi,
   });
   return (
     <DocViewerSource
       CodeEditor={CodeEditor}
+      textBasedHits={textBasedHits}
       requestState={reqState}
       hit={hit}
       onRefresh={requestData}

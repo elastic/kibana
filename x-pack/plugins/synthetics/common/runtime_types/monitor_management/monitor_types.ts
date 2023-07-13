@@ -11,7 +11,6 @@ import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
-  CodeEditorModeCodec,
   DataStream,
   DataStreamCodec,
   FormMonitorTypeCodec,
@@ -22,6 +21,7 @@ import {
   SourceTypeCodec,
   TLSVersionCodec,
   VerificationModeCodec,
+  RequestBodyCheckCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
@@ -195,7 +195,7 @@ export const HTTPSensitiveAdvancedFieldsCodec = t.intersection([
     [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: t.array(t.string),
     [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: t.array(t.string),
     [ConfigKey.RESPONSE_HEADERS_CHECK]: t.record(t.string, t.string),
-    [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: CodeEditorModeCodec }),
+    [ConfigKey.REQUEST_BODY_CHECK]: RequestBodyCheckCodec,
     [ConfigKey.REQUEST_HEADERS_CHECK]: t.record(t.string, t.string),
     [ConfigKey.USERNAME]: t.string,
   }),
@@ -354,22 +354,12 @@ export const HeartbeatConfigCodec = t.intersection([
   }),
 ]);
 
-export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
-  EncryptedSyntheticsMonitorCodec,
-  t.interface({ id: t.string }),
-]);
-
-// TODO: Remove EncryptedSyntheticsMonitorWithIdCodec (as well as SyntheticsMonitorWithIdCodec if possible) along with respective TypeScript types in favor of EncryptedSyntheticsSavedMonitorCodec
 export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
-
-export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
-  typeof EncryptedSyntheticsMonitorWithIdCodec
->;
 
 export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
 
@@ -385,18 +375,7 @@ export const MonitorDefaultsCodec = t.interface({
 export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
-  monitors: t.array(
-    t.intersection([
-      t.interface({
-        id: t.string,
-        attributes: EncryptedSyntheticsMonitorCodec,
-      }),
-      t.partial({
-        updated_at: t.string,
-        created_at: t.string,
-      }),
-    ])
-  ),
+  monitors: t.array(EncryptedSyntheticsSavedMonitorCodec),
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
@@ -416,6 +395,7 @@ export const MonitorOverviewItemCodec = t.intersection([
     isStatusAlertEnabled: t.boolean,
     type: t.string,
     tags: t.array(t.string),
+    schedule: t.string,
   }),
   t.partial({
     projectId: t.string,

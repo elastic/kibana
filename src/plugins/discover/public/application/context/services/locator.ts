@@ -15,6 +15,7 @@ import {
   DiscoverContextAppLocatorDependencies,
   DiscoverContextAppLocatorParams,
 } from '@kbn/unified-discover/src/context/types';
+import { addProfile } from '../../../../common/customizations';
 
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 
@@ -47,9 +48,21 @@ export class DiscoverContextAppLocatorDefinition
       dataViewId = index;
     }
 
-    let path = `#/context/${dataViewId}/${rowId}`;
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    let path = '#/';
+
+    if (params.profile) {
+      path = addProfile(path, params.profile);
+    }
+
+    path = `${path}context/${dataViewId}/${encodeURIComponent(rowId)}`;
+
+    if (Object.keys(queryState).length) {
+      path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
+    }
+
+    if (Object.keys(appState).length) {
+      path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    }
 
     return {
       app: 'discover',

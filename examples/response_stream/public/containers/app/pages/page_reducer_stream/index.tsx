@@ -51,6 +51,7 @@ export const PageReducerStream: FC = () => {
     typeof basePath
   >(
     `${basePath}/internal/response_stream/reducer_stream`,
+    '1',
     { compressResponse, simulateErrors },
     { reducer: reducerStreamReducer, initialState }
   );

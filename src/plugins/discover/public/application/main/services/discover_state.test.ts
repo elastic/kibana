@@ -40,6 +40,14 @@ const startSync = (appState: DiscoverAppStateContainer) => {
 async function getState(url: string = '/', savedSearch?: SavedSearch) {
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
+
+  discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
+    ...dataViewMock,
+    isPersisted: () => false,
+    id: 'ad-hoc-id',
+    title: 'test',
+  });
+
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
@@ -178,18 +186,21 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
   const history = createBrowserHistory();
   const mockDataPlugin = dataPluginMock.createStartContract();
+  const discoverStateContainer = getDiscoverStateContainer({
+    services: discoverServiceMock,
+    history,
+  });
+  discoverStateContainer.appState.update({
+    index: savedSearchMock.searchSource.getField('index')!.id,
+  });
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
-    appStateContainer: getDiscoverStateContainer({
-      savedSearch: savedSearchMock,
-      services: discoverServiceMock,
-      history,
-    }).appState,
+    appStateContainer: discoverStateContainer.appState,
     getSavedSearch: () => mockSavedSearch,
   });
 
   describe('session name', () => {
-    test('No saved search returns default name', async () => {
+    test('No persisted saved search returns default name', async () => {
       expect(await searchSessionInfoProvider.getName()).toBe('Discover');
     });
 
@@ -206,6 +217,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
 
   describe('session state', () => {
     test('restoreState has sessionId and initialState has not', async () => {
+      mockSavedSearch = savedSearchMock;
       const searchSessionId = 'id';
       (mockDataPlugin.search.session.getSessionId as jest.Mock).mockImplementation(
         () => searchSessionId
@@ -216,6 +228,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
     });
 
     test('restoreState has absoluteTimeRange', async () => {
+      mockSavedSearch = savedSearchMock;
       const relativeTime = 'relativeTime';
       const absoluteTime = 'absoluteTime';
       (mockDataPlugin.query.timefilter.timefilter.getTime as jest.Mock).mockImplementation(
@@ -230,12 +243,28 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
     });
 
     test('restoreState has paused autoRefresh', async () => {
+      mockSavedSearch = savedSearchMock;
       const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.refreshInterval).toBe(undefined);
       expect(restoreState.refreshInterval).toEqual({
         pause: true,
         value: 0,
       });
+    });
+
+    test('restoreState has persisted data view', async () => {
+      mockSavedSearch = savedSearchMock;
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
+      expect(initialState.dataViewSpec).toEqual(undefined);
+      expect(restoreState.dataViewSpec).toEqual(undefined);
+      expect(initialState.dataViewId).toEqual(savedSearchMock.searchSource.getField('index')?.id);
+    });
+
+    test('restoreState has temporary data view', async () => {
+      mockSavedSearch = savedSearchAdHoc;
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
+      expect(initialState.dataViewSpec).toEqual({});
+      expect(restoreState.dataViewSpec).toEqual({});
     });
   });
 });
@@ -638,16 +667,10 @@ describe('Test discover state actions', () => {
   });
 
   test('onCreateDefaultAdHocDataView', async () => {
-    discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
-      ...dataViewMock,
-      isPersisted: () => false,
-      id: 'ad-hoc-id',
-      title: 'test',
-    });
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
-    await state.actions.onCreateDefaultAdHocDataView('ad-hoc-test');
+    await state.actions.onCreateDefaultAdHocDataView({ title: 'ad-hoc-test' });
     expect(state.appState.getState().index).toBe('ad-hoc-id');
     expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();

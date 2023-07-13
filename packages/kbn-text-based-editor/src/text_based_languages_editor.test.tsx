@@ -16,18 +16,23 @@ import {
   TextBasedLanguagesEditor,
   TextBasedLanguagesEditorProps,
 } from './text_based_languages_editor';
+import { of } from 'rxjs';
 
 describe('TextBasedLanguagesEditor', () => {
   const uiConfig: Record<string, any> = {};
   const uiSettings = {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
+  const theme = {
+    theme$: of({ darkMode: false }),
+  };
 
   const services = {
     uiSettings,
     settings: {
       client: uiSettings,
     },
+    theme,
   };
 
   function renderTextBasedLanguagesEditorComponent(testProps: TextBasedLanguagesEditorProps) {
@@ -60,6 +65,33 @@ describe('TextBasedLanguagesEditor', () => {
       expect(
         component.find('[data-test-subj="TextBasedLangEditor-inline-lines-badge"]').length
       ).not.toBe(0);
+    });
+  });
+
+  it('should  render the date info with no @timestamp detected', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
+      ).toStrictEqual('@timestamp not detected');
+    });
+  });
+
+  it('should render the date info with @timestamp detected if detectTimestamp is true', async () => {
+    const newProps = {
+      ...props,
+      isCodeEditorExpanded: true,
+      detectTimestamp: true,
+    };
+    await act(async () => {
+      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
+      expect(
+        component.find('[data-test-subj="TextBasedLangEditor-date-info"]').at(0).text()
+      ).toStrictEqual('@timestamp detected');
     });
   });
 

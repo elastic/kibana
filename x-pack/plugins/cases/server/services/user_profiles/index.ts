@@ -70,11 +70,11 @@ export class UserProfileService {
   }
 
   public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
-    const params = decodeWithExcessOrThrow(SuggestUserProfilesRequestRt)(request.body);
-
-    const { name, size, owners } = params;
-
     try {
+      const params = decodeWithExcessOrThrow(SuggestUserProfilesRequestRt)(request.body);
+
+      const { name, size, owners } = params;
+
       this.validateInitialization();
 
       const licensingService = new LicensingService(
@@ -110,7 +110,7 @@ export class UserProfileService {
     } catch (error) {
       throw createCaseError({
         logger: this.logger,
-        message: `Failed to retrieve suggested user profiles in service for name: ${name} owners: [${owners}]: ${error}`,
+        message: `Failed to retrieve suggested user profiles in service: ${error}`,
         error,
       });
     }

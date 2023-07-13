@@ -198,4 +198,24 @@ describe('mustache lambdas', () => {
       expect(result).toMatch(/^error rendering mustache template .*/);
     });
   });
+
+  describe('FormatNumber', () => {
+    it('valid format string is successful', () => {
+      const num = '42.0';
+      const template = dedent`
+          {{#FormatNumber}} {{num}}; en-US; style: currency, currency: EUR  {{/FormatNumber}}
+        `.trim();
+
+      expect(renderMustacheString(template, { num }, 'none')).toEqual('€42.00');
+    });
+
+    it('renders an error message on errors', () => {
+      const num = 'nope;;';
+      const template = dedent`
+          {{#FormatNumber}} {{num}} {{/FormatNumber}}
+        `.trim();
+
+      expect(renderMustacheString(template, { num }, 'none')).toEqual(`invalid number: 'nope'`);
+    });
+  });
 });

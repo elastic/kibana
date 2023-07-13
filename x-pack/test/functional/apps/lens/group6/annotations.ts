@@ -9,10 +9,20 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'tagManagement',
+    'settings',
+    'savedObjects',
+  ]);
   const find = getService('find');
   const retry = getService('retry');
+  const toastsService = getService('toasts');
   const testSubjects = getService('testSubjects');
+  const listingTable = getService('listingTable');
   const from = 'Sep 19, 2015 @ 06:31:44.000';
   const to = 'Sep 23, 2015 @ 18:31:44.000';
 
@@ -100,6 +110,94 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+    });
+
+    describe('library annotation groups', () => {
+      const ANNOTATION_GROUP_TITLE = 'library annotation group';
+      const FIRST_VIS_TITLE = 'first visualization';
+      const SECOND_VIS_TITLE = 'second visualization';
+
+      it('should save annotation group to library', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+
+        await PageObjects.lens.goToTimeRange();
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
+
+        await PageObjects.lens.createLayer('annotations');
+
+        await PageObjects.lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
+
+        await PageObjects.visualize.setSaveModalValues(ANNOTATION_GROUP_TITLE, {
+          description: 'my description',
+        });
+
+        await testSubjects.click('savedObjectTagSelector');
+        await testSubjects.click(`tagSelectorOption-action__create`);
+
+        const { tagModal } = PageObjects.tagManagement;
+
+        expect(await tagModal.isOpened()).to.be(true);
+
+        await tagModal.fillForm(
+          {
+            name: 'my-new-tag',
+            color: '#FFCC33',
+            description: '',
+          },
+          {
+            submit: true,
+          }
+        );
+
+        expect(await tagModal.isOpened()).to.be(false);
+
+        await testSubjects.click('confirmSaveSavedObjectButton');
+
+        const toastContents = await toastsService.getToastContent(1);
+
+        expect(toastContents).to.be(
+          `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`
+        );
+
+        await PageObjects.lens.save(FIRST_VIS_TITLE);
+
+        // TODO test that saved object info gets populated on subsequent save
+      });
+
+      it('should add annotation group from library', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+
+        await PageObjects.lens.goToTimeRange();
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
+
+        await PageObjects.lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
+
+        retry.try(async () => {
+          expect(await PageObjects.lens.getLayerCount()).to.be(2);
+        });
+
+        await PageObjects.lens.save(SECOND_VIS_TITLE);
+      });
+
+      it('should remove layer for deleted annotation group', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.selectAnnotationsTab();
+        await listingTable.deleteItem(ANNOTATION_GROUP_TITLE);
+        await PageObjects.visualize.selectVisualizationsTab();
+        await PageObjects.visualize.loadSavedVisualization(FIRST_VIS_TITLE, {
+          navigateToVisualize: false,
+        });
+
+        retry.try(async () => {
+          expect(await PageObjects.lens.getLayerCount()).to.be(1);
+        });
+      });
+
+      // TODO check various saving configurations (linked layer, clean by-ref, revert)
+
+      // TODO check annotation library, including delete flow
     });
   });
 }

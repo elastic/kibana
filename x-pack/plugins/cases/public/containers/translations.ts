@@ -61,3 +61,10 @@ export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
 export const FILE_DELETE_SUCCESS = i18n.translate('xpack.cases.containers.deleteSuccess', {
   defaultMessage: 'File deleted successfully',
 });
+
+export const CATEGORIES_ERROR_TITLE = i18n.translate(
+  'xpack.cases.containers.categoriesErrorTitle',
+  {
+    defaultMessage: 'Error fetching categories',
+  }
+);

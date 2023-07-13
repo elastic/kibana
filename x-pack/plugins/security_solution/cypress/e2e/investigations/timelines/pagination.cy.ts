@@ -28,10 +28,10 @@ describe('Pagination', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('timeline');
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();

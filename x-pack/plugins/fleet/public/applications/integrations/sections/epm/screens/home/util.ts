@@ -8,7 +8,7 @@
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import { INTEGRATION_CATEGORY_DISPLAY } from '@kbn/custom-integrations-plugin/common';
 
-import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+import type { IntegrationCardItem } from '.';
 
 import type { CategoryFacet } from './category_facets';
 

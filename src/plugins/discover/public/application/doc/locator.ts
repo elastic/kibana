@@ -7,13 +7,13 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import {
+import type {
   DiscoverSingleDocLocatorParams,
   DocHistoryLocationState,
 } from '@kbn/unified-discover/src/doc/types';
+import { addProfile } from '../../../common/customizations';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
-
 export class DiscoverSingleDocLocatorDefinition
   implements LocatorDefinition<DiscoverSingleDocLocatorParams>
 {
@@ -33,7 +33,13 @@ export class DiscoverSingleDocLocatorDefinition
       dataViewId = index;
     }
 
-    const path = `#/doc/${dataViewId}/${rowIndex}?id=${rowId}`;
+    let path = '#/';
+
+    if (params.profile) {
+      path = addProfile(path, params.profile);
+    }
+
+    path = `${path}doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`;
 
     return {
       app: 'discover',

@@ -16,7 +16,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'discover',
+    'visualize',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   describe('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -46,11 +53,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // marks is the style that highlights the text in yellow
         await queryBar.setQuery('php');
         await queryBar.submitQuery();
-        await PageObjects.discover.clickFieldListItemAdd('extension');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
-        await PageObjects.discover.clickFieldListItemRemove('extension');
+        await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
       });
 
       it('search type:apache should show the correct hit count', async function () {

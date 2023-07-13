@@ -36,3 +36,30 @@ curl --request POST \
 	}
 }'
 ```
+
+
+Delete a composite SLO:
+
+```
+curl --request DELETE \
+  --url http://localhost:5601/kibana/api/observability/composite_slos/7ba92850-fbd6-11ed-8eb2-037af7d0dfa6 \
+  --header 'Authorization: Basic ZWxhc3RpYzpjaGFuZ2VtZQ==' \
+  --header 'Content-Type: application/json' \
+  --header 'kbn-xsrf: oui'
+```
+
+Update an existing composite SLO:
+
+```
+curl --request PUT \
+  --url http://localhost:5601/kibana/api/observability/composite_slos/01af9e10-fbf1-11ed-83f3-01ffee47b374 \
+  --header 'Authorization: Basic ZWxhc3RpYzpjaGFuZ2VtZQ==' \
+  --header 'Content-Type: application/json' \
+  --header 'kbn-xsrf: oui' \
+  --data '{
+	"name": "new composite slo name",
+	"objective": {
+		"target": 0.90
+	}
+}'
+```

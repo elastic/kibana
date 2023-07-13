@@ -17,14 +17,16 @@ import {
   HOST_TABLE_HOST_NAME_BTN,
   HOST_TABLE_ROW_SEV,
   HOST_TABLE_ROW_TOTAL_ALERTS,
+  HOST_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON,
   RULE_TABLE_ROW_RULE_NAME_BTN,
   RULE_TABLE_ROW_TOTAL_ALERTS,
+  RULE_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON,
   RULE_TABLE_VIEW_ALL_OPEN_ALERTS_BTN,
   USER_TABLE_ROW_SEV,
   USER_TABLE_ROW_TOTAL_ALERTS,
+  USER_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON,
   USER_TABLE_USER_NAME_BTN,
 } from '../../../screens/detection_response';
-import { DETECTION_RESPONSE } from '../../../screens/security_header';
 import { QUERY_TAB_BUTTON, TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../../screens/timeline';
 import { waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -32,8 +34,8 @@ import { cleanKibana } from '../../../tasks/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login, visit } from '../../../tasks/login';
-import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../../../tasks/security_header';
-import { closeTimeline } from '../../../tasks/timeline';
+import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
+import { createNewTimeline } from '../../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../../urls/navigation';
 
 const TEST_USER_NAME = 'test';
@@ -42,12 +44,15 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 describe('Detection response view', () => {
   before(() => {
     cleanKibana();
-    login();
     createRule(getNewRule());
+  });
+
+  beforeEach(() => {
+    login();
     visit(DETECTIONS_RESPONSE_URL);
   });
 
-  context('KQL search bar', { testIsolation: false }, () => {
+  context('KQL search bar', () => {
     it(`filters out hosts with KQL search bar query`, () => {
       kqlSearch(`host.name : fakeHostName{enter}`);
 
@@ -89,9 +94,9 @@ describe('Detection response view', () => {
     });
   });
 
-  context('Open in timeline', { testIsolation: false }, () => {
+  context('Open in timeline', () => {
     afterEach(() => {
-      closeTimeline();
+      createNewTimeline();
     });
 
     it(`opens timeline with correct query count for hosts by alert severity table`, () => {
@@ -103,7 +108,7 @@ describe('Detection response view', () => {
             .first()
             .then((hostNameEl) => {
               const hostName = hostNameEl.text();
-              investigateDashboardItemInTimeline(HOST_TABLE_ROW_TOTAL_ALERTS);
+              investigateDashboardItemInTimeline(HOST_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON);
               cy.get(QUERY_TAB_BUTTON).should('be.visible').should('contain.text', alertCount);
               cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
                 .should('be.visible')
@@ -124,7 +129,7 @@ describe('Detection response view', () => {
             .first()
             .then((userNameEl) => {
               const userName = userNameEl.text();
-              investigateDashboardItemInTimeline(USER_TABLE_ROW_TOTAL_ALERTS);
+              investigateDashboardItemInTimeline(USER_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON);
               cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
               cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
                 .should('be.visible')
@@ -144,7 +149,7 @@ describe('Detection response view', () => {
             .first()
             .then((ruleNameEl) => {
               const ruleName = ruleNameEl.text();
-              investigateDashboardItemInTimeline(RULE_TABLE_ROW_TOTAL_ALERTS);
+              investigateDashboardItemInTimeline(RULE_TABLE_ROW_TOTAL_ALERTS_CELL_ACTION_BUTTON);
               cy.get(QUERY_TAB_BUTTON).should('contain.text', alertCount);
               cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER)
                 .should('be.visible')
@@ -157,11 +162,7 @@ describe('Detection response view', () => {
     });
   });
 
-  context('Redirection to AlertPage', { testIsolation: false }, () => {
-    afterEach(() => {
-      navigateFromHeaderTo(DETECTION_RESPONSE);
-    });
-
+  context('Redirection to AlertPage', () => {
     it('should redirect to alert page with host and status as the filters', () => {
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS)
         .first()
@@ -173,7 +174,7 @@ describe('Detection response view', () => {
             .should('be.visible')
             .then((hostNameEl) => {
               const hostName = hostNameEl.text();
-              sub.trigger('click');
+              sub.click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               cy.url().should((urlString) => {
                 const url = new URL(urlString);
@@ -201,7 +202,7 @@ describe('Detection response view', () => {
             .first()
             .should('be.visible')
             .then((hostNameEl) => {
-              cy.get(HOST_TABLE_ROW_SEV(severityVal)).first().trigger('click');
+              cy.get(HOST_TABLE_ROW_SEV(severityVal)).first().click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               const hostName = hostNameEl.text();
               waitForAlerts();
@@ -227,7 +228,7 @@ describe('Detection response view', () => {
             .should('be.visible')
             .then((userNameEl) => {
               const userName = userNameEl.text();
-              sub.trigger('click');
+              sub.click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               cy.url().should((urlString) => {
                 const url = new URL(urlString);
@@ -256,7 +257,7 @@ describe('Detection response view', () => {
             .should('be.visible')
             .then((userNameEl) => {
               const userName = userNameEl.text();
-              cy.get(USER_TABLE_ROW_SEV(severityVal)).trigger('click');
+              cy.get(USER_TABLE_ROW_SEV(severityVal)).click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               waitForAlerts();
               cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
@@ -280,7 +281,7 @@ describe('Detection response view', () => {
             .first()
             .should('be.visible')
             .then((ruleNameEl) => {
-              sub.trigger('click');
+              sub.click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               const ruleName = ruleNameEl.text();
               waitForAlerts();
@@ -294,17 +295,12 @@ describe('Detection response view', () => {
         });
     });
     it('should redirect to "View Open Alerts" correctly', () => {
-      cy.get(RULE_TABLE_VIEW_ALL_OPEN_ALERTS_BTN)
-        .first()
-        .should('be.visible')
-        .then((sub) => {
-          sub.trigger('click');
-          waitToNavigateAwayFrom(DASHBOARDS_URL);
-          waitForAlerts();
-          cy.get(CONTROL_FRAMES).should('have.length', 1);
-          cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
-          cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
-        });
+      cy.get(RULE_TABLE_VIEW_ALL_OPEN_ALERTS_BTN).first().click();
+      waitToNavigateAwayFrom(DASHBOARDS_URL);
+      waitForAlerts();
+      cy.get(CONTROL_FRAMES).should('have.length', 1);
+      cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
+      cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
     });
   });
 });

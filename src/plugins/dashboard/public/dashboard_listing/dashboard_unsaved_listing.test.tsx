@@ -39,7 +39,7 @@ describe('Unsaved listing', () => {
     mountWith({});
     await waitFor(() => {
       expect(
-        pluginServices.getServices().dashboardSavedObject.findDashboards.findByIds
+        pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds
       ).toHaveBeenCalledTimes(1);
     });
   });
@@ -50,7 +50,7 @@ describe('Unsaved listing', () => {
     mountWith({ props });
     await waitFor(() => {
       expect(
-        pluginServices.getServices().dashboardSavedObject.findDashboards.findByIds
+        pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds
       ).toHaveBeenCalledWith(['dashboardUnsavedOne']);
     });
   });
@@ -99,7 +99,7 @@ describe('Unsaved listing', () => {
 
   it('removes unsaved changes from any dashboard which errors on fetch', async () => {
     (
-      pluginServices.getServices().dashboardSavedObject.findDashboards.findByIds as jest.Mock
+      pluginServices.getServices().dashboardContentManagement.findDashboards.findByIds as jest.Mock
     ).mockResolvedValue([
       {
         id: 'failCase1',

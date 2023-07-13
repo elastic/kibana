@@ -12,6 +12,7 @@ import {
   TIMELINE_KQLMODE_SEARCH,
   TIMELINE_SEARCH_OR_FILTER,
 } from '../../../screens/timeline';
+import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { cleanKibana } from '../../../tasks/common';
 
 import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
@@ -28,11 +29,11 @@ import { HOSTS_URL, TIMELINES_URL } from '../../../urls/navigation';
 describe('Timeline search and filters', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
+      login();
       visit(HOSTS_URL);
     });
 
@@ -56,14 +57,14 @@ describe('Timeline search and filters', () => {
 
   describe('Update kqlMode for timeline', () => {
     beforeEach(() => {
+      login();
       visitWithoutDateRange(TIMELINES_URL);
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.get(TIMELINE_SEARCH_OR_FILTER)
-        .pipe(($el) => $el.trigger('click'))
-        .should('exist');
+      cy.get(LOADING_INDICATOR).should('not.exist');
+      cy.get(TIMELINE_SEARCH_OR_FILTER).click();
+      cy.get(TIMELINE_SEARCH_OR_FILTER).should('exist');
     });
 
     it('should be able to update timeline kqlMode with filter', () => {

@@ -32,19 +32,15 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
 
   const value: NavigationServices = {
     basePath,
-    loadingCount$: http.getLoadingCount$(),
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
     navLinks$: chrome.navLinks.getNavLinks$(),
     navigateToUrl,
     navIsOpen: true,
     onProjectNavigationChange: serverless.setNavigation,
+    activeNodes$: serverless.getActiveNavigationNodes$(),
   };
 
-  return (
-    <Context.Provider {...{ value }} {...dependencies}>
-      {children}
-    </Context.Provider>
-  );
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 /**

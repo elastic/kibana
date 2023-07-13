@@ -11,6 +11,7 @@ export const checkVersionCompatibilityMock = jest.fn();
 export const buildIndexMappingsMock = jest.fn();
 export const generateAdditiveMappingDiffMock = jest.fn();
 export const getAliasActionsMock = jest.fn();
+export const checkIndexCurrentAlgorithmMock = jest.fn();
 
 jest.doMock('../../utils', () => {
   const realModule = jest.requireActual('../../utils');
@@ -21,5 +22,16 @@ jest.doMock('../../utils', () => {
     buildIndexMappings: buildIndexMappingsMock,
     generateAdditiveMappingDiff: generateAdditiveMappingDiffMock,
     getAliasActions: getAliasActionsMock,
+    checkIndexCurrentAlgorithm: checkIndexCurrentAlgorithmMock,
+  };
+});
+
+export const getAliasesMock = jest.fn();
+
+jest.doMock('../../../model/helpers', () => {
+  const realModule = jest.requireActual('../../../model/helpers');
+  return {
+    ...realModule,
+    getAliases: getAliasesMock,
   };
 });

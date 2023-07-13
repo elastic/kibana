@@ -10,7 +10,7 @@ import { render as testLibRender } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { of } from 'rxjs';
 import { createMemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { MemoryHistory } from 'history';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

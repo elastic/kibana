@@ -40,6 +40,7 @@ export interface ProductFeatures {
   hasConnectors: boolean;
   hasDefaultIngestPipeline: boolean;
   hasDocumentLevelSecurityEnabled: boolean;
+  hasIncrementalSyncEnabled: boolean;
   hasNativeConnectors: boolean;
   hasWebCrawler: boolean;
 }

@@ -150,13 +150,13 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
             color="warning"
             iconType="warning"
           >
-            <p>
+            <div>
               <ul>
                 {pipelineWarning.map((pipelineName) => {
                   return <li key={pipelineName}>{pipelineName}</li>;
                 })}
               </ul>
-            </p>
+            </div>
           </EuiCallOut>
         </>
       ) : null}

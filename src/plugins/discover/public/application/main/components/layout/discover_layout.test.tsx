@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
@@ -31,7 +32,6 @@ import {
 import { createDiscoverServicesMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { LocalStorageMock } from '@kbn/unified-discover/src/__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -167,17 +167,17 @@ describe('Discover component', () => {
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, undefined);
-      expect(component.find(DiscoverSidebar).length).toBe(1);
+      expect(component.find(EuiPageSidebar).length).toBe(1);
     }, 10000);
 
     test('should be opened if discover:sidebarClosed is false', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, false);
-      expect(component.find(DiscoverSidebar).length).toBe(1);
+      expect(component.find(EuiPageSidebar).length).toBe(1);
     }, 10000);
 
     test('should be closed if discover:sidebarClosed is true', async () => {
       const component = await mountComponent(dataViewWithTimefieldMock, true);
-      expect(component.find(DiscoverSidebar).length).toBe(0);
+      expect(component.find(EuiPageSidebar).length).toBe(0);
     }, 10000);
   });
 

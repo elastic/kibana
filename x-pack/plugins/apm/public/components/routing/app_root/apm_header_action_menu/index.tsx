@@ -6,10 +6,10 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHeaderLink,
   EuiHeaderLinks,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -21,23 +21,19 @@ import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
-import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
-import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 
 export function ApmHeaderActionMenu() {
-  const { core, plugins } = useApmPluginContext();
+  const { core, plugins, config } = useApmPluginContext();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
   const { capabilities } = application;
+  const { featureFlags } = config;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
   const canCreateMlJobs = !!capabilities.ml?.canCreateJob;
   const { isAlertingAvailable, canReadAlerts, canSaveAlerts } =
     getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
-  const isStorageExplorerAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.StorageExplorerAvailable
-  );
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -55,7 +51,7 @@ export function ApmHeaderActionMenu() {
   return (
     <EuiHeaderLinks gutterSize="xs">
       {isLabsButtonEnabled && <Labs />}
-      {isStorageExplorerAvailable && (
+      {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
           color="text"
           href={apmHref('/storage-explorer')}

@@ -29,6 +29,9 @@ describe('Create DataView runtime field', () => {
   before(() => {
     deleteRuntimeField('security-solution-default', alertRunTimeField);
     deleteRuntimeField('security-solution-default', timelineRuntimeField);
+  });
+
+  beforeEach(() => {
     login();
   });
 

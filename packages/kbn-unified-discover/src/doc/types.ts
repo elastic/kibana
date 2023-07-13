@@ -14,6 +14,7 @@ export interface DiscoverSingleDocLocatorParams extends SerializableRecord {
   rowId: string;
   rowIndex: string;
   referrer: string; // discover main view url
+  profile?: string;
 }
 
 export type DiscoverSingleDocLocator = LocatorPublic<DiscoverSingleDocLocatorParams>;

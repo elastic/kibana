@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '@kbn/unified-discover/src/__mocks__/es_hits';
 import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
@@ -33,7 +34,7 @@ import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
-const mountComponent = ({
+const mountComponent = async ({
   hideChart = false,
   isPlainRecord = false,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
@@ -116,31 +117,35 @@ const mountComponent = ({
     </KibanaContextProvider>
   );
 
+  await act(async () => {
+    component.update();
+  });
+
   return component;
 };
 
 describe('Discover main content component', () => {
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
-      const component = mountComponent();
+      const component = await mountComponent();
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
     it('should not show DocumentViewModeToggle when isPlainRecord is true', async () => {
-      const component = mountComponent({ isPlainRecord: true });
+      const component = await mountComponent({ isPlainRecord: true });
       expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
     });
   });
 
   describe('Document view', () => {
     it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
-      const component = mountComponent();
+      const component = await mountComponent();
       expect(component.find(DiscoverDocuments).exists()).toBe(true);
       expect(component.find(FieldStatisticsTab).exists()).toBe(false);
     });
 
     it('should show FieldStatisticsTableMemoized when VIEW_MODE is not DOCUMENT_LEVEL', async () => {
-      const component = mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
+      const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
       expect(component.find(DiscoverDocuments).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(true);
     });

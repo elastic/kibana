@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
 import type { NamedAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, getGroupingQuery } from '@kbn/securitysolution-grouping';
+import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 
 interface AlertsGroupingQueryParams {
   additionalFilters: Array<{
@@ -17,7 +17,7 @@ interface AlertsGroupingQueryParams {
   from: string;
   pageIndex: number;
   pageSize: number;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   selectedGroup: string;
   uniqueValue: string;
   to: string;

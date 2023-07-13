@@ -239,9 +239,9 @@ describe('Response actions history', () => {
         agentIds: undefined,
         commands: [],
         statuses: [],
+        types: [],
         userIds: [],
         withOutputs: [],
-        withAutomatedActions: false,
         startDate: 'now-24h/h',
         endDate: 'now',
       },
@@ -312,9 +312,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1089,14 +1089,14 @@ describe('Response actions history', () => {
         RESPONSE_ACTION_API_COMMANDS_NAMES.length
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'isolate',
-        'release',
-        'kill-process',
-        'suspend-process',
-        'processes',
-        'get-file',
-        'execute',
-        'upload',
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
       ]);
     });
 
@@ -1160,9 +1160,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: ['failed', 'pending'],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1362,9 +1362,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );

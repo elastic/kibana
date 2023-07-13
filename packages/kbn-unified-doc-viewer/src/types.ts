@@ -10,6 +10,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IgnoredReason } from './utils';
@@ -45,6 +46,10 @@ export interface DocProps {
    * Discover main view url
    */
   referrer?: string;
+  /**
+   * Records fetched from text based query
+   */
+  textBasedHits?: DataTableRecord[];
 }
 
 export interface UnifiedDocViewerServices {
@@ -127,6 +132,8 @@ export interface DocViewRenderProps {
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
+  query?: Query | AggregateQuery;
+  textBasedHits?: DataTableRecord[];
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
