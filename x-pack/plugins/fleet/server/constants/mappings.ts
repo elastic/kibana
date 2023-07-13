@@ -5,35 +5,40 @@
  * 2.0.
  */
 
+/**
+ * The mappings declared closely mirror the ones declared in indices and SOs
+ * But they are only used to perform validation on those endpoints using ListWithKuery
+ * Whenever a field is added on any of these mappings, make sure to add it here as well
+ */
+
 export const AGENT_POLICY_MAPPINGS = {
   properties: {
-    name: { type: 'keyword' },
-    schema_version: { type: 'version' },
-    description: { type: 'text' },
-    namespace: { type: 'keyword' },
-    is_managed: { type: 'boolean' },
-    is_default: { type: 'boolean' },
-    is_default_fleet_server: { type: 'boolean' },
-    status: { type: 'keyword' },
-    unenroll_timeout: { type: 'integer' },
-    inactivity_timeout: { type: 'integer' },
-    updated_at: { type: 'date' },
-    updated_by: { type: 'keyword' },
-    revision: { type: 'integer' },
-    monitoring_enabled: { type: 'keyword', index: false },
-    is_preconfigured: { type: 'keyword' },
-    data_output_id: { type: 'keyword' },
-    monitoring_output_id: { type: 'keyword' },
-    download_source_id: { type: 'keyword' },
-    fleet_server_host_id: { type: 'keyword' },
     agent_features: {
       properties: {
         name: { type: 'keyword' },
         enabled: { type: 'boolean' },
       },
     },
+    data_output_id: { type: 'keyword' },
+    description: { type: 'text' },
+    download_source_id: { type: 'keyword' },
+    fleet_server_host_id: { type: 'keyword' },
+    inactivity_timeout: { type: 'integer' },
+    is_default: { type: 'boolean' },
+    is_default_fleet_server: { type: 'boolean' },
+    is_managed: { type: 'boolean' },
+    is_preconfigured: { type: 'keyword' },
     is_protected: { type: 'boolean' },
-    overrides: { type: 'flattened', index: false },
+    monitoring_enabled: { type: 'keyword', index: false },
+    monitoring_output_id: { type: 'keyword' },
+    name: { type: 'keyword' },
+    namespace: { type: 'keyword' },
+    revision: { type: 'integer' },
+    schema_version: { type: 'version' },
+    status: { type: 'keyword' },
+    unenroll_timeout: { type: 'integer' },
+    updated_at: { type: 'date' },
+    updated_by: { type: 'keyword' },
   },
 } as const;
 
@@ -72,12 +77,8 @@ export const PACKAGE_POLICIES_MAPPINGS = {
 
 export const AGENT_MAPPINGS = {
   properties: {
-    access_api_key_id: {
-      type: 'keyword',
-    },
     action_seq_no: {
       type: 'integer',
-      index: false,
     },
     active: {
       type: 'boolean',
@@ -95,14 +96,8 @@ export const AGENT_MAPPINGS = {
     default_api_key: {
       type: 'keyword',
     },
-    default_api_key_id: {
-      type: 'keyword',
-    },
     enrolled_at: {
       type: 'date',
-    },
-    enrollment_id: {
-      type: 'keyword',
     },
     last_checkin: {
       type: 'date',
@@ -112,7 +107,6 @@ export const AGENT_MAPPINGS = {
       fields: {
         keyword: {
           type: 'keyword',
-          ignore_above: 1024,
         },
       },
     },
@@ -135,7 +129,6 @@ export const AGENT_MAPPINGS = {
                       fields: {
                         keyword: {
                           type: 'keyword',
-                          ignore_above: 256,
                         },
                       },
                     },
@@ -188,7 +181,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 64,
                 },
               },
             },
@@ -197,7 +189,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 17,
                 },
               },
             },
@@ -206,7 +197,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 256,
                 },
               },
             },
@@ -222,7 +212,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 128,
                 },
               },
             },
@@ -231,7 +220,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 128,
                 },
               },
             },
@@ -240,7 +228,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 256,
                 },
               },
             },
@@ -252,7 +239,6 @@ export const AGENT_MAPPINGS = {
               fields: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 32,
                 },
               },
             },
@@ -261,6 +247,9 @@ export const AGENT_MAPPINGS = {
       },
     },
     packages: {
+      type: 'keyword',
+    },
+    policy_output_permissions_hash: {
       type: 'keyword',
     },
     policy_coordinator_idx: {
@@ -272,13 +261,10 @@ export const AGENT_MAPPINGS = {
     policy_revision_idx: {
       type: 'integer',
     },
-    policy_output_permissions_hash: {
-      type: 'keyword',
-    },
-    shared_id: {
-      type: 'keyword',
-    },
     type: {
+      type: 'keyword',
+    },
+    tags: {
       type: 'keyword',
     },
     unenrolled_at: {
@@ -286,6 +272,9 @@ export const AGENT_MAPPINGS = {
     },
     unenrollment_started_at: {
       type: 'date',
+    },
+    unenrolled_reason: {
+      type: 'keyword',
     },
     updated_at: {
       type: 'date',
@@ -296,7 +285,7 @@ export const AGENT_MAPPINGS = {
     upgraded_at: {
       type: 'date',
     },
-    tags: {
+    upgrade_status: {
       type: 'keyword',
     },
     // added to allow validation on status field
