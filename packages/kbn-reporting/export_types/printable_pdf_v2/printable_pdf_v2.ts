@@ -22,7 +22,6 @@ import {
   REPORTING_TRANSACTION_TYPE,
   CancellationToken,
   TaskRunResult,
-  UrlOrUrlLocatorTuple,
 } from '@kbn/reporting-common';
 import {
   decryptJobHeaders,
@@ -30,11 +29,8 @@ import {
   getFullRedirectAppUrl,
   ExportType,
 } from '@kbn/reporting-common';
-import {
-  PdfScreenshotOptions,
-  PdfScreenshotResult,
-  ScreenshotOptions,
-} from '@kbn/screenshotting-plugin/server';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 import { generatePdfObservable } from './lib/generate_pdf';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
 
@@ -75,15 +71,11 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
   };
 
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
-    return Rx.defer(async () => this.startDeps.screenshotting).pipe(() => {
-      return this.startDeps.screenshotting.getScreenshots({
-        ...options,
-        urls: options.urls.map((url) =>
-          typeof url === 'string'
-            ? url
-            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-        ),
-      } as ScreenshotOptions);
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
     });
   }
 
@@ -115,7 +107,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
-        let urls: UrlOrUrlLocatorTuple[];
+        let urls: UrlOrUrlWithContext[];
         if (locatorParams) {
           urls = locatorParams.map((locator) => [
             getFullRedirectAppUrl(
@@ -125,7 +117,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
               payload.forceNow
             ),
             locator,
-          ]) as unknown as UrlOrUrlLocatorTuple[];
+          ]) as unknown as UrlOrUrlWithContext[];
         }
 
         apmGetAssets?.end();

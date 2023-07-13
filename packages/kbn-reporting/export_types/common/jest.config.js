@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PdfExportType } from './printable_pdf_v2';
-export type { TaskPayloadPDFV2 } from './types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/kbn-reporting/export_types/common'],
+};

@@ -10,7 +10,7 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { REPORTING_TRANSACTION_TYPE, PngMetrics } from '@kbn/reporting-common';
 
 interface PngResult {

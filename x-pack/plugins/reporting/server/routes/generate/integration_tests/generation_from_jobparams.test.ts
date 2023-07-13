@@ -21,9 +21,9 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
+import type { ReportingRequestHandlerContext } from '@kbn/reporting-common';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
-import { PdfExportType } from '../../../export_types/printable_pdf_v2';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
