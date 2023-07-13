@@ -895,7 +895,6 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 
 # Machine Learning
-/x-pack/plugins/ml/common/openapi/ @elastic/mlr-docs
 /x-pack/test/accessibility/apps/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/ml_embeddables_in_dashboard.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
@@ -1021,7 +1020,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /docs/api/actions-and-connectors @elastic/mlr-docs
 /docs/api/alerting @elastic/mlr-docs
 /docs/api/cases @elastic/mlr-docs
-/x-pack/plugins/cases/docs/openapi @elastic/mlr-docs
 
 # Enterprise Search
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
