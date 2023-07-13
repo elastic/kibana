@@ -25,6 +25,7 @@ import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { ConfigSchema } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -96,11 +97,13 @@ export function ObservabilityOnboardingAppRoot({
   core,
   deps,
   corePlugins: { observability, data },
+  config,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
+  config: ConfigSchema;
 }) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -117,6 +120,7 @@ export function ObservabilityOnboardingAppRoot({
           ...plugins,
           observability,
           data,
+          config,
         }}
       >
         <KibanaThemeProvider
@@ -156,11 +160,13 @@ export const renderApp = ({
   deps,
   appMountParameters,
   corePlugins,
+  config,
 }: {
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   appMountParameters: AppMountParameters;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
+  config: ConfigSchema;
 }) => {
   const { element } = appMountParameters;
 
@@ -170,6 +176,7 @@ export const renderApp = ({
       core={core}
       deps={deps}
       corePlugins={corePlugins}
+      config={config}
     />,
     element
   );

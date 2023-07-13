@@ -19,20 +19,29 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import { breadcrumbsApp } from '../../../application/app';
+import { ObservabilityOnboardingAppServices } from '../../..';
 
 export function Home() {
   useBreadcrumbs([], breadcrumbsApp);
 
   const { navigateToKibanaUrl } = useKibanaNavigation();
+  const {
+    config: {
+      serverless: { enabled: isServerlessEnabled },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>().services;
 
   const handleClickSystemLogs = () => {};
   const handleClickCustomLogs = () => {
     navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
   };
   const handleClickApmSetupGuide = () => {
-    navigateToKibanaUrl('/app/home#/tutorial/apm');
+    navigateToKibanaUrl(
+      isServerlessEnabled ? '/app/apm/onboarding' : '/app/home#/tutorial/apm'
+    );
   };
   const handleClickKubernetesSetupGuide = () => {
     navigateToKibanaUrl('/app/integrations/detail/kubernetes');
