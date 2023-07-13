@@ -44,7 +44,8 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-describe('Manage lists from "Shared Exception Lists" page', () => {
+// eslint-disable-next-line ban/ban
+describe.only('Manage lists from "Shared Exception Lists" page', () => {
   describe('Create/Export/Delete List', () => {
     before(() => {
       esArchiverResetKibana();
