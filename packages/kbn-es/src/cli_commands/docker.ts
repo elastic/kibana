@@ -16,9 +16,6 @@ import { parseTimeoutToMs, DEFAULT_DOCKER_CMD, DEFAULT_DOCKER_IMG } from '../uti
 import { Command } from './types';
 
 /*
-rm -rf /tmp/objectstore ; mkdir /tmp/objectstore ; chmod a+rw -R /tmp/objectstore
-
-docker network create elastic
 
 docker run --rm -d --name es01 --net elastic -p 9200:9200 -p 9300:9300 -e ES_JAVA_OPTS="-Xms1g -Xmx1g" -e node.name=es01 -e cluster.initial_master_nodes=es01,es02,es03 -e discovery.seed_hosts=es02,es03 -e node.roles='["master","index"]' -e xpack.security.enabled=false -e cluster.name=stateless -e stateless.enabled=true -e xpack.searchable.snapshot.shared_cache.size=1gb -e stateless.object_store.type=fs -e stateless.object_store.bucket=stateless -e path.repo=/objectstore -v ./data:/objectstore:z docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
 
