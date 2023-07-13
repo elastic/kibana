@@ -287,7 +287,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnDocCount',
       width: NARROW_COLUMN_WIDTH,
       field: 'docCount',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTableGroups.docCountLabel', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountLabel', {
         defaultMessage: 'Doc count',
       }),
       sortable: true,
@@ -354,7 +354,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     },
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTableGroups.actionsColumnName', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
       actions: [

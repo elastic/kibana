@@ -108,7 +108,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldName',
       field: 'fieldName',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.analysisResultsTable.fieldNameLabel', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameLabel', {
         defaultMessage: 'Field name',
       }),
       render: (_, { fieldName, fieldValue }) => (
@@ -130,7 +130,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldValue',
       field: 'fieldValue',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.analysisResultsTable.fieldValueLabel', {
+      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldValueLabel', {
         defaultMessage: 'Field value',
       }),
       render: (_, { fieldValue }) => String(fieldValue),
