@@ -45,27 +45,52 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
   describe('Installation of prebuilt rules package via Fleet', () => {
     beforeEach(() => {
-      cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
+      cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackageBulk');
+      cy.intercept('POST', '/api/fleet/epm/packages/security_detection_engine/*').as(
+        'installPackage'
+      );
       waitForRulesTableToBeLoaded();
     });
 
     it('should install package from Fleet in the background', () => {
       /* Assert that the package in installed from Fleet by checking that
       /* the installSource is "registry", as opposed to "bundle" */
-      cy.wait('@installPackage', {
+      cy.wait('@installPackageBulk', {
         timeout: 60000,
-      }).then(({ response }) => {
-        cy.wrap(response?.statusCode).should('eql', 200);
+      }).then(({ response: bulkResponse }) => {
+        cy.wrap(bulkResponse?.statusCode).should('eql', 200);
 
-        const packages = response?.body.items.map(({ name, result }: BulkInstallPackageInfo) => ({
-          name,
-          installSource: result.installSource,
-        }));
+        const packages = bulkResponse?.body.items.map(
+          ({ name, result }: BulkInstallPackageInfo) => ({
+            name,
+            installSource: result.installSource,
+          })
+        );
 
-        expect(packages.length).to.have.greaterThan(0);
-        expect(packages).to.deep.include.members([
-          { name: 'security_detection_engine', installSource: 'registry' },
-        ]);
+        const packagesBulkInstalled = packages.map(({ name }: { name: string }) => name);
+
+        // Under normal flow the package is installed via the Fleet bulk install API.
+        // However, for testing purposes the package can be installed via the Fleet individual install API,
+        // so we need to intercept and wait for that request as well.
+        if (!packagesBulkInstalled.includes('security_detection_engine')) {
+          // Should happen only during testing when the `xpack.securitySolution.prebuiltRulesPackageVersion` flag is set
+          cy.wait('@installPackage').then(({ response }) => {
+            cy.wrap(response?.statusCode).should('eql', 200);
+            cy.wrap(response?.body)
+              .should('have.property', 'items')
+              .should('have.length.greaterThan', 0);
+            cy.wrap(response?.body)
+              .should('have.property', '_meta')
+              .should('have.property', 'install_source')
+              .should('eql', 'registry');
+          });
+        } else {
+          // Normal flow, install via the Fleet bulk install API
+          expect(packages.length).to.have.greaterThan(0);
+          expect(packages).to.deep.include.members([
+            { name: 'security_detection_engine', installSource: 'registry' },
+          ]);
+        }
       });
     });
 
