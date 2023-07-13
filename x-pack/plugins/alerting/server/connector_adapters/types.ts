@@ -5,6 +5,43 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
+import type {
+  RuleActionParams as GenericRuleActionParams,
+  RuleTypeParams,
+  SanitizedRule,
+} from '../../common';
+
+type ActionTypeParams = Record<string, unknown>;
+
+interface Alert {
+  count: number;
+  data: unknown[];
+}
+interface Alerts {
+  new: Alert;
+  ongoing: Alert;
+  recovered: Alert;
+  all: Alert;
+}
+
+interface BuildActionParamsArgs<
+  RuleParams extends RuleTypeParams = RuleTypeParams,
+  RuleActionParams extends GenericRuleActionParams = GenericRuleActionParams
+> {
+  alerts: Alerts;
+  rule: SanitizedRule<RuleParams>;
+  params: RuleActionParams;
+}
+
 export interface ConnectorAdapter {
   connectorTypeId: string;
+  ruleActionParamsSchema: ObjectType;
+  buildActionParams: <
+    RuleParams extends RuleTypeParams = RuleTypeParams,
+    RuleActionParams extends GenericRuleActionParams = GenericRuleActionParams,
+    ActionParams extends ActionTypeParams = ActionTypeParams
+  >(
+    args: BuildActionParamsArgs<RuleParams, RuleActionParams>
+  ) => ActionParams;
 }
