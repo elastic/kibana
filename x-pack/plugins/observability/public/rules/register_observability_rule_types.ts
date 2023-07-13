@@ -93,7 +93,7 @@ export const registerObservabilityRuleTypes = (
       documentationUrl(docLinks) {
         return `${docLinks.links.observability.threshold}`;
       },
-      ruleParamsExpression: lazy(() => import('../components/threshold/components/expression')),
+      ruleParamsExpression: lazy(() => import('../components/threshold/threshold_rule_expression')),
       validate: validateMetricThreshold,
       defaultActionMessage: i18n.translate(
         'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
