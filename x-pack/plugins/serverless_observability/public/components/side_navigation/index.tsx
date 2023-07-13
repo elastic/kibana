@@ -128,8 +128,10 @@ const navigationTree: NavigationTreeDefinition = {
   footer: [
     {
       type: 'navGroup',
-      id: 'projest_settings_project_nav',
-      title: 'Project settings',
+      id: 'project_settings_project_nav',
+      title: i18n.translate('xpack.serverlessObservability.nav.projectSettings', {
+        defaultMessage: 'Project settings',
+      }),
       icon: 'gear',
       defaultIsCollapsed: true,
       breadcrumbStatus: 'hidden',
