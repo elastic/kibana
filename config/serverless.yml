@@ -72,10 +72,6 @@ server.versioned.strictClientVersionCheck: false
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
 
-# Temporarily allow unauthenticated access to task manager utilization & status/stats APIs for autoscaling
-status.allowAnonymous: true
-xpack.task_manager.unsafe.authenticate_background_task_utilization: false
-
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless
 
