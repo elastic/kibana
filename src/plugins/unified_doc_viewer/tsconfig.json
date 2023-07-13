@@ -15,9 +15,10 @@
     "@kbn/react-field",
     "@kbn/test-jest-helpers",
     "@kbn/unified-doc-viewer",
-    "@kbn/unified-field-list-plugin",
     "@kbn/unified-discover",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/unified-field-list",
+    "@kbn/ebt-tools"
   ],
   "exclude": [
     "target/**/*",

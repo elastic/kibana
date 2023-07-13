@@ -52,5 +52,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/saved-search-plugin",
     "@kbn/std",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core-analytics-browser",
   ]
 }
