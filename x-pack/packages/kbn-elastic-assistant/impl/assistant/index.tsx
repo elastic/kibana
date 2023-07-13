@@ -398,7 +398,8 @@ const AssistantComponent: React.FC<Props> = ({
           `}
         />
 
-        <EuiSpacer size={'m'} />
+        {currentConversation.messages.length !== 0 &&
+          Object.keys(selectedPromptContexts).length > 0 && <EuiSpacer size={'m'} />}
 
         {(currentConversation.messages.length === 0 ||
           Object.keys(selectedPromptContexts).length > 0) && (

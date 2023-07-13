@@ -160,12 +160,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     baseSystemPrompts
   );
 
-  // if basePrompt has been updated, the localstorage should be accordingly updated
-  // if it exists
-  useEffect(() => {
-    setLocalStorageSystemPrompts(baseSystemPrompts);
-  }, [baseSystemPrompts, setLocalStorageSystemPrompts]);
-
   const [localStorageLastConversationId, setLocalStorageLastConversationId] =
     useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
 
