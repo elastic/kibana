@@ -15,8 +15,8 @@ import { EmbeddablePanelTitle } from './embeddable_panel_title';
 import { getAriaLabelForTitle } from '../embeddable_panel_strings';
 import { useEmbeddablePanelBadges } from './use_embeddable_panel_badges';
 import { useSelectFromEmbeddableInput } from '../use_select_from_embeddable';
+import { EmbeddablePanelContextMenu } from './embeddable_panel_context_menu';
 import { UnwrappedEmbeddablePanelProps, PanelUniversalActions } from '../types';
-import { useEmbeddablePanelContextMenu } from './use_embeddable_panel_context_menu';
 
 export const EmbeddablePanelHeader = ({
   index,
@@ -40,13 +40,6 @@ export const EmbeddablePanelHeader = ({
     embeddable,
     getActions
   );
-  const embeddablePanelContextMenu = useEmbeddablePanelContextMenu({
-    index,
-    embeddable,
-    getActions,
-    actionPredicate,
-    universalActions,
-  });
 
   const title = embeddable.getTitle();
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
@@ -82,6 +75,12 @@ export const EmbeddablePanelHeader = ({
     'embPanel--dragHandle': viewMode === ViewMode.EDIT,
   });
 
+  const embeddablePanelContextMenu = (
+    <EmbeddablePanelContextMenu
+      {...{ index, embeddable, getActions, actionPredicate, universalActions }}
+    />
+  );
+
   if (!showPanelBar) {
     return (
       <div className={headerClasses}>
@@ -99,8 +98,10 @@ export const EmbeddablePanelHeader = ({
       <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
         <EmbeddablePanelTitle
+          viewMode={viewMode}
           hideTitle={hideTitle}
           embeddable={embeddable}
+          description={description}
           customizePanelAction={universalActions.customizePanel}
         />
         {showBadges && badgeComponents}

@@ -12,21 +12,22 @@ import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { IEmbeddable, ViewMode } from '../../lib';
 import { CustomizePanelAction } from '../panel_actions';
-import { useSelectFromEmbeddableInput } from '../use_select_from_embeddable';
 import { getEditTitleAriaLabel, placeholderTitle } from '../embeddable_panel_strings';
 
 export const EmbeddablePanelTitle = ({
+  viewMode,
   hideTitle,
   embeddable,
+  description,
   customizePanelAction,
 }: {
   hideTitle?: boolean;
+  viewMode?: ViewMode;
+  description?: string;
   embeddable: IEmbeddable;
   customizePanelAction?: CustomizePanelAction;
 }) => {
   const title = embeddable.getTitle();
-  const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
-  const description = useSelectFromEmbeddableInput('description', embeddable);
 
   const titleComponent = useMemo(() => {
     if (hideTitle) return null;

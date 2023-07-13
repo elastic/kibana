@@ -8,8 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { useMount, useMountedState } from 'react-use/lib';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -38,7 +37,7 @@ const removeById =
   ({ id }: { id: string }) =>
     disabledActions.indexOf(id) === -1;
 
-export const useEmbeddablePanelContextMenu = ({
+export const EmbeddablePanelContextMenu = ({
   index,
   embeddable,
   getActions,
@@ -52,61 +51,71 @@ export const useEmbeddablePanelContextMenu = ({
   actionPredicate?: (actionId: string) => boolean;
 }) => {
   const [menuPanelsLoading, setMenuPanelsLoading] = useState(false);
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuActions, setContextMenuActions] = useState<Array<Action<object>>>([]);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean | undefined>(undefined);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
   const title = useSelectFromEmbeddableInput('title', embeddable);
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
 
-  const mounted = useMountedState();
+  useEffect(() => {
+    /**
+     * isContextMenuOpen starts as undefined which allows this use effect to run on mount. This
+     * is required so that showNotification is calculated on mount.
+     */
+    if (isContextMenuOpen === false) return;
 
-  useMount(() => {
-    updatePanelActions();
-  });
-
-  const getAllPanelActions = useCallback(async () => {
-    const regularActions = await (async () => {
-      if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, { embeddable });
-      return (
-        (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
-          embeddable,
-        })) ?? []
+    setMenuPanelsLoading(true);
+    let canceled = false;
+    (async () => {
+      /**
+       * Build and update all actions
+       */
+      const regularActions = await (async () => {
+        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, { embeddable });
+        return (
+          (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
+            embeddable,
+          })) ?? []
+        );
+      })();
+      if (canceled) return;
+      let allActions = regularActions.concat(
+        Object.values(universalActions ?? {}) as Array<Action<object>>
       );
+
+      const { disabledActions } = embeddable.getInput();
+      if (disabledActions) {
+        const removeDisabledActions = removeById(disabledActions);
+        allActions = allActions.filter(removeDisabledActions);
+      }
+      allActions.sort(sortByOrderField);
+
+      if (actionPredicate) {
+        allActions = allActions.filter(({ id }) => actionPredicate(id));
+      }
+
+      /**
+       * Build context menu panel from actions
+       */
+      const panels = await buildContextMenuForActions({
+        actions: allActions.map((action) => ({
+          action,
+          context: { embeddable },
+          trigger: contextMenuTrigger,
+        })),
+        closeMenu: () => setIsContextMenuOpen(false),
+      });
+      if (canceled) return;
+
+      setMenuPanelsLoading(false);
+      setContextMenuActions(allActions);
+      setContextMenuPanels(panels);
     })();
-
-    let allActions = regularActions.concat(
-      Object.values(universalActions ?? {}) as Array<Action<object>>
-    );
-
-    const { disabledActions } = embeddable.getInput();
-    if (disabledActions) {
-      const removeDisabledActions = removeById(disabledActions);
-      allActions = allActions.filter(removeDisabledActions);
-    }
-    allActions.sort(sortByOrderField);
-
-    if (actionPredicate) {
-      allActions = allActions.filter(({ id }) => actionPredicate(id));
-    }
-    return allActions;
-  }, [actionPredicate, embeddable, universalActions, getActions]);
-
-  const updatePanelActions = useCallback(async () => {
-    const newActions = await getAllPanelActions();
-    if (!mounted()) return;
-    setContextMenuActions(newActions);
-    const panels = await buildContextMenuForActions({
-      actions: newActions.map((action) => ({
-        action,
-        context: { embeddable },
-        trigger: contextMenuTrigger,
-      })),
-      closeMenu: () => setIsContextMenuOpen(false),
-    });
-    if (!mounted()) return;
-    setContextMenuPanels(panels);
-  }, [embeddable, getAllPanelActions, mounted]);
+    return () => {
+      canceled = true;
+    };
+  }, [actionPredicate, embeddable, getActions, isContextMenuOpen, universalActions]);
 
   const showNotification = useMemo(
     () => contextMenuActions.some((action) => action.showNotification),
@@ -123,24 +132,14 @@ export const useEmbeddablePanelContextMenu = ({
     <EuiButtonIcon
       color="text"
       className="embPanel__optionsMenuButton"
-      onClick={() => {
-        const wasOpen = isContextMenuOpen;
-        setIsContextMenuOpen((isOpen) => !isOpen);
-        if (wasOpen) return;
-
-        setMenuPanelsLoading(true);
-        updatePanelActions().then(() => {
-          if (!mounted()) return;
-          setMenuPanelsLoading(false);
-        });
-      }}
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
+      onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
       iconType={viewMode === ViewMode.VIEW ? 'boxesHorizontal' : 'gear'}
     />
   );
 
-  const embeddablePanelContextMenu = (
+  return (
     <EuiPopover
       repositionOnScroll
       panelPaddingSize="none"
@@ -156,7 +155,7 @@ export const useEmbeddablePanelContextMenu = ({
       {menuPanelsLoading ? (
         <EuiContextMenuPanel
           className="embPanel__optionsMenuPopover-loading"
-          title={i18n.translate('embeddablePanel.contextMenu.loadingTitle', {
+          title={i18n.translate('embeddableApi.panel.contextMenu.loadingTitle', {
             defaultMessage: 'Options',
           })}
         >
@@ -169,6 +168,4 @@ export const useEmbeddablePanelContextMenu = ({
       )}
     </EuiPopover>
   );
-
-  return embeddablePanelContextMenu;
 };
