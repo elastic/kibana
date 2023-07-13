@@ -15,7 +15,7 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import type { UserActionTypes } from '../../../../common/types/domain';
+import type { UserActionActionType } from '../../../../common/types/domain';
 import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import { CaseStatuses, CommentType } from '../../../../common/api';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
@@ -83,7 +83,7 @@ export const getUserActionType = (fields: string[], action: string): string => {
     return UserActionActionTypes.delete_case;
   }
 
-  const field = fields[0] as UserActionTypes;
+  const field = fields[0] as UserActionActionType;
   return UserActionActionTypes[field] ?? '';
 };
 

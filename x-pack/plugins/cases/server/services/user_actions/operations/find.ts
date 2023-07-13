@@ -28,7 +28,7 @@ import type {
 } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
 import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
-import type { UserActionTypes } from '../../../../common/types/domain';
+import type { UserActionActionType } from '../../../../common/types/domain';
 import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 
 export class UserActionFinder {
@@ -169,7 +169,7 @@ export class UserActionFinder {
     );
   }
 
-  private static buildGenericTypeFilter(type: UserActionTypes): KueryNode | undefined {
+  private static buildGenericTypeFilter(type: UserActionActionType): KueryNode | undefined {
     return buildFilter({
       filters: [type],
       field: 'type',

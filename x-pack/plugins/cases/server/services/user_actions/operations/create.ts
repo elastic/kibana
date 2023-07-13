@@ -7,7 +7,7 @@
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
-import type { ActionCategory, UserActionTypes } from '../../../../common/types/domain';
+import type { ActionCategory, UserActionActionType } from '../../../../common/types/domain';
 import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
@@ -147,7 +147,7 @@ export class UserActionPersister {
     return this.buildAddDeleteUserActions(params, createPayload, UserActionActionTypes.tags);
   }
 
-  private buildAddDeleteUserActions<Item, ActionType extends UserActionTypes>(
+  private buildAddDeleteUserActions<Item, ActionType extends UserActionActionType>(
     params: TypedUserActionDiffedItems<Item>,
     createPayload: CreatePayloadFunction<Item, ActionType>,
     actionType: ActionType
@@ -176,7 +176,7 @@ export class UserActionPersister {
     ];
   }
 
-  private buildUserAction<Item, ActionType extends UserActionTypes>({
+  private buildUserAction<Item, ActionType extends UserActionActionType>({
     commonArgs,
     actionType,
     action,

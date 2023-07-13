@@ -11,7 +11,7 @@ import type {
   CommentUserAction,
   UserAction,
   UserActions,
-  UserActionTypes,
+  UserActionActionType,
 } from '../../common/types/domain';
 import { Actions, UserActionActionTypes } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
@@ -615,7 +615,7 @@ export const allCasesSnake: CasesFindResponse = {
 };
 
 export const getUserAction = (
-  type: UserActionTypes,
+  type: UserActionActionType,
   action: ActionCategory,
   overrides?: Record<string, unknown>
 ): UserActionUI => {
@@ -748,7 +748,7 @@ export const getUserAction = (
 };
 
 export const getUserActionSnake = (
-  type: UserActionTypes,
+  type: UserActionActionType,
   action: ActionCategory,
   overrides?: Record<string, unknown>
 ): UserAction => {

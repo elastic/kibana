@@ -21,7 +21,7 @@ import type {
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
-  UserActionTypes,
+  UserActionActionType,
 } from '../../../common/types/domain';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
@@ -118,7 +118,7 @@ export interface Attributes {
   created_at: string;
   created_by: User;
   owner: string;
-  type: UserActionTypes;
+  type: UserActionActionType;
   payload: Record<string, unknown>;
 }
 
@@ -142,7 +142,7 @@ export interface UserActionEvent {
 
 export type CommonBuilderArguments = CommonArguments & {
   action: ActionCategory;
-  type: UserActionTypes;
+  type: UserActionActionType;
   value: unknown;
   valueKey: string;
 };
@@ -278,7 +278,7 @@ export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDiffer
   newValue: T[];
 }
 
-export type CreatePayloadFunction<Item, ActionType extends UserActionTypes> = (
+export type CreatePayloadFunction<Item, ActionType extends UserActionActionType> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 

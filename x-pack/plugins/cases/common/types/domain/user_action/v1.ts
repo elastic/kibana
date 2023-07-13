@@ -7,7 +7,6 @@
 
 import * as rt from 'io-ts';
 import { UserRt } from '../../../api';
-import type { ActionTypeValues } from './action/v1';
 import { ActionsRt } from './action/v1';
 import { AssigneesUserActionRt } from './assignees/v1';
 import { CategoryUserActionRt } from './category/v1';
@@ -26,6 +25,8 @@ import { TitleUserActionRt } from './title/v1';
 
 export { ActionsRt, UserActionActionTypes, Actions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
+
+export type { UserActionActionType } from './action/v1';
 
 const UserActionCommonAttributesRt = rt.strict({
   created_at: rt.string,
@@ -126,11 +127,6 @@ export type UserAction<T extends UserActionPayload = UserActionPayload> = Omit<
  * This defines the high level category for the user action. Whether the user add, removed, updated something
  */
 export type ActionCategory = rt.TypeOf<typeof ActionsRt>;
-/**
- * This defines the type of the user action, meaning what individual action was taken, for example changing the status,
- * adding an assignee etc.
- */
-export type UserActionTypes = ActionTypeValues;
 
 /**
  * User actions

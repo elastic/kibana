@@ -16,7 +16,7 @@ import type {
   StatusUserAction,
   TagsUserAction,
   TitleUserAction,
-  UserActionTypes,
+  UserActionActionType,
 } from '../types/domain';
 import { UserActionActionTypes } from '../types/domain';
 
@@ -70,8 +70,8 @@ export const isCreateCaseUserAction = (userAction: unknown): userAction is Creat
    */
   (userAction as CreateCaseUserAction)?.payload?.connector != null;
 
-export const isUserActionType = (field: string): field is UserActionTypes =>
-  UserActionActionTypes[field as UserActionTypes] != null;
+export const isUserActionType = (field: string): field is UserActionActionType =>
+  UserActionActionTypes[field as UserActionActionType] != null;
 
 export const isCategoryUserAction = (userAction: unknown): userAction is CategoryUserAction =>
   (userAction as CategoryUserAction)?.type === UserActionActionTypes.category &&
