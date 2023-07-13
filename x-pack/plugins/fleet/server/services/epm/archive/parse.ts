@@ -41,6 +41,7 @@ const readFileAsync = promisify(readFile);
 export const MANIFEST_NAME = 'manifest.yml';
 export const DATASTREAM_MANIFEST_NAME = 'manifest.yml';
 export const DATASTREAM_ROUTING_RULES_NAME = 'routing_rules.yml';
+export const DATASTREAM_LIFECYCLE_NAME = 'lifecycle.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
 
@@ -128,6 +129,18 @@ const registryPolicyTemplateProps = Object.values(RegistryPolicyTemplateKeys);
 const registryStreamProps = Object.values(RegistryStreamKeys);
 const registryDataStreamProps = Object.values(RegistryDataStreamKeys);
 
+const PARSE_AND_VERIFY_ASSETS_NAME = [
+  MANIFEST_NAME,
+  DATASTREAM_ROUTING_RULES_NAME,
+  DATASTREAM_LIFECYCLE_NAME,
+];
+/**
+ * Filter assets needed for the parse and verify archive function
+ */
+export function filterAssetPathForParseAndVerifyArchive(assetPath: string): boolean {
+  return PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) => assetPath.endsWith(endWithPath));
+}
+
 /*
   This function generates a package info object (see type `ArchivePackage`) by parsing and verifying the `manifest.yml` file as well
   as the directory structure for the given package archive and other files adhering to the package spec: https://github.com/elastic/package-spec.
@@ -149,10 +162,7 @@ export async function generatePackageInfoFromArchiveBuffer(
   const paths: string[] = [];
   entries.forEach(({ path: bufferPath, buffer }) => {
     paths.push(bufferPath);
-    if (
-      buffer &&
-      (bufferPath.endsWith(MANIFEST_NAME) || bufferPath.endsWith(DATASTREAM_ROUTING_RULES_NAME))
-    ) {
+    if (buffer && filterAssetPathForParseAndVerifyArchive(bufferPath)) {
       manifestsAndRoutingRules[bufferPath] = buffer;
     }
   });
@@ -174,7 +184,7 @@ export async function _generatePackageInfoFromPaths(
   const manifestsAndRoutingRules: AssetsBufferMap = {};
   await Promise.all(
     paths.map(async (filePath) => {
-      if (filePath.endsWith(MANIFEST_NAME) || filePath.endsWith(DATASTREAM_ROUTING_RULES_NAME)) {
+      if (filterAssetPathForParseAndVerifyArchive(filePath)) {
         manifestsAndRoutingRules[filePath] = await readFileAsync(filePath);
       }
     })
@@ -249,7 +259,7 @@ export function parseAndVerifyArchive(
     pkgName: parsed.name,
     pkgVersion: parsed.version,
     pkgBasePathOverride: topLevelDirOverride,
-    manifestsAndRoutingRules,
+    assetsMap: manifestsAndRoutingRules,
   });
 
   if (parsedDataStreams.length) {
@@ -294,10 +304,10 @@ export function parseAndVerifyDataStreams(opts: {
   paths: string[];
   pkgName: string;
   pkgVersion: string;
-  manifestsAndRoutingRules: AssetsBufferMap;
+  assetsMap: AssetsBufferMap;
   pkgBasePathOverride?: string;
 }): RegistryDataStream[] {
-  const { paths, pkgName, pkgVersion, manifestsAndRoutingRules, pkgBasePathOverride } = opts;
+  const { paths, pkgName, pkgVersion, assetsMap: assetsMap, pkgBasePathOverride } = opts;
   // A data stream is made up of a subdirectory of name-version/data_stream/, containing a manifest.yml
   const dataStreamPaths = new Set<string>();
   const dataStreams: RegistryDataStream[] = [];
@@ -316,7 +326,7 @@ export function parseAndVerifyDataStreams(opts: {
   dataStreamPaths.forEach((dataStreamPath) => {
     const fullDataStreamPath = path.posix.join(dataStreamsBasePath, dataStreamPath);
     const manifestFile = path.posix.join(fullDataStreamPath, DATASTREAM_MANIFEST_NAME);
-    const manifestBuffer = manifestsAndRoutingRules[manifestFile];
+    const manifestBuffer = assetsMap[manifestFile];
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
         `No manifest.yml file found for data stream '${dataStreamPath}'`
@@ -334,17 +344,18 @@ export function parseAndVerifyDataStreams(opts: {
 
     // Routing rules
     const routingRulesFiles = path.posix.join(fullDataStreamPath, DATASTREAM_ROUTING_RULES_NAME);
-    const routingRulesBuffer = manifestsAndRoutingRules[routingRulesFiles];
+    const routingRulesBuffer = assetsMap[routingRulesFiles];
     let dataStreamRoutingRules: any;
     if (routingRulesBuffer) {
       try {
         dataStreamRoutingRules = yaml.safeLoad(routingRulesBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
-          `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
+          `Could not parse routing rules for data stream '${dataStreamPath}': ${error}.`
         );
       }
     }
+    // Lifecycle
 
     const {
       title: dataStreamTitle,

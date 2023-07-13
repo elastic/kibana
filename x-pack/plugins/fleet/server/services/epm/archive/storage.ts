@@ -24,7 +24,12 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
 import type { ArchiveEntry } from '.';
-import { DATASTREAM_ROUTING_RULES_NAME, MANIFEST_NAME, parseAndVerifyArchive } from './parse';
+import {
+  DATASTREAM_ROUTING_RULES_NAME,
+  filterAssetPathForParseAndVerifyArchive,
+  MANIFEST_NAME,
+  parseAndVerifyArchive,
+} from './parse';
 
 const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
@@ -216,9 +221,7 @@ export const getEsPackage = async (
       paths.push(path);
     }
     paths.push(path);
-    if (path.endsWith(MANIFEST_NAME) && buffer) {
-      manifestsAndRoutingRules[path] = buffer;
-    } else if (path.endsWith(DATASTREAM_ROUTING_RULES_NAME) && buffer) {
+    if (buffer && filterAssetPathForParseAndVerifyArchive(path)) {
       manifestsAndRoutingRules[path] = buffer;
     }
   });
