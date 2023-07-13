@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 import { CaseAssigneesRt } from '../../../../api';
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 
 export const AssigneesUserActionPayloadRt = rt.strict({ assignees: CaseAssigneesRt });
 
 export const AssigneesUserActionRt = rt.strict({
-  type: rt.literal(UserActionActionTypes.assignees),
+  type: rt.literal(UserActionTypes.assignees),
   payload: AssigneesUserActionPayloadRt,
 });

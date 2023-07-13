@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 import { AssigneesUserActionPayloadRt, AssigneesUserActionRt } from './v1';
 
 describe('Assignees', () => {
@@ -34,7 +34,7 @@ describe('Assignees', () => {
   });
   describe('AssigneesUserActionRt', () => {
     const defaultRequest = {
-      type: UserActionActionTypes.assignees,
+      type: UserActionTypes.assignees,
       payload: {
         assignees: [{ uid: '1' }, { uid: '2' }, { uid: '3' }],
       },
@@ -60,7 +60,7 @@ describe('Assignees', () => {
 
     it('removes foo:bar attributes from assignees', () => {
       const query = AssigneesUserActionRt.decode({
-        type: UserActionActionTypes.assignees,
+        type: UserActionTypes.assignees,
         payload: {
           assignees: [{ uid: '1', foo: 'bar' }, { uid: '2' }, { uid: '3' }],
         },
@@ -69,7 +69,7 @@ describe('Assignees', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
-          type: UserActionActionTypes.assignees,
+          type: UserActionTypes.assignees,
           payload: {
             assignees: [{ uid: '1' }, { uid: '2' }, { uid: '3' }],
           },

@@ -13,7 +13,7 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type { ConfigurationAttributes } from '../../../common/types/domain';
-import { UserActionActionTypes } from '../../../common/types/domain';
+import { UserActionTypes } from '../../../common/types/domain';
 import type {
   ActionConnector,
   Case,
@@ -253,7 +253,7 @@ export const push = async (
 
     if (shouldMarkAsClosed) {
       await userActionService.creator.createUserAction({
-        type: UserActionActionTypes.status,
+        type: UserActionTypes.status,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -267,7 +267,7 @@ export const push = async (
     }
 
     await userActionService.creator.createUserAction({
-      type: UserActionActionTypes.pushed,
+      type: UserActionTypes.pushed,
       payload: { externalService },
       user,
       caseId,

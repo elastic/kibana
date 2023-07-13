@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React, { memo } from 'react';
 import type { AssigneesUserAction } from '../../../common/types/domain';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { User } from '../../../common/api';
 import { getName } from '../user_profiles/display_name';
@@ -141,8 +141,8 @@ const getLabelTitle = (
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-assignees-label" grow={false}>
-        {userAction.action === Actions.add && i18n.ASSIGNED}
-        {userAction.action === Actions.delete && i18n.UNASSIGNED}
+        {userAction.action === UserActionActions.add && i18n.ASSIGNED}
+        {userAction.action === UserActionActions.delete && i18n.UNASSIGNED}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Assignees createdByUser={userAction.createdBy} assignees={assignees} />

@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { TagsUserAction } from '../../../common/types/domain';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tags/tags';
@@ -22,8 +22,9 @@ const getLabelTitle = (userAction: SnakeToCamelCase<TagsUserAction>) => {
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
-        {userAction.action === Actions.add && i18n.ADDED_FIELD}
-        {userAction.action === Actions.delete && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
+        {userAction.action === UserActionActions.add && i18n.ADDED_FIELD}
+        {userAction.action === UserActionActions.delete && i18n.REMOVED_FIELD}{' '}
+        {i18n.TAGS.toLowerCase()}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Tags tags={tags} gutterSize="xs" color="hollow" />

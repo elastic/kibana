@@ -13,7 +13,7 @@ import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createCategoryUserActionBuilder } from './category';
 import { getMockBuilderArgs } from './mock';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -26,7 +26,7 @@ describe('createCategoryUserActionBuilder ', () => {
   });
 
   it('renders correctly when the category is updated', () => {
-    const userAction = getUserAction('category', Actions.update, {
+    const userAction = getUserAction('category', UserActionActions.update, {
       payload: { category: 'fantasy' },
     });
     const builder = createCategoryUserActionBuilder({
@@ -46,7 +46,7 @@ describe('createCategoryUserActionBuilder ', () => {
   });
 
   it('renders correctly when the category is removed', () => {
-    const userAction = getUserAction('category', Actions.delete, {
+    const userAction = getUserAction('category', UserActionActions.delete, {
       payload: { category: null },
     });
     const builder = createCategoryUserActionBuilder({

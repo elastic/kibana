@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { UserRt } from '../../../api';
-import { ActionsRt } from './action/v1';
+import { UserActionActionsRt } from './action/v1';
 import { AssigneesUserActionRt } from './assignees/v1';
 import { CategoryUserActionRt } from './category/v1';
 import type { CommentUserActionPayloadWithoutIdsRt } from './comment/v1';
@@ -23,16 +23,16 @@ import { StatusUserActionRt } from './status/v1';
 import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
 
-export { ActionsRt, UserActionActionTypes, Actions } from './action/v1';
+export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 
-export type { UserActionActionType } from './action/v1';
+export type { UserActionType, UserActionAction } from './action/v1';
 
 const UserActionCommonAttributesRt = rt.strict({
   created_at: rt.string,
   created_by: UserRt,
   owner: rt.string,
-  action: ActionsRt,
+  action: UserActionActionsRt,
 });
 
 /**
@@ -122,11 +122,6 @@ export type UserAction<T extends UserActionPayload = UserActionPayload> = Omit<
   'type' | 'payload'
 > &
   T;
-
-/**
- * This defines the high level category for the user action. Whether the user add, removed, updated something
- */
-export type ActionCategory = rt.TypeOf<typeof ActionsRt>;
 
 /**
  * User actions

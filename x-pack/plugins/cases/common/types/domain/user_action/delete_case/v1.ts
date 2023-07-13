@@ -6,9 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 
 export const DeleteCaseUserActionRt = rt.strict({
-  type: rt.literal(UserActionActionTypes.delete_case),
+  type: rt.literal(UserActionTypes.delete_case),
   payload: rt.strict({}),
 });

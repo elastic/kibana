@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class TitleUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'title'>): UserActionEvent {
-    const action = Actions.update;
+    const action = UserActionActions.update;
 
     const parameters = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'title',
       value: args.payload.title,
-      type: UserActionActionTypes.title,
+      type: UserActionTypes.title,
     });
 
     const getMessage = (id?: string) =>

@@ -6,11 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 
 export const CategoryUserActionPayloadRt = rt.strict({ category: rt.union([rt.string, rt.null]) });
 
 export const CategoryUserActionRt = rt.strict({
-  type: rt.literal(UserActionActionTypes.category),
+  type: rt.literal(UserActionTypes.category),
   payload: CategoryUserActionPayloadRt,
 });

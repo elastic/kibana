@@ -14,7 +14,7 @@ import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createStatusUserActionBuilder } from './status';
 import { getMockBuilderArgs } from './mock';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -32,7 +32,7 @@ describe('createStatusUserActionBuilder ', () => {
   });
 
   it.each(tests)('renders correctly when changed to %s status', async (status, label) => {
-    const userAction = getUserAction('status', Actions.update, { payload: { status } });
+    const userAction = getUserAction('status', UserActionActions.update, { payload: { status } });
     const builder = createStatusUserActionBuilder({
       ...builderArgs,
       userAction,

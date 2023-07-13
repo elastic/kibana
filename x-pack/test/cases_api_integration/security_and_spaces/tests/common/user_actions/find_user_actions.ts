@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { Case, CaseSeverity, CaseStatuses, ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
-import { UserActionActionTypes, CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
+import { UserActionTypes, CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'desc',
-            types: [UserActionActionTypes.comment, UserActionActionTypes.create_case],
+            types: [UserActionTypes.comment, UserActionTypes.create_case],
           },
         });
 
@@ -143,7 +143,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.comment, UserActionActionTypes.create_case],
+            types: [UserActionTypes.comment, UserActionTypes.create_case],
             perPage: 1,
           },
         });
@@ -161,7 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.comment, UserActionActionTypes.create_case],
+            types: [UserActionTypes.comment, UserActionTypes.create_case],
             perPage: 2,
           },
         });
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.comment, UserActionActionTypes.create_case],
+            types: [UserActionTypes.comment, UserActionTypes.create_case],
             page: 2,
             perPage: 1,
           },
@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.comment, UserActionActionTypes.create_case],
+            types: [UserActionTypes.comment, UserActionTypes.create_case],
             page: 3,
             perPage: 1,
           },
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.comment, UserActionActionTypes.create_case],
+            types: [UserActionTypes.comment, UserActionTypes.create_case],
             page: 1,
             perPage: 10,
           },
@@ -273,7 +273,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.comment],
+            types: [UserActionTypes.comment],
           },
         });
 
@@ -294,7 +294,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.comment],
+            types: [UserActionTypes.comment],
           },
         });
 
@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.connector],
+            types: [UserActionTypes.connector],
           },
         });
 
@@ -383,7 +383,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.description],
+            types: [UserActionTypes.description],
           },
         });
 
@@ -417,7 +417,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.tags],
+            types: [UserActionTypes.tags],
           },
         });
 
@@ -456,7 +456,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.title],
+            types: [UserActionTypes.title],
           },
         });
 
@@ -490,7 +490,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.status],
+            types: [UserActionTypes.status],
           },
         });
 
@@ -524,7 +524,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.settings],
+            types: [UserActionTypes.settings],
           },
         });
 
@@ -558,7 +558,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.severity],
+            types: [UserActionTypes.severity],
           },
         });
 
@@ -579,7 +579,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.create_case],
+            types: [UserActionTypes.create_case],
           },
         });
 
@@ -767,7 +767,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             options: {
               sortOrder: 'asc',
-              types: [UserActionActionTypes.create_case, UserActionActionTypes.comment],
+              types: [UserActionTypes.create_case, UserActionTypes.comment],
             },
           });
 
@@ -790,7 +790,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             options: {
               sortOrder: 'asc',
-              types: [UserActionActionTypes.create_case, UserActionActionTypes.comment],
+              types: [UserActionTypes.create_case, UserActionTypes.comment],
             },
           });
 
@@ -879,7 +879,7 @@ export default ({ getService }: FtrProviderContext): void => {
               supertest: supertestWithoutAuth,
               options: {
                 sortOrder: 'asc',
-                types: [UserActionActionTypes.create_case],
+                types: [UserActionTypes.create_case],
               },
               auth: { user: scenario.user, space: scenario.space },
             });
@@ -921,7 +921,7 @@ export default ({ getService }: FtrProviderContext): void => {
               expectedHttpCode: scenario.expectedCode,
               options: {
                 sortOrder: 'asc',
-                types: [UserActionActionTypes.create_case],
+                types: [UserActionTypes.create_case],
               },
               auth: { user: scenario.user, space: scenario.space },
             });

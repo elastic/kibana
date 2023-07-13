@@ -6,7 +6,7 @@
  */
 
 import { CommentType } from '../../../api';
-import { UserActionActionTypes } from '../../domain/user_action/action/v1';
+import { UserActionTypes } from '../../domain/user_action/action/v1';
 import {
   CaseUserActionStatsResponseRt,
   CaseUserActionStatsRt,
@@ -18,7 +18,7 @@ describe('User actions APIs', () => {
   describe('Find API', () => {
     describe('UserActionFindRequestRt', () => {
       const defaultRequest = {
-        types: [UserActionActionTypes.comment],
+        types: [UserActionTypes.comment],
         sortOrder: 'desc',
         page: '1',
         perPage: '10',
@@ -55,7 +55,7 @@ describe('User actions APIs', () => {
       const defaultRequest = {
         userActions: [
           {
-            type: UserActionActionTypes.comment,
+            type: UserActionTypes.comment,
             payload: {
               comment: {
                 comment: 'this is a sample comment',

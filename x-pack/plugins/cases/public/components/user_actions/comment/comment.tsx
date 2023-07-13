@@ -9,7 +9,7 @@ import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { Actions } from '../../../../common/types/domain';
+import { UserActionActions } from '../../../../common/types/domain';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import { CommentType } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
@@ -273,7 +273,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   build: () => {
     const commentUserAction = userAction as SnakeToCamelCase<CommentUserAction>;
 
-    if (commentUserAction.action === Actions.delete) {
+    if (commentUserAction.action === UserActionActions.delete) {
       return getDeleteCommentUserAction({
         userAction: commentUserAction,
         caseData,
@@ -290,7 +290,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       return [];
     }
 
-    if (commentUserAction.action === Actions.create) {
+    if (commentUserAction.action === UserActionActions.create) {
       const commentAction = getCreateCommentUserAction({
         appId,
         caseData,

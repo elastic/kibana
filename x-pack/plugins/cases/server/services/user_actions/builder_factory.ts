@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserActionActionType } from '../../../common/types/domain';
+import type { UserActionType } from '../../../common/types/domain';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
@@ -46,7 +46,7 @@ export class BuilderFactory {
     this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
   }
 
-  getBuilder<T extends UserActionActionType>(type: T): UserActionBuilder | undefined {
+  getBuilder<T extends UserActionType>(type: T): UserActionBuilder | undefined {
     return new builderMap[type]({
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     });

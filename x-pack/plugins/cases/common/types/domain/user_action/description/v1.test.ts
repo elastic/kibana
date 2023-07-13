@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 import { DescriptionUserActionPayloadRt, DescriptionUserActionRt } from './v1';
 
 describe('Description', () => {
@@ -35,7 +35,7 @@ describe('Description', () => {
 
   describe('DescriptionUserActionRt', () => {
     const defaultRequest = {
-      type: UserActionActionTypes.description,
+      type: UserActionTypes.description,
       payload: {
         description: 'this is sample description',
       },

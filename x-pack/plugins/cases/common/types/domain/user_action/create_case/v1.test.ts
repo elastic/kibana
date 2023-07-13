@@ -6,13 +6,13 @@
  */
 
 import { ConnectorTypes } from '../../../../api';
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './v1';
 
 describe('Create case', () => {
   describe('CreateCaseUserActionRt', () => {
     const defaultRequest = {
-      type: UserActionActionTypes.create_case,
+      type: UserActionTypes.create_case,
       payload: {
         connector: {
           id: 'jira-connector-id',
@@ -98,7 +98,7 @@ describe('Create case', () => {
 
   describe('CreateCaseUserActionWithoutConnectorIdRt', () => {
     const defaultRequest = {
-      type: UserActionActionTypes.create_case,
+      type: UserActionTypes.create_case,
       payload: {
         connector: {
           type: ConnectorTypes.jira,

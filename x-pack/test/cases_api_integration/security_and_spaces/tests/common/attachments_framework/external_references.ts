@@ -13,7 +13,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
-import { UserActionActionTypes } from '@kbn/cases-plugin/common/types/domain';
+import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -244,7 +244,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
       const createCommentUserAction = userActions.find(
-        (userAction) => userAction.type === UserActionActionTypes.comment
+        (userAction) => userAction.type === UserActionTypes.comment
       );
 
       const esResponse = await getSOFromKibanaIndex({

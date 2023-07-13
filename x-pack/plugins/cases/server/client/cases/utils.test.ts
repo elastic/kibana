@@ -34,7 +34,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 
 const allComments = [
   commentObj,
@@ -980,7 +980,7 @@ describe('utils', () => {
         ...userActions.slice(0, 3),
         {
           type: 'pushed',
-          action: Actions.push_to_service,
+          action: UserActionActions.push_to_service,
           created_at: '2021-02-03T17:45:29.400Z',
           created_by: {
             email: 'elastic@elastic.co',

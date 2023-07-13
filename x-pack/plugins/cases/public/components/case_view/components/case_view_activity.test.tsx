@@ -37,7 +37,7 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { UserActionActionTypes } from '../../../../common/types/domain';
+import { UserActionTypes } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -602,7 +602,7 @@ describe('Case View Page activity tab', () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
           data: {
-            userActions: [getUserAction(UserActionActionTypes.assignees, 'delete')],
+            userActions: [getUserAction(UserActionTypes.assignees, 'delete')],
           },
         });
 
@@ -620,7 +620,7 @@ describe('Case View Page activity tab', () => {
           ...defaultUseFindCaseUserActions,
           data: {
             userActions: [
-              getUserAction(UserActionActionTypes.assignees, 'add', {
+              getUserAction(UserActionTypes.assignees, 'add', {
                 payload: {
                   assignees: [
                     { uid: 'not-valid' },

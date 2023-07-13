@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { paginationSchema } from '../../../schema';
 import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
-import { UserActionActionTypes } from '../../domain/user_action/action/v1';
+import { UserActionTypes } from '../../domain/user_action/action/v1';
 import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
 import {
   CaseUserActionInjectedDeprecatedIdsRt,
@@ -58,7 +58,7 @@ const UserActionAdditionalFindRequestFilterTypes = {
 } as const;
 
 const UserActionFindRequestTypes = {
-  ...UserActionActionTypes,
+  ...UserActionTypes,
   ...UserActionAdditionalFindRequestFilterTypes,
 } as const;
 

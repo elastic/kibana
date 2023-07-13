@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 import { TagsUserActionPayloadRt, TagsUserActionRt } from './v1';
 
 describe('Tags', () => {
@@ -35,7 +35,7 @@ describe('Tags', () => {
 
   describe('TagsUserActionRt', () => {
     const defaultRequest = {
-      type: UserActionActionTypes.tags,
+      type: UserActionTypes.tags,
       payload: {
         tags: ['one', '2-two'],
       },

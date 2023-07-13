@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { CategoryUserAction } from '../../../common/types/domain';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 
 import { createCommonUpdateUserActionBuilder } from './common';
@@ -25,7 +25,7 @@ const getLabelTitle = (userAction: SnakeToCamelCase<CategoryUserAction>) => {
       data-test-subj={`${userAction.id}-category-user-action-title`}
       responsive={false}
     >
-      {userAction.action === Actions.update ? (
+      {userAction.action === UserActionActions.update ? (
         <EuiFlexItem grow={false}>{`${i18n.ADD_CATEGORY} "${category}"`}</EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>{i18n.REMOVE_CATEGORY}</EuiFlexItem>

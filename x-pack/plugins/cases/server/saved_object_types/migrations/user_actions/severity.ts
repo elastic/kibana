@@ -7,13 +7,13 @@
 
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import type { CreateCaseUserAction } from '../../../../common/types/domain';
-import { UserActionActionTypes } from '../../../../common/types/domain';
+import { UserActionTypes } from '../../../../common/types/domain';
 import { CaseSeverity } from '../../../../common/api';
 
 export const addSeverityToCreateUserAction = (
   doc: SavedObjectUnsanitizedDoc<CreateCaseUserAction>
 ): SavedObjectSanitizedDoc<CreateCaseUserAction> => {
-  if (doc.attributes.type !== UserActionActionTypes.create_case) {
+  if (doc.attributes.type !== UserActionTypes.create_case) {
     return { ...doc, references: doc.references ?? [] };
   }
 

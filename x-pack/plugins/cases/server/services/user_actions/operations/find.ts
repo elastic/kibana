@@ -28,8 +28,8 @@ import type {
 } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
 import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
-import type { UserActionActionType } from '../../../../common/types/domain';
-import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
+import type { UserActionType } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -113,7 +113,7 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [UserActionActionTypes.comment],
+          filters: [UserActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -133,7 +133,7 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [UserActionActionTypes.comment],
+          filters: [UserActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -153,7 +153,7 @@ export class UserActionFinder {
     return combineFilters(
       [
         buildFilter({
-          filters: [UserActionActionTypes.comment],
+          filters: [UserActionTypes.comment],
           field: 'type',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -169,7 +169,7 @@ export class UserActionFinder {
     );
   }
 
-  private static buildGenericTypeFilter(type: UserActionActionType): KueryNode | undefined {
+  private static buildGenericTypeFilter(type: UserActionType): KueryNode | undefined {
     return buildFilter({
       filters: [type],
       field: 'type',
@@ -189,14 +189,14 @@ export class UserActionFinder {
       this.context.log.debug('Attempting to find status changes');
 
       const updateActionFilter = buildFilter({
-        filters: Actions.update,
+        filters: UserActionActions.update,
         field: 'action',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
       });
 
       const statusChangeFilter = buildFilter({
-        filters: UserActionActionTypes.status,
+        filters: UserActionTypes.status,
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,

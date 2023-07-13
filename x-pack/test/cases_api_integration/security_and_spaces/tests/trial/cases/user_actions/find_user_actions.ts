@@ -7,7 +7,7 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { UserActionActionTypes } from '@kbn/cases-plugin/common/api';
+import { UserActionTypes } from '@kbn/cases-plugin/common/api';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.assignees],
+            types: [UserActionTypes.assignees],
           },
         });
 
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           options: {
             sortOrder: 'asc',
-            types: [UserActionActionTypes.pushed],
+            types: [UserActionTypes.pushed],
           },
         });
 

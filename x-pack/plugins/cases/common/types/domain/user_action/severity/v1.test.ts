@@ -6,7 +6,7 @@
  */
 
 import { CaseSeverity } from '../../../../api';
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 import { SeverityUserActionPayloadRt, SeverityUserActionRt } from './v1';
 
 describe('Severity', () => {
@@ -36,7 +36,7 @@ describe('Severity', () => {
 
   describe('SeverityUserActionRt', () => {
     const defaultRequest = {
-      type: UserActionActionTypes.severity,
+      type: UserActionTypes.severity,
       payload: {
         severity: CaseSeverity.CRITICAL,
       },

@@ -11,7 +11,7 @@ import * as rt from 'io-ts';
  * These values are used in a number of places including to define the accepted values in the
  * user_actions/_find api. These values should not be removed only new values can be added.
  */
-export const UserActionActionTypes = {
+export const UserActionTypes = {
   assignees: 'assignees',
   comment: 'comment',
   connector: 'connector',
@@ -27,14 +27,14 @@ export const UserActionActionTypes = {
   category: 'category',
 } as const;
 
-type ActionTypeKeys = keyof typeof UserActionActionTypes;
+type UserActionActionTypeKeys = keyof typeof UserActionTypes;
 /**
  * This defines the type of the user action, meaning what individual action was taken, for example changing the status,
  * adding an assignee etc.
  */
-export type UserActionActionType = typeof UserActionActionTypes[ActionTypeKeys];
+export type UserActionType = typeof UserActionTypes[UserActionActionTypeKeys];
 
-export const Actions = {
+export const UserActionActions = {
   add: 'add',
   create: 'create',
   delete: 'delete',
@@ -42,4 +42,9 @@ export const Actions = {
   push_to_service: 'push_to_service',
 } as const;
 
-export const ActionsRt = rt.keyof(Actions);
+export const UserActionActionsRt = rt.keyof(UserActionActions);
+
+/**
+ * This defines the high level category for the user action. Whether the user add, removed, updated something
+ */
+export type UserActionAction = rt.TypeOf<typeof UserActionActionsRt>;

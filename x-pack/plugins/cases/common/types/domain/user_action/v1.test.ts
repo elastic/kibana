@@ -6,14 +6,14 @@
  */
 
 import { CommentType } from '../../../api';
-import { UserActionActionTypes } from './action/v1';
+import { UserActionTypes } from './action/v1';
 import { UserActionsRt } from './v1';
 
 describe('User actions', () => {
   describe('UserActionsRt', () => {
     const defaultRequest = [
       {
-        type: UserActionActionTypes.comment,
+        type: UserActionTypes.comment,
         payload: {
           comment: {
             comment: 'this is a sample comment',

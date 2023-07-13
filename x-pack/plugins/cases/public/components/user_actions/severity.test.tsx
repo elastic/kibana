@@ -13,7 +13,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
 import { createSeverityUserActionBuilder } from './severity';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -25,7 +25,7 @@ describe('createSeverityUserActionBuilder', () => {
     appMockRenderer = createAppMockRenderer();
   });
   it('renders correctly', () => {
-    const userAction = getUserAction('severity', Actions.update, {
+    const userAction = getUserAction('severity', UserActionActions.update, {
       payload: { severity: CaseSeverity.LOW },
     });
     const builder = createSeverityUserActionBuilder({

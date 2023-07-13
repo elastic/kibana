@@ -6,14 +6,14 @@
  */
 
 import { omit } from 'lodash';
-import { UserActionActionTypes } from '../../../common/types/domain';
+import { UserActionTypes } from '../../../common/types/domain';
 import type { SupportedUserActionTypes } from './types';
 
 export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';
 
 export const UNSUPPORTED_ACTION_TYPES = ['delete_case'] as const;
 export const SUPPORTED_ACTION_TYPES: SupportedUserActionTypes[] = Object.keys(
-  omit(UserActionActionTypes, UNSUPPORTED_ACTION_TYPES)
+  omit(UserActionTypes, UNSUPPORTED_ACTION_TYPES)
 ) as SupportedUserActionTypes[];
 
 export const NEW_COMMENT_ID = 'newComment';

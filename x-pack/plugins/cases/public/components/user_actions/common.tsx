@@ -10,8 +10,8 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { ActionCategory, ConnectorUserAction } from '../../../common/types/domain';
-import { Actions } from '../../../common/types/domain';
+import type { UserActionAction, ConnectorUserAction } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import { UserActionTimestamp } from './timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { UserActionCopyLink } from './copy_link';
@@ -24,9 +24,9 @@ interface Props {
 }
 
 const showMoveToReference = (
-  action: ActionCategory,
+  action: UserActionAction,
   commentId: string | null
-): commentId is string => action === Actions.update && commentId != null;
+): commentId is string => action === UserActionActions.update && commentId != null;
 
 const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutlineComment }) => (
   <EuiFlexGroup responsive={false}>

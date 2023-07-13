@@ -16,9 +16,9 @@ import type {
   StatusUserAction,
   TagsUserAction,
   TitleUserAction,
-  UserActionActionType,
+  UserActionType,
 } from '../types/domain';
-import { UserActionActionTypes } from '../types/domain';
+import { UserActionTypes } from '../types/domain';
 
 type SnakeCaseOrCamelCaseUserAction<
   T extends 'snakeCase' | 'camelCase',
@@ -27,7 +27,7 @@ type SnakeCaseOrCamelCaseUserAction<
 > = T extends 'snakeCase' ? S : C;
 
 export const isConnectorUserAction = (userAction: unknown): userAction is ConnectorUserAction =>
-  (userAction as ConnectorUserAction)?.type === UserActionActionTypes.connector &&
+  (userAction as ConnectorUserAction)?.type === UserActionTypes.connector &&
   (userAction as ConnectorUserAction)?.payload?.connector != null;
 
 export const isPushedUserAction = <T extends 'snakeCase' | 'camelCase' = 'snakeCase'>(
@@ -37,31 +37,31 @@ export const isPushedUserAction = <T extends 'snakeCase' | 'camelCase' = 'snakeC
   PushedUserAction,
   SnakeToCamelCase<PushedUserAction>
 > =>
-  (userAction as PushedUserAction)?.type === UserActionActionTypes.pushed &&
+  (userAction as PushedUserAction)?.type === UserActionTypes.pushed &&
   (userAction as PushedUserAction)?.payload?.externalService != null;
 
 export const isTitleUserAction = (userAction: unknown): userAction is TitleUserAction =>
-  (userAction as TitleUserAction)?.type === UserActionActionTypes.title &&
+  (userAction as TitleUserAction)?.type === UserActionTypes.title &&
   (userAction as TitleUserAction)?.payload?.title != null;
 
 export const isStatusUserAction = (userAction: unknown): userAction is StatusUserAction =>
-  (userAction as StatusUserAction)?.type === UserActionActionTypes.status &&
+  (userAction as StatusUserAction)?.type === UserActionTypes.status &&
   (userAction as StatusUserAction)?.payload?.status != null;
 
 export const isTagsUserAction = (userAction: unknown): userAction is TagsUserAction =>
-  (userAction as TagsUserAction)?.type === UserActionActionTypes.tags &&
+  (userAction as TagsUserAction)?.type === UserActionTypes.tags &&
   (userAction as TagsUserAction)?.payload?.tags != null;
 
 export const isCommentUserAction = (userAction: unknown): userAction is CommentUserAction =>
-  (userAction as CommentUserAction)?.type === UserActionActionTypes.comment &&
+  (userAction as CommentUserAction)?.type === UserActionTypes.comment &&
   (userAction as CommentUserAction)?.payload?.comment != null;
 
 export const isDescriptionUserAction = (userAction: unknown): userAction is DescriptionUserAction =>
-  (userAction as DescriptionUserAction)?.type === UserActionActionTypes.description &&
+  (userAction as DescriptionUserAction)?.type === UserActionTypes.description &&
   (userAction as DescriptionUserAction)?.payload?.description != null;
 
 export const isCreateCaseUserAction = (userAction: unknown): userAction is CreateCaseUserAction =>
-  (userAction as CreateCaseUserAction)?.type === UserActionActionTypes.create_case &&
+  (userAction as CreateCaseUserAction)?.type === UserActionTypes.create_case &&
   /**
    * Connector is needed in various places across the application where
    * the isCreateCaseUserAction is being used.
@@ -70,9 +70,9 @@ export const isCreateCaseUserAction = (userAction: unknown): userAction is Creat
    */
   (userAction as CreateCaseUserAction)?.payload?.connector != null;
 
-export const isUserActionType = (field: string): field is UserActionActionType =>
-  UserActionActionTypes[field as UserActionActionType] != null;
+export const isUserActionType = (field: string): field is UserActionType =>
+  UserActionTypes[field as UserActionType] != null;
 
 export const isCategoryUserAction = (userAction: unknown): userAction is CategoryUserAction =>
-  (userAction as CategoryUserAction)?.type === UserActionActionTypes.category &&
+  (userAction as CategoryUserAction)?.type === UserActionTypes.category &&
   (userAction as CategoryUserAction)?.payload?.category !== undefined;

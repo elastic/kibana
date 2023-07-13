@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions, UserActionActionTypes } from '../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
 import {
@@ -44,7 +44,7 @@ describe('UserActionBuilder', () => {
 
   describe('parameters', () => {
     it('builds a title user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.title)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.title)!;
       const userAction = builder.build({
         payload: { title: 'test' },
         ...commonArgs,
@@ -78,7 +78,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a connector user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.connector)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.connector)!;
       const userAction = builder.build({
         payload: {
           connector: {
@@ -144,9 +144,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a comment user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: {
           attachment: {
             comment: 'a comment!',
@@ -195,9 +195,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds an external reference attachment (savedObject) user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
@@ -252,9 +252,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds an external reference attachment (elasticSearchDoc) user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: {
           attachment: externalReferenceAttachmentES,
         },
@@ -304,9 +304,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a persistable state attachment user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: {
           attachment: persistableStateAttachment,
         },
@@ -359,7 +359,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a description user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.description)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.description)!;
       const userAction = builder.build({
         payload: { description: 'test' },
         ...commonArgs,
@@ -393,7 +393,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a pushed user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.pushed)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.pushed)!;
       const userAction = builder.build({
         payload: { externalService },
         ...commonArgs,
@@ -443,9 +443,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a tags user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.tags)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.tags)!;
       const userAction = builder.build({
-        action: Actions.add,
+        action: UserActionActions.add,
         payload: { tags: ['one', 'two'] },
         ...commonArgs,
       });
@@ -481,7 +481,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a status user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.status)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.status)!;
       const userAction = builder.build({
         payload: { status: CaseStatuses.open },
         ...commonArgs,
@@ -515,7 +515,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a severity user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.severity)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.severity)!;
       const userAction = builder.build({
         payload: { severity: CaseSeverity.LOW },
         ...commonArgs,
@@ -549,7 +549,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds an assign user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.assignees)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.assignees)!;
       const userAction = builder.build({
         payload: { assignees: [{ uid: '1' }, { uid: '2' }] },
         ...commonArgs,
@@ -590,7 +590,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a settings user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.settings)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.settings)!;
       const userAction = builder.build({
         payload: { settings: { syncAlerts: true } },
         ...commonArgs,
@@ -626,7 +626,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a create case user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.create_case)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.create_case)!;
       const userAction = builder.build({
         payload: casePayload,
         ...commonArgs,
@@ -693,7 +693,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a delete case user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.delete_case)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.delete_case)!;
       const userAction = builder.build({
         payload: {},
         connectorId: '456',
@@ -704,7 +704,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds an add category user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.category)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.category)!;
       const userAction = builder.build({
         payload: { category: 'new' },
         ...commonArgs,
@@ -738,7 +738,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('builds a remove category user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.category)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.category)!;
       const userAction = builder.build({
         payload: { category: null },
         ...commonArgs,
@@ -774,7 +774,7 @@ describe('UserActionBuilder', () => {
 
   describe('eventDetails', () => {
     it('builds a title user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.title)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.title)!;
       const userAction = builder.build({
         payload: { title: 'test' },
         ...commonArgs,
@@ -795,7 +795,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a connector user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.connector)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.connector)!;
       const userAction = builder.build({
         payload: {
           connector: {
@@ -831,9 +831,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a comment user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: {
           attachment: {
             comment: 'a comment!',
@@ -860,9 +860,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs an external reference attachment (savedObject) user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.create,
+        action: UserActionActions.create,
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
@@ -885,9 +885,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs an external reference attachment (elasticSearchDoc) user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: {
           attachment: externalReferenceAttachmentES,
         },
@@ -910,9 +910,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a persistable state attachment user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.comment)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: {
           attachment: persistableStateAttachment,
         },
@@ -935,7 +935,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a description user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.description)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.description)!;
       const userAction = builder.build({
         payload: { description: 'test' },
         ...commonArgs,
@@ -956,7 +956,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a pushed user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.pushed)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.pushed)!;
       const userAction = builder.build({
         payload: { externalService },
         ...commonArgs,
@@ -977,9 +977,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a tags user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.tags)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.tags)!;
       const userAction = builder.build({
-        action: Actions.add,
+        action: UserActionActions.add,
         payload: { tags: ['one', 'two'] },
         ...commonArgs,
       });
@@ -999,9 +999,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a tags change user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.tags)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.tags)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: UserActionActions.update,
         payload: { tags: ['one', 'two'] },
         ...commonArgs,
       });
@@ -1021,9 +1021,9 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a tags delete user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.tags)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.tags)!;
       const userAction = builder.build({
-        action: Actions.delete,
+        action: UserActionActions.delete,
         payload: { tags: ['one', 'two'] },
         ...commonArgs,
       });
@@ -1043,7 +1043,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a status user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.status)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.status)!;
       const userAction = builder.build({
         payload: { status: CaseStatuses.open },
         ...commonArgs,
@@ -1064,7 +1064,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a severity user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.severity)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.severity)!;
       const userAction = builder.build({
         payload: { severity: CaseSeverity.LOW },
         ...commonArgs,
@@ -1085,7 +1085,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs an assign user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.assignees)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.assignees)!;
       const userAction = builder.build({
         payload: { assignees: [{ uid: '1' }, { uid: '2' }] },
         ...commonArgs,
@@ -1106,11 +1106,11 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs an unassign user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.assignees)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.assignees)!;
       const userAction = builder.build({
         payload: { assignees: [{ uid: '1' }, { uid: '2' }] },
         ...commonArgs,
-        action: Actions.delete,
+        action: UserActionActions.delete,
       });
 
       expect(userAction!.eventDetails).toMatchInlineSnapshot(`
@@ -1128,11 +1128,11 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs an assignee unknown action user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.assignees)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.assignees)!;
       const userAction = builder.build({
         payload: { assignees: [{ uid: '1' }, { uid: '2' }] },
         ...commonArgs,
-        action: Actions.create,
+        action: UserActionActions.create,
       });
 
       expect(userAction!.eventDetails).toMatchInlineSnapshot(`
@@ -1150,7 +1150,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a settings user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.settings)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.settings)!;
       const userAction = builder.build({
         payload: { settings: { syncAlerts: true } },
         ...commonArgs,
@@ -1171,7 +1171,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a create case user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.create_case)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.create_case)!;
       const userAction = builder.build({
         payload: casePayload,
         ...commonArgs,
@@ -1192,7 +1192,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs an add category user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.category)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.category)!;
       const userAction = builder.build({
         payload: { category: 'sci-fi' },
         ...commonArgs,
@@ -1213,7 +1213,7 @@ describe('UserActionBuilder', () => {
     });
 
     it('logs a remove category user action correctly', () => {
-      const builder = builderFactory.getBuilder(UserActionActionTypes.category)!;
+      const builder = builderFactory.getBuilder(UserActionTypes.category)!;
       const userAction = builder.build({
         payload: { category: null },
         ...commonArgs,

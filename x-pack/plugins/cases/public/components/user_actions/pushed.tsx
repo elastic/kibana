@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { PushedUserAction } from '../../../common/types/domain';
-import { Actions } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
@@ -95,7 +95,7 @@ const getFooters = ({
     connectorInfo.push.details?.latestUserActionPushDate
   );
 
-  const showTopFooter = userAction.action === Actions.push_to_service && latestPush;
+  const showTopFooter = userAction.action === UserActionActions.push_to_service && latestPush;
   const showBottomFooter = showTopFooter && connectorInfo.push.needsToBePushed;
 
   if (showTopFooter) {

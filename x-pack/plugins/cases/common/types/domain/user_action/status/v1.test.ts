@@ -6,7 +6,7 @@
  */
 
 import { CaseStatuses } from '@kbn/cases-components';
-import { UserActionActionTypes } from '../action/v1';
+import { UserActionTypes } from '../action/v1';
 import { StatusUserActionPayloadRt, StatusUserActionRt } from './v1';
 
 describe('Status', () => {
@@ -36,7 +36,7 @@ describe('Status', () => {
 
   describe('StatusUserActionRt', () => {
     const defaultRequest = {
-      type: UserActionActionTypes.status,
+      type: UserActionTypes.status,
       payload: {
         status: CaseStatuses.closed,
       },

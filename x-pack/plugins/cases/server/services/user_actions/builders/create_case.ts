@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions, UserActionActionTypes } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { CaseStatuses } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
@@ -14,7 +14,7 @@ import type { EventDetails, UserActionParameters, UserActionEvent } from '../typ
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'create_case'>): UserActionEvent {
     const { payload, caseId, owner, user } = args;
-    const action = Actions.create;
+    const action = UserActionActions.create;
 
     const connectorWithoutId = this.extractConnectorId(payload.connector);
     const parameters = {
@@ -22,7 +22,7 @@ export class CreateCaseUserActionBuilder extends UserActionBuilder {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action,
         payload: { ...payload, connector: connectorWithoutId, status: CaseStatuses.open },
-        type: UserActionActionTypes.create_case,
+        type: UserActionTypes.create_case,
       },
       references: [
         ...this.createCaseReferences(caseId),

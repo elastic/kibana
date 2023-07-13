@@ -16,12 +16,12 @@ import type {
 import type { KueryNode } from '@kbn/es-query';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type {
-  ActionCategory,
+  UserActionAction,
   CaseUserActionWithoutReferenceIds,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
-  UserActionActionType,
+  UserActionType,
 } from '../../../common/types/domain';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
@@ -110,15 +110,15 @@ export interface CommonArguments {
   owner: string;
   attachmentId?: string;
   connectorId?: string;
-  action?: ActionCategory;
+  action?: UserActionAction;
 }
 
 export interface Attributes {
-  action: ActionCategory;
+  action: UserActionAction;
   created_at: string;
   created_by: User;
   owner: string;
-  type: UserActionActionType;
+  type: UserActionType;
   payload: Record<string, unknown>;
 }
 
@@ -129,7 +129,7 @@ export interface SavedObjectParameters {
 
 export interface EventDetails {
   getMessage: (storedUserActionId?: string) => string;
-  action: ActionCategory;
+  action: UserActionAction;
   descriptiveAction: string;
   savedObjectId: string;
   savedObjectType: string;
@@ -141,8 +141,8 @@ export interface UserActionEvent {
 }
 
 export type CommonBuilderArguments = CommonArguments & {
-  action: ActionCategory;
-  type: UserActionActionType;
+  action: UserActionAction;
+  type: UserActionType;
   value: unknown;
   valueKey: string;
 };
@@ -278,7 +278,7 @@ export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDiffer
   newValue: T[];
 }
 
-export type CreatePayloadFunction<Item, ActionType extends UserActionActionType> = (
+export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
 
