@@ -11,25 +11,15 @@ import type {
   RuleTypeParams,
   SanitizedRule,
 } from '../../common';
+import { CombinedSummarizedAlerts } from '../types';
 
 type ActionTypeParams = Record<string, unknown>;
-
-interface Alert {
-  count: number;
-  data: unknown[];
-}
-interface Alerts {
-  new: Alert;
-  ongoing: Alert;
-  recovered: Alert;
-  all: Alert;
-}
 
 interface BuildActionParamsArgs<
   RuleParams extends RuleTypeParams = RuleTypeParams,
   RuleActionParams extends GenericRuleActionParams = GenericRuleActionParams
 > {
-  alerts: Alerts;
+  alerts: CombinedSummarizedAlerts;
   rule: SanitizedRule<RuleParams>;
   params: RuleActionParams;
 }

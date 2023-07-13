@@ -57,6 +57,24 @@ export interface RunResult {
   throttledSummaryActions: ThrottledActions;
 }
 
+interface RunSummarizedActionArgs {
+  action: RuleAction;
+  summarizedAlerts: CombinedSummarizedAlerts;
+  spaceId: string;
+}
+
+interface RunActionArgs<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  action: RuleAction;
+  alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+  ruleId: string;
+  spaceId: string;
+}
+
 export class ExecutionHandler<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -157,7 +175,7 @@ export class ExecutionHandler<
         logger,
         alertingEventLogger,
         ruleRunMetricsStore,
-        taskRunnerContext: { actionsConfigMap, actionsPlugin },
+        taskRunnerContext: { actionsConfigMap },
         taskInstance: {
           params: { spaceId, alertId: ruleId },
         },
@@ -213,37 +231,16 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-        if (isSummaryAction(action) && summarizedAlerts) {
-          const { start, end } = getSummaryActionTimeBounds(
-            action,
-            this.rule.schedule,
-            this.previousStartedAt
-          );
-          const ruleUrl = this.buildRuleUrl(spaceId, start, end);
-          const actionToRun = {
-            ...action,
-            params: injectActionParams({
-              actionTypeId,
-              ruleUrl,
-              actionParams: transformSummaryActionParams({
-                alerts: summarizedAlerts,
-                rule: this.rule,
-                ruleTypeId: this.ruleType.id,
-                actionId: action.id,
-                actionParams: action.params,
-                spaceId,
-                actionsPlugin,
-                actionTypeId,
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl,
-              }),
-            }),
-          };
+        const isSystemAction = this.actionsClient.isSystemAction(action.id);
 
-          await this.actionRunOrAddToBulk({
-            enqueueOptions: this.getEnqueueOptions(actionToRun),
-            bulkActions,
+        if (isSummaryAction(action) && summarizedAlerts && !isSystemAction) {
+          const toEnqueueForExecution = await this.runSummarizedAction({
+            action,
+            summarizedAlerts,
+            spaceId,
           });
+
+          bulkActions.push(...toEnqueueForExecution);
 
           if (isActionOnInterval(action)) {
             throttledSummaryActions[action.uuid!] = { date: new Date() };
@@ -258,42 +255,19 @@ export class ExecutionHandler<
               recovered: summarizedAlerts.recovered.count,
             },
           });
+        } else if (isSystemAction) {
+          //
         } else {
           const executableAlert = alert!;
-          const ruleUrl = this.buildRuleUrl(spaceId);
-          const actionToRun = {
-            ...action,
-            params: injectActionParams({
-              actionTypeId,
-              ruleUrl,
-              actionParams: transformActionParams({
-                actionsPlugin,
-                alertId: ruleId,
-                alertType: this.ruleType.id,
-                actionTypeId,
-                alertName: this.rule.name,
-                spaceId,
-                tags: this.rule.tags,
-                alertInstanceId: executableAlert.getId(),
-                alertUuid: executableAlert.getUuid(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: executableAlert.getContext(),
-                actionId: action.id,
-                state: executableAlert.getScheduledActionOptions()?.state || {},
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                alertParams: this.rule.params,
-                actionParams: action.params,
-                flapping: executableAlert.getFlapping(),
-                ruleUrl,
-              }),
-            }),
-          };
 
-          await this.actionRunOrAddToBulk({
-            enqueueOptions: this.getEnqueueOptions(actionToRun),
-            bulkActions,
+          const toEnqueueForExecution = await this.runAction({
+            action,
+            spaceId,
+            alert: executableAlert,
+            ruleId,
           });
+
+          bulkActions.push(...toEnqueueForExecution);
 
           logActions.push({
             id: action.id,
@@ -330,6 +304,89 @@ export class ExecutionHandler<
       }
     }
     return { throttledSummaryActions };
+  }
+
+  private async runSummarizedAction({
+    action,
+    summarizedAlerts,
+    spaceId,
+  }: RunSummarizedActionArgs): Promise<EnqueueExecutionOptions[]> {
+    const { start, end } = getSummaryActionTimeBounds(
+      action,
+      this.rule.schedule,
+      this.previousStartedAt
+    );
+    const ruleUrl = this.buildRuleUrl(spaceId, start, end);
+    const actionToRun = {
+      ...action,
+      params: injectActionParams({
+        actionTypeId: action.actionTypeId,
+        ruleUrl,
+        actionParams: transformSummaryActionParams({
+          alerts: summarizedAlerts,
+          rule: this.rule,
+          ruleTypeId: this.ruleType.id,
+          actionId: action.id,
+          actionParams: action.params,
+          spaceId,
+          actionsPlugin: this.taskRunnerContext.actionsPlugin,
+          actionTypeId: action.actionTypeId,
+          kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+          ruleUrl,
+        }),
+      }),
+    };
+
+    const toEnqueueForExecution = await this.actionRunOrAddToBulk({
+      enqueueOptions: this.getEnqueueOptions(actionToRun),
+    });
+
+    return toEnqueueForExecution;
+  }
+
+  private async runAction({
+    action,
+    spaceId,
+    alert,
+    ruleId,
+  }: RunActionArgs<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
+    EnqueueExecutionOptions[]
+  > {
+    const ruleUrl = this.buildRuleUrl(spaceId);
+    const actionToRun = {
+      ...action,
+      params: injectActionParams({
+        actionTypeId: action.actionTypeId,
+        ruleUrl,
+        actionParams: transformActionParams({
+          actionsPlugin: this.taskRunnerContext.actionsPlugin,
+          alertId: ruleId,
+          alertType: this.ruleType.id,
+          actionTypeId: action.actionTypeId,
+          alertName: this.rule.name,
+          spaceId,
+          tags: this.rule.tags,
+          alertInstanceId: alert.getId(),
+          alertUuid: alert.getUuid(),
+          alertActionGroup: action.group,
+          alertActionGroupName: this.ruleTypeActionGroups!.get(action.group as ActionGroupIds)!,
+          context: alert.getContext(),
+          actionId: action.id,
+          state: alert.getScheduledActionOptions()?.state || {},
+          kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+          alertParams: this.rule.params,
+          actionParams: action.params,
+          flapping: alert.getFlapping(),
+          ruleUrl,
+        }),
+      }),
+    };
+
+    const toEnqueueForExecution = await this.actionRunOrAddToBulk({
+      enqueueOptions: this.getEnqueueOptions(actionToRun),
+    });
+
+    return toEnqueueForExecution;
   }
 
   private logNumberOfFilteredAlerts({
@@ -658,11 +715,11 @@ export class ExecutionHandler<
 
   private async actionRunOrAddToBulk({
     enqueueOptions,
-    bulkActions,
   }: {
     enqueueOptions: EnqueueExecutionOptions;
-    bulkActions: EnqueueExecutionOptions[];
-  }) {
+  }): Promise<EnqueueExecutionOptions[]> {
+    const bulkActions: EnqueueExecutionOptions[] = [];
+
     if (this.taskRunnerContext.supportsEphemeralTasks && this.ephemeralActionsToSchedule > 0) {
       this.ephemeralActionsToSchedule--;
       try {
@@ -675,5 +732,7 @@ export class ExecutionHandler<
     } else {
       bulkActions.push(enqueueOptions);
     }
+
+    return bulkActions;
   }
 }
