@@ -8,10 +8,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageSection,
-  EuiPageBody,
-} from '@elastic/eui';
+import { EuiPageSection, EuiPageBody } from '@elastic/eui';
 
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
@@ -61,7 +58,7 @@ export class RemoteClusterAdd extends PureComponent {
 
     return (
       <EuiPageBody restrictWidth={true} data-test-subj="remote-clusters-add">
-        <EuiPageSection paddingSize='none'>
+        <EuiPageSection paddingSize="none">
           <RemoteClusterPageTitle
             title={
               <FormattedMessage

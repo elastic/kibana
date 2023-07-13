@@ -21,11 +21,9 @@ import {
   EuiFormRow,
   EuiLink,
   EuiLoadingLogo,
-  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiTitle,
   EuiDelayRender,
   EuiScreenReaderOnly,
@@ -304,7 +302,7 @@ export class RemoteClusterForm extends Component<Props, State> {
   renderActions() {
     const { isSaving, cancel } = this.props;
     const { areErrorsVisible, isRequestVisible } = this.state;
-    const isSaveDisabled = areErrorsVisible && this.hasErrors() || isSaving;
+    const isSaveDisabled = (areErrorsVisible && this.hasErrors()) || isSaving;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -322,7 +320,10 @@ export class RemoteClusterForm extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={this.toggleRequest} data-test-subj="remoteClustersRequestButton">
+              <EuiButtonEmpty
+                onClick={this.toggleRequest}
+                data-test-subj="remoteClustersRequestButton"
+              >
                 {isRequestVisible ? (
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
