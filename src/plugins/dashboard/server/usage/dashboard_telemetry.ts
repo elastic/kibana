@@ -14,7 +14,10 @@ import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common
 import { type ControlGroupTelemetry, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 
 import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
-import { TASK_ID, DashboardTelemetryTaskState } from './dashboard_telemetry_collection_task';
+import { TASK_ID } from './dashboard_telemetry_collection_task';
+import { type LatestTaskStateSchema } from './task_state';
+
+// TODO: Merge with LatestTaskStateSchema
 export interface DashboardCollectorData {
   panels: {
     total: number;
@@ -127,7 +130,7 @@ export async function collectDashboardTelemetry(taskManager: TaskManagerStartCon
   const latestTaskState = await getLatestTaskState(taskManager);
 
   if (latestTaskState !== null) {
-    const state = latestTaskState[0].state as DashboardTelemetryTaskState;
+    const state = latestTaskState[0].state as LatestTaskStateSchema;
     return state.telemetry;
   }
 
