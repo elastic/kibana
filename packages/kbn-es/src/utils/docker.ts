@@ -43,7 +43,7 @@ export const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_I
 const SHARED_SERVERLESS_PARAMS = [
   'run',
 
-  // '--rm',
+  '--rm',
 
   '--detach',
 
@@ -164,7 +164,7 @@ export async function runServerlessEsNode(
   Container Name: ${name}
   Container Id:   ${stdout}
 
-  View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${name}`)}
+  View running output:  ${chalk.bold(`docker attach --sig-proxy=false ${name}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${name} /bin/bash`)}
   Kill container:       ${chalk.bold(`docker kill ${stdout}`)}
 `);
