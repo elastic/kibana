@@ -19,13 +19,13 @@ export const buildResultsQuery = ({
   pagination: { activePage, querySize },
 }: ResultsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
-  const agentQuery = agentId ? ` and agent.id: ${agentId}` : '';
+  const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
   let filter = actionIdQuery + agentQuery;
   if (!isEmpty(kql)) {
-    filter = actionIdQuery + ` and ${kql}`;
+    filter = actionIdQuery + ` AND ${kql}`;
   }
 
-  const query = getQueryFilter({ filter });
+  const filterQuery = getQueryFilter({ filter });
 
   const dslQuery = {
     allow_no_indices: true,
@@ -45,7 +45,7 @@ export const buildResultsQuery = ({
           },
         },
       },
-      query,
+      query: { bool: { filter: filterQuery } },
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,

@@ -23,14 +23,14 @@ export const buildActionDetailsQuery = ({
     filter = actionIdQuery + ` and ${kql}`;
   }
 
-  const query = getQueryFilter({ filter });
+  const filterQuery = getQueryFilter({ filter });
 
   const dslQuery = {
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     body: {
-      query,
+      query: { bool: { filter: filterQuery } },
       size: 1,
       fields: ['*'],
     },

@@ -25,7 +25,7 @@ export const buildActionResultsQuery = ({
     filter = actionIdQuery + ` AND ${kql}`;
   }
 
-  const query = getQueryFilter({ filter });
+  const filterQuery = getQueryFilter({ filter });
 
   const dslQuery = {
     allow_no_indices: true,
@@ -70,7 +70,7 @@ export const buildActionResultsQuery = ({
           },
         },
       },
-      query,
+      query: { bool: { filter: filterQuery } },
       // from: activePage * querySize,
       size: 10000, // querySize,
       track_total_hits: true,

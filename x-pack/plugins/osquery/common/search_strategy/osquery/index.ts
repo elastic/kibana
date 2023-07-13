@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import type { ESQuery } from '../../typed_json';
 import type {
   ActionsStrategyResponse,
   ActionsRequestOptions,
@@ -36,10 +34,7 @@ export enum OsqueryQueries {
 export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
-  // filterQuery to be removed, when I solve the aggregations problem with kql
-  filterQuery?: ESQuery | string | undefined;
   kql?: string;
-  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
   componentTemplateExists?: boolean;

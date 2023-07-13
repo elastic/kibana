@@ -7,26 +7,22 @@
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { isEmpty } from 'lodash';
+import { getQueryFilter } from '../../../../utils/build_query';
 import type { AgentsRequestOptions } from '../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildAgentsQuery = ({
-  filterQuery,
+  kql,
   pagination: { cursorStart, querySize },
   sort,
-  aggregations,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  const filter = [
-    { term: { active: { value: 'true' } } },
-    ...createQueryFilterClauses(filterQuery),
-  ];
-  // const activeQuery = `active: true`;
-  // let filter = activeQuery;
-  // if (!isEmpty(kql)) {
-  //   filter = activeQuery + ` AND ${kql}`;
-  // }
+  const activeQuery = `active: true`;
+  let filter = activeQuery;
+  if (!isEmpty(kql)) {
+    filter = activeQuery + ` AND ${kql}`;
+  }
 
-  // const query = getQueryFilter({ filter });
+  const filterQuery = getQueryFilter({ filter });
 
   const dslQuery = {
     allow_no_indices: true,
@@ -35,10 +31,28 @@ export const buildAgentsQuery = ({
     body: {
       query: {
         bool: {
-          filter,
+          filter: filterQuery,
         },
       },
-      aggs: aggregations,
+      aggs: {
+        platforms: {
+          terms: {
+            field: 'local_metadata.os.platform',
+          },
+          aggs: {
+            policies: {
+              terms: {
+                field: 'policy_id',
+              },
+            },
+          },
+        },
+        policies: {
+          terms: {
+            field: 'policy_id',
+          },
+        },
+      },
       track_total_hits: true,
       sort: [
         {
