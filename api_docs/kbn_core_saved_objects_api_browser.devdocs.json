@@ -903,14 +903,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/lib/get_title.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/lib/get_title.ts"
-          },
-          {
             "plugin": "home",
             "path": "src/plugins/home/public/application/kibana_services.ts"
           },
@@ -1742,10 +1734,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-browser-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/common/lib/get_title.ts"
               },
               {
                 "plugin": "savedObjects",
