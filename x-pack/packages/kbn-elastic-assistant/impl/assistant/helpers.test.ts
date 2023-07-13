@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getWelcomeConversation } from './helpers';
+import { getBlockBotConversation } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
 
-describe('getWelcomeConversation', () => {
+describe('getBlockBotConversation', () => {
   describe('isAssistantEnabled = false', () => {
     const isAssistantEnabled = false;
     it('When no conversation history, return only enterprise messaging', () => {
@@ -18,7 +18,7 @@ describe('getWelcomeConversation', () => {
         messages: [],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages).toEqual(enterpriseMessaging);
       expect(result.messages.length).toEqual(1);
     });
@@ -40,7 +40,7 @@ describe('getWelcomeConversation', () => {
         ],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(2);
     });
 
@@ -51,7 +51,7 @@ describe('getWelcomeConversation', () => {
         messages: enterpriseMessaging,
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(1);
       expect(result.messages).toEqual(enterpriseMessaging);
     });
@@ -74,7 +74,7 @@ describe('getWelcomeConversation', () => {
         ],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
     });
   });
@@ -88,7 +88,7 @@ describe('getWelcomeConversation', () => {
         messages: [],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
     });
     it('returns a conversation history with the welcome conversation appended', () => {
@@ -108,7 +108,7 @@ describe('getWelcomeConversation', () => {
         ],
         apiConfig: {},
       };
-      const result = getWelcomeConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(4);
     });
   });

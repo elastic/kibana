@@ -26,7 +26,7 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
   }
 };
 
-export const getWelcomeConversation = (
+export const getBlockBotConversation = (
   conversation: Conversation,
   isAssistantEnabled: boolean
 ): Conversation => {

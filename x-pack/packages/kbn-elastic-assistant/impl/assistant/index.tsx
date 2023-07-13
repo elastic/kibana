@@ -10,12 +10,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButtonIcon,
-  EuiHorizontalRule,
   EuiCommentList,
-  EuiToolTip,
   EuiSwitchEvent,
-  EuiSwitch,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalBody,
@@ -26,10 +22,11 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ChatActions } from './chat_actions';
+import { BlockBotCallToAction } from './block_bot/cta';
+import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { AssistantTitle } from './assistant_title';
-import { UpgradeButtons } from '../upgrade/upgrade_buttons';
-import { getMessageFromRawResponse, getWelcomeConversation } from './helpers';
+import { getMessageFromRawResponse, getBlockBotConversation } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
@@ -40,14 +37,11 @@ import { useConversation } from './use_conversation';
 import { CodeBlockDetails } from './use_conversation/helpers';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
-import { ConversationSelector } from './conversations/conversation_selector';
 import { PromptEditor } from './prompt_editor';
 import { getCombinedMessage } from './prompt/helpers';
-import * as i18n from './translations';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
-import { AssistantSettingsButton } from './settings/assistant_settings_button';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 
 export interface Props {
@@ -140,8 +134,8 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
-  const welcomeConversation = useMemo(
-    () => getWelcomeConversation(currentConversation, isAssistantEnabled),
+  const blockBotConversation = useMemo(
+    () => getBlockBotConversation(currentConversation, isAssistantEnabled),
     [currentConversation, isAssistantEnabled]
   );
 
@@ -164,13 +158,16 @@ const AssistantComponent: React.FC<Props> = ({
     onSetupComplete: () => {
       bottomRef.current?.scrollIntoView({ behavior: 'auto' });
     },
-    conversation: welcomeConversation,
+    conversation: blockBotConversation,
     isConnectorConfigured: !!connectors?.length,
   });
 
   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
-    isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
-      ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
+    isWelcomeSetup && blockBotConversation.theme?.title && blockBotConversation.theme?.titleIcon
+      ? {
+          title: blockBotConversation.theme?.title,
+          titleIcon: blockBotConversation.theme?.titleIcon,
+        }
       : { title, titleIcon: 'logoSecurity' };
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -443,6 +440,13 @@ const AssistantComponent: React.FC<Props> = ({
     return chatbotComments;
   }, [connectorComments, isDisabled, chatbotComments]);
 
+  const clearTextArea = useCallback(() => {
+    setPromptTextPreview('');
+    clearConversation(selectedConversationId);
+    setSelectedPromptContexts({});
+    setSuggestedUserPrompt('');
+  }, [clearConversation, selectedConversationId]);
+
   return (
     <>
       <EuiModalHeader
@@ -452,69 +456,19 @@ const AssistantComponent: React.FC<Props> = ({
         `}
       >
         {showTitle && (
-          <>
-            <EuiFlexGroup
-              css={css`
-                width: 100%;
-              `}
-              alignItems={'center'}
-              justifyContent={'spaceBetween'}
-            >
-              <EuiFlexItem grow={false}>
-                <AssistantTitle currentTitle={currentTitle} docLinks={docLinks} />
-              </EuiFlexItem>
-
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  width: 335px;
-                `}
-              >
-                <ConversationSelector
-                  defaultConnectorId={defaultConnectorId}
-                  defaultProvider={defaultProvider}
-                  selectedConversationId={selectedConversationId}
-                  setSelectedConversationId={setSelectedConversationId}
-                  shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
-                  isDisabled={isDisabled}
-                />
-
-                <>
-                  <EuiSpacer size={'s'} />
-                  <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.SHOW_ANONYMIZED_TOOLTIP}
-                        position="left"
-                        repositionOnScroll={true}
-                      >
-                        <EuiSwitch
-                          checked={
-                            currentConversation.replacements != null &&
-                            Object.keys(currentConversation.replacements).length > 0 &&
-                            showAnonymizedValues
-                          }
-                          compressed={true}
-                          disabled={currentConversation.replacements == null}
-                          label={i18n.SHOW_ANONYMIZED}
-                          onChange={onToggleShowAnonymizedValues}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <AssistantSettingsButton
-                        isDisabled={isDisabled}
-                        selectedConversation={currentConversation}
-                        setSelectedConversationId={setSelectedConversationId}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiHorizontalRule margin={'m'} />
-          </>
+          <AssistantHeader
+            currentConversation={currentConversation}
+            defaultConnectorId={defaultConnectorId}
+            defaultProvider={defaultProvider}
+            docLinks={docLinks}
+            isDisabled={isDisabled}
+            onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
+            selectedConversationId={selectedConversationId}
+            setSelectedConversationId={setSelectedConversationId}
+            shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
+            showAnonymizedValues={showAnonymizedValues}
+            currentTitle={currentTitle}
+          />
         )}
 
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -553,28 +507,12 @@ const AssistantComponent: React.FC<Props> = ({
           flex-direction: column;
         `}
       >
-        {!isAssistantEnabled ? (
-          <EuiFlexGroup
-            justifyContent="spaceAround"
-            css={css`
-              width: 100%;
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              {<UpgradeButtons basePath={http.basePath.get()} />}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          isWelcomeSetup && (
-            <EuiFlexGroup
-              css={css`
-                width: 100%;
-              `}
-            >
-              <EuiFlexItem>{connectorPrompt}</EuiFlexItem>
-            </EuiFlexGroup>
-          )
-        )}
+        <BlockBotCallToAction
+          connectorPrompt={connectorPrompt}
+          http={http}
+          isAssistantEnabled={isAssistantEnabled}
+          isWelcomeSetup={isWelcomeSetup}
+        />
         <EuiFlexGroup
           gutterSize="none"
           css={css`
@@ -591,53 +529,12 @@ const AssistantComponent: React.FC<Props> = ({
             />
           </EuiFlexItem>
 
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              left: -34px;
-              position: relative;
-              top: 11px;
-            `}
-          >
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="xs"
-              css={css`
-                position: absolute;
-              `}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiToolTip position="right" content={i18n.CLEAR_CHAT}>
-                  <EuiButtonIcon
-                    display="base"
-                    iconType="cross"
-                    isDisabled={isSendingDisabled}
-                    aria-label={i18n.CLEAR_CHAT}
-                    color="danger"
-                    onClick={() => {
-                      setPromptTextPreview('');
-                      clearConversation(selectedConversationId);
-                      setSelectedPromptContexts({});
-                      setSuggestedUserPrompt('');
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip position="right" content={i18n.SUBMIT_MESSAGE}>
-                  <EuiButtonIcon
-                    display="base"
-                    iconType="returnKey"
-                    isDisabled={isSendingDisabled}
-                    aria-label={i18n.SUBMIT_MESSAGE}
-                    color="primary"
-                    onClick={handleButtonSendMessage}
-                    isLoading={isLoading}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <ChatActions
+            clearTextArea={clearTextArea}
+            isDisabled={isSendingDisabled}
+            isLoading={isLoading}
+            onSendMessage={handleButtonSendMessage}
+          />
         </EuiFlexGroup>
         {!isDisabled && <QuickPrompts setInput={setSuggestedUserPrompt} />}
       </EuiModalFooter>
