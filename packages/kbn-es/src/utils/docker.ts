@@ -51,7 +51,7 @@ const SHARED_SERVERLESS_PARAMS = [
   'elastic',
 
   '--env',
-  'ES_JAVA_OPTS="-Xms1g -Xmx1g"',
+  'ES_JAVA_OPTS=-Xms1g -Xmx1g',
 
   '--env',
   'cluster.initial_master_nodes=es01,es02,es03',
