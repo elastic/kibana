@@ -18,7 +18,6 @@ import {
   EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
-import { schema } from '@kbn/config-schema';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
