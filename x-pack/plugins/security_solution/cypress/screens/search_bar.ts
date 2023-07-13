@@ -12,6 +12,9 @@ export const GLOBAL_SEARCH_BAR_ADD_FILTER =
 
 export const GLOBAL_SEARCH_BAR_SUBMIT_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
 
+export const GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON = (localSearchBarSelector: string) =>
+  `${localSearchBarSelector ?? ''} [data-test-subj="querySubmitButton"]`;
+
 export const ADD_FILTER_FORM_FIELD_INPUT =
   '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 

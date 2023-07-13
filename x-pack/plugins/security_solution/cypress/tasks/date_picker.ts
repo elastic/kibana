@@ -21,6 +21,7 @@ import {
   LOCAL_DATE_PICKER_APPLY_BUTTON,
   LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   DATE_PICKER_CONTAINER,
+  GET_LOCAL_SHOW_DATES_BUTTON,
 } from '../screens/date_picker';
 
 export const setEndDate = (date: string) => {
@@ -100,8 +101,12 @@ export const updateTimelineDates = () => {
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().should('not.have.text', 'Updating');
 };
 
-export const updateDateRangeInLocalDatePickers = (startDate: string, endDate: string) => {
-  cy.get(SHOW_DATES_BUTTON).click();
+export const updateDateRangeInLocalDatePickers = (
+  localQueryBarSelector: string,
+  startDate: string,
+  endDate: string
+) => {
+  cy.get(GET_LOCAL_SHOW_DATES_BUTTON(localQueryBarSelector)).click();
   cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();

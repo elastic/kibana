@@ -18,6 +18,7 @@ import {
   ADD_FILTER_FORM_FILTER_VALUE_INPUT,
   GLOBAL_KQL_INPUT,
   LOCAL_KQL_INPUT,
+  GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON,
 } from '../screens/search_bar';
 
 export const openAddFilterPopover = () => {
@@ -71,6 +72,6 @@ export const fillLocalSearchBar = (query: string) => {
   cy.get(LOCAL_KQL_INPUT).type(query);
 };
 
-export const submitLocalSearch = () => {
-  cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).click();
+export const submitLocalSearch = (localSearchBarSelector: string) => {
+  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(localSearchBarSelector)).click();
 };

@@ -41,6 +41,9 @@ export const DATE_PICKER_START_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER
 
 export const SHOW_DATES_BUTTON = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="superDatePickerShowDatesButton"]`;
 
+export const GET_LOCAL_SHOW_DATES_BUTTON = (localQueryBarSelector: string) =>
+  `${localQueryBarSelector} [data-test-subj="superDatePickerShowDatesButton"]`;
+
 export const DATE_PICKER_SHOW_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER} ${SHOW_DATES_BUTTON}`;
 
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE =
