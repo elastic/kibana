@@ -106,7 +106,12 @@ export const useDashboardMenuItems = ({
    * Clone the dashboard
    */
   const clone = useCallback(() => {
-    dashboard.runClone().then((result) => maybeRedirect(result));
+    setIsSaveInProgress(true);
+
+    dashboard.runClone().then((result) => {
+      setIsSaveInProgress(false);
+      maybeRedirect(result);
+    });
   }, [maybeRedirect, dashboard]);
 
   /**
