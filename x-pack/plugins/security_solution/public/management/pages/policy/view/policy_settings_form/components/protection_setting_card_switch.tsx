@@ -82,6 +82,11 @@ export const ProtectionSettingCardSwitch = React.memo(
                 newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
                   event.target.checked;
               }
+              if (protection === 'behavior_protection') {
+                newPayload.windows.behavior_protection.reputation_service = event.target.checked;
+                newPayload.mac.behavior_protection.reputation_service = event.target.checked;
+                newPayload.linux.behavior_protection.reputation_service = event.target.checked;
+              }
             }
           }
         } else {
@@ -94,6 +99,11 @@ export const ProtectionSettingCardSwitch = React.memo(
               newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
             }
             if (isPlatinumPlus) {
+              if (protection === 'behavior_protection') {
+                newPayload.windows.behavior_protection.reputation_service = false;
+                newPayload.mac.behavior_protection.reputation_service = false;
+                newPayload.linux.behavior_protection.reputation_service = false;
+              }
               if (os === 'windows') {
                 newPayload[os].popup[protection].enabled = event.target.checked;
               } else if (os === 'mac') {

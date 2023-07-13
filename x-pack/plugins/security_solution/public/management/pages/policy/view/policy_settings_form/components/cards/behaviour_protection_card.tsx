@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ReputationService } from '../reputation_service';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { SettingCard } from '../setting_card';
 import { NotifyUserOption } from '../notify_user_option';
@@ -23,6 +24,7 @@ import { APP_UI_ID, SecurityPageName } from '../../../../../../../../common';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
+import { useKibana } from '../../../../../../../common/lib/kibana';
 
 const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
@@ -41,7 +43,9 @@ type BehaviourProtectionCardProps = PolicyFormComponentCommonProps;
 
 export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
+    const { cloud } = useKibana().services;
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isCloud = cloud?.isCloudEnabled ?? false;
     const getTestId = useTestIdGenerator(dataTestSubj);
     const protection = 'behavior_protection';
     const protectionLabel = i18n.translate(
@@ -81,6 +85,15 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           protection={protection}
           osList={BEHAVIOUR_OS_VALUES}
         />
+
+        {!isCloud && (
+          <ReputationService
+            policy={policy}
+            onChange={onChange}
+            mode={mode}
+            protection={protection}
+          />
+        )}
 
         <NotifyUserOption
           policy={policy}
