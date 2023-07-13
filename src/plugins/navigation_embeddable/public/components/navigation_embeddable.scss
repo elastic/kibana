@@ -7,7 +7,7 @@
     animation: euiFlyoutOpenAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
   }
 
-  &.out {
+  &.out { 
     animation: euiFlyoutCloseAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
   }
 
@@ -20,7 +20,9 @@
   background-color: none;
 }
 
-.navEmbeddablePanelEditor {
+.navEmbeddableLinkPanel {
+  padding: $euiSizeXS $euiSizeS;
+
   .linkText {
     flex: 1;
     min-width: 0;

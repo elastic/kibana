@@ -59,7 +59,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
   }, [link]);
 
   return (
-    <EuiPanel hasBorder paddingSize="s" hasShadow={false} className="navEmbeddablePanelEditor">
+    <EuiPanel hasBorder hasShadow={false} className="navEmbeddableLinkPanel">
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiPanel
