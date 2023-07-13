@@ -11,7 +11,7 @@ import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-p
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
-import { createRuleRoute } from './rule/create';
+import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';
@@ -34,7 +34,7 @@ import { muteAlertRoute } from './mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
-import { bulkEditInternalRulesRoute } from './bulk_edit_rules';
+import { bulkEditInternalRulesRoute } from './rule/apis/buk_edit/bulk_edit_rules_route';
 import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
 import { runSoonRoute } from './run_soon';
