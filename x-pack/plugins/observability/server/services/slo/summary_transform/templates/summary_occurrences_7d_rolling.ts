@@ -10,10 +10,11 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../../../assets/constants';
 
 export const SUMMARY_OCCURRENCES_7D_ROLLING: TransformPutTransformRequest = {
-  transform_id: 'slo-summary-occurrences-7d-rolling',
+  transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}occurrences-7d-rolling`,
   dest: {
     index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
   },

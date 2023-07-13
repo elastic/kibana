@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
-  TransformGetTransformTransformSummary,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SLO_RESOURCES_VERSION } from '../../../assets/constants';
+import {
+  SLO_RESOURCES_VERSION,
+  SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
+} from '../../../assets/constants';
 import { retryTransientEsErrors } from '../../../utils/retry';
 import { ALL_TRANSFORM_TEMPLATES } from './templates';
 
@@ -22,20 +22,28 @@ export class DefaultSummaryTransformInstaller implements SummaryTransformInstall
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   public async installAndStart(): Promise<void> {
+    const allTransformIds = ALL_TRANSFORM_TEMPLATES.map((transform) => transform.transform_id);
+    const summaryTransforms = await this.execute(() =>
+      this.esClient.transform.getTransform(
+        { transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}*`, allow_no_match: true },
+        { ignore: [404] }
+      )
+    );
+    const alreadyInstalled =
+      summaryTransforms.count === allTransformIds.length &&
+      summaryTransforms.transforms.every(
+        (transform) => transform._meta?.version === SLO_RESOURCES_VERSION
+      ) &&
+      summaryTransforms.transforms.every((transform) => allTransformIds.includes(transform.id));
+
+    if (alreadyInstalled) {
+      this.logger.info(`SLO summary transforms already installed - skipping`);
+      return;
+    }
+
     for (const transformTemplate of ALL_TRANSFORM_TEMPLATES) {
       const transformId = transformTemplate.transform_id;
-      const response = await this.execute(() =>
-        this.esClient.transform.getTransform(
-          { transform_id: transformId, allow_no_match: true },
-          { ignore: [404] }
-        )
-      );
-
-      // @ts-ignore incorrectly typed
-      const existingTransforms = response.existingTransforms || response.transforms;
-      const transform = existingTransforms?.find(
-        (t: TransformGetTransformTransformSummary) => t.id === transformId
-      );
+      const transform = summaryTransforms.transforms.find((t) => t.id === transformId);
 
       const transformAlreadyInstalled =
         !!transform && transform._meta?.version === SLO_RESOURCES_VERSION;

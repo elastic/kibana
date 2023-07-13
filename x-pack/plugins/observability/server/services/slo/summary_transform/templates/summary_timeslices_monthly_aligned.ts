@@ -10,10 +10,11 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../../../assets/constants';
 
 export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = {
-  transform_id: 'slo-summary-timeslices-monthly-aligned',
+  transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}timeslices-monthly-aligned`,
   dest: {
     index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
   },
