@@ -24,6 +24,7 @@ import {
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
+  INDICATOR_HISTOGRAM,
 } from '../../../utils/slo/labels';
 
 export interface SloListSearchFilterSortBarProps {
@@ -38,7 +39,8 @@ export type FilterType =
   | 'sli.apm.transactionDuration'
   | 'sli.apm.transactionErrorRate'
   | 'sli.kql.custom'
-  | 'sli.metric.custom';
+  | 'sli.metric.custom'
+  | 'sli.histogram.custom';
 
 export type Item<T> = EuiSelectableOption & {
   label: string;
@@ -78,6 +80,10 @@ const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
   {
     label: INDICATOR_CUSTOM_METRIC,
     type: 'sli.metric.custom',
+  },
+  {
+    label: INDICATOR_HISTOGRAM,
+    type: 'sli.histogram.custom',
   },
 ];
 
