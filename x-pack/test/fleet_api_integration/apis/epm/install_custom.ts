@@ -88,12 +88,10 @@ export default function (providerContext: FtrProviderContext) {
         expect(actualComponentTemplates).to.contain(template);
       });
 
-      const installation = await kibanaServer.savedObjects
-        .get({
-          type: PACKAGES_SAVED_OBJECT_TYPE,
-          id: INTEGRATION_NAME,
-        })
-        .catch(() => {});
+      const installation = await kibanaServer.savedObjects.get({
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+        id: INTEGRATION_NAME,
+      });
 
       expect(installation.attributes.name).to.be(INTEGRATION_NAME);
       expect(installation.attributes.version).to.be(INTEGRATION_VERSION);
