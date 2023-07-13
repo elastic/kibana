@@ -61,7 +61,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
       });
 
-      it.only('should notify user about prebuilt rules available for installation', () => {
+      it('should notify user about prebuilt rules available for installation', () => {
         cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
       });
     });
