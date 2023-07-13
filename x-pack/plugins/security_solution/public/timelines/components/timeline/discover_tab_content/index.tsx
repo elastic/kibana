@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import styled from 'styled-components';
+import type { ScopedHistory } from '@kbn/core/public';
 import { useGetStatefulQueryBar } from '../../../../common/hooks/use_get_stateful_query_bar';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -23,37 +24,35 @@ export const DiscoverTabContent = () => {
     services: { customDataService: discoverDataService, discover, discoverFilterManager },
   } = useKibana();
 
-  const { useDiscoverMainRoute } = discover;
-
   const { CustomStatefulTopNavKqlQueryBar } = useGetStatefulQueryBar();
 
-  const getDiscoverLayout = useDiscoverMainRoute({
-    services: {
-      filterManager: discoverFilterManager,
-      data: discoverDataService,
-    },
-  });
-
-  const DiscoverMainRoute = getDiscoverLayout(history);
-
-  const customizationCallback: CustomizationCallback = useCallback(
-    ({ customizations, stateContainer }) => {
+  const customize: CustomizationCallback = useCallback(
+    ({ customizations }) => {
       customizations.set({
         id: 'search_bar',
-        CustomQueryBar: CustomStatefulTopNavKqlQueryBar,
-      });
-
-      customizations.set({
-        id: 'top_nav',
-        showBreadcrumbs: false,
+        CustomSearchBar: CustomStatefulTopNavKqlQueryBar,
       });
     },
     [CustomStatefulTopNavKqlQueryBar]
   );
 
+  const services = useMemo(
+    () => ({
+      filterManager: discoverFilterManager,
+      data: discoverDataService,
+    }),
+    [discoverDataService, discoverFilterManager]
+  );
+
+  const DiscoverContainer = discover.DiscoverContainer;
+
   return (
     <EmbeddedDiscoverContainer>
-      <DiscoverMainRoute isDev={false} customizationCallbacks={[customizationCallback]} />
+      <DiscoverContainer
+        services={services}
+        scopedHistory={history as ScopedHistory}
+        customize={customize}
+      />
     </EmbeddedDiscoverContainer>
   );
 };

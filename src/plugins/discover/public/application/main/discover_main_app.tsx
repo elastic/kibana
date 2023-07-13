@@ -18,6 +18,7 @@ import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias
 import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
+import type { DiscoverDisplayMode } from '../types';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -26,7 +27,7 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
-  mode?: 'embedded' | 'standalone';
+  mode?: DiscoverDisplayMode;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {

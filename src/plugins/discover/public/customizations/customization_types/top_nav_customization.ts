@@ -31,5 +31,4 @@ export interface TopNavCustomization {
   id: 'top_nav';
   defaultMenu?: TopNavDefaultMenu;
   getMenuItems?: () => TopNavMenuItem[];
-  showBreadcrumbs?: boolean;
 }

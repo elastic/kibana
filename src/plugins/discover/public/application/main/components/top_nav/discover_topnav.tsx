@@ -200,8 +200,8 @@ export const DiscoverTopNav = ({
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   const SearchBar = useMemo(
-    () => searchBarCustomization?.CustomQueryBar ?? AggregateQueryTopNavMenu,
-    [searchBarCustomization?.CustomQueryBar, AggregateQueryTopNavMenu]
+    () => searchBarCustomization?.CustomSearchBar ?? AggregateQueryTopNavMenu,
+    [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
   );
 
   return (

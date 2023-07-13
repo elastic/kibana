@@ -34,6 +34,7 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
+import type { DiscoverDisplayMode } from '../types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -44,7 +45,7 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
-  mode?: 'embedded' | 'standalone';
+  mode?: DiscoverDisplayMode;
 }
 
 export function DiscoverMainRoute({
