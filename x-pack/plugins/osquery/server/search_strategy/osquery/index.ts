@@ -15,9 +15,11 @@ import type {
   FactoryQueryTypes,
   StrategyResponseType,
   StrategyRequestType,
+  ResultsRequestOptions,
 } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
+import type { RequestOptionsPaginated } from '../../../common/search_strategy/osquery';
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
@@ -39,7 +41,24 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
         })
       ).pipe(
         mergeMap((exists) => {
-          const dsl = queryFactory.buildDsl({ ...request, componentTemplateExists: exists });
+          const requestWithOptionalTypes = {
+            factoryQueryType: request.factoryQueryType,
+            kql: request.kql,
+            ...((request as RequestOptionsPaginated).pagination
+              ? { pagination: (request as RequestOptionsPaginated).pagination }
+              : {}),
+            ...((request as RequestOptionsPaginated).sort
+              ? { sort: (request as RequestOptionsPaginated).sort }
+              : {}),
+            ...((request as ResultsRequestOptions).actionId
+              ? { actionId: (request as ResultsRequestOptions).actionId }
+              : {}),
+            ...((request as ResultsRequestOptions).agentId
+              ? { agentId: (request as ResultsRequestOptions).agentId }
+              : {}),
+            componentTemplateExists: exists,
+          } as StrategyRequestType<T>;
+          const dsl = queryFactory.buildDsl(requestWithOptionalTypes);
           // use internal user for searching .fleet* indices
           es =
             dsl.index?.includes('fleet') || dsl.index?.includes('logs-osquery_manager.action')
@@ -48,7 +67,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
           return es.search(
             {
-              ...request,
+              ...requestWithOptionalTypes,
               params: dsl,
             },
             options,
