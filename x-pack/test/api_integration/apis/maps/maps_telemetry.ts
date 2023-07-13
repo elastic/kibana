@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe.skip('maps_telemetry', () => {
+  describe('maps_telemetry', () => {
     it('should return the correct telemetry values for map saved objects', async () => {
       const {
         body: [{ stats: apiResponse }],
