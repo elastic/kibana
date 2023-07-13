@@ -10,11 +10,11 @@ import fs from 'fs';
 import Path, { join } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { generateQueryParams } from './generate_query_params';
+import { generateAvailability } from './generate_availability';
 import type {
   AutocompleteBodyParams,
   AutocompleteDefinition,
   AutocompleteUrlParams,
-  AutocompleteAvailability,
   SpecificationTypes,
 } from './types';
 import { findTypeDefinition } from './utils';
@@ -64,23 +64,6 @@ const generateBodyParams = (
   requestType: SpecificationTypes.TypeDefinition
 ): AutocompleteBodyParams => {
   return {};
-};
-
-const DEFAULT_STACK_ENDPOINT_AVAILABILITY = true;
-const DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY = true;
-
-const generateAvailability = (endpoint: SpecificationTypes.Endpoint): AutocompleteAvailability => {
-  const availability: AutocompleteAvailability = {
-    stack: DEFAULT_STACK_ENDPOINT_AVAILABILITY,
-    serverless: DEFAULT_SERVERLESS_ENDPOINT_AVAILABILITY,
-  };
-  if (endpoint.availability.stack?.visibility) {
-    availability.stack = endpoint.availability.stack?.visibility === 'public';
-  }
-  if (endpoint.availability.serverless?.visibility) {
-    availability.serverless = endpoint.availability.serverless?.visibility === 'public';
-  }
-  return availability;
 };
 
 const addParams = (
