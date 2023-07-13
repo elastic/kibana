@@ -41,51 +41,95 @@ describe('supportsFieldMetaFromEs', () => {
 describe('supportsFieldMetaFromLocalData', () => {
   describe('source is vector tiles', () => {
     const mvtSource = {
-      isMvt: () => { return true },
+      isMvt: () => {
+        return true;
+      },
     } as unknown as IESAggSource;
     test('number metrics should support field meta from local', () => {
-      const avgMetric = new AggField({ ...defaultParams, source: mvtSource, aggType: AGG_TYPE.AVG });
+      const avgMetric = new AggField({
+        ...defaultParams,
+        source: mvtSource,
+        aggType: AGG_TYPE.AVG,
+      });
       expect(avgMetric.supportsFieldMetaFromLocalData()).toBe(true);
-      const maxMetric = new AggField({ ...defaultParams, source: mvtSource, aggType: AGG_TYPE.MAX });
+      const maxMetric = new AggField({
+        ...defaultParams,
+        source: mvtSource,
+        aggType: AGG_TYPE.MAX,
+      });
       expect(maxMetric.supportsFieldMetaFromLocalData()).toBe(true);
-      const minMetric = new AggField({ ...defaultParams, source: mvtSource, aggType: AGG_TYPE.MIN });
+      const minMetric = new AggField({
+        ...defaultParams,
+        source: mvtSource,
+        aggType: AGG_TYPE.MIN,
+      });
       expect(minMetric.supportsFieldMetaFromLocalData()).toBe(true);
-      const sumMetric = new AggField({ ...defaultParams, source: mvtSource, aggType: AGG_TYPE.SUM });
+      const sumMetric = new AggField({
+        ...defaultParams,
+        source: mvtSource,
+        aggType: AGG_TYPE.SUM,
+      });
       expect(sumMetric.supportsFieldMetaFromLocalData()).toBe(true);
       const uniqueCountMetric = new AggField({
         ...defaultParams,
-        source: mvtSource, 
+        source: mvtSource,
         aggType: AGG_TYPE.UNIQUE_COUNT,
       });
       expect(uniqueCountMetric.supportsFieldMetaFromLocalData()).toBe(true);
     });
 
     test('Non number metrics should not support field meta from local', () => {
-      const termMetric = new AggField({ ...defaultParams, source: mvtSource, aggType: AGG_TYPE.TERMS });
+      const termMetric = new AggField({
+        ...defaultParams,
+        source: mvtSource,
+        aggType: AGG_TYPE.TERMS,
+      });
       expect(termMetric.supportsFieldMetaFromLocalData()).toBe(false);
     });
   });
 
   describe('source is not vector tiles', () => {
     const geojsonSource = {
-      isMvt: () => { return false; },
+      isMvt: () => {
+        return false;
+      },
     } as unknown as IESAggSource;
     test('should always support field meta from local', () => {
-      const avgMetric = new AggField({ ...defaultParams, source: geojsonSource, aggType: AGG_TYPE.AVG });
+      const avgMetric = new AggField({
+        ...defaultParams,
+        source: geojsonSource,
+        aggType: AGG_TYPE.AVG,
+      });
       expect(avgMetric.supportsFieldMetaFromLocalData()).toBe(true);
-      const maxMetric = new AggField({ ...defaultParams, source: geojsonSource, aggType: AGG_TYPE.MAX });
+      const maxMetric = new AggField({
+        ...defaultParams,
+        source: geojsonSource,
+        aggType: AGG_TYPE.MAX,
+      });
       expect(maxMetric.supportsFieldMetaFromLocalData()).toBe(true);
-      const minMetric = new AggField({ ...defaultParams, source: geojsonSource, aggType: AGG_TYPE.MIN });
+      const minMetric = new AggField({
+        ...defaultParams,
+        source: geojsonSource,
+        aggType: AGG_TYPE.MIN,
+      });
       expect(minMetric.supportsFieldMetaFromLocalData()).toBe(true);
-      const sumMetric = new AggField({ ...defaultParams, source: geojsonSource, aggType: AGG_TYPE.SUM });
+      const sumMetric = new AggField({
+        ...defaultParams,
+        source: geojsonSource,
+        aggType: AGG_TYPE.SUM,
+      });
       expect(sumMetric.supportsFieldMetaFromLocalData()).toBe(true);
       const uniqueCountMetric = new AggField({
         ...defaultParams,
-        source: geojsonSource, 
+        source: geojsonSource,
         aggType: AGG_TYPE.UNIQUE_COUNT,
       });
       expect(uniqueCountMetric.supportsFieldMetaFromLocalData()).toBe(true);
-      const termMetric = new AggField({ ...defaultParams, source: geojsonSource, aggType: AGG_TYPE.TERMS });
+      const termMetric = new AggField({
+        ...defaultParams,
+        source: geojsonSource,
+        aggType: AGG_TYPE.TERMS,
+      });
       expect(termMetric.supportsFieldMetaFromLocalData()).toBe(true);
     });
   });
