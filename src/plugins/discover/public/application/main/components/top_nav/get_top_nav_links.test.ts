@@ -35,14 +35,14 @@ test('getTopNavLinks result', () => {
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
+        "badge": Object {
+          "iconType": "beaker",
+          "label": "Technical preview",
+        },
         "description": "Switch to Logs mode",
         "id": "switchToLogsProfile",
         "label": "Switch to Logs mode",
         "run": [Function],
-        "badge": Object {
-          "iconType": "beaker",
-          "label": "Technical preview",
-        }
         "testId": "switchToLogsProfile",
       },
       Object {
@@ -100,14 +100,14 @@ test('getTopNavLinks result for sql mode', () => {
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
       Object {
+        "badge": Object {
+          "iconType": "beaker",
+          "label": "Technical preview",
+        },
         "description": "Switch to Logs mode",
         "id": "switchToLogsProfile",
         "label": "Switch to Logs mode",
         "run": [Function],
-        "badge": Object {
-          "iconType": "beaker",
-          "label": "Technical preview",
-        }
         "testId": "switchToLogsProfile",
       },
       Object {
