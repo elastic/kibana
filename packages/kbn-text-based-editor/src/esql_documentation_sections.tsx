@@ -14,9 +14,9 @@ export const initialSection = (
     markdown={i18n.translate(
       'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown',
       {
-        defaultMessage: `## ESQL
+        defaultMessage: `## ES|QL
 
-An ESQL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
+An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
 A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.
 
@@ -40,7 +40,7 @@ export const sourceCommands = {
   description: i18n.translate(
     'textBasedEditor.query.textBasedLanguagesEditor.commandsDescription',
     {
-      defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ESQL supports the following source commands.`,
+      defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ES|QL supports the following source commands.`,
     }
   ),
   items: [
@@ -134,7 +134,7 @@ export const processingCommands = {
   description: i18n.translate(
     'textBasedEditor.query.textBasedLanguagesEditor.processingCommandsDescription',
     {
-      defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ESQL supports the following processing commands.`,
+      defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ES|QL supports the following processing commands.`,
     }
   ),
   items: [
