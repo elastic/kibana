@@ -47,15 +47,15 @@ export interface EventFormOption<T extends OperatingSystem> {
 }
 
 export interface SupplementalEventFormOption<T extends OperatingSystem> {
+  name: string;
+  protectionField: ProtectionField<T>;
+  indented?: boolean;
   id?: string;
   title?: string;
   description?: string;
-  name: string;
   uncheckedName?: string;
-  protectionField: ProtectionField<T>;
   tooltipText?: string;
   beta?: boolean;
-  indented?: boolean;
   isDisabled?(policyConfig: UIPolicyConfig): boolean;
 }
 
@@ -168,6 +168,7 @@ export const EventCollectionCard = memo(
             }) => {
               const keyPath = `${policyOs}.events.${protectionField}`;
               const isChecked = get(policy, keyPath);
+              const fieldString = protectionField as string;
 
               if (!isEditMode && !isChecked) {
                 return null;
@@ -177,18 +178,25 @@ export const EventCollectionCard = memo(
                 <div
                   key={String(protectionField)}
                   style={indented ? { paddingLeft: theme.eui.euiSizeL } : {}}
+                  data-test-subj={getTestId(`${fieldString}Container`)}
                 >
                   {title && (
                     <>
                       <EuiSpacer size="m" />
-                      <SettingCardHeader>{title}</SettingCardHeader>
+                      <SettingCardHeader data-test-subj={getTestId(`${fieldString}Title`)}>
+                        {title}
+                      </SettingCardHeader>
                     </>
                   )}
 
                   {description && (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiText size="xs" color="subdued">
+                      <EuiText
+                        size="xs"
+                        color="subdued"
+                        data-test-subj={getTestId(`${fieldString}Description`)}
+                      >
                         {description}
                       </EuiText>
                     </>
@@ -207,19 +215,27 @@ export const EventCollectionCard = memo(
                         onChange={onChange}
                         mode={mode}
                         disabled={isDisabled ? isDisabled(policy) : false}
-                        data-test-subj={getTestId(protectionField as string)}
+                        data-test-subj={getTestId(fieldString)}
                       />
                     </EuiFlexItem>
 
                     {tooltipText && (
                       <EuiFlexItem grow={false}>
-                        <EuiIconTip position="right" content={tooltipText} />
+                        <EuiIconTip
+                          position="right"
+                          content={tooltipText}
+                          anchorProps={{ 'data-test-subj': getTestId(`${fieldString}TooltipIcon`) }}
+                        />
                       </EuiFlexItem>
                     )}
 
                     {beta && (
                       <EuiFlexItem grow={false}>
-                        <EuiBetaBadge label="beta" size="s" />
+                        <EuiBetaBadge
+                          label="beta"
+                          size="s"
+                          data-test-subj={getTestId(`${fieldString}Badge`)}
+                        />
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>

@@ -9,17 +9,25 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
-import type { EventCollectionCardProps } from './event_collection_card';
+import type {
+  EventCollectionCardProps,
+  SupplementalEventFormOption,
+} from './event_collection_card';
 import { EventCollectionCard } from './event_collection_card';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { expectIsViewOnly, matchExactTextContent } from '../mocks';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep, set } from 'lodash';
+import { within } from '@testing-library/dom';
 
 describe('Policy Event Collection Card common component', () => {
   let formProps: EventCollectionCardProps<OperatingSystem.WINDOWS>;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
+
+  const isChecked = (selector: string): boolean => {
+    return (renderResult.getByTestId(selector) as HTMLInputElement).checked;
+  };
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -64,8 +72,8 @@ describe('Policy Event Collection Card common component', () => {
       matchExactTextContent('2 / 2 event collections enabled')
     );
     expect(getByTestId('test-osValues')).toHaveTextContent(matchExactTextContent('Windows'));
-    expect(getByTestId<HTMLInputElement>('test-file').checked).toBe(true);
-    expect(getByTestId<HTMLInputElement>('test-network').checked).toBe(true);
+    expect(isChecked('test-file')).toBe(true);
+    expect(isChecked('test-network')).toBe(true);
   });
 
   it('should allow items to be unchecked', () => {
@@ -92,7 +100,7 @@ describe('Policy Event Collection Card common component', () => {
     expect(getByTestId('test-selectedCount')).toHaveTextContent(
       matchExactTextContent('1 / 2 event collections enabled')
     );
-    expect(getByTestId<HTMLInputElement>('test-file').checked).toBe(false);
+    expect(isChecked('test-file')).toBe(false);
 
     userEvent.click(getByTestId('test-file'));
 
@@ -103,7 +111,79 @@ describe('Policy Event Collection Card common component', () => {
   });
 
   describe('and supplementalOptions are used', () => {
-    // FIXME:PT implement
+    let supplementalEntry: SupplementalEventFormOption<OperatingSystem.WINDOWS>;
+
+    beforeEach(() => {
+      formProps.selection.dns = true;
+      supplementalEntry = {
+        protectionField: 'dns',
+        name: 'Collect DNS',
+        id: 'dns',
+        title: 'DNS collection',
+        uncheckedName: 'Do not collect DNS',
+        description: 'This collects info about DNS',
+        tooltipText: 'This is a tooltip',
+      };
+      formProps.supplementalOptions = [supplementalEntry];
+    });
+
+    it('should render supplemental option', () => {
+      const { getByTestId } = render();
+
+      expect(getByTestId('test-selectedCount')).toHaveTextContent(
+        matchExactTextContent('2 / 2 event collections enabled')
+      );
+      expect(isChecked('test-dns')).toBe(true);
+
+      const optionContainer = within(getByTestId('test-dnsContainer'));
+
+      expect(optionContainer.getByTestId('test-dnsTitle')).toHaveTextContent(
+        matchExactTextContent(supplementalEntry.title!)
+      );
+      expect(optionContainer.getByTestId('test-dnsDescription')).toHaveTextContent(
+        matchExactTextContent(supplementalEntry.description!)
+      );
+      expect(optionContainer.getAllByLabelText(supplementalEntry.name));
+      expect(optionContainer.getByTestId('test-dnsTooltipIcon'));
+    });
+
+    it('should render with minimum set of options defined', () => {
+      supplementalEntry = {
+        name: supplementalEntry.name,
+        protectionField: supplementalEntry.protectionField,
+      };
+      formProps.supplementalOptions = [supplementalEntry];
+      render();
+
+      expect(renderResult.getByTestId('test-dnsContainer')).toHaveTextContent(
+        matchExactTextContent(supplementalEntry.name)
+      );
+    });
+
+    it('should include BETA badge', () => {
+      supplementalEntry.beta = true;
+      render();
+
+      expect(renderResult.getByTestId('test-dnsBadge')).toHaveTextContent(
+        matchExactTextContent('beta')
+      );
+    });
+
+    it('should indent entry', () => {
+      supplementalEntry.indented = true;
+      render();
+
+      expect(renderResult.getByTestId('test-dnsContainer').getAttribute('style')).toMatch(
+        /padding-left/
+      );
+    });
+
+    it('should should render it disabled', () => {
+      supplementalEntry.isDisabled = () => true;
+      render();
+
+      expect(renderResult.getByTestId('test-dns')).toBeDisabled();
+    });
   });
 
   describe('and when rendered in View mode', () => {
@@ -149,6 +229,42 @@ describe('Policy Event Collection Card common component', () => {
       expect(renderResult.getByTestId('test-options')).toHaveTextContent(
         matchExactTextContent('—')
       );
+    });
+
+    describe('and supplemental options are used', () => {
+      let supplementalEntry: SupplementalEventFormOption<OperatingSystem.WINDOWS>;
+
+      beforeEach(() => {
+        formProps.selection.dns = true;
+        supplementalEntry = {
+          protectionField: 'dns',
+          name: 'Collect DNS',
+          id: 'dns',
+          title: 'DNS collection',
+          uncheckedName: 'Do not collect DNS',
+          description: 'This collects info about DNS',
+          tooltipText: 'This is a tooltip',
+        };
+        formProps.supplementalOptions = [supplementalEntry];
+      });
+
+      it('should render expected content when option is checked', () => {
+        render();
+        const dnsOption = renderResult.getByTestId('test-dnsContainer');
+
+        expectIsViewOnly(dnsOption);
+        expect(dnsOption).toHaveTextContent(
+          matchExactTextContent('DNS collectionThis collects info about DNSCollect DNSInfo')
+        );
+      });
+
+      it('should not render option if un-checked', () => {
+        formProps.policy.windows.events.dns = false;
+        formProps.selection.dns = false;
+        render();
+
+        expect(renderResult.queryByTestId('test-dnsContainer')).toBeNull();
+      });
     });
   });
 });
