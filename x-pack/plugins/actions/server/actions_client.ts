@@ -410,7 +410,14 @@ export class ActionsClient {
 
     const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
 
-    if (foundInMemoryConnector !== undefined) {
+    /**
+     * Getting system connector is not allowed
+     */
+    if (foundInMemoryConnector !== undefined && foundInMemoryConnector.isSystemAction) {
+      throw Boom.notFound(`Connector ${id} not found`);
+    }
+
+    if (foundInMemoryConnector !== undefined && foundInMemoryConnector.isPreconfigured) {
       this.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET,
@@ -483,9 +490,13 @@ export class ActionsClient {
       )
     );
 
+    const inMemoryConnectorsWithoutSystemActions = this.inMemoryConnectors.filter(
+      (connector) => !connector.isSystemAction
+    );
+
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.inMemoryConnectors.map((inMemoryConnector) => ({
+      ...inMemoryConnectorsWithoutSystemActions.map((inMemoryConnector) => ({
         id: inMemoryConnector.id,
         actionTypeId: inMemoryConnector.actionTypeId,
         name: inMemoryConnector.name,
@@ -523,7 +534,14 @@ export class ActionsClient {
         (inMemoryConnector) => inMemoryConnector.id === actionId
       );
 
-      if (action !== undefined) {
+      /**
+       * Getting system connector is not allowed
+       */
+      if (action !== undefined && action.isSystemAction) {
+        throw Boom.notFound(`Connector ${action.id} not found`);
+      }
+
+      if (action !== undefined && action.isPreconfigured) {
         actionResults.push(action);
       }
     }
