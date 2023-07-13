@@ -1072,6 +1072,35 @@ FROM employees
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.log10Function',
+        {
+          defaultMessage: 'LOG10',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.log10Function.markdown',
+            {
+              defaultMessage: `### LOG10
+Returns the log base 10. The input can be any numeric value, the return value is always a double.
+
+Logs of negative numbers are NaN. Logs of infinites are infinite, as is the log of 0.
+
+\`\`\`
+ROW d = 1000.0
+| EVAL s = LOG10(d)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvAvgFunction',
         {
           defaultMessage: 'MV_AVG',
