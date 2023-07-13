@@ -11,13 +11,25 @@ import { Subject } from 'rxjs';
 import { memoize } from 'lodash';
 import { skip, take, takeUntil } from 'rxjs/operators';
 
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
 import { NavigationEmbeddableInput } from '../embeddable/types';
-import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
 import { memoizedFetchDashboards } from '../components/dashboard_link/dashboard_link_tools';
+
+const LazyNavigationEmbeddablePanelEditor = React.lazy(
+  () => import('../components/navigation_embeddable_panel_editor')
+);
+
+const NavigationEmbeddablePanelEditor = withSuspense(
+  LazyNavigationEmbeddablePanelEditor,
+  <EuiPanel className="eui-textCenter">
+    <EuiLoadingSpinner size="l" />
+  </EuiPanel>
+);
 
 /**
  * @throws in case user cancels

@@ -41,7 +41,7 @@ import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_pan
 
 import './navigation_embeddable.scss';
 
-export const NavigationEmbeddablePanelEditor = ({
+const NavigationEmbeddablePanelEditor = ({
   onSave,
   onClose,
   initialInput,
@@ -201,3 +201,7 @@ export const NavigationEmbeddablePanelEditor = ({
     </>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default NavigationEmbeddablePanelEditor;
