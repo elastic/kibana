@@ -903,6 +903,32 @@ Timespan literals are not whitespace sensitive. These expressions are all valid:
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eFunction',
+        {
+          defaultMessage: 'E',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eFunction.markdown',
+            {
+              defaultMessage: `### E
+Euler’s number.
+
+\`\`\`
+ROW E()
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction',
         {
           defaultMessage: 'IS_FINITE',
@@ -1369,6 +1395,32 @@ NOTE: The input type can be any number and the output type is the same as the in
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.piFunction',
+        {
+          defaultMessage: 'PI',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.piFunction.markdown',
+            {
+              defaultMessage: `### PI
+The ratio of a circle’s circumference to its diameter.
+
+\`\`\`
+ROW PI()
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.powFunction',
         {
           defaultMessage: 'POW',
@@ -1520,6 +1572,32 @@ If length is omitted, substring returns the remainder of the string. This exampl
 FROM employees
 | KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, 2)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tauFunction',
+        {
+          defaultMessage: 'TAU',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tauFunction.markdown',
+            {
+              defaultMessage: `### TAU
+The ratio of a circle’s circumference to its radius.
+
+\`\`\`
+ROW TAU()
 \`\`\`
               `,
               description:
