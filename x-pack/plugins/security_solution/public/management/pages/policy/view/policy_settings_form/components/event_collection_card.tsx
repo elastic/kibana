@@ -18,7 +18,6 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiText,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { cloneDeep, get, set } from 'lodash';
 import type { EuiCheckboxProps } from '@elastic/eui/src/components/form/checkbox/checkbox';
@@ -112,7 +111,7 @@ export const EventCollectionCard = memo(
         })}
         supportedOss={[os]}
         rightCorner={
-          <EuiText size="s" color="subdued">
+          <EuiText size="s" color="subdued" data-test-subj={getTestId('selectedCount')}>
             {i18n.translate(
               'xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled',
               {
@@ -252,7 +251,6 @@ const EventCheckbox = memo<EventCheckboxProps>(
     disabled,
     'data-test-subj': dataTestSubj,
   }) => {
-    const checkboxId = useGeneratedHtmlId();
     const isChecked: boolean = get(policy, keyPath);
     const isEditMode = mode === 'edit';
     const displayLabel = isChecked ? label : unCheckedLabel ? unCheckedLabel : label;
@@ -270,7 +268,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
     return isEditMode ? (
       <EuiCheckbox
         key={keyPath}
-        id={checkboxId}
+        id={keyPath}
         label={displayLabel}
         data-test-subj={dataTestSubj}
         checked={isChecked}
@@ -278,7 +276,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
         disabled={disabled}
       />
     ) : isChecked ? (
-      <div>{displayLabel}</div>
+      <div data-test-subj={dataTestSubj}>{displayLabel}</div>
     ) : null;
   }
 );

@@ -67,11 +67,9 @@ describe('Policy form Detect Prevent Protection level component', () => {
     set(expectedPolicyUpdate, 'windows.malware.mode', ProtectionModes.detect);
     set(expectedPolicyUpdate, 'mac.malware.mode', ProtectionModes.detect);
     set(expectedPolicyUpdate, 'linux.malware.mode', ProtectionModes.detect);
-
     set(expectedPolicyUpdate, 'windows.popup.malware.enabled', false);
     set(expectedPolicyUpdate, 'mac.popup.malware.enabled', false);
     set(expectedPolicyUpdate, 'linux.popup.malware.enabled', false);
-
     render();
 
     expect(isProtectionChecked('prevent')).toBe(true);
@@ -87,10 +85,8 @@ describe('Policy form Detect Prevent Protection level component', () => {
   it('should allow prevent mode to be selected', () => {
     formProps.osList = ['windows'];
     set(formProps.policy, 'windows.malware.mode', ProtectionModes.detect);
-
     const expectedPolicyUpdate = cloneDeep(formProps.policy);
     set(expectedPolicyUpdate, 'windows.malware.mode', ProtectionModes.prevent);
-
     render();
 
     expect(isProtectionChecked('detect')).toBe(true);
@@ -120,7 +116,6 @@ describe('Policy form Detect Prevent Protection level component', () => {
       set(expectedPolicyUpdate, 'windows.malware.mode', ProtectionModes.detect);
       set(expectedPolicyUpdate, 'mac.malware.mode', ProtectionModes.detect);
       set(expectedPolicyUpdate, 'linux.malware.mode', ProtectionModes.detect);
-
       render();
 
       expect(isProtectionChecked('prevent')).toBe(true);
