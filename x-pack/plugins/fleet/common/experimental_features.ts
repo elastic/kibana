@@ -20,7 +20,7 @@ export const allowedExperimentalValues = Object.freeze({
   showIntegrationsSubcategories: true,
   agentFqdnMode: true,
   showExperimentalShipperOptions: false,
-  agentTamperProtectionEnabled: false,
+  agentTamperProtectionEnabled: true,
   secretsStorage: false,
 });
 
