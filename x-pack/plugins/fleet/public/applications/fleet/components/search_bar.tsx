@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { fromKueryExpression } from '@kbn/es-query';
 
@@ -35,7 +35,7 @@ interface Props {
   dataTestSubj?: string;
 }
 
-// exported for testability
+/** Exported for testing only **/
 export const filterAndConvertFields = (
   fields: FieldSpec[],
   indexPattern?: string,
