@@ -6,7 +6,7 @@
  */
 import React, { createContext } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { mockCoreStart } from './context.mocks';
+import { mockCoreStart } from '../../mocks/context';
 
 const navigationContext = createContext<CoreStart | null>(mockCoreStart);
 

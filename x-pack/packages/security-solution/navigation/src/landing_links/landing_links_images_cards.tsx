@@ -59,7 +59,7 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
   function LandingLinksImageCards({ items, urlState, onLinkClick }) {
     const styles = useStyles();
     return (
-      <EuiFlexGroup direction="row" wrap>
+      <EuiFlexGroup direction="row" wrap data-test-subj="LandingImageCards">
         {items.map(
           ({ id, landingImage, title, description, isBeta, betaOptions, skipUrlState }) => {
             const linkProps: WrappedLinkProps = {

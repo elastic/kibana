@@ -44,7 +44,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({ services, subPluginRoutes 
   );
 };
 
-const RedirectRoute = React.memo<{ capabilities: Capabilities }>(function RedirectRoute({
+export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(function RedirectRoute({
   capabilities,
 }) {
   if (capabilities[SERVER_APP_ID].show === true) {

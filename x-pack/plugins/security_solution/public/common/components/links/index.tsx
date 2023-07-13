@@ -7,10 +7,9 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
-import { useGetLinkProps, withLink, type LinkProps } from '@kbn/security-solution-navigation/links';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { useTourContext } from '../guided_onboarding_tour';
@@ -43,7 +42,7 @@ import {
 } from './helpers';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
-import { useGetUrlStateQueryParams } from '../navigation/use_url_state_query_params';
+import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -574,76 +573,6 @@ export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string
 );
 
 WhoIsLink.displayName = 'WhoIsLink';
-
-interface SecuritySolutionLinkProps {
-  deepLinkId: SecurityPageName;
-  path?: string;
-}
-
-type GetSecuritySolutionLinkPropsParams = SecuritySolutionLinkProps & {
-  /**
-   * Optional `onClick` callback prop.
-   * It is composed within the returned `onClick` function to perform extra actions when the link is clicked.
-   * It does not override the navigation operation.
-   **/
-  onClick?: MouseEventHandler;
-};
-
-export type GetSecuritySolutionLinkProps = (
-  params: GetSecuritySolutionLinkPropsParams
-) => LinkProps;
-
-/**
- * It returns a function to get the `onClick` and `href` props to use in link components
- * based on the` deepLinkId` and `path` parameters.
- */
-export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionLinkProps => {
-  const getLinkProps = useGetLinkProps();
-  const getUrlStateQueryParams = useGetUrlStateQueryParams();
-
-  const getSecuritySolutionLinkProps = useCallback<GetSecuritySolutionLinkProps>(
-    ({ deepLinkId, path, onClick }) => {
-      const urlState = getUrlStateQueryParams(deepLinkId);
-      return getLinkProps({ id: deepLinkId, path, urlState, onClick });
-    },
-    [getLinkProps, getUrlStateQueryParams]
-  );
-
-  return getSecuritySolutionLinkProps;
-};
-
-/**
- * It returns the `onClick` and `href` props to use in link components
- * based on the` deepLinkId` and `path` parameters.
- */
-export const useSecuritySolutionLinkProps: GetSecuritySolutionLinkProps = ({
-  deepLinkId,
-  path,
-  onClick,
-}) => {
-  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
-  const securitySolutionLinkProps = useMemo<LinkProps>(
-    () => getSecuritySolutionLinkProps({ deepLinkId, path, onClick }),
-    [getSecuritySolutionLinkProps, deepLinkId, path, onClick]
-  );
-  return securitySolutionLinkProps;
-};
-
-export const withSecuritySolutionPropsLink = <T extends { id: string; urlState?: string }>(
-  WrappedComponent: React.ComponentType<T>
-): React.FC<Omit<T, 'id' | 'urlState'> & { deepLinkId: SecurityPageName }> =>
-  React.memo(function WithSecuritySolutionProps({ deepLinkId, ...rest }) {
-    const getUrlStateQueryParams = useGetUrlStateQueryParams();
-    const urlState = getUrlStateQueryParams(deepLinkId);
-    return <WrappedComponent {...({ id: deepLinkId, urlState, ...rest } as unknown as T)} />;
-  });
-
-/**
- * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
- */
-export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
-  WrappedComponent: React.FC<T>
-) => withSecuritySolutionPropsLink(withLink(WrappedComponent));
 
 /**
  * Security Solutions internal link button.

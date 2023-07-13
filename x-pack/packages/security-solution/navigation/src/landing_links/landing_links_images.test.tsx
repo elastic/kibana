@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SecurityPageName } from '../constants';
-import { mockNavigateTo, mockGetAppUrl } from '../__mocks__/navigation.mocks';
+import { mockNavigateTo, mockGetAppUrl } from '../../mocks/navigation';
 import { LandingLinksImages } from './landing_links_images';
 import { BETA } from './beta_badge';
 

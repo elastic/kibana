@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockGetAppUrl, mockNavigateTo } from './navigation.mocks';
+import { mockGetAppUrl, mockNavigateTo } from '../../mocks/navigation';
 
 export const useGetAppUrl = () => {
   return { getAppUrl: mockGetAppUrl };

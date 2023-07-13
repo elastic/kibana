@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../../app/types';
 import { TestProviders } from '../../../common/mock';
 import { DashboardsLandingPage } from '.';
 import type { NavigationLink } from '../../../common/links';
 import { useCapabilities } from '../../../common/lib/kibana';
-import * as telemetry from '../../../common/lib/telemetry';
+import { METRIC_TYPE, TELEMETRY_EVENT } from '../../../common/lib/telemetry/constants';
+import * as telemetry from '../../../common/lib/telemetry/track';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
@@ -67,18 +68,23 @@ const renderDashboardLanding = () => render(<DashboardsLandingPage />, { wrapper
 
 describe('Dashboards landing', () => {
   describe('Dashboards default links', () => {
-    it('should render items', () => {
-      const { queryByText } = renderDashboardLanding();
+    it('should render items', async () => {
+      const { queryByText, queryByTestId } = renderDashboardLanding();
+
+      // wait for lazy loaded landing
+      await waitFor(() => expect(queryByTestId('LandingImageCards')).toBeInTheDocument());
 
       expect(queryByText(OVERVIEW_ITEM_LABEL)).toBeInTheDocument();
       expect(queryByText(DETECTION_RESPONSE_ITEM_LABEL)).toBeInTheDocument();
     });
 
-    it('should render items in the same order as defined', () => {
+    it('should render items in the same order as defined', async () => {
       mockAppManageLink.mockReturnValueOnce({
         ...APP_DASHBOARD_LINKS,
       });
-      const { queryAllByTestId } = renderDashboardLanding();
+      const { queryAllByTestId, queryByTestId } = renderDashboardLanding();
+
+      await waitFor(() => expect(queryByTestId('LandingImageCards')).toBeInTheDocument());
 
       const renderedItems = queryAllByTestId('LandingImageCard-item');
 
@@ -86,12 +92,14 @@ describe('Dashboards landing', () => {
       expect(renderedItems[1]).toHaveTextContent(DETECTION_RESPONSE_ITEM_LABEL);
     });
 
-    it('should not render items if all items filtered', () => {
+    it('should not render items if all items filtered', async () => {
       mockAppManageLink.mockReturnValueOnce({
         ...APP_DASHBOARD_LINKS,
         links: [],
       });
-      const { queryByText } = renderDashboardLanding();
+      const { queryByText, queryByTestId } = renderDashboardLanding();
+
+      await waitFor(() => expect(queryByTestId('LandingImageCards')).toBeInTheDocument());
 
       expect(queryByText(OVERVIEW_ITEM_LABEL)).not.toBeInTheDocument();
       expect(queryByText(DETECTION_RESPONSE_ITEM_LABEL)).not.toBeInTheDocument();
@@ -154,10 +162,7 @@ describe('Dashboards landing', () => {
       it('should send telemetry', () => {
         const result = renderDashboardLanding();
         result.getByTestId('createDashboardButton').click();
-        expect(spyTrack).toHaveBeenCalledWith(
-          telemetry.METRIC_TYPE.CLICK,
-          telemetry.TELEMETRY_EVENT.CREATE_DASHBOARD
-        );
+        expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.CREATE_DASHBOARD);
       });
     });
   });
