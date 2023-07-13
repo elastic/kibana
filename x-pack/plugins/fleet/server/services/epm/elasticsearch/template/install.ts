@@ -45,6 +45,8 @@ import {
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
 
+import { appContextService } from '../../../app_context';
+
 import {
   generateMappings,
   generateTemplateName,
@@ -53,7 +55,6 @@ import {
   getTemplatePriority,
 } from './template';
 import { buildDefaultSettings } from './default_settings';
-import { appContextService } from '../../../app_context';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
