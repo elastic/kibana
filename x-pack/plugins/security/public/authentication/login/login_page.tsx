@@ -170,7 +170,8 @@ export class LoginPage extends Component<Props, State> {
                 />
               </h1>
             </EuiTitle>
-            <div>Testing my PR</div>
+            <div>Testing my PR ..</div>
+            <div>.. again!</div>
             <EuiSpacer size="xl" />
           </div>
         </header>
