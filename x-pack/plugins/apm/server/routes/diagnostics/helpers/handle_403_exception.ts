@@ -17,7 +17,7 @@ export async function handle403Exception<T>(
       error instanceof errors.ResponseError &&
       error.meta.statusCode === 403
     ) {
-      console.error(`Handled insufficient access error: ${error.message}}`);
+      console.error(`Suppressed insufficient access error: ${error.message}}`);
       return defaultValue as T;
     }
 
