@@ -11,6 +11,9 @@ import { IntegrationId, IntegrationType } from '../types';
 export class Integration {
   id: IntegrationId;
   name: IntegrationType['name'];
+  title?: IntegrationType['title'];
+  description?: IntegrationType['description'];
+  icons?: IntegrationType['icons'];
   status: IntegrationType['status'];
   version: IntegrationType['version'];
   datasets: Dataset[];
@@ -18,6 +21,9 @@ export class Integration {
   private constructor(integration: Integration) {
     this.id = integration.id;
     this.name = integration.name;
+    this.title = integration.title ?? integration.name;
+    this.description = integration.description;
+    this.icons = integration.icons;
     this.status = integration.status;
     this.version = integration.version;
     this.datasets = integration.datasets;
