@@ -27,7 +27,8 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/analytics",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/ui-theme"
   ],
   "exclude": ["target/**/*"]
 }
