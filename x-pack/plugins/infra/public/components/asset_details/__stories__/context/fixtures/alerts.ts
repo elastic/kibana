@@ -36,8 +36,6 @@ const summaryResponse = {
 
 export const alertsSummaryHttpResponse = {
   default: () => Promise.resolve({ ...summaryResponse }),
-  loading: () => new Promise(() => {}),
-  noData: () => Promise.resolve({ data: [] }),
 };
 
 export type AlertsSummaryHttpMocks = keyof typeof alertsSummaryHttpResponse;
