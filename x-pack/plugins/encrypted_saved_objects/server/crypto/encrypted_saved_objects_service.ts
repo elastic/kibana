@@ -136,7 +136,7 @@ export function descriptorToArray(descriptor: SavedObjectDescriptor) {
 export class EncryptedSavedObjectsService {
   // Embedding excluded AAD fields POC rev2
   // We need an internal repo to write and read the versioned ESO descriptors
-  private internalSoRepository: ISavedObjectsRepository | undefined;
+  private internalSoRepository?: ISavedObjectsRepository;
 
   // Embedding excluded AAD fields POC rev2
   // Metadata is stored in an SO. Ehen we read one, we'll
