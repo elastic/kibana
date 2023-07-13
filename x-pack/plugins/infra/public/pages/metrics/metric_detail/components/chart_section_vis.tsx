@@ -18,7 +18,7 @@ import {
   TooltipProps,
   Tooltip,
 } from '@elastic/charts';
-import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { SeriesChart } from './series_chart';
 import {
@@ -110,7 +110,7 @@ export const ChartSectionVis = ({
   }
 
   return (
-    <EuiPageContentBody>
+    <EuiPageSection>
       <div className="infrastructureChart" style={{ height: 250, marginBottom: 16 }}>
         <Chart>
           <Axis
@@ -142,6 +142,6 @@ export const ChartSectionVis = ({
           />
         </Chart>
       </div>
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };
