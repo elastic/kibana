@@ -53,9 +53,19 @@ const navigationTree: NavigationTreeDefinition = {
             },
             {
               link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
             },
             {
               link: 'visualize',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
+                  pathNameSerialized.startsWith(prepend('/app/maps'))
+                );
+              },
             },
           ],
         },

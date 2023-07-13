@@ -38,6 +38,9 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Dashboards',
               }),
               link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
             },
             {
               link: 'observability-overview:alerts',
@@ -76,13 +79,14 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-
         {
           id: 'applications',
           children: [
             {
               id: 'apm',
-              title: 'Applications',
+              title: i18n.translate('xpack.serverlessObservability.nav.applications', {
+                defaultMessage: 'Applications',
+              }),
               children: [
                 {
                   link: 'apm:services',
@@ -108,6 +112,13 @@ const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Visualizations',
               }),
               link: 'visualize',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return (
+                  pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+                  pathNameSerialized.startsWith(prepend('/app/lens')) ||
+                  pathNameSerialized.startsWith(prepend('/app/maps'))
+                );
+              },
             },
           ],
         },
