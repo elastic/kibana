@@ -12,17 +12,14 @@ import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
-import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '../../common/constants';
+import {
+  AUTOCOMPLETE_DEFINITIONS_FOLDER,
+  ENDPOINTS_SUBFOLDER,
+  GLOBALS_SUBFOLDER,
+  OVERRIDES_SUBFOLDER
+} from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
-
-interface EndpointDescription {
-  methods?: string[];
-  patterns?: string | string[];
-  url_params?: Record<string, unknown>;
-  data_autocomplete_rules?: Record<string, unknown>;
-  url_components?: Record<string, unknown>;
-  priority?: number;
-}
+import type { EndpointDefinition, GlobalDefinition } from '../../common/types';
 
 export class SpecDefinitionsService {
   private readonly name = 'es';
@@ -36,7 +33,7 @@ export class SpecDefinitionsService {
     this.globalRules[parentNode] = rules;
   }
 
-  public addEndpointDescription(endpoint: string, description: EndpointDescription = {}) {
+  public addEndpointDescription(endpoint: string, description: EndpointDefinition = {}) {
     let copiedDescription: { patterns?: string; url_params?: Record<string, unknown> } = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
@@ -91,16 +88,18 @@ export class SpecDefinitionsService {
     }
   }
 
-  private loadJSONSpecInDir(dirname: string) {
+  private loadEndpoints() {
     // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
-    const generatedFiles = globby.sync(normalizePath(join(dirname, 'generated', '*.json')));
-    const overrideFiles = globby.sync(normalizePath(join(dirname, 'overrides', '*.json')));
+    const generatedFiles = globby.sync(
+      normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, ENDPOINTS_SUBFOLDER, '*.json'))
+    );
+    const overrideFiles = globby.sync(
+      normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER, '*.json'))
+    );
 
     return generatedFiles.reduce((acc, file) => {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
-      const loadedSpec: Record<string, EndpointDescription> = JSON.parse(
-        readFileSync(file, 'utf8')
-      );
+      const loadedSpec: Record<string, EndpointDefinition> = JSON.parse(readFileSync(file, 'utf8'));
       if (overrideFile) {
         merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
       }
@@ -113,15 +112,28 @@ export class SpecDefinitionsService {
         }
       });
       return acc;
-    }, {} as Record<string, EndpointDescription>);
+    }, {} as Record<string, EndpointDefinition>);
+  }
+
+  private loadGlobals() {
+    const globalsFiles = globby.sync(
+      normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, GLOBALS_SUBFOLDER, '*.json'))
+    );
+    globalsFiles.forEach((globalFile) => {
+      const loadedGlobalDefinition: GlobalDefinition = JSON.parse(readFileSync(globalFile, 'utf8'));
+      const { name, params } = loadedGlobalDefinition;
+      this.addGlobalAutocompleteRules(name, params);
+    });
   }
 
   private loadJsonSpec() {
-    const result = this.loadJSONSpecInDir(AUTOCOMPLETE_DEFINITIONS_FOLDER);
+    const endpointsSpecs = this.loadEndpoints();
 
-    Object.keys(result).forEach((endpoint) => {
-      this.addEndpointDescription(endpoint, result[endpoint]);
+    Object.keys(endpointsSpecs).forEach((endpoint) => {
+      this.addEndpointDescription(endpoint, endpointsSpecs[endpoint]);
     });
+
+    this.loadGlobals();
   }
 
   private loadJSSpec() {

@@ -6,6 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './models';
-export * from './plugin_config';
-export * from './autocomplete_definitions';
+export interface EndpointDefinition {
+  methods?: string[];
+  patterns?: string | string[];
+  url_params?: Record<string, unknown>;
+  data_autocomplete_rules?: Record<string, unknown>;
+  url_components?: Record<string, unknown>;
+  priority?: number;
+}
+
+export interface GlobalDefinition {
+  name: string;
+  params: Record<string, unknown>;
+}

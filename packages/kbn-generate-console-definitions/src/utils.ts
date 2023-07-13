@@ -111,6 +111,6 @@ export const getCombinedGlobalName = (typeName: SpecificationTypes.TypeName): st
 
 export const getGlobalScopeLink = (type: S.TypeName) => {
   return {
-    __scope_link: getCombinedGlobalName(type),
+    __scope_link: `GLOBAL.${getCombinedGlobalName(type)}`,
   };
 };
