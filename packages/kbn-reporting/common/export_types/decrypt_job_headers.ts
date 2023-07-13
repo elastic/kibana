@@ -18,7 +18,7 @@ export const decryptJobHeaders = async (
   try {
     if (typeof headers !== 'string') {
       throw new Error(
-        i18n.translate('xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage', {
+        i18n.translate('reporting.common.exportTypes.missingJobHeadersErrorMessage', {
           defaultMessage: 'Job headers are missing',
         })
       );
@@ -30,14 +30,11 @@ export const decryptJobHeaders = async (
     logger.error(err);
 
     throw new Error(
-      i18n.translate(
-        'xpack.reporting.exportTypes.common.failedToDecryptReportJobDataErrorMessage',
-        {
-          defaultMessage:
-            'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-          values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
-        }
-      )
+      i18n.translate('reporting.common.exportTypes.failedToDecryptReportJobDataErrorMessage', {
+        defaultMessage:
+          'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
+        values: { encryptionKey: 'reporting.encryptionKey', err: err.toString() },
+      })
     );
   }
 };
