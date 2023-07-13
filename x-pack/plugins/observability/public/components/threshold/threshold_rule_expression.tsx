@@ -6,14 +6,18 @@
  */
 
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiAccordion,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
+  EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,23 +29,24 @@ import { DataViewBase } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '../../../utils/kibana_react';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/threshold_rule/types';
-import { TimeUnitChar } from '../../../../common/utils/formatters/duration';
-import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
-import { ExpressionChart } from './expression_chart';
-import { ExpressionRow } from './expression_row';
-import { MetricsExplorerKueryBar } from './kuery_bar';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { convertKueryToElasticSearchQuery } from '../helpers/kuery';
-import { MetricsExplorerGroupBy } from './group_by';
+
+import { useKibana } from '../../utils/kibana_react';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../common/threshold_rule/types';
+import { TimeUnitChar } from '../../../common/utils/formatters/duration';
+import { AlertContextMeta, AlertParams, MetricExpression } from './types';
+import { ExpressionChart } from './components/expression_chart';
+import { ExpressionRow } from './components/expression_row';
+import { MetricsExplorerKueryBar } from './components/kuery_bar';
+import { MetricsExplorerGroupBy } from './components/group_by';
+import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
+import { convertKueryToElasticSearchQuery } from './helpers/kuery';
+
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
@@ -66,6 +71,7 @@ export default function Expressions(props: Props) {
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
+  const [paramsError, setParamsError] = useState<Error>();
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -97,8 +103,7 @@ export default function Expressions(props: Props) {
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
       } catch (error) {
-        // TODO Handle error
-        console.log('error:', error);
+        setParamsError(error);
       }
     };
 
@@ -335,11 +340,32 @@ export default function Expressions(props: Props) {
       .filter((g) => typeof g === 'string') as string[];
   }, [ruleParams, groupByFilterTestPatterns]);
 
+  if (paramsError) {
+    return (
+      <>
+        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
+          <p>{paramsError.message}</p>
+        </EuiCallOut>
+        <EuiSpacer size={'m'} />
+      </>
+    );
+  }
+
+  if (!searchSource) {
+    return (
+      <>
+        <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
+        <EuiSpacer size={'m'} />
+      </>
+    );
+  }
+
   return (
     <>
       <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
+        metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
         onSelectDataView={onSelectDataView}
         onChangeMetaData={({ adHocDataViewList }) => {
           onChangeMetaData({ ...metadata, adHocDataViewList });
