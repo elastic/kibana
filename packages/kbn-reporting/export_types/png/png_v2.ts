@@ -27,12 +27,9 @@ import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
-import {
-  PngScreenshotOptions,
-  PngScreenshotResult,
-  ScreenshotOptions,
-} from '@kbn/screenshotting-plugin/server';
-import { decryptJobHeaders, generatePngObservable } from '../common';
+import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { Context } from '@kbn/screenshotting-plugin/server/browsers';
+import { decryptJobHeaders, generatePngObservable } from '@kbn/reporting-export-types-common';
 import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
 
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
@@ -71,15 +68,11 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   };
 
   public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult> {
-    return Rx.defer(async () => this.startDeps.screenshotting).pipe(() => {
-      return this.startDeps.screenshotting.getScreenshots({
-        ...options,
-        urls: options.urls.map((url) =>
-          typeof url === 'string'
-            ? url
-            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-        ),
-      } as ScreenshotOptions);
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
     });
   }
 
@@ -112,7 +105,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           payload.forceNow
         );
 
-        const [locatorParams] = payload.locatorParams;
+        const [locatorParams] = payload.locatorParams as unknown as Context[];
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
