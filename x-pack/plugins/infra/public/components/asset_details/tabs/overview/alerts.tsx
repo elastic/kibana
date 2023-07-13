@@ -113,12 +113,12 @@ const AlertsSectionTitle = () => {
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs" textTransform="uppercase">
-          <h6>
+          <h5>
             <FormattedMessage
               id="xpack.infra.assetDetails.overview.alertsSectionTitle"
               defaultMessage="Alerts"
             />
-          </h6>
+          </h5>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
