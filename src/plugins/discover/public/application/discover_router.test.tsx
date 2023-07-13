@@ -18,8 +18,9 @@ import { ContextAppRoute } from './context';
 import { createProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 import { NotFoundRoute } from './not_found';
+import { DiscoverProfileName } from '../customizations/profile_provider';
 
-let mockProfile: string | undefined;
+let mockProfile: DiscoverProfileName | undefined;
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -46,6 +47,7 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
 const props = {
   isDev: false,
   customizationCallbacks: [],
+  profileName: 'default',
 };
 
 describe('DiscoverRoutes', () => {
@@ -154,6 +156,7 @@ describe('CustomDiscoverRoutes', () => {
         prefix={addProfile('', mockProfile)}
         customizationCallbacks={callbacks}
         isDev={props.isDev}
+        profileName={mockProfile}
       />
     );
   });
@@ -186,7 +189,11 @@ describe('DiscoverRouter', () => {
 
   it('should show DiscoverRoutes component for / route', () => {
     expect(pathMap['/']).toMatchObject(
-      <DiscoverRoutes customizationCallbacks={callbacks} isDev={props.isDev} />
+      <DiscoverRoutes
+        customizationCallbacks={callbacks}
+        isDev={props.isDev}
+        profileName="default"
+      />
     );
   });
 

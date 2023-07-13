@@ -8,7 +8,7 @@
 
 import createContainer from 'constate';
 
-export type DiscoverProfileName = 'default' | 'log-explorer';
+export type DiscoverProfileName = string;
 
 export const [DiscoverProfileNameProvider, useDiscoverProfileName] = createContainer(
   ({ profileName }: { profileName: DiscoverProfileName }) => profileName

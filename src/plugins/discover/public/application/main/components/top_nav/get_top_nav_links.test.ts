@@ -30,9 +30,21 @@ test('getTopNavLinks result', () => {
     isPlainRecord: false,
     adHocDataViews: [],
     topNavCustomization: undefined,
+    profileName: 'default',
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "description": "Switch to Logs mode",
+        "id": "switchToLogsProfile",
+        "label": "Switch to Logs mode",
+        "run": [Function],
+        "badge": Object {
+          "iconType": "beaker",
+          "label": "Technical preview",
+        }
+        "testId": "switchToLogsProfile",
+      },
       Object {
         "description": "New Search",
         "id": "new",
@@ -83,9 +95,21 @@ test('getTopNavLinks result for sql mode', () => {
     isPlainRecord: true,
     adHocDataViews: [],
     topNavCustomization: undefined,
+    profileName: 'default',
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "description": "Switch to Logs mode",
+        "id": "switchToLogsProfile",
+        "label": "Switch to Logs mode",
+        "run": [Function],
+        "badge": Object {
+          "iconType": "beaker",
+          "label": "Technical preview",
+        }
+        "testId": "switchToLogsProfile",
+      },
       Object {
         "description": "New Search",
         "id": "new",

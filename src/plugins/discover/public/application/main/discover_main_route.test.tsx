@@ -101,6 +101,7 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
   const props = {
     isDev: false,
     customizationCallbacks: [],
+    profileName: 'default',
   };
 
   return mountWithIntl(
