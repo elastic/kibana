@@ -60,7 +60,7 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <EuiPageBody data-test-subj="remote-clusters-add">
+      <EuiPageBody restrictWidth={true} data-test-subj="remote-clusters-add">
         <EuiPageSection paddingSize='none'>
           <RemoteClusterPageTitle
             title={

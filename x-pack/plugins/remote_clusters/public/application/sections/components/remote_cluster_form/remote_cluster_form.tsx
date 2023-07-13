@@ -304,84 +304,58 @@ export class RemoteClusterForm extends Component<Props, State> {
   renderActions() {
     const { isSaving, cancel } = this.props;
     const { areErrorsVisible, isRequestVisible } = this.state;
-
-    if (isSaving) {
-      return (
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.actions.savingText"
-                defaultMessage="Saving"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    let cancelButton;
-
-    if (cancel) {
-      cancelButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="primary" onClick={cancel}>
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      );
-    }
-
-    const isSaveDisabled = areErrorsVisible && this.hasErrors();
+    const isSaveDisabled = areErrorsVisible && this.hasErrors() || isSaving;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        {cancel && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="primary" onClick={cancel}>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={this.toggleRequest} data-test-subj="remoteClustersRequestButton">
+                {isRequestVisible ? (
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
+                    defaultMessage="Hide request"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
+                    defaultMessage="Show request"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="remoteClusterFormSaveButton"
-                color="success"
-                iconType="check"
+                color="primary"
                 onClick={this.save}
                 fill
                 isDisabled={isSaveDisabled}
+                isLoading={isSaving}
                 aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(
                   ERROR_LIST_ID
                 )}`}
               >
                 <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
-                  defaultMessage="Save"
+                  id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
+                  defaultMessage="Next"
                 />
               </EuiButton>
             </EuiFlexItem>
-
-            {cancelButton}
           </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.toggleRequest} data-test-subj="remoteClustersRequestButton">
-            {isRequestVisible ? (
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
-                defaultMessage="Hide request"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
-                defaultMessage="Show request"
-              />
-            )}
-          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

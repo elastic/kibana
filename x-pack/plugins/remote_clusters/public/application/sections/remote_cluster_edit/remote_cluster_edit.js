@@ -185,7 +185,7 @@ export class RemoteClusterEdit extends Component {
     }
 
     return (
-      <EuiPageBody data-test-subj="remote-clusters-edit">
+      <EuiPageBody restrictWidth={true} data-test-subj="remote-clusters-edit">
         <EuiPageSection paddingSize='none'>
           <RemoteClusterPageTitle
             title={
