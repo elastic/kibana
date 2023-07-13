@@ -60,7 +60,11 @@ export interface ActionsPlugin {
 }
 
 // the parameters passed to an action type executor function
-export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
+export interface ActionTypeExecutorOptions<
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>,
+  Params
+> {
   actionId: string;
   services: Services;
   config: Config;
@@ -84,11 +88,12 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   isSystemAction: boolean;
 }
 
-export interface PreConfiguredAction<
+export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
 > extends ActionResult<Config> {
   secrets: Secrets;
+  config: Config;
 }
 
 export interface FindActionResult extends ActionResult {
@@ -96,7 +101,12 @@ export interface FindActionResult extends ActionResult {
 }
 
 // signature of the action type executor function
-export type ExecutorType<Config, Secrets, Params, ResultData> = (
+export type ExecutorType<
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>,
+  Params,
+  ResultData
+> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
@@ -140,17 +150,17 @@ export interface ActionType<
     secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
-  isSystemAction?: boolean;
+  isSystemActionType?: boolean;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
-export interface RawAction extends SavedObjectAttributes {
+export interface RawAction extends Record<string, unknown> {
   actionTypeId: string;
   name: string;
   isMissingSecrets: boolean;
-  config: SavedObjectAttributes;
-  secrets: SavedObjectAttributes;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

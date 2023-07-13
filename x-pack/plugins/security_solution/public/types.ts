@@ -66,6 +66,7 @@ import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
+import type { EntityAnalytics } from './entity_analytics';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
@@ -187,6 +188,7 @@ export interface SubPlugins {
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
+  entityAnalytics: EntityAnalytics;
 }
 
 // TODO: find a better way to defined these types
@@ -204,4 +206,5 @@ export interface StartedSubPlugins {
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
+  entityAnalytics: ReturnType<EntityAnalytics['start']>;
 }
