@@ -129,8 +129,8 @@ export class SpecDefinitionsService {
       const addEndpoint =
         // If the 'availability' property doesn't exist, display the endpoint by default
         !description.availability ||
-        (endpointsAvailability === 'stack' && description.availability?.stack) ||
-        (endpointsAvailability === 'serverless' && description.availability?.serverless);
+        (endpointsAvailability === 'stack' && description.availability.stack) ||
+        (endpointsAvailability === 'serverless' && description.availability.serverless);
       if (addEndpoint) {
         this.addEndpointDescription(endpoint, description);
       }
