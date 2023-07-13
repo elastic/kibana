@@ -91,19 +91,28 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
           );
         }
 
+        const executeResult = await actionsClient.execute({
+          actionId: request.body.connector_id,
+          params: {
+            subAction: 'test',
+            subActionParams: {
+              body: JSON.stringify(messageBody),
+              stream: true,
+            },
+          },
+        });
+
+        if (executeResult?.status === 'error') {
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: `${executeResult?.message} - ${executeResult?.serviceMessage}`,
+            },
+          });
+        }
+
         return response.ok({
-          body: (
-            await actionsClient.execute({
-              actionId: request.body.connector_id,
-              params: {
-                subAction: 'test',
-                subActionParams: {
-                  body: JSON.stringify(messageBody),
-                  stream: true,
-                },
-              },
-            })
-          ).data as CreateChatCompletionResponse | Readable,
+          body: executeResult.data as CreateChatCompletionResponse | Readable,
         });
       }
     );
