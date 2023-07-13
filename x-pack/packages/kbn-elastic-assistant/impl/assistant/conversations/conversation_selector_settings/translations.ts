@@ -8,49 +8,49 @@
 import { i18n } from '@kbn/i18n';
 
 export const SELECTED_CONVERSATION_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.defaultConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelectorSettings.defaultConversationTitle',
   {
-    defaultMessage: 'Selected conversation',
+    defaultMessage: 'Conversations',
   }
 );
 
 export const CONVERSATION_SELECTOR_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.ariaLabel',
+  'xpack.elasticAssistant.assistant.conversationSelectorSettings.ariaLabel',
   {
     defaultMessage: 'Conversation selector',
   }
 );
 
 export const CONVERSATION_SELECTOR_PLACE_HOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.placeholderTitle',
+  'xpack.elasticAssistant.assistant.conversationSelectorSettings.placeholderTitle',
   {
     defaultMessage: 'Select or type to create new...',
   }
 );
 
 export const CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.CustomOptionTextTitle',
+  'xpack.elasticAssistant.assistant.conversationSelectorSettings.CustomOptionTextTitle',
   {
     defaultMessage: 'Create new conversation:',
   }
 );
 
 export const PREVIOUS_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.previousConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelectorSettings.previousConversationTitle',
   {
     defaultMessage: 'Previous conversation',
   }
 );
 
 export const NEXT_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.nextConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelectorSettings.nextConversationTitle',
   {
     defaultMessage: 'Next conversation',
   }
 );
 
 export const DELETE_CONVERSATION = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSelector.deleteConversationTitle',
+  'xpack.elasticAssistant.assistant.conversationSelectorSettings.deleteConversationTitle',
   {
     defaultMessage: 'Delete conversation',
   }
