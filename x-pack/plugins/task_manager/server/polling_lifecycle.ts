@@ -209,6 +209,7 @@ export class TaskPollingLifecycle {
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
+      requeueInvalidTasksConfig: this.config.requeue_invalid_tasks,
     });
   };
 

@@ -304,6 +304,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render metadata tab, add and remove filter', async () => {
           await pageObjects.infraHostsView.metadataTableExist();
 
+          // Add Pin
+          await pageObjects.infraHostsView.clickAddMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+
+          // Persist pin after refresh
+          await browser.refresh();
+          await retry.try(async () => {
+            await pageObjects.infraHome.waitForLoading();
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
+          });
+
+          // Remove Pin
+          await pageObjects.infraHostsView.clickRemoveMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
+
           await pageObjects.infraHostsView.clickAddMetadataFilter();
           await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -328,9 +344,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           // Persist pin after refresh
           await browser.refresh();
-          await retry.tryForTime(5 * 1000, async () => {
+          await retry.try(async () => {
             await pageObjects.infraHome.waitForLoading();
-            expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
           });
 
           // Remove Pin
