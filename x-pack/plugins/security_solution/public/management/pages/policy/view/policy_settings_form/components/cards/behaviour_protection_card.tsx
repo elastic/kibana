@@ -86,7 +86,7 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           osList={BEHAVIOUR_OS_VALUES}
         />
 
-        {!isCloud && (
+        {isCloud && (
           <ReputationService
             policy={policy}
             onChange={onChange}
