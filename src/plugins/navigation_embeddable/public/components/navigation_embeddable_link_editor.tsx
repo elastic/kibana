@@ -7,7 +7,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiForm,
@@ -34,6 +34,7 @@ import {
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
+  DashboardItem,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { NavigationEmbeddableUnorderedLink } from '../editor/open_link_editor_flyout';
@@ -54,8 +55,8 @@ export const NavigationEmbeddableLinkEditor = ({
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
   );
-  const [linkLabel, setLinkLabel] = useState<string | undefined>(link?.label);
-  const [linkLabelPlaceholder, setLinkLabelPlaceholder] = useState<string | undefined>();
+  const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
+  const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
@@ -77,6 +78,33 @@ export const NavigationEmbeddableLinkEditor = ({
       };
     });
   }, []);
+
+  const onDashboardSelected = useCallback(
+    (selectedDashboard?: DashboardItem) => {
+      setLinkDestination(selectedDashboard?.id);
+      if (selectedDashboard) {
+        const dashboardTitle = selectedDashboard.attributes.title;
+        setDefaultLinkLabel(dashboardTitle);
+        if (!currentLinkLabel || currentLinkLabel === defaultLinkLabel) {
+          setCurrentLinkLabel(dashboardTitle);
+        }
+      }
+    },
+    [currentLinkLabel, defaultLinkLabel]
+  );
+
+  const onUrlSelected = useCallback(
+    (url?: string) => {
+      setLinkDestination(url);
+      if (url) {
+        setDefaultLinkLabel(url);
+        if (!currentLinkLabel || currentLinkLabel === defaultLinkLabel) {
+          setCurrentLinkLabel(url);
+        }
+      }
+    },
+    [currentLinkLabel, defaultLinkLabel]
+  );
 
   return (
     <EuiFocusTrap className={'navEmbeddableLinkEditor in'}>
@@ -109,10 +137,12 @@ export const NavigationEmbeddableLinkEditor = ({
               onChange={(id) => {
                 if (link?.type === id) {
                   setLinkDestination(link.destination);
+                  setCurrentLinkLabel(link.label ?? '');
                 } else {
                   setLinkDestination(undefined);
-                  setLinkLabelPlaceholder(undefined);
+                  setCurrentLinkLabel('');
                 }
+                setDefaultLinkLabel(undefined);
                 setSelectedLinkType(id as NavigationLinkType);
               }}
             />
@@ -122,15 +152,13 @@ export const NavigationEmbeddableLinkEditor = ({
             {selectedLinkType === DASHBOARD_LINK_TYPE ? (
               <DashboardLinkDestinationPicker
                 parentDashboard={parentDashboard}
-                setDestination={setLinkDestination}
-                initialSelection={link?.destination}
-                setPlaceholder={setLinkLabelPlaceholder}
+                initialSelection={linkDestination}
+                onDestinationPicked={onDashboardSelected}
               />
             ) : (
               <ExternalLinkDestinationPicker
-                setDestination={setLinkDestination}
                 initialSelection={link?.destination}
-                setPlaceholder={setLinkLabelPlaceholder}
+                onDestinationPicked={onUrlSelected}
               />
             )}
           </EuiFormRow>
@@ -138,13 +166,10 @@ export const NavigationEmbeddableLinkEditor = ({
           <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
               placeholder={
-                linkLabelPlaceholder ||
-                NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
+                defaultLinkLabel || NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
-              value={linkLabel ?? ''}
-              onChange={(e) => {
-                setLinkLabel(e.target.value);
-              }}
+              value={currentLinkLabel}
+              onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>
         </EuiForm>
@@ -171,7 +196,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety
                 if (linkDestination) {
                   onSave({
-                    label: linkLabel,
+                    label: currentLinkLabel === defaultLinkLabel ? undefined : currentLinkLabel,
                     type: selectedLinkType,
                     id: link?.id ?? uuidv4(),
                     destination: linkDestination,

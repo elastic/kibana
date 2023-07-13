@@ -8,6 +8,7 @@
 
 import { debounce } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
+import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -21,26 +22,29 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { DashboardItem } from '../../embeddable/types';
-import { memoizedFetchDashboards } from './dashboard_link_tools';
+import { memoizedFetchDashboard, memoizedFetchDashboards } from './dashboard_link_tools';
 import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
 
 export const DashboardLinkDestinationPicker = ({
-  setDestination,
-  setPlaceholder,
-  parentDashboard,
+  onDestinationPicked,
   initialSelection,
+  parentDashboard,
   ...other
 }: {
-  setDestination: (destination?: string) => void;
-  setPlaceholder: (placeholder?: string) => void;
+  onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
   parentDashboard?: DashboardContainer;
   initialSelection?: string;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
-  const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
+
+  useMount(async () => {
+    if (initialSelection) {
+      onDestinationPicked(await memoizedFetchDashboard(initialSelection));
+    }
+  });
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
     return await memoizedFetchDashboards({
@@ -53,7 +57,6 @@ export const DashboardLinkDestinationPicker = ({
   useEffect(() => {
     const dashboardOptions =
       (dashboardList ?? []).map((dashboard: DashboardItem) => {
-        if (dashboard.id === initialSelection) setSelectedDashboard(dashboard);
         return {
           data: dashboard,
           label: dashboard.attributes.title,
@@ -79,16 +82,6 @@ export const DashboardLinkDestinationPicker = ({
     [setSearchString]
   );
 
-  useEffect(() => {
-    if (selectedDashboard) {
-      setDestination(selectedDashboard.id);
-      setPlaceholder(selectedDashboard.attributes.title);
-    } else {
-      setDestination(undefined);
-      setPlaceholder(undefined);
-    }
-  }, [selectedDashboard, setDestination, setPlaceholder]);
-
   /* {...other} is needed so all inner elements are treated as part of the form */
   return (
     <div {...other}>
@@ -108,9 +101,9 @@ export const DashboardLinkDestinationPicker = ({
         aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
         onChange={(newOptions, _, selected) => {
           if (selected.checked) {
-            setSelectedDashboard(selected.data as DashboardItem);
+            onDestinationPicked(selected.data as DashboardItem);
           } else {
-            setSelectedDashboard(undefined);
+            onDestinationPicked(undefined);
           }
           setDashboardListOptions(newOptions);
         }}

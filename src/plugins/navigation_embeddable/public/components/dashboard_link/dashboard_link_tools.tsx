@@ -27,6 +27,20 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
 };
 
 /**
+ * Memoized fetch dashboard will only refetch the dashboard information if the given `dashboardId` changed between
+ * calls; otherwise, it will use the cached dashboard, which may not take into account changes to the dashboard's title
+ * description, etc. Be mindful when choosing the memoized version.
+ */
+export const memoizedFetchDashboard = memoize(
+  async (dashboardId: string) => {
+    return await fetchDashboard(dashboardId);
+  },
+  (dashboardId) => {
+    return dashboardId;
+  }
+);
+
+/**
  * ----------------------------------
  * Fetch lists of dashboards
  * ----------------------------------

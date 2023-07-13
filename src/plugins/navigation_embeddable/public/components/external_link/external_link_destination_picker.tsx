@@ -7,7 +7,7 @@
  */
 
 import useMount from 'react-use/lib/useMount';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
 import { ExternalLinkEmbeddableStrings } from './external_link_strings';
@@ -17,42 +17,37 @@ const isValidUrl =
   /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 
 export const ExternalLinkDestinationPicker = ({
-  setDestination,
-  setPlaceholder,
+  onDestinationPicked,
   initialSelection,
   ...other
 }: {
-  setDestination: (destination?: string) => void;
-  setPlaceholder: (placeholder?: string) => void;
+  onDestinationPicked: (destination?: string) => void;
   initialSelection?: string;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
-  const [urlValue, setUrlValue] = useState(initialSelection);
 
   useMount(() => {
-    if (urlValue && urlValue.length > 0) {
-      setPlaceholder(urlValue);
-      setValidUrl(isValidUrl.test(urlValue));
+    if (initialSelection) {
+      onDestinationPicked(initialSelection);
+      setValidUrl(isValidUrl.test(initialSelection));
     }
   });
-
-  useEffect(() => {
-    if (urlValue) {
-      const isValid = isValidUrl.test(urlValue);
-      setValidUrl(isValid);
-      setDestination(isValid ? urlValue : undefined);
-      setPlaceholder(isValid ? urlValue : undefined);
-    }
-  }, [urlValue, setDestination, setPlaceholder]);
 
   /* {...other} is needed so all inner elements are treated as part of the form */
   return (
     <div {...other}>
       <EuiFieldText
-        value={urlValue || ''}
+        value={initialSelection || ''}
         placeholder={ExternalLinkEmbeddableStrings.getPlaceholder()}
         isInvalid={!validUrl}
-        onChange={(e) => setUrlValue(e.target.value)}
+        onChange={(e) => {
+          const url = e.target.value;
+          const isValid = isValidUrl.test(url);
+          setValidUrl(isValid);
+          if (isValid) {
+            onDestinationPicked(url);
+          }
+        }}
       />
     </div>
   );
