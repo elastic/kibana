@@ -93,6 +93,7 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
   pipelineName: '',
   sourceField: '',
+  fieldMappings: [],
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
@@ -285,29 +286,21 @@ export const MLInferenceLogic = kea<
     createPipeline: () => {
       const {
         addInferencePipelineModal: { configuration, indexName },
-        isTextExpansionModelSelected,
         mlInferencePipeline, // Full pipeline definition
       } = values;
-      actions.makeCreatePipelineRequest(
-        isTextExpansionModelSelected && mlInferencePipeline && configuration.fieldMappings
-          ? {
-              indexName,
-              fieldMappings: configuration.fieldMappings,
-              pipelineDefinition: mlInferencePipeline,
-              pipelineName: configuration.pipelineName,
-            }
-          : {
-              destinationField:
-                configuration.destinationField.trim().length > 0
-                  ? configuration.destinationField
-                  : undefined,
-              indexName,
-              inferenceConfig: configuration.inferenceConfig,
-              modelId: configuration.modelID,
-              pipelineName: configuration.pipelineName,
-              sourceField: configuration.sourceField,
-            }
-      );
+
+      actions.makeCreatePipelineRequest({
+        indexName,
+        inferenceConfig: configuration.inferenceConfig,
+        fieldMappings: configuration.fieldMappings || [ // Temporary while we're using single fields for non-ELSER pipelines
+          {
+            sourceField: configuration.sourceField,
+            targetField: getMlInferencePrefixedFieldName(configuration.destinationField),
+          }
+        ],
+        pipelineDefinition: mlInferencePipeline || {},
+        pipelineName: configuration.pipelineName,
+      });
     },
     selectExistingPipeline: ({ pipelineName }) => {
       const pipeline = values.mlInferencePipelinesData?.[pipelineName];
