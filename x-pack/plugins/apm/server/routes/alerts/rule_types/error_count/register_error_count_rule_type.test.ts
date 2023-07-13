@@ -666,6 +666,7 @@ describe('Error count alert', () => {
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
       errorGroupingKey: 'error-key-foo',
       errorGroupingName: 'error-name-foo',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -679,6 +680,7 @@ describe('Error count alert', () => {
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
       errorGroupingKey: 'error-key-foo-2',
       errorGroupingName: 'error-name-foo2',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -692,6 +694,7 @@ describe('Error count alert', () => {
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
       errorGroupingKey: 'error-key-bar',
       errorGroupingName: 'error-name-bar',
+      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
     });
   });
 });
