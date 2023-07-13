@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';

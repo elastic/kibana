@@ -8,11 +8,8 @@ import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
-import {
-  alertsLocatorID,
-  AlertsLocatorParams,
-  getAlertUrl,
-} from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { alertsLocatorID, AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { schema } from '@kbn/config-schema';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';

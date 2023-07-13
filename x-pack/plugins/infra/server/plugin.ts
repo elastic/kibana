@@ -16,7 +16,7 @@ import {
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
-import { alertsLocatorID } from '@kbn/observability-plugin/common';
+import { alertsLocatorID } from '@kbn/observability-shared-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   DISCOVER_APP_TARGET,

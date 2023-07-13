@@ -8,7 +8,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
-import { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import { AlertStatus } from '@kbn/observability-shared-plugin/common';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';

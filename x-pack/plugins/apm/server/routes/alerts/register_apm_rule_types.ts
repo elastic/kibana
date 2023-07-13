@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { Observable } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';

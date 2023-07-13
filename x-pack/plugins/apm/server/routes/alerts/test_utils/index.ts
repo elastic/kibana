@@ -8,7 +8,7 @@
 import { of } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';

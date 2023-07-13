@@ -15,12 +15,11 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import {
-  alertsLocatorID,
-  AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
+import { alertsLocatorID, AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { UptimeAlertTypeFactory } from './types';

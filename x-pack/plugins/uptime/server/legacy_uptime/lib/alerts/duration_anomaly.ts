@@ -15,11 +15,8 @@ import {
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { getSeverityType, type MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
-import {
-  alertsLocatorID,
-  AlertsLocatorParams,
-  getAlertUrl,
-} from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { alertsLocatorID, AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { UptimeEsClient } from '../lib';

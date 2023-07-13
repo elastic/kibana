@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
-import { syntheticsEditMonitorLocatorID } from '@kbn/observability-plugin/common';
+import { syntheticsEditMonitorLocatorID } from '@kbn/observability-shared-plugin/common';
 import { useSyntheticsStartPlugins } from '../contexts';
 
 export function useEditMonitorLocator({

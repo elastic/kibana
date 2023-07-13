@@ -9,7 +9,7 @@ import { IBasePath, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UMServerLibs } from '../../lib';
