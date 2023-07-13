@@ -8,52 +8,27 @@
 
 import { Toast } from '@kbn/core-notifications-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
-interface ToastRepresentation {
-  toasts: Toast[];
-}
-
+/**
+ * Collects toast messages to groups based on the `getKeyOf` function,
+ * then represents every group of message with a single toast
+ * @param allToasts
+ * @param dismissToast
+ */
 export function deduplicateToasts(allToasts: Toast[], dismissToast: (id: string) => void) {
-  const toastGroups: Record<string, ToastRepresentation> = {};
-  const closeAll = (tx: Toast[]) => () => {
-    for (const t of tx) {
-      dismissToast(t.id);
-    }
-  };
+  const toastGroups = groupByKey(allToasts);
 
-  allToasts.forEach((toast) => {
-    const key = getKeyOf(toast);
-
-    if (!toastGroups[key]) {
-      toastGroups[key] = { toasts: [toast] };
+  const distinctToasts: Toast[] = [];
+  for (const toastGroup of Object.values(toastGroups)) {
+    if (toastGroup.length === 1) {
+      distinctToasts.push(toastGroup[0]);
     } else {
-      toastGroups[key].toasts.push(toast);
+      distinctToasts.push(
+        mergeToasts(toastGroup, () => toastGroup.forEach((t) => dismissToast(t.id)))
+      );
     }
-  });
-
-  const distinctToasts = [];
-  Object.keys(toastGroups).forEach((key) => {
-    const toastList = toastGroups[key].toasts;
-    if (toastList.length === 1) {
-      distinctToasts.push(toastList[0]);
-    } else {
-      const representation: Toast = createMulticardToast(toastList, closeAll);
-      distinctToasts.push(representation);
-    }
-  });
-
-  if (distinctToasts.length >= 2) {
-    distinctToasts.push({
-      id: 'ID_close_all',
-      text: mountReactNode(
-        <EuiButton onClick={closeAll(allToasts.concat({ id: 'ID_close_all' }))}>
-          Close all notifications
-        </EuiButton>
-      ),
-      toastLifeTimeMs: 100000,
-    });
   }
 
   return distinctToasts;
@@ -82,24 +57,37 @@ function isString(a: string | any): a is string {
   return typeof a === 'string';
 }
 
-function createMulticardToast(toasts: Toast[], closeAll: (tx: Toast[]) => () => void) {
+function groupByKey(allToasts: Toast[]) {
+  const toastGroups: Record<string, Toast[]> = {};
+  for (const toast of allToasts) {
+    const key = getKeyOf(toast);
+
+    if (!toastGroups[key]) {
+      toastGroups[key] = [toast];
+    } else {
+      toastGroups[key].push(toast);
+    }
+  }
+  return toastGroups;
+}
+
+function mergeToasts(toasts: Toast[], closeAll: () => void) {
   const firstElement = toasts[0];
   const key = getKeyOf(firstElement);
   return {
     ...firstElement,
     id: key,
-    text: firstElement.text + ' ' + key,
+    text: firstElement.text,
     toastLifeTimeMs: 50000,
-    onClose: closeAll(toasts),
+    onClose: closeAll,
     // TODO: this causes an error, because the unmount is not called on a react root
-    // title: `${firstElement.title} (${toastList.length})`,
     title: mountReactNode(
-      <EuiFlexGroup justifyContent="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>{toasts.length}</EuiNotificationBadge>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{firstElement.title}</EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        {firstElement.title}{' '}
+        <EuiNotificationBadge color="subdued" className="eui-alignTop">
+          {toasts.length}
+        </EuiNotificationBadge>
+      </>
     ),
   };
 }
