@@ -89,14 +89,18 @@ export function LayerPanels(
         if (datasourceId) {
           dispatchLens(
             updateDatasourceState({
-              updater: (prevState: unknown) =>
-                typeof newState === 'function' ? newState(prevState) : newState,
+              updater: (prevState: unknown) => {
+                onUpdateStateCb?.(
+                  typeof newState === 'function' ? newState(prevState) : newState,
+                  visualization.state
+                );
+                return typeof newState === 'function' ? newState(prevState) : newState;
+              },
               datasourceId,
               clearStagedPreview: false,
               dontSyncLinkedDimensions,
             })
           );
-          onUpdateStateCb?.(newState, visualization.state);
         }
       },
     [dispatchLens, onUpdateStateCb, visualization.state]
@@ -136,6 +140,7 @@ export function LayerPanels(
                   typeof newVisualizationState === 'function'
                     ? newVisualizationState(prevState.visualization.state)
                     : newVisualizationState;
+                onUpdateStateCb?.(updatedDatasourceState, updatedVisualizationState);
 
                 return {
                   ...prevState,
@@ -154,7 +159,6 @@ export function LayerPanels(
               },
             })
           );
-          onUpdateStateCb?.(newDatasourceState, newVisualizationState);
         }, 0);
       },
     [dispatchLens, onUpdateStateCb]
@@ -195,14 +199,24 @@ export function LayerPanels(
           layerIds,
         })
       );
+      if (activeDatasourceId && onUpdateStateCb) {
+        const newState = lensStore.getState().lens;
+        onUpdateStateCb(
+          newState.datasourceStates[activeDatasourceId].state,
+          newState.visualization.state
+        );
+      }
       removeLayerRef(layerToRemoveId);
     },
     [
+      activeDatasourceId,
       activeVisualization.id,
       datasourceMap,
       datasourceStates,
       dispatchLens,
       layerIds,
+      lensStore,
+      onUpdateStateCb,
       props.framePublicAPI.datasourceLayers,
       props.uiActions,
       removeLayerRef,
@@ -242,7 +256,16 @@ export function LayerPanels(
 
   const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
+
     dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
+
+    if (activeDatasourceId && onUpdateStateCb) {
+      const newState = lensStore.getState().lens;
+      onUpdateStateCb(
+        newState.datasourceStates[activeDatasourceId].state,
+        newState.visualization.state
+      );
+    }
     setNextFocusedLayerId(layerId);
   };
 

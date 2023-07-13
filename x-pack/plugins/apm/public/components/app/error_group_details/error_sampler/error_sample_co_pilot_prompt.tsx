@@ -49,6 +49,7 @@ export function ErrorSampleCoPilotPrompt({
           )}
           promptId={CoPilotPromptId.ApmExplainError}
           params={promptParams}
+          feedbackEnabled={false}
         />
       </EuiFlexItem>
       <EuiSpacer size="s" />
