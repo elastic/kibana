@@ -10,6 +10,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { HostMetricsDocsLink } from '../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
 import { MetricChart, type MetricChartProps } from './metric_chart';
 import { hostLensFormulas } from '../../../../../common/visualizations';
@@ -263,7 +264,12 @@ export const MetricsGrid = React.memo(
     return (
       <>
         <EuiTitle size="xxxs" textTransform="uppercase">
-          <h6>Metrics</h6>
+          <span>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.overview.metricsSectionTitle"
+              defaultMessage="Metrics"
+            />
+          </span>
         </EuiTitle>
         <EuiSpacer size="m" />
         <HostMetricsDocsLink />
