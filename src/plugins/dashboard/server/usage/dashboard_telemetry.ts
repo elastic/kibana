@@ -131,7 +131,7 @@ export async function collectDashboardTelemetry(taskManager: TaskManagerStartCon
 
   if (latestTaskState !== null) {
     const state = latestTaskState[0].state as LatestTaskStateSchema;
-    return state.telemetry;
+    return state.telemetry || getEmptyDashboardData();
   }
 
   return getEmptyDashboardData();
