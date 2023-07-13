@@ -39,7 +39,7 @@ import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
 
 export class UserActionPersister {
-  private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
+  public static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
 
   private readonly builderFactory: BuilderFactory;
   private readonly auditLogger: UserActionAuditLogger;

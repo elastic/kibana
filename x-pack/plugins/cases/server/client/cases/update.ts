@@ -39,11 +39,12 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
 
 import { arraysDifference, getCaseToUpdate } from '../utils';
 
-import type { AlertService, CasesService } from '../../services';
+import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
@@ -59,6 +60,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { UserActionPersister } from '../../services/user_actions/operations/create';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -70,6 +72,43 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
   }
+}
+
+/**
+ * Throws an error if any of the requests attempt to create a number of user actions that would put
+ * it's case over the limit.
+ */
+async function throwIfMaxUserActionsReached({
+  query,
+  userActionService,
+}: {
+  query: CasesPatchRequest;
+  userActionService: CaseUserActionService;
+}) {
+  const caseIdsAndFieldsToUpdate = query.cases.reduce<Record<string, number>>(
+    (acc, casePatchRequest) => {
+      const fieldsToUpdate = Object.keys(casePatchRequest).filter((field) =>
+        UserActionPersister.userActionFieldsAllowed.has(field)
+      );
+      acc[casePatchRequest.id] = fieldsToUpdate.length;
+      return acc;
+    },
+    {}
+  );
+
+  const result = await userActionService.getMultipleCasesUserActionsTotal({
+    caseIds: Object.keys(caseIdsAndFieldsToUpdate),
+  });
+
+  result.aggregations?.references.caseUserActions.buckets.forEach(
+    ({ key: caseId, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
+      if (totalUserActions + caseIdsAndFieldsToUpdate[caseId] > MAX_USER_ACTIONS_PER_CASE) {
+        throw Boom.badRequest(
+          `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      }
+    }
+  );
 }
 
 /**
@@ -368,6 +407,7 @@ export const update = async (
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(casesToUpdate);
+    throwIfMaxUserActionsReached({ query, userActionService });
 
     notifyPlatinumUsage(licensingService, casesToUpdate);
 

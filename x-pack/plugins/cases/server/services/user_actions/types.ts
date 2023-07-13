@@ -236,6 +236,17 @@ export interface UserActionsStatsAggsResult {
   };
 }
 
+export interface MultipleCasesUserActionsTotalAggsResult {
+  references: {
+    caseUserActions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
 export interface ParticipantsAggsResult {
   participants: {
     buckets: Array<{

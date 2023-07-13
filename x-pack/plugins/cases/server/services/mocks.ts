@@ -126,6 +126,7 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
     getAll: jest.fn(),
     getUniqueConnectors: jest.fn(),
     getUserActionIdsForCases: jest.fn(),
+    getMultipleCasesUserActionsTotal: jest.fn(),
     getCaseUserActionStats: jest.fn(),
     getUsers: jest.fn(),
   };
