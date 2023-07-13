@@ -21,7 +21,7 @@ describe('getGroupByActionVariables', () => {
       Object {
         "environment": "development",
         "errorGroupingKey": "error-key-0",
-        'errorGroupingName': 'error-name-0',
+        "errorGroupingName": "error-name-0",
         "serviceName": "opbeans-java",
         "transactionName": "tx-java",
         "transactionType": "request",
