@@ -252,21 +252,6 @@ Then rules returned in this response should exist as alert saved objects
 
 ### Rule installation and upgrade notifications on the Rule Management page
 
-#### **Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are X prebuilt rules available to install
-When user opens the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see a number of rules available to install (X)
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
-```
-
 #### **Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**
 
 **Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
@@ -291,6 +276,21 @@ Given all the latest prebuilt rules are installed in Kibana
 When user opens the Rule Management page
 Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
+And user should NOT see a CTA to upgrade prebuilt rules
+And user should NOT see a number of rules available to upgrade
+And user should NOT see the Rule Updates table
+```
+
+#### **Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**
+
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are X prebuilt rules available to install
+When user opens the Rule Management page
+Then user should see a CTA to install prebuilt rules
+And user should see a number of rules available to install (X)
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
 And user should NOT see the Rule Updates table
