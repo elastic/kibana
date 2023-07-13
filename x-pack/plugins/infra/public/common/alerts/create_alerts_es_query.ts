@@ -10,7 +10,7 @@ import { buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
 import type { AlertStatus } from './types';
 import { ALERT_STATUS_QUERY } from './constants';
 import { buildCombinedHostsFilter } from '../../utils/filters/build';
-import type { AlertsEsQuery } from '../../pages/metrics/hosts/hooks/use_alerts_query';
+import type { AlertsEsQuery } from './types';
 
 export const createAlertsEsQuery = ({
   dateRange,

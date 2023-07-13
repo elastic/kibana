@@ -8,14 +8,14 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { TimeRange } from '@kbn/es-query';
+import type { AlertsEsQuery } from '../../../../common/alerts/types';
 import { useSummaryTimeRange } from '../../../../common/alerts/use_summary_time_range';
 import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import { infraAlertFeatureIds } from '../../../../pages/metrics/hosts/components/tabs/config';
-import type { HostsState } from '../../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import type { AlertsEsQuery } from '../../../../pages/metrics/hosts/hooks/use_alerts_query';
 import type { StringDateRange } from '../../types';
 
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -76,7 +76,7 @@ export const AlertsSummaryContent = ({
 
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
-  dateRange: HostsState['dateRange'];
+  dateRange: TimeRange;
 }
 
 const MemoAlertSummaryWidget = React.memo(
