@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageTemplate, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import './page_loading.scss';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 function PageLoadingUI() {
