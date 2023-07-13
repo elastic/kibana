@@ -117,7 +117,7 @@ export function setupSavedObjects({
       '8.10.0': schema.object({
         type: schema.string({ minLength: 1 }),
         version: schema.string({ minLength: 1 }),
-        attributesToEncrypt: schema.maybe(schema.arrayOf(schema.string())),
+        attributesToEncrypt: schema.arrayOf(schema.string()),
         attributesToExcludeFromAAD: schema.maybe(schema.arrayOf(schema.string())),
       }),
     },
