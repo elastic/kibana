@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ComponentType, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
   AppMountParameters,
@@ -55,7 +55,7 @@ import {
   syncHistoryLocations,
 } from './kibana_services';
 import { registerFeature } from './register_feature';
-import { buildServices, DiscoverServices } from './build_services';
+import { buildServices } from './build_services';
 import { SearchEmbeddableFactory } from './embeddable';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
@@ -74,25 +74,14 @@ import {
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 import type { CustomizationCallback } from './customizations';
 import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
-import { useDiscoverMainRouteInternal } from './exports/discover_app';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
+import { DiscoverContainerInternal, DiscoverContainerProps } from './components/discover_container';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
 );
 const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
 const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
-
-interface UseDiscoverMainRouteProps {
-  /*
-   *  Any override that user of this hook
-   *  wants discover to use. Need to keep in mind that this
-   *  param is only for overrides for the services that Discover
-   *  already consumes.
-   *
-   * */
-  services?: Partial<DiscoverServices>;
-}
 
 /**
  * @public
@@ -172,9 +161,7 @@ export interface DiscoverStart {
    */
   readonly locator: undefined | DiscoverAppLocator;
   readonly customize: (profileName: string, callback: CustomizationCallback) => void;
-  readonly useDiscoverMainRoute: (
-    props?: UseDiscoverMainRouteProps
-  ) => ReturnType<typeof useDiscoverMainRouteInternal>;
+  readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
 }
 
 /**
@@ -419,8 +406,14 @@ export class DiscoverPlugin
     // initializeServices are assigned at start and used
     // when the application/embeddable is mounted
 
-    const { uiActions } = plugins;
+    const viewSavedSearchAction = new ViewSavedSearchAction(core.application);
 
+    plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
+    plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
+    setUiActions(plugins.uiActions);
+    injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
+
+    const isDev = this.initializerContext.env.mode.dev;
     const services = buildServices(
       core,
       plugins,
@@ -430,21 +423,16 @@ export class DiscoverPlugin
       this.singleDocLocator!
     );
 
-    uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-
-    const viewSavedSearchAction = new ViewSavedSearchAction(core.application);
-    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
-    setUiActions(plugins.uiActions);
-
-    injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
-
     return {
       locator: this.locator,
       customize: createCustomizeFunction(this.profileRegistry),
-      useDiscoverMainRoute: (props?: UseDiscoverMainRouteProps) => {
-        return useDiscoverMainRouteInternal({
-          services: { ...services, ...props?.services },
-        });
+      DiscoverContainer: (props: DiscoverContainerProps) => {
+        const mergedServices = useMemo(
+          () => ({ ...services, ...props.services }),
+          [props.services]
+        );
+
+        return <DiscoverContainerInternal {...props} services={mergedServices} isDev={isDev} />;
       },
     };
   }
