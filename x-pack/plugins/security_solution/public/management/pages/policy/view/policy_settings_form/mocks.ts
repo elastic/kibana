@@ -144,6 +144,18 @@ export const getPolicySettingsFormTestSubjects = (
       showHideButton: advancedSectionTestSubj('showButton'),
       settingsContainer: advancedSectionTestSubj('settings'),
       warningCallout: advancedSectionTestSubj('warning'),
+      settingRowTestSubjects: (settingKeyPath: string) => {
+        const testSubjForSetting = advancedSectionTestSubj.withPrefix(settingKeyPath);
+
+        return {
+          container: testSubjForSetting('container'),
+          label: testSubjForSetting('label'),
+          tooltipIcon: testSubjForSetting('tooltipIcon'),
+          versionInfo: testSubjForSetting('versionInfo'),
+          textField: settingKeyPath,
+          viewValue: testSubjForSetting('viewValue'),
+        };
+      },
     },
   };
 
