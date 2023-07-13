@@ -1162,6 +1162,41 @@ NOTE: This function accepts all types and always returns an integer.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvDedupeFunction',
+        {
+          defaultMessage: 'MV_DEDUPE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvDedupeFunction.markdown',
+            {
+              defaultMessage: `### MV_DEDUPE
+Removes duplicates from a multivalued field. For example:
+
+\`\`\`
+ROW a=["foo", "foo", "bar", "foo"]
+| EVAL dedupe_a = MV_DEDUPE(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "foo", "bar", "foo"] | ["foo", "bar"]
+\`\`\`
+
+NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
