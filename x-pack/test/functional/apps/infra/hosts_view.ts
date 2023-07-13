@@ -154,8 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  // Failing: See https://github.com/elastic/kibana/issues/161514
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     before(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
@@ -309,8 +308,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           // Persist pin after refresh
           await browser.refresh();
-          await pageObjects.infraHome.waitForLoading();
-          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+          await retry.try(async () => {
+            await pageObjects.infraHome.waitForLoading();
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
+          });
 
           // Remove Pin
           await pageObjects.infraHostsView.clickRemoveMetadataPin();
