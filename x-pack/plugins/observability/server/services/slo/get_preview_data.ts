@@ -104,7 +104,7 @@ export class GetPreviewData {
     }));
   }
 
-  private async getAPMTranscationErrorPreviewData(
+  private async getAPMTransactionErrorPreviewData(
     indicator: APMTransactionErrorRateIndicator
   ): Promise<GetPreviewDataResponse> {
     const filter = [];
@@ -133,10 +133,8 @@ export class GetPreviewData {
         bool: {
           filter: [
             { range: { '@timestamp': { gte: 'now-60m' } } },
-            { terms: { 'processor.event': ['metric'] } },
             { term: { 'metricset.name': 'transaction' } },
-            { exists: { field: 'transaction.duration.histogram' } },
-            { exists: { field: 'transaction.result' } },
+            { terms: { 'event.outcome': ['success', 'failure'] } },
             ...filter,
           ],
         },
@@ -160,8 +158,8 @@ export class GetPreviewData {
               },
             },
             total: {
-              value_count: {
-                field: 'transaction.duration.histogram',
+              filter: {
+                match_all: {},
               },
             },
           },
@@ -174,7 +172,7 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total
-          ? computeSLI(bucket.good.doc_count, bucket.total.value)
+          ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
           : null,
     }));
   }
@@ -305,7 +303,7 @@ export class GetPreviewData {
       case 'sli.apm.transactionDuration':
         return this.getAPMTransactionDurationPreviewData(params.indicator);
       case 'sli.apm.transactionErrorRate':
-        return this.getAPMTranscationErrorPreviewData(params.indicator);
+        return this.getAPMTransactionErrorPreviewData(params.indicator);
       case 'sli.kql.custom':
         return this.getCustomKQLPreviewData(params.indicator);
       case 'sli.histogram.custom':
