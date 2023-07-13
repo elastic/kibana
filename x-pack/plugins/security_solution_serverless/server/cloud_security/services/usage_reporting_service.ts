@@ -8,8 +8,8 @@
 import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
 
-import { USAGE_SERVICE_USAGE_URL } from '../constants';
-import type { UsageRecord } from '../types';
+import { USAGE_SERVICE_USAGE_URL } from '../../constants';
+import type { UsageRecord } from '../../types';
 
 export class SecurityUsageReportingService {
   public async reportUsage(records: UsageRecord[]): Promise<Response> {

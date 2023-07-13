@@ -16,7 +16,7 @@ import type {
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 
 import type { UsageRecord } from '../../types';
-import { securityUsageReportingService } from '../../routes/usage_reporting_service';
+import { securityUsageReportingService } from '../services/usage_reporting_service';
 
 const SCOPE = ['serverlessSecurity'];
 // const INTERVAL = '5m';

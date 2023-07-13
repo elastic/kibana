@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { securityUsageReportingService } from '../../routes/usage_reporting_service';
+export { usageReportingService } from './usage_reporting_service';
