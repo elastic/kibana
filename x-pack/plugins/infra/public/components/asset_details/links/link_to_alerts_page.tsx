@@ -62,7 +62,7 @@ export const LinkToAlertsHomePage = () => {
       <EuiLink data-test-subj="assetDetailsTooltipDocumentationLink" href={linkToAlertsPage}>
         <FormattedMessage
           id="xpack.infra.assetDetails.table.tooltip.alertsLink"
-          defaultMessage="alerts"
+          defaultMessage="alerts."
         />
       </EuiLink>
     </RedirectAppLinks>

@@ -7,10 +7,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
+import type { AlertStatus } from '../../../../common/alerts/types';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsViewContext } from './use_hosts_view';
-import { AlertStatus } from '../types';
 
 export interface AlertsEsQuery {
   bool: BoolQuery;

@@ -13,7 +13,7 @@ import {
   ALL_ALERTS,
   RECOVERED_ALERTS,
 } from '../../../../../../common/alerts/constants';
-import { AlertStatus } from '../../../types';
+import { AlertStatus } from '../../../../../../common/alerts/types';
 export interface AlertStatusFilterProps {
   status: AlertStatus;
   onChange: (id: AlertStatus) => void;

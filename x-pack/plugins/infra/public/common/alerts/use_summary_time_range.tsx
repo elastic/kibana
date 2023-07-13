@@ -12,10 +12,7 @@ import {
   useTimeBuckets,
 } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import {
-  DEFAULT_DATE_FORMAT,
-  DEFAULT_INTERVAL,
-} from '../../pages/metrics/hosts/components/tabs/config';
+import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from './constants';
 
 export const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
   const timeBuckets = useTimeBuckets();

@@ -18,31 +18,35 @@ export const AlertsTooltipContent = React.memo(() => {
 
   return (
     <EuiText size="xs" onClick={onClick}>
-      <FormattedMessage
-        id="xpack.infra.assetDetails.alerts.tooltip.alertsLabel"
-        defaultMessage="Showing alerts for this host. You can create and manage alerts in {alerts}"
-        values={{
-          alerts: <LinkToAlertsHomePage />,
-        }}
-      />
-      <FormattedMessage
-        id="xpack.infra.assetDetails.alerts.tooltip.documentationLabel"
-        defaultMessage="See {documentation} for more information"
-        values={{
-          documentation: (
-            <EuiLink
-              data-test-subj="assetDetailsTooltipDocumentationLink"
-              href={ALERTS_DOC_HREF}
-              target="_blank"
-            >
-              <FormattedMessage
-                id="xpack.infra.assetDetails.alerts.tooltip.documentationLink"
-                defaultMessage="documentation"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
+      <p>
+        <FormattedMessage
+          id="xpack.infra.assetDetails.alerts.tooltip.alertsLabel"
+          defaultMessage="Showing alerts for this host. You can create and manage alerts in {alerts}"
+          values={{
+            alerts: <LinkToAlertsHomePage />,
+          }}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.infra.assetDetails.alerts.tooltip.documentationLabel"
+          defaultMessage="See {documentation} for more information"
+          values={{
+            documentation: (
+              <EuiLink
+                data-test-subj="assetDetailsTooltipDocumentationLink"
+                href={ALERTS_DOC_HREF}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.infra.assetDetails.alerts.tooltip.documentationLink"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
     </EuiText>
   );
 });

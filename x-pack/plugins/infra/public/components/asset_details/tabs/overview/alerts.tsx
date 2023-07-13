@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiPopover, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSummaryTimeRange } from '../../../../common/alerts/use_summary_time_range';
 import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
@@ -94,16 +94,14 @@ const MemoAlertSummaryWidget = React.memo(
     };
 
     return (
-      <>
-        <AlertSummaryWidget
-          chartProps={chartProps}
-          featureIds={infraAlertFeatureIds}
-          filter={alertsQuery}
-          timeRange={summaryTimeRange}
-          fullSize
-          hideChart
-        />
-      </>
+      <AlertSummaryWidget
+        chartProps={chartProps}
+        featureIds={infraAlertFeatureIds}
+        filter={alertsQuery}
+        timeRange={summaryTimeRange}
+        fullSize
+        hideChart
+      />
     );
   }
 );
@@ -114,12 +112,14 @@ const AlertsSectionTitle = () => {
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiText style={{ fontWeight: 700, textTransform: 'uppercase' }} size="s">
-          <FormattedMessage
-            id="xpack.infra.assetDetails.overview.alertsSectionTitle"
-            defaultMessage="Alerts"
-          />
-        </EuiText>
+        <EuiTitle size="xxs" textTransform="uppercase">
+          <h6>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.overview.alertsSectionTitle"
+              defaultMessage="Alerts"
+            />
+          </h6>
+        </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
@@ -132,7 +132,7 @@ const AlertsSectionTitle = () => {
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
-          repositionOnScroll={true}
+          repositionOnScroll
           anchorPosition="upCenter"
         >
           <AlertsTooltipContent />

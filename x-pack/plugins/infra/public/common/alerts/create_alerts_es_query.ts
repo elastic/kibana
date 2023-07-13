@@ -6,9 +6,8 @@
  */
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { buildEsQuery, Filter } from '@kbn/es-query';
-import type { HostsState } from '../../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import type { AlertStatus } from '../../pages/metrics/hosts/types';
+import { buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
+import type { AlertStatus } from './types';
 import { ALERT_STATUS_QUERY } from './constants';
 import { buildCombinedHostsFilter } from '../../utils/filters/build';
 import type { AlertsEsQuery } from '../../pages/metrics/hosts/hooks/use_alerts_query';
@@ -18,7 +17,7 @@ export const createAlertsEsQuery = ({
   hostNodeNames,
   status,
 }: {
-  dateRange: HostsState['dateRange'];
+  dateRange: TimeRange;
   hostNodeNames: string[];
   status?: AlertStatus;
 }): AlertsEsQuery => {
@@ -35,7 +34,7 @@ export const createAlertsEsQuery = ({
   return buildEsQuery(undefined, [], filters);
 };
 
-const createDateFilter = (date: HostsState['dateRange']) =>
+const createDateFilter = (date: TimeRange) =>
   getTime(undefined, date, { fieldName: ALERT_TIME_RANGE });
 
 const createAlertStatusFilter = (status: AlertStatus = 'all'): Filter | null =>

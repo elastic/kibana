@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import type { AlertStatusFilter } from '../../pages/metrics/hosts/types';
+import type { AlertStatusFilter } from './types';
 
 export const ALERT_STATUS_ALL = 'all';
 
@@ -55,3 +55,6 @@ export const ALERTS_DOC_HREF =
   'https://www.elastic.co/guide/en/observability/current/create-alerts.html';
 
 export const ALERTS_PATH = '/app/observability/alerts';
+
+export const DEFAULT_INTERVAL = '60s';
+export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
