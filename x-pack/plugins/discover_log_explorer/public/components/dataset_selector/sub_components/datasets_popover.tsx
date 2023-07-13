@@ -61,6 +61,7 @@ export const DatasetsPopover = ({
             <PackageIcon
               packageName={parentIntegration.name}
               version={parentIntegration.version}
+              icons={parentIntegration.icons}
               size="m"
               tryApi
             />

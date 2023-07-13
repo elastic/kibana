@@ -232,6 +232,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
+        'xpack.index_management.enableIndexActions (boolean)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * xpack.infra.logs is conditional and will resolve to an object of properties
@@ -273,6 +274,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
         'xpack.observability.aiAssistant.enabled (boolean)',
+        'xpack.observability.aiAssistant.feedback.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
