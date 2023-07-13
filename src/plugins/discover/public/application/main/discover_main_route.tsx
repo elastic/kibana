@@ -223,9 +223,8 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   /**
    * Side effect to initialize discover applying customization and listeners in the correct order:
-   * 1. Start appState syncing with url
-   * 2. Initialize customization service
-   * 3. Restore the previously selected data view for a new state
+   * 1. Initialize customization service
+   * 2. Restore the previously selected data view for a new state
    *
    * This effect act as primary fetch: on initial search + triggered when id changes
    */
