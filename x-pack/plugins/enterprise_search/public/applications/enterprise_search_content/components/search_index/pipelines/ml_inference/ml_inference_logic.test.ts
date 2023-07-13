@@ -169,7 +169,7 @@ describe('MlInferenceLogic', () => {
             {
               sourceField: 'body',
               targetField: 'ml.inference.body',
-            }
+            },
           ],
           indexName: 'test',
           pipelineDefinition: {},
@@ -573,7 +573,7 @@ describe('MlInferenceLogic', () => {
             {
               sourceField: 'my_source_field2',
               targetField: 'ml.inference.my_source_field2_expanded',
-            }
+            },
           ],
           pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
           pipelineName: mockModelConfiguration.configuration.pipelineName,

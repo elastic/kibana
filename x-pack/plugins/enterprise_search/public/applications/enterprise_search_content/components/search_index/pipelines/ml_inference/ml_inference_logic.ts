@@ -292,11 +292,12 @@ export const MLInferenceLogic = kea<
       actions.makeCreatePipelineRequest({
         indexName,
         inferenceConfig: configuration.inferenceConfig,
-        fieldMappings: configuration.fieldMappings || [ // Temporary while we're using single fields for non-ELSER pipelines
+        fieldMappings: configuration.fieldMappings || [
+          // Temporary while we're using single fields for non-ELSER pipelines
           {
             sourceField: configuration.sourceField,
             targetField: getMlInferencePrefixedFieldName(configuration.destinationField),
-          }
+          },
         ],
         pipelineDefinition: mlInferencePipeline || {},
         pipelineName: configuration.pipelineName,
