@@ -11,7 +11,7 @@ import { tap, map } from 'lodash';
 import { mergeMap, finalize, takeUntil } from 'rxjs';
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
-import { BasePayload } from '../../../common';
+import { PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 import { decryptJobHeaders, ExportType, generatePngObservable, getFullUrls } from '../common';
 import { validateUrls } from '../common/validate_urls';
@@ -23,8 +23,9 @@ import {
   LICENSE_TYPE_ENTERPRISE,
   PNG_JOB_TYPE,
   REPORTING_TRANSACTION_TYPE,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '../../../common/constants';
-
+import { BasePayload, PngScreenshotOptions } from '../../types';
 /**
  * @deprecated
  * Used for the Reporting Diagnostic
@@ -47,6 +48,16 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
     super(...args);
     const logger = args[2];
     this.logger = logger.get('png-export-v1');
+  }
+
+  // PR 161712 needs these out of reporting
+  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult> {
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
+    });
   }
 
   public createJob = async (jobParams: JobParamsPNGDeprecated) => {
@@ -83,7 +94,7 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
         apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
         return generatePngObservable(
           () =>
-            this.startDeps.reporting.getScreenshots({
+            this.getScreenshots({
               headers,
               urls: [url],
               browserTimezone: job.browserTimezone,
@@ -94,7 +105,6 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
             }),
           jobLogger,
           {
-            headers,
             urls: [url],
             browserTimezone: job.browserTimezone,
             layout: {
@@ -104,7 +114,6 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
           }
         );
       }),
-      tap(({ buffer }) => stream.write(buffer)),
       map(({ metrics, warnings }) => ({
         content_type: 'image/png',
         metrics: { png: metrics },

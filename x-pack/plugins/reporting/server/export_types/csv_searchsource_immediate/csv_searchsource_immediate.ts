@@ -12,6 +12,11 @@ import { CsvGenerator } from '@kbn/generate-csv';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import {
+  ExportType,
+  BaseExportTypeSetupDeps,
+  BaseExportTypeStartDeps,
+} from '../common/export_type';
+import {
   CSV_JOB_TYPE,
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   LICENSE_TYPE_BASIC,
@@ -23,7 +28,6 @@ import {
 } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
 import { ReportingRequestHandlerContext } from '../../types';
-import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
 import { JobParamsDownloadCSV } from './types';
 
 /*

@@ -87,7 +87,8 @@ export abstract class ExportType<
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
-  private getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+  // needed to be protected vs private for the csv search source immediate export type
+  protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;

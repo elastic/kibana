@@ -212,13 +212,6 @@ export class ReportingCore {
 
     const reportingStart = this.getContract();
     const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
-    this.csvSearchSourceExport.start(exportTypeStartDeps);
-    this.csvV2ExportType.start(exportTypeStartDeps);
-    this.pdfExport.start(exportTypeStartDeps);
-    this.pngExport.start(exportTypeStartDeps);
-
-    const reportingStart = this.getContract();
-    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
 
     this.csvSearchSourceExport.start(exportTypeStartDeps);
     this.csvV2ExportType.start(exportTypeStartDeps);
