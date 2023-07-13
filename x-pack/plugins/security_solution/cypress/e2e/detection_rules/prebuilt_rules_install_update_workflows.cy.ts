@@ -111,19 +111,15 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         });
       };
       /* Retrieve how many rules were installed from the Fleet package */
-      cy.wait('@installPackage', {
+      /* See comments in test above for more details */
+      cy.wait('@installPackageBulk', {
         timeout: 60000,
       }).then(({ response: bulkResponse }) => {
         cy.wrap(bulkResponse?.statusCode).should('eql', 200);
 
-        const packages = bulkResponse?.body.items.map(
-          ({ name, result }: BulkInstallPackageInfo) => ({
-            name,
-            installSource: result.installSource,
-          })
+        const packagesBulkInstalled = bulkResponse?.body.items.map(
+          ({ name }: { name: string }) => name
         );
-
-        const packagesBulkInstalled = packages.map(({ name }: { name: string }) => name);
 
         if (!packagesBulkInstalled.includes('security_detection_engine')) {
           cy.wait('@installPackage').then(() => {
