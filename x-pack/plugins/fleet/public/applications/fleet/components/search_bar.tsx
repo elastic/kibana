@@ -35,6 +35,49 @@ interface Props {
   dataTestSubj?: string;
 }
 
+// exported for testability
+export const filterAndConvertFields = (
+  fields: FieldSpec[],
+  indexPattern?: string,
+  fieldPrefix?: string
+) => {
+  if (!fields) return {};
+  let filteredFields: FieldSpec[] = [];
+
+  if (fieldPrefix) {
+    // exclude fields from different indices
+    if (indexPattern === INDEX_NAME) {
+      filteredFields = fields.filter((field) => field.name.startsWith(fieldPrefix));
+    } else {
+      // Concatenate the fields with the prefix
+      const withPrefix = fields.map((field) => {
+        return !field.name.startsWith(fieldPrefix)
+          ? { ...field, name: `${fieldPrefix}.${field.name}` }
+          : field;
+      });
+      // filter out fields that have names to be hidden
+      filteredFields = withPrefix.filter((field) => {
+        if (field.name.startsWith(fieldPrefix)) {
+          for (const hiddenField of HIDDEN_FIELDS) {
+            if (field.name.includes(hiddenField)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      });
+    }
+  } else {
+    filteredFields = fields;
+  }
+
+  const fieldsMap = filteredFields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+    acc[curr.name] = curr;
+    return acc;
+  }, {});
+  return fieldsMap;
+};
+
 export const SearchBar: React.FunctionComponent<Props> = ({
   value,
   fieldPrefix,
@@ -76,39 +119,13 @@ export const SearchBar: React.FunctionComponent<Props> = ({
         const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
           pattern: indexPattern,
         });
-        // In the case when indexPattern is not passed and all the indices are fetched, filter only the fields starting with fieldPrefix
-        const _fields =
-          fields.length && fieldPrefix && indexPattern === INDEX_NAME
-            ? fields.filter((field) => field.name.startsWith(fieldPrefix))
-            : fields;
-        // Remove hidden fields
-        const filteredFields =
-          _fields.length && fieldPrefix
-            ? _fields
-                .filter((field) => {
-                  if (HIDDEN_FIELDS.includes(field.name)) {
-                    return false;
-                  }
-                  return true;
-                })
-                // Concatenate the fields with the prefix if needed
-                .map((field) => {
-                  return !field.name.startsWith(fieldPrefix)
-                    ? { ...field, name: `${fieldPrefix}.${field.name}` }
-                    : field;
-                })
-            : fields;
+        const fieldsMap = filterAndConvertFields(fields, indexPattern, fieldPrefix);
+        // Refetch only if fieldsMap is empty
+        const skipFetchField = !!fieldsMap;
 
-        const fieldsMap = filteredFields.reduce(
-          (acc: Record<string, FieldSpec>, curr: FieldSpec) => {
-            acc[curr.name] = curr;
-            return acc;
-          },
-          {}
-        );
         const newDataView = await data.dataViews.create(
           { title: indexPattern, fields: fieldsMap },
-          true // skipFetchField: if it is not set, the passed fields are ignored and get refetched again
+          skipFetchField
         );
         setDataView(newDataView);
       } catch (err) {
