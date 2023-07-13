@@ -275,7 +275,7 @@ export function Chart({
     [isFlyoutVisible]
   );
 
-  const canEditVisualizationOnTheFly = isPlainRecord && chartVisible;
+  const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
 
   return (
     <EuiFlexGroup
@@ -438,6 +438,7 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
+              hasLensSuggestions={Boolean(currentSuggestion)}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}

@@ -297,7 +297,7 @@ describe('MlInferenceLogic', () => {
           },
         ]);
       });
-      it('returns disabled pipeline option if pipeline already attached', () => {
+      it('filters pipeline if pipeline already attached', () => {
         FetchMlInferencePipelineProcessorsApiLogic.actions.apiSuccess([
           {
             modelId: 'test-model',
@@ -324,17 +324,7 @@ describe('MlInferenceLogic', () => {
           },
         });
 
-        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
-          {
-            disabled: true,
-            disabledReason: expect.any(String),
-            pipelineName: 'unit-test',
-            modelType: '',
-            modelId: 'test-model',
-            sourceFields: ['body'],
-            indexFields: ['body'],
-          },
-        ]);
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([]);
       });
     });
     describe('mlInferencePipeline', () => {
