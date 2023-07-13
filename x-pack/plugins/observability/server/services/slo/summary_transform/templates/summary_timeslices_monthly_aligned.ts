@@ -107,7 +107,7 @@ export const SUMMARY_TIMESLICES_MONTHLY_ALIGNED: TransformPutTransformRequest = 
               LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
               int sliceDurationInMinutes = params.sliceDurationInSeconds * 60;
               
-              Math.ceil(Duration.between(startOfMonth, startOfNextMonth).toMinutes() / sliceDurationInMinutes);
+              return Duration.between(startOfMonth, startOfNextMonth).toMinutes() / sliceDurationInMinutes;
             `,
           },
         },
