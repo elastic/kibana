@@ -7,14 +7,23 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '../../common/constants';
 
 export function registerScriptsRoute(router: IRouter) {
-  router.get(
-    { path: '/api/kibana/scripts/languages', validate: false },
-    async (context, request, response) => {
-      return response.ok({
-        body: ['painless', 'expression'],
-      });
-    }
-  );
+  router.versioned
+    .get({
+      path: '/internal/scripts/languages',
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
+        validate: false,
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: ['painless', 'expression'],
+        });
+      }
+    );
 }
