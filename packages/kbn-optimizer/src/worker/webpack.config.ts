@@ -192,8 +192,6 @@ export function getWebpackConfig(
                       outputStyle: worker.dist ? 'compressed' : 'expanded',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
-                      // sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                      quiet: true,
                       quietDeps: true,
                     },
                   },
