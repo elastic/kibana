@@ -14,7 +14,6 @@ import {
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
-  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
@@ -27,7 +26,6 @@ import {
   rawDocExistsInNamespaces,
   isFoundGetResponse,
   type GetResponseFound,
-  getSavedObjectFromSource,
 } from '../utils';
 import {
   preflightCheckForCreate,
