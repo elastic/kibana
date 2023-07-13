@@ -6,7 +6,7 @@
  */
 
 import { mockJobs } from '../../common/test';
-import * as jobTypes from '../../common/constants/job_types';
+import * as jobTypes from '@kbn/reporting-common/export_types/job_types';
 import { Job } from './job';
 
 describe('Job', () => {

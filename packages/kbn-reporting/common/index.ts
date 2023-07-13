@@ -21,6 +21,7 @@ export {
   getTracker,
   ExportType,
   setFieldFormats,
+  buildKibanaPath,
 } from './export_types';
 export type {
   BaseParams,

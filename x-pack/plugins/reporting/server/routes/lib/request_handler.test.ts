@@ -9,13 +9,13 @@ import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf';
 import { ReportingCore } from '../..';
-import { JobParamsPDFDeprecated } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 import { ReportingRequestHandlerContext } from '@kbn/reporting-common';
+import { JobParamsPDFDeprecated } from '../../../common/types';
 
 jest.mock('./crypto', () => ({
   cryptoFactory: () => ({

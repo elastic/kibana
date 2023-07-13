@@ -7,6 +7,7 @@
  */
 
 export { getTracker } from './pdf_tracker';
+export { buildKibanaPath } from './build_kibana_path';
 export { cryptoFactory } from './crypto';
 export { decryptJobHeaders } from './decrypt_job_headers';
 export { getFieldFormats, setFieldFormats } from './services';

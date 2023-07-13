@@ -10,7 +10,8 @@ import { stringify } from 'query-string';
 import rison from '@kbn/rison';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import { buildKibanaPath } from '../../../common/build_kibana_path';
+import { BaseParams, buildKibanaPath } from '@kbn/reporting-common';
+import { JobId } from '@kbn/reporting-common/export_types';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
@@ -20,13 +21,7 @@ import {
   getRedirectAppPath,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
-import {
-  BaseParams,
-  DownloadReportFn,
-  JobId,
-  ManagementLinkFn,
-  ReportApiJSON,
-} from '../../../common/types';
+import { DownloadReportFn, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
 
