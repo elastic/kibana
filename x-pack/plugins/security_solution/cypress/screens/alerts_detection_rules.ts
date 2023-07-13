@@ -182,3 +182,11 @@ export const RULE_EXECUTION_STATUS_BADGE = '[data-test-subj="ruleExecutionStatus
 export const EXECUTION_STATUS_FILTER_BUTTON = '[data-test-subj="executionStatusFilterButton"]';
 
 export const EXECUTION_STATUS_FILTER_OPTION = '[data-test-subj="executionStatusFilterOption"]';
+
+export const getInstallSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="installSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
+};

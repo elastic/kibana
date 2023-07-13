@@ -325,7 +325,6 @@ Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
 And user should see a CTA to upgrade prebuilt rules
 And user should see the number of rules available to upgrade (Z)
-And user should see the Rule Updates table
 ```
 
 #### **Scenario: User is notified when both rules to install and upgrade are available**
@@ -341,7 +340,6 @@ Then user should see a CTA to install prebuilt rules
 And user should see the number of rules available to install (Y)
 And user should see a CTA to upgrade prebuilt rules
 And user should see the number of rules available to upgrade (Z)
-And user should see the Rule Updates table
 ```
 
 #### **Scenario: User is notified after a prebuilt rule gets deleted**
