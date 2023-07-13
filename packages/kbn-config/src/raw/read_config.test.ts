@@ -61,27 +61,7 @@ test('throws parsing another config with forbidden paths', () => {
 
 test('merging two configs', () => {
   const config = getConfigFromFiles([fixtureFile('merge_1.yml'), fixtureFile('merge_2.yml')]);
-  expect(config).toMatchInlineSnapshot(`
-    Object {
-      "arr1": Array [
-        4,
-        5,
-      ],
-      "arr2": Array [],
-      "bar": 3,
-      "foo": 2,
-      "nested": Object {
-        "str1": "bar",
-        "str2": "hello",
-        "str3": "dolly",
-      },
-      "obj_array": Array [
-        Object {
-          "id": 3,
-        },
-      ],
-    }
-  `);
+  expect(config).toMatchSnapshot();
 });
 
 describe('different cwd()', () => {
