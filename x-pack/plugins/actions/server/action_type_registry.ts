@@ -164,6 +164,19 @@ export class ActionTypeRegistry {
       );
     }
 
+    if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
+          defaultMessage:
+            'Kibana privilege authorization is only supported for system action types',
+          values: {
+            connectorTypeId: actionType.id,
+            ids: actionType.supportedFeatureIds.join(','),
+          },
+        })
+      );
+    }
+
     const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
       actionTypeId: actionType.id,
       actionTypeMaxAttempts: actionType.maxAttempts,

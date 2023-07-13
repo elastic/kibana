@@ -248,6 +248,29 @@ describe('actionTypeRegistry', () => {
         })
       ).not.toThrow();
     });
+
+    test('throws if the kibana privileges are defined but the action type is not a system action type', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges: jest.fn(),
+          isSystemActionType: false,
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Kibana privilege authorization is only supported for system action types"`
+      );
+    });
   });
 
   describe('get()', () => {
@@ -754,30 +777,6 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.getSystemActionKibanaPrivileges('foo');
       expect(result).toEqual([]);
-    });
-
-    it('should return an empty array if the action type is not a system action but defines kibana privileges', () => {
-      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
-      const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
-
-      registry.register({
-        id: 'foo',
-        name: 'Foo',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges,
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
-
-      const result = registry.getSystemActionKibanaPrivileges('foo');
-
-      expect(result).toEqual([]);
-      expect(getKibanaPrivileges).not.toHaveBeenCalled();
     });
 
     it('should pass the metadata correctly', () => {
