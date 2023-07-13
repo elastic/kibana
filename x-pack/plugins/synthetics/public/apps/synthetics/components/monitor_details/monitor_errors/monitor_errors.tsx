@@ -23,7 +23,7 @@ import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
 export const MonitorErrors = () => {
-  const { errorStates, loading, data } = useMonitorErrors();
+  const { errorStates, upStates, loading, data } = useMonitorErrors();
   const location = useSelectedLocation();
 
   const initialLoading = !data;
@@ -42,7 +42,12 @@ export const MonitorErrors = () => {
       {initialLoading && <LoadingErrors />}
       {emptyState && <EmptyErrors />}
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent location={location} errorStates={errorStates ?? []} loading={loading} />
+        <ErrorsTabContent
+          location={location}
+          errorStates={errorStates}
+          upStates={upStates}
+          loading={loading}
+        />
       </div>
     </MonitorPendingWrapper>
   );
