@@ -141,6 +141,8 @@ export class SpecDefinitionsService {
     Object.keys(result).forEach((endpoint) => {
       const description = result[endpoint];
       const addEndpoint =
+        // If the 'availability' property doesn't exist, display the endpoint by default
+        !description.availability ||
         (endpointsAvailability === 'stack' && description.availability?.stack) ||
         (endpointsAvailability === 'serverless' && description.availability?.serverless);
       if (addEndpoint) {
