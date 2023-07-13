@@ -11,9 +11,9 @@ import { IntegrationId, IntegrationType } from '../types';
 export class Integration {
   id: IntegrationId;
   name: IntegrationType['name'];
-  title: IntegrationType['title'];
-  description: IntegrationType['description'];
-  icons: IntegrationType['icons'];
+  title?: IntegrationType['title'];
+  description?: IntegrationType['description'];
+  icons?: IntegrationType['icons'];
   status: IntegrationType['status'];
   version: IntegrationType['version'];
   datasets: Dataset[];
