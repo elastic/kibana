@@ -234,7 +234,7 @@ export class EncryptedSavedObjectsService {
     const versionedEsoMetadata = new Array<SavedObjectsBulkCreateObject>();
 
     this.typeDefinitions.forEach((versionedType) => {
-      if (!!versionedType.modelVersion) {
+      if (versionedType.modelVersion) {
         const attributes: EncryptedSavedObjectVersionedMetadata = {
           type: versionedType.type,
           modelVersion: versionedType.modelVersion,
