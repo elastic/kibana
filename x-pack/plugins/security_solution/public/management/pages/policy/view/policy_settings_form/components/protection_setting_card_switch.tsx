@@ -83,9 +83,9 @@ export const ProtectionSettingCardSwitch = React.memo(
                   event.target.checked;
               }
               if (protection === 'behavior_protection') {
-                newPayload.windows.behavior_protection.reputation_service = event.target.checked;
-                newPayload.mac.behavior_protection.reputation_service = event.target.checked;
-                newPayload.linux.behavior_protection.reputation_service = event.target.checked;
+                newPayload.windows.behavior_protection.reputation_service = false;
+                newPayload.mac.behavior_protection.reputation_service = false;
+                newPayload.linux.behavior_protection.reputation_service = false;
               }
             }
           }
