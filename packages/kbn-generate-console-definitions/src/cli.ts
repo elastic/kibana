@@ -20,30 +20,16 @@ export function runGenerateConsoleDefinitionsCli() {
     (context) => {
       const { log, flags } = context;
       log.info('starting console definitions generation');
-      const { source, dest, emptyDest } = flags;
+      const { source, dest } = flags;
       if (!source) {
         throw createFlagError(`Missing --source argument`);
       }
       let generatedFilesFolder = Path.resolve(REPO_ROOT, `${dest}`);
       if (!dest) {
-        generatedFilesFolder = Path.resolve(AUTOCOMPLETE_DEFINITIONS_FOLDER, 'generated');
+        generatedFilesFolder = AUTOCOMPLETE_DEFINITIONS_FOLDER;
       }
       log.info(`autocomplete definitions folder ${generatedFilesFolder}`);
       createFolderIfDoesntExist(generatedFilesFolder, log);
-      const files = fs.readdirSync(generatedFilesFolder);
-      if (files.length > 0) {
-        if (!emptyDest) {
-          throw createFlagError(
-            `Definitions folder already contain files, use --emptyDest to clean the folder before generation`
-          );
-        }
-        log.warning(`folder ${generatedFilesFolder} already contains files, emptying the folder`);
-        for (const file of files) {
-          fs.rmSync(Path.resolve(generatedFilesFolder, file), { recursive: true });
-        }
-        log.warning(`folder ${generatedFilesFolder} has been emptied`);
-      }
-
       const specsRepo = Path.resolve(`${source}`);
       if (!fs.existsSync(specsRepo)) {
         throw createFlagError(`ES specification folder ${specsRepo} doesn't exist`);
@@ -65,7 +51,6 @@ node scripts/generate_console_definitions.js --source <ES_SPECIFICATION_REPO> [-
         help: `
 --source        Folder containing the root of the Elasticsearch specification repo
 --dest          Folder where console autocomplete definitions will be generated (relative to the Kibana repo root)
---emptyDest     Flag to empty definitions folder if it already contains any files
 `,
       },
     }

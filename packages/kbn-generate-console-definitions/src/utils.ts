@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { join } from 'path';
+import Path, { join } from 'path';
 import type { SpecificationTypes } from './types';
 import { SpecificationTypes as S } from './types';
 
@@ -26,6 +26,17 @@ export const createFolderIfDoesntExist = (folder: string, log: ToolingLog) => {
     log.warning(`folder ${folder} doesn't exist, creating a new folder`);
     fs.mkdirSync(folder, { recursive: true });
     log.warning(`created a new folder ${folder}`);
+  }
+};
+
+export const emptyFolder = (folder: string, log: ToolingLog) => {
+  const files = fs.readdirSync(folder);
+  if (files.length > 0) {
+    log.warning(`folder ${folder} already contains files, emptying the folder`);
+    for (const file of files) {
+      fs.rmSync(Path.resolve(folder, file), { recursive: true });
+    }
+    log.warning(`folder ${folder} has been emptied`);
   }
 };
 

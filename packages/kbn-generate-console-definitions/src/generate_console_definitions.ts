@@ -9,6 +9,7 @@
 import fs from 'fs';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { ENDPOINTS_SUBFOLDER, GLOBALS_SUBFOLDER } from '@kbn/console-plugin/common/constants';
 import { generateQueryParams } from './generate_query_params';
 import type {
   AutocompleteBodyParams,
@@ -16,7 +17,12 @@ import type {
   AutocompleteUrlParams,
   SpecificationTypes,
 } from './types';
-import { createFolderIfDoesntExist, findTypeDefinition, saveJsonToFile } from './utils';
+import {
+  createFolderIfDoesntExist,
+  emptyFolder,
+  findTypeDefinition,
+  saveJsonToFile,
+} from './utils';
 import { BodyParamsConverter } from './body_params_converter';
 
 const generateMethods = (endpoint: SpecificationTypes.Endpoint): string[] => {
@@ -117,8 +123,9 @@ export function generateConsoleDefinitions({
   const schema = JSON.parse(fs.readFileSync(pathToSchemaFile, 'utf8')) as SpecificationTypes.Model;
 
   // convert endpoints
-  const definitionsFolder = Path.resolve(generatedFilesFolder, 'endpoints');
+  const definitionsFolder = Path.resolve(generatedFilesFolder, ENDPOINTS_SUBFOLDER);
   createFolderIfDoesntExist(definitionsFolder, log);
+  emptyFolder(definitionsFolder, log);
   const { endpoints } = schema;
   log.info(`iterating over endpoints array: ${endpoints.length} endpoints`);
   const bodyParamsConverter = new BodyParamsConverter(schema);
@@ -133,8 +140,9 @@ export function generateConsoleDefinitions({
   });
 
   // convert global types needed for endpoint definitions
-  const globalsFolder = Path.resolve(generatedFilesFolder, 'globals');
+  const globalsFolder = Path.resolve(generatedFilesFolder, GLOBALS_SUBFOLDER);
   createFolderIfDoesntExist(globalsFolder, log);
+  emptyFolder(globalsFolder, log);
   const globalTypes = bodyParamsConverter.getPublicTypes();
   console.log({ globalTypes });
   const globalDefinitions = bodyParamsConverter.convertGlobals();
