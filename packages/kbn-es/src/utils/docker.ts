@@ -154,9 +154,9 @@ export async function runServerlessEsNode(
     image
   );
 
-  log.info(chalk.bold('Running Serverless ES node.'));
+  log.info(chalk.bold(`Running Serverless ES node: ${name}`));
   log.indent(4);
-  log.info('docker %s', fullCmd.join(' '));
+  log.info(chalk.dim(`docker ${fullCmd.join(' ')}`));
 
   const { stdout } = await execa('docker', fullCmd);
 

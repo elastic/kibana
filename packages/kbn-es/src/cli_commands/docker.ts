@@ -15,16 +15,6 @@ import { Cluster } from '../cluster';
 import { parseTimeoutToMs, DEFAULT_DOCKER_CMD, DEFAULT_DOCKER_IMG } from '../utils';
 import { Command } from './types';
 
-/*
-
--p 9200:9200 -p 9300:9300 -e discovery.seed_hosts=es02,es03 -e node.roles='["master","index"]' -e xpack.searchable.snapshot.shared_cache.size=1gb   
-
--p 9202:9202 -p 9302:9302 -e discovery.seed_hosts=es01,es03 -e node.roles='["master","search"]' -e xpack.searchable.snapshot.shared_cache.size=1gb   
-
--p 9203:9203 -p 9303:9303 -e discovery.seed_hosts=es01,es02 -e node.roles='["master"]'   
-
-*/
-
 export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',
   usage: 'es docker [<args>]',
