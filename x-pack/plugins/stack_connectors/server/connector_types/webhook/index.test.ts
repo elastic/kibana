@@ -136,7 +136,7 @@ describe('config validation', () => {
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
-      hasAuth: true,
+      authType: WebhookAuthType.Basic,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -149,7 +149,7 @@ describe('config validation', () => {
       const config: Record<string, string | boolean> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
-        hasAuth: true,
+        authType: WebhookAuthType.Basic,
       };
       expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
         ...defaultValues,
@@ -175,7 +175,7 @@ describe('config validation', () => {
   test('config validation passes when a url is specified', () => {
     const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
-      hasAuth: true,
+      authType: WebhookAuthType.Basic,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -202,7 +202,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      hasAuth: true,
+      authType: WebhookAuthType.Basic,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -232,7 +232,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      hasAuth: true,
+      authType: WebhookAuthType.Basic,
     };
 
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
@@ -306,7 +306,6 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      hasAuth: true,
       authType: WebhookAuthType.Basic,
     };
     await connectorType.executor({
@@ -368,7 +367,6 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      hasAuth: true,
       authType: WebhookAuthType.SSL,
       certType: SSLCertType.CRT,
     };
@@ -517,7 +515,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      hasAuth: true,
+      authType: WebhookAuthType.Basic,
     };
     requestMock.mockReset();
     requestMock.mockRejectedValueOnce({
@@ -546,7 +544,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
-      hasAuth: false,
+      authType: WebhookAuthType.None,
     };
     const secrets: ConnectorTypeSecretsType = {
       user: null,

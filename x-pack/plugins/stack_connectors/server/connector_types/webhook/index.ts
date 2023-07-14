@@ -54,7 +54,6 @@ const configSchemaProps = {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
-  hasAuth: schema.boolean({ defaultValue: true }),
   authType: schema.string({ defaultValue: WebhookAuthType.None }),
   certType: schema.maybe(schema.string()),
   ca: schema.maybe(schema.string()),
@@ -173,16 +172,16 @@ export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const { actionId, config, params, configurationUtilities, logger } = execOptions;
-  const { method, url, headers = {}, hasAuth, ca, verificationMode } = config;
+  const { method, url, headers = {}, authType, ca, verificationMode } = config;
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
   const basicAuth =
-    hasAuth && isString(secrets.user) && isString(secrets.password)
+    authType === WebhookAuthType.Basic && isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
   const sslCertificate =
-    hasAuth &&
+    authType === WebhookAuthType.SSL &&
     isString(secrets.password) &&
     ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
       ? isString(secrets.pfx)
