@@ -199,7 +199,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
   });
 
-  describe('Update of prebuilt rules', () => {
+  describe('Upgrade of prebuilt rules', () => {
     const RULE_1_ID = 'rule_1';
     const RULE_2_ID = 'rule_2';
     const OUTDATED_RULE_1 = createRuleAssetSavedObject({

@@ -201,7 +201,7 @@ const assertUpgradeSuccessOrFailure = (
     }
   } else {
     for (const rule of rules) {
-      cy.get(RULES_UPDATES_TABLE).get(rule['security-rule'].name).should('not.exist');
+      cy.get(rule['security-rule'].name).should('not.exist');
     }
   }
 };
