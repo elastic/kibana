@@ -52,8 +52,8 @@ export function SloCallout({
             service: serviceName,
             environment:
               environment === ENVIRONMENT_ALL.value ? '*' : environment,
-            transactionName: transactionName,
-            transactionType: transactionType,
+            transactionName,
+            transactionType,
           },
         },
       },
