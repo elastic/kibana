@@ -6,6 +6,14 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type {
+  CasesFindRequest,
+  CasesFindResponse,
+  CasesStatusRequest,
+  CasesStatusResponse,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
+} from '../../common/types/api';
 import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../../common/ui';
 import {
   CASE_FIND_URL,
@@ -13,16 +21,7 @@ import {
   CASE_STATUS_URL,
   INTERNAL_BULK_GET_CASES_URL,
 } from '../../common/constants';
-import type {
-  CasesBulkGetRequest,
-  CasesBulkGetResponse,
-  CasesFindRequest,
-  CasesFindResponse,
-  CasesMetricsRequest,
-  CasesMetricsResponse,
-  CasesStatusRequest,
-  CasesStatusResponse,
-} from '../../common/api';
+import type { CasesMetricsRequest, CasesMetricsResponse } from '../../common/api';
 import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 import {
   decodeCasesBulkGetResponse,

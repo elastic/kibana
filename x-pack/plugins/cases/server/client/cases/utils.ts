@@ -10,23 +10,21 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserActionTypes } from '../../../common/types/domain';
+import type { Case, CaseAttributes, ExternalService } from '../../../common/types/domain';
+import { CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
   ActionConnector,
-  CaseFullExternalService,
-  Case,
   Comment,
   User,
-  CaseAttributes,
   CaseAssignees,
   CaseField,
   ThirdPartyField,
   ConnectorMappings,
 } from '../../../common/api';
-import { CommentType, CaseStatuses } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
@@ -53,7 +51,7 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   return uniqBy(assignees, 'uid');
 };
 
-type LatestPushInfo = { index: number; pushedInfo: CaseFullExternalService } | null;
+type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
 export const getLatestPushInfo = (
   connectorId: string,

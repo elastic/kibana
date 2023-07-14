@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Case } from '../../../common/types/domain';
 import type { AlertResponse } from '../../../common/types/api';
 import type {
   Comments,
   BulkGetAttachmentsResponse,
-  Case,
   Comment,
   CommentsFindResponse,
 } from '../../../common/api';

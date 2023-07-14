@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { decodeWithExcessOrThrow, CasePushRequestParamsRt } from '../../../../common/api';
+import { CasePushRequestParamsRt } from '../../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../../common/api';
 import { CASE_PUSH_URL } from '../../../../common/constants';
 import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';

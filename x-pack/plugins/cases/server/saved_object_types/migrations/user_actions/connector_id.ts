@@ -16,12 +16,10 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseAttributes, CaseConnector } from '../../../../common/api';
-import {
-  CaseConnectorRt,
-  CaseExternalServiceBasicRt,
-  NONE_CONNECTOR_ID,
-} from '../../../../common/api';
+import type { CaseAttributes } from '../../../../common/types/domain';
+import { ExternalServiceRt } from '../../../../common/types/domain';
+import type { CaseConnector } from '../../../../common/api';
+import { CaseConnectorRt, NONE_CONNECTOR_ID } from '../../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -233,7 +231,7 @@ function isUpdateCaseConnector(
   }
 }
 
-type CaseExternalService = rt.TypeOf<typeof CaseExternalServiceBasicRt>;
+type CaseExternalService = rt.TypeOf<typeof ExternalServiceRt>;
 
 function isPushConnector(
   action: string,
@@ -241,7 +239,7 @@ function isPushConnector(
   actionDetails: unknown
 ): actionDetails is CaseExternalService {
   try {
-    return isPush(action, actionFields) && CaseExternalServiceBasicRt.is(actionDetails);
+    return isPush(action, actionFields) && ExternalServiceRt.is(actionDetails);
   } catch {
     return false;
   }

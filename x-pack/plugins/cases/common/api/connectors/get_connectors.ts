@@ -6,13 +6,13 @@
  */
 
 import * as rt from 'io-ts';
+import { ExternalServiceRt } from '../../types/domain/external_service/v1';
 import { CaseConnectorRt } from './connector';
-import { CaseExternalServiceBasicRt } from '../cases';
 
 const PushDetailsRt = rt.strict({
   latestUserActionPushDate: rt.string,
   oldestUserActionPushDate: rt.string,
-  externalService: CaseExternalServiceBasicRt,
+  externalService: ExternalServiceRt,
 });
 
 const CaseConnectorPushInfoRt = rt.intersection([

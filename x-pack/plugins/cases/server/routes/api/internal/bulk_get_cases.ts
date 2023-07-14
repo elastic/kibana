@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { CasesBulkGetRequest } from '../../../../common/types/api';
 import { INTERNAL_BULK_GET_CASES_URL } from '../../../../common/constants';
-import type { CasesBulkGetRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';

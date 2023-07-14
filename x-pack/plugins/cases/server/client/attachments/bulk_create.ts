@@ -7,7 +7,8 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CommentRequest } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
+import type { CommentRequest } from '../../../common/api';
 import { BulkCreateCommentRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
 
 import { CaseCommentModel } from '../../common/models';

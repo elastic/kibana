@@ -12,8 +12,15 @@ import type {
   UserAction,
   UserActions,
   UserActionType,
+  Case,
+  Cases,
 } from '../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  UserActionActions,
+  UserActionTypes,
+} from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
 
 import type {
@@ -30,21 +37,8 @@ import type {
   CasesFindResponseUI,
   CasesUI,
 } from '../../common/ui/types';
-import type {
-  CaseConnector,
-  Case,
-  CasesFindResponse,
-  Cases,
-  CasesStatusResponse,
-  Comment,
-} from '../../common/api';
-import {
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-  CaseSeverity,
-  ExternalReferenceStorageType,
-} from '../../common/api';
+import type { CaseConnector, Comment } from '../../common/api';
+import { CommentType, ConnectorTypes, ExternalReferenceStorageType } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
@@ -53,7 +47,11 @@ import type {
   AttachmentViewObject,
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
-import type { UserActionWithResponse } from '../../common/types/api';
+import type {
+  CasesFindResponse,
+  CasesStatusResponse,
+  UserActionWithResponse,
+} from '../../common/types/api';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';

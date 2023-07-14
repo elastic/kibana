@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  UserActionActions,
+  UserActionTypes,
+} from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
+import { CommentType, ConnectorTypes } from '../../../common/api';
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,

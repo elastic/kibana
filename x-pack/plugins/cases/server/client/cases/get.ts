@@ -6,31 +6,28 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { Case, CaseAttributes } from '../../../common/types/domain';
 import type {
-  Case,
-  CaseResolveResponse,
-  User,
-  AllTagsFindRequest,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
+  AllTagsFindRequest,
+  CaseResolveResponse,
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
-  CaseAttributes,
-  AttachmentTotals,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import {
-  AllTagsFindRequestRt,
   AllCategoriesFindRequestRt,
-  CaseRt,
-  CaseResolveResponseRt,
-  decodeWithExcessOrThrow,
   AllReportersFindRequestRt,
+  AllTagsFindRequestRt,
+  CaseResolveResponseRt,
   CasesByAlertIDRequestRt,
-  GetRelatedCasesByAlertResponseRt,
-  GetTagsResponseRt,
-  GetReportersResponseRt,
   GetCategoriesResponseRt,
-} from '../../../common/api';
+  GetRelatedCasesByAlertResponseRt,
+  GetReportersResponseRt,
+  GetTagsResponseRt,
+} from '../../../common/types/api';
+import type { User, AttachmentTotals } from '../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
@@ -39,6 +36,7 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { CaseRt } from '../../../common/types/domain';
 
 /**
  * Parameters for finding cases IDs using an alert ID

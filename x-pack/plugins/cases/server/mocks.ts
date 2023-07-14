@@ -7,20 +7,25 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type {
-  CasePostRequest,
   CommentAttributes,
   CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestUserType,
   ConnectorMappings,
 } from '../common/api';
-import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
+import { CommentType, ConnectorTypes } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
 import type { UserActionAttributes } from '../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../common/types/domain';
+import {
+  UserActionActions,
+  UserActionTypes,
+  CaseSeverity,
+  CaseStatuses,
+} from '../common/types/domain';
+import type { CasePostRequest } from '../common/types/api';
 
 const lensPersistableState = {
   attributes: {

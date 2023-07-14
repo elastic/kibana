@@ -13,7 +13,6 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type {
   GetCaseConnectorsResponse,
   CaseConnector,
-  CaseExternalServiceBasic,
   GetCaseConnectorsPushDetails,
 } from '../../../common/api';
 import { decodeOrThrow, GetCaseConnectorsResponseRt } from '../../../common/api';
@@ -29,7 +28,7 @@ import { Operations } from '../../authorization';
 import type { GetConnectorsRequest } from './types';
 import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
-import type { UserActionAttributes } from '../../../common/types/domain';
+import type { ExternalService, UserActionAttributes } from '../../../common/types/domain';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,
@@ -113,7 +112,7 @@ const checkConnectorsAuthorization = async ({
 interface EnrichedPushInfo {
   latestPushDate: Date;
   oldestPushDate: Date;
-  externalService: CaseExternalServiceBasic;
+  externalService: ExternalService;
   connectorFieldsUsedInPush: CaseConnector;
 }
 
@@ -158,7 +157,7 @@ const getActionConnectors = async (
 
 interface PushDetails {
   connectorId: string;
-  externalService: CaseExternalServiceBasic;
+  externalService: ExternalService;
   mostRecentPush: Date;
   oldestPush: Date;
 }
@@ -225,7 +224,7 @@ const getPushDetails = (activity: CaseConnectorActivity[]) => {
 
 const getExternalServiceFromSavedObject = (
   savedObject: SavedObject<UserActionAttributes> | undefined
-): CaseExternalServiceBasic | undefined => {
+): ExternalService | undefined => {
   if (savedObject != null && isPushedUserAction(savedObject.attributes)) {
     return savedObject.attributes.payload.externalService;
   }

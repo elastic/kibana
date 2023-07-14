@@ -17,7 +17,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import type { CaseUI } from '../../../common/ui/types';
-import type { CaseStatuses } from '../../../common/api';
+import type { CaseStatuses } from '../../../common/types/domain';
 import * as i18n from '../case_view/translations';
 import { Actions } from './actions';
 import { StatusContextMenu } from './status_context_menu';

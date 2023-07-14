@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AllCategoriesFindRequest } from '../../../../../common/api';
-
+import type { AllCategoriesFindRequest } from '../../../../../common/types/api';
 import { INTERNAL_GET_CASE_CATEGORIES_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';

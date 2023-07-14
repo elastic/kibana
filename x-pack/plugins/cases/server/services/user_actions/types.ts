@@ -22,17 +22,12 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-} from '../../../common/types/domain';
-import type {
   CaseAttributes,
-  CasePostRequest,
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CommentRequest,
-  User,
-  CaseAssignees,
-} from '../../../common/api';
+} from '../../../common/types/domain';
+import type { CommentRequest, User, CaseAssignees } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
@@ -40,7 +35,7 @@ import type {
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import type { UserActionFindRequest } from '../../../common/types/api';
+import type { CasePostRequest, UserActionFindRequest } from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {

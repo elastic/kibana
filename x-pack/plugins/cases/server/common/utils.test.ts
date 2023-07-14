@@ -10,12 +10,11 @@ import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/ma
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type {
   CaseConnector,
-  Case,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
 } from '../../common/api';
-import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
+import { CommentType, ConnectorTypes } from '../../common/api';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -39,6 +38,8 @@ import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import { mockCases, mockCaseComments } from '../mocks';
 import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
+import type { Case } from '../../common/types/domain';
+import { CaseSeverity } from '../../common/types/domain';
 
 interface CommentReference {
   ids: string[];

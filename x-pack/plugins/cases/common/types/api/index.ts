@@ -11,6 +11,7 @@ export * from './user_action/latest';
 export * from './alert/latest';
 export * from './case/latest';
 export * from './external_service/latest';
+export * from './status/latest';
 
 // V1
 export * as configureApiV1 from './configure/v1';

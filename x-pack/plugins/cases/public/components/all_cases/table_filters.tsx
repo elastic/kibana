@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } 
 
 import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
 import { FilterPopover } from '../filter_popover';
 import { SolutionFilter } from './solution_filter';

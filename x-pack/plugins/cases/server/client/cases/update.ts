@@ -17,24 +17,10 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { CasePatchRequest, CasesPatchRequest } from '../../../common/types/api';
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
-import type {
-  CaseAssignees,
-  CaseAttributes,
-  CasePatchRequest,
-  Case,
-  CasesPatchRequest,
-  Cases,
-  CommentAttributes,
-  User,
-} from '../../../common/api';
-import {
-  CasesPatchRequestRt,
-  CasesRt,
-  CaseStatuses,
-  CommentType,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
+import type { CaseAssignees, CommentAttributes, User } from '../../../common/api';
+import { CommentType, decodeWithExcessOrThrow } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -59,6 +45,9 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { Cases, Case, CaseAttributes } from '../../../common/types/domain';
+import { CasesPatchRequestRt } from '../../../common/types/api';
+import { CasesRt, CaseStatuses } from '../../../common/types/domain';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.

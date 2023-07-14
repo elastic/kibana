@@ -15,7 +15,8 @@
 // For example, constants below could eventually be in a "kbn-cases-constants" instead.
 // See: https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro#public-plugin-api
 
-export type { Case, Cases, CasesBulkGetResponse } from './api';
+export type { CasesBulkGetResponse } from './types/api';
+export type { Case, Cases, CaseStatuses, CaseSeverity } from './types/domain';
 export type {
   CaseUI,
   CasesUI,
@@ -42,8 +43,6 @@ export {
 
 export {
   CommentType,
-  CaseStatuses,
-  CaseSeverity,
   ConnectorTypes,
   getCasesFromAlertsUrl,
   throwErrors,

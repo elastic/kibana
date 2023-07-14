@@ -28,13 +28,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 import type {
-  CasesBulkGetRequest,
-  CasesBulkGetResponse,
-  GetRelatedCasesByAlertResponse,
-  CasesByAlertIDRequest,
-  CasesFindRequest,
   CasesMetricsRequest,
-  CasesStatusRequest,
   CommentRequestAlertType,
   CommentRequestExternalReferenceNoSOType,
   CommentRequestExternalReferenceSOType,
@@ -55,6 +49,14 @@ import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type {
+  CasesByAlertIDRequest,
+  GetRelatedCasesByAlertResponse,
+  CasesFindRequest,
+  CasesStatusRequest,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
+} from '../common/types/api';
 
 export interface CasesPluginSetup {
   files: FilesSetup;

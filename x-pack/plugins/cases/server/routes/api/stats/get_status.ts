@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { CasesStatusRequest } from '../../../../common/types/api';
 import type { CaseRoute } from '../types';
 
-import type { CasesStatusRequest } from '../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';

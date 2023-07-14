@@ -11,29 +11,31 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import type { CaseUserActionStatsResponse } from '../../common/types/api';
-import type { Configuration, Configurations, UserActions } from '../../common/types/domain';
-import { ConfigurationRt, ConfigurationsRt, UserActionsRt } from '../../common/types/domain';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
   CasePatchRequest,
   CaseResolveResponse,
-  SingleCaseMetricsResponse,
-  User,
+  CaseUserActionStatsResponse,
+} from '../../common/types/api';
+import { CaseResolveResponseRt, CaseUserActionStatsResponseRt } from '../../common/types/api';
+import type {
   Case,
   Cases,
-} from '../../common/api';
+  Configuration,
+  Configurations,
+  UserActions,
+} from '../../common/types/domain';
 import {
+  ConfigurationRt,
+  ConfigurationsRt,
+  UserActionsRt,
   CaseRt,
   CasesRt,
-  throwErrors,
-  CommentType,
-  CaseResolveResponseRt,
-  SingleCaseMetricsResponseRt,
-} from '../../common/api';
+} from '../../common/types/domain';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import type { SingleCaseMetricsResponse, User } from '../../common/api';
+import { throwErrors, CommentType, SingleCaseMetricsResponseRt } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
-import { CaseUserActionStatsResponseRt } from '../../common/types/api';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 

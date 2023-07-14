@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case } from '../../../../common/api';
+import type { Case } from '../../../../common/types/domain';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

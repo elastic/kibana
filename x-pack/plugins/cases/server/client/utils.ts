@@ -16,13 +16,8 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
-import type {
-  CaseStatuses,
-  CommentRequest,
-  CaseSeverity,
-  CommentRequestExternalReferenceType,
-  CasesFindRequest,
-} from '../../common/api';
+import type { CaseSeverity, CaseStatuses } from '../../common/types/domain';
+import type { CommentRequest, CommentRequestExternalReferenceType } from '../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
 
@@ -52,6 +47,7 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { CasesFindRequest } from '../../common/types/api';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (

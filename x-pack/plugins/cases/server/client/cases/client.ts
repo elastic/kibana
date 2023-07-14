@@ -5,22 +5,21 @@
  * 2.0.
  */
 
+import type { Case, Cases } from '../../../common/types/domain';
 import type {
   CasePostRequest,
-  CasesPatchRequest,
   CasesFindRequest,
-  User,
+  CasesFindResponse,
+  CaseResolveResponse,
+  CasesBulkGetRequest,
+  CasesPatchRequest,
   AllTagsFindRequest,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
   GetRelatedCasesByAlertResponse,
-  CasesBulkGetRequest,
   CasesBulkGetResponse,
-  Case,
-  CaseResolveResponse,
-  Cases,
-  CasesFindResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
+import type { User } from '../../../common/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';

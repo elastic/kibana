@@ -39,17 +39,13 @@ import type {
   CaseUserActionsStats,
 } from '../../../common/ui/types';
 import { SeverityAll } from '../../../common/ui/types';
-import type {
-  CasePatchRequest,
-  CasePostRequest,
-  CommentRequest,
-  SingleCaseMetricsResponse,
-} from '../../../common/api';
-import { CaseStatuses } from '../../../common/api';
+import type { CommentRequest, SingleCaseMetricsResponse } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import type { CasePostRequest, CasePatchRequest } from '../../../common/types/api';
 
 export const getCase = async (
   caseId: string,

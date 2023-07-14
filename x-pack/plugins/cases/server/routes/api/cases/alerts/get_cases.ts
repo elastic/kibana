@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { CasesByAlertIDRequest } from '../../../../../common/types/api';
 
-import type { CasesByAlertIDRequest } from '../../../../../common/api';
 import { CASE_ALERTS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';

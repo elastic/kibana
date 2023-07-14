@@ -7,19 +7,13 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
-import type { UserActions } from '../../common/types/domain';
+import type { CaseResolveResponse, CasesFindResponse } from '../../common/types/api';
+import type { Case, Cases, UserActions } from '../../common/types/domain';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
-import type {
-  CasesFindResponse,
-  Case,
-  CommentRequest,
-  Comment,
-  CaseResolveResponse,
-  Cases,
-} from '../../common/api';
+import type { CommentRequest, Comment } from '../../common/api';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type {
   CasesFindResponseUI,

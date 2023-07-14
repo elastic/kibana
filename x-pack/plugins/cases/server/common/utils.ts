@@ -15,6 +15,8 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import type { Case } from '../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -27,9 +29,6 @@ import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest, SOWithErrors } from './types';
 
 import type {
-  CasePostRequest,
-  Case,
-  CasesFindResponse,
   CommentAttributes,
   CommentRequest,
   CommentRequestActionsType,
@@ -40,8 +39,6 @@ import type {
   User,
 } from '../../common/api';
 import {
-  CaseSeverity,
-  CaseStatuses,
   CommentType,
   ConnectorTypes,
   ExternalReferenceSORt,
@@ -54,6 +51,7 @@ import {
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
+import type { CasePostRequest, CasesFindResponse } from '../../common/types/api';
 
 /**
  * Default sort field for querying saved objects.

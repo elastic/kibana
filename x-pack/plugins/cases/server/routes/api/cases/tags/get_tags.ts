@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AllTagsFindRequest } from '../../../../../common/api';
+import type { AllTagsFindRequest } from '../../../../../common/types/api';
 import { CASE_TAGS_URL } from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';

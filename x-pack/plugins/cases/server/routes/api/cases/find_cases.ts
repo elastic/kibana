@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesFindRequest } from '../../../../common/api';
+import type { CasesFindRequest } from '../../../../common/types/api';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';

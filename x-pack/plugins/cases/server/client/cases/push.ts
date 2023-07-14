@@ -12,16 +12,14 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import type { ConfigurationAttributes } from '../../../common/types/domain';
-import { UserActionTypes } from '../../../common/types/domain';
+import type { Case, ConfigurationAttributes } from '../../../common/types/domain';
+import { CaseRt, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   ActionConnector,
-  Case,
-  ExternalServiceResponse,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
-import { CaseRt, CaseStatuses, OWNER_FIELD, CommentType } from '../../../common/api';
+import { OWNER_FIELD, CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
@@ -37,6 +35,7 @@ import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
