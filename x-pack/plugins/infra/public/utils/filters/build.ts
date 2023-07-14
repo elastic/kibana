@@ -23,7 +23,8 @@ export const buildCombinedHostsFilter = ({
   field: string;
   dataView?: DataView;
 }) => {
-  if (!dataView) {
+  const indexField = dataView?.getFieldByName(field);
+  if (!dataView || !indexField) {
     return {
       query: {
         terms: {
@@ -33,7 +34,6 @@ export const buildCombinedHostsFilter = ({
       meta: {},
     };
   }
-  const indexField = dataView.getFieldByName(field)!;
   const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
 
   return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
