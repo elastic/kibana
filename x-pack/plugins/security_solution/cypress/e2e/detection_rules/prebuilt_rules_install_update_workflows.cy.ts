@@ -113,7 +113,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           const numberOfRulesToInstall = new Set(ruleIds).size;
           addElasticRulesButtonClick();
 
-          cy.get(INSTALL_ALL_RULES_BUTTON).click();
+          cy.get(INSTALL_ALL_RULES_BUTTON).should('be.enabled').click();
           cy.get(TOASTER)
             .should('be.visible')
             .should('have.text', `${numberOfRulesToInstall} rules installed successfully.`);
@@ -243,12 +243,12 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       assertRuleUpgradeAvailableAndUpgradeOne({ rules: [OUTDATED_RULE_1] });
     });
 
-    it('should install multiple selected prebuilt rules by selecting them individually', () => {
+    it('should upgrade multiple selected prebuilt rules by selecting them individually', () => {
       ruleUpdatesTabClick();
       assertRuleUpgradeAvailableAndUpgradeSelected({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
     });
 
-    it('should install multiple selected prebuilt rules by selecting all in page', () => {
+    it('should upgrade multiple selected prebuilt rules by selecting all in page', () => {
       ruleUpdatesTabClick();
       assertRuleUpgradeAvailableAndUpgradeAllInPage({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
     });
@@ -264,20 +264,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       assertRuleUpgradeAvailableAndUpgradeAll({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
       cy.get(RULES_UPDATES_TAB).should('not.exist');
       cy.get(NO_RULES_AVAILABLE_FOR_UPGRADE_MESSSAGE).should('exist');
-      cy.get(GO_BACK_TO_RULES_TABLE_BUTTON).should('exist');
-    });
-
-    it('should fail gracefully with toast error message when request to update rules fails', () => {
-      /* Stub request to force rules update to fail */
-      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
-        statusCode: 500,
-      }).as('updatePrebuiltRules');
-      ruleUpdatesTabClick();
-      assertRuleUpgradeAvailableAndUpgradeAll({ rules: [OUTDATED_RULE_1] });
-      cy.get(TOASTER).should('be.visible').should('have.text', 'Rule update failed');
-
-      /* Assert that the rule has not been updated in the UI */
-      cy.get(RULES_UPDATES_TABLE).should('contain', OUTDATED_RULE_1['security-rule'].name);
     });
   });
 });

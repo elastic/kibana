@@ -11,7 +11,6 @@ import {
   ADD_ELASTIC_RULES_TABLE,
   getInstallSingleRuleButtonByRuleId,
   getUpgradeSingleRuleButtonByRuleId,
-  GO_BACK_TO_RULES_TABLE_BUTTON,
   INSTALL_ALL_RULES_BUTTON,
   INSTALL_SELECTED_RULES_BUTTON,
   RULES_MANAGEMENT_TABLE,
@@ -45,6 +44,7 @@ export const assertRuleAvailableForInstallAndInstallOne = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptInstallationRequestToFail(rules, didRequestFail);
   const rule = rules[0];
   cy.get(getInstallSingleRuleButtonByRuleId(rule['security-rule'].rule_id)).click();
   cy.wait('@installPrebuiltRules');
@@ -55,6 +55,7 @@ export const assertRuleAvailableForInstallAndInstallSelected = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptInstallationRequestToFail(rules, didRequestFail);
   let i = 0;
   for (const rule of rules) {
     cy.get(RULE_CHECKBOX).eq(i).click();
@@ -70,6 +71,7 @@ export const assertRuleAvailableForInstallAndInstallAllInPage = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptInstallationRequestToFail(rules, didRequestFail);
   for (const rule of rules) {
     cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
   }
@@ -83,6 +85,7 @@ export const assertRuleAvailableForInstallAndInstallAll = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptInstallationRequestToFail(rules, didRequestFail);
   for (const rule of rules) {
     cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name);
   }
@@ -112,10 +115,28 @@ const assertInstallationSuccessOrFailure = (
   }
 };
 
+const interceptInstallationRequestToFail = (
+  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
+  didRequestFail: boolean
+) => {
+  if (didRequestFail) {
+    cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform', {
+      body: {
+        summary: {
+          succeeded: [],
+          skipped: [],
+          failed: rules.length,
+        },
+      },
+    }).as('installPrebuiltRules');
+  }
+};
+
 export const assertRuleUpgradeAvailableAndUpgradeOne = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptUpgradeRequestToFail(rules, didRequestFail);
   const rule = rules[0];
   cy.get(getUpgradeSingleRuleButtonByRuleId(rule['security-rule'].rule_id)).click();
   cy.wait('@updatePrebuiltRules');
@@ -126,6 +147,7 @@ export const assertRuleUpgradeAvailableAndUpgradeSelected = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptUpgradeRequestToFail(rules, didRequestFail);
   let i = 0;
   for (const rule of rules) {
     cy.get(RULE_CHECKBOX).eq(i).click();
@@ -141,6 +163,7 @@ export const assertRuleUpgradeAvailableAndUpgradeAllInPage = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptUpgradeRequestToFail(rules, didRequestFail);
   for (const rule of rules) {
     cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
   }
@@ -154,6 +177,7 @@ export const assertRuleUpgradeAvailableAndUpgradeAll = ({
   rules,
   didRequestFail = false,
 }: RuleInstallUpgradeAssertionPayload) => {
+  interceptUpgradeRequestToFail(rules, didRequestFail);
   for (const rule of rules) {
     cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
   }
@@ -179,5 +203,22 @@ const assertUpgradeSuccessOrFailure = (
     for (const rule of rules) {
       cy.get(RULES_UPDATES_TABLE).get(rule['security-rule'].name).should('not.exist');
     }
+  }
+};
+
+const interceptUpgradeRequestToFail = (
+  rules: Array<typeof SAMPLE_PREBUILT_RULE>,
+  didRequestFail: boolean
+) => {
+  if (didRequestFail) {
+    cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
+      body: {
+        summary: {
+          succeeded: [],
+          skipped: [],
+          failed: rules.length,
+        },
+      },
+    }).as('updatePrebuiltRules');
   }
 };
