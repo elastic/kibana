@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import { useMemo } from 'react';
-import DateMath from '@kbn/datemath';
+import { parseDateRange } from '../../../utils/datemath';
 import type { AssetDetailsProps } from '../types';
 
 const DEFAULT_DATE_RANGE = {
@@ -26,9 +26,8 @@ export function useAssetDetailsState({ state }: UseAssetDetailsStateProps) {
   const { node, nodeType, dateRange: rawDateRange, onTabsStateChange, overrides } = state;
 
   const dateRange = useMemo(() => {
-    const from = DateMath.parse(rawDateRange.from)?.toISOString() ?? DEFAULT_DATE_RANGE.from;
-    const to =
-      DateMath.parse(rawDateRange.to, { roundUp: true })?.toISOString() ?? DEFAULT_DATE_RANGE.to;
+    const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
+      parseDateRange(rawDateRange);
 
     return { from, to };
   }, [rawDateRange]);
