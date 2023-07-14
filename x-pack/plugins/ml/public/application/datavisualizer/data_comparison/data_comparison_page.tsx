@@ -14,7 +14,7 @@ import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 
-export const DataComparisonWithDocCountPage: FC = () => {
+export const DataComparisonPage: FC = () => {
   const {
     services: { dataVisualizer },
   } = useMlKibana();
