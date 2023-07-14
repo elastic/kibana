@@ -5,30 +5,21 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
-
 import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
-
+import { v1 as uuidv1 } from 'uuid';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
-import { ResourceInstaller } from './resource_installer';
+import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { validateSLO } from '../../domain/services';
 
 export class CreateSLO {
-  constructor(
-    private resourceInstaller: ResourceInstaller,
-    private repository: SLORepository,
-    private transformManager: TransformManager
-  ) {}
+  constructor(private repository: SLORepository, private transformManager: TransformManager) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    await this.resourceInstaller.ensureCommonResourcesInstalled();
     await this.repository.save(slo, { throwOnConflict: true });
-
     let sloTransformId;
     try {
       sloTransformId = await this.transformManager.install(slo);
