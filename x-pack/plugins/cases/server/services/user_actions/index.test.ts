@@ -12,23 +12,27 @@ import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsFindResponse,
-  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import type { CaseAttributes, CaseUserActionWithoutReferenceIds } from '../../../common/api';
+import type { CaseUserActionWithoutReferenceIds } from '../../../common/api';
 import { Actions, ActionTypes, CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
-import { createCaseSavedObjectResponse, createSOFindResponse } from '../test_utils';
+import { createSOFindResponse } from '../test_utils';
 import {
   casePayload,
   externalService,
-  originalCases,
-  updatedCases,
   attachments,
-  updatedAssigneesCases,
-  originalCasesWithAssignee,
-  updatedTagsCases,
+  patchRemoveAssigneesCasesRequest,
+  patchCasesRequest,
+  patchAssigneesCasesRequest,
+  patchAddRemoveAssigneesCasesRequest,
+  patchTagsCasesRequest,
+  getBuiltUserActions,
+  getAssigneesAddedUserActions,
+  getAssigneesRemovedUserActions,
+  getAssigneesAddedRemovedUserActions,
+  getTagsAddedRemovedUserActions,
 } from './mocks';
 import { CaseUserActionService } from '.';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
@@ -40,6 +44,7 @@ import {
   pushConnectorUserAction,
 } from './test_utils';
 import { comment } from '../../mocks';
+import type { UserActionEvent } from './types';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -496,13 +501,73 @@ describe('CaseUserActionService', () => {
       });
     });
 
+    describe('buildUserActions', () => {
+      it('creates the correct user actions when bulk updating cases', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getBuiltUserActions({ isMock: false }));
+      });
+
+      it('creates the correct user actions when an assignee is added', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchAssigneesCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getAssigneesAddedUserActions({ isMock: false }));
+      });
+
+      it('creates the correct user actions when an assignee is removed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchRemoveAssigneesCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(getAssigneesRemovedUserActions({ isMock: false }));
+      });
+
+      it('creates the correct user actions when assignees are added and removed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchAddRemoveAssigneesCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(
+          getAssigneesAddedRemovedUserActions({
+            isMock: false,
+          })
+        );
+      });
+
+      it('creates the correct user actions when tags are added and removed', async () => {
+        expect(
+          await service.creator.buildUserActions({
+            updatedCases: patchTagsCasesRequest,
+            user: commonArgs.user,
+          })
+        ).toEqual(
+          getTagsAddedRemovedUserActions({
+            isMock: false,
+          })
+        );
+      });
+    });
+
     describe('bulkCreateUpdateCase', () => {
+      const mockBuiltUserActions = getBuiltUserActions({ isMock: true });
+      const builtUserActions = Object.keys(mockBuiltUserActions).reduce<UserActionEvent[]>(
+        (acc, key) => {
+          return [...acc, ...mockBuiltUserActions[key]];
+        },
+        []
+      );
+
       it('creates the correct user actions when bulk updating cases', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases,
-          updatedCases,
-          user: commonArgs.user,
+          builtUserActions,
         });
 
         expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -667,10 +732,7 @@ describe('CaseUserActionService', () => {
 
       it('logs the correct user actions when bulk updating cases', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases,
-          updatedCases,
-          user: commonArgs.user,
+          builtUserActions,
         });
 
         expect(mockAuditLogger.log).toBeCalledTimes(8);
@@ -694,7 +756,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User updated the title for case id: 1 - user action id: 0",
+                "message": undefined,
               },
             ],
             Array [
@@ -715,7 +777,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User updated the status for case id: 1 - user action id: 1",
+                "message": undefined,
               },
             ],
             Array [
@@ -736,7 +798,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User changed the case connector to id: 456 for case id: 1 - user action id: 2",
+                "message": undefined,
               },
             ],
             Array [
@@ -757,7 +819,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User updated the description for case id: 2 - user action id: 3",
+                "message": undefined,
               },
             ],
             Array [
@@ -778,7 +840,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User added tags to case id: 2 - user action id: 4",
+                "message": undefined,
               },
             ],
             Array [
@@ -799,7 +861,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User deleted tags in case id: 2 - user action id: 5",
+                "message": undefined,
               },
             ],
             Array [
@@ -820,7 +882,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User updated the settings for case id: 2 - user action id: 6",
+                "message": undefined,
               },
             ],
             Array [
@@ -841,19 +903,23 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User updated the severity for case id: 2 - user action id: 7",
+                "message": undefined,
               },
             ],
           ]
         `);
       });
 
+      const mockAssigneesAddedUserActions = getAssigneesAddedUserActions({ isMock: true });
+      const assigneesAddedUserActions = Object.keys(mockAssigneesAddedUserActions).reduce<
+        UserActionEvent[]
+      >((acc, key) => {
+        return [...acc, ...mockAssigneesAddedUserActions[key]];
+      }, []);
+
       it('creates the correct user actions when an assignee is added', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases,
-          updatedCases: updatedAssigneesCases,
-          user: commonArgs.user,
+          builtUserActions: assigneesAddedUserActions,
         });
 
         expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
@@ -897,10 +963,7 @@ describe('CaseUserActionService', () => {
 
       it('logs the correct user actions when an assignee is added', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases,
-          updatedCases: updatedAssigneesCases,
-          user: commonArgs.user,
+          builtUserActions: assigneesAddedUserActions,
         });
 
         expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -924,29 +987,23 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User assigned uids: [1] to case id: 1 - user action id: 0",
+                "message": undefined,
               },
             ],
           ]
         `);
       });
 
-      it('creates the correct user actions when an assignee is removed', async () => {
-        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
-          {
-            ...createCaseSavedObjectResponse(),
-            id: '1',
-            attributes: {
-              assignees: [],
-            },
-          },
-        ];
+      const mockAssigneesRemovedUserActions = getAssigneesRemovedUserActions({ isMock: true });
+      const assigneesRemovedUserActions = Object.keys(mockAssigneesRemovedUserActions).reduce<
+        UserActionEvent[]
+      >((acc, key) => {
+        return [...acc, ...mockAssigneesRemovedUserActions[key]];
+      }, []);
 
+      it('creates the correct user actions when an assignee is removed', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases: originalCasesWithAssignee,
-          updatedCases: casesWithAssigneeRemoved,
-          user: commonArgs.user,
+          builtUserActions: assigneesRemovedUserActions,
         });
 
         expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
@@ -989,21 +1046,8 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when an assignee is removed', async () => {
-        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
-          {
-            ...createCaseSavedObjectResponse(),
-            id: '1',
-            attributes: {
-              assignees: [],
-            },
-          },
-        ];
-
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases: originalCasesWithAssignee,
-          updatedCases: casesWithAssigneeRemoved,
-          user: commonArgs.user,
+          builtUserActions: assigneesRemovedUserActions,
         });
 
         expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -1027,29 +1071,25 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User unassigned uids: [1] from case id: 1 - user action id: 0",
+                "message": undefined,
               },
             ],
           ]
         `);
       });
 
-      it('creates the correct user actions when assignees are added and removed', async () => {
-        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
-          {
-            ...createCaseSavedObjectResponse(),
-            id: '1',
-            attributes: {
-              assignees: [{ uid: '2' }],
-            },
-          },
-        ];
+      const mockAssigneesAddedRemovedUserActions = getAssigneesAddedRemovedUserActions({
+        isMock: true,
+      });
+      const assigneesAddedRemovedUserActions = Object.keys(
+        mockAssigneesAddedRemovedUserActions
+      ).reduce<UserActionEvent[]>((acc, key) => {
+        return [...acc, ...mockAssigneesAddedRemovedUserActions[key]];
+      }, []);
 
+      it('creates the correct user actions when assignees are added and removed', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases: originalCasesWithAssignee,
-          updatedCases: caseAssignees,
-          user: commonArgs.user,
+          builtUserActions: assigneesAddedRemovedUserActions,
         });
 
         expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1120,21 +1160,8 @@ describe('CaseUserActionService', () => {
       });
 
       it('logs the correct user actions when assignees are added and removed', async () => {
-        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
-          {
-            ...createCaseSavedObjectResponse(),
-            id: '1',
-            attributes: {
-              assignees: [{ uid: '2' }],
-            },
-          },
-        ];
-
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases: originalCasesWithAssignee,
-          updatedCases: caseAssignees,
-          user: commonArgs.user,
+          builtUserActions: assigneesAddedRemovedUserActions,
         });
 
         expect(mockAuditLogger.log).toBeCalledTimes(2);
@@ -1158,7 +1185,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User assigned uids: [2] to case id: 1 - user action id: 0",
+                "message": undefined,
               },
             ],
             Array [
@@ -1179,19 +1206,25 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User unassigned uids: [1] from case id: 1 - user action id: 1",
+                "message": undefined,
               },
             ],
           ]
         `);
       });
 
+      const mockTagsAddedRemovedUserActions = getTagsAddedRemovedUserActions({
+        isMock: true,
+      });
+      const tagsAddedRemovedUserActions = Object.keys(mockTagsAddedRemovedUserActions).reduce<
+        UserActionEvent[]
+      >((acc, key) => {
+        return [...acc, ...mockTagsAddedRemovedUserActions[key]];
+      }, []);
+
       it('creates the correct user actions when tags are added and removed', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases,
-          updatedCases: updatedTagsCases,
-          user: commonArgs.user,
+          builtUserActions: tagsAddedRemovedUserActions,
         });
 
         expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1260,10 +1293,7 @@ describe('CaseUserActionService', () => {
 
       it('logs the correct user actions when tags are added and removed', async () => {
         await service.creator.bulkCreateUpdateCase({
-          ...commonArgs,
-          originalCases,
-          updatedCases: updatedTagsCases,
-          user: commonArgs.user,
+          builtUserActions: tagsAddedRemovedUserActions,
         });
 
         expect(mockAuditLogger.log).toBeCalledTimes(2);
@@ -1287,7 +1317,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User added tags to case id: 1 - user action id: 0",
+                "message": undefined,
               },
             ],
             Array [
@@ -1308,7 +1338,7 @@ describe('CaseUserActionService', () => {
                     "type": "cases",
                   },
                 },
-                "message": "User deleted tags in case id: 1 - user action id: 1",
+                "message": undefined,
               },
             ],
           ]

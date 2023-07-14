@@ -17,7 +17,6 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
-import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import type {
   CaseAssignees,
   CaseAttributes,
@@ -28,6 +27,15 @@ import type {
   CommentAttributes,
   User,
 } from '../../../common/api';
+import type { AlertService, CasesService, CaseUserActionService } from '../../services';
+import type { UpdateAlertStatusRequest } from '../alerts/types';
+import type { CasesClientArgs } from '..';
+import type { OwnerEntity } from '../../authorization';
+import type { PatchCasesArgs } from '../../services/cases/types';
+import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
+import type { LicensingService } from '../../services/licensing';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
+
 import {
   CasesPatchRequestRt,
   CasesRt,
@@ -35,32 +43,24 @@ import {
   CommentType,
   decodeWithExcessOrThrow,
 } from '../../../common/api';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ASSIGNEES_PER_CASE,
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
-
-import { arraysDifference, getCaseToUpdate } from '../utils';
-
-import type { AlertService, CasesService, CaseUserActionService } from '../../services';
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import { Operations } from '../../authorization';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import type { UpdateAlertStatusRequest } from '../alerts/types';
-import type { CasesClientArgs } from '..';
-import type { OwnerEntity } from '../../authorization';
-import { Operations } from '../../authorization';
+import { arraysDifference, getCaseToUpdate } from '../utils';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import type { LicensingService } from '../../services/licensing';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
-import { UserActionPersister } from '../../services/user_actions/operations/create';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -79,30 +79,19 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
  * it's case over the limit.
  */
 async function throwIfMaxUserActionsReached({
-  query,
+  userActionsDict,
   userActionService,
 }: {
-  query: CasesPatchRequest;
+  userActionsDict: UserActionsDict;
   userActionService: CaseUserActionService;
 }) {
-  const caseIdsAndFieldsToUpdate = query.cases.reduce<Record<string, number>>(
-    (acc, casePatchRequest) => {
-      const fieldsToUpdate = Object.keys(casePatchRequest).filter((field) =>
-        UserActionPersister.userActionFieldsAllowed.has(field)
-      );
-      acc[casePatchRequest.id] = fieldsToUpdate.length;
-      return acc;
-    },
-    {}
-  );
-
   const result = await userActionService.getMultipleCasesUserActionsTotal({
-    caseIds: Object.keys(caseIdsAndFieldsToUpdate),
+    caseIds: Object.keys(userActionsDict),
   });
 
   result.aggregations?.references.caseUserActions.buckets.forEach(
     ({ key: caseId, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
-      if (totalUserActions + caseIdsAndFieldsToUpdate[caseId] > MAX_USER_ACTIONS_PER_CASE) {
+      if (totalUserActions + userActionsDict[caseId].length > MAX_USER_ACTIONS_PER_CASE) {
         throw Boom.badRequest(
           `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
         );
@@ -407,11 +396,17 @@ export const update = async (
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(casesToUpdate);
-    throwIfMaxUserActionsReached({ query, userActionService });
 
+    const patchCasesPayload = createPatchCasesPayload({ user, casesToUpdate });
+    const userActionsDict = userActionService.creator.buildUserActions({
+      updatedCases: patchCasesPayload,
+      user,
+    });
+
+    throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
 
-    const updatedCases = await patchCases({ caseService, user, casesToUpdate });
+    const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
@@ -458,10 +453,12 @@ export const update = async (
       return flattenCases;
     }, [] as Case[]);
 
+    const builtUserActions = Object.keys(userActionsDict).reduce<UserActionEvent[]>((acc, key) => {
+      return [...acc, ...userActionsDict[key]];
+    }, []);
+
     await userActionService.creator.bulkCreateUpdateCase({
-      originalCases: myCases.saved_objects,
-      updatedCases: updatedCases.saved_objects,
-      user,
+      builtUserActions,
     });
 
     const casesAndAssigneesToNotifyForAssignment = getCasesAndAssigneesToNotifyForAssignment(
@@ -487,18 +484,16 @@ export const update = async (
   }
 };
 
-const patchCases = async ({
-  caseService,
+const createPatchCasesPayload = ({
   casesToUpdate,
   user,
 }: {
-  caseService: CasesService;
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
-}) => {
+}): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
-  const updatedCases = await caseService.patchCases({
+  return {
     cases: casesToUpdate.map(({ updateReq, originalCase }) => {
       // intentionally removing owner from the case so that we don't accidentally allow it to be updated
       const { id: caseId, version, owner, assignees, ...updateCaseAttributes } = updateReq;
@@ -528,9 +523,17 @@ const patchCases = async ({
       };
     }),
     refresh: false,
-  });
+  };
+};
 
-  return updatedCases;
+const patchCases = async ({
+  caseService,
+  patchCasesPayload,
+}: {
+  caseService: CasesService;
+  patchCasesPayload: PatchCasesArgs;
+}) => {
+  return caseService.patchCases(patchCasesPayload);
 };
 
 const getCasesAndAssigneesToNotifyForAssignment = (

@@ -21,6 +21,7 @@ import type {
 import { Actions, ActionTypes, decodeOrThrow } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';
 import type {
+  BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
   BulkCreateBulkUpdateCaseUserActions,
@@ -33,6 +34,7 @@ import type {
   ServiceContext,
   TypedUserActionDiffedItems,
   UserActionEvent,
+  UserActionsDict,
 } from '../types';
 import { isAssigneesArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
@@ -52,30 +54,25 @@ export class UserActionPersister {
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }
 
-  public async bulkCreateUpdateCase({
-    originalCases,
-    updatedCases,
-    user,
-    refresh,
-  }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
-    const builtUserActions = updatedCases.reduce<UserActionEvent[]>((acc, updatedCase) => {
-      const originalCase = originalCases.find(({ id }) => id === updatedCase.id);
+  public buildUserActions({ updatedCases, user }: BuildUserActionsDictParams): UserActionsDict {
+    return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
+      const originalCase = updatedCase.originalCase;
 
       if (originalCase == null) {
         return acc;
       }
 
-      const caseId = updatedCase.id;
+      const caseId = updatedCase.caseId;
       const owner = originalCase.attributes.owner;
 
       const userActions: UserActionEvent[] = [];
-      const updatedFields = Object.keys(updatedCase.attributes);
+      const updatedFields = Object.keys(updatedCase.updatedAttributes);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
         .forEach((field) => {
           const originalValue = get(originalCase, ['attributes', field]);
-          const newValue = get(updatedCase, ['attributes', field]);
+          const newValue = get(updatedCase, ['updatedAttributes', field]);
           userActions.push(
             ...this.getUserActionItemByDifference({
               field,
@@ -88,9 +85,15 @@ export class UserActionPersister {
           );
         });
 
-      return [...acc, ...userActions];
-    }, []);
+      acc[caseId] = userActions;
+      return acc;
+    }, {});
+  }
 
+  public async bulkCreateUpdateCase({
+    builtUserActions,
+    refresh,
+  }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
     await this.bulkCreateAndLog({
       userActions: builtUserActions,
       refresh,

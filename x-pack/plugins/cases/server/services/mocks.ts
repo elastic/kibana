@@ -97,6 +97,7 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
   const service: PublicMethodsOf<UserActionPersister> = {
     bulkAuditLogCaseDeletion: jest.fn(),
     bulkCreateUpdateCase: jest.fn(),
+    buildUserActions: jest.fn(),
     bulkCreateAttachmentDeletion: jest.fn(),
     bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
