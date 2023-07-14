@@ -14,13 +14,11 @@ oneOf:
       aggType:
         $ref: 'aggtype.yaml'
       excludeHitsFromPreviousRun:
-        description: Indicates whether to exclude matches from previous runs.
-        type: boolean
-        default: true
+        $ref: 'excludehitsfrompreviousrun.yaml'
       groupBy:
         $ref: 'groupby.yaml'
       searchConfiguration:
-        description: Use KQL or Lucene to define a query.
+        description: The query definition, which uses KQL or Lucene.
         type: object
         properties:
           filter:
@@ -73,6 +71,7 @@ oneOf:
       - index
       - threshold
       - thresholdComparator
+      - timeField
       - timeWindowSize
       - timeWindowUnit
     properties:
@@ -80,10 +79,11 @@ oneOf:
         $ref: 'aggfield.yaml'
       aggType:
         $ref: 'aggtype.yaml'
+      esQuery:
+        description: The query definition, which uses Elasticsearch Query DSL.
+        type: string
       excludeHitsFromPreviousRun:
-        description: Indicates whether to exclude matches from previous runs.
-        type: boolean
-        default: true
+        $ref: 'excludehitsfrompreviousrun.yaml'
       groupBy:
         $ref: 'groupby.yaml'
       index:

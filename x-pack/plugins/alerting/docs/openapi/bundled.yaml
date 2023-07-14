@@ -2160,11 +2160,11 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    aggField:
+    aggfield:
       description: |
         The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
       type: string
-    aggType:
+    aggtype:
       description: The type of aggregation to perform.
       type: string
       enum:
@@ -2174,7 +2174,11 @@ components:
         - min
         - sum
       default: count
-    groupBy:
+    excludehitsfrompreviousrun:
+      description: |
+        Indicates whether to exclude matches from previous runs. If `true`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified.
+      type: boolean
+    groupby:
       description: |
         Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
       type: string
@@ -2182,11 +2186,11 @@ components:
         - all
         - top
       default: all
-    termField:
+    termfield:
       description: |
         This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.
       type: string
-    termSize:
+    termsize:
       description: |
         This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
       type: integer
@@ -2197,7 +2201,7 @@ components:
       items:
         type: integer
         example: 4000
-    thresholdComparator:
+    thresholdcomparator:
       description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
       type: string
       enum:
@@ -2208,15 +2212,15 @@ components:
         - between
         - notBetween
       example: '>'
-    timeField:
+    timefield:
       description: The field that is used to calculate the time window.
       type: string
-    timeWindowSize:
+    timewindowsize:
       description: |
         The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
       type: integer
       example: 5
-    timeWindowUnit:
+    timewindowunit:
       description: |
         The type of units for the time window: seconds, minutes, hours, or days.
       type: string
@@ -2239,17 +2243,15 @@ components:
             - timeWindowUnit
           properties:
             aggField:
-              $ref: '#/components/schemas/aggField'
+              $ref: '#/components/schemas/aggfield'
             aggType:
-              $ref: '#/components/schemas/aggType'
+              $ref: '#/components/schemas/aggtype'
             excludeHitsFromPreviousRun:
-              description: Indicates whether to exclude matches from previous runs.
-              type: boolean
-              default: true
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
             groupBy:
-              $ref: '#/components/schemas/groupBy'
+              $ref: '#/components/schemas/groupby'
             searchConfiguration:
-              description: Use KQL or Lucene to define a query.
+              description: The query definition, which uses KQL or Lucene.
               type: object
               properties:
                 filter:
@@ -2282,19 +2284,19 @@ components:
                 The number of documents to pass to the configured actions when the threshold condition is met.
               type: integer
             termField:
-              $ref: '#/components/schemas/termField'
+              $ref: '#/components/schemas/termfield'
             termSize:
-              $ref: '#/components/schemas/termSize'
+              $ref: '#/components/schemas/termsize'
             threshold:
               $ref: '#/components/schemas/threshold'
             thresholdComparator:
-              $ref: '#/components/schemas/thresholdComparator'
+              $ref: '#/components/schemas/thresholdcomparator'
             timeField:
-              $ref: '#/components/schemas/timeField'
+              $ref: '#/components/schemas/timefield'
             timeWindowSize:
-              $ref: '#/components/schemas/timeWindowSize'
+              $ref: '#/components/schemas/timewindowsize'
             timeWindowUnit:
-              $ref: '#/components/schemas/timeWindowUnit'
+              $ref: '#/components/schemas/timewindowunit'
         - type: object
           description: The parameters for an Elasticsearch query rule that uses Elasticsearch Query DSL to define the query.
           required:
@@ -2302,19 +2304,21 @@ components:
             - index
             - threshold
             - thresholdComparator
+            - timeField
             - timeWindowSize
             - timeWindowUnit
           properties:
             aggField:
-              $ref: '#/components/schemas/aggField'
+              $ref: '#/components/schemas/aggfield'
             aggType:
-              $ref: '#/components/schemas/aggType'
+              $ref: '#/components/schemas/aggtype'
+            esQuery:
+              description: The query definition, which uses Elasticsearch Query DSL.
+              type: string
             excludeHitsFromPreviousRun:
-              description: Indicates whether to exclude matches from previous runs.
-              type: boolean
-              default: true
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
             groupBy:
-              $ref: '#/components/schemas/groupBy'
+              $ref: '#/components/schemas/groupby'
             index:
               description: The indices to query.
               oneOf:
@@ -2334,19 +2338,19 @@ components:
                 The number of documents to pass to the configured actions when the threshold condition is met.
               type: integer
             termField:
-              $ref: '#/components/schemas/termField'
+              $ref: '#/components/schemas/termfield'
             termSize:
-              $ref: '#/components/schemas/termSize'
+              $ref: '#/components/schemas/termsize'
             threshold:
               $ref: '#/components/schemas/threshold'
             thresholdComparator:
-              $ref: '#/components/schemas/thresholdComparator'
+              $ref: '#/components/schemas/thresholdcomparator'
             timeField:
-              $ref: '#/components/schemas/timeField'
+              $ref: '#/components/schemas/timefield'
             timeWindowSize:
-              $ref: '#/components/schemas/timeWindowSize'
+              $ref: '#/components/schemas/timewindowsize'
             timeWindowUnit:
-              $ref: '#/components/schemas/timeWindowUnit'
+              $ref: '#/components/schemas/timewindowunit'
     create_es_query_rule_request:
       title: Create Elasticsearch query rule request
       description: |
