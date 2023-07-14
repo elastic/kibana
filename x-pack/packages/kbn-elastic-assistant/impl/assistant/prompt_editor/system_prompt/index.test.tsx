@@ -11,15 +11,16 @@ import userEvent from '@testing-library/user-event';
 
 import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
-import { BASE_CONVERSATIONS, Conversation } from '../../../..';
+import { Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { Prompt } from '../../types';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../constants';
 import { useAssistantContext } from '../../../assistant_context';
+import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
 
 const BASE_CONVERSATION: Conversation = {
-  ...BASE_CONVERSATIONS[DEFAULT_CONVERSATION_TITLE],
+  ...WELCOME_CONVERSATION,
   apiConfig: {
     defaultSystemPromptId: mockSystemPrompt.id,
   },
