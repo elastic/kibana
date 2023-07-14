@@ -176,7 +176,7 @@ export async function runServerlessEsNode(
   log: ToolingLog,
   { params, name, image }: RunServerlessEsNodeArgs
 ) {
-  const fullCmd = SHARED_SERVERLESS_PARAMS.concat(
+  const dockerCmd = SHARED_SERVERLESS_PARAMS.concat(
     params,
     ['--name', name, '--env', `node.name=${name}`],
     image
@@ -184,9 +184,9 @@ export async function runServerlessEsNode(
 
   log.info(chalk.bold(`Running Serverless ES node: ${name}`));
   log.indent(4);
-  log.info(chalk.dim(`docker ${fullCmd.join(' ')}`));
+  log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
 
-  const { stdout } = await execa('docker', fullCmd);
+  const { stdout } = await execa('docker', dockerCmd);
 
   log.info(`${name} is running.
   Container Name: ${name}

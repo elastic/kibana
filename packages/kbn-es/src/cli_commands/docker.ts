@@ -33,6 +33,7 @@ export const docker: Command = {
     // TODO: docs?
     // TODO: remove unused CLI options
     // TODO: setup pw
+    // TODO: Windows support?
     return dedent`
     Options:
 
