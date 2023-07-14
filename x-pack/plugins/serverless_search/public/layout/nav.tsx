@@ -119,6 +119,15 @@ const navigationTree: NavigationTreeDefinition = {
   footer: [
     {
       type: 'navGroup',
+      id: 'devTools',
+      title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
+        defaultMessage: 'Developer tools',
+      }),
+      link: 'dev_tools',
+      icon: 'editorCodeBlock',
+    },
+    {
+      type: 'navGroup',
       id: 'project_settings_project_nav',
       title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
         defaultMessage: 'Project settings',
