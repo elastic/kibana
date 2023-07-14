@@ -25,6 +25,9 @@ export default defineCypressConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    specPattern: [
+      './cypress/e2e/**/*.cy.ts',
+      '../../test/security_solution_cypress/e2e/**/*.cy.ts',
+    ],
   },
 });

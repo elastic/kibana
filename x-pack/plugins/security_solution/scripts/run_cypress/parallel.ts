@@ -360,6 +360,7 @@ export const cli = () => {
                 config: {
                   e2e: {
                     baseUrl: `http://localhost:${kibanaPort}`,
+                    specPattern: files,
                   },
                   env: customEnv,
                 },

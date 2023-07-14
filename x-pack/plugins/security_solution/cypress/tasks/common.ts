@@ -101,6 +101,8 @@ export const cleanKibana = () => {
 
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');
+  cy.log(Cypress.env('ELASTICSEARCH_URL'));
+  cy.log('GLOOOOOO');
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   rootRequest({
