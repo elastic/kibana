@@ -64,7 +64,7 @@ const {
   routes: customLogsRoutes,
 } = createWizardContext({
   initialState,
-  initialStep: 'selectLogs',
+  initialStep: 'configureLogs',
   steps,
   basePath: '/customLogs',
 });
