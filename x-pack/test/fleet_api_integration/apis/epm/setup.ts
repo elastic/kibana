@@ -18,8 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
 
-  // FAILING FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/157513
-  describe.skip('setup api', async () => {
+  describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
     describe('setup performs upgrades', async () => {
