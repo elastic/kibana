@@ -139,6 +139,21 @@ test('stops services on "shutdown" an calls `onShutdown` with error passed to `s
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 });
 
+test('only shutdowns once', async () => {
+  const mockOnShutdown = jest.fn();
+  const root = new Root(rawConfigService, env, mockOnShutdown);
+
+  await root.preboot();
+  await root.setup();
+  await root.start();
+
+  await root.shutdown();
+  await root.shutdown();
+
+  expect(mockOnShutdown).toHaveBeenCalledTimes(1);
+  expect(mockServer.stop).toHaveBeenCalledTimes(1);
+});
+
 test('fails and stops services if server preboot fails', async () => {
   const mockOnShutdown = jest.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
