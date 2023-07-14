@@ -33,8 +33,8 @@ interface OwnProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversationId: string;
   onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
-  setSelectedConversationId: (e: string) => void;
-  shouldDisableKeyboardShortcut: () => void;
+  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
 }
 
