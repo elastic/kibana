@@ -24,6 +24,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { WebhookAuthType } from '../../../common/webhook/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { nullableType } from '../lib/nullable';
 import { isOk, promiseResult, Result } from '../lib/result_type';
@@ -54,7 +55,7 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
-  authType: schema.maybe(schema.string()),
+  authType: schema.string({ defaultValue: WebhookAuthType.None }),
   certType: schema.maybe(schema.string()),
   ca: schema.maybe(schema.string()),
   verificationMode: schema.maybe(

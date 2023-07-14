@@ -24,3 +24,4 @@ export * from './date_picker_field';
 export * from './password_field';
 export * from './hidden_field';
 export * from './file_picker_field';
+export * from './card_radio_group_field';

@@ -42,6 +42,13 @@ export const PASSWORD_LABEL = i18n.translate(
   }
 );
 
+export const PASSPHRASE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.passphraseTextFieldLabel',
+  {
+    defaultMessage: 'Passphrase',
+  }
+);
+
 export const ADD_HEADERS_LABEL = i18n.translate(
   'xpack.stackConnectors.components.webhook.viewHeadersSwitch',
   {
@@ -119,24 +126,24 @@ export const AUTHENTICATION_METHOD = i18n.translate(
   }
 );
 
+export const AUTHENTICATION_NONE = i18n.translate(
+  'xpack.stackConnectors.components.webhook.authenticationMethodNoneLabel',
+  {
+    defaultMessage: 'None',
+  }
+);
+
 export const AUTHENTICATION_BASIC = i18n.translate(
   'xpack.stackConnectors.components.webhook.authenticationMethodBasicLabel',
   {
-    defaultMessage: 'Basic',
+    defaultMessage: 'Basic authentication',
   }
 );
 
 export const AUTHENTICATION_SSL = i18n.translate(
   'xpack.stackConnectors.components.webhook.authenticationMethodSSLLabel',
   {
-    defaultMessage: 'SSL certificate',
-  }
-);
-
-export const CERT_FILE_TYPE = i18n.translate(
-  'xpack.stackConnectors.components.webhook.certTypeLabel',
-  {
-    defaultMessage: 'Certificate file type',
+    defaultMessage: 'SSL authentication',
   }
 );
 
