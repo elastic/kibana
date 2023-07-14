@@ -150,7 +150,9 @@ MATH_FUNCTION
     | L O G TEN
     | P I
     | T A U
+    | E
     | S U B S T R I N G
+    | T R I M
     | C O N C A T
     | S T A R T S UNDERSCORE W I T H
     | D A T E UNDERSCORE F O R M A T
@@ -169,6 +171,7 @@ MATH_FUNCTION
     | M V UNDERSCORE C O N C A T
     | M V UNDERSCORE J O I N
     | M V UNDERSCORE M E D I A N
+    | M V UNDERSCORE D E D U P E
     | M E T A D A T A
     | S P L I T
     | T O UNDERSCORE S T R I N G
@@ -195,6 +198,8 @@ UNARY_FUNCTION
     | C O U N T
     | C O U N T UNDERSCORE D I S T I N C T
     | P E R C E N T I L E
+    | M E D I A N
+    | M E D I A N UNDERSCORE A B S O L U T E UNDERSCORE D E V I A T I O N
     ;
 
 WHERE_FUNCTIONS
