@@ -8123,6 +8123,10 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/epm/index.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/setup/index.ts"
               },
               {
