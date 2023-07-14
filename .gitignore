@@ -99,6 +99,10 @@ x-pack/plugins/fleet/cypress.config.d.ts
 x-pack/plugins/fleet/cypress.config.js
 x-pack/plugins/osquery/cypress.config.d.ts
 x-pack/plugins/osquery/cypress.config.js
+x-pack/plugins/security_solution/public/management/cypress.config.d.ts
+x-pack/plugins/security_solution/public/management/cypress.config.js
+x-pack/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
+x-pack/plugins/security_solution/public/management/cypress_endpoint.config.js
 
 # release notes script output
 report.csv
