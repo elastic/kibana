@@ -46,7 +46,6 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
-        console.log({ requestQuery: request.query });
         try {
           const search = await context.search;
           const res = await lastValueFrom(
