@@ -22,3 +22,11 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
+
+# Search session disable for discover embedding
+data.search.sessions.enabled: false
+
+# Serverless security specific options
+xpack.securitySolution.enableExperimental:
+   - discoverInTimeline
+
