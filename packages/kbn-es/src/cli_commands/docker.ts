@@ -27,19 +27,13 @@ export const docker: Command = {
   help: (defaults: Record<string, any> = {}) => {
     const { password } = defaults;
 
-    // TODO: enrollment token + env params?
-    // TODO: private registry?
-    // TODO: docker-compose
-    // TODO: check docker installed
-    // TODO: get image name by version number? snapshot or release?
-    // TODO: add serverless flag
-    // TODO: parse docker logs
+    // TODO: additional env/es params?
+    // TODO: parse docker logs?
     // TODO: tests
     // TODO: docs?
-    // TODO: validate img
     // TODO: network?
-    // TODO: restart last container?
-    // TODO: data archive
+    // TODO: remove unused CLI options
+    // TODO: setup pw
     return dedent`
     Options:
 
