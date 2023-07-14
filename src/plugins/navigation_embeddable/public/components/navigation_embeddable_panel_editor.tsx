@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiButton,
+  EuiToolTip,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
@@ -31,6 +32,7 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+
 import { coreServices } from '../services/kibana_services';
 import {
   NavigationEmbeddableLink,
@@ -55,9 +57,9 @@ const NavigationEmbeddablePanelEditor = ({
   parentDashboard,
 }: {
   onClose: () => void;
+  parentDashboard?: DashboardContainer;
   initialInput: Partial<NavigationEmbeddableInput>;
   onSave: (input: Partial<NavigationEmbeddableInput>) => void;
-  parentDashboard?: DashboardContainer;
 }) => {
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
@@ -118,6 +120,32 @@ const NavigationEmbeddablePanelEditor = ({
     },
     [orderedLinks]
   );
+
+  const saveButtonComponent = useMemo(() => {
+    const canSave = orderedLinks.length !== 0;
+
+    const button = (
+      <EuiButton
+        disabled={!canSave}
+        onClick={() => {
+          const newLinks = orderedLinks.reduce((prev, link, i) => {
+            return { ...prev, [link.id]: { ...link, order: i } };
+          }, {} as NavigationEmbeddableLinkList);
+          onSave({ links: newLinks });
+        }}
+      >
+        {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
+      </EuiButton>
+    );
+
+    return canSave ? (
+      button
+    ) : (
+      <EuiToolTip content={NavEmbeddableStrings.editor.panelEditor.getEmptyLinksTooltip()}>
+        {button}
+      </EuiToolTip>
+    );
+  }, [onSave, orderedLinks]);
 
   return (
     <>
@@ -199,20 +227,7 @@ const NavigationEmbeddablePanelEditor = ({
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={orderedLinks.length === 0}
-              onClick={() => {
-                const newLinks = orderedLinks.reduce((prev, link, i) => {
-                  return { ...prev, [link.id]: { ...link, order: i } };
-                }, {} as NavigationEmbeddableLinkList);
-                onSave({ links: newLinks });
-                onClose();
-              }}
-            >
-              {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{saveButtonComponent}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>

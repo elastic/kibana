@@ -14,11 +14,13 @@ import {
   EuiIcon,
   EuiTitle,
   EuiButton,
+  EuiSpacer,
   EuiFormRow,
   EuiFlexItem,
   EuiFieldText,
   EuiFocusTrap,
   EuiFlexGroup,
+  EuiTextColor,
   EuiRadioGroup,
   EuiFlyoutBody,
   EuiButtonEmpty,
@@ -148,27 +150,43 @@ export const NavigationEmbeddableLinkEditor = ({
             />
           </EuiFormRow>
 
-          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}>
-            {selectedLinkType === DASHBOARD_LINK_TYPE ? (
-              <DashboardLinkDestinationPicker
-                parentDashboard={parentDashboard}
-                initialSelection={linkDestination}
-                onDestinationPicked={onDashboardSelected}
-              />
-            ) : (
-              <ExternalLinkDestinationPicker
-                initialSelection={link?.destination}
-                onDestinationPicked={onUrlSelected}
-              />
-            )}
+          <EuiFormRow label={'Destination'}>
+            <div>
+              {linkDestination ? (
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={NavigationLinkInfo[selectedLinkType].icon} color="text" />
+                  </EuiFlexItem>
+                  <EuiFlexItem data-test-subj="control-editor-type">{defaultLinkLabel}</EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiTextColor color="subdued" data-test-subj="control-editor-type">
+                  Please select a destination for your link.
+                </EuiTextColor>
+              )}
+              <EuiSpacer size="m" />
+              {selectedLinkType === DASHBOARD_LINK_TYPE ? (
+                <DashboardLinkDestinationPicker
+                  parentDashboard={parentDashboard}
+                  initialSelection={linkDestination}
+                  onDestinationPicked={onDashboardSelected}
+                />
+              ) : (
+                <ExternalLinkDestinationPicker
+                  initialSelection={link?.destination}
+                  onDestinationPicked={onUrlSelected}
+                />
+              )}
+            </div>
           </EuiFormRow>
 
           <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
               placeholder={
-                defaultLinkLabel || NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
+                (linkDestination ? defaultLinkLabel : '') ||
+                NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
               }
-              value={currentLinkLabel}
+              value={linkDestination ? currentLinkLabel : ''}
               onChange={(e) => setCurrentLinkLabel(e.target.value)}
             />
           </EuiFormRow>

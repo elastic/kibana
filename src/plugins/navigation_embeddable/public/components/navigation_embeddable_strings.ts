@@ -35,6 +35,10 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.emptyLinksMessage', {
           defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
         }),
+      getEmptyLinksTooltip: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.emptyLinksTooltip', {
+          defaultMessage: 'Add one or more links.',
+        }),
       getCreateFlyoutTitle: () =>
         i18n.translate('navigationEmbeddable.panelEditor.createFlyoutTitle', {
           defaultMessage: 'Create links panel',
