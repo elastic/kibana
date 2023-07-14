@@ -127,6 +127,9 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   const propsForGroupAsLink = groupIsLink
     ? {
         buttonElement: 'div' as const,
+        // If we don't force the state there is a little UI animation  as if the
+        // accordion was openin/closing. We don't want any animation when it is a link.
+        forceState: 'closed' as const,
         buttonContent: (
           <GroupAsLink
             title={title}
