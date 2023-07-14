@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertResponseRt } from './alerts';
+import { AlertResponseRt } from './v1';
 
 describe('Alerts', () => {
   describe('AlertResponseRt', () => {

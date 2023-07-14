@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { AlertResponse } from '../../../common/types/api';
 import type {
-  AlertResponse,
   Comments,
   BulkGetAttachmentsResponse,
   Case,

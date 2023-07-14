@@ -7,10 +7,11 @@
 
 import type { SavedObject } from '@kbn/core/server';
 
+import type { AlertResponse } from '../../../common/types/api';
+import { AlertResponseRt } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import type {
-  AlertResponse,
   Comments,
   AttributesTypeAlerts,
   Comment,
@@ -26,7 +27,6 @@ import {
   CommentRt,
   CommentsFindResponseRt,
   decodeWithExcessOrThrow,
-  AlertResponseRt,
 } from '../../../common/api';
 import {
   defaultSortField,
