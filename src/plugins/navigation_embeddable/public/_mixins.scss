@@ -28,10 +28,15 @@
   @include kibanaFullBodyHeight();
   border-left: $euiBorderThin;
   position: fixed;
-  width: 50%;
   z-index: $euiZFlyout;
   background: $euiColorEmptyShade;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  inline-size: 50vw;
+
+  @media only screen and (max-width: 767px) {
+    inline-size: $euiSizeXL * 13; // 424px
+    max-inline-size: 90vw;
+  }
 }
