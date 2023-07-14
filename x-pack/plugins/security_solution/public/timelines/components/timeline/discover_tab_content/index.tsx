@@ -10,8 +10,8 @@ import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
-import { useGetStatefulQueryBar } from '../../../../common/hooks/use_get_stateful_query_bar';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useGetStatefulQueryBar } from './use_get_stateful_query_bar';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {

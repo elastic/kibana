@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useKibana } from '../lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const useGetStatefulQueryBar = () => {
   const {
@@ -24,10 +24,7 @@ export const useGetStatefulQueryBar = () => {
   } = unifiedSearch;
 
   const CustomSearchBar = useMemo(
-    () =>
-      getCustomSearchBar({
-        data: customDataService,
-      }),
+    () => getCustomSearchBar(customDataService),
     [customDataService, getCustomSearchBar]
   );
 
