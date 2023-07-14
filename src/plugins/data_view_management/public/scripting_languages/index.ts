@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, NotificationsStart } from '@kbn/core/public';
-import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common/constants';
+import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
 
 export function getSupportedScriptingLanguages(): estypes.ScriptLanguage[] {
   return ['painless'];

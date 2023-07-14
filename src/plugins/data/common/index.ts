@@ -13,6 +13,7 @@ export {
   DEFAULT_QUERY_LANGUAGE,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+  SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
   UI_SETTINGS,
 } from './constants';
 export type { ValueSuggestionsMethod } from './constants';
