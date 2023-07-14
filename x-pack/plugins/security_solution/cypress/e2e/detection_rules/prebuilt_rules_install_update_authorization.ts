@@ -15,19 +15,14 @@ import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import {
   addElasticRulesButtonClick,
   assertRuleAvailableForInstallAndInstallOne,
-  assertRuleAvailableForInstallAndInstallSelected,
-  assertRuleAvailableForInstallAndInstallAllInPage,
-  assertRuleAvailableForInstallAndInstallAll,
   assertRuleUpgradeAvailableAndUpgradeOne,
-  assertRuleUpgradeAvailableAndUpgradeSelected,
-  assertRuleUpgradeAvailableAndUpgradeAllInPage,
-  assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
 } from '../../tasks/prebuilt_rules';
+import { ROLES } from '../../../common/test';
 
 describe('Detection rules, Prebuilt Rules Installation and Update - Error handling', () => {
   beforeEach(() => {
-    login();
+    login(ROLES.reader);
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
@@ -52,27 +47,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
     it('installing prebuilt rules one by one', () => {
       addElasticRulesButtonClick();
       assertRuleAvailableForInstallAndInstallOne({ rules: [RULE_1], didRequestFail: true });
-    });
-
-    it('installing multiple selected prebuilt rules by selecting them individually', () => {
-      addElasticRulesButtonClick();
-      assertRuleAvailableForInstallAndInstallSelected({
-        rules: [RULE_1, RULE_2],
-        didRequestFail: true,
-      });
-    });
-
-    it('installing multiple selected prebuilt rules by selecting all in page', () => {
-      addElasticRulesButtonClick();
-      assertRuleAvailableForInstallAndInstallAllInPage({
-        rules: [RULE_1, RULE_2],
-        didRequestFail: true,
-      });
-    });
-
-    it('installing all available rules at once', () => {
-      addElasticRulesButtonClick();
-      assertRuleAvailableForInstallAndInstallAll({ rules: [RULE_1, RULE_2], didRequestFail: true });
     });
   });
 
@@ -114,30 +88,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
     it('upgrading prebuilt rules one by one', () => {
       ruleUpdatesTabClick();
       assertRuleUpgradeAvailableAndUpgradeOne({ rules: [OUTDATED_RULE_1], didRequestFail: true });
-    });
-
-    it('upgrading multiple selected prebuilt rules by selecting them individually', () => {
-      ruleUpdatesTabClick();
-      assertRuleUpgradeAvailableAndUpgradeSelected({
-        rules: [OUTDATED_RULE_1, OUTDATED_RULE_2],
-        didRequestFail: true,
-      });
-    });
-
-    it('upgrading multiple selected prebuilt rules by selecting all in page', () => {
-      ruleUpdatesTabClick();
-      assertRuleUpgradeAvailableAndUpgradeAllInPage({
-        rules: [OUTDATED_RULE_1, OUTDATED_RULE_2],
-        didRequestFail: true,
-      });
-    });
-
-    it('upgrading all rules with available upgrades at once', () => {
-      ruleUpdatesTabClick();
-      assertRuleUpgradeAvailableAndUpgradeAll({
-        rules: [OUTDATED_RULE_1, OUTDATED_RULE_2],
-        didRequestFail: true,
-      });
     });
   });
 });
