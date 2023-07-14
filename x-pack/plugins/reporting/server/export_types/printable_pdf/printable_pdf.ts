@@ -10,7 +10,7 @@ import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { BasePayload, JobParamsPDFDeprecated } from '../../../common/types';
+import { JobParamsPDFDeprecated } from '../../../common/types';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -60,7 +60,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
   public runTask = async (
     jobId: string,
-    job: BasePayload,
+    job: TaskPayloadPDF,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
