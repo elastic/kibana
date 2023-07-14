@@ -73,9 +73,12 @@ function serializeDeeplinkUrl(url?: string) {
  * @param key The key to extract parent paths from
  * @returns An array of parent paths
  */
-function extractParentPaths(key: string) {
+function extractParentPaths(key: string, navTree: Record<string, ChromeProjectNavigationNode>) {
   // Split the string on every '][' to get an array of values without the brackets.
   const arr = key.split('][');
+  if (arr.length === 1) {
+    return arr;
+  }
   // Add the brackets back in for the first and last elements, and all elements in between.
   arr[0] = `${arr[0]}]`;
   arr[arr.length - 1] = `[${arr[arr.length - 1]}`;
@@ -83,10 +86,12 @@ function extractParentPaths(key: string) {
     arr[i] = `[${arr[i]}]`;
   }
 
-  return arr.reduce<string[]>((acc, currentValue, currentIndex) => {
-    acc.push(arr.slice(0, currentIndex + 1).join(''));
-    return acc;
-  }, []);
+  return arr
+    .reduce<string[]>((acc, currentValue, currentIndex) => {
+      acc.push(arr.slice(0, currentIndex + 1).join(''));
+      return acc;
+    }, [])
+    .filter((k) => Boolean(navTree[k]));
 }
 
 /**
@@ -116,7 +121,7 @@ export const findActiveNodes = (
     if (node.getIsActive && location) {
       const isActive = node.getIsActive({ pathNameSerialized: currentPathname, location, prepend });
       if (isActive) {
-        const keysWithParents = extractParentPaths(key);
+        const keysWithParents = extractParentPaths(key, navTree);
         activeNodes.push(keysWithParents.map(activeNodeFromKey));
       }
       return;
@@ -140,7 +145,7 @@ export const findActiveNodes = (
   if (matches.length > 0) {
     const longestMatch = matches[matches.length - 1];
     longestMatch.forEach((key) => {
-      const keysWithParents = extractParentPaths(key);
+      const keysWithParents = extractParentPaths(key, navTree);
       activeNodes.push(keysWithParents.map(activeNodeFromKey));
     });
   }
