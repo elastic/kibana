@@ -10,6 +10,7 @@ import {
   ConfigKey,
   SyntheticsMonitor,
   MonitorFields,
+  MonitorOverviewItem,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -175,7 +176,8 @@ export default function ({ getService }: FtrProviderContext) {
         const apiResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
           .query({ sortField: 'status' });
-        expect(apiResponse.body.monitors).eql([
+
+        const expected: MonitorOverviewItem[] = [
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
             configId: savedMonitors[0].id,
@@ -194,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -213,6 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -232,6 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -251,8 +256,11 @@ export default function ({ getService }: FtrProviderContext) {
             isStatusAlertEnabled: true,
             tags: ['tag1', 'tag2'],
             type: 'http',
+            schedule: '5',
           },
-        ]);
+        ];
+
+        expect(apiResponse.body.monitors).eql(expected);
         expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
       } finally {
         await Promise.all(

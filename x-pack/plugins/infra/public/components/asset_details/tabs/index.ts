@@ -11,3 +11,4 @@ export { Processes } from './processes/processes';
 export { Osquery } from './osquery/osquery';
 export { Metrics } from './metrics/metrics';
 export { Logs } from './logs/logs';
+export { Overview } from './overview/overview';

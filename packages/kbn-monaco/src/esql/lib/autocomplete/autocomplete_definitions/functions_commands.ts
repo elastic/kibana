@@ -89,6 +89,20 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'log10',
+    insertText: 'log10',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.log10Doc', {
+      defaultMessage: 'Returns the log base 10.',
+    }),
+    documentation: {
+      value: buildDocumentation('log10(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval s = log10(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'concat',
     insertText: 'concat',
     kind: 1,
@@ -113,6 +127,20 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     documentation: {
       value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
         'from index where field="value" | eval new_string = substring(field, 1, 3)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'trim',
+    insertText: 'trim',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.trimDoc', {
+      defaultMessage: 'Removes leading and trailing whitespaces from strings.',
+    }),
+    documentation: {
+      value: buildDocumentation('trim(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval new_string = trim(field)',
       ]),
     },
     sortText: 'C',
@@ -481,6 +509,35 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
     documentation: {
       value: buildDocumentation('count(grouped[T]): aggregated[T]', [
         'from index | stats count = count_distinct(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'median',
+    insertText: 'median',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.medianDoc', {
+      defaultMessage: 'Returns the 50% percentile.',
+    }),
+    documentation: {
+      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
+        'from index | stats count = median(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'median_absolute_deviation',
+    insertText: 'median_absolute_deviation',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.medianDeviationDoc', {
+      defaultMessage:
+        'Returns the median of each data point’s deviation from the median of the entire sample.',
+    }),
+    documentation: {
+      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
+        'from index | stats count = median_absolute_deviation(field)',
       ]),
     },
     sortText: 'C',

@@ -51,6 +51,12 @@ const eventLoopDelaySchema = schema.object({
   }),
 });
 
+const requeueInvalidTasksConfig = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  delay: schema.number({ defaultValue: 3000, min: 0 }),
+  max_attempts: schema.number({ defaultValue: 100, min: 1, max: 500 }),
+});
+
 export const configSchema = schema.object(
   {
     /* The maximum number of times a task will be attempted before being abandoned as failed */
@@ -137,6 +143,7 @@ export const configSchema = schema.object(
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
+    requeue_invalid_tasks: requeueInvalidTasksConfig,
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
   },
   {
@@ -152,6 +159,7 @@ export const configSchema = schema.object(
   }
 );
 
+export type RequeueInvalidTasksConfig = TypeOf<typeof requeueInvalidTasksConfig>;
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

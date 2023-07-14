@@ -120,6 +120,8 @@ describe('autocomplete_listener', () => {
       'sum',
       'count',
       'count_distinct',
+      'median',
+      'median_absolute_deviation',
       'percentile',
     ]);
     testSuggestions('from a | stats a=b by ', ['FieldIdentifier']);
@@ -142,8 +144,10 @@ describe('autocomplete_listener', () => {
       'round',
       'abs',
       'pow',
+      'log10',
       'concat',
       'substring',
+      'trim',
       'starts_with',
       'split',
       'to_string',
