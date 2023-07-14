@@ -58,16 +58,16 @@ describe('<Navigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId('nav-item-group1.item1')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.item2')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A.item1')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A.group1A_1')).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.item1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.item2/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.item1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.group1A_1/)).toBeVisible();
 
       // Click the last group to expand and show the last depth
-      (await findByTestId('nav-item-group1.group1A.group1A_1')).click();
+      (await findByTestId(/nav-item-group1.group1A.group1A_1/)).click();
 
-      expect(await findByTestId('nav-item-group1.group1A.group1A_1.item1')).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -266,8 +266,8 @@ describe('<Navigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId('nav-item-root.group1.item1')).toBeVisible();
-      expect(await findByTestId('nav-item-root.group1.item1')).toBeVisible();
+      expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -342,8 +342,8 @@ describe('<Navigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(queryByTestId('nav-group-root.group1')).toBeNull();
-      expect(queryByTestId('nav-item-root.group2.item1')).toBeVisible();
+      expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
+      expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -649,10 +649,10 @@ describe('<Navigation />', () => {
         </NavigationProvider>
       );
 
-      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
-      expect(await findByTestId('nav-item-group1.item2')).not.toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item2/)).not.toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
 
@@ -673,10 +673,10 @@ describe('<Navigation />', () => {
         ]);
       });
 
-      expect(await findByTestId('nav-item-group1.item1')).not.toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item1/)).not.toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
-      expect(await findByTestId('nav-item-group1.item2')).toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item2/)).toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
     });
@@ -730,7 +730,7 @@ describe('<Navigation />', () => {
 
       jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
 
-      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
     });
