@@ -6,6 +6,9 @@
  */
 
 export * from './live_query/create_live_query_route';
+export * from './live_query/find_live_query_route';
+export * from './live_query/get_live_query_results_route';
+export * from './live_query/get_live_query_details_route';
 export * from './saved_query/create_saved_query_route';
 export * from './common/utils';
 export * from './model/default_uuid';
