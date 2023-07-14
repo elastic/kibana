@@ -49,7 +49,7 @@ type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
  */
 export interface UnifiedSearchPublicPluginStartUi {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  getCustomSearchBar: (props: Partial<StatefulSearchBarDeps>) => AggQuerySearchBarComp;
+  getCustomSearchBar: (customDataService?: StatefulSearchBarDeps['data']) => AggQuerySearchBarComp;
   SearchBar: (props: StatefulSearchBarProps<Query>) => React.ReactElement;
   AggregateQuerySearchBar: AggQuerySearchBarComp;
   FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;

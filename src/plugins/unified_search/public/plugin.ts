@@ -13,13 +13,14 @@ import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from 
 import { ConfigSchema } from '../config';
 import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
-import { createSearchBar, StatefulSearchBarDeps } from './search_bar/create_search_bar';
+import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
   UnifiedSearchStartDependencies,
   UnifiedSearchSetupDependencies,
   UnifiedSearchPluginSetup,
   UnifiedSearchPublicPluginStart,
+  UnifiedSearchPublicPluginStartUi,
 } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
 import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
@@ -76,21 +77,22 @@ export class UnifiedSearchPublicPlugin
     /*
      *
      *  unifiedsearch uses global data service to create stateful search bar.
-     *  This function helps in creating a search bar with different instances of services
+     *  This function helps in creating a search bar with different instances of data service
      *  so that it can be easy to use multiple stateful searchbars in the single applications
      *
      * */
-    const getCustomSearchBar = (deps?: Partial<StatefulSearchBarDeps>) =>
+    const getCustomSearchBar: UnifiedSearchPublicPluginStartUi['getCustomSearchBar'] = (
+      customDataService
+    ) =>
       createSearchBar({
         core,
-        data,
+        data: customDataService ?? data,
         storage: this.storage,
         usageCollection: this.usageCollection,
         isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
         unifiedSearch: {
           autocomplete: autocompleteStart,
         },
-        ...(deps ?? {}),
       });
 
     const SearchBar = getCustomSearchBar();
