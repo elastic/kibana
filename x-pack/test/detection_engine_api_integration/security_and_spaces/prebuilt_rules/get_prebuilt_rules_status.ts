@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
             num_prebuilt_rules_to_upgrade: 0,
-            num_prebuilt_rules_total_in_package: 0,
+            num_prebuilt_rules_total_in_package: RULES_COUNT,
           });
         });
       });
@@ -253,7 +253,9 @@ export default ({ getService }: FtrProviderContext): void => {
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
             num_prebuilt_rules_to_upgrade: 1,
-            num_prebuilt_rules_total_in_package: RULES_COUNT,
+            // Two prebuilt rules have been installed, but only 1 rule asset
+            // is made available after deleting the previous versions
+            num_prebuilt_rules_total_in_package: 1,
           });
         });
 
@@ -277,7 +279,9 @@ export default ({ getService }: FtrProviderContext): void => {
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
             num_prebuilt_rules_to_upgrade: 0,
-            num_prebuilt_rules_total_in_package: RULES_COUNT,
+            // Two prebuilt rules have been installed, but only 1 rule asset
+            // is made available after deleting the previous versions
+            num_prebuilt_rules_total_in_package: 1,
           });
         });
       });
@@ -395,7 +399,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT,
             rules_not_installed: 0,
-            rules_not_updated: RULES_COUNT,
+            rules_not_updated: 0,
           });
         });
       });
@@ -418,7 +422,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_custom_installed: 0,
             rules_installed: 0,
             rules_not_installed: RULES_COUNT,
-            rules_not_updated: RULES_COUNT,
+            rules_not_updated: 0,
           });
         });
 
