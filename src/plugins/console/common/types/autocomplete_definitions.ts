@@ -13,6 +13,7 @@ export interface EndpointDefinition {
   data_autocomplete_rules?: Record<string, unknown>;
   url_components?: Record<string, unknown>;
   priority?: number;
+  availability?: Record<string, boolean>;
 }
 
 export interface GlobalDefinition {
