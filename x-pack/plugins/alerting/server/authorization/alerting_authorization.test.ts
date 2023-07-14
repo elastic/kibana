@@ -556,6 +556,65 @@ describe('AlertingAuthorization', () => {
       });
     });
 
+    test('ensures the user has privileges to execute alerts for one of the producers', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        ruleTypeRegistry,
+        features,
+        getSpace,
+        getSpaceId,
+      });
+
+      ruleTypeRegistry.get.mockImplementation((id) => ({
+        id,
+        name: 'My Alert Type',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        producer: ['myApp', 'foo'],
+        validate: {
+          params: schema.any(),
+        },
+      }));
+
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
+              authorized: false,
+            },
+          ],
+        },
+      });
+
+      await expect(
+        alertAuthorization.ensureAuthorized({
+          ruleTypeId: 'myType',
+          consumer: 'myOtherApp',
+          operation: WriteOperations.Update,
+          entity: AlertingAuthorizationEntity.Alert,
+        })
+      ).toMatchInlineSnapshot(`Promise {}`);
+    });
+
     test('throws if user lacks the required rule privileges for the consumer', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -735,6 +794,67 @@ describe('AlertingAuthorization', () => {
         `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
       );
     });
+
+    test('throws if user has NO privileges for producers', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        ruleTypeRegistry,
+        features,
+        getSpace,
+        getSpaceId,
+      });
+
+      ruleTypeRegistry.get.mockImplementation((id) => ({
+        id,
+        name: 'My Alert Type',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        producer: ['bar', 'foo'],
+        validate: {
+          params: schema.any(),
+        },
+      }));
+
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
+              authorized: false,
+            },
+          ],
+        },
+      });
+
+      await expect(
+        alertAuthorization.ensureAuthorized({
+          ruleTypeId: 'myType',
+          consumer: 'myOtherApp',
+          operation: WriteOperations.Update,
+          entity: AlertingAuthorizationEntity.Alert,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to update a \\"myType\\" alert by \\"bar, foo\\""`
+      );
+    });
   });
 
   describe('getFindAuthorizationFilter', () => {
@@ -847,6 +967,93 @@ describe('AlertingAuthorization', () => {
       ).toEqual(
         fromKueryExpression(
           `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+        )
+      );
+    });
+
+    test('creates a filter based on the privileged types and producers', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'rule', 'find'),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction(
+                'myOtherAppAlertType',
+                'myOtherApp',
+                'alert',
+                'find'
+              ),
+              authorized: false,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'rule', 'find'),
+              authorized: false,
+            },
+          ],
+        },
+      });
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        ruleTypeRegistry,
+        features,
+        getSpace,
+        getSpaceId,
+      });
+
+      const ruleTypeOneProducer: RegistryRuleType = {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: 'myOtherAppAlertType',
+        name: 'myOtherAppAlertType',
+        producer: 'myOtherApp',
+        enabledInLicense: true,
+      };
+      const ruleTypeProducers: RegistryRuleType = {
+        actionGroups: [],
+        actionVariables: undefined,
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        id: 'myAppAlertType',
+        name: 'myAppAlertType',
+        producer: ['myApp', 'myOtherApp'],
+        enabledInLicense: true,
+      };
+      ruleTypeRegistry.list.mockReturnValue(new Set([ruleTypeOneProducer, ruleTypeProducers]));
+
+      expect(
+        (
+          await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
+          })
+        ).filter
+      ).toEqual(
+        fromKueryExpression(
+          `path.to.rule_type_id:myAppAlertType and consumer-field:(myApp or alerts)`
         )
       );
     });

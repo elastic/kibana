@@ -1017,8 +1017,12 @@ export class AlertsClient {
       // the user should be provided that features' alerts index.
       // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
       const authorizedFeatures = new Set<string>();
+
       for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
-        authorizedFeatures.add(ruleType.producer);
+        const producers = Array.isArray(ruleType.producer)
+          ? ruleType.producer
+          : [ruleType.producer];
+        producers.forEach((p) => authorizedFeatures.add(p));
       }
       const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
         (feature): feature is ValidFeatureId =>
@@ -1061,7 +1065,10 @@ export class AlertsClient {
         // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
         const authorizedFeatures = new Set<string>();
         for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
-          authorizedFeatures.add(ruleType.producer);
+          const producers = Array.isArray(ruleType.producer)
+            ? ruleType.producer
+            : [ruleType.producer];
+          producers.forEach((p) => authorizedFeatures.add(p));
         }
         const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
           (feature): feature is ValidFeatureId =>
@@ -1101,7 +1108,8 @@ export class AlertsClient {
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
     const { producer, fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
-    const indices = await this.getAuthorizedAlertsIndices([producer]);
+    const producers = Array.isArray(producer) ? producer : [producer];
+    const indices = await this.getAuthorizedAlertsIndices(producers);
     const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({

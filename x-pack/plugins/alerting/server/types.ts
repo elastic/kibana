@@ -289,7 +289,8 @@ export interface RuleType<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
     AlertData
   >;
-  producer: string;
+  // TODO Accept string[] && string
+  producer: string[] | string;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];

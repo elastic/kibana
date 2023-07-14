@@ -18,7 +18,7 @@ import {
 } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { observabilityFeatureId } from '../../../../common';
+import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
@@ -219,8 +219,10 @@ export function thresholdRuleType(
         };
       },
     },
-    producer: observabilityFeatureId,
+    producer: [AlertConsumers.LOGS, AlertConsumers.INFRASTRUCTURE],
     getSummarizedAlerts: getSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
+    // TO ALLOW grouping on the creation flyout page
+    // groupRuleBy: 'observability',
   };
 }
