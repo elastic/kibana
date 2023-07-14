@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@
 import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash/fp';
 import { useAssistantContext } from '../../../assistant_context';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
@@ -84,7 +85,7 @@ const SystemPromptComponent: React.FC<Props> = ({
                 }
               `}
             >
-              {selectedPrompt?.content ?? ''}
+              {isEmpty(selectedPrompt?.content) ? i18n.EMPTY_PROMPT : selectedPrompt?.content}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
