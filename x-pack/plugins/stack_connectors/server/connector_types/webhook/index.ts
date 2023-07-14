@@ -54,6 +54,7 @@ const configSchemaProps = {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
+  hasAuth: schema.maybe(schema.boolean()), // DEPRECATED
   authType: schema.string({ defaultValue: WebhookAuthType.None }),
   certType: schema.maybe(schema.string()),
   ca: schema.maybe(schema.string()),
@@ -172,12 +173,14 @@ export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const { actionId, config, params, configurationUtilities, logger } = execOptions;
-  const { method, url, headers = {}, authType, ca, verificationMode } = config;
+  const { method, url, headers = {}, hasAuth, authType, ca, verificationMode } = config;
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
   const basicAuth =
-    authType === WebhookAuthType.Basic && isString(secrets.user) && isString(secrets.password)
+    (hasAuth || authType === WebhookAuthType.Basic) &&
+    isString(secrets.user) &&
+    isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
   const sslCertificate =
