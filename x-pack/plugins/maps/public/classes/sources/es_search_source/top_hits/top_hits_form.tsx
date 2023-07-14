@@ -160,9 +160,12 @@ export class TopHitsForm extends Component<Props, State> {
               display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
             >
               <SingleFieldSelect
-                placeholder={i18n.translate('xpack.maps.source.esSearch.sortFieldSelectPlaceholder', {
-                  defaultMessage: 'Select sort field',
-                })}
+                placeholder={i18n.translate(
+                  'xpack.maps.source.esSearch.sortFieldSelectPlaceholder',
+                  {
+                    defaultMessage: 'Select sort field',
+                  }
+                )}
                 value={this.props.sortField}
                 onChange={this._onSortFieldChange}
                 fields={this.props.sortFields}
