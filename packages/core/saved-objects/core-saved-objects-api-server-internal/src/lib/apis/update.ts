@@ -22,26 +22,11 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import { merge } from 'lodash';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { getCurrentTime, getSavedObjectFromSource } from './utils';
 import { ApiExecutionContext } from './types';
 import { isValidRequest, errorMap, canUpsertDoc } from '../utils';
-
-/**
- * Downward compatible update control flow types
- */
-// temp interface for progress conditionals
-export interface UpdateState<A = boolean> {
-  validRequest?: A;
-  docExists?: A;
-  canUpdate?: A;
-  updateSuccessful?: A;
-  updateVersionConflict?: A;
-  retryRequest?: A;
-  shouldCreate?: A;
-  allowedToCreate?: A;
-  createSuccessful?: A;
-}
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;
@@ -69,17 +54,14 @@ export const performUpdate = async <T>(
     encryption: encryptionHelper,
     preflight: preflightHelper,
     migration: migrationHelper,
-    // validation: validationHelper,
+    validation: validationHelper,
   } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   // check request is valid
   const { validRequest, error } = isValidRequest({ allowedTypes, type, id });
-  if (!validRequest && error) {
-    logger.warn(error.message); // at least log what went wrong.
-    throw error;
-  }
+  if (!validRequest && error) throw error;
 
   const {
     version,
@@ -199,6 +181,7 @@ export const performUpdate = async <T>(
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
+    validationHelper.validateObjectForCreate(type, migratedUpsert as SavedObjectSanitizedDoc<T>);
     rawUpsert = serializer.savedObjectToRaw(migratedUpsert as SavedObjectSanitizedDoc);
   }
 
@@ -272,16 +255,11 @@ export const performUpdate = async <T>(
       id,
       type,
       attributes: await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, {
-        ...migrated!.attributes,
-        ...attributes,
+        ...merge(attributes, migrated!.attributes),
       }),
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
-    // validationHelper.validateObjectForCreate(
-    //   type,
-    //   migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc<T>
-    // );
 
     docToSend = serializer.savedObjectToRaw(
       migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
