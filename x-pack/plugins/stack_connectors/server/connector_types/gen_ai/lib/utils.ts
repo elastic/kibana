@@ -6,6 +6,7 @@
  */
 
 import { AxiosRequestHeaders, AxiosResponse, ResponseType } from 'axios';
+import { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/gen_ai/constants';
 import {
   sanitizeRequest as openAiSanitizeRequest,
@@ -65,7 +66,9 @@ export const getAxiosOptions = (
   }
 };
 
-export const pipeStreamingResponse = <R>(response: AxiosResponse<R>) => {
-  response.headers['Content-Type'] = 'dont-compress-this';
+export const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) => {
+  response.data.headers = {
+    ['Content-Type']: 'dont-compress-this',
+  };
   return response.data;
 };
