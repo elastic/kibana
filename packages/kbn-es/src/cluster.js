@@ -592,7 +592,10 @@ exports.Cluster = class Cluster {
     const dockerCmd = resolveDockerCmd(options);
 
     this._log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
-    this._process = await execa('docker', dockerCmd);
+    this._process = execa('docker', dockerCmd, {
+      // inherit is required to show Java console output for pw, enrollment token, etc
+      stdio: ['ignore', 'inherit', 'inherit'],
+    });
     // TODO: logging
     // TODO: not detached?
   }

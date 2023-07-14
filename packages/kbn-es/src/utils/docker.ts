@@ -44,7 +44,9 @@ const DOCKER_BASE_CMD = [
 
   '--rm',
 
-  '--detach',
+  '-t',
+
+  // '--detach',
 
   '--net',
   'elastic',
@@ -57,6 +59,12 @@ const DOCKER_BASE_CMD = [
 
   '-p',
   '127.0.0.1:9300:9300',
+
+  '--env',
+  'ES_LOG_STYLE=file',
+
+  '--env',
+  'ES_JAVA_OPTS=-Xms1g -Xmx1g',
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
