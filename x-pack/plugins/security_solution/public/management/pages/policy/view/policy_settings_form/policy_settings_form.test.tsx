@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { getPolicySettingsFormTestSubjects } from './mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from './mocks';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { PolicySettingsFormProps } from './policy_settings_form';
@@ -51,5 +51,12 @@ describe('Endpoint Policy Settings Form', () => {
     render();
 
     expect(renderResult.getByTestId(testSubjSelector));
+  });
+
+  it('should render in View mode', () => {
+    formProps.mode = 'view';
+    render();
+
+    expectIsViewOnly(renderResult.getByTestId('test'));
   });
 });

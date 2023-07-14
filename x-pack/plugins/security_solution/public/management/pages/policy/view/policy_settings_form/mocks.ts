@@ -163,7 +163,11 @@ export const getPolicySettingsFormTestSubjects = (
 };
 
 export const expectIsViewOnly = (ele: HTMLElement): void => {
-  expect(ele.querySelectorAll('button:not(.euiLink),input,select,textarea')).toHaveLength(0);
+  expect(
+    ele.querySelectorAll(
+      'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"]),input,select,textarea'
+    )
+  ).toHaveLength(0);
 };
 
 /**
