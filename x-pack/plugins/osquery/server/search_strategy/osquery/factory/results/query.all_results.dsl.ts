@@ -22,7 +22,7 @@ export const buildResultsQuery = ({
   const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
   let filter = actionIdQuery + agentQuery;
   if (!isEmpty(kql)) {
-    filter = actionIdQuery + ` AND ${kql}`;
+    filter = filter + ` AND ${kql}`;
   }
 
   const filterQuery = getQueryFilter({ filter });

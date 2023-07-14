@@ -20,7 +20,7 @@ export const buildActionDetailsQuery = ({
   const actionIdQuery = `action_id: ${actionId}`;
   let filter = actionIdQuery;
   if (!isEmpty(kql)) {
-    filter = actionIdQuery + ` and ${kql}`;
+    filter = filter + ` AND ${kql}`;
   }
 
   const filterQuery = getQueryFilter({ filter });
