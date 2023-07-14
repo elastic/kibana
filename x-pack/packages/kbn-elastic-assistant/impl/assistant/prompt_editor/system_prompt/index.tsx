@@ -13,34 +13,38 @@ import { useAssistantContext } from '../../../assistant_context';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import { SelectSystemPrompt } from './select_system_prompt';
-import { useConversation } from '../../use_conversation';
 
 interface Props {
   conversation: Conversation | undefined;
+  editingSystemPromptId: string | undefined;
+  onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
 }
 
-const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
+const SystemPromptComponent: React.FC<Props> = ({
+  conversation,
+  editingSystemPromptId,
+  onSystemPromptSelectionChange,
+}) => {
   const { allSystemPrompts } = useAssistantContext();
-  const { setApiConfig } = useConversation();
 
-  const selectedPrompt = useMemo(
-    () => allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId),
-    [allSystemPrompts, conversation]
-  );
+  const selectedPrompt = useMemo(() => {
+    if (editingSystemPromptId !== undefined) {
+      return (
+        allSystemPrompts?.find((p) => p.id === editingSystemPromptId) ??
+        allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId)
+      );
+    } else {
+      return undefined;
+    }
+  }, [allSystemPrompts, conversation?.apiConfig.defaultSystemPromptId, editingSystemPromptId]);
 
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
 
   const handleClearSystemPrompt = useCallback(() => {
     if (conversation) {
-      setApiConfig({
-        conversationId: conversation.id,
-        apiConfig: {
-          ...conversation.apiConfig,
-          defaultSystemPromptId: undefined,
-        },
-      });
+      onSystemPromptSelectionChange(undefined);
     }
-  }, [conversation, setApiConfig]);
+  }, [conversation, onSystemPromptSelectionChange]);
 
   const handleEditSystemPrompt = useCallback(() => setIsEditing(true), []);
 
@@ -55,6 +59,7 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
           isClearable={true}
           isEditing={isEditing}
           isOpen={isEditing}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           selectedPrompt={selectedPrompt}
           setIsEditing={setIsEditing}
         />

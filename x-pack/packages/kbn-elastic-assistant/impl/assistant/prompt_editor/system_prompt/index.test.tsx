@@ -60,6 +60,9 @@ jest.mock('../../use_conversation', () => {
 });
 
 describe('SystemPrompt', () => {
+  const editingSystemPromptId = undefined;
+  const onSystemPromptSelectionChange = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -72,33 +75,45 @@ describe('SystemPrompt', () => {
     });
   });
 
-  describe('when conversation is undefined and default prompt is used', () => {
+  describe('when conversation is undefined', () => {
     const conversation = undefined;
 
     beforeEach(() => {
-      render(<SystemPrompt conversation={conversation} />);
+      render(
+        <SystemPrompt
+          conversation={conversation}
+          editingSystemPromptId={editingSystemPromptId}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+        />
+      );
     });
 
-    it('does render the system prompt fallback text', () => {
-      expect(screen.getByTestId('systemPromptText')).toBeInTheDocument();
+    it('renders the system prompt select', () => {
+      expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
     });
 
-    it('does NOT render the system prompt select', () => {
-      expect(screen.queryByTestId('selectSystemPrompt')).not.toBeInTheDocument();
+    it('does NOT render the system prompt text', () => {
+      expect(screen.queryByTestId('systemPromptText')).not.toBeInTheDocument();
     });
 
-    it('does render the edit button', () => {
-      expect(screen.getByTestId('edit')).toBeInTheDocument();
+    it('does NOT render the edit button', () => {
+      expect(screen.queryByTestId('edit')).not.toBeInTheDocument();
     });
 
-    it('does render the clear button', () => {
-      expect(screen.getByTestId('clear')).toBeInTheDocument();
+    it('does NOT render the clear button', () => {
+      expect(screen.queryByTestId('clear')).not.toBeInTheDocument();
     });
   });
 
   describe('when conversation is NOT null', () => {
     beforeEach(() => {
-      render(<SystemPrompt conversation={BASE_CONVERSATION} />);
+      render(
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={BASE_CONVERSATION.id}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+        />
+      );
     });
 
     it('does NOT render the system prompt select', () => {
@@ -125,7 +140,11 @@ describe('SystemPrompt', () => {
       const customPromptText = 'custom prompt text';
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -165,7 +184,11 @@ describe('SystemPrompt', () => {
       const customPromptText = 'custom prompt text';
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -219,7 +242,11 @@ describe('SystemPrompt', () => {
       const customPromptText = 'custom prompt text';
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -280,7 +307,11 @@ describe('SystemPrompt', () => {
     it('should save new prompt correctly when prompt is removed from selected conversation', async () => {
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -351,7 +382,11 @@ describe('SystemPrompt', () => {
 
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -413,7 +448,11 @@ describe('SystemPrompt', () => {
   it('shows the system prompt select when the edit button is clicked', () => {
     render(
       <TestProviders>
-        <SystemPrompt conversation={BASE_CONVERSATION} />
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={BASE_CONVERSATION.id}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+        />
       </TestProviders>
     );
 
@@ -425,7 +464,11 @@ describe('SystemPrompt', () => {
   it('shows the system prompt select when system prompt text is clicked', () => {
     render(
       <TestProviders>
-        <SystemPrompt conversation={BASE_CONVERSATION} />
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={BASE_CONVERSATION.id}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+        />
       </TestProviders>
     );
 

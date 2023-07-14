@@ -37,7 +37,7 @@ import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selec
 import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
-import { CodeBlockDetails } from './use_conversation/helpers';
+import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversations/conversation_selector';
@@ -242,6 +242,20 @@ const AssistantComponent: React.FC<Props> = ({
     }
   }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPromptId]);
 
+  const [editingSystemPromptId, setEditingSystemPromptId] = useState<string | undefined>(
+    selectedSystemPrompt?.id
+  );
+
+  const handleOnConversationSelected = useCallback(
+    (cId: string) => {
+      setSelectedConversationId(cId);
+      setEditingSystemPromptId(
+        getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cId] })?.id
+      );
+    },
+    [allSystemPrompts, conversations]
+  );
+
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText) => {
@@ -251,13 +265,15 @@ const AssistantComponent: React.FC<Props> = ({
           replacements: newReplacements,
         });
 
+      const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
+
       const message = await getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
         currentReplacements: currentConversation.replacements,
         onNewReplacements,
         promptText,
         selectedPromptContexts,
-        selectedSystemPrompt,
+        selectedSystemPrompt: systemPrompt,
       });
 
       const updatedMessages = appendMessage({
@@ -278,22 +294,40 @@ const AssistantComponent: React.FC<Props> = ({
       appendMessage({ conversationId: selectedConversationId, message: responseMessage });
     },
     [
-      selectedSystemPrompt,
-      appendMessage,
-      appendReplacements,
-      currentConversation.apiConfig,
+      allSystemPrompts,
       currentConversation.messages.length,
       currentConversation.replacements,
-      http,
-      selectedConversationId,
+      currentConversation.apiConfig,
       selectedPromptContexts,
+      appendMessage,
+      selectedConversationId,
       sendMessages,
+      http,
+      appendReplacements,
+      editingSystemPromptId,
     ]
   );
 
   const handleButtonSendMessage = useCallback(() => {
     handleSendMessage(promptTextAreaRef.current?.value?.trim() ?? '');
   }, [handleSendMessage, promptTextAreaRef]);
+
+  const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
+    setEditingSystemPromptId(systemPromptId);
+  }, []);
+
+  const handleOnChatCleared = useCallback(() => {
+    const defaultSystemPromptId = getDefaultSystemPrompt({
+      allSystemPrompts,
+      conversation: conversations[selectedConversationId],
+    })?.id;
+
+    setPromptTextPreview('');
+    setSuggestedUserPrompt('');
+    setSelectedPromptContexts({});
+    clearConversation(selectedConversationId);
+    setEditingSystemPromptId(defaultSystemPromptId);
+  }, [allSystemPrompts, clearConversation, conversations, selectedConversationId]);
 
   const shouldDisableConversationSelectorHotkeys = useCallback(() => {
     const promptTextAreaHasFocus = document.activeElement === promptTextAreaRef.current;
@@ -405,9 +439,11 @@ const AssistantComponent: React.FC<Props> = ({
           Object.keys(selectedPromptContexts).length > 0) && (
           <PromptEditor
             conversation={currentConversation}
+            editingSystemPromptId={editingSystemPromptId}
             isNewConversation={currentConversation.messages.length === 0}
             promptContexts={promptContexts}
             promptTextPreview={promptTextPreview}
+            onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPromptContexts={selectedPromptContexts}
             setSelectedPromptContexts={setSelectedPromptContexts}
           />
@@ -418,7 +454,9 @@ const AssistantComponent: React.FC<Props> = ({
     ),
     [
       currentConversation,
+      editingSystemPromptId,
       getComments,
+      handleOnSystemPromptSelectionChange,
       promptContexts,
       promptTextPreview,
       selectedPromptContexts,
@@ -475,7 +513,7 @@ const AssistantComponent: React.FC<Props> = ({
                   defaultConnectorId={defaultConnectorId}
                   defaultProvider={defaultProvider}
                   selectedConversationId={selectedConversationId}
-                  setSelectedConversationId={setSelectedConversationId}
+                  onConversationSelected={handleOnConversationSelected}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                   isDisabled={isDisabled}
                 />
@@ -615,12 +653,7 @@ const AssistantComponent: React.FC<Props> = ({
                     isDisabled={isSendingDisabled}
                     aria-label={i18n.CLEAR_CHAT}
                     color="danger"
-                    onClick={() => {
-                      setPromptTextPreview('');
-                      clearConversation(selectedConversationId);
-                      setSelectedPromptContexts({});
-                      setSuggestedUserPrompt('');
-                    }}
+                    onClick={handleOnChatCleared}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

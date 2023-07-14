@@ -19,9 +19,11 @@ import { SelectedPromptContexts } from './selected_prompt_contexts';
 
 export interface Props {
   conversation: Conversation | undefined;
+  editingSystemPromptId: string | undefined;
   isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   promptTextPreview: string;
+  onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
@@ -34,16 +36,24 @@ const PreviewText = styled(EuiText)`
 
 const PromptEditorComponent: React.FC<Props> = ({
   conversation,
+  editingSystemPromptId,
   isNewConversation,
   promptContexts,
   promptTextPreview,
+  onSystemPromptSelectionChange,
   selectedPromptContexts,
   setSelectedPromptContexts,
 }) => {
   const commentBody = useMemo(
     () => (
       <>
-        {isNewConversation && <SystemPrompt conversation={conversation} />}
+        {isNewConversation && (
+          <SystemPrompt
+            conversation={conversation}
+            editingSystemPromptId={editingSystemPromptId}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          />
+        )}
 
         <SelectedPromptContexts
           isNewConversation={isNewConversation}
@@ -59,7 +69,9 @@ const PromptEditorComponent: React.FC<Props> = ({
     ),
     [
       conversation,
+      editingSystemPromptId,
       isNewConversation,
+      onSystemPromptSelectionChange,
       promptContexts,
       promptTextPreview,
       selectedPromptContexts,

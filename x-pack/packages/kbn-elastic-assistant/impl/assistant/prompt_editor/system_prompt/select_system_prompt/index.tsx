@@ -39,7 +39,7 @@ export interface Props {
   isOpen?: boolean;
   setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
   showTitles?: boolean;
-  onSystemPromptSelectionChange?: (promptId: string) => void;
+  onSystemPromptSelectionChange?: (promptId: string | undefined) => void;
 }
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';

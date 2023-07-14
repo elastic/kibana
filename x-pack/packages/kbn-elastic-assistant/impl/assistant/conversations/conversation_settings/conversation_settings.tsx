@@ -21,7 +21,7 @@ import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_sys
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';
 import { UseAssistantContext } from '../../../assistant_context';
 import { ConversationSelectorSettings } from '../conversation_selector_settings';
-import { getDefaultSystemPromptFromConversation } from './helpers';
+import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -50,13 +50,13 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     setUpdatedConversationSettings,
     isDisabled = false,
   }) => {
-    // Defaults
     const defaultSystemPrompt = useMemo(() => {
-      return (
-        allSystemPrompts.find((systemPrompt) => systemPrompt.isNewConversationDefault) ??
-        allSystemPrompts[0]
-      );
+      return getDefaultSystemPrompt({ allSystemPrompts, conversation: undefined });
     }, [allSystemPrompts]);
+
+    const selectedSystemPrompt = useMemo(() => {
+      return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });
+    }, [allSystemPrompts, selectedConversation]);
 
     // Conversation callbacks
     // When top level conversation selection changes
@@ -102,18 +102,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       [setUpdatedConversationSettings]
     );
 
-    const selectedSystemPrompt = useMemo(
-      () =>
-        getDefaultSystemPromptFromConversation({
-          allSystemPrompts,
-          conversation: selectedConversation,
-          defaultSystemPrompt,
-        }),
-      [allSystemPrompts, defaultSystemPrompt, selectedConversation]
-    );
-
     const handleOnSystemPromptSelectionChange = useCallback(
-      (systemPromptId?: string) => {
+      (systemPromptId?: string | undefined) => {
         if (selectedConversation != null) {
           setUpdatedConversationSettings((prev) => ({
             ...prev,
