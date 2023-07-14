@@ -8,10 +8,16 @@
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import { useGetStatefulQueryBar } from '../../../../common/hooks/use_get_stateful_query_bar';
 import { useKibana } from '../../../../common/lib/kibana';
+
+const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
+  [data-test-subj='searchSessionIndicator'] {
+    display: none;
+  }
+`;
 
 const EmbeddedDiscoverContainer = styled.div`
   width: 100%;
@@ -48,6 +54,7 @@ export const DiscoverTabContent = () => {
 
   return (
     <EmbeddedDiscoverContainer>
+      <HideSearchSessionIndicatorBreadcrumbIcon />
       <DiscoverContainer
         services={services}
         scopedHistory={history as ScopedHistory}
