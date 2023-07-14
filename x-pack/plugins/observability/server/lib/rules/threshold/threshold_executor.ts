@@ -58,7 +58,7 @@ export type MetricThresholdAlertContext = {
   groupings?: object;
   reason?: string;
   timestamp: string; // ISO string
-  value?: number[] | null;
+  value?: Array<number | null> | null;
 };
 
 export const FIRED_ACTIONS_ID = 'threshold.fired';
