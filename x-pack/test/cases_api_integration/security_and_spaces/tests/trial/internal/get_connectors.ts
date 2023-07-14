@@ -8,12 +8,8 @@
 import http from 'http';
 import expect from '@kbn/expect';
 
-import {
-  UserActionTypes,
-  CaseSeverity,
-  CaseStatuses,
-  ConnectorTypes,
-} from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
   globalRead,
   noKibanaPrivileges,

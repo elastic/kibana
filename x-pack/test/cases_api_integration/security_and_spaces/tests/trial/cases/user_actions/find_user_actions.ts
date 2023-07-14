@@ -7,7 +7,7 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { UserActionTypes } from '@kbn/cases-plugin/common/api';
+import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
