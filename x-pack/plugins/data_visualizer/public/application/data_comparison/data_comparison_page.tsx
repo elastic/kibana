@@ -304,7 +304,7 @@ export const DataComparisonPage: FC = () => {
                       fill: colors.productionColor,
                       opacity: 0.5,
                     },
-                    badgeWidth: 80,
+                    badgeWidth: 90,
                   }}
                 />
               </EuiPanel>

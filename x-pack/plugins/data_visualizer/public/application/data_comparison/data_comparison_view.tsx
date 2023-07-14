@@ -7,25 +7,25 @@
 import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   AreaSeries,
+  Axis,
+  BarSeries,
   Chart,
   CurveType,
-  Settings,
-  BarSeries,
-  ScaleType,
   Position,
-  Axis,
+  ScaleType,
+  Settings,
   Tooltip,
 } from '@elastic/charts';
 import {
-  EuiButtonIcon,
   EuiBasicTableColumn,
-  EuiTableFieldDataColumnType,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexItem,
   EuiFormRow,
+  EuiInMemoryTable,
   EuiScreenReaderOnly,
   EuiSwitch,
-  EuiInMemoryTable,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
@@ -42,18 +42,19 @@ import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { DataComparisonChartTooltipBody } from './data_comparison_chart_tooltip_body';
 import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
 import {
+  COMPARISON_LABEL,
   DATA_COMPARISON_TYPE,
   DATA_COMPARISON_TYPE_LABEL,
-  COMPARISON_LABEL,
   REFERENCE_LABEL,
 } from './constants';
 import type {
-  Histogram,
   ComparisionHistogram,
-  Feature,
-  TimeRange,
   DataComparisonField,
+  Feature,
+  Histogram,
+  TimeRange,
 } from './types';
+import { FETCH_STATUS } from './types';
 
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (typeof significanceLevel !== 'number' || isNaN(significanceLevel)) return '';
@@ -118,7 +119,7 @@ const OverlapDistributionComparison = ({
           'xpack.dataVisualizer.dataComparison.distributionComparisonChartName',
           {
             defaultMessage:
-              'Distribution comparison of reference and production data for {fieldName}',
+              'Distribution comparison of reference and comparison data for {fieldName}',
             values: { fieldName },
           }
         )}
@@ -321,7 +322,7 @@ export const DataComparisonView = ({
         <h2>
           <FormattedMessage
             id="xpack.dataVisualizer.dataComparison.emptyPromptTitle"
-            defaultMessage="Select a time range for reference and production data in the histogram chart to compare data distribution."
+            defaultMessage="Select a time range for reference and comparison data in the histogram chart to compare data distribution."
           />
         </h2>
       }
@@ -330,7 +331,7 @@ export const DataComparisonView = ({
         <p>
           <FormattedMessage
             id="xpack.dataVisualizer.dataComparison.emptyPromptBody"
-            defaultMessage="The Data Comparison Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues.
+            defaultMessage="The Data Comparison View compares the statistical properties of features in the 'reference' and 'comparison' data sets.
 "
           />
         </p>
@@ -370,6 +371,7 @@ export const DataComparisonView = ({
         pagination={pagination}
         sorting={sorting}
         setPageIndex={setPageIndex}
+        status={result.status}
       />
     </div>
   );
@@ -380,8 +382,10 @@ export const DataComparisonOverviewTable = ({
   onTableChange,
   pagination,
   sorting,
+  status,
 }: {
   data: Feature[];
+  status: FETCH_STATUS;
 } & UseTableState<Feature>) => {
   const euiTheme = useCurrentEuiTheme();
   const colors = {
@@ -566,6 +570,21 @@ export const DataComparisonOverviewTable = ({
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
+  const tableMessage = useMemo(() => {
+    switch (status) {
+      case FETCH_STATUS.NOT_INITIATED:
+        return i18n.translate('xpack.dataVisualizer.dataComparison.dataComparisonRunAnalysisMsg', {
+          defaultMessage: 'Run analysis to compare reference and comparison data',
+        });
+      case FETCH_STATUS.LOADING:
+        return i18n.translate('xpack.dataVisualizer.dataComparison.dataComparisonLoadingMsg', {
+          defaultMessage: 'Analyzing',
+        });
+      default:
+        return undefined;
+    }
+  }, [status]);
+
   return (
     <EuiInMemoryTable<Feature>
       tableCaption={i18n.translate(
@@ -585,6 +604,8 @@ export const DataComparisonOverviewTable = ({
       sorting={sorting}
       onChange={onTableChange}
       pagination={pagination}
+      loading={status === FETCH_STATUS.LOADING}
+      message={tableMessage}
     />
   );
 };
