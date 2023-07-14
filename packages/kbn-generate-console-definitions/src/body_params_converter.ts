@@ -207,7 +207,16 @@ export class BodyParamsConverter {
     literalValue: S.LiteralValue,
     serverDefault: S.Property['serverDefault']
   ): any => {
-    return serverDefault ? serverDefault.toString() : literalValue.value;
+    let value = serverDefault ? serverDefault.toString() : literalValue.value;
+    /**
+     * if the value is enclosed into curly braces, it's meant to be a variable
+     * use upper case to indicate that
+     * for example {dynamic_property} -> DYNAMIC_PROPERTY
+     */
+    if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+      value = value.replace('{', '').replace('}', '').toUpperCase();
+    }
+    return value;
   };
 
   private convertEnum(enumType: S.Enum): any {
