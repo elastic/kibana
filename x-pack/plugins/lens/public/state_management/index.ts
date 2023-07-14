@@ -35,7 +35,6 @@ export const {
   submitSuggestion,
   switchDatasource,
   switchAndCleanDatasource,
-  updateStateFromSuggestion,
   updateIndexPatterns,
   setToggleFullscreen,
   initEmpty,
