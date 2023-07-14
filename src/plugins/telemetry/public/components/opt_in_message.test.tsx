@@ -7,16 +7,97 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import type { ReactWrapper } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { mockTelemetryConstants, mockTelemetryService } from '../mocks';
 import { OptInMessage } from './opt_in_message';
-import { mockTelemetryConstants } from '../mocks';
-
-const telemetryConstants = mockTelemetryConstants();
 
 describe('OptInMessage', () => {
-  it('renders as expected', () => {
-    expect(
-      shallowWithIntl(<OptInMessage telemetryConstants={telemetryConstants} />)
-    ).toMatchSnapshot();
+  const addBasePath = httpServiceMock.createBasePath().prepend;
+  const telemetryConstants = mockTelemetryConstants();
+
+  describe('when opted-in', () => {
+    const telemetryService = mockTelemetryService({ config: { optIn: true } });
+
+    let dom: ReactWrapper;
+
+    beforeAll(() => {
+      dom = mountWithIntl(
+        <OptInMessage
+          telemetryConstants={telemetryConstants}
+          telemetryService={telemetryService}
+          addBasePath={addBasePath}
+        />
+      );
+    });
+
+    afterAll(() => {
+      dom.unmount();
+    });
+
+    it('claims that telemetry is enabled', () => {
+      expect(dom.text()).toContain('Usage collection is enabled.');
+    });
+
+    it('offers the link to disable it', () => {
+      expect(dom.text()).toContain('Disable usage collection.');
+    });
+  });
+
+  describe('when opted-out', () => {
+    const telemetryService = mockTelemetryService({ config: { optIn: false } });
+
+    let dom: ReactWrapper;
+
+    beforeAll(() => {
+      dom = mountWithIntl(
+        <OptInMessage
+          telemetryConstants={telemetryConstants}
+          telemetryService={telemetryService}
+          addBasePath={addBasePath}
+        />
+      );
+    });
+
+    afterAll(() => {
+      dom.unmount();
+    });
+
+    it('claims that telemetry is disabled', () => {
+      expect(dom.text()).toContain('Usage collection is disabled.');
+    });
+
+    it('offers the link to enable it', () => {
+      expect(dom.text()).toContain('Enable usage collection.');
+    });
+  });
+
+  describe('when null', () => {
+    const telemetryService = mockTelemetryService({ config: { optIn: null } });
+
+    let dom: ReactWrapper;
+
+    beforeAll(() => {
+      dom = mountWithIntl(
+        <OptInMessage
+          telemetryConstants={telemetryConstants}
+          telemetryService={telemetryService}
+          addBasePath={addBasePath}
+        />
+      );
+    });
+
+    afterAll(() => {
+      dom.unmount();
+    });
+
+    it('claims that telemetry is disabled', () => {
+      expect(dom.text()).toContain('Usage collection is disabled.');
+    });
+
+    it('offers the link to enable it', () => {
+      expect(dom.text()).toContain('Enable usage collection.');
+    });
   });
 });

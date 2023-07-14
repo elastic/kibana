@@ -36,8 +36,7 @@ export const getActions = async ({
   startDate,
   userIds,
   unExpiredOnly,
-  withAutomatedActions,
-  alertId,
+  types,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
@@ -50,10 +49,6 @@ export const getActions = async ({
         'data.command': commands,
       },
     });
-  }
-
-  if (alertId?.length) {
-    additionalFilters.push({ terms: { 'data.alert_id': alertId } });
   }
 
   if (elasticAgentIds?.length) {
@@ -81,8 +76,12 @@ export const getActions = async ({
     },
   ];
 
-  const mustNot: SearchRequest =
-    withAutomatedActions === false
+  const getTypesFilter = (): SearchRequest => {
+    const singleType = types?.length === 1 && types[0];
+    if (!singleType) {
+      return {};
+    }
+    return singleType === 'manual'
       ? {
           must_not: {
             exists: {
@@ -90,7 +89,16 @@ export const getActions = async ({
             },
           },
         }
+      : singleType === 'automated'
+      ? {
+          filter: {
+            exists: {
+              field: 'data.alert_id',
+            },
+          },
+        }
       : {};
+  };
 
   if (userIds?.length) {
     const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
@@ -106,7 +114,7 @@ export const getActions = async ({
       query: {
         bool: {
           must,
-          ...mustNot,
+          ...getTypesFilter(),
         },
       },
       sort: [

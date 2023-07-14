@@ -88,7 +88,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
   props.title = title;
 
   (
-    pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
+    pluginServices.getServices().dashboardContentManagement.findDashboards.findByTitle as jest.Mock
   ).mockResolvedValue(undefined);
 
   let component: ReactWrapper;
@@ -110,7 +110,7 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
   const props = makeDefaultProps();
   props.title = title;
   (
-    pluginServices.getServices().dashboardSavedObject.findDashboards.findByTitle as jest.Mock
+    pluginServices.getServices().dashboardContentManagement.findDashboards.findByTitle as jest.Mock
   ).mockResolvedValue({ id: 'you_found_me' });
 
   let component: ReactWrapper;

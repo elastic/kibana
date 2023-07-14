@@ -27,6 +27,7 @@ export const configSchema = schema.object({
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
+  isCloud: schema.boolean({ defaultValue: false }),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
       schema.oneOf([schema.arrayOf(schema.string(), { minSize: 1 }), schema.string()])
@@ -50,5 +51,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 export const CONNECTORS_INDEX = '.elastic-connectors';
 export const CURRENT_CONNECTORS_INDEX = '.elastic-connectors-v1';
 export const CONNECTORS_JOBS_INDEX = '.elastic-connectors-sync-jobs';
+export const CURRENT_CONNECTORS_JOB_INDEX = '.elastic-connectors-sync-jobs-v1';
 export const CONNECTORS_VERSION = 1;
 export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';

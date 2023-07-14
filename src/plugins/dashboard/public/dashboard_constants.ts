@@ -53,7 +53,6 @@ export const DASHBOARD_UI_METRIC_ID = 'dashboard';
 export const DASHBOARD_APP_ID = 'dashboards';
 export const LEGACY_DASHBOARD_APP_ID = 'dashboard';
 export const SEARCH_SESSION_ID = 'searchSessionId';
-export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 // ------------------------------------------------------------------
 // Grid
@@ -65,6 +64,8 @@ export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
 export const CHANGE_CHECK_DEBOUNCE = 100;
+
+export { CONTENT_ID as DASHBOARD_CONTENT_ID } from '../common/content_management/constants';
 
 // ------------------------------------------------------------------
 // Default State

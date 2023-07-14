@@ -28,7 +28,10 @@ import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar
 import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
 import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
@@ -45,6 +48,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   indexPatterns?: DataView[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
+  dataViewPickerOverride?: React.ReactNode;
   screenTitle?: string;
   dataTestSubj?: string;
   // Togglers
@@ -84,6 +88,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   indicateNoData?: boolean;
+  // Disables the default auto-refresh option inside the date picker
+  isAutoRefreshDisabled?: boolean;
 
   placeholder?: string;
   isClearable?: boolean;
@@ -102,6 +108,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
 
   /**
@@ -513,6 +520,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
               )
             : undefined
         }
+        suggestionsAbstraction={this.props.suggestionsAbstraction}
       />
     ) : undefined;
 
@@ -527,6 +535,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           readOnly={this.props.isDisabled}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       ) : (
         <FilterBar
@@ -539,6 +548,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       );
     }
@@ -570,6 +580,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataViewPickerOverride={this.props.dataViewPickerOverride}
           showSubmitButton={this.props.showSubmitButton}
           submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}
@@ -592,6 +603,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}
           onTextLangQueryChange={this.onTextLangQueryChange}
           submitOnBlur={this.props.submitOnBlur}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       </div>
     );

@@ -25,6 +25,7 @@ import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../rule_management/logic/use_find_rules');
+jest.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review');
 jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings');
 jest.mock('./use_rules_table_saved_state');
 

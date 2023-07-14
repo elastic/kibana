@@ -13,7 +13,11 @@ export const INPUT_CONTROL = 'cloud_defend/control';
 export const ALERTS_DATASET = 'cloud_defend.alerts';
 export const ALERTS_INDEX_PATTERN = 'cloud_defend.alerts*';
 
+export const CURRENT_API_VERSION = '1';
 export const POLICIES_ROUTE_PATH = '/internal/cloud_defend/policies';
 export const STATUS_ROUTE_PATH = '/internal/cloud_defend/status';
 
 export const CLOUD_DEFEND_FLEET_PACKAGE_KUERY = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${INTEGRATION_PACKAGE_NAME}`;
+
+export const DEFAULT_POLICIES_PER_PAGE = 20;
+export const POLICIES_PACKAGE_POLICY_PREFIX = 'package_policy.';

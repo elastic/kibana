@@ -44,6 +44,8 @@ jest.mock('@kbn/cell-actions/src/hooks/use_load_actions', () => {
   };
 });
 
+jest.mock('../../hooks/use_get_field_spec');
+
 const props = {
   data: mockAlertDetailsData as TimelineEventsDetailsItem[],
   browserFields: mockBrowserFields,

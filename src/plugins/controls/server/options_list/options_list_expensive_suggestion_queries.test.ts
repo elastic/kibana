@@ -115,6 +115,100 @@ describe('options list expensive queries', () => {
         `);
       });
 
+      test('test keyword field, with wildcard search and basic search string', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          searchString: 'c',
+          searchTechnique: 'wildcard',
+          allowExpensiveQueries: true,
+          fieldName: 'coolTestField.keyword',
+          sort: { by: '_key', direction: 'desc' },
+          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "filteredSuggestions": Object {
+              "aggs": Object {
+                "suggestions": Object {
+                  "terms": Object {
+                    "field": "coolTestField.keyword",
+                    "order": Object {
+                      "_key": "desc",
+                    },
+                    "shard_size": 10,
+                    "size": 10,
+                  },
+                },
+                "unique_terms": Object {
+                  "cardinality": Object {
+                    "field": "coolTestField.keyword",
+                  },
+                },
+              },
+              "filter": Object {
+                "wildcard": Object {
+                  "coolTestField.keyword": Object {
+                    "case_insensitive": true,
+                    "value": "*c*",
+                  },
+                },
+              },
+            },
+          }
+        `);
+      });
+
+      test('test keyword field, with wildcard search and search string that needs to be escaped', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          size: 10,
+          searchString: '.c?o&o[l*',
+          searchTechnique: 'wildcard',
+          allowExpensiveQueries: true,
+          fieldName: 'coolTestField.keyword',
+          sort: { by: '_key', direction: 'desc' },
+          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getExpensiveSuggestionAggregationBuilder(
+          optionsListRequestBodyMock
+        );
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "filteredSuggestions": Object {
+              "aggs": Object {
+                "suggestions": Object {
+                  "terms": Object {
+                    "field": "coolTestField.keyword",
+                    "order": Object {
+                      "_key": "desc",
+                    },
+                    "shard_size": 10,
+                    "size": 10,
+                  },
+                },
+                "unique_terms": Object {
+                  "cardinality": Object {
+                    "field": "coolTestField.keyword",
+                  },
+                },
+              },
+              "filter": Object {
+                "wildcard": Object {
+                  "coolTestField.keyword": Object {
+                    "case_insensitive": true,
+                    "value": "*.c\\\\?o&o[l\\\\**",
+                  },
+                },
+              },
+            },
+          }
+        `);
+      });
+
       test('test nested field, with a search string', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,

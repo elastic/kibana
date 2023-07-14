@@ -7,6 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { UpsellingService } from '../../lib/upsellings';
 import { updateAppLinks } from '../../links';
 import { links } from '../../links/app_links';
 import { useShowTimeline } from './use_show_timeline';
@@ -51,6 +52,8 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
+const mockUpselling = new UpsellingService();
+
 describe('use show timeline', () => {
   beforeAll(() => {
     // initialize all App links before running test
@@ -66,6 +69,7 @@ describe('use show timeline', () => {
           crud: true,
         },
       },
+      upselling: mockUpselling,
     });
   });
 

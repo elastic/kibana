@@ -10,10 +10,10 @@ import { useState, useEffect } from 'react';
 import {
   getDependentVar,
   getPredictionFieldName,
+  ANALYSIS_CONFIG_TYPE,
   type ClassificationEvaluateResponse,
   type ConfusionMatrix,
   type DataFrameAnalyticsConfig,
-  ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';

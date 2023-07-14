@@ -5,6 +5,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.DATA_QUALITY_PROMPT_CONTEXT_PILL",
+        "type": "Function",
+        "tags": [],
+        "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL",
+        "description": [],
+        "signature": [
+          "(indexName: string) => any"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+            "id": "def-public.DATA_QUALITY_PROMPT_CONTEXT_PILL.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
         "id": "def-public.DataQualityPanel",
         "type": "Function",
         "tags": [],
@@ -78,12 +111,42 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
+        "type": "Any",
+        "tags": [],
+        "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
         "id": "def-public.DATA_QUALITY_SUBTITLE",
         "type": "string",
         "tags": [],
         "label": "DATA_QUALITY_SUBTITLE",
         "description": [
           "The subtitle displayed on the Data Quality dashboard"
+        ],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.DATA_QUALITY_SUGGESTED_USER_PROMPT",
+        "type": "Any",
+        "tags": [],
+        "label": "DATA_QUALITY_SUGGESTED_USER_PROMPT",
+        "description": [],
+        "signature": [
+          "any"
         ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,

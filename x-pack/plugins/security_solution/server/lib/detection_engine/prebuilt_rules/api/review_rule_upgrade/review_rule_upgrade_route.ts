@@ -92,6 +92,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     return {
       id: installedCurrentVersion.id,
       rule_id: installedCurrentVersion.rule_id,
+      revision: installedCurrentVersion.revision,
       rule: diffableCurrentVersion,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(

@@ -17,7 +17,7 @@ import {
   eventCategoryMatches,
   netflowRowRenderer,
 } from './netflow_row_renderer';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 export const justIdAndTimestamp: Ecs = {
   _id: 'abcd',

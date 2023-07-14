@@ -14,12 +14,21 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
+import { getSafeVulnerabilitiesQueryFilter } from '../../common/utils/get_safe_vulnerabilities_query_filter';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import { FindingsStatsTaskResult, TaskHealthStatus, ScoreByPolicyTemplateBucket } from './types';
+import {
+  FindingsStatsTaskResult,
+  TaskHealthStatus,
+  ScoreByPolicyTemplateBucket,
+  VulnSeverityAggs,
+} from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_SEVERITY,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
 import { CspServerPluginStartServices } from '../types';
@@ -170,6 +179,128 @@ const getScoreQuery = (): SearchRequest => ({
   },
 });
 
+const getVulnStatsTrendQuery = (): SearchRequest => ({
+  index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  size: 0,
+  query: getSafeVulnerabilitiesQueryFilter(),
+  aggs: {
+    critical: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
+    },
+    high: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.HIGH } },
+    },
+    medium: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.MEDIUM } },
+    },
+    low: {
+      filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
+    },
+    vulnerabilities_stats_by_cloud_account: {
+      terms: {
+        field: 'cloud.account.id',
+      },
+      aggs: {
+        cloud_account_id: {
+          terms: {
+            field: 'cloud.account.id',
+            size: 1,
+          },
+        },
+        cloud_account_name: {
+          terms: {
+            field: 'cloud.account.name',
+            size: 1,
+          },
+        },
+        critical: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
+        },
+        high: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.HIGH } },
+        },
+        medium: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.MEDIUM } },
+        },
+        low: {
+          filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
+        },
+      },
+    },
+  },
+});
+
+const getFindingsScoresDocIndexingPromises = (
+  esClient: ElasticsearchClient,
+  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets']
+) =>
+  scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
+    // creating score per cluster id objects
+    const clustersStats = Object.fromEntries(
+      policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
+        const clusterId = clusterStats.key;
+
+        return [
+          clusterId,
+          {
+            total_findings: clusterStats.total_findings.value,
+            passed_findings: clusterStats.passed_findings.doc_count,
+            failed_findings: clusterStats.failed_findings.doc_count,
+          },
+        ];
+      })
+    );
+
+    // each document contains the policy template and its scores
+    return esClient.index({
+      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+      document: {
+        policy_template: policyTemplateTrend.key,
+        passed_findings: policyTemplateTrend.passed_findings.doc_count,
+        failed_findings: policyTemplateTrend.failed_findings.doc_count,
+        total_findings: policyTemplateTrend.total_findings.value,
+        score_by_cluster_id: clustersStats,
+      },
+    });
+  });
+
+const getVulnStatsTrendDocIndexingPromises = (
+  esClient: ElasticsearchClient,
+  vulnStatsAggs?: VulnSeverityAggs
+) => {
+  if (!vulnStatsAggs) return;
+
+  const scoreByCloudAccount = Object.fromEntries(
+    vulnStatsAggs.vulnerabilities_stats_by_cloud_account.buckets.map((accountScore) => {
+      const cloudAccountId = accountScore.key;
+
+      return [
+        cloudAccountId,
+        {
+          cloudAccountId: accountScore.key,
+          cloudAccountName: accountScore.cloud_account_name.buckets[0].key,
+          critical: accountScore.critical.doc_count,
+          high: accountScore.high.doc_count,
+          medium: accountScore.medium.doc_count,
+          low: accountScore.low.doc_count,
+        },
+      ];
+    })
+  );
+
+  return esClient.index({
+    index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+    document: {
+      policy_template: VULN_MGMT_POLICY_TEMPLATE,
+      critical: vulnStatsAggs.critical.doc_count,
+      high: vulnStatsAggs.high.doc_count,
+      medium: vulnStatsAggs.medium.doc_count,
+      low: vulnStatsAggs.low.doc_count,
+      vulnerabilities_stats_by_cloud_account: scoreByCloudAccount,
+    },
+  });
+};
+
 export const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
   stateRuns: number,
@@ -180,8 +311,11 @@ export const aggregateLatestFindings = async (
     const scoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
       getScoreQuery()
     );
+    const vulnStatsTrendIndexQueryResult = await esClient.search<unknown, VulnSeverityAggs>(
+      getVulnStatsTrendQuery()
+    );
 
-    if (!scoreIndexQueryResult.aggregations) {
+    if (!scoreIndexQueryResult.aggregations && !vulnStatsTrendIndexQueryResult.aggregations) {
       logger.warn(`No data found in latest findings index`);
       return 'warning';
     }
@@ -195,43 +329,25 @@ export const aggregateLatestFindings = async (
 
     // getting score per policy template buckets
     const scoresByPolicyTemplatesBuckets =
-      scoreIndexQueryResult.aggregations.score_by_policy_template.buckets;
+      scoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
 
     // iterating over the buckets and return promises which will index a modified document into the scores index
-    const docIndexingPromises = scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
-      // creating score per cluster id objects
-      const clustersStats = Object.fromEntries(
-        policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
-          const clusterId = clusterStats.key;
+    const findingsScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
+      esClient,
+      scoresByPolicyTemplatesBuckets
+    );
 
-          return [
-            clusterId,
-            {
-              total_findings: clusterStats.total_findings.value,
-              passed_findings: clusterStats.passed_findings.doc_count,
-              failed_findings: clusterStats.failed_findings.doc_count,
-            },
-          ];
-        })
-      );
-
-      // each document contains the policy template and its scores
-      return esClient.index({
-        index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-        document: {
-          policy_template: policyTemplateTrend.key,
-          passed_findings: policyTemplateTrend.passed_findings.doc_count,
-          failed_findings: policyTemplateTrend.failed_findings.doc_count,
-          total_findings: policyTemplateTrend.total_findings.value,
-          score_by_cluster_id: clustersStats,
-        },
-      });
-    });
+    const vulnStatsTrendDocIndexingPromises = getVulnStatsTrendDocIndexingPromises(
+      esClient,
+      vulnStatsTrendIndexQueryResult.aggregations
+    );
 
     const startIndexTime = performance.now();
 
     // executing indexing commands
-    await Promise.all(docIndexingPromises);
+    await Promise.all(
+      [...findingsScoresDocIndexingPromises, vulnStatsTrendDocIndexingPromises].filter(Boolean)
+    );
 
     const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
     logger.debug(

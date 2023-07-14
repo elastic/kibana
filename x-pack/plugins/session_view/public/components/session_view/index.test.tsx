@@ -18,6 +18,7 @@ import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 import { useDateFormat } from '../../hooks';
 import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
+import { ResizeObserver } from '@juggle/resize-observer';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -45,7 +46,7 @@ describe('SessionView component', () => {
       })),
     });
 
-    global.ResizeObserver = require('resize-observer-polyfill');
+    global.ResizeObserver = ResizeObserver;
   });
 
   beforeEach(() => {
@@ -54,7 +55,7 @@ describe('SessionView component', () => {
     render = () =>
       (renderResult = mockedContext.render(
         <SessionView
-          processIndex={TEST_PROCESS_INDEX}
+          index={TEST_PROCESS_INDEX}
           sessionStartTime={TEST_SESSION_START_TIME}
           sessionEntityId="test-entity-id"
         />
@@ -234,9 +235,7 @@ describe('SessionView component', () => {
         render();
 
         await waitFor(() => {
-          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')?.classList[2]).toContain(
-            'disabled'
-          );
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeDisabled();
         });
       });
     });

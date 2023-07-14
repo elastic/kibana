@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, notImplemented } from '@hapi/boom';
+import { badRequest } from '@hapi/boom';
 import {
   createCompositeSLOParamsSchema,
   deleteCompositeSLOParamsSchema,
@@ -16,8 +16,13 @@ import {
 
 import {
   CreateCompositeSLO,
+  DefaultSummaryClient,
+  DeleteCompositeSLO,
+  FindCompositeSLO,
   KibanaSavedObjectsCompositeSLORepository,
+  UpdateCompositeSLO,
 } from '../../services/composite_slo';
+import { GetCompositeSLO } from '../../services/composite_slo/get_composite_slo';
 import { KibanaSavedObjectsSLORepository } from '../../services/slo';
 import { ObservabilityRequestHandlerContext } from '../../types';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
@@ -39,7 +44,6 @@ const createCompositeSLORoute = createObservabilityServerRoute({
     await assertLicenseAtLeastPlatinum(context);
 
     const soClient = (await context.core).savedObjects.client;
-
     const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
     const createCompositeSLO = new CreateCompositeSLO(compositeSloRepository, sloRepository);
@@ -56,10 +60,17 @@ const updateCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_write'],
   },
   params: updateCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
+    const updateCompositeSLO = new UpdateCompositeSLO(compositeSloRepository, sloRepository);
+
+    const response = await updateCompositeSLO.execute(params.path.id, params.body);
+
+    return response;
   },
 });
 
@@ -69,10 +80,14 @@ const deleteCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_write'],
   },
   params: deleteCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const deleteCompositeSLO = new DeleteCompositeSLO(compositeSloRepository);
+
+    await deleteCompositeSLO.execute(params.path.id);
   },
 });
 
@@ -82,10 +97,19 @@ const getCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_read'],
   },
   params: getCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const getCompositeSlo = new GetCompositeSLO(compositeSloRepository, summaryClient);
+
+    const response = await getCompositeSlo.execute(params.path.id);
+
+    return response;
   },
 });
 
@@ -95,10 +119,18 @@ const findCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_read'],
   },
   params: findCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const findCompositeSlo = new FindCompositeSLO(repository, summaryClient);
+
+    const response = await findCompositeSlo.execute(params?.query ?? {});
+
+    return response;
   },
 });
 

@@ -7,19 +7,40 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiFontSize,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionButtonIcon } from './dimension_button_icon';
 import { PaletteIndicator } from './palette_indicator';
 import type { AccessorConfig, Message } from './types';
+import { emptyTitleText } from './constants';
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('visualizationUiComponents.dimensionButton.editConfig', {
     defaultMessage: 'Edit {label} configuration',
-    values: { label },
+    values: {
+      label: label.trim().length ? label : emptyTitleText,
+    },
   });
+
+export interface DimensionButtonProps {
+  className?: string;
+  groupLabel: string;
+  children: React.ReactElement;
+  onClick: (id: string) => void;
+  onRemoveClick: (id: string) => void;
+  accessorConfig: AccessorConfig;
+  label: string;
+  message?: Message;
+}
 
 export function DimensionButton({
   groupLabel,
@@ -30,23 +51,34 @@ export function DimensionButton({
   label,
   message,
   ...otherProps // from Drag&Drop integration
-}: {
-  className?: string;
-  groupLabel: string;
-  children: React.ReactElement;
-  onClick: (id: string) => void;
-  onRemoveClick: (id: string) => void;
-  accessorConfig: AccessorConfig;
-  label: string;
-  message?: Message;
-}) {
+}: DimensionButtonProps) {
   return (
-    <div {...otherProps}>
+    <div
+      {...otherProps}
+      css={css`
+        ${useEuiFontSize('s')}
+        border-radius: ${euiThemeVars.euiBorderRadius};
+        position: relative;
+        line-height: 1;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: ${euiThemeVars.euiSizeS};
+        min-height: ${euiThemeVars.euiSizeXL};
+        padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS};
+      `}
+    >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiToolTip content={message?.content} position="left">
             <EuiLink
               className="lnsLayerPanel__dimensionLink"
+              css={css`
+                width: 100%;
+                &:hover {
+                  text-decoration: none;
+                }
+              `}
               data-test-subj="lnsLayerPanel-dimensionLink"
               onClick={() => onClick(accessorConfig.columnId)}
               aria-label={triggerLinkA11yText(label)}
@@ -83,7 +115,16 @@ export function DimensionButton({
         onClick={() => onRemoveClick(accessorConfig.columnId)}
         css={css`
           color: ${euiThemeVars.euiTextSubduedColor};
-          &:hover {
+          transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+          transition-property: color, opacity, background-color, transform;
+          opacity: 0;
+
+          .domDragDrop:hover &,
+          .domDragDrop:focus-within & {
+            opacity: 1;
+          }
+          &:hover,
+          &:focus {
             color: ${euiThemeVars.euiColorDangerText};
           }
         `}

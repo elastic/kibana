@@ -21,7 +21,7 @@ import { GraphWorkspaceSavedObject } from '../../types';
  * @param source - serialized version of this object what will be indexed into elasticsearch.
  * @param savedObject - VisSavedObject
  * @param options - options to pass to the saved object create method
- * @param services - provides Kibana services savedObjectsClient and overlays
+ * @param services - provides Kibana services contentClient and overlays
  * @returns {Promise} - A promise that is resolved with the objects id if the object is
  * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
  * a confirmRejected = true parameter so that case can be handled differently than

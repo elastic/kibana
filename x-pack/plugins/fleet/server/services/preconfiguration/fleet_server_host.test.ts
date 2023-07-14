@@ -118,6 +118,7 @@ describe('getCloudFleetServersHosts', () => {
         'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
       isCloudEnabled: true,
       deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
       apm: {},
     });
 
@@ -134,6 +135,8 @@ describe('getCloudFleetServersHosts', () => {
         'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
       isCloudEnabled: true,
       deploymentId: 'deployment-id-1',
+      cloudHost: 'test.fr',
+      cloudDefaultPort: '9243',
       apm: {},
     });
 
@@ -185,6 +188,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
         'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
       isCloudEnabled: true,
       deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
       apm: {},
     });
     mockedGetDefaultFleetServerHost.mockResolvedValue(null);

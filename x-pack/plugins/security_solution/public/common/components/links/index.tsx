@@ -276,12 +276,28 @@ const NetworkDetailsLinkComponent: React.FC<{
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 
-const CaseDetailsLinkComponent: React.FC<{
+export interface CaseDetailsLinkComponentProps {
   children?: React.ReactNode;
+  /**
+   * Will be used to construct case url
+   */
   detailName: string;
+  /**
+   * Link title
+   */
   title?: string;
+  /**
+   * Link index
+   */
   index?: number;
-}> = ({ index, children, detailName, title }) => {
+}
+
+const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
+  index,
+  children,
+  detailName,
+  title,
+}) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, isTourShown } = useTourContext();
@@ -571,7 +587,7 @@ interface LinkProps {
   href: string;
 }
 
-type GetSecuritySolutionProps = (
+export type GetSecuritySolutionProps = (
   params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
 ) => LinkProps;
 

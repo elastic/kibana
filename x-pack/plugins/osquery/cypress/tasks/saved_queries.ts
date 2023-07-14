@@ -114,11 +114,13 @@ export const getSavedQueriesComplexTest = () =>
 
         // Disabled submit button in test configuration
         cy.contains('Submit').should('not.be.disabled');
-        // this clears the input
-        inputQuery('{selectall}{backspace}{selectall}{backspace}');
-        cy.contains('Submit').should('be.disabled');
-        inputQuery(BIG_QUERY);
-        cy.contains('Submit').should('not.be.disabled');
+        cy.getBySel('osquery-save-query-flyout').within(() => {
+          cy.contains('Query is a required field').should('not.exist');
+          // this clears the input
+          inputQuery('{selectall}{backspace}{selectall}{backspace}');
+          cy.contains('Query is a required field');
+          inputQuery(BIG_QUERY);
+        });
 
         // Save edited
         cy.react('EuiButton').contains('Update query').click();

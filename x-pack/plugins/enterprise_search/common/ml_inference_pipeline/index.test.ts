@@ -154,10 +154,11 @@ describe('generateMlInferencePipelineBody lib function', () => {
             {
               append: {
                 field: '_source._ingest.inference_errors',
+                allow_duplicates: false,
                 value: [
                   {
                     message:
-                      "Processor 'inference' in pipeline 'my-pipeline' failed with message '{{ _ingest.on_failure_message }}'",
+                      "Processor 'inference' in pipeline 'my-pipeline' failed for field 'my-source-field' with message '{{ _ingest.on_failure_message }}'",
                     pipeline: 'my-pipeline',
                     timestamp: '{{{ _ingest.timestamp }}}',
                   },
@@ -380,12 +381,59 @@ describe('parseMlInferenceParametersFromPipeline', () => {
       model_id: 'test-model',
       pipeline_name: 'unit-test',
       source_field: 'body',
+      field_mappings: [
+        {
+          sourceField: 'body',
+          targetField: 'ml.inference.test',
+        },
+      ],
     });
   });
-  it('return null if pipeline missing inference processor', () => {
+  it('returns pipeline parameters from ingest pipeline with multiple inference processors', () => {
+    expect(
+      parseMlInferenceParametersFromPipeline('unit-test', {
+        processors: [
+          {
+            inference: {
+              field_map: {
+                body: 'text_field',
+              },
+              model_id: 'test-model',
+              target_field: 'ml.inference.body',
+            },
+          },
+          {
+            inference: {
+              field_map: {
+                title: 'text_field',
+              },
+              model_id: 'test-model',
+              target_field: 'ml.inference.title',
+            },
+          },
+        ],
+      })
+    ).toEqual({
+      destination_field: 'body',
+      model_id: 'test-model',
+      pipeline_name: 'unit-test',
+      source_field: 'body',
+      field_mappings: [
+        {
+          sourceField: 'body',
+          targetField: 'ml.inference.body',
+        },
+        {
+          sourceField: 'title',
+          targetField: 'ml.inference.title',
+        },
+      ],
+    });
+  });
+  it('return null if pipeline is missing inference processor', () => {
     expect(parseMlInferenceParametersFromPipeline('unit-test', { processors: [] })).toBeNull();
   });
-  it('return null if pipeline missing field_map', () => {
+  it('return null if pipeline is missing field_map', () => {
     expect(
       parseMlInferenceParametersFromPipeline('unit-test', {
         processors: [

@@ -217,19 +217,19 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
 
     // Save data in DB
     const soClient = await savedObjectClientFromRequest(ctx);
-    const partialSavedObject = await soClient.update<LensSavedObjectAttributes>(
-      SO_TYPE,
+
+    const savedObject = await soClient.create<LensSavedObjectAttributes>(SO_TYPE, dataToLatest, {
       id,
-      dataToLatest,
-      optionsToLatest
-    );
+      overwrite: true,
+      ...optionsToLatest,
+    });
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.update.out.result.down<
       LensUpdateOut,
       LensUpdateOut
     >({
-      item: savedObjectToLensSavedObject(partialSavedObject, true),
+      item: savedObjectToLensSavedObject(savedObject, true),
     });
 
     if (resultError) {

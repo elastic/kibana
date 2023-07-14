@@ -4,13 +4,14 @@ value:
     - group: threshold met
       id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
       uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
+      connector_type_id: .server-log
       frequency:
         notify_when: onActionGroupChange
         summary: false
         throttle: null
       params:
         level: info
-        message: "alert {{alertName}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+        message: "Rule {{rule.name}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
   api_key_created_by_user: false
   api_key_owner: elastic
   consumer: alerts
@@ -24,7 +25,7 @@ value:
   muted_alert_ids: []
   mute_all: false
   name: my rule
-  notify_when: onActionGroupChange
+  notify_when: null
   params:
     aggType: avg
     termSize: 6

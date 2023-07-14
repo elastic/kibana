@@ -14,6 +14,3 @@ export interface DownloadSourceBase {
 export type DownloadSource = DownloadSourceBase & {
   id: string;
 };
-export type DownloadSourceAttributes = DownloadSourceBase & {
-  source_id?: string;
-};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '../../common/types/timeline';
+import type { TimelineResponse } from '../../common/types/timeline/api';
 
 export interface Timeline {
   title: string;

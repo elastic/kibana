@@ -14,6 +14,7 @@ import { cspmUsageSchema } from './schema';
 import { CspmUsage } from './types';
 import { getAccountsStats } from './accounts_stats_collector';
 import { getRulesStats } from './rules_stats_collector';
+import { getInstallationStats } from './installation_stats_collector';
 
 export function registerCspmUsageCollector(
   logger: Logger,
@@ -33,23 +34,31 @@ export function registerCspmUsageCollector(
       return true;
     },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const [indicesStats, accountsStats, resourcesStats, rulesStats] = await Promise.all([
-        getIndicesStats(
-          collectorFetchContext.esClient,
-          collectorFetchContext.soClient,
-          coreServices,
-          logger
-        ),
-        getAccountsStats(collectorFetchContext.esClient, logger),
-        getResourcesStats(collectorFetchContext.esClient, logger),
-        getRulesStats(collectorFetchContext.esClient, logger),
-      ]);
+      const [indicesStats, accountsStats, resourcesStats, rulesStats, installationStats] =
+        await Promise.all([
+          getIndicesStats(
+            collectorFetchContext.esClient,
+            collectorFetchContext.soClient,
+            coreServices,
+            logger
+          ),
+          getAccountsStats(collectorFetchContext.esClient, logger),
+          getResourcesStats(collectorFetchContext.esClient, logger),
+          getRulesStats(collectorFetchContext.esClient, logger),
+          getInstallationStats(
+            collectorFetchContext.esClient,
+            collectorFetchContext.soClient,
+            coreServices,
+            logger
+          ),
+        ]);
 
       return {
         indices: indicesStats,
         accounts_stats: accountsStats,
         resources_stats: resourcesStats,
         rules_stats: rulesStats,
+        installation_stats: installationStats,
       };
     },
     schema: cspmUsageSchema,

@@ -21,10 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
-import { DimensionButton } from '@kbn/visualization-ui-components/public';
+import { DimensionButton, DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
-import { NativeRenderer } from '../../../native_renderer';
 import {
   StateSetter,
   Visualization,
@@ -34,6 +33,7 @@ import {
   VisualizationDimensionGroupConfig,
   UserMessagesGetter,
   AddLayerFunction,
+  RegisterLibraryAnnotationGroupFunction,
 } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
@@ -63,6 +63,7 @@ export function LayerPanel(
     layerIndex: number;
     isOnlyLayer: boolean;
     addLayer: AddLayerFunction;
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (
       datasourceId: string | undefined,
@@ -87,8 +88,9 @@ export function LayerPanel(
       datasourceId?: string;
       visualizationId?: string;
     }) => void;
-    indexPatternService: IndexPatternServiceAPI;
-    getUserMessages: UserMessagesGetter;
+    indexPatternService?: IndexPatternServiceAPI;
+    getUserMessages?: UserMessagesGetter;
+    displayLayerSettings: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -146,7 +148,16 @@ export function LayerPanel(
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
   const datasourceId = datasourcePublicAPI?.datasourceId;
-  const layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  let layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  // try again with aliases
+  if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
+    const aliasId = datasourcePublicAPI.datasourceAliasIds.find(
+      (id) => datasourceStates?.[id]?.state
+    );
+    if (aliasId) {
+      layerDatasourceState = datasourceStates[aliasId].state;
+    }
+  }
   const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
@@ -162,7 +173,10 @@ export function LayerPanel(
   const columnLabelMap =
     !layerDatasource && activeVisualization.getUniqueLabels
       ? activeVisualization.getUniqueLabels(props.visualizationState)
-      : layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
+      : layerDatasource?.uniqueLabels?.(
+          layerDatasourceConfigProps?.state,
+          framePublicAPI.dataViews.indexPatterns
+        );
 
   const isEmptyLayer = !dimensionGroups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
@@ -339,6 +353,7 @@ export function LayerPanel(
             layerId,
             visualizationState,
             updateVisualization,
+            props.registerLibraryAnnotationGroup,
             isSaveable
           )
           .map((action) => ({
@@ -351,7 +366,6 @@ export function LayerPanel(
         ...getSharedActions({
           layerId,
           activeVisualization,
-          visualizationState,
           core,
           layerIndex,
           layerType: activeVisualization.getLayerType(layerId, visualizationState),
@@ -359,28 +373,33 @@ export function LayerPanel(
           isTextBasedLanguage,
           hasLayerSettings: Boolean(
             (Object.values(visualizationLayerSettings).some(Boolean) &&
-              activeVisualization.renderLayerSettings) ||
-              layerDatasource?.renderLayerSettings
+              activeVisualization.LayerSettingsComponent) ||
+              layerDatasource?.LayerSettingsComponent
           ),
           openLayerSettings: () => setPanelSettingsOpen(true),
           onCloneLayer,
           onRemoveLayer: () => onRemoveLayer(layerId),
+          customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
+            layerId,
+            visualizationState
+          ),
         }),
       ].filter((i) => i.isCompatible),
     [
       activeVisualization,
+      layerId,
+      visualizationState,
+      updateVisualization,
+      props.registerLibraryAnnotationGroup,
+      isSaveable,
       core,
+      layerIndex,
       isOnlyLayer,
       isTextBasedLanguage,
-      layerDatasource?.renderLayerSettings,
-      layerId,
-      layerIndex,
+      visualizationLayerSettings,
+      layerDatasource?.LayerSettingsComponent,
       onCloneLayer,
       onRemoveLayer,
-      updateVisualization,
-      visualizationLayerSettings,
-      visualizationState,
-      isSaveable,
     ]
   );
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
@@ -406,20 +425,24 @@ export function LayerPanel(
                   activeVisualization={activeVisualization}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LayerActions
-                  actions={compatibleActions}
-                  layerIndex={layerIndex}
-                  mountingPoint={layerActionsFlyoutRef.current}
-                />
-                <div ref={layerActionsFlyoutRef} />
-              </EuiFlexItem>
+              {props.displayLayerSettings && (
+                <EuiFlexItem grow={false}>
+                  <LayerActions
+                    actions={compatibleActions}
+                    layerIndex={layerIndex}
+                    mountingPoint={layerActionsFlyoutRef.current}
+                  />
+                  <div ref={layerActionsFlyoutRef} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
-            {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
-            {layerDatasource && (
-              <NativeRenderer
-                render={layerDatasource.renderLayerPanel}
-                nativeProps={{
+            {props.indexPatternService &&
+              (layerDatasource || activeVisualization.LayerPanelComponent) && (
+                <EuiSpacer size="s" />
+              )}
+            {layerDatasource && props.indexPatternService && (
+              <layerDatasource.LayerPanelComponent
+                {...{
                   layerId,
                   state: layerDatasourceState,
                   activeData: props.framePublicAPI.activeData,
@@ -429,10 +452,9 @@ export function LayerPanel(
                 }}
               />
             )}
-            {activeVisualization.renderLayerPanel && (
-              <NativeRenderer
-                render={activeVisualization.renderLayerPanel}
-                nativeProps={{
+            {activeVisualization.LayerPanelComponent && (
+              <activeVisualization.LayerPanelComponent
+                {...{
                   layerId,
                   state: visualizationState,
                   frame: framePublicAPI,
@@ -524,17 +546,14 @@ export function LayerPanel(
               >
                 <>
                   {group.accessors.length ? (
-                    <ReorderProvider
-                      id={group.groupId}
-                      className={'lnsLayerPanel__group'}
-                      dataTestSubj="lnsDragDrop"
-                    >
+                    <ReorderProvider className={'lnsLayerPanel__group'} dataTestSubj="lnsDragDrop">
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
 
-                        const messages = props.getUserMessages('dimensionButton', {
-                          dimensionId: columnId,
-                        });
+                        const messages =
+                          props?.getUserMessages?.('dimensionButton', {
+                            dimensionId: columnId,
+                          }) ?? [];
 
                         return (
                           <DraggableDimensionButton
@@ -572,7 +591,6 @@ export function LayerPanel(
                             indexPatterns={dataViews.indexPatterns}
                           >
                             <DimensionButton
-                              className="lnsLayerPanel__dimension"
                               accessorConfig={accessorConfig}
                               label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
                               groupLabel={group.groupLabel}
@@ -593,19 +611,18 @@ export function LayerPanel(
                               }}
                             >
                               {layerDatasource ? (
-                                <NativeRenderer
-                                  render={layerDatasource.renderDimensionTrigger}
-                                  nativeProps={{
+                                <>
+                                  {layerDatasource.DimensionTriggerComponent({
                                     ...layerDatasourceConfigProps,
                                     columnId: accessorConfig.columnId,
                                     groupId: group.groupId,
                                     filterOperations: group.filterOperations,
                                     indexPatterns: dataViews.indexPatterns,
-                                  }}
-                                />
+                                  })}
+                                </>
                               ) : (
                                 <>
-                                  {activeVisualization?.renderDimensionTrigger?.({
+                                  {activeVisualization?.DimensionTriggerComponent?.({
                                     columnId,
                                     label: columnLabelMap?.[columnId] ?? '',
                                     hideTooltip,
@@ -621,25 +638,24 @@ export function LayerPanel(
 
                   {group.fakeFinalAccessor && (
                     <div
-                      className="lnsLayerPanel__dimension domDragDrop-isDraggable"
                       css={css`
+                        display: flex;
+                        align-items: center;
+                        border-radius: ${euiThemeVars.euiBorderRadius};
+                        min-height: ${euiThemeVars.euiSizeXL};
+
                         cursor: default !important;
-                        border-color: transparent !important;
-                        margin-top: ${group.accessors.length ? 8 : 0}px !important;
                         background-color: ${euiThemeVars.euiColorLightShade} !important;
+                        border-color: transparent !important;
                         box-shadow: none !important;
+                        padding: 0 ${euiThemeVars.euiSizeS};
                       `}
                     >
-                      <EuiText
-                        size="s"
-                        className="lnsLayerPanel__triggerText"
+                      <DimensionTrigger
+                        label={group.fakeFinalAccessor.label}
+                        id="lns-fakeDimension"
                         data-test-subj="lns-fakeDimension"
-                        color={'subdued'}
-                      >
-                        <span className="lnsLayerPanel__triggerTextLabel">
-                          {group.fakeFinalAccessor.label}
-                        </span>
-                      </EuiText>
+                      />
                     </div>
                   )}
 
@@ -688,7 +704,7 @@ export function LayerPanel(
           })}
         </EuiPanel>
       </section>
-      {(layerDatasource?.renderLayerSettings || activeVisualization?.renderLayerSettings) && (
+      {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
           panelRef={(el) => (settingsPanelRef.current = el)}
           isOpen={isPanelSettingsOpen}
@@ -704,7 +720,7 @@ export function LayerPanel(
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
-              {layerDatasource?.renderLayerSettings || visualizationLayerSettings.data ? (
+              {layerDatasource?.LayerSettingsComponent || visualizationLayerSettings.data ? (
                 <EuiText
                   size="s"
                   css={css`
@@ -718,21 +734,17 @@ export function LayerPanel(
                   </h4>
                 </EuiText>
               ) : null}
-              {layerDatasource?.renderLayerSettings && (
+              {layerDatasource?.LayerSettingsComponent && (
                 <>
-                  <NativeRenderer
-                    render={layerDatasource.renderLayerSettings}
-                    nativeProps={layerDatasourceConfigProps}
-                  />
+                  <layerDatasource.LayerSettingsComponent {...layerDatasourceConfigProps} />
                 </>
               )}
-              {layerDatasource?.renderLayerSettings && visualizationLayerSettings.data ? (
+              {layerDatasource?.LayerSettingsComponent && visualizationLayerSettings.data ? (
                 <EuiSpacer size="m" />
               ) : null}
-              {activeVisualization?.renderLayerSettings && visualizationLayerSettings.data ? (
-                <NativeRenderer
-                  render={activeVisualization?.renderLayerSettings}
-                  nativeProps={{
+              {activeVisualization?.LayerSettingsComponent && visualizationLayerSettings.data ? (
+                <activeVisualization.LayerSettingsComponent
+                  {...{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
                     panelRef: settingsPanelRef,
@@ -754,10 +766,9 @@ export function LayerPanel(
                   </h4>
                 </EuiText>
               ) : null}
-              {activeVisualization?.renderLayerSettings && (
-                <NativeRenderer
-                  render={activeVisualization?.renderLayerSettings}
-                  nativeProps={{
+              {activeVisualization?.LayerSettingsComponent && (
+                <activeVisualization.LayerSettingsComponent
+                  {...{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
                     panelRef: settingsPanelRef,
@@ -802,59 +813,54 @@ export function LayerPanel(
         }}
         panel={
           <>
-            {activeGroup && activeId && layerDatasource && (
-              <NativeRenderer
-                render={layerDatasource.renderDimensionEditor}
-                nativeProps={{
-                  ...layerDatasourceConfigProps,
-                  core: props.core,
-                  columnId: activeId,
-                  groupId: activeGroup.groupId,
-                  hideGrouping: activeGroup.hideGrouping,
-                  filterOperations: activeGroup.filterOperations,
-                  isMetricDimension: activeGroup?.isMetricDimension,
-                  dimensionGroups,
-                  toggleFullscreen,
-                  isFullscreen,
-                  setState: updateDataLayerState,
-                  supportStaticValue: Boolean(activeGroup.supportStaticValue),
-                  paramEditorCustomProps: activeGroup.paramEditorCustomProps,
-                  enableFormatSelector: activeGroup.enableFormatSelector !== false,
-                  formatSelectorOptions: activeGroup.formatSelectorOptions,
-                  layerType: activeVisualization.getLayerType(layerId, visualizationState),
-                  indexPatterns: dataViews.indexPatterns,
-                  activeData: layerVisualizationConfigProps.activeData,
-                  dataSectionExtra: !isFullscreen &&
-                    !activeDimension.isNew &&
-                    activeVisualization.renderDimensionEditorDataExtra && (
-                      <NativeRenderer
-                        render={activeVisualization.renderDimensionEditorDataExtra}
-                        nativeProps={{
-                          ...layerVisualizationConfigProps,
-                          groupId: activeGroup.groupId,
-                          accessor: activeId,
-                          datasource,
-                          setState: props.updateVisualization,
-                          addLayer: props.addLayer,
-                          removeLayer: props.onRemoveLayer,
-                          panelRef,
-                        }}
-                      />
-                    ),
-                }}
-              />
-            )}
+            {activeGroup &&
+              activeId &&
+              layerDatasource &&
+              layerDatasource.DimensionEditorComponent({
+                ...layerDatasourceConfigProps,
+                core: props.core,
+                columnId: activeId,
+                groupId: activeGroup.groupId,
+                hideGrouping: activeGroup.hideGrouping,
+                filterOperations: activeGroup.filterOperations,
+                isMetricDimension: activeGroup?.isMetricDimension,
+                dimensionGroups,
+                toggleFullscreen,
+                isFullscreen,
+                setState: updateDataLayerState,
+                supportStaticValue: Boolean(activeGroup.supportStaticValue),
+                paramEditorCustomProps: activeGroup.paramEditorCustomProps,
+                enableFormatSelector: activeGroup.enableFormatSelector !== false,
+                layerType: activeVisualization.getLayerType(layerId, visualizationState),
+                indexPatterns: dataViews.indexPatterns,
+                activeData: layerVisualizationConfigProps.activeData,
+                dataSectionExtra: !isFullscreen &&
+                  !activeDimension.isNew &&
+                  activeVisualization.DimensionEditorDataExtraComponent && (
+                    <activeVisualization.DimensionEditorDataExtraComponent
+                      {...{
+                        ...layerVisualizationConfigProps,
+                        groupId: activeGroup.groupId,
+                        accessor: activeId,
+                        datasource,
+                        setState: props.updateVisualization,
+                        addLayer: props.addLayer,
+                        removeLayer: props.onRemoveLayer,
+                        panelRef,
+                      }}
+                    />
+                  ),
+              })}
             {activeGroup &&
               activeId &&
               !isFullscreen &&
               !activeDimension.isNew &&
-              activeVisualization.renderDimensionEditor &&
+              activeVisualization.DimensionEditorComponent &&
               activeGroup?.enableDimensionEditor && (
                 <>
                   <div className="lnsLayerPanel__styleEditor">
-                    <NativeRenderer
-                      render={activeVisualization.renderDimensionEditor}
-                      nativeProps={{
+                    <activeVisualization.DimensionEditorComponent
+                      {...{
                         ...layerVisualizationConfigProps,
                         groupId: activeGroup.groupId,
                         accessor: activeId,
@@ -866,10 +872,9 @@ export function LayerPanel(
                       }}
                     />
                   </div>
-                  {activeVisualization.renderDimensionEditorAdditionalSection && (
-                    <NativeRenderer
-                      render={activeVisualization.renderDimensionEditorAdditionalSection}
-                      nativeProps={{
+                  {activeVisualization.DimensionEditorAdditionalSectionComponent && (
+                    <activeVisualization.DimensionEditorAdditionalSectionComponent
+                      {...{
                         ...layerVisualizationConfigProps,
                         groupId: activeGroup.groupId,
                         accessor: activeId,

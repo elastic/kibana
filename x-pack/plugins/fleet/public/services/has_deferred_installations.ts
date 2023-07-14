@@ -8,8 +8,10 @@
 import type { PackageInfo, PackageListItem } from '../../common';
 
 export const getDeferredInstallationsCnt = (pkg?: PackageInfo | PackageListItem | null): number => {
-  return pkg && 'savedObject' in pkg && pkg.savedObject
-    ? pkg.savedObject.attributes?.installed_es?.filter((d) => d.deferred).length
+  if (!pkg) return 0;
+
+  return pkg && 'installationInfo' in pkg && pkg.installationInfo
+    ? pkg.installationInfo.installed_es?.filter((d) => d.deferred).length
     : 0;
 };
 

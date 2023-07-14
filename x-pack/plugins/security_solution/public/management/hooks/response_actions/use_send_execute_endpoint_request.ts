@@ -20,6 +20,7 @@ export const useSendExecuteEndpoint = (
     (executeActionReqBody) => {
       return KibanaServices.get().http.post<ResponseActionApiResponse>(EXECUTE_ROUTE, {
         body: JSON.stringify(executeActionReqBody),
+        version: '2023-10-31',
       });
     },
     options

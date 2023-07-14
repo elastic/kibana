@@ -8,8 +8,8 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { Theme, ThemeProvider } from '@emotion/react';
 import {
-  APP_WRAPPER_CLASS,
   AppMountParameters,
+  APP_WRAPPER_CLASS,
   CoreStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -19,21 +19,20 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-import { Route } from '@kbn/shared-ux-router';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  Router,
-  Switch,
-  RouteComponentProps,
-  RouteProps,
-} from 'react-router-dom';
+import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { customLogsRoutes } from '../components/app/custom_logs/wizard';
+import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
-import { routes } from '../routes';
+import { baseRoutes, routes } from '../routes';
+import { CustomLogs } from '../routes/templates/custom_logs';
 
 export type BreadcrumbTitle<
   T extends { [K in keyof T]?: string | undefined } = {}
@@ -58,20 +57,43 @@ export const breadcrumbsApp = {
 };
 
 function App() {
+  const customLogRoutesPaths = Object.keys(customLogsRoutes);
+
   return (
     <>
-      <Switch>
-        {Object.keys(routes).map((key) => {
+      <Routes>
+        {Object.keys(baseRoutes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
           const Wrapper = () => {
             return handler();
           };
+
           return (
             <Route key={path} path={path} exact={exact} component={Wrapper} />
           );
         })}
-      </Switch>
+        <Route exact path={customLogRoutesPaths}>
+          <CustomLogs>
+            {customLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return (
+                <Route
+                  key={path}
+                  path={path}
+                  exact={exact}
+                  component={Wrapper}
+                />
+              );
+            })}
+          </CustomLogs>
+        </Route>
+      </Routes>
     </>
   );
 }
@@ -105,7 +127,7 @@ export function ObservabilityOnboardingAppRoot({
   deps: ObservabilityOnboardingPluginSetupDeps;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
 }) {
-  const { history } = appMountParameters;
+  const { history, setHeaderActionMenu, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = { ...deps };
 
@@ -123,7 +145,7 @@ export function ObservabilityOnboardingAppRoot({
         }}
       >
         <KibanaThemeProvider
-          theme$={appMountParameters.theme$}
+          theme$={theme$}
           modify={{
             breakpoint: {
               xxl: 1600,
@@ -134,6 +156,12 @@ export function ObservabilityOnboardingAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <EuiErrorBoundary>
+                <HeaderMenuPortal
+                  setHeaderActionMenu={setHeaderActionMenu}
+                  theme$={theme$}
+                >
+                  <ObservabilityOnboardingHeaderActionMenu />
+                </HeaderMenuPortal>
                 <ObservabilityOnboardingApp />
               </EuiErrorBoundary>
             </Router>

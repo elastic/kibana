@@ -21,6 +21,7 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./ilm'));
     loadTestFile(require.resolve('./install_bundled'));
     loadTestFile(require.resolve('./install_by_upload'));
+    loadTestFile(require.resolve('./install_custom'));
     loadTestFile(require.resolve('./install_endpoint'));
     loadTestFile(require.resolve('./install_overrides'));
     loadTestFile(require.resolve('./install_prerelease'));
@@ -41,5 +42,9 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./verification_key_id'));
     loadTestFile(require.resolve('./install_integration_in_multiple_spaces.ts'));
     loadTestFile(require.resolve('./install_hidden_datastreams'));
+    loadTestFile(require.resolve('./bulk_get_assets'));
+    loadTestFile(require.resolve('./install_dynamic_template_metric'));
+    loadTestFile(require.resolve('./routing_rules'));
+    loadTestFile(require.resolve('./install_runtime_field'));
   });
 }

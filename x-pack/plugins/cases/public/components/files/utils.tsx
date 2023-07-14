@@ -12,7 +12,7 @@ import type {
 
 import {
   compressionMimeTypes,
-  imageMimeTypes,
+  IMAGE_MIME_TYPES,
   textMimeTypes,
   pdfMimeTypes,
 } from '../../../common/constants/mime_types';
@@ -26,7 +26,7 @@ export const parseMimeType = (mimeType: string | undefined) => {
     return i18n.UNKNOWN_MIME_TYPE;
   }
 
-  if (imageMimeTypes.includes(mimeType)) {
+  if (IMAGE_MIME_TYPES.has(mimeType)) {
     return i18n.IMAGE_MIME_TYPE;
   }
 

@@ -163,6 +163,7 @@ export class RuleRegistryPlugin
       },
       securityPluginSetup: security,
       ruleDataService,
+      getRuleType: plugins.alerting.getType,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

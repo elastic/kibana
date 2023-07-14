@@ -59,6 +59,7 @@ describe('When using the `useGetFileInfo()` hook', () => {
     await renderReactQueryHook(() => useGetFileInfo(actionDetailsMock));
 
     expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
+      version: '2023-10-31',
       path: resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: '123',
         file_id: '123.agent-a',
@@ -70,6 +71,7 @@ describe('When using the `useGetFileInfo()` hook', () => {
     await renderReactQueryHook(() => useGetFileInfo(actionDetailsMock, 'agent-a'));
 
     expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
+      version: '2023-10-31',
       path: resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: '123',
         file_id: '123.agent-a',

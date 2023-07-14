@@ -18,9 +18,9 @@ import {
 import { TestProviders } from '../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
 import { LeftPanelInsightsTabPath, LeftPanelKey } from '../../left';
-import { useCorrelations } from '../hooks/use_correlations';
+import { useCorrelations } from '../../shared/hooks/use_correlations';
 
-jest.mock('../hooks/use_correlations');
+jest.mock('../../shared/hooks/use_correlations');
 
 const panelContextValue = {
   eventId: 'event id',
@@ -143,6 +143,7 @@ describe('<ThreatIntelligenceOverview />', () => {
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
+        scopeId: panelContextValue.scopeId,
       },
     });
   });

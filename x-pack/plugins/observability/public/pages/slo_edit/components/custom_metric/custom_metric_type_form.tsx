@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -16,25 +15,20 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CreateSLOInput } from '@kbn/slo-schema';
-
-import {
-  Field,
-  useFetchIndexPatternFields,
-} from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { IndexSelection } from '../custom_common/index_selection';
+import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { createOptionsFromFields } from '../../helpers/create_options';
+import { CreateSLOForm } from '../../types';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
+import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
+
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
-interface Option {
-  label: string;
-  value: string;
-}
-
 export function CustomMetricIndicatorTypeForm() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
 
   const { isLoading, data: indexFields } = useFetchIndexPatternFields(
     watch('indicator.params.index')
@@ -57,7 +51,6 @@ export function CustomMetricIndicatorTypeForm() {
           >
             <Controller
               name="indicator.params.timestampField"
-              shouldUnregister
               defaultValue=""
               rules={{ required: true }}
               control={control}
@@ -85,7 +78,7 @@ export function CustomMetricIndicatorTypeForm() {
 
                     field.onChange('');
                   }}
-                  options={createOptions(timestampFields)}
+                  options={createOptionsFromFields(timestampFields)}
                   selectedOptions={
                     !!watch('indicator.params.index') &&
                     !!field.value &&
@@ -109,7 +102,6 @@ export function CustomMetricIndicatorTypeForm() {
 
       <EuiFlexItem>
         <QueryBuilder
-          control={control}
           dataTestSubj="customMetricIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
           label={i18n.translate(
@@ -150,6 +142,10 @@ export function CustomMetricIndicatorTypeForm() {
             'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetricLabel',
             { defaultMessage: 'Good metric' }
           )}
+          filterLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.goodFilterLabel',
+            { defaultMessage: 'Good filter' }
+          )}
           metricTooltip={
             <EuiIconTip
               content={i18n.translate(
@@ -189,6 +185,10 @@ export function CustomMetricIndicatorTypeForm() {
             'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetricLabel',
             { defaultMessage: 'Total metric' }
           )}
+          filterLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.totalFilterLabel',
+            { defaultMessage: 'Total filter' }
+          )}
           metricTooltip={
             <EuiIconTip
               content={i18n.translate(
@@ -215,12 +215,7 @@ export function CustomMetricIndicatorTypeForm() {
           }
         />
       </EuiPanel>
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
-}
-
-function createOptions(fields: Field[]): Option[] {
-  return fields
-    .map((field) => ({ label: field.name, value: field.name }))
-    .sort((a, b) => String(a.label).localeCompare(b.label));
 }
