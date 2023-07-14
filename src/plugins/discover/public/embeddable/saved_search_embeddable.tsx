@@ -613,7 +613,6 @@ export class SavedSearchEmbeddable
     if (
       this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
       viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-      savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
       searchProps.services &&
       searchProps.dataView &&
       Array.isArray(searchProps.columns)
@@ -656,6 +655,7 @@ export class SavedSearchEmbeddable
 
     if (searchProps.services) {
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
+
       ReactDOM.render(
         <I18nProvider>
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>

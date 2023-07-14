@@ -16,9 +16,13 @@ import type {
 } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../common';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
-import { getSearchSavedObject, convertToSavedSearch } from './get_saved_searches';
+import {
+  getSearchSavedObject,
+  convertToSavedSearch,
+} from '../../../common/service/get_saved_searches';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
 import { saveSearchSavedObject } from './save_saved_searches';
+import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
 export interface SavedSearchUnwrapMetaInfo {
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
@@ -59,7 +63,7 @@ export function getSavedSearchAttributeService(
       return { id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<SavedSearchUnwrapResult> => {
-      const so = await getSearchSavedObject(savedObjectId, services);
+      const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(services));
 
       return {
         attributes: {
@@ -95,7 +99,7 @@ export const toSavedSearch = async (
       savedSearchId: id,
       sharingSavedObjectProps,
     },
-    services
+    createGetSavedSearchDeps(services)
   );
 };
 
