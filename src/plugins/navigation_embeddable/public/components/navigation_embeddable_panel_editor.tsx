@@ -152,7 +152,11 @@ const NavigationEmbeddablePanelEditor = ({
       <div ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}</h2>
+          <h2>
+            {initialInput.links && Object.keys(initialInput.links).length > 0
+              ? NavEmbeddableStrings.editor.panelEditor.getEditFlyoutTitle()
+              : NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

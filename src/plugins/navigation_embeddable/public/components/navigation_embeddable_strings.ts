@@ -43,6 +43,10 @@ export const NavEmbeddableStrings = {
         i18n.translate('navigationEmbeddable.panelEditor.createFlyoutTitle', {
           defaultMessage: 'Create links panel',
         }),
+      getEditFlyoutTitle: () =>
+        i18n.translate('navigationEmbeddable.panelEditor.editFlyoutTitle', {
+          defaultMessage: 'Edit links panel',
+        }),
       getSaveButtonLabel: () =>
         i18n.translate('navigationEmbeddable.panelEditor.saveButtonLabel', {
           defaultMessage: 'Save',
