@@ -20,7 +20,8 @@ properties:
         sli.apm.transactionErrorRate: './indicator_properties_apm_availability.yaml'
         sli.kql.custom: './indicator_properties_custom_kql.yaml'
         sli.apm.transactionDuration: './indicator_properties_apm_latency.yaml'
-        sli.apm.sli.metric.custom: './indicator_properties_custom_metric.yaml'
+        sli.metric.custom: 'indicator_properties_custom_metric.yaml'
+        sli.histogram.custom: 'indicator_properties_histogram.yaml'
     oneOf:
       - $ref: "indicator_properties_custom_kql.yaml"
       - $ref: "indicator_properties_apm_availability.yaml"
