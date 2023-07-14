@@ -46,6 +46,7 @@ import {
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
 } from './rule_action_helper';
+import { ConnectorAdapter } from '../connector_adapters/types';
 
 enum Reasons {
   MUTED = 'muted',
@@ -73,6 +74,11 @@ interface RunActionArgs<
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
   ruleId: string;
   spaceId: string;
+}
+
+interface RunSystemActionArgs {
+  connectorAdapter: ConnectorAdapter;
+  summarizedAlerts: CombinedSummarizedAlerts;
 }
 
 export class ExecutionHandler<
@@ -256,7 +262,15 @@ export class ExecutionHandler<
             },
           });
         } else if (isSystemAction) {
-          //
+          const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
+            action.actionTypeId
+          );
+
+          if (connectorAdapter) {
+            const toEnqueueForExecution = await this.runSystemAction({ connectorAdapter });
+
+            bulkActions.push(...toEnqueueForExecution);
+          }
         } else {
           const executableAlert = alert!;
 
@@ -388,6 +402,10 @@ export class ExecutionHandler<
 
     return toEnqueueForExecution;
   }
+
+  private async runSystemAction({
+    connectorAdapter,
+  }: RunSystemActionArgs): Promise<EnqueueExecutionOptions[]> {}
 
   private logNumberOfFilteredAlerts({
     numberOfAlerts = 0,
