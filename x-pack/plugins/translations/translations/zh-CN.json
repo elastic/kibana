@@ -39283,7 +39283,6 @@
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "短 URL",
     "xpack.features.savedObjectsManagementFeatureName": "已保存对象管理",
     "xpack.features.visualizeFeatureName": "Visualize 库",
-    "xpack.observability_onboarding.breadcrumbs.logs": "日志",
     "xpack.observability_onboarding.breadcrumbs.onboarding": "载入",
     "xpack.observability_onboarding.fetcher.error.status": "错误",
     "xpack.observability_onboarding.fetcher.error.title": "提取资源时出错",
