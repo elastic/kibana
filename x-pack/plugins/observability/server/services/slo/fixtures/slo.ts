@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+import { SavedObject } from '@kbn/core-saved-objects-server';
+import { CreateSLOParams, HistogramIndicator, sloSchema } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-server';
-import { sloSchema, CreateSLOParams, HistogramIndicator } from '@kbn/slo-schema';
-
-import { SO_SLO_TYPE } from '../../../saved_objects';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -22,9 +20,10 @@ import {
   SLO,
   StoredSLO,
 } from '../../../domain/models';
+import { SO_SLO_TYPE } from '../../../saved_objects';
 import { Paginated } from '../slo_repository';
-import { oneWeek, twoMinute } from './duration';
-import { sevenDaysRolling } from './time_window';
+import { twoMinute } from './duration';
+import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -184,10 +183,7 @@ export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}
 
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
-    timeWindow: {
-      duration: oneWeek(),
-      type: 'calendarAligned',
-    },
+    timeWindow: weeklyCalendarAligned(),
     ...params,
   });
 };
