@@ -12,6 +12,7 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { noop } from 'lodash/fp';
 import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -27,6 +28,8 @@ export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   conversationSettings: UseAssistantContext['conversations'];
+  defaultConnectorId?: string;
+  defaultProvider?: OpenAiProviderType;
   http: HttpSetup;
   onSelectedConversationChange: (conversation?: Conversation) => void;
   selectedConversation: Conversation | undefined;
@@ -43,6 +46,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
   ({
     actionTypeRegistry,
     allSystemPrompts,
+    defaultConnectorId,
+    defaultProvider,
     selectedConversation,
     onSelectedConversationChange,
     conversationSettings,
@@ -68,8 +73,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               id: c ?? '',
               messages: [],
               apiConfig: {
-                connectorId: undefined,
-                provider: undefined,
+                connectorId: defaultConnectorId,
+                provider: defaultProvider,
                 defaultSystemPromptId: defaultSystemPrompt?.id,
               },
             }
@@ -86,7 +91,13 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
         onSelectedConversationChange(newSelectedConversation);
       },
-      [defaultSystemPrompt?.id, onSelectedConversationChange, setUpdatedConversationSettings]
+      [
+        defaultConnectorId,
+        defaultProvider,
+        defaultSystemPrompt?.id,
+        onSelectedConversationChange,
+        setUpdatedConversationSettings,
+      ]
     );
 
     const onConversationDeleted = useCallback(
@@ -205,6 +216,8 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
             showTitles={true}
+            isSettingsModalVisible={true}
+            setIsSettingsModalVisible={noop} // noop, already in settings
           />
         </EuiFormRow>
 

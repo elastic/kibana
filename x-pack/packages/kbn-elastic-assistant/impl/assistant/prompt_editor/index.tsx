@@ -21,10 +21,12 @@ export interface Props {
   conversation: Conversation | undefined;
   editingSystemPromptId: string | undefined;
   isNewConversation: boolean;
+  isSettingsModalVisible: boolean;
   promptContexts: Record<string, PromptContext>;
   promptTextPreview: string;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
@@ -38,10 +40,12 @@ const PromptEditorComponent: React.FC<Props> = ({
   conversation,
   editingSystemPromptId,
   isNewConversation,
+  isSettingsModalVisible,
   promptContexts,
   promptTextPreview,
   onSystemPromptSelectionChange,
   selectedPromptContexts,
+  setIsSettingsModalVisible,
   setSelectedPromptContexts,
 }) => {
   const commentBody = useMemo(
@@ -52,6 +56,8 @@ const PromptEditorComponent: React.FC<Props> = ({
             conversation={conversation}
             editingSystemPromptId={editingSystemPromptId}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            isSettingsModalVisible={isSettingsModalVisible}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         )}
 

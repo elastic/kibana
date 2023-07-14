@@ -61,7 +61,9 @@ jest.mock('../../use_conversation', () => {
 
 describe('SystemPrompt', () => {
   const editingSystemPromptId = undefined;
+  const isSettingsModalVisible = false;
   const onSystemPromptSelectionChange = jest.fn();
+  const setIsSettingsModalVisible = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,7 +85,9 @@ describe('SystemPrompt', () => {
         <SystemPrompt
           conversation={conversation}
           editingSystemPromptId={editingSystemPromptId}
+          isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
         />
       );
     });
@@ -111,7 +115,9 @@ describe('SystemPrompt', () => {
         <SystemPrompt
           conversation={BASE_CONVERSATION}
           editingSystemPromptId={BASE_CONVERSATION.id}
+          isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
         />
       );
     });
@@ -143,7 +149,9 @@ describe('SystemPrompt', () => {
           <SystemPrompt
             conversation={BASE_CONVERSATION}
             editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         </TestProviders>
       );
@@ -187,7 +195,9 @@ describe('SystemPrompt', () => {
           <SystemPrompt
             conversation={BASE_CONVERSATION}
             editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         </TestProviders>
       );
@@ -245,7 +255,9 @@ describe('SystemPrompt', () => {
           <SystemPrompt
             conversation={BASE_CONVERSATION}
             editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         </TestProviders>
       );
@@ -310,7 +322,9 @@ describe('SystemPrompt', () => {
           <SystemPrompt
             conversation={BASE_CONVERSATION}
             editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         </TestProviders>
       );
@@ -385,7 +399,9 @@ describe('SystemPrompt', () => {
           <SystemPrompt
             conversation={BASE_CONVERSATION}
             editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
           />
         </TestProviders>
       );
@@ -451,7 +467,9 @@ describe('SystemPrompt', () => {
         <SystemPrompt
           conversation={BASE_CONVERSATION}
           editingSystemPromptId={BASE_CONVERSATION.id}
+          isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
         />
       </TestProviders>
     );
@@ -467,7 +485,9 @@ describe('SystemPrompt', () => {
         <SystemPrompt
           conversation={BASE_CONVERSATION}
           editingSystemPromptId={BASE_CONVERSATION.id}
+          isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
         />
       </TestProviders>
     );

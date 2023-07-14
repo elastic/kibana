@@ -17,13 +17,17 @@ import { SelectSystemPrompt } from './select_system_prompt';
 interface Props {
   conversation: Conversation | undefined;
   editingSystemPromptId: string | undefined;
+  isSettingsModalVisible: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
   conversation,
   editingSystemPromptId,
+  isSettingsModalVisible,
   onSystemPromptSelectionChange,
+  setIsSettingsModalVisible,
 }) => {
   const { allSystemPrompts } = useAssistantContext();
 
@@ -59,9 +63,11 @@ const SystemPromptComponent: React.FC<Props> = ({
           isClearable={true}
           isEditing={isEditing}
           isOpen={isEditing}
+          isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           selectedPrompt={selectedPrompt}
           setIsEditing={setIsEditing}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
         />
       ) : (
         <EuiFlexGroup alignItems="flexStart" gutterSize="none">

@@ -31,6 +31,7 @@ const defaultProps: Props = {
   conversation: undefined,
   editingSystemPromptId: undefined,
   isNewConversation: true,
+  isSettingsModalVisible: false,
   onSystemPromptSelectionChange: jest.fn(),
   promptContexts: {
     [mockAlertPromptContext.id]: mockAlertPromptContext,
@@ -38,6 +39,7 @@ const defaultProps: Props = {
   },
   promptTextPreview: 'Preview text',
   selectedPromptContexts: {},
+  setIsSettingsModalVisible: jest.fn(),
   setSelectedPromptContexts: jest.fn(),
 };
 
