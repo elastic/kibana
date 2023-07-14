@@ -30,8 +30,7 @@ import {
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-// FLAKY: https://github.com/elastic/kibana/issues/133470
-describe.skip('Fleet preconfiguration reset', () => {
+describe('Fleet preconfiguration reset', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
 
