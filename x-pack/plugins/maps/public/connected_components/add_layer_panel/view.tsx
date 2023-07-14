@@ -179,9 +179,10 @@ export class AddLayerPanel extends Component<Props, State> {
       return null;
     }
 
-    const isDisabled = this.state.currentStep.id === ADD_LAYER_STEP_ID 
-      ? !this.props.hasPreviewLayers 
-      : !this.state.isNextStepBtnEnabled;
+    const isDisabled =
+      this.state.currentStep.id === ADD_LAYER_STEP_ID
+        ? !this.props.hasPreviewLayers
+        : !this.state.isNextStepBtnEnabled;
 
     const nextButton = (
       <EuiFlexItem grow={false}>
