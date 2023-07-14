@@ -7,7 +7,7 @@
 
 import { CommentType, ConnectorTypes } from '../../../api';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
-import { CasesStatusRequestRt, CasesStatusResponseRt } from '../status/v1';
+import { CasesStatusRequestRt, CasesStatusResponseRt } from '../stats/v1';
 import {
   AllReportersFindRequestRt,
   CasePatchRequestRt,

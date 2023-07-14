@@ -35,7 +35,7 @@ import {
   CaseStatusRt,
   RelatedCaseRt,
 } from '../../domain/case/v1';
-import { CasesStatusResponseRt } from '../status/v1';
+import { CasesStatusResponseRt } from '../stats/v1';
 
 /**
  * Create case
@@ -439,8 +439,11 @@ export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
+export type GetTagsResponse = rt.TypeOf<typeof GetTagsResponseRt>;
 export type AllCategoriesFindRequest = rt.TypeOf<typeof AllCategoriesFindRequestRt>;
+export type GetCategoriesResponse = rt.TypeOf<typeof GetCategoriesResponseRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
+export type GetReportersResponse = rt.TypeOf<typeof GetReportersResponseRt>;
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
