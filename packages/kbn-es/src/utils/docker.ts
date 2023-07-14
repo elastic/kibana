@@ -36,10 +36,34 @@ interface RunServerlessEsNodeArgs {
   image: string;
 }
 
-const DEFAULT_DOCKER_BASE_CMD = 'run --name es01 -p 9200:9200 -p 9300:9300 -d --rm';
-export const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co';
-export const DEFAULT_DOCKER_IMG = `${DEFAULT_DOCKER_REGISTRY}/elasticsearch/elasticsearch:${pkg.version}-SNAPSHOT`;
-export const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_IMG}`;
+const DOCKER_REGISTRY = 'docker.elastic.co';
+
+const DOCKER_BASE_CMD = [
+  'run',
+
+  '--rm',
+
+  '--detach',
+
+  '--name',
+  'es01',
+
+  '-p',
+  '9200:9200',
+
+  '-p',
+  '9300:9300',
+];
+
+export const DOCKER_REPO = 'elasticsearch/elasticsearch';
+export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
+export const DOCKER_IMG = `${DOCKER_REGISTRY}/${DOCKER_REPO}:${DOCKER_TAG}`;
+export const DEFAULT_DOCKER_CMD = `${DOCKER_BASE_CMD.join(' ')} ${DOCKER_IMG}`;
+
+export const SERVERLESS_REPO = 'elasticsearch-ci/elasticsearch-serverless';
+export const SERVERLESS_TAG = 'latest';
+export const SERVERLESS_IMG = `${DOCKER_REGISTRY}/${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
+
 const SHARED_SERVERLESS_PARAMS = [
   'run',
 
@@ -171,26 +195,18 @@ export async function runServerlessEsNode(
   log.indent(-4);
 }
 
-const resolveDockerImage = ({ version, image }: DockerOptions) => {
+const resolveDockerImage = ({ tag, image }: ServerlessOptions) => {
   if (image) {
     return image;
-  } else if (version) {
-    return `${DEFAULT_DOCKER_REGISTRY}:${version}-SNAPSHOT`;
+  } else if (tag) {
+    return `${DOCKER_REGISTRY}:${tag}-SNAPSHOT`;
   }
 
-  return DEFAULT_DOCKER_IMG;
+  return DOCKER_IMG;
 };
 
 export const resolveDockerCmd = (options: DockerOptions) => {
-  let cmd;
-
-  if (options.dockerCmd) {
-    cmd = options.dockerCmd;
-  } else {
-    const img = resolveDockerImage(options);
-
-    cmd = `${DEFAULT_DOCKER_BASE_CMD} ${img}`;
-  }
-
-  return cmd.split(' ');
+  return options.dockerCmd
+    ? options.dockerCmd.split(' ')
+    : DOCKER_BASE_CMD.concat(resolveDockerImage(options));
 };

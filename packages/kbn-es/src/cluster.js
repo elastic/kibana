@@ -585,7 +585,6 @@ exports.Cluster = class Cluster {
    */
   async runServerless(options = {}) {
     // const dockerCmd = resolveDockerCmd(options);
-    // await this._execDocker(dockerCmd);
     await verifyDockerInstalled(this._log);
     await maybeCreateDockerNetwork(this._log);
     const volumeParentPath = await setupServerlessVolumes(this._log, options);

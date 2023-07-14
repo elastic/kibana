@@ -12,11 +12,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
-import { parseTimeoutToMs, DEFAULT_DOCKER_REGISTRY } from '../utils';
+import { parseTimeoutToMs, SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG } from '../utils';
 import { Command } from './types';
-
-const DEFAULT_TAG = 'latest';
-const DEFAULT_IMG = `${DEFAULT_DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless:${DEFAULT_TAG}`;
 
 export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
@@ -25,8 +22,8 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ES Serverless to run from ${DEFAULT_DOCKER_REGISTRY} [default: ${DEFAULT_TAG}]
-      --image             Full path of ES Serverless image to run [default: ${DEFAULT_IMG}]. Has precedence over tag.
+      --tag               Image tag of ES Serverless to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
+      --image             Full path of ES Serverless image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
       --clean             Remove existing file system object store before running
       -E                  Additional key=value settings to pass to Elasticsearch
 
