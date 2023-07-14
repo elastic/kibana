@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Selector, Response, SelectorType, SelectorCondition, ResponseAction } from '../../../../common';
+import {
+  Selector,
+  Response,
+  SelectorType,
+  SelectorCondition,
+  ResponseAction,
+} from '../../../../common';
 
 export interface CloudDefendUsage {
   indices: CloudDefendIndicesStats;
