@@ -9,5 +9,3 @@ export * from './case';
 export * from './comment';
 export * from './status';
 export * from './constants';
-export * from './user_profiles';
-export * from './assignee';

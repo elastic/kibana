@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { MAX_SUGGESTED_PROFILES } from '../constants';
+import { limitedNumberSchema } from '../schema';
 
 const UserWithoutProfileUidRt = rt.strict({
   email: rt.union([rt.undefined, rt.null, rt.string]),
@@ -49,3 +51,34 @@ export const GetCaseUsersResponseRt = rt.strict({
 });
 
 export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;
+
+/**
+ * User Profiles
+ */
+
+export const SuggestUserProfilesRequestRt = rt.intersection([
+  rt.strict({
+    name: rt.string,
+    owners: rt.array(rt.string),
+  }),
+  rt.exact(
+    rt.partial({
+      size: limitedNumberSchema({ fieldName: 'size', min: 1, max: MAX_SUGGESTED_PROFILES }),
+    })
+  ),
+]);
+
+export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;
+
+export const CaseUserProfileRt = rt.strict({
+  uid: rt.string,
+});
+
+export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
+
+/**
+ * Assignees
+ */
+
+export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
+export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;

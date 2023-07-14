@@ -23,7 +23,6 @@ import type {
   PushedUserAction,
   UserActionType,
 } from '../../../common/types/domain';
-import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
   CaseAttributes,
   CasePostRequest,
@@ -32,6 +31,7 @@ import type {
   CaseStatuses,
   CommentRequest,
   User,
+  CaseAssignees,
 } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {

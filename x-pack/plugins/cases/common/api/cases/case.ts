@@ -7,11 +7,10 @@
 
 import * as rt from 'io-ts';
 
-import { UserRt } from '../user';
+import { CaseAssigneesRt, UserRt } from '../user';
 import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
-import { CaseAssigneesRt } from './assignee';
 import {
   limitedArraySchema,
   limitedStringSchema,
