@@ -19,7 +19,12 @@ import {
   OVERRIDES_SUBFOLDER,
 } from '../../common/constants';
 import { jsSpecLoaders } from '../lib';
+
 import type { EndpointDefinition, GlobalDefinition } from '../../common/types';
+
+export interface SpecDefinitionsDependencies {
+  endpointsAvailability: string;
+}
 
 export class SpecDefinitionsService {
   private readonly name = 'es';
@@ -78,9 +83,9 @@ export class SpecDefinitionsService {
     };
   }
 
-  public start() {
+  public start({ endpointsAvailability }: SpecDefinitionsDependencies) {
     if (!this.hasLoadedSpec) {
-      this.loadJsonSpec();
+      this.loadJsonSpec(endpointsAvailability);
       this.loadJSSpec();
       this.hasLoadedSpec = true;
     } else {
@@ -126,11 +131,19 @@ export class SpecDefinitionsService {
     });
   }
 
-  private loadJsonSpec() {
+  private loadJsonSpec(endpointsAvailability: string) {
     const endpointsSpecs = this.loadEndpoints();
 
     Object.keys(endpointsSpecs).forEach((endpoint) => {
-      this.addEndpointDescription(endpoint, endpointsSpecs[endpoint]);
+      const description = endpointsSpecs[endpoint];
+      const addEndpoint =
+        // If the 'availability' property doesn't exist, display the endpoint by default
+        !description.availability ||
+        (endpointsAvailability === 'stack' && description.availability.stack) ||
+        (endpointsAvailability === 'serverless' && description.availability.serverless);
+      if (addEndpoint) {
+        this.addEndpointDescription(endpoint, description);
+      }
     });
 
     this.loadGlobals();

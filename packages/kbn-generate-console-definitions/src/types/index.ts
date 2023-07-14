@@ -11,6 +11,7 @@ export type {
   AutocompleteUrlParams,
   AutocompleteBodyParams,
   GlobalDefinition,
+  AutocompleteAvailability,
 } from './autocomplete_definition_types';
 
 export * as SpecificationTypes from './specification_types';

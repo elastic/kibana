@@ -11,6 +11,7 @@ import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ENDPOINTS_SUBFOLDER, GLOBALS_SUBFOLDER } from '@kbn/console-plugin/common/constants';
 import { generateQueryParams } from './generate_query_params';
+import { generateAvailability } from './generate_availability';
 import type {
   AutocompleteBodyParams,
   AutocompleteDefinition,
@@ -99,12 +100,13 @@ const generateDefinition = ({
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
+  const availability = generateAvailability(endpoint);
   let definition: AutocompleteDefinition = {};
   const params = generateParams({ endpoint, schema, bodyParamsConverter });
   if (params) {
     definition = addParams(definition, params);
   }
-  definition = { ...definition, methods, patterns, documentation };
+  definition = { ...definition, methods, patterns, documentation, availability };
 
   return definition;
 };
