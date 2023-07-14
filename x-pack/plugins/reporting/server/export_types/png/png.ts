@@ -7,11 +7,10 @@
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
-import { tap, map } from 'lodash';
-import { mergeMap, finalize, takeUntil } from 'rxjs';
+import { mergeMap, finalize, takeUntil, tap, map } from 'rxjs';
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
-import { PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 import { decryptJobHeaders, ExportType, generatePngObservable, getFullUrls } from '../common';
 import { validateUrls } from '../common/validate_urls';
@@ -25,7 +24,7 @@ import {
   REPORTING_TRANSACTION_TYPE,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '../../../common/constants';
-import { BasePayload, PngScreenshotOptions } from '../../types';
+
 /**
  * @deprecated
  * Used for the Reporting Diagnostic
@@ -46,8 +45,7 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    const logger = args[2];
-    this.logger = logger.get('png-export-v1');
+    this.logger = this.logger.get('png-export-v1');
   }
 
   // PR 161712 needs these out of reporting
@@ -62,7 +60,6 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
 
   public createJob = async (jobParams: JobParamsPNGDeprecated) => {
     validateUrls([jobParams.relativeUrl]);
-
     return {
       ...jobParams,
       isDeprecated: true,
@@ -72,29 +69,37 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
 
   public runTask = (
     jobId: string,
-    job: BasePayload,
+    job: TaskPayloadPNG,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
-    const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
-    let apmGeneratePng: { end: () => void } | null | undefined;
+    {
+      const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
+      let apmGeneratePng: { end: () => void } | null | undefined;
+      const { encryptionKey } = this.config;
+      const jobLogger = this.logger.get(`execute:${jobId}`);
 
-    const jobLogger = this.logger.get(`execute:${jobId}`);
-    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(this.config.encryptionKey, job.headers, jobLogger)),
-      mergeMap((headers) => {
-        const [url] = getFullUrls(
-          this.getServerInfo(),
-          this.config,
-          job as unknown as TaskPayloadPNG
-        );
+      const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
+        mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
+        mergeMap((headers) => {
+          const [url] = getFullUrls(this.getServerInfo(), this.config, job);
 
-        apmGetAssets?.end();
-        apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
-        return generatePngObservable(
-          () =>
-            this.getScreenshots({
+          apmGetAssets?.end();
+          apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
+          return generatePngObservable(
+            () =>
+              this.getScreenshots({
+                headers,
+                urls: [url],
+                browserTimezone: job.browserTimezone,
+                layout: {
+                  ...job.layout,
+                  id: 'preserve_layout',
+                },
+              }),
+            jobLogger,
+            {
               headers,
               urls: [url],
               browserTimezone: job.browserTimezone,
@@ -102,28 +107,21 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
                 ...job.layout,
                 id: 'preserve_layout',
               },
-            }),
-          jobLogger,
-          {
-            urls: [url],
-            browserTimezone: job.browserTimezone,
-            layout: {
-              ...job.layout,
-              id: 'preserve_layout',
-            },
-          }
-        );
-      }),
-      map(({ metrics, warnings }) => ({
-        content_type: 'image/png',
-        metrics: { png: metrics },
-        warnings,
-      })),
-      tap({ error: (error: any) => jobLogger.error(error) }),
-      finalize(() => apmGeneratePng?.end())
-    );
+            }
+          );
+        }),
+        tap(({ buffer }) => stream.write(buffer)),
+        map(({ metrics, warnings }) => ({
+          content_type: 'image/png',
+          metrics: { png: metrics },
+          warnings,
+        })),
+        tap({ error: (error) => jobLogger.error(error) }),
+        finalize(() => apmGeneratePng?.end())
+      );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
-    return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
+      const stop$ = Rx.fromEventPattern(cancellationToken.on);
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
+    }
   };
 }
