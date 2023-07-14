@@ -19,13 +19,9 @@ import type { UsageRecord } from '../../types';
 import { securityUsageReportingService } from '../services';
 
 const SCOPE = ['serverlessSecurity'];
-// const INTERVAL = '5m';
 const TIMEOUT = '1m';
-export const TYPE = 'serverless-security:endpoint-usage-reporting-task';
-export const VERSION = '1.0.0';
 
-// 1 hour
-// const SAMPLE_PERIOD_SECONDS = 3600;
+export const VERSION = '1.0.0';
 
 type MeteringCallback = (metringCallbackInput: MeteringCallbackInput) => UsageRecord[];
 
@@ -35,6 +31,7 @@ export interface MeteringCallbackInput {
 }
 
 export interface CloudSecurityUsageReportingTaskSetupContract {
+  taskType: string;
   taskTitle: string;
   meteringCallback: MeteringCallback;
   logFactory: LoggerFactory;
@@ -54,11 +51,11 @@ export class SecurityUsageReportingTask {
   private wasStarted: boolean = false;
 
   constructor(setupContract: CloudSecurityUsageReportingTaskSetupContract) {
-    const { taskTitle, logFactory, core, taskManager, meteringCallback } = setupContract;
+    const { taskType, taskTitle, logFactory, core, taskManager, meteringCallback } = setupContract;
 
-    this.logger = logFactory.get(this.getTaskId());
+    this.logger = logFactory.get(this.getTaskId(taskType));
     taskManager.registerTaskDefinitions({
-      [TYPE]: {
+      [taskType]: {
         title: taskTitle,
         timeout: TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
@@ -89,7 +86,7 @@ export class SecurityUsageReportingTask {
 
     try {
       await taskManager.ensureScheduled({
-        id: this.getTaskId(),
+        id: this.getTaskId(taskType),
         taskType,
         scope: SCOPE,
         schedule: {
@@ -117,7 +114,7 @@ export class SecurityUsageReportingTask {
     }
 
     // Check that this task is current
-    if (taskInstance.id !== this.getTaskId()) {
+    if (taskInstance.id !== this.getTaskId(taskInstance.taskType)) {
       // old task, die
       throwUnrecoverableError(new Error('Outdated task version'));
     }
@@ -143,7 +140,7 @@ export class SecurityUsageReportingTask {
     return { state };
   };
 
-  private getTaskId = (): string => {
-    return `${TYPE}:${VERSION}`;
+  private getTaskId = (taskType: string): string => {
+    return `${taskType}:${VERSION}`;
   };
 }
