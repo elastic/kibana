@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useContext } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   DragDrop,
   DragDropIdentifier,
-  DragContext,
+  useDragDropContext,
   DropType,
   DropTargetSwapDuplicateCombine,
 } from '@kbn/dom-drag-drop';
@@ -116,7 +116,7 @@ export function EmptyDimensionButton({
     };
   };
 }) {
-  const { dragging } = useContext(DragContext);
+  const [{ dragging }] = useDragDropContext();
 
   let getDropProps;
 
