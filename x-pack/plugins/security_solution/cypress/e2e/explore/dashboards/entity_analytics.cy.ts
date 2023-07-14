@@ -149,7 +149,8 @@ describe('Entity Analytics Dashboard', () => {
       cy.get(HOSTS_TABLE_ALERT_CELL).should('have.length', 5);
     });
 
-    it('filters by risk classification', () => {
+    // tracked by https://github.com/elastic/kibana/issues/161874
+    it.skip('filters by risk classification', () => {
       openRiskTableFilterAndSelectTheLowOption();
 
       cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
@@ -299,7 +300,8 @@ describe('Entity Analytics Dashboard', () => {
     });
   });
 
-  describe('With anomalies data', () => {
+  // tracked by https://github.com/elastic/kibana/issues/161874
+  describe.skip('With anomalies data', () => {
     before(() => {
       esArchiverLoad('network');
     });
