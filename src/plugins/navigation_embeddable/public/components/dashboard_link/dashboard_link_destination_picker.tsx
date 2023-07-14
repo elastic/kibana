@@ -122,6 +122,8 @@ export const DashboardLinkDestinationPicker = ({
         if (option.length > 0) {
           // single select is `true`, so there is only ever one item in the array
           onDestinationPicked(option[0].value);
+        } else {
+          onDestinationPicked(undefined);
         }
       }}
     />
