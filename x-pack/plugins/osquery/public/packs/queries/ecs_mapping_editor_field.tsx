@@ -43,11 +43,11 @@ import type { FieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook
 import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import type { ECSMappingArray } from '../../../common/schemas/common/utils';
+import type { ECSMappingArray } from '../../../common/api/common/utils';
 import {
   convertECSMappingToArray,
   convertECSMappingToObject,
-} from '../../../common/schemas/common/utils';
+} from '../../../common/api/common/utils';
 import ECSSchema from '../../common/schemas/ecs/v8.7.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.7.0.json';
 
