@@ -44,7 +44,7 @@ import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_
 import {
   DATA_COMPARISON_TYPE,
   DATA_COMPARISON_TYPE_LABEL,
-  PRODUCTION_LABEL,
+  COMPARISON_LABEL,
   REFERENCE_LABEL,
 } from './constants';
 import type {
@@ -133,7 +133,7 @@ const OverlapDistributionComparison = ({
         curve={CurveType.CURVE_STEP_AFTER}
         color={(identifier) => {
           const key = identifier.seriesKeys[0];
-          return key === PRODUCTION_LABEL ? colors.productionColor : colors.referenceColor;
+          return key === COMPARISON_LABEL ? colors.productionColor : colors.referenceColor;
         }}
       />
     </Chart>
@@ -498,7 +498,7 @@ export const DataComparisonOverviewTable = ({
                 'xpack.dataVisualizer.dataComparison.dataComparisonDistributionLabel',
                 {
                   defaultMessage: '{label} distribution',
-                  values: { label: PRODUCTION_LABEL },
+                  values: { label: COMPARISON_LABEL },
                 }
               )}
             />

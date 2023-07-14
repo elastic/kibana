@@ -40,10 +40,10 @@ export const REFERENCE_LABEL = i18n.translate(
   }
 );
 
-export const PRODUCTION_LABEL = i18n.translate(
+export const COMPARISON_LABEL = i18n.translate(
   'xpack.dataVisualizer.dataComparison.productionLabel',
   {
-    defaultMessage: 'Production',
+    defaultMessage: 'Comparison',
   }
 );
 

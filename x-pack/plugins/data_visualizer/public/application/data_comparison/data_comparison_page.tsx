@@ -46,7 +46,7 @@ import { DataComparisonFullAppState, getDefaultDataComparisonState } from './typ
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataComparisonView } from './data_comparison_view';
-import { PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
+import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithDualBrush } from './document_count_with_dual_brush';
@@ -297,7 +297,7 @@ export const DataComparisonPage: FC = () => {
                     badgeWidth: 80,
                   }}
                   deviationBrush={{
-                    label: PRODUCTION_LABEL,
+                    label: COMPARISON_LABEL,
                     annotationStyle: {
                       strokeWidth: 0,
                       stroke: colors.productionColor,

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
-  PRODUCTION_LABEL,
+  COMPARISON_LABEL,
   DRIFT_P_VALUE_THRESHOLD,
   DATA_COMPARISON_TYPE,
 } from './constants';
@@ -137,7 +137,7 @@ const processDataComparisonResult = (
         productionHistogram: productionHistogram ?? [],
         comparisonDistribution: [
           ...referenceHistogram.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-          ...productionHistogram.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+          ...productionHistogram.map((h) => ({ ...h, g: COMPARISON_LABEL })),
         ],
       };
     }
@@ -205,7 +205,7 @@ const processDataComparisonResult = (
       productionHistogram: normalizedDriftedTerms ?? [],
       comparisonDistribution: [
         ...normalizedBaselineTerms.map((h) => ({ ...h, g: REFERENCE_LABEL })),
-        ...normalizedDriftedTerms.map((h) => ({ ...h, g: PRODUCTION_LABEL })),
+        ...normalizedDriftedTerms.map((h) => ({ ...h, g: COMPARISON_LABEL })),
       ],
     };
   });
