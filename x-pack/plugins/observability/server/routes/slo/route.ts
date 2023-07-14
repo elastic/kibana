@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { forbidden, failedDependency } from '@hapi/boom';
+import { failedDependency, forbidden } from '@hapi/boom';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
-  getSLOBurnRatesParamsSchema,
   getPreviewDataParamsSchema,
+  getSLOBurnRatesParamsSchema,
   getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
+import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
   DefaultResourceInstaller,
@@ -29,6 +30,13 @@ import {
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
 } from '../../services/slo';
+import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
+import { getBurnRates } from '../../services/slo/get_burn_rates';
+import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
+import { GetPreviewData } from '../../services/slo/get_preview_data';
+import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
+import { ManageSLO } from '../../services/slo/manage_slo';
+import { DefaultSummaryTransformInstaller } from '../../services/slo/summary_transform/summary_transform_installer';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
@@ -37,15 +45,8 @@ import {
   MetricCustomTransformGenerator,
   TransformGenerator,
 } from '../../services/slo/transform_generators';
-import { createObservabilityServerRoute } from '../create_observability_server_route';
-import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_summary_client';
-import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
-import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
-import { ManageSLO } from '../../services/slo/manage_slo';
-import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
-import { getBurnRates } from '../../services/slo/get_burn_rates';
-import { GetPreviewData } from '../../services/slo/get_preview_data';
+import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -74,12 +75,22 @@ const createSLORoute = createObservabilityServerRoute({
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const esInternalClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
 
-    const resourceInstaller = new DefaultResourceInstaller(esClient, logger);
+    const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, logger);
+    const sloSummaryInstaller = new DefaultSummaryTransformInstaller(esInternalClient, logger);
+    try {
+      await sloResourceInstaller.ensureCommonResourcesInstalled();
+      await sloSummaryInstaller.installAndStart();
+    } catch (error) {
+      logger.error('Failed to install SLO common resources and summary transforms', { error });
+      throw error;
+    }
+
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const createSLO = new CreateSLO(resourceInstaller, repository, transformManager);
+    const createSLO = new CreateSLO(repository, transformManager);
 
     const response = await createSLO.execute(params.body);
 

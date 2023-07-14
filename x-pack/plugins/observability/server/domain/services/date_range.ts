@@ -15,6 +15,14 @@ import type { TimeWindow } from '../models/time_window';
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit);
+    if (unit === 'weeks') {
+      // moment startOf(week) returns sunday, but we want to stay consistent with es "now/w" date math which returns monday.
+      const from = moment.utc(currentDate).startOf(unit).add(1, 'day');
+      const to = moment.utc(currentDate).endOf(unit).add(1, 'day');
+
+      return { from: from.toDate(), to: to.toDate() };
+    }
+
     const from = moment.utc(currentDate).startOf(unit);
     const to = moment.utc(currentDate).endOf(unit);
 
