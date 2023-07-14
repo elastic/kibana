@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiText,
   EuiIcon,
@@ -27,9 +27,11 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiImage,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-
+import { coreServices } from '../services/kibana_services';
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
@@ -40,6 +42,8 @@ import {
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
+import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
+import noLinksIllustrationLight from '../assets/empty_links_light.svg';
 
 import './navigation_embeddable.scss';
 
@@ -56,6 +60,7 @@ export const NavigationEmbeddablePanelEditor = ({
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
   const [links, setLinks] = useState(initialInput.links);
+  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
 
   /**
    * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
@@ -98,25 +103,34 @@ export const NavigationEmbeddablePanelEditor = ({
           <EuiFormRow>
             <>
               {!links || Object.keys(links).length === 0 ? (
-                <EuiPanel hasBorder={true}>
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        onClick={() => setShowLinkEditorFlyout(true)}
-                        iconType="plusInCircle"
-                      >
-                        {NavEmbeddableStrings.editor.getAddButtonLabel()}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                <EuiPanel paddingSize="m" hasBorder={true}>
+                  <EuiEmptyPrompt
+                    paddingSize="none"
+                    hasShadow={false}
+                    color="plain"
+                    icon={
+                      <EuiImage
+                        alt="alt"
+                        size="s"
+                        src={isDarkTheme ? noLinksIllustrationDark : noLinksIllustrationLight}
+                      />
+                    }
+                    body={
+                      <>
+                        <EuiText size="s">
+                          {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
+                        </EuiText>
+                        <EuiSpacer size="m" />
+                        <EuiButton
+                          size="s"
+                          onClick={() => setShowLinkEditorFlyout(true)}
+                          iconType="plusInCircle"
+                        >
+                          {NavEmbeddableStrings.editor.getAddButtonLabel()}
+                        </EuiButton>
+                      </>
+                    }
+                  />
                 </EuiPanel>
               ) : (
                 <>
