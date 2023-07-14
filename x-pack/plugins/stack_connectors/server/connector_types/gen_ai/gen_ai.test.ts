@@ -18,10 +18,14 @@ import { initGenAiDashboard } from './create_dashboard';
 jest.mock('./create_dashboard');
 
 describe('GenAiConnector', () => {
-  const mockResponse = { headers: {}, data: { result: 'success' } };
-  const mockRequest = jest.fn().mockResolvedValue(mockResponse);
-  const mockError = jest.fn().mockImplementation(() => {
-    throw new Error('API Error');
+  let mockRequest: jest.Mock;
+  let mockError: jest.Mock;
+  beforeEach(() => {
+    const mockResponse = { headers: {}, data: { result: 'success' } };
+    mockRequest = jest.fn().mockResolvedValue(mockResponse);
+    mockError = jest.fn().mockImplementation(() => {
+      throw new Error('API Error');
+    });
   });
 
   describe('OpenAI', () => {
@@ -150,7 +154,10 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual({
+          headers: { 'Content-Type': 'dont-compress-this' },
+          result: 'success',
+        });
       });
 
       it('overrides stream parameter if set in the body with explicit stream parameter', async () => {
@@ -185,7 +192,10 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual({
+          headers: { 'Content-Type': 'dont-compress-this' },
+          result: 'success',
+        });
       });
 
       it('errors during API calls are properly handled', async () => {
@@ -229,7 +239,7 @@ describe('GenAiConnector', () => {
     });
 
     describe('runApi', () => {
-      it('the AzureAI API call is successful with correct parameters', async () => {
+      it('test the AzureAI API call is successful with correct parameters', async () => {
         const response = await connector.runApi({ body: JSON.stringify(sampleAzureAiBody) });
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith({
@@ -318,7 +328,10 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual({
+          headers: { 'Content-Type': 'dont-compress-this' },
+          result: 'success',
+        });
       });
 
       it('overrides stream parameter if set in the body with explicit stream parameter', async () => {
@@ -349,7 +362,10 @@ describe('GenAiConnector', () => {
             'content-type': 'application/json',
           },
         });
-        expect(response).toEqual({ result: 'success' });
+        expect(response).toEqual({
+          headers: { 'Content-Type': 'dont-compress-this' },
+          result: 'success',
+        });
       });
 
       it('errors during API calls are properly handled', async () => {
