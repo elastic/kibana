@@ -8,26 +8,19 @@
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
-import {
-  createResourceInstallerMock,
-  createSLORepositoryMock,
-  createTransformManagerMock,
-} from './mocks';
-import { ResourceInstaller } from './resource_installer';
+import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('CreateSLO', () => {
-  let mockResourceInstaller: jest.Mocked<ResourceInstaller>;
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
 
   beforeEach(() => {
-    mockResourceInstaller = createResourceInstallerMock();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    createSLO = new CreateSLO(mockResourceInstaller, mockRepository, mockTransformManager);
+    createSLO = new CreateSLO(mockRepository, mockTransformManager);
   });
 
   describe('happy path', () => {
@@ -37,7 +30,6 @@ describe('CreateSLO', () => {
 
       const response = await createSLO.execute(sloParams);
 
-      expect(mockResourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalled();
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
@@ -73,7 +65,6 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockResourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalled();
       expect(mockRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
