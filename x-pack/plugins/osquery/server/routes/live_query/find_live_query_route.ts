@@ -46,6 +46,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
+        console.log({ requestQuery: request.query });
         try {
           const search = await context.search;
           const res = await lastValueFrom(
@@ -54,8 +55,8 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
                 factoryQueryType: OsqueryQueries.actions,
                 filterQuery: createFilter(request.query.filterQuery),
                 pagination: generateTablePaginationOptions(
-                  request.query.page ?? 0,
-                  request.query.pageSize ?? 100
+                  Number(request.query.page) ?? 0,
+                  Number(request.query.pageSize) ?? 100
                 ),
                 sort: {
                   direction: (request.query.sortOrder ?? 'desc') as Direction,

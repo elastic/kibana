@@ -9,9 +9,9 @@ import * as t from 'io-ts';
 
 export const getLiveQueryResultsRequestQuerySchema = t.type({
   filterQuery: t.union([t.string, t.undefined]),
-  page: t.union([t.number, t.undefined]),
-  pageSize: t.union([t.number, t.undefined]),
-  sort: t.union([t.number, t.undefined]),
+  page: t.union([t.string, t.undefined]),
+  pageSize: t.union([t.string, t.undefined]),
+  sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.union([t.literal('asc'), t.literal('desc')]), t.undefined]),
 });
 
