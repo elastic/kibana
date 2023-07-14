@@ -67,6 +67,8 @@ export const getAxiosOptions = (
 };
 
 export const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) => {
+  // Streaming responses are compressed by the Hapi router by default
+  // Set content-type to something that's not recognized by Hapi in order to circumvent this
   response.data.headers = {
     ['Content-Type']: 'dont-compress-this',
   };
