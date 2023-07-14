@@ -47,7 +47,6 @@ export interface Props {
   addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   closeFlyout: () => void;
   hasPreviewLayers: boolean;
-  isLoadingPreviewLayers: boolean;
   addLayersAndClose: () => void;
   addLayersAndContinue: () => void;
   enableEditMode: () => void;
