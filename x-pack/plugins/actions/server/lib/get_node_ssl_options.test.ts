@@ -45,7 +45,7 @@ describe('getNodeSSLOptions', () => {
     });
   });
 
-  test('appends additional SSL options', () => {
+  test('appends SSL overrides', () => {
     const nodeOption = getNodeSSLOptions(logger, 'none', {
       pfx: Buffer.from("Hi i'm a pfx"),
       passphrase: 'aaaaaaa',

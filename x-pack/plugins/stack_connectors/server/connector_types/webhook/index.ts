@@ -192,13 +192,6 @@ export async function executor(
           }
       : {};
 
-  if (!isEmpty(sslCertificate)) {
-    configurationUtilities.getSSLSettings = () => ({
-      verificationMode: 'none',
-      ...sslCertificate,
-    });
-  }
-
   const axiosInstance = axios.create();
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
@@ -211,6 +204,12 @@ export async function executor(
       headers: headers ? headers : {},
       data,
       configurationUtilities,
+      sslOverrides: !isEmpty(sslCertificate)
+        ? {
+            verificationMode: 'none',
+            ...sslCertificate,
+          }
+        : {},
     })
   );
 

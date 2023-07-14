@@ -12,6 +12,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
+import { SSLSettings } from '../types';
 
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;
@@ -21,13 +22,14 @@ interface GetCustomAgentsResponse {
 export function getCustomAgents(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  url: string
+  url: string,
+  sslOverrides?: SSLSettings
 ): GetCustomAgentsResponse {
   const generalSSLSettings = configurationUtilities.getSSLSettings();
   const agentSSLOptions = getNodeSSLOptions(
     logger,
     generalSSLSettings.verificationMode,
-    generalSSLSettings
+    sslOverrides
   );
   // the default for rejectUnauthorized is the global setting, which can
   // be overridden (below) with a custom host setting

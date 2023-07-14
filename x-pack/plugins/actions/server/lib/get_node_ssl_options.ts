@@ -13,7 +13,7 @@ import { SSLSettings } from '../types';
 export function getNodeSSLOptions(
   logger: Logger,
   verificationMode?: string,
-  sslSettings?: SSLSettings
+  sslOverrides?: SSLSettings
 ): {
   rejectUnauthorized?: boolean;
   checkServerIdentity?: ((host: string, cert: PeerCertificate) => Error | undefined) | undefined;
@@ -51,8 +51,8 @@ export function getNodeSSLOptions(
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
   }
-  if (sslSettings) {
-    Object.assign(agentOptions, omit(sslSettings, 'verificationMode'));
+  if (sslOverrides) {
+    Object.assign(agentOptions, omit(sslOverrides, 'verificationMode'));
   }
   return agentOptions;
 }
