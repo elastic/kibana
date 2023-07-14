@@ -112,7 +112,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
       reload();
     });
 
-    it.only('upgrading prebuilt rules one by one', () => {
+    it('upgrading prebuilt rules one by one', () => {
       ruleUpdatesTabClick();
       assertRuleUpgradeAvailableAndUpgradeOne({ rules: [OUTDATED_RULE_1], didRequestFail: true });
     });
