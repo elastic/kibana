@@ -80,14 +80,9 @@ describe('deleteAccessControlIndex lib function', () => {
       mockClient.asCurrentUser.indices.delete.mockImplementation(() => {
         return Promise.reject(mockErrorRejection);
       });
-
-      try {
-        await deleteAccessControlIndex(mockClient as unknown as IScopedClusterClient, 'indexName');
-      } catch (e) {
-        const asResponseError = e as unknown as ElasticsearchResponseError;
-        expect(asResponseError.meta?.body?.error?.type).toEqual('uncaught_exception');
-      }
-
+      await expect(
+        deleteAccessControlIndex(mockClient as unknown as IScopedClusterClient, 'indexName')
+      ).rejects.toEqual(mockErrorRejection);
       expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
         index: 'indexName',
       });
