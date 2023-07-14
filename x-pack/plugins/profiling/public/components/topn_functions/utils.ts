@@ -28,12 +28,16 @@ export interface IFunctionRow {
   samples: number;
   selfCPU: number;
   totalCPU: number;
+  selfCPUPerc: number;
+  totalCPUPerc: number;
   impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
     selfCPU: number;
     totalCPU: number;
+    selfCPUPerc: number;
+    totalCPUPerc: number;
     impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   };
 }
@@ -75,8 +79,10 @@ export function getFunctionsRows({
         return {
           rank: topN.Rank - comparisonRow.Rank,
           samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-          selfCPU: topN.selfCPUPerc - comparisonRow.selfCPUPerc,
-          totalCPU: topN.totalCPUPerc - comparisonRow.totalCPUPerc,
+          selfCPU: comparisonRow.CountExclusive,
+          totalCPU: comparisonRow.CountInclusive,
+          selfCPUPerc: topN.selfCPUPerc - comparisonRow.selfCPUPerc,
+          totalCPUPerc: topN.totalCPUPerc - comparisonRow.totalCPUPerc,
           impactEstimates: comparisonRow.impactEstimates,
         };
       }
@@ -86,8 +92,10 @@ export function getFunctionsRows({
       rank: topN.Rank,
       frame: topN.Frame,
       samples: topNCountExclusiveScaled,
-      selfCPU: topN.selfCPUPerc,
-      totalCPU: topN.totalCPUPerc,
+      selfCPUPerc: topN.selfCPUPerc,
+      totalCPUPerc: topN.totalCPUPerc,
+      selfCPU: topN.CountExclusive,
+      totalCPU: topN.CountInclusive,
       impactEstimates: topN.impactEstimates,
       diff: calculateDiff(),
     };

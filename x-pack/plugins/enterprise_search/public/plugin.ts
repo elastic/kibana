@@ -145,6 +145,29 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchContent } = await import(
+          './applications/enterprise_search_content'
+        );
+
+        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
+      },
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
       appRoute: ESRE_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ESRE_PLUGIN.LOGO,
@@ -184,29 +207,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
       },
       title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
-    });
-
-    core.application.register({
-      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchContent } = await import(
-          './applications/enterprise_search_content'
-        );
-
-        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
-      },
-      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
     });
 
     core.application.register({
@@ -295,6 +295,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(AppSearch, kibanaDeps, pluginData);
         },
+        navLinkStatus: AppNavLinkStatus.hidden,
         title: APP_SEARCH_PLUGIN.NAME,
       });
 
@@ -319,6 +320,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
         },
+        navLinkStatus: AppNavLinkStatus.hidden,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
       });
     }
