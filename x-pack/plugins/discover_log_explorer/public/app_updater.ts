@@ -6,6 +6,7 @@
  */
 
 import { AppUpdater } from '@kbn/core-application-browser';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
@@ -16,6 +17,8 @@ const logExplorerDeepLink = {
     defaultMessage: 'Log Explorer',
   }),
   path: `#/p/log-explorer`,
+  category: DEFAULT_APP_CATEGORIES.observability,
+  euiIconType: 'logoObservability',
 };
 
 export const createAppUpdater = () => {

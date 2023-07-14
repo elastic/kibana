@@ -297,6 +297,8 @@ export type AppDeepLink<Id extends string = string> = {
   navLinkStatus?: AppNavLinkStatus;
   /** Optional flag to determine if the link is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted */
   searchable?: boolean;
+  /** Optional category to use over the parent app category */
+  category?: AppCategory;
 } & AppNavOptions &
   (
     | {
