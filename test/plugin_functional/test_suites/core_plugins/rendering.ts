@@ -186,6 +186,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.latestAgentVersionsUrl (string)',
         'xpack.apm.featureFlags.agentConfigurationAvailable (any)',
         'xpack.apm.featureFlags.configurableIndicesAvailable (any)',
+        'xpack.apm.featureFlags.fastRefreshAvailable (any)',
         'xpack.apm.featureFlags.infrastructureTabAvailable (any)',
         'xpack.apm.featureFlags.infraUiAvailable (any)',
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
