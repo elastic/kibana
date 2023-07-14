@@ -22,7 +22,7 @@ import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
 
-interface Props {
+export interface TextAreaWithAutocompleteProps {
   editAction: (property: string, value: any, index: number) => void;
   errors?: string[];
   index: number;
@@ -33,7 +33,7 @@ interface Props {
   paramsProperty: string;
 }
 
-export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
+export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutocompleteProps> = ({
   editAction,
   errors,
   index,
@@ -315,3 +315,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     </EuiFormRow>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { TextAreaWithAutocomplete as default };

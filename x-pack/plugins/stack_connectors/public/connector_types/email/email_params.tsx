@@ -11,12 +11,14 @@ import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  TextAreaWithAutocomplete,
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { EmailActionParams } from '../types';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+
 const noop = () => {};
 
 export const EmailParamsFields = ({
@@ -32,6 +34,9 @@ export const EmailParamsFields = ({
   showEmailSubjectAndMessage = true,
   useDefaultMessage,
 }: ActionParamsProps<EmailActionParams>) => {
+  const {
+    triggersActionsUi: { getTextAreaWithAutocomplete: TextAreaWithAutocomplete },
+  } = useKibana<{ triggersActionsUi: TriggersAndActionsUIPublicPluginStart }>().services;
   const isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];

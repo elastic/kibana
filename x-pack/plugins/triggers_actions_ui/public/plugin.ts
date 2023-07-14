@@ -42,6 +42,7 @@ import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { getRulesListLazy } from './common/get_rules_list';
+import { getTextAreaWithAutocompleteLazy } from './common/get_text_area_with_autocomplete';
 import { getActionFormLazy } from './common/get_action_form';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -71,6 +72,7 @@ import type {
   EditConnectorFlyoutProps,
   ConnectorServices,
   RuleDefinitionProps,
+  TextAreaWithAutocompleteProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
@@ -137,6 +139,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getRulesSettingsLink: () => ReactElement;
+  getTextAreaWithAutocomplete: (
+    props: TextAreaWithAutocompleteProps
+  ) => ReactElement<TextAreaWithAutocompleteProps>;
 }
 
 interface PluginsSetup {
@@ -447,6 +452,9 @@ export class Plugin
       },
       getRulesSettingsLink: () => {
         return getRulesSettingsLinkLazy();
+      },
+      getTextAreaWithAutocomplete: (props: TextAreaWithAutocompleteProps) => {
+        return getTextAreaWithAutocompleteLazy(props);
       },
     };
   }
