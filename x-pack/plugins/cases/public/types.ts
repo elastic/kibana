@@ -30,7 +30,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type {
   CasesBulkGetRequest,
   CasesBulkGetResponse,
-  CasesByAlertId,
+  GetRelatedCasesByAlertResponse,
   CasesByAlertIDRequest,
   CasesFindRequest,
   CasesMetricsRequest,
@@ -105,7 +105,10 @@ export interface CasesUiSetup {
 
 export interface CasesUiStart {
   api: {
-    getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
+    getRelatedCases: (
+      alertId: string,
+      query: CasesByAlertIDRequest
+    ) => Promise<GetRelatedCasesByAlertResponse>;
     cases: {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<CasesFindResponseUI>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;

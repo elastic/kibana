@@ -6,17 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseStatuses } from '@kbn/cases-components/src/status/types';
-
-export { CaseStatuses };
-
-export const CaseStatusRt = rt.union([
-  rt.literal(CaseStatuses.open),
-  rt.literal(CaseStatuses['in-progress']),
-  rt.literal(CaseStatuses.closed),
-]);
-
-export const caseStatuses = Object.values(CaseStatuses);
 
 export const CasesStatusResponseRt = rt.strict({
   count_open_cases: rt.number,

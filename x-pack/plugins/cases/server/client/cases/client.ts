@@ -13,7 +13,7 @@ import type {
   AllTagsFindRequest,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
-  CasesByAlertId,
+  GetRelatedCasesByAlertResponse,
   CasesBulkGetRequest,
   CasesBulkGetResponse,
   Case,
@@ -90,7 +90,7 @@ export interface CasesSubClient {
   /**
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
-  getCasesByAlertID(params: CasesByAlertIDParams): Promise<CasesByAlertId>;
+  getCasesByAlertID(params: CasesByAlertIDParams): Promise<GetRelatedCasesByAlertResponse>;
 }
 
 /**

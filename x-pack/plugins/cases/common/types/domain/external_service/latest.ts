@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './comment';
-export * from './constants';
+export * from './v1';

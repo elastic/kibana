@@ -357,6 +357,11 @@ export const BulkGetAttachmentsResponseRt = rt.strict({
   ),
 });
 
+export const AttachmentTotalsRt = rt.strict({
+  alerts: rt.number,
+  userComments: rt.number,
+});
+
 export type FindCommentsQueryParams = rt.TypeOf<typeof FindCommentsQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
@@ -398,3 +403,5 @@ export type CommentRequestExternalReferenceNoSOType = rt.TypeOf<typeof ExternalR
 export type CommentRequestPersistableStateType = rt.TypeOf<typeof PersistableStateAttachmentRt>;
 export type BulkGetAttachmentsResponse = rt.TypeOf<typeof BulkGetAttachmentsResponseRt>;
 export type BulkGetAttachmentsRequest = rt.TypeOf<typeof BulkGetAttachmentsRequestRt>;
+
+export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;

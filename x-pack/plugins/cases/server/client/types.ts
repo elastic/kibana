@@ -14,7 +14,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { CasesFindRequest, User } from '../../common/api';
+import type { User } from '../../common/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
   CaseConfigureService,
@@ -28,6 +28,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../attachment_frame
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
+import { CasesFindRequest } from '@kbn/cases-plugin/common/types/api';
 
 export interface CasesServices {
   alertsService: AlertService;

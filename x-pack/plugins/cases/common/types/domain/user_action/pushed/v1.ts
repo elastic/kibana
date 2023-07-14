@@ -6,15 +6,15 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseExternalServiceBasicRt, CaseUserActionExternalServiceRt } from '../../../../api';
+import { ExternalServiceBasicRt, ExternalServiceRt } from '../../external_service/v1';
 import { UserActionTypes } from '../action/v1';
 
 export const PushedUserActionPayloadWithoutConnectorIdRt = rt.strict({
-  externalService: CaseUserActionExternalServiceRt,
+  externalService: ExternalServiceBasicRt,
 });
 
 export const PushedUserActionPayloadRt = rt.strict({
-  externalService: CaseExternalServiceBasicRt,
+  externalService: ExternalServiceRt,
 });
 
 export const PushedUserActionWithoutConnectorIdRt = rt.strict({

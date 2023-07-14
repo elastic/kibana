@@ -14,7 +14,7 @@ import type {
   AllCategoriesFindRequest,
   AllReportersFindRequest,
   CasesByAlertIDRequest,
-  CasesByAlertId,
+  GetRelatedCasesByAlertResponse,
   CaseAttributes,
   AttachmentTotals,
 } from '../../../common/api';
@@ -26,7 +26,7 @@ import {
   decodeWithExcessOrThrow,
   AllReportersFindRequestRt,
   CasesByAlertIDRequestRt,
-  CasesByAlertIdRt,
+  GetRelatedCasesByAlertResponseRt,
   GetTagsResponseRt,
   GetReportersResponseRt,
   GetCategoriesResponseRt,
@@ -63,7 +63,7 @@ export interface CasesByAlertIDParams {
 export const getCasesByAlertID = async (
   { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
-): Promise<CasesByAlertId> => {
+): Promise<GetRelatedCasesByAlertResponse> => {
   const {
     services: { caseService, attachmentService },
     logger,
@@ -134,7 +134,7 @@ export const getCasesByAlertID = async (
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
 
-    return decodeOrThrow(CasesByAlertIdRt)(res);
+    return decodeOrThrow(GetRelatedCasesByAlertResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(

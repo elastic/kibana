@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type {
-  CasesByAlertId,
+  GetRelatedCasesByAlertResponse,
   CasesByAlertIDRequest,
   CasesFindRequest,
   CasesStatusRequest,
@@ -23,8 +23,8 @@ export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['ap
     getRelatedCases: async (
       alertId: string,
       query: CasesByAlertIDRequest
-    ): Promise<CasesByAlertId> =>
-      http.get<CasesByAlertId>(getCasesFromAlertsUrl(alertId), { query }),
+    ): Promise<GetRelatedCasesByAlertResponse> =>
+      http.get<GetRelatedCasesByAlertResponse>(getCasesFromAlertsUrl(alertId), { query }),
     cases: {
       find: (query: CasesFindRequest, signal?: AbortSignal): Promise<CasesFindResponseUI> =>
         getCases({ http, query, signal }),
