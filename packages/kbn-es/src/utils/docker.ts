@@ -53,10 +53,10 @@ const DOCKER_BASE_CMD = [
   'es01',
 
   '-p',
-  '9200:9200',
+  '127.0.0.1:9200:9200',
 
   '-p',
-  '9300:9300',
+  '127.0.0.1:9300:9300',
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;

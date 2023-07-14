@@ -616,10 +616,10 @@ exports.Cluster = class Cluster {
     await runServerlessEsNode(this._log, {
       params: [
         '-p',
-        '9200:9200',
+        '127.0.0.1:9200:9200',
 
         '-p',
-        '9300:9300',
+        '127.0.0.1:9300:9300',
 
         '--env',
         'discovery.seed_hosts=es02,es03',
@@ -637,10 +637,10 @@ exports.Cluster = class Cluster {
     await runServerlessEsNode(this._log, {
       params: [
         '-p',
-        '9202:9202',
+        '127.0.0.1:9202:9202',
 
         '-p',
-        '9302:9302',
+        '127.0.0.1:9302:9302',
 
         '--env',
         'discovery.seed_hosts=es01,es03',
@@ -658,10 +658,10 @@ exports.Cluster = class Cluster {
     await runServerlessEsNode(this._log, {
       params: [
         '-p',
-        '9203:9203',
+        '127.0.0.1:9203:9203',
 
         '-p',
-        '9303:9303',
+        '127.0.0.1:9303:9303',
 
         '--env',
         'discovery.seed_hosts=es01,es02',
