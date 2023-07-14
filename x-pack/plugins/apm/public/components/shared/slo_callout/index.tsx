@@ -6,10 +6,10 @@
  */
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
 } from '@elastic/eui';
 import { sloEditLocatorID } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -41,9 +41,9 @@ export function SloCallout({
     },
   } = useApmPluginContext();
 
-  const handleClick = () => {
-    const locator = locators.get(sloEditLocatorID);
+  const locator = locators.get(sloEditLocatorID);
 
+  const handleClick = () => {
     locator?.navigate(
       {
         indicator: {
@@ -82,22 +82,20 @@ export function SloCallout({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiLink data-test-subj="apmCreateSloLink" onClick={handleClick}>
-                <EuiButton
-                  data-test-subj="apmSloCalloutCreateSloButton"
-                  onClick={() => {
-                    dismissCallout();
-                  }}
-                >
-                  {i18n.translate('xpack.apm.slo.callout.createButton', {
-                    defaultMessage: 'Create SLO',
-                  })}
-                </EuiButton>
-              </EuiLink>
+              <EuiButton
+                data-test-subj="apmSloCalloutCreateSloButton"
+                onClick={() => {
+                  handleClick();
+                  dismissCallout();
+                }}
+              >
+                {i18n.translate('xpack.apm.slo.callout.createButton', {
+                  defaultMessage: 'Create SLO',
+                })}
+              </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton
-                color="text"
+              <EuiButtonEmpty
                 data-test-subj="apmSloDismissButton"
                 onClick={() => {
                   dismissCallout();
@@ -106,7 +104,7 @@ export function SloCallout({
                 {i18n.translate('xpack.apm.slo.callout.dimissButton', {
                   defaultMessage: 'Hide this',
                 })}
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
