@@ -60,7 +60,7 @@ describe('ruleType', () => {
             "name": "group",
           },
           Object {
-            "description": "The date the threshold was exceeded.",
+            "description": "The date the alert met the threshold conditions.",
             "name": "date",
           },
           Object {
