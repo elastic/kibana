@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
+import { getSLOTransformId, SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
@@ -47,7 +47,7 @@ describe('DeleteSLO', () => {
       );
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: `${SLO_INDEX_TEMPLATE_NAME}*`,
+          index: SLO_DESTINATION_INDEX_PATTERN,
           query: {
             match: {
               'slo.id': slo.id,
