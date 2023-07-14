@@ -39,14 +39,12 @@ interface RunServerlessEsNodeArgs {
 
 const DOCKER_REGISTRY = 'docker.elastic.co';
 
-const DOCKER_BASE_CMD = [
+export const DOCKER_BASE_CMD = [
   'run',
 
   '--rm',
 
   '-t',
-
-  // '--detach',
 
   '--net',
   'elastic',
@@ -65,6 +63,9 @@ const DOCKER_BASE_CMD = [
 
   '--env',
   'ES_JAVA_OPTS=-Xms1g -Xmx1g',
+
+  '--env',
+  'ELASTIC_PASSWORD=changeme',
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
