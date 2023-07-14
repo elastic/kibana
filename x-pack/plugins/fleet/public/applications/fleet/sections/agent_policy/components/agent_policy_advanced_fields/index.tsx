@@ -330,14 +330,16 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   defaultMessage="Prevent agent tampering"
                 />{' '}
                 {!defendIntegrationInstalled && (
-                  <EuiIconTip
-                    type="warning"
-                    color="warning"
-                    content={i18n.translate(
-                      'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
-                      { defaultMessage: 'this is why its disabled' }
-                    )}
-                  />
+                  <span data-test-subj="tamperMissingIntegrationTooltip">
+                    <EuiIconTip
+                      type="warning"
+                      color="warning"
+                      content={i18n.translate(
+                        'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
+                        { defaultMessage: 'this is why its disabled' }
+                      )}
+                    />
+                  </span>
                 )}
               </>
             }

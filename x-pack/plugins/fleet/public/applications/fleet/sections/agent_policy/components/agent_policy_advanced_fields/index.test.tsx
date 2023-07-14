@@ -17,6 +17,7 @@ import { allowedExperimentalValues } from '../../../../../../../common/experimen
 
 import { ExperimentalFeaturesService } from '../../../../../../services/experimental_features';
 
+import { createPackagePolicyMock } from '../../../../../../../common/mocks';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../../../../common/types';
 
 import { useLicense } from '../../../../../../hooks/use_license';
@@ -48,7 +49,11 @@ describe('Agent policy advanced options content', () => {
       isPlatinum: () => true,
     } as unknown as LicenseService);
 
-  const render = ({ isProtected = false, policyId = 'agent-policy-1' } = {}) => {
+  const render = ({
+    isProtected = false,
+    policyId = 'agent-policy-1',
+    packagePolicy = [createPackagePolicyMock()],
+  } = {}) => {
     // remove when feature flag is removed
     ExperimentalFeaturesService.init({
       ...allowedExperimentalValues,
@@ -57,7 +62,12 @@ describe('Agent policy advanced options content', () => {
 
     renderResult = testRender.render(
       <AgentPolicyAdvancedOptionsContent
-        agentPolicy={{ ...mockAgentPolicy, is_protected: isProtected, id: policyId }}
+        agentPolicy={{
+          ...mockAgentPolicy,
+          package_policies: packagePolicy,
+          is_protected: isProtected,
+          id: policyId,
+        }}
         updateAgentPolicy={mockUpdateAgentPolicy}
         validation={mockValidation}
       />
@@ -117,6 +127,27 @@ describe('Agent policy advanced options content', () => {
         renderResult.getByTestId('tamperProtectionSwitch').click();
       });
       expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({ is_protected: true });
+    });
+    describe('when the defend integration is not installed', () => {
+      beforeEach(() => {
+        usePlatinumLicense();
+        render({
+          packagePolicy: [
+            {
+              ...createPackagePolicyMock(),
+              package: { name: 'not-endpoint', title: 'Not Endpoint', version: '0.1.0' },
+            },
+          ],
+          is_protected: true,
+        });
+      });
+      it('should disable the switch and uninstall command link', () => {
+        expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
+        expect(renderResult.getByTestId('uninstallCommandLink')).toBeDisabled();
+      });
+      it('should show an icon tip explaining why the switch is disabled', () => {
+        expect(renderResult.getByTestId('tamperMissingIntegrationTooltip')).toBeTruthy();
+      });
     });
   });
 });
