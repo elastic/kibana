@@ -71,6 +71,21 @@ describe('kuery functions', () => {
       });
     });
 
-    describe('toKqlExpression', () => {});
+    describe('toKqlExpression', () => {
+      test('with one sub-expression', () => {
+        const node = nodeTypes.function.buildNode('or', [childNode1]) as KqlOrFunctionNode;
+        const result = or.toKqlExpression(node);
+        expect(result).toBe('(machine.os: osx)');
+      });
+
+      test('with two sub-expressions', () => {
+        const node = nodeTypes.function.buildNode('or', [
+          childNode1,
+          childNode2,
+        ]) as KqlOrFunctionNode;
+        const result = or.toKqlExpression(node);
+        expect(result).toBe('(machine.os: osx OR extension: jpg)');
+      });
+    });
   });
 });
