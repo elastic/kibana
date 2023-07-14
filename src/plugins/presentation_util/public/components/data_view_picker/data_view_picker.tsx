@@ -26,6 +26,7 @@ export function DataViewPicker({
   onChangeDataViewId,
   trigger,
   selectableProps,
+  ...other
 }: {
   dataViews: DataViewListItem[];
   selectedDataViewId?: string;
@@ -62,6 +63,7 @@ export function DataViewPicker({
 
   return (
     <EuiPopover
+      {...other}
       button={createTrigger()}
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverIsOpen(false)}

@@ -39,6 +39,7 @@ export const FieldPicker = ({
   filterPredicate,
   selectedFieldName,
   selectableProps,
+  ...other
 }: FieldPickerProps) => {
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [fieldSelectableOptions, setFieldSelectableOptions] = useState<EuiSelectableOption[]>([]);
@@ -102,6 +103,7 @@ export const FieldPicker = ({
 
   return (
     <EuiSelectable
+      {...other}
       {...selectableProps}
       className={classNames('fieldPickerSelectable', {
         fieldPickerSelectableLoading: selectableProps?.isLoading,
