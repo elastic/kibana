@@ -64,7 +64,7 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'development',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3,000 ms.',
+        'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
@@ -133,7 +133,7 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'development',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: development, type: request, name: GET /products. Alert when > 3,000 ms.',
+        'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request, name: GET /products. Alert when > 3.0 s.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
@@ -199,7 +199,7 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'development',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3,000 ms.',
+        'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
@@ -273,7 +273,7 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'Not defined',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: Not defined, type: request, name: tx-java. Alert when > 3,000 ms.',
+        'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: Not defined, type: request, name: tx-java. Alert when > 3.0 s.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,

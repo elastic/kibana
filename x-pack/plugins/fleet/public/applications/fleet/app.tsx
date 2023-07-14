@@ -10,8 +10,8 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Switch, useRouteMatch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -258,7 +258,7 @@ export const FleetAppContext: React.FC<{
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices }}>
+          <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
@@ -325,7 +325,7 @@ export const AppRoutes = memo(
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        <Switch>
+        <Routes>
           <Route path={FLEET_ROUTING_PATHS.agents}>
             <AgentsApp />
           </Route>
@@ -368,7 +368,7 @@ export const AppRoutes = memo(
               );
             }}
           />
-        </Switch>
+        </Routes>
 
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>

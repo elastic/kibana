@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  AlertInstanceContext as AlertContext,
-  AlertInstanceState as AlertState,
-} from '@kbn/alerting-plugin/server';
+import { AlertInstanceState as AlertState } from '@kbn/alerting-plugin/server';
 import {
   AlertInstanceMock,
   RuleExecutorServicesMock,
@@ -19,6 +16,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
+  MetricThresholdAlertContext,
   NO_DATA_ACTIONS,
 } from './threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
@@ -1896,7 +1894,7 @@ const executor = createMetricThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createRuleExecutorServices();
 const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, AlertContext, string> = {
+  LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };

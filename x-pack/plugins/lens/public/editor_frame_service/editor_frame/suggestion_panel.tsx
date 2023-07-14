@@ -185,7 +185,7 @@ const SuggestionPreview = ({
           onClick={onSelect}
           aria-current={!!selected}
           aria-label={preview.title}
-          element="div"
+          element="button"
           role="listitem"
         >
           {preview.expression || preview.error ? (

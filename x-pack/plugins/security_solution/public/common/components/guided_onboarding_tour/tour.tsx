@@ -100,13 +100,15 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     setCompleteStep(tourId);
   }, []);
 
-  const context = {
-    activeStep,
-    endTourStep,
-    incrementStep,
-    isTourShown,
-    setStep,
-  };
+  const context = useMemo(() => {
+    return {
+      activeStep,
+      endTourStep,
+      incrementStep,
+      isTourShown,
+      setStep,
+    };
+  }, [activeStep, endTourStep, incrementStep, isTourShown, setStep]);
 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
 };

@@ -1296,7 +1296,12 @@ describe('migration actions', () => {
       const leftResponse = (await readWithPitTask()) as Either.Left<EsResponseTooLargeError>;
 
       expect(leftResponse.left.type).toBe('es_response_too_large');
-      expect(leftResponse.left.contentLength).toBe(3184);
+      // ES response contains a field that indicates how long it took ES to get the response, e.g.: "took": 7
+      // if ES takes more than 9ms, the payload will be 1 byte bigger.
+      // see https://github.com/elastic/kibana/issues/160994
+      // Thus, the statements below account for response times up to 99ms
+      expect(leftResponse.left.contentLength).toBeGreaterThanOrEqual(3184);
+      expect(leftResponse.left.contentLength).toBeLessThanOrEqual(3185);
     });
 
     it('rejects if PIT does not exist', async () => {

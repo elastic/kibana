@@ -99,6 +99,10 @@ export const cli = () => {
       };
 
       const getKibanaPort = <T>(): T | number => {
+        if (isOpen) {
+          return 5620;
+        }
+
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
         if (kibanaPorts.includes(kibanaPort)) {
           return getKibanaPort();
@@ -108,6 +112,10 @@ export const cli = () => {
       };
 
       const getFleetServerPort = <T>(): T | number => {
+        if (isOpen) {
+          return 8220;
+        }
+
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
         if (fleetServerPorts.includes(fleetServerPort)) {
           return getFleetServerPort();
@@ -179,9 +187,10 @@ export const cli = () => {
                   }
                   return element.value as string;
                 });
+              } else if (property.value.type === 'StringLiteral') {
+                value = property.value.value;
               }
               if (key && value) {
-                // @ts-expect-error
                 acc[key] = value;
               }
               return acc;
@@ -280,6 +289,10 @@ export const cli = () => {
                   );
                 }
 
+                if (configFromTestFile?.license) {
+                  vars.esTestCluster.license = configFromTestFile.license;
+                }
+
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
@@ -373,7 +386,7 @@ export const cli = () => {
             }
 
             await procs.stop('kibana');
-            shutdownEs();
+            await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
             return result;

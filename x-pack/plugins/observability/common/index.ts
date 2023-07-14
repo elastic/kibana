@@ -55,9 +55,6 @@ export const observabilityAppId = 'observability-overview';
 // Used by feature and "solution" registration
 export const observabilityFeatureId = 'observability';
 
-// Used by Cases to install routes
-export const casesPath = '/cases';
-
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
 export const uptimeOverviewLocatorID = 'UPTIME_OVERVIEW_LOCATOR';
@@ -68,6 +65,7 @@ export const alertsLocatorID = 'ALERTS_LOCATOR';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
+export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 
 export type { AlertsLocatorParams } from './locators/alerts';
 
@@ -84,4 +82,4 @@ export {
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
-export { CoPilotPromptId, coPilotPrompts } from './co_pilot';
+export { CoPilotPromptId, loadCoPilotPrompts } from './co_pilot';

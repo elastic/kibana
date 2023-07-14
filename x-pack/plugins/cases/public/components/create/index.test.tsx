@@ -33,6 +33,7 @@ import { CreateCase } from '.';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_tags');

@@ -129,8 +129,8 @@ export function combineErrorMessages(
   return messages.length ? messages : undefined;
 }
 
-export function getSafeName(name: string, indexPattern: IndexPattern): string {
-  const field = indexPattern.getFieldByName(name);
+export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
+  const field = indexPattern?.getFieldByName(name);
   return field
     ? field.displayName
     : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {

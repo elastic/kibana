@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -21,14 +24,30 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
-export function NoDataView({ subTitle }: { subTitle: string }) {
+export enum NoDataTabs {
+  Kubernetes = 'kubernetes',
+  Docker = 'docker',
+  Binary = 'binary',
+  Deb = 'deb',
+  RPM = 'rpm',
+  ElasticAgentIntegration = 'elasticAgentIntegration',
+  Symbols = 'symbols',
+}
+
+export function NoDataView() {
+  const { query } = useProfilingParams('/add-data-instructions');
+  const { selectedTab } = query;
+  const profilingRouter = useProfilingRouter();
+  const routePath = useProfilingRoutePath();
+
   const {
     services: { setupDataCollectionInstructions },
     start: { core },
@@ -48,7 +67,7 @@ export function NoDataView({ subTitle }: { subTitle: string }) {
 
   const tabs = [
     {
-      key: 'kubernetes',
+      key: NoDataTabs.Kubernetes,
       title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
         defaultMessage: 'Kubernetes',
       }),
@@ -97,7 +116,7 @@ optimyze/pf-host-agent`}
       ],
     },
     {
-      key: 'docker',
+      key: NoDataTabs.Docker,
       title: i18n.translate('xpack.profiling.tabs.dockerTitle', {
         defaultMessage: 'Docker',
       }),
@@ -119,7 +138,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: 'binary',
+      key: NoDataTabs.Binary,
       title: i18n.translate('xpack.profiling.tabs.binaryTitle', {
         defaultMessage: 'Binary',
       }),
@@ -157,7 +176,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: 'deb',
+      key: NoDataTabs.Deb,
       title: i18n.translate('xpack.profiling.tabs.debTitle', {
         defaultMessage: 'DEB Package',
       }),
@@ -210,7 +229,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: 'rpm',
+      key: NoDataTabs.RPM,
       title: i18n.translate('xpack.profiling.tabs.rpmTitle', {
         defaultMessage: 'RPM Package',
       }),
@@ -263,7 +282,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: 'elasticAgentIntegration',
+      key: NoDataTabs.ElasticAgentIntegration,
       title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
         defaultMessage: 'Elastic Agent Integration',
       }),
@@ -281,21 +300,23 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
                 })}
               </EuiText>
               <EuiSpacer />
-              <EuiCodeBlock paddingSize="s" isCopyable>
+              <EuiText style={{ fontWeight: 'bold' }} size="s">
                 {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
-                  defaultMessage: 'Secret token: {secretToken}',
-                  values: { secretToken },
+                  defaultMessage: 'Secret token:',
                 })}
+              </EuiText>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {secretToken}
               </EuiCodeBlock>
               <EuiSpacer size="s" />
-              <EuiCodeBlock paddingSize="s" isCopyable>
+              <EuiText style={{ fontWeight: 'bold' }} size="s">
                 {i18n.translate(
                   'xpack.profiling.tabs.elasticAgentIntegrarion.step1.collectionAgentUrl',
-                  {
-                    defaultMessage: 'Universal Profiling Collector url: {collectionAgentHost}',
-                    values: { collectionAgentHost },
-                  }
+                  { defaultMessage: 'Universal Profiling Collector url:' }
                 )}
+              </EuiText>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {collectionAgentHost}
               </EuiCodeBlock>
             </>
           ),
@@ -309,7 +330,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
               iconType="gear"
               fill
               href={`${core.http.basePath.prepend(
-                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview'
+                `/app/integrations/detail/profiler_agent-${data?.profilerAgent.version}/overview?prerelease=true`
               )}`}
             >
               {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
@@ -321,7 +342,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: 'symbols',
+      key: NoDataTabs.Symbols,
       title: i18n.translate('xpack.profiling.tabs.symbols.title', {
         defaultMessage: 'Upload Symbols',
       }),
@@ -409,8 +430,6 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
     },
   ];
 
-  const [selectedTab, setSelectedTab] = useState(tabs[0].key);
-
   const displayedTab = tabs.find((tab) => tab.key === selectedTab)!;
 
   const displayedSteps = displayedTab.steps ?? [];
@@ -444,7 +463,56 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
         <></>
       ) : (
         <>
-          <EuiText>{subTitle}</EuiText>
+          <EuiCallOut
+            color="warning"
+            iconType="help"
+            title={
+              <FormattedMessage
+                id="xpack.profiling.tabs.debWarning"
+                defaultMessage="Due to a {linuxLink}, we have stopped host-agents on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more."
+                values={{
+                  versionFrom: <strong>5.19</strong>,
+                  versionTo: <strong>6.4</strong>,
+                  linuxLink: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d319f344561de23e810515d109c7278919bff7b0"
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.linuxLink', {
+                        defaultMessage: 'Linux kernel bug',
+                      })}
+                    </EuiLink>
+                  ),
+                  debianLink: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1033398"
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.debianLink', {
+                        defaultMessage: 'Debian',
+                      })}
+                    </EuiLink>
+                  ),
+                  fedoraLink: (
+                    <EuiLink
+                      target="_blank"
+                      href="https://bugzilla.redhat.com/show_bug.cgi?id=2211455"
+                    >
+                      {i18n.translate('xpack.profiling.tabs.debWarning.fedoraLink', {
+                        defaultMessage: 'Fedora/CentOS',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
+          <EuiSpacer />
+          <EuiText>
+            {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
+              defaultMessage: 'Select an option below to deploy the host-agent.',
+            })}
+          </EuiText>
           <EuiSpacer />
           <EuiSplitPanel.Outer>
             <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
@@ -454,7 +522,12 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
                     return (
                       <EuiTab
                         key={tab.key}
-                        onClick={() => setSelectedTab(tab.key)}
+                        onClick={() => {
+                          profilingRouter.push(routePath, {
+                            path: {},
+                            query: { selectedTab: tab.key },
+                          });
+                        }}
                         isSelected={tab.key === selectedTab}
                       >
                         {tab.title}

@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.t1_analyst, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la' } })
         .expect(403, {
           statusCode: 403,
@@ -47,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.response_actions_role, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [' '], parameters: { command: 'ls -la' } })
         .expect(400, {
           statusCode: 400,
@@ -60,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.response_actions_role, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ parameters: { command: 'ls -la' } })
         .expect(400, {
           statusCode: 400,
@@ -74,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.response_actions_role, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: ' ' } })
         .expect(400, {
           statusCode: 400,
@@ -87,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.response_actions_role, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId] })
         .expect(400, {
           statusCode: 400,
@@ -101,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.response_actions_role, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la', timeout: 'too' } })
         .expect(400, {
           statusCode: 400,
@@ -117,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.response_actions_role, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la' } })
         .expect(200);
 
@@ -132,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(EXECUTE_ROUTE)
         .auth(ROLE.response_actions_role, 'changeme')
         .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
         .send({ endpoint_ids: [agentId], parameters: { command: 'ls -la', timeout: 2000 } })
         .expect(200);
 

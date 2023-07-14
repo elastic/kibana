@@ -74,6 +74,7 @@ import {
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 import type { CustomizationCallback } from './customizations';
 import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
+import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -404,6 +405,8 @@ export class DiscoverPlugin
     // when the application/embeddable is mounted
 
     const { uiActions } = plugins;
+
+    uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
 
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application);
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
