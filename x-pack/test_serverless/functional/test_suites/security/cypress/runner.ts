@@ -17,6 +17,7 @@ export async function SecuritySolutionCypressTestRunner(
   command: string
 ) {
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
