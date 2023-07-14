@@ -44,6 +44,18 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-tabs-metadata');
     },
 
+    async clickOverviewFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-overview');
+    },
+
+    async clickOverviewLinkToAlerts() {
+      return testSubjects.click('assetDetails-flyout-alerts-link');
+    },
+
+    async clickOverviewOpenAlertsFlyout() {
+      return testSubjects.click('infraNodeContextPopoverCreateInventoryRuleButton');
+    },
+
     async clickProcessesFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-processes');
     },
@@ -197,6 +209,22 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
+    },
+
+    overviewAlertsTitleExist() {
+      return testSubjects.exists('assetDetailsAlertsTitle');
+    },
+
+    async getActiveAlertsCountText() {
+      const container = await testSubjects.find('activeAlertCount');
+      const containerText = await container.getVisibleText();
+      return containerText;
+    },
+
+    async getTotalAlertsCountText() {
+      const container = await testSubjects.find('totalAlertCount');
+      const containerText = await container.getVisibleText();
+      return containerText;
     },
 
     getMetadataTab() {

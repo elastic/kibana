@@ -113,7 +113,7 @@ const AlertsSectionTitle = () => {
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs" textTransform="uppercase">
+        <EuiTitle data-test-subj="assetDetailsAlertsTitle" size="xxs" textTransform="uppercase">
           <h5>
             <FormattedMessage
               id="xpack.infra.assetDetails.overview.alertsSectionTitle"
