@@ -18,15 +18,16 @@ import { getDataPath } from '@kbn/utils';
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 
-export interface DockerOptions extends EsClusterExecOptions {
-  version?: string;
+interface BaseOptions {
+  tag?: string;
   image?: string;
+}
+
+export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
 
-export interface ServerlessOptions extends EsClusterExecOptions {
-  tag?: string;
-  image?: string;
+export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   clean?: boolean;
 }
 
@@ -55,14 +56,14 @@ const DOCKER_BASE_CMD = [
   '9300:9300',
 ];
 
-export const DOCKER_REPO = 'elasticsearch/elasticsearch';
+export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
-export const DOCKER_IMG = `${DOCKER_REGISTRY}/${DOCKER_REPO}:${DOCKER_TAG}`;
+export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 export const DEFAULT_DOCKER_CMD = `${DOCKER_BASE_CMD.join(' ')} ${DOCKER_IMG}`;
 
-export const SERVERLESS_REPO = 'elasticsearch-ci/elasticsearch-serverless';
+export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
 export const SERVERLESS_TAG = 'latest';
-export const SERVERLESS_IMG = `${DOCKER_REGISTRY}/${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
+export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
 
 const SHARED_SERVERLESS_PARAMS = [
   'run',
@@ -195,18 +196,25 @@ export async function runServerlessEsNode(
   log.indent(-4);
 }
 
-const resolveDockerImage = ({ tag, image }: ServerlessOptions) => {
+export const resolveDockerImage = ({
+  tag,
+  image,
+  repo,
+  defaultImg,
+}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) => {
   if (image) {
     return image;
   } else if (tag) {
-    return `${DOCKER_REGISTRY}:${tag}-SNAPSHOT`;
+    return `${repo}:${tag}`;
   }
 
-  return DOCKER_IMG;
+  return defaultImg;
 };
 
 export const resolveDockerCmd = (options: DockerOptions) => {
   return options.dockerCmd
     ? options.dockerCmd.split(' ')
-    : DOCKER_BASE_CMD.concat(resolveDockerImage(options));
+    : DOCKER_BASE_CMD.concat(
+        resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG })
+      );
 };

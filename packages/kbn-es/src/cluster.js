@@ -24,9 +24,12 @@ const {
   parseTimeoutToMs,
   verifyDockerInstalled,
   resolveDockerCmd,
+  resolveDockerImage,
   maybeCreateDockerNetwork,
   setupServerlessVolumes,
   runServerlessEsNode,
+  SERVERLESS_REPO,
+  SERVERLESS_IMG,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -584,12 +587,16 @@ exports.Cluster = class Cluster {
    * @param {ServerlessOptions} options
    */
   async runServerless(options = {}) {
-    // const dockerCmd = resolveDockerCmd(options);
     await verifyDockerInstalled(this._log);
     await maybeCreateDockerNetwork(this._log);
+
     const volumeParentPath = await setupServerlessVolumes(this._log, options);
     const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
-    const image = 'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest';
+    const image = resolveDockerImage({
+      ...options,
+      repo: SERVERLESS_REPO,
+      defaultImg: SERVERLESS_IMG,
+    });
 
     await runServerlessEsNode(this._log, {
       params: [

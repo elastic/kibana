@@ -25,7 +25,7 @@ export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',
   usage: 'es docker [<args>]',
   help: (defaults: Record<string, any> = {}) => {
-    const { version, password } = defaults;
+    const { password } = defaults;
 
     // TODO: enrollment token + env params?
     // TODO: private registry?
@@ -77,7 +77,7 @@ export const docker: Command = {
         readyTimeout: 'ready-timeout',
       },
 
-      string: ['version', 'ready-timeout', 'D'],
+      string: ['tag', 'ready-timeout', 'D'],
       boolean: ['skip-ready-check'],
 
       default: defaults,
