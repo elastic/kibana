@@ -14,7 +14,7 @@
   border-color: darken($euiColorLightestShade, 2%);
 
   .optionsList__actionsRow {
-    margin: ($euiSizeS / 2) 0 !important;
+    margin: calc($euiSizeS / 2) 0 !important;
 
     .optionsList__actionBarDivider {
       height: $euiSize;
