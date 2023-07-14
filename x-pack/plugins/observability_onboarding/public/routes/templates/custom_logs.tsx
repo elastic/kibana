@@ -65,7 +65,10 @@ function AnimatedTransitionsWizard({ children }: Props) {
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="l" />
-          <EuiTitle size="l">
+          <EuiTitle
+            size="l"
+            data-test-subj="obltOnboardingStreamLogFilePageHeader"
+          >
             <h1>
               {i18n.translate(
                 'xpack.observability_onboarding.title.collectCustomLogs',
