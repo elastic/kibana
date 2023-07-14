@@ -255,8 +255,8 @@ const CHARTS_IN_ORDER: Array<
 export interface MetricsGridProps {
   nodeName: string;
   timeRange: TimeRange;
-  metricsDataView?: DataView;
-  logsDataView?: DataView;
+  metricsDataView: DataView;
+  logsDataView: DataView;
 }
 
 export const MetricsGrid = React.memo(

@@ -117,7 +117,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
               <FormattedMessage
-                id="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
+                id="xpack.infra.hostsViewPage.errorOnLoadingLensDependencies"
                 defaultMessage="There was an error trying to load Lens Plugin."
               />
             </EuiText>
