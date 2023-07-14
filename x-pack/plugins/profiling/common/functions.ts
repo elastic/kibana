@@ -173,9 +173,9 @@ export function createTopNFunctions({
     const impactEstimates =
       totalSeconds > 0
         ? calculateImpactEstimates({
-            countExclusive: selfCPUPerc,
-            countInclusive: totalCPUPerc,
-            totalSamples: countExclusive,
+            countExclusive,
+            countInclusive,
+            totalSamples: totalCount,
             totalSeconds,
           })
         : undefined;
@@ -199,9 +199,9 @@ export function createTopNFunctions({
   const impactEstimates =
     totalSeconds > 0
       ? calculateImpactEstimates({
-          countExclusive: selfCPUPerc,
-          countInclusive: totalCPUPerc,
-          totalSamples: sumSelfCPU,
+          countExclusive: sumSelfCPU,
+          countInclusive: sumTotalCPU,
+          totalSamples: totalCount,
           totalSeconds,
         })
       : undefined;
