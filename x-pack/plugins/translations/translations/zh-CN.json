@@ -27319,7 +27319,6 @@
     "xpack.observability.slo.duration.minute": "{duration, plural, other {# 分钟}}",
     "xpack.observability.slo.duration.month": "{duration, plural, other {# 个月}}",
     "xpack.observability.slo.duration.week": "{duration, plural, other {# 周}}",
-    "xpack.observability.slo.duration.year": "{duration, plural, other {# 年}}",
     "xpack.observability.slo.indicatorTypeBadge.exploreInApm": "查看 {service} 详情",
     "xpack.observability.slo.list.sortByType": "按 {type} 排序",
     "xpack.observability.slo.rules.burnRate.errors.invalidThresholdValue": "消耗速度阈值必须介于 1 和 {maxBurnRate} 之间。",
