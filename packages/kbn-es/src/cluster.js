@@ -390,10 +390,9 @@ exports.Cluster = class Cluster {
       []
     );
 
+    this._log.info('%s %s', ES_BIN, args.join(' '));
     const esJavaOpts = this.javaOptions(options);
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
-
-    this._log.info('%s %s', ES_BIN, args.join(' '));
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,

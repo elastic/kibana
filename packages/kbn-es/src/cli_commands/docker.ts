@@ -31,7 +31,6 @@ export const docker: Command = {
     // TODO: parse docker logs?
     // TODO: tests
     // TODO: docs?
-    // TODO: network?
     // TODO: remove unused CLI options
     // TODO: setup pw
     return dedent`

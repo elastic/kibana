@@ -125,7 +125,7 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
   log.info(chalk.bold('Checking status of elastic Docker network.'));
   log.indent(4);
 
-  const p = await execa('docker', ['network', 'create', 'elastic']).catch(({ message }) => {
+  const process = await execa('docker', ['network', 'create', 'elastic']).catch(({ message }) => {
     if (message.includes('network with name elastic already exists')) {
       log.info('Using existing network.');
     } else {
@@ -133,7 +133,7 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
     }
   });
 
-  if (p?.exitCode === 0) {
+  if (process?.exitCode === 0) {
     log.info('Created new network.');
   }
 
