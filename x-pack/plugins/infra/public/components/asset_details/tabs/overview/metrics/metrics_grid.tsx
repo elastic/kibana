@@ -264,7 +264,7 @@ export const MetricsGrid = React.memo(
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs" textTransform="uppercase">
+          <EuiTitle size="xxs">
             <h5>
               <FormattedMessage
                 id="xpack.infra.assetDetails.overview.metricsSectionTitle"
