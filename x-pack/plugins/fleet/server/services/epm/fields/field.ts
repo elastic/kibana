@@ -6,7 +6,6 @@
  */
 
 import { safeLoad } from 'js-yaml';
-import { omit } from 'lodash';
 
 import type { PackageInfo } from '../../../types';
 import { getAssetsData } from '../packages/assets';
@@ -40,6 +39,7 @@ export interface Field {
   null_value?: string;
   dimension?: boolean;
   default_field?: boolean;
+  runtime?: boolean | string;
 
   // Fields specific of the aggregate_metric_double type
   metrics?: string[];
@@ -48,7 +48,6 @@ export interface Field {
   // Meta fields
   metric_type?: string;
   unit?: string;
-  time_series_metric?: string;
 
   // Kibana specific
   analyzed?: boolean;
@@ -254,15 +253,11 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
   return undefined;
 };
 
-export function processFieldsWithWildcard(
-  fields: Fields,
-  isIndexModeTimeSeries: boolean | undefined
-): Fields {
+export function processFieldsWithWildcard(fields: Fields): Fields {
   const newFields: Fields = [];
   for (const field of fields) {
     const objectTypeField = processFieldWithoutObjectType(field);
-    const processedField = processFieldWithTimeSeries(objectTypeField, isIndexModeTimeSeries);
-    newFields.push({ ...processedField });
+    newFields.push({ ...objectTypeField });
   }
   return newFields;
 }
@@ -277,19 +272,8 @@ export function processFieldWithoutObjectType(field: Field): Field {
   }
 }
 
-export function processFieldWithTimeSeries(
-  field: Field,
-  isIndexModeTimeSeries: boolean | undefined
-): Field {
-  if (isIndexModeTimeSeries && field.name.includes('*') && 'metric_type' in field) {
-    return { ...omit(field, 'metric_type'), type: 'object', time_series_metric: field.metric_type };
-  } else {
-    return { ...field };
-  }
-}
-
-export function processFields(fields: Fields, isIndexModeTimeSeries?: boolean): Fields {
-  const processedFields = processFieldsWithWildcard(fields, isIndexModeTimeSeries);
+export function processFields(fields: Fields): Fields {
+  const processedFields = processFieldsWithWildcard(fields);
   const expandedFields = expandFields(processedFields);
   const dedupedFields = dedupFields(expandedFields);
 

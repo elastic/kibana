@@ -30,7 +30,6 @@ describe('useCreateAttachments', () => {
     addSuccess,
   });
 
-  const abortCtrl = new AbortController();
   const attachmentsWithoutOwner = [
     {
       comment: 'a comment',
@@ -69,7 +68,7 @@ describe('useCreateAttachments', () => {
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(attachmentsWithOwner, request.caseId, abortCtrl.signal);
+    expect(spy).toHaveBeenCalledWith({ attachments: attachmentsWithOwner, caseId: request.caseId });
   });
 
   it('does not show a success toaster', async () => {

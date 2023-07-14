@@ -46,7 +46,18 @@ function NavigationGroupInternalComp<
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
   const navigationContext = useNavigation();
-  const { children, defaultIsCollapsed, ...node } = props;
+
+  const { children, node } = useMemo(() => {
+    const { children: _children, defaultIsCollapsed, ...rest } = props;
+    return {
+      children: _children,
+      node: {
+        ...rest,
+        isActive: defaultIsCollapsed !== undefined ? defaultIsCollapsed === false : undefined,
+      },
+    };
+  }, [props]);
+
   const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
 
   const unstyled = props.unstyled ?? navigationContext.unstyled;
@@ -68,11 +79,7 @@ function NavigationGroupInternalComp<
     return (
       <>
         {isTopLevel && (
-          <NavigationSectionUI
-            navNode={navNode}
-            items={Object.values(childrenNodes)}
-            defaultIsCollapsed={defaultIsCollapsed}
-          />
+          <NavigationSectionUI navNode={navNode} items={Object.values(childrenNodes)} />
         )}
         {/* We render the children so they mount and can register themselves but
         visually they don't appear here in the DOM. They are rendered inside the
@@ -80,7 +87,7 @@ function NavigationGroupInternalComp<
         {children}
       </>
     );
-  }, [navNode, path, childrenNodes, children, defaultIsCollapsed, unstyled]);
+  }, [navNode, path, childrenNodes, children, unstyled]);
 
   const contextValue = useMemo(() => {
     return {

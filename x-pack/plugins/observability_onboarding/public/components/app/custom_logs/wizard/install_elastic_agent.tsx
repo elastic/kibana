@@ -35,11 +35,12 @@ import {
   StepPanelFooter,
 } from '../../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
+import { BackButton } from './back_button';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
   const { navigateToKibanaUrl } = useKibanaNavigation();
-  const { goBack, goToStep, getState, setState, CurrentStep } = useWizard();
+  const { goBack, goToStep, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
@@ -51,10 +52,6 @@ export function InstallElasticAgent() {
     navigateToKibanaUrl('/app/logs/stream');
   }
 
-  function onBack() {
-    goBack();
-  }
-
   function onAutoDownloadConfig() {
     setState((state) => ({
       ...state,
@@ -64,10 +61,7 @@ export function InstallElasticAgent() {
 
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
-      if (
-        CurrentStep === InstallElasticAgent &&
-        !hasAlreadySavedFlow(getState())
-      ) {
+      if (!hasAlreadySavedFlow(getState())) {
         return callApi(
           'GET /internal/observability_onboarding/custom_logs/privileges'
         );
@@ -77,11 +71,9 @@ export function InstallElasticAgent() {
   );
 
   const { data: setup } = useFetcher((callApi) => {
-    if (CurrentStep === InstallElasticAgent) {
-      return callApi(
-        'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
-      );
-    }
+    return callApi(
+      'GET /internal/observability_onboarding/custom_logs/install_shipper_setup'
+    );
   }, []);
 
   const {
@@ -97,11 +89,7 @@ export function InstallElasticAgent() {
         customConfigurations,
         logFilePaths,
       } = getState();
-      if (
-        CurrentStep === InstallElasticAgent &&
-        !hasAlreadySavedFlow(getState()) &&
-        monitoringRole?.hasPrivileges
-      ) {
+      if (!hasAlreadySavedFlow(getState()) && monitoringRole?.hasPrivileges) {
         return callApi(
           'POST /internal/observability_onboarding/custom_logs/save',
           {
@@ -133,7 +121,7 @@ export function InstallElasticAgent() {
       customConfigurations,
       logFilePaths,
     } = getState();
-    if (CurrentStep === InstallElasticAgent && onboardingId) {
+    if (onboardingId) {
       return callApi(
         'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
         {
@@ -158,13 +146,9 @@ export function InstallElasticAgent() {
 
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
-      if (
-        CurrentStep === InstallElasticAgent &&
-        apiKeyEncoded &&
-        onboardingId
-      ) {
+      if (apiKeyEncoded && onboardingId) {
         return callApi(
-          'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
+          'GET /internal/observability_onboarding/elastic_agent/config',
           {
             headers: { authorization: `ApiKey ${apiKeyEncoded}` },
             params: { query: { onboardingId } },
@@ -190,7 +174,7 @@ export function InstallElasticAgent() {
     refetch: refetchProgress,
   } = useFetcher(
     (callApi) => {
-      if (CurrentStep === InstallElasticAgent && onboardingId) {
+      if (onboardingId) {
         return callApi(
           'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
           { params: { path: { onboardingId } } }
@@ -208,8 +192,7 @@ export function InstallElasticAgent() {
         refetchProgress();
       }, 2000);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progressSucceded]);
+  }, [progressSucceded, refetchProgress]);
 
   const getStep = useCallback(
     ({ id, incompleteTitle, loadingTitle, completedTitle }) => {
@@ -270,11 +253,7 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
-              {i18n.translate('xpack.observability_onboarding.steps.back', {
-                defaultMessage: 'Back',
-              })}
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onInspect}>

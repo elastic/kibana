@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from './trigger';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
 

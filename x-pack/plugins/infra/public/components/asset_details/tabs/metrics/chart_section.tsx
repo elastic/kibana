@@ -13,7 +13,7 @@ import {
   type ChartSizeArray,
   type PointerUpdateListener,
   type TickFormatter,
-  type TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import moment from 'moment';
 import React from 'react';
@@ -24,7 +24,7 @@ import {
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import type { MetricsExplorerSeries } from '../../../../../common/http_api';
-import { getTimelineChartTheme } from '../../../../utils/get_chart_theme';
+import { getTimelineChartThemes } from '../../../../utils/get_chart_theme';
 
 import { ChartHeader } from './chart_header';
 
@@ -60,9 +60,6 @@ export const ChartSection = ({
 }: Props) => {
   const isDarkMode = useIsDarkMode();
   const metrics = series.map((chartSeries) => chartSeries.metric);
-  const tooltipProps: TooltipProps = {
-    headerFormatter: ({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS'),
-  };
 
   return (
     <>
@@ -90,13 +87,12 @@ export const ChartSection = ({
           tickFormat={tickFormatter}
           domain={domain}
           ticks={6}
-          showGridLines
+          gridLine={{
+            visible: true,
+          }}
         />
-        <Settings
-          onPointerUpdate={onPointerUpdate}
-          tooltip={tooltipProps}
-          theme={getTimelineChartTheme(isDarkMode)}
-        />
+        <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
+        <Settings {...getTimelineChartThemes(isDarkMode)} onPointerUpdate={onPointerUpdate} />
       </Chart>
     </>
   );

@@ -13,7 +13,6 @@ import {
   DELETE_RULE_ACTION_BTN,
   DELETE_RULE_BULK_BTN,
   RULES_SELECTED_TAG,
-  LOAD_PREBUILT_RULES_BTN,
   RULES_TABLE_INITIAL_LOADING_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULE_CHECKBOX,
@@ -65,6 +64,7 @@ import {
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
   TOASTER_CLOSE_ICON,
+  ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -336,7 +336,7 @@ export const waitForRulesTableToBeRefreshed = () => {
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
   cy.log('Wait for prebuilt rules to be loaded');
-  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('not.exist');
+  cy.get(ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN, { timeout: 300000 }).should('not.exist');
   cy.get(RULES_MANAGEMENT_TABLE).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };

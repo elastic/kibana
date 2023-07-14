@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -17,6 +18,7 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function FieldMappingStatus() {
   const router = useApmRouter();
+  const { query } = useApmParams('/diagnostics/*');
   const { diagnosticsBundle, status } = useDiagnosticsContext();
   const isLoading = status === FETCH_STATUS.LOADING;
   const isOk = getIndicesTabStatus(diagnosticsBundle);
@@ -30,7 +32,7 @@ export function FieldMappingStatus() {
       Indices
       <EuiLink
         data-test-subj="apmFieldMappingStatusSeeDetailsLink"
-        href={router.link('/diagnostics/indices')}
+        href={router.link('/diagnostics/indices', { query })}
       >
         See details
       </EuiLink>

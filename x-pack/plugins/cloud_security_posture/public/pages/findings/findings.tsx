@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { Redirect, Switch, useHistory, useLocation, matchPath } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { Vulnerabilities } from '../vulnerabilities';
@@ -103,7 +103,7 @@ export const Findings = () => {
           </EuiTabs>
         </>
       )}
-      <Switch>
+      <Routes>
         <Route
           exact
           path={cloudPosturePages.findings.path}
@@ -125,7 +125,7 @@ export const Findings = () => {
         />
         {/* Redirect to default findings page if no match */}
         <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
-      </Switch>
+      </Routes>
     </>
   );
 };

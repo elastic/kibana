@@ -51,127 +51,190 @@ export function registerResponseActionRoutes(
   /**
    * @deprecated use ISOLATE_HOST_ROUTE_V2 instead
    */
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: ISOLATE_HOST_ROUTE,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
+    );
 
   /**
    * @deprecated use RELEASE_HOST_ROUTE instead
    */
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: UNISOLATE_HOST_ROUTE,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canUnIsolateHost'] },
-      logger,
-      redirectHandler(UNISOLATE_HOST_ROUTE_V2)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canUnIsolateHost'] },
+        logger,
+        redirectHandler(UNISOLATE_HOST_ROUTE_V2)
+      )
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: ISOLATE_HOST_ROUTE_V2,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canIsolateHost'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'isolate')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canIsolateHost'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'isolate')
+      )
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: UNISOLATE_HOST_ROUTE_V2,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canUnIsolateHost'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'unisolate')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canUnIsolateHost'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'unisolate')
+      )
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: KILL_PROCESS_ROUTE,
-      validate: KillOrSuspendProcessRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canKillProcess'] },
-      logger,
-      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
-        endpointContext,
-        'kill-process'
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: KillOrSuspendProcessRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canKillProcess'] },
+        logger,
+        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+          endpointContext,
+          'kill-process'
+        )
       )
-    )
-  );
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: SUSPEND_PROCESS_ROUTE,
-      validate: KillOrSuspendProcessRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canSuspendProcess'] },
-      logger,
-      responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
-        endpointContext,
-        'suspend-process'
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: KillOrSuspendProcessRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canSuspendProcess'] },
+        logger,
+        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+          endpointContext,
+          'suspend-process'
+        )
       )
-    )
-  );
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: GET_PROCESSES_ROUTE,
-      validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canGetRunningProcesses'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'running-processes')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: NoParametersRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canGetRunningProcesses'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'running-processes')
+      )
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: GET_FILE_ROUTE,
-      validate: EndpointActionGetFileSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteFileOperations'] },
-      logger,
-      responseActionRequestHandler(endpointContext, 'get-file')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: EndpointActionGetFileSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'get-file')
+      )
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: EXECUTE_ROUTE,
-      validate: ExecuteActionRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteExecuteOperations'] },
-      logger,
-      responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ExecuteActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+      )
+    );
 
   registerActionFileUploadRoute(router, endpointContext);
 }

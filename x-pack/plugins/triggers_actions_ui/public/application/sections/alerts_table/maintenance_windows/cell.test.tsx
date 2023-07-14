@@ -19,7 +19,7 @@ const maintenanceWindowsMap = getMaintenanceWindowMockMap();
 const alert = {
   _id: 'alert-id',
   _index: 'alert-index',
-  [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
+  [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1', 'test-mw-id-2'],
 } as Alert;
 
 const props: CellComponentProps = {
@@ -34,7 +34,7 @@ const props: CellComponentProps = {
 describe('MaintenanceWindowCell', () => {
   it('renders the maintenance window cell', async () => {
     render(<MaintenanceWindowCell {...props} />);
-    expect(screen.getByText('test-title')).toBeInTheDocument();
+    expect(screen.getByText('test-title,')).toBeInTheDocument();
   });
 
   it('renders the loading skeleton', async () => {
@@ -44,8 +44,16 @@ describe('MaintenanceWindowCell', () => {
 
   it('shows the tooltip', async () => {
     render(<MaintenanceWindowCell {...props} />);
-    expect(screen.getByText('test-title')).toBeInTheDocument();
-    userEvent.hover(screen.getByText('test-title'));
+    expect(screen.getByText('test-title,')).toBeInTheDocument();
+    userEvent.hover(screen.getByText('test-title,'));
     expect(await screen.findByTestId('maintenance-window-tooltip-content')).toBeInTheDocument();
+  });
+
+  it('renders the maintenance window IDs if the endpoint could not be fetched', async () => {
+    render(<MaintenanceWindowCell {...props} maintenanceWindows={new Map()} />);
+    expect(screen.queryByText('test-title,')).not.toBeInTheDocument();
+    expect(screen.queryByText('test-title-2')).not.toBeInTheDocument();
+    expect(screen.getByText('test-mw-id-1,')).toBeInTheDocument();
+    expect(screen.getByText('test-mw-id-2')).toBeInTheDocument();
   });
 });

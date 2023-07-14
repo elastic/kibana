@@ -31,7 +31,7 @@ export const RecentlyAccessed: FC<Props> = ({
   defaultIsCollapsed = false,
 }) => {
   const strings = getI18nStrings();
-  const { recentlyAccessed$ } = useServices();
+  const { recentlyAccessed$, basePath, navigateToUrl } = useServices();
   const recentlyAccessed = useObservable(recentlyAccessedProp$ ?? recentlyAccessed$, []);
 
   if (recentlyAccessed.length === 0) {
@@ -42,11 +42,20 @@ export const RecentlyAccessed: FC<Props> = ({
     {
       name: '', // no list header title
       id: 'recents_root',
-      items: recentlyAccessed.map(({ id, label, link }) => ({
-        id,
-        name: label,
-        href: link,
-      })),
+      items: recentlyAccessed.map((recent) => {
+        const { id, label, link } = recent;
+        const href = basePath.prepend(link);
+
+        return {
+          id,
+          name: label,
+          href,
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            navigateToUrl(href);
+          },
+        };
+      }),
     },
   ];
 

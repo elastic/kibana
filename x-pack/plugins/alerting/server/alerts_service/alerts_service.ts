@@ -109,6 +109,7 @@ export type PublicFrameworkAlertsService = PublicAlertsService & {
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
+  private isInitializing: boolean = false;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
@@ -156,12 +157,46 @@ export class AlertsService implements IAlertsService {
       opts.namespace
     );
 
-    if (!initialized) {
-      // TODO - retry initialization here
-      this.options.logger.warn(
-        `There was an error in the framework installing namespace-level resources and creating concrete indices for - ${error}`
+    // If initialization failed, retry
+    if (!initialized && error) {
+      let initPromise: Promise<InitializationPromise> | undefined;
+
+      // If !this.initialized, we know that common resource initialization failed
+      // and we need to retry this before retrying the context specific resources
+      // However, if this.isInitializing, then the alerts service is in the process
+      // of retrying common installation, so we don't want to kick off another retry
+      if (!this.initialized) {
+        if (!this.isInitializing) {
+          this.options.logger.info(`Retrying common resource initialization`);
+          initPromise = this.initializeCommon(this.options.timeoutMs);
+        } else {
+          this.options.logger.info(
+            `Skipped retrying common resource initialization because it is already being retried.`
+          );
+        }
+      }
+
+      this.resourceInitializationHelper.retry(opts.ruleType.alerts, opts.namespace, initPromise);
+
+      const retryResult = await this.resourceInitializationHelper.getInitializedContext(
+        opts.ruleType.alerts.context,
+        opts.ruleType.alerts.isSpaceAware ? opts.namespace : DEFAULT_NAMESPACE_STRING
       );
-      return null;
+
+      if (!retryResult.result) {
+        const errorLogPrefix = `There was an error in the framework installing namespace-level resources and creating concrete indices for context "${opts.ruleType.alerts.context}" - `;
+        // Retry also failed
+        this.options.logger.warn(
+          retryResult.error === error
+            ? `${errorLogPrefix}Retry failed with error: ${error}`
+            : `${errorLogPrefix}Original error: ${error}; Error after retry: ${retryResult.error}`
+        );
+        return null;
+      } else {
+        this.options.logger.info(
+          `Resource installation for "${opts.ruleType.alerts.context}" succeeded after retry`
+        );
+      }
     }
 
     if (!opts.ruleType.alerts.shouldWrite) {
@@ -171,6 +206,10 @@ export class AlertsService implements IAlertsService {
       return null;
     }
 
+    // TODO - when we replace the LegacyAlertsClient, we will need to decide whether to
+    // initialize the AlertsClient even if alert resource installation failed. That would allow
+    // us to detect alerts and trigger notifications even if we can't persist the alerts
+    // (partial rule failure vs failing the entire rule execution).
     return new AlertsClient<
       AlertData,
       LegacyState,
@@ -183,6 +222,7 @@ export class AlertsService implements IAlertsService {
       ruleType: opts.ruleType,
       namespace: opts.namespace,
       rule: opts.rule,
+      kibanaVersion: this.options.kibanaVersion,
     });
   }
 
@@ -245,6 +285,7 @@ export class AlertsService implements IAlertsService {
    * - Component template - common mappings for fields populated and used by the framework
    */
   private async initializeCommon(timeoutMs?: number): Promise<InitializationPromise> {
+    this.isInitializing = true;
     try {
       this.options.logger.debug(`Initializing resources for AlertsService`);
       const esClient = await this.options.elasticsearchClientPromise;
@@ -302,12 +343,14 @@ export class AlertsService implements IAlertsService {
       );
 
       this.initialized = true;
+      this.isInitializing = false;
       return successResult();
     } catch (err) {
       this.options.logger.error(
         `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
       );
       this.initialized = false;
+      this.isInitializing = false;
       return errorResult(err.message);
     }
   }

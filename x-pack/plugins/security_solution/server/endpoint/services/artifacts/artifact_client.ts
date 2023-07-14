@@ -24,6 +24,8 @@ export interface EndpointArtifactClientInterface {
 
   deleteArtifact(id: string): Promise<void>;
 
+  bulkDeleteArtifacts(ids: string[]): Promise<Error[]>;
+
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 }
 
@@ -95,5 +97,9 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
+  }
+
+  async bulkDeleteArtifacts(ids: string[]): Promise<Error[]> {
+    return this.fleetArtifacts.bulkDeleteArtifacts(ids);
   }
 }

@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaConfig } from '../../../types';
 
-export const diskSpaceUsage: LensChartConfig = {
-  title: 'Disk Space Usage',
-  formula: {
-    formula: 'average(system.filesystem.used.pct)',
-    format: {
-      id: 'percent',
-      params: {
-        decimals: 0,
-      },
+export const diskSpaceUsage: FormulaConfig = {
+  label: 'Disk Space Usage',
+  value: 'average(system.filesystem.used.pct)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
     },
   },
-  getFilters,
 };

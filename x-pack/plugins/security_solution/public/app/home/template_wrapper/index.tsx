@@ -24,10 +24,7 @@ import {
   SecuritySolutionBottomBarProps,
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
-import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
 import { useSyncFlyoutStateWithUrl } from '../../../flyout/url/use_sync_flyout_state_with_url';
-
-const NO_DATA_PAGE_MAX_WIDTH = 950;
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -39,6 +36,10 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     $addBottomPadding?: boolean;
   }
 >`
+  .kbnSolutionNav {
+    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  }
+
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
     background: ${({ theme }) =>
@@ -68,8 +69,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
     const { colorMode: globalColorMode } = useEuiTheme();
 
-    const showEmptyState = useShowPagesWithEmptyView() || rest.isEmptyState;
-
     const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
 
     /*
@@ -88,16 +87,17 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
           paddingSize="none"
           solutionNav={solutionNavProps}
-          restrictWidth={showEmptyState ? NO_DATA_PAGE_MAX_WIDTH : false}
+          restrictWidth={false}
           {...rest}
         >
           <GlobalKQLHeader />
           <KibanaPageTemplate.Section
             className="securityPageWrapper"
             data-test-subj="pageContainer"
-            paddingSize="l"
-            alignment={showEmptyState ? 'center' : 'top'}
+            paddingSize={rest.paddingSize ?? 'l'}
+            alignment="top"
             component="div"
+            grow={true}
           >
             {children}
           </KibanaPageTemplate.Section>
@@ -110,7 +110,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           )}
           <ExpandableFlyout
             registeredPanels={expandableFlyoutDocumentsPanels}
-            onClose={() => {}}
             handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
           />
         </StyledKibanaPageTemplate>

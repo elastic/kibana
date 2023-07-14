@@ -7,11 +7,9 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
-  CONNECTORS_INDEX,
-  CONNECTORS_JOBS_INDEX,
-} from '../..';
+import { CONNECTORS_INDEX, CURRENT_CONNECTORS_JOB_INDEX } from '../..';
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../common/constants';
+
 import { SyncJobType, SyncStatus, TriggerMethod } from '../../../common/types/connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -97,7 +95,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
   it('should start a full sync with service type, pipeline and nextSyncConfig', async () => {
@@ -166,7 +164,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 
@@ -301,7 +299,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 
@@ -368,7 +366,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 });

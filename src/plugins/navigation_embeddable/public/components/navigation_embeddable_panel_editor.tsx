@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import useObservable from 'react-use/lib/useObservable';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiText,
   EuiForm,
+  EuiImage,
   EuiTitle,
   EuiPanel,
   EuiSpacer,
@@ -21,6 +23,7 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiFlyoutBody,
+  EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -28,16 +31,20 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-
+import { coreServices } from '../services/kibana_services';
 import {
   NavigationEmbeddableLink,
   NavigationEmbeddableInput,
   NavigationEmbeddableLinkList,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+
 import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
+
+import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
+import noLinksIllustrationLight from '../assets/empty_links_light.svg';
 
 import './navigation_embeddable.scss';
 
@@ -52,7 +59,9 @@ const NavigationEmbeddablePanelEditor = ({
   onSave: (input: Partial<NavigationEmbeddableInput>) => void;
   parentDashboard?: DashboardContainer;
 }) => {
+  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
+
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
 
   useEffect(() => {
@@ -123,22 +132,30 @@ const NavigationEmbeddablePanelEditor = ({
           <EuiFormRow>
             <>
               {orderedLinks.length === 0 ? (
-                <EuiPanel hasBorder={true}>
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton onClick={() => addOrEditLink()} iconType="plusInCircle">
-                        {NavEmbeddableStrings.editor.getAddButtonLabel()}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                <EuiPanel paddingSize="m" hasBorder={true}>
+                  <EuiEmptyPrompt
+                    paddingSize="none"
+                    hasShadow={false}
+                    color="plain"
+                    icon={
+                      <EuiImage
+                        alt="alt"
+                        size="s"
+                        src={isDarkTheme ? noLinksIllustrationDark : noLinksIllustrationLight}
+                      />
+                    }
+                    body={
+                      <>
+                        <EuiText size="s">
+                          {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
+                        </EuiText>
+                        <EuiSpacer size="m" />
+                        <EuiButton size="s" onClick={() => addOrEditLink()} iconType="plusInCircle">
+                          {NavEmbeddableStrings.editor.getAddButtonLabel()}
+                        </EuiButton>
+                      </>
+                    }
+                  />
                 </EuiPanel>
               ) : (
                 <>

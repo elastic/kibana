@@ -10,6 +10,7 @@ import { EuiWrappingPopover } from '@elastic/eui';
 
 import { useLocation } from 'react-router-dom';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import { first } from 'lodash/fp';
 import { StatefulTopN } from '../../common/components/top_n';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { APP_ID } from '../../../common/constants';
@@ -29,9 +30,10 @@ export const TopNAction = ({
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   const userCasesPermissions = useGetUserCasesPermissions();
   const CasesContext = casesService.ui.getCasesContext();
-  const { field, nodeRef, metadata } = context;
+  const { data, nodeRef, metadata } = context;
+  const firstItem = first(data);
 
-  if (!nodeRef?.current) return null;
+  if (!nodeRef?.current || !firstItem) return null;
 
   return (
     <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
@@ -46,11 +48,10 @@ export const TopNAction = ({
         attachToAnchor={false}
       >
         <StatefulTopN
-          field={field.name}
+          field={firstItem.field.name}
           showLegend
           scopeId={metadata?.scopeId}
           toggleTopN={onClose}
-          value={field.value}
           indexPattern={indexPattern}
           browserFields={browserFields}
         />

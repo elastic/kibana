@@ -9,13 +9,14 @@ import type { ReactNode } from 'react';
 import React, { memo, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { MockAssistantProvider } from '../mock_assistant_provider';
 import { RouteCapture } from '../../components/endpoint/route_capture';
 import type { StartPlugins } from '../../../types';
 
@@ -46,9 +47,11 @@ export const AppRootProvider = memo<{
         <I18nProvider>
           <KibanaContextProvider services={services}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <Router history={history}>
-                <RouteCapture>{children}</RouteCapture>
-              </Router>
+              <MockAssistantProvider>
+                <Router history={history}>
+                  <RouteCapture>{children}</RouteCapture>
+                </Router>
+              </MockAssistantProvider>
             </EuiThemeProvider>
           </KibanaContextProvider>
         </I18nProvider>

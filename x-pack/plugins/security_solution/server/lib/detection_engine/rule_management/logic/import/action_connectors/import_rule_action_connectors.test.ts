@@ -317,6 +317,7 @@ describe('importRuleActionConnectors', () => {
         id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
         referencedByCount: 1,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     const actionsImporter2 = core.savedObjects.getImporter;
@@ -358,6 +359,7 @@ describe('importRuleActionConnectors', () => {
         id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
         referencedByCount: 1,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
 

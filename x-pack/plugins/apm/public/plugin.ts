@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -61,6 +62,14 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import {
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+} from '@kbn/profiling-plugin/public';
+import {
+  DiscoverStart,
+  DiscoverSetup,
+} from '@kbn/discover-plugin/public/plugin';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -80,6 +89,7 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  discover?: DiscoverSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
@@ -92,12 +102,14 @@ export interface ApmPluginSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
+  profiling?: ProfilingPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
@@ -117,6 +129,7 @@ export interface ApmPluginStartDeps {
   storage: IStorageWrapper;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
+  profiling?: ProfilingPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -168,6 +181,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
+    const { featureFlags } = config;
+
     if (pluginSetupDeps.home) {
       pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
@@ -215,11 +230,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         );
                       }
                     },
-                  },
-                  {
-                    label: apmStorageExplorerTitle,
-                    app: 'apm',
-                    path: '/storage-explorer',
                   },
                 ],
               },
@@ -320,6 +330,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      navLinkStatus: AppNavLinkStatus.visible,
       deepLinks: [
         {
           id: 'service-groups-list',
@@ -330,19 +341,33 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
-        { id: 'traces', title: tracesTitle, path: '/traces' },
+        {
+          id: 'traces',
+          title: tracesTitle,
+          path: '/traces',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
+        },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
+          searchable: featureFlags.storageExplorerAvailable,
         },
       ],
 

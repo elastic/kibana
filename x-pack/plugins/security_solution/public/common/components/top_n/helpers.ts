@@ -70,6 +70,7 @@ export interface TopNOption {
 export const detectionAlertsTables: string[] = [
   TableId.alertsOnAlertsPage,
   TableId.alertsOnRuleDetailsPage,
+  TableId.alertsOnCasePage,
   TimelineId.casePage,
 ];
 

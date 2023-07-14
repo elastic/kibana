@@ -8,6 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
+import { API_VERSIONS } from '../../common/constants';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
@@ -50,6 +51,7 @@ export const useAllLiveQueries = ({
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',
         {
+          version: API_VERSIONS.public.v1,
           query: {
             filterQuery: createFilter(filterQuery),
             page: activePage,
