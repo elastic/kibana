@@ -220,10 +220,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [columnId, fireOrResetRandomSamplingToast, layerId, setState, state.layers]
   );
 
-  const setIsCloseable = (isCloseable: boolean) => {
-    setState((prevState) => ({ ...prevState, isDimensionClosePrevented: !isCloseable }));
-  };
-
   const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
   const {
     operationType: incompleteOperation,
@@ -664,7 +660,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     operationDefinitionMap,
     toggleFullscreen,
     isFullscreen,
-    setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
     dataSectionExtra: props.dataSectionExtra,
@@ -865,7 +860,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 })}
                 isFullscreen={isFullscreen}
                 toggleFullscreen={toggleFullscreen}
-                setIsCloseable={setIsCloseable}
                 paramEditorCustomProps={paramEditorCustomProps}
                 {...services}
               />
@@ -938,7 +932,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isFullscreen={isFullscreen}
         indexPattern={currentIndexPattern}
         toggleFullscreen={toggleFullscreen}
-        setIsCloseable={setIsCloseable}
         ReferenceEditor={ReferenceEditor}
         {...services}
       />
