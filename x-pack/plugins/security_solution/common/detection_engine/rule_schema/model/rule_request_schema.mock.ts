@@ -11,6 +11,7 @@ import type {
   MachineLearningRuleUpdateProps,
   QueryRuleCreateProps,
   QueryRuleUpdateProps,
+  EsqlRuleCreateProps,
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
@@ -150,6 +151,23 @@ export const getCreateNewTermsRulesSchemaMock = (
   from: 'now-6m',
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
+});
+
+export const getEsqlRulesSchemaMock = (
+  ruleId = 'rule-1',
+  enabled = false
+): EsqlRuleCreateProps => ({
+  description: 'Detecting root and admin users',
+  enabled,
+  name: 'Query with a rule id',
+  query: 'from auditbeat-* | where user.name=="root" or user.name=="admin"',
+  severity: 'high',
+  type: 'esql',
+  risk_score: 55,
+  language: 'esql',
+  rule_id: ruleId,
+  interval: '5m',
+  from: 'now-6m',
 });
 
 export const getUpdateRulesSchemaMock = (
