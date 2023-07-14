@@ -125,17 +125,15 @@ const getAppIdsFromId = (id: string): { appId?: string; deepLinkId?: string } =>
 };
 
 const formatPath = (path: string, urlState: string) => {
+  const urlStateClean = urlState.replace('?', '');
   const [urlPath, parameterPath] = path.split('?');
   let queryParams = '';
-  if (parameterPath) {
+  if (urlStateClean && parameterPath) {
+    queryParams = `?${queryParams}&${urlStateClean}`;
+  } else if (parameterPath) {
     queryParams = `?${parameterPath}`;
-  }
-  if (urlState) {
-    if (queryParams) {
-      queryParams = `${queryParams}&${urlState}`;
-    } else {
-      queryParams = `?${urlState}`;
-    }
+  } else if (urlStateClean) {
+    queryParams = `?${urlStateClean}`;
   }
   return `${urlPath}${queryParams}`;
 };
