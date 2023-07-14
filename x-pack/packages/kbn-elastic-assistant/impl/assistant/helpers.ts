@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { BASE_CONVERSATIONS, Conversation } from '../..';
+import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { enterpriseMessaging } from './use_conversation/sample_conversations';
+import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (rawResponse: string): Message => {
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
@@ -27,13 +26,13 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
   }
 };
 
-export const getWelcomeConversation = (isAssistantEnabled: boolean): Conversation => {
-  const conversation = BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
-  const doesConversationHaveMessages = conversation.messages.length > 0;
-
+export const getWelcomeConversation = (
+  conversation: Conversation,
+  isAssistantEnabled: boolean
+): Conversation => {
   if (!isAssistantEnabled) {
     if (
-      !doesConversationHaveMessages ||
+      conversation.messages.length === 0 ||
       conversation.messages[conversation.messages.length - 1].content !==
         enterpriseMessaging[0].content
     ) {
@@ -47,6 +46,6 @@ export const getWelcomeConversation = (isAssistantEnabled: boolean): Conversatio
 
   return {
     ...conversation,
-    messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+    messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
   };
 };
