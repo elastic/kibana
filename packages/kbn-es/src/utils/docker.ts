@@ -160,13 +160,12 @@ export async function runServerlessEsNode(
 
   const { stdout } = await execa('docker', fullCmd);
 
-  log.info(`Serverless ES node is running.
+  log.info(`${name} is running.
   Container Name: ${name}
   Container Id:   ${stdout}
 
   View running output:  ${chalk.bold(`docker attach --sig-proxy=false ${name}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${name} /bin/bash`)}
-  Kill container:       ${chalk.bold(`docker kill ${stdout}`)}
 `);
 
   log.indent(-4);

@@ -651,6 +651,10 @@ exports.Cluster = class Cluster {
       image,
       name: 'es03',
     });
+
+    this._log.success(`Serverless ES cluster running.
+      Stop the cluster:     ${chalk.bold('docker container stop es01 es02 es03')}
+    `);
   }
 
   /**
