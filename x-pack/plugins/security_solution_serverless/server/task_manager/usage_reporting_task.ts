@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Response } from 'node-fetch';
+import type { Response } from 'node-fetch';
 
 import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
