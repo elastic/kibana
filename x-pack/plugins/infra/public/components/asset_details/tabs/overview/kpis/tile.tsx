@@ -25,7 +25,7 @@ const MIN_HEIGHT = 150;
 
 export interface TileProps {
   timeRange: TimeRange;
-  dataView: DataView;
+  dataView?: DataView;
   nodeName: string;
 }
 
