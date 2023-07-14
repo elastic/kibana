@@ -36,6 +36,9 @@ xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 
+# Disable index management actions from the UI
+xpack.index_management.enableIndexActions: false
+
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
 management.deeplinks.navLinkStatus: visible
