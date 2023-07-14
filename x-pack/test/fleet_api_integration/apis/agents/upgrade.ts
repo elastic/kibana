@@ -21,7 +21,6 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/161557
   describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
