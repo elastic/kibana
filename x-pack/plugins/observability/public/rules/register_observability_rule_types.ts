@@ -53,6 +53,27 @@ const sloBurnRateDefaultRecoveryMessage = i18n.translate(
   }
 );
 
+const thresholdDefaultActionMessage = i18n.translate(
+  'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
+  {
+    defaultMessage: `\\{\\{context.reason\\}\\}
+
+\\{\\{rule.name\\}\\} is active.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+const thresholdDefaultRecoveryMessage = i18n.translate(
+  'xpack.observability.threshold.rule.alerting.threshold.defaultRecoveryMessage',
+  {
+    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+
+[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+`,
+  }
+);
+
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
@@ -95,16 +116,8 @@ export const registerObservabilityRuleTypes = (
       },
       ruleParamsExpression: lazy(() => import('../components/threshold/threshold_rule_expression')),
       validate: validateMetricThreshold,
-      defaultActionMessage: i18n.translate(
-        'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
-        {
-          defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
-
-  Reason:
-  \\{\\{context.reason\\}\\}
-  `,
-        }
-      ),
+      defaultActionMessage: thresholdDefaultActionMessage,
+      defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
       requiresAppContext: false,
       format: formatReason,
       alertDetailsAppSection: lazy(

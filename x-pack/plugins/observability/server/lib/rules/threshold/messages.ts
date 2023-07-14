@@ -173,7 +173,7 @@ export const timestampActionVariableDescription = i18n.translate(
 export const valueActionVariableDescription = i18n.translate(
   'xpack.observability.threshold.rule.valueActionVariableDescription',
   {
-    defaultMessage: 'The value of the metric for each condition, comma separated.',
+    defaultMessage: 'List of the condition values.',
   }
 );
 

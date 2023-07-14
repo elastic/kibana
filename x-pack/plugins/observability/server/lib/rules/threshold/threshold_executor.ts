@@ -58,7 +58,7 @@ export type MetricThresholdAlertContext = {
   groupings?: object;
   reason?: string;
   timestamp: string; // ISO string
-  value?: string[] | null;
+  value?: number[] | null;
 };
 
 export const FIRED_ACTIONS_ID = 'threshold.fired';
@@ -337,7 +337,7 @@ export const createMetricThresholdExecutor = ({
           groupings: groupByKeysObjectMapping[group],
           reason,
           timestamp,
-          value: mapToConditionsLookup(alertResults, (result, index) => {
+          value: alertResults.map((result, index) => {
             const evaluation = result[group];
             if (!evaluation && criteria[index].aggType === 'count') {
               return 0;
@@ -408,15 +408,6 @@ export const NO_DATA_ACTIONS = {
     defaultMessage: 'No Data',
   }),
 };
-
-const mapToConditionsLookup = (
-  list: any[],
-  mapFn: (value: any, index: number, array: any[]) => unknown
-) =>
-  list.map(mapFn).reduce((result: Record<string, any>, value, i) => {
-    result.push(value);
-    return result;
-  }, [] as string[]);
 
 const formatAlertResult = <AlertResult>(
   alertResult: {
