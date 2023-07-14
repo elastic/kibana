@@ -28,7 +28,7 @@ export function getCustomAgents(
   const generalSSLSettings = configurationUtilities.getSSLSettings();
   const agentSSLOptions = getNodeSSLOptions(
     logger,
-    generalSSLSettings.verificationMode,
+    sslOverrides?.verificationMode ?? generalSSLSettings.verificationMode,
     sslOverrides
   );
   // the default for rejectUnauthorized is the global setting, which can

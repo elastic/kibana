@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isString, isEmpty } from 'lodash';
+import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -56,6 +56,10 @@ const configSchemaProps = {
   hasAuth: schema.boolean({ defaultValue: true }),
   authType: schema.maybe(schema.string()),
   certType: schema.maybe(schema.string()),
+  ca: schema.maybe(schema.string()),
+  verificationMode: schema.maybe(
+    schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
+  ),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -63,11 +67,11 @@ export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: schema.maybe(schema.string()),
-  password: schema.maybe(schema.string()),
-  crt: schema.maybe(schema.string()),
-  key: schema.maybe(schema.string()),
-  pfx: schema.maybe(schema.string()),
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
+  crt: schema.nullable(schema.string()),
+  key: schema.nullable(schema.string()),
+  pfx: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
@@ -168,7 +172,7 @@ export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const { actionId, config, params, configurationUtilities, logger } = execOptions;
-  const { method, url, headers = {}, hasAuth } = config;
+  const { method, url, headers = {}, hasAuth, ca, verificationMode } = config;
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
@@ -194,6 +198,12 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
+  const sslOverrides = {
+    ...sslCertificate,
+    ...(verificationMode ? { verificationMode } : {}),
+    ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
+  };
+
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
@@ -204,12 +214,7 @@ export async function executor(
       headers: headers ? headers : {},
       data,
       configurationUtilities,
-      sslOverrides: !isEmpty(sslCertificate)
-        ? {
-            verificationMode: 'none',
-            ...sslCertificate,
-          }
-        : {},
+      sslOverrides,
     })
   );
 

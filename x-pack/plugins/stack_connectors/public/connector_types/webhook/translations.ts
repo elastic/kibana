@@ -173,3 +173,23 @@ export const PFX_REQUIRED = i18n.translate(
     defaultMessage: 'PFX file is required.',
   }
 );
+
+export const ADD_CA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.viewCertificateAuthoritySwitch',
+  {
+    defaultMessage: 'Add certificate authority',
+  }
+);
+
+export const VERIFICATION_MODE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.webhook.verificationModeFieldLabel',
+  { defaultMessage: 'Verification mode' }
+);
+
+export const EDIT_CA_CALLOUT = i18n.translate(
+  'xpack.stackConnectors.components.webhook.editCACallout',
+  {
+    defaultMessage:
+      'This webhook has an existing certificate authority file. Upload a new one to replace it.',
+  }
+);

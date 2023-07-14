@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
   EuiTitle,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 import {
   UseArray,
@@ -38,23 +39,36 @@ import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];
 const { emptyField, urlField } = fieldValidators;
+const VERIFICATION_MODE_DEFAULT = 'certificate';
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
-    watch: ['config.hasAuth', 'config.authType', 'config.certType', '__internal__.hasHeaders'],
+    watch: [
+      'config.hasAuth',
+      'config.authType',
+      'config.certType',
+      '__internal__.hasHeaders',
+      '__internal__.hasCA',
+    ],
   });
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
   const authTypeDefaultValue = getFieldDefaultValue('config.authType') ?? WebhookAuthType.Basic;
   const certTypeDefaultValue = getFieldDefaultValue('config.certType') ?? SSLCertType.CRT;
+  const hasCADefaultValue =
+    !!getFieldDefaultValue<boolean | undefined>('config.ca') ||
+    getFieldDefaultValue('config.verificationMode') === 'none';
 
   const hasAuth = config == null ? true : config.hasAuth;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
+  const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const authType = config == null ? WebhookAuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
+
+  const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
 
   return (
     <>
@@ -127,7 +141,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       </EuiFlexGroup>
       {hasAuth ? (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <UseField
             path="config.authType"
             defaultValue={authTypeDefaultValue}
@@ -318,61 +332,133 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           },
         }}
       />
-      <EuiSpacer size="m" />
       {hasHeaders ? (
-        <UseArray path="config.headers" initialNumberOfItems={1}>
-          {({ items, addItem, removeItem }) => {
-            return (
-              <>
-                {items.map((item) => (
-                  <EuiFlexGroup key={item.id}>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.key`}
-                        config={{
-                          label: i18n.HEADER_KEY_LABEL,
-                        }}
-                        component={TextField}
-                        // This is needed because when you delete
-                        // a row and add a new one, the stale values will appear
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: { readOnly },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.value`}
-                        config={{ label: i18n.HEADER_VALUE_LABEL }}
-                        component={TextField}
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: { readOnly },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        aria-label={i18n.REMOVE_ITEM_LABEL}
-                        style={{ marginTop: '28px' }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ))}
-                <EuiSpacer size="m" />
-                <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
-                  {i18n.ADD_HEADER_BTN}
-                </EuiButtonEmpty>
-                <EuiSpacer />
-              </>
-            );
-          }}
-        </UseArray>
+        <>
+          {' '}
+          <EuiSpacer size="m" />
+          <UseArray path="config.headers" initialNumberOfItems={1}>
+            {({ items, addItem, removeItem }) => {
+              return (
+                <>
+                  {items.map((item) => (
+                    <EuiFlexGroup key={item.id}>
+                      <EuiFlexItem>
+                        <UseField
+                          path={`${item.path}.key`}
+                          config={{
+                            label: i18n.HEADER_KEY_LABEL,
+                          }}
+                          component={TextField}
+                          // This is needed because when you delete
+                          // a row and add a new one, the stale values will appear
+                          readDefaultValueOnForm={!item.isNew}
+                          componentProps={{
+                            euiFieldProps: { readOnly },
+                          }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <UseField
+                          path={`${item.path}.value`}
+                          config={{ label: i18n.HEADER_VALUE_LABEL }}
+                          component={TextField}
+                          readDefaultValueOnForm={!item.isNew}
+                          componentProps={{
+                            euiFieldProps: { readOnly },
+                          }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          color="danger"
+                          onClick={() => removeItem(item.id)}
+                          iconType="minusInCircle"
+                          aria-label={i18n.REMOVE_ITEM_LABEL}
+                          style={{ marginTop: '28px' }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ))}
+                  <EuiSpacer size="m" />
+                  <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                    {i18n.ADD_HEADER_BTN}
+                  </EuiButtonEmpty>
+                  <EuiSpacer />
+                </>
+              );
+            }}
+          </UseArray>
+        </>
       ) : null}
+      <EuiSpacer size="m" />
+      <UseField
+        path="__internal__.hasCA"
+        component={ToggleField}
+        config={{ defaultValue: hasCADefaultValue, label: i18n.ADD_CA_LABEL }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'webhookViewCASwitch',
+          },
+        }}
+      />
+      <EuiSpacer size="m" />
+      {hasCA && (
+        <>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <UseField
+                path="config.ca"
+                config={{
+                  label: 'CA file',
+                }}
+                component={FilePickerField}
+                componentProps={{
+                  euiFieldProps: {
+                    display: 'default',
+                    'data-test-subj': 'webhookCAInput',
+                    readOnly,
+                  },
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {' '}
+              <UseField
+                path="config.verificationMode"
+                component={SelectField}
+                config={{
+                  label: i18n.VERIFICATION_MODE_LABEL,
+                  defaultValue: VERIFICATION_MODE_DEFAULT,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.VERIFICATION_MODE_LABEL),
+                    },
+                  ],
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'webhookVerificationModeSelect',
+                    options: [
+                      { text: 'None', value: 'none' },
+                      { text: 'Certificate', value: 'certificate' },
+                      { text: 'Full', value: 'full' },
+                    ],
+                    fullWidth: true,
+                    readOnly,
+                  },
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {hasInitialCA && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut size="s" iconType="document" title={i18n.EDIT_CA_CALLOUT} />
+            </>
+          )}
+        </>
+      )}
     </>
   );
 };

@@ -21,6 +21,7 @@ export function getNodeSSLOptions(
   key?: Buffer;
   pfx?: Buffer;
   passphrase?: string;
+  ca?: Buffer;
 } {
   const agentOptions: {
     rejectUnauthorized?: boolean;
@@ -29,6 +30,7 @@ export function getNodeSSLOptions(
     key?: Buffer;
     pfx?: Buffer;
     passphrase?: string;
+    ca?: Buffer;
   } = {};
   if (!!verificationMode) {
     switch (verificationMode) {

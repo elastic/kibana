@@ -313,7 +313,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123' },
+      secrets: { user: 'abc', password: '123', key: null, crt: null, pfx: null },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -376,7 +376,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { crt: CRT_FILE, key: KEY_FILE, password: 'passss' },
+      secrets: { crt: CRT_FILE, key: KEY_FILE, password: 'passss', user: null, pfx: null },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -529,7 +529,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123' },
+      secrets: { user: 'abc', password: '123', key: null, crt: null, pfx: null },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -548,7 +548,13 @@ describe('execute()', () => {
       },
       hasAuth: false,
     };
-    const secrets: ConnectorTypeSecretsType = {};
+    const secrets: ConnectorTypeSecretsType = {
+      user: null,
+      password: null,
+      pfx: null,
+      crt: null,
+      key: null,
+    };
     await connectorType.executor({
       actionId: 'some-id',
       services,
