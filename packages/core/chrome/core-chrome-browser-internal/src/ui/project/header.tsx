@@ -268,23 +268,19 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
-
-          <EuiHeader
-            position="fixed"
-            className="header__secondBar"
-            data-test-subj="kibanaProjectHeaderActionMenu"
-          >
-            <EuiHeaderSection />
-            {headerActionMenuMounter.mount && (
-              <EuiHeaderSection side="right">
-                <EuiHeaderSectionItem>
-                  <HeaderActionMenu mounter={headerActionMenuMounter} />
-                </EuiHeaderSectionItem>
-              </EuiHeaderSection>
-            )}
-          </EuiHeader>
         </div>
       </header>
+
+      {headerActionMenuMounter.mount && (
+        <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
+          <EuiHeaderSection />
+          <EuiHeaderSection side="right">
+            <EuiHeaderSectionItem>
+              <HeaderActionMenu mounter={headerActionMenuMounter} />
+            </EuiHeaderSectionItem>
+          </EuiHeaderSection>
+        </EuiHeader>
+      )}
     </>
   );
 };
