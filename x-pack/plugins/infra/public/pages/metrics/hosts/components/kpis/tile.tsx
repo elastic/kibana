@@ -56,6 +56,8 @@ export const Tile = ({
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
 
+  const shouldUseSearchCriteria = hostNodes.length === 0;
+
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
       ? i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average.limit', {
@@ -84,15 +86,43 @@ export const Tile = ({
   });
 
   const filters = useMemo(() => {
-    return [
-      ...searchCriteria.filters,
-      buildCombinedHostsFilter({
-        field: 'host.name',
-        values: hostNodes.map((p) => p.name),
-        dataView,
+    return shouldUseSearchCriteria
+      ? searchCriteria.filters
+      : [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: hostNodes.map((p) => p.name),
+            dataView,
+          }),
+        ];
+  }, [shouldUseSearchCriteria, searchCriteria.filters, hostNodes, dataView]);
+
+  const loading = hostsLoading || !attributes || hostCountLoading;
+
+  // prevents requestTs and serchCriteria states from reloading the chart
+  // we want it to reload only once the host count and table have finished loading
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    attributes,
+    lastReloadRequestTime: requestTs,
+    ...searchCriteria,
+    filters,
+  });
+
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: afterLoadedState.dateRange,
+        query: shouldUseSearchCriteria ? afterLoadedState.query : undefined,
+        filters,
       }),
-    ];
-  }, [searchCriteria.filters, hostNodes, dataView]);
+    [
+      afterLoadedState.dateRange,
+      afterLoadedState.query,
+      filters,
+      getExtraActions,
+      shouldUseSearchCriteria,
+    ]
+  );
 
   const handleBrushEnd = useCallback(
     ({ range }: BrushTriggerEvent['data']) => {
@@ -106,27 +136,6 @@ export const Tile = ({
       });
     },
     [onSubmit]
-  );
-
-  const loading = hostsLoading || !attributes || hostCountLoading;
-
-  // prevents requestTs and serchCriteria states from reloading the chart
-  // we want it to reload only once the table has finished loading
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    attributes,
-    lastReloadRequestTime: requestTs,
-    ...searchCriteria,
-    filters,
-  });
-
-  const extraActions: Action[] = useMemo(
-    () =>
-      getExtraActions({
-        timeRange: afterLoadedState.dateRange,
-        query: searchCriteria.query,
-        filters,
-      }),
-    [afterLoadedState.dateRange, filters, getExtraActions, searchCriteria.query]
   );
 
   return (
@@ -170,7 +179,7 @@ export const Tile = ({
               lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
               dateRange={afterLoadedState.dateRange}
               filters={afterLoadedState.filters}
-              query={afterLoadedState.query}
+              query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
               onBrushEnd={handleBrushEnd}
               loading={loading}
             />
