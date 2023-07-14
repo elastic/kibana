@@ -83,6 +83,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
+        'console.autocompleteDefinitions.endpointsAvailability (string)',
         'console.ui.enabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
@@ -186,6 +187,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.latestAgentVersionsUrl (string)',
         'xpack.apm.featureFlags.agentConfigurationAvailable (any)',
         'xpack.apm.featureFlags.configurableIndicesAvailable (any)',
+        'xpack.apm.featureFlags.fastRefreshAvailable (any)',
         'xpack.apm.featureFlags.infrastructureTabAvailable (any)',
         'xpack.apm.featureFlags.infraUiAvailable (any)',
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
