@@ -18,6 +18,9 @@ import {
   EuiSelectable,
   EuiFieldSearch,
   EuiSelectableOption,
+  EuiInputPopover,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -36,7 +39,7 @@ export const DashboardLinkDestinationPicker = ({
   initialSelection?: string;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
-  const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
+  const [dashboardListOptions, setDashboardListOptions] = useState<EuiComboBoxOptionOption[]>([]);
 
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
@@ -60,7 +63,6 @@ export const DashboardLinkDestinationPicker = ({
         return {
           data: dashboard,
           label: dashboard.attributes.title,
-          checked: dashboard.id === initialSelection ? 'on' : undefined,
           ...(dashboard.id === parentDashboardId
             ? {
                 prepend: (
@@ -68,7 +70,7 @@ export const DashboardLinkDestinationPicker = ({
                 ),
               }
             : {}),
-        } as EuiSelectableOption;
+        } as EuiComboBoxOptionOption;
       }) ?? [];
 
     setDashboardListOptions(dashboardOptions);
@@ -85,7 +87,17 @@ export const DashboardLinkDestinationPicker = ({
   /* {...other} is needed so all inner elements are treated as part of the form */
   return (
     <div {...other}>
-      <EuiFieldSearch
+      <EuiComboBox
+        fullWidth
+        aria-label="Accessible screen reader label"
+        placeholder="Select a single option"
+        singleSelection={{ asPlainText: true }}
+        options={dashboardListOptions}
+        // selectedOptions={selectedOptions}
+        // onChange={onChange}
+        customOptionText="Add {searchValue} as your occupation"
+      />
+      {/* <EuiFieldSearch
         isClearable={true}
         placeholder={DashboardLinkEmbeddableStrings.getSearchPlaceholder()}
         onChange={(e) => {
@@ -112,7 +124,7 @@ export const DashboardLinkDestinationPicker = ({
         }}
       >
         {(list) => list}
-      </EuiSelectable>
+      </EuiSelectable> */}
     </div>
   );
 };
