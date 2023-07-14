@@ -74,7 +74,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
         <EuiFlexItem grow={false}>
           <EuiIcon type={NavigationLinkInfo[link.type].icon} color="text" />
         </EuiFlexItem>
-        <EuiFlexItem className="linkText">
+        <EuiFlexItem className="navEmbeddableLinkText">
           <EuiSkeletonTitle
             size="xxxs"
             isLoading={linkLabelLoading}

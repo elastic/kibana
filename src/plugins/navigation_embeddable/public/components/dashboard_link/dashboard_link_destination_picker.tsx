@@ -9,21 +9,23 @@
 import { debounce } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiBadge,
-  EuiSpacer,
+  EuiComboBox,
+  EuiFlexItem,
   EuiHighlight,
-  EuiSelectable,
-  EuiFieldSearch,
-  EuiSelectableOption,
+  EuiFlexGroup,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { DashboardItem } from '../../embeddable/types';
 import { memoizedFetchDashboard, memoizedFetchDashboards } from './dashboard_link_tools';
 import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
+
+type DashboardComboBoxOption = EuiComboBoxOptionOption<DashboardItem>;
 
 export const DashboardLinkDestinationPicker = ({
   onDestinationPicked,
@@ -36,43 +38,38 @@ export const DashboardLinkDestinationPicker = ({
   initialSelection?: string;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
-  const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
+  const [selectedOption, setSelectedOption] = useState<DashboardComboBoxOption[]>([]);
 
   const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
+  const getDashboardItem = useCallback((dashboard: DashboardItem) => {
+    return {
+      key: dashboard.id,
+      value: dashboard,
+      label: dashboard.attributes.title,
+      className: 'navEmbeddableDashboardItem',
+    };
+  }, []);
+
   useMount(async () => {
     if (initialSelection) {
-      onDestinationPicked(await memoizedFetchDashboard(initialSelection));
+      const dashboard = await memoizedFetchDashboard(initialSelection);
+      onDestinationPicked(dashboard);
+      setSelectedOption([getDashboardItem(dashboard)]);
     }
   });
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    return await memoizedFetchDashboards({
+    const dashboards = await memoizedFetchDashboards({
       search: searchString,
       parentDashboardId,
       selectedDashboardId: initialSelection,
     });
-  }, [searchString, parentDashboardId]);
-
-  useEffect(() => {
-    const dashboardOptions =
-      (dashboardList ?? []).map((dashboard: DashboardItem) => {
-        return {
-          data: dashboard,
-          label: dashboard.attributes.title,
-          checked: dashboard.id === initialSelection ? 'on' : undefined,
-          ...(dashboard.id === parentDashboardId
-            ? {
-                prepend: (
-                  <EuiBadge>{DashboardLinkEmbeddableStrings.getCurrentDashboardLabel()}</EuiBadge>
-                ),
-              }
-            : {}),
-        } as EuiSelectableOption;
-      }) ?? [];
-
-    setDashboardListOptions(dashboardOptions);
-  }, [dashboardList, parentDashboardId, initialSelection, searchString]);
+    const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) => {
+      return getDashboardItem(dashboard);
+    });
+    return dashboardOptions;
+  }, [searchString, parentDashboardId, getDashboardItem]);
 
   const debouncedSetSearch = useMemo(
     () =>
@@ -82,37 +79,51 @@ export const DashboardLinkDestinationPicker = ({
     [setSearchString]
   );
 
-  /* {...other} is needed so all inner elements are treated as part of the form */
+  const renderOption = useCallback(
+    (option, searchValue, contentClassName) => {
+      const { label, key: dashboardId } = option;
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" className={contentClassName}>
+          {dashboardId === parentDashboardId && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge>{DashboardLinkEmbeddableStrings.getCurrentDashboardLabel()}</EuiBadge>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem className={'navEmbeddableLinkText'}>
+            <EuiHighlight search={searchValue} className={'wrapText'}>
+              {label}
+            </EuiHighlight>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+    [parentDashboardId]
+  );
+
+  /* {...other} is needed so the EuiComboBox is treated as part of the form */
   return (
-    <div {...other}>
-      <EuiFieldSearch
-        isClearable={true}
-        placeholder={DashboardLinkEmbeddableStrings.getSearchPlaceholder()}
-        onChange={(e) => {
-          debouncedSetSearch(e.target.value);
-        }}
-      />
-      <EuiSpacer size="s" />
-      <EuiSelectable
-        singleSelection={true}
-        options={dashboardListOptions}
-        isLoading={loadingDashboardList}
-        listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}
-        aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
-        onChange={(newOptions, _, selected) => {
-          if (selected.checked) {
-            onDestinationPicked(selected.data as DashboardItem);
-          } else {
-            onDestinationPicked(undefined);
-          }
-          setDashboardListOptions(newOptions);
-        }}
-        renderOption={(option) => {
-          return <EuiHighlight search={searchString}>{option.label}</EuiHighlight>;
-        }}
-      >
-        {(list) => list}
-      </EuiSelectable>
-    </div>
+    <EuiComboBox
+      {...other}
+      async
+      fullWidth
+      className={'navEmbeddableDashboardPicker'}
+      isLoading={loadingDashboardList}
+      aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
+      placeholder={DashboardLinkEmbeddableStrings.getDashboardPickerPlaceholder()}
+      singleSelection={{ asPlainText: true }}
+      options={dashboardList}
+      onSearchChange={(searchValue) => {
+        debouncedSetSearch(searchValue);
+      }}
+      renderOption={renderOption}
+      selectedOptions={selectedOption}
+      onChange={(option) => {
+        setSelectedOption(option);
+        if (option.length > 0) {
+          // single select is `true`, so there is only ever one item in the array
+          onDestinationPicked(option[0].value);
+        }
+      }}
+    />
   );
 };

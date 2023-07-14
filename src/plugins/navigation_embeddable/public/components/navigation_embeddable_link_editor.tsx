@@ -157,7 +157,7 @@ export const NavigationEmbeddableLinkEditor = ({
               />
             ) : (
               <ExternalLinkDestinationPicker
-                initialSelection={link?.destination}
+                initialSelection={linkDestination}
                 onDestinationPicked={onUrlSelected}
               />
             )}
