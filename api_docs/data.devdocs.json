@@ -13270,7 +13270,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -20933,7 +20933,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",

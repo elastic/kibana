@@ -120,6 +120,10 @@ describe('getCloudFleetServersHosts', () => {
       deploymentId: 'deployment-id-1',
       cloudHost: 'us-east-1.aws.found.io',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -138,6 +142,10 @@ describe('getCloudFleetServersHosts', () => {
       cloudHost: 'test.fr',
       cloudDefaultPort: '9243',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -171,6 +179,10 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       isCloudEnabled: true,
       deploymentId: 'deployment-id-1',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
     mockedGetDefaultFleetServerHost.mockResolvedValue({
       id: 'test',
@@ -190,6 +202,10 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       deploymentId: 'deployment-id-1',
       cloudHost: 'us-east-1.aws.found.io',
       apm: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
     });
     mockedGetDefaultFleetServerHost.mockResolvedValue(null);
     soClient.create.mockResolvedValue({
