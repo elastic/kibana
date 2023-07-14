@@ -288,7 +288,7 @@ export function buildComponentTemplates(params: {
   pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
-  lifecyle?: IndexTemplate['template']['lifecycle'];
+  lifecycle?: IndexTemplate['template']['lifecycle'];
 }) {
   const {
     templateName,
@@ -298,7 +298,7 @@ export function buildComponentTemplates(params: {
     mappings,
     pipelineName,
     experimentalDataStreamFeature,
-    lifecyle,
+    lifecycle,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -379,7 +379,7 @@ export function buildComponentTemplates(params: {
             }
           : {}),
       },
-      ...(lifecyle ? { lifecyle } : {}),
+      ...(lifecycle ? { lifecycle } : {}),
     },
     _meta,
   };
@@ -530,6 +530,8 @@ export function prepareTemplate({
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   const lifecyle = isILMPolicyDisabled && dataStream.lifecycle ? dataStream.lifecycle : undefined;
 
+  console.log('dataStream.lifecycle', dataStream.lifecycle);
+
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
@@ -548,7 +550,7 @@ export function prepareTemplate({
     pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
-    lifecyle,
+    lifecycle: lifecyle,
   });
 
   const template = getTemplate({

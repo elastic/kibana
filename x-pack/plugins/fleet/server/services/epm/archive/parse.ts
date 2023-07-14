@@ -197,7 +197,7 @@ export async function _generatePackageInfoFromPaths(
 
 export function parseAndVerifyArchive(
   paths: string[],
-  manifestsAndRoutingRules: AssetsBufferMap,
+  assetsMap: AssetsBufferMap,
   topLevelDirOverride?: string
 ): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
@@ -209,10 +209,11 @@ export function parseAndVerifyArchive(
       );
     }
   });
+  console.log('assetsMap', Object.keys(assetsMap));
 
   // The package must contain a manifest file ...
   const manifestFile = path.posix.join(toplevelDir, MANIFEST_NAME);
-  const manifestBuffer = manifestsAndRoutingRules[manifestFile];
+  const manifestBuffer = assetsMap[manifestFile];
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError(
       `Package at top-level directory ${toplevelDir} must contain a top-level ${MANIFEST_NAME} file.`
@@ -261,7 +262,7 @@ export function parseAndVerifyArchive(
     pkgName: parsed.name,
     pkgVersion: parsed.version,
     pkgBasePathOverride: topLevelDirOverride,
-    assetsMap: manifestsAndRoutingRules,
+    assetsMap,
   });
 
   if (parsedDataStreams.length) {
@@ -358,11 +359,12 @@ export function parseAndVerifyDataStreams(opts: {
       }
     }
     // Lifecycle
-    const lifecyclePath = path.posix.join(fullDataStreamPath, DATASTREAM_ROUTING_RULES_NAME);
+    const lifecyclePath = path.posix.join(fullDataStreamPath, DATASTREAM_LIFECYCLE_NAME);
     const lifecyleBuffer = assetsMap[lifecyclePath];
     let dataStreamLifecyle: RegistryDataStreamLifecycle | undefined;
     if (lifecyleBuffer) {
       try {
+        console.log('lifecyleBuffer.toString()', lifecyleBuffer.toString());
         dataStreamLifecyle = yaml.safeLoad(lifecyleBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
