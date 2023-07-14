@@ -44,7 +44,7 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
         items={items}
         categories={CATEGORIES}
         selectedId={selectedId}
-        panelTopOffset={`calc(${euiTheme.size.l} * 4)`}
+        panelTopOffset={`calc(${euiTheme.size.l} * 2)`}
       />
     </SolutionNav>
   );

@@ -24,7 +24,7 @@ export const SolutionSideNavPanelStyles = (
   bottom: 0;
   width: ${PANEL_WIDTH};
   height: inherit;
-  z-index: 999;
+  z-index: 1000;
   background-color: ${euiTheme.colors.body};
 
   // If the bottom bar is visible add padding to the navigation
