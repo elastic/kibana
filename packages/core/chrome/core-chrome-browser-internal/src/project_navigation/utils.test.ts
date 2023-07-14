@@ -345,7 +345,7 @@ describe('findActiveNodes', () => {
         id: 'item1',
         title: 'Item 1',
         path: ['root', 'item1'],
-        getIsActive: (loc) => loc.pathname.startsWith('/foo'), // Should match
+        getIsActive: ({ location }) => location.pathname.startsWith('/foo'), // Should match
       },
       '[0][2]': {
         id: 'item2',
