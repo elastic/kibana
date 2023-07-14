@@ -209,7 +209,6 @@ export function parseAndVerifyArchive(
       );
     }
   });
-  console.log('assetsMap', Object.keys(assetsMap));
 
   // The package must contain a manifest file ...
   const manifestFile = path.posix.join(toplevelDir, MANIFEST_NAME);
@@ -364,7 +363,6 @@ export function parseAndVerifyDataStreams(opts: {
     let dataStreamLifecyle: RegistryDataStreamLifecycle | undefined;
     if (lifecyleBuffer) {
       try {
-        console.log('lifecyleBuffer.toString()', lifecyleBuffer.toString());
         dataStreamLifecyle = yaml.safeLoad(lifecyleBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(

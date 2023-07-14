@@ -530,8 +530,6 @@ export function prepareTemplate({
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   const lifecyle = isILMPolicyDisabled && dataStream.lifecycle ? dataStream.lifecycle : undefined;
 
-  console.log('dataStream.lifecycle', dataStream.lifecycle);
-
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
