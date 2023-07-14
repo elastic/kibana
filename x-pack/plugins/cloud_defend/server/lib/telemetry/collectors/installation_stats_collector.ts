@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import yaml from 'js-yaml';
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -14,34 +13,13 @@ import {
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
-import type { CloudDefendInstallationStats, CloudDefendPolicyYamlStats } from './types';
+import type { CloudDefendInstallationStats } from './types';
 import type { CloudDefendPluginStart, CloudDefendPluginStartDeps } from '../../../types';
 import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL } from '../../../../common/constants';
-import { getInputFromPolicy } from '../../../../common/utils/helpers';
-
-const getPolicyYamlStats = (policyYaml: string, logger: Logger) => {
-  let policyJson: any = {};
-
-  try {
-    policyJson = JSON.stringify(yaml.load(policyYaml));
-  } catch (err) {
-    logger.error(
-      'could not convert cloud_defend yaml to json for installation stats usage collection',
-      err
-    );
-  }
-
-  const policyStats: CloudDefendPolicyYamlStats = {
-    policy_yaml: policyYaml,
-    policy_json: JSON.stringify(policyJson),
-    selector_counts: {},
-    response_counts: {},
-    conditions_in_use: {},
-    actions_in_use: {},
-  };
-
-  return policyStats;
-};
+import {
+  getInputFromPolicy,
+  getSelectorsAndResponsesFromYaml,
+} from '../../../../common/utils/helpers';
 
 export const getInstallationStats = async (
   esClient: ElasticsearchClient,
@@ -71,7 +49,7 @@ export const getInstallationStats = async (
 
         const input = getInputFromPolicy(packagePolicy, INPUT_CONTROL);
         const policyYaml = input?.vars?.configuration?.value;
-        const policyYamlStats = getPolicyYamlStats(policyYaml, logger);
+        const { selectors, responses } = getSelectorsAndResponsesFromYaml(policyYaml);
 
         return {
           package_policy_id: packagePolicy.id,
@@ -79,7 +57,9 @@ export const getInstallationStats = async (
           created_at: packagePolicy.created_at,
           agent_policy_id: packagePolicy.policy_id,
           agent_count: agentCounts,
-          policy_yaml_stats: policyYamlStats,
+          policy_yaml: policyYaml,
+          selectors,
+          responses,
         };
       }
     );

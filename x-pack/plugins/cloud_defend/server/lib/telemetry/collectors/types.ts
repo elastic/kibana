@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SelectorType, SelectorCondition, ResponseAction } from '../../../../common';
+import { Selector, Response, SelectorType, SelectorCondition, ResponseAction } from '../../../../common';
 
 export interface CloudDefendUsage {
   indices: CloudDefendIndicesStats;
@@ -58,11 +58,11 @@ export interface CloudDefendAccountsStats {
 }
 
 export type CloudDefendSelectorTypeCounts = {
-  [key in SelectorType]?: number;
+  [key in SelectorType]: number;
 };
 
 export type CloudDefendResponseTypeCounts = {
-  [key in SelectorType]?: number;
+  [key in SelectorType]: number;
 };
 
 export type CloudDefendConditionsCounts = {
@@ -78,9 +78,14 @@ export interface CloudDefendPolicyYamlStats {
   policy_json: string; // to be used for further digging in BigQuery
   selector_counts: CloudDefendSelectorTypeCounts;
   response_counts: CloudDefendResponseTypeCounts;
-  conditions_in_use: CloudDefendConditionsCounts;
-  actions_in_use: CloudDefendActionCounts;
+  selector_conditions_counts: CloudDefendConditionsCounts;
+  response_actions_counts: CloudDefendActionCounts;
+  response_match_names: string[];
+  response_exclude_names: string[];
 }
+
+type CloudDefendSelector = Omit<Selector, 'hasErrors'>;
+type CloudDefendResponse = Omit<Response, 'hasErrors'>;
 
 export interface CloudDefendInstallationStats {
   package_policy_id: string;
@@ -88,5 +93,7 @@ export interface CloudDefendInstallationStats {
   agent_policy_id: string;
   created_at: string;
   agent_count: number;
-  policy_yaml_stats: CloudDefendPolicyYamlStats;
+  policy_yaml: string;
+  selectors: CloudDefendSelector[];
+  responses: CloudDefendResponse[];
 }

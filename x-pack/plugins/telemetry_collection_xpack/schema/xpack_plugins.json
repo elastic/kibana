@@ -5560,12 +5560,6 @@
               "package_policy_id": {
                 "type": "keyword"
               },
-              "policy_yaml": {
-                "type": "keyword"
-              },
-              "policy_json": {
-                "type": "keyword"
-              },
               "package_version": {
                 "type": "keyword"
               },
@@ -5577,6 +5571,106 @@
               },
               "agent_count": {
                 "type": "long"
+              },
+              "policy_yaml": {
+                "type": "keyword"
+              },
+              "policy_json": {
+                "type": "keyword"
+              },
+              "selector_counts": {
+                "properties": {
+                  "file": {
+                    "type": "long"
+                  },
+                  "process": {
+                    "type": "long"
+                  }
+                }
+              },
+              "response_counts": {
+                "properties": {
+                  "file": {
+                    "type": "long"
+                  },
+                  "process": {
+                    "type": "long"
+                  }
+                }
+              },
+              "selector_conditions_counts": {
+                "properties": {
+                  "containerImageFullName": {
+                    "type": "long"
+                  },
+                  "containerImageName": {
+                    "type": "long"
+                  },
+                  "containerImageTag": {
+                    "type": "long"
+                  },
+                  "ignoreVolumeFiles": {
+                    "type": "long"
+                  },
+                  "ignoreVolumeMounts": {
+                    "type": "long"
+                  },
+                  "kubernetesClusterId": {
+                    "type": "long"
+                  },
+                  "kubernetesClusterName": {
+                    "type": "long"
+                  },
+                  "kubernetesNamespace": {
+                    "type": "long"
+                  },
+                  "kubernetesPodLabel": {
+                    "type": "long"
+                  },
+                  "kubernetesPodName": {
+                    "type": "long"
+                  },
+                  "operation": {
+                    "type": "long"
+                  },
+                  "processExecutable": {
+                    "type": "long"
+                  },
+                  "processName": {
+                    "type": "long"
+                  },
+                  "sessionLeaderInteractive": {
+                    "type": "long"
+                  },
+                  "targetFilePath": {
+                    "type": "long"
+                  }
+                }
+              },
+              "response_actions_counts": {
+                "properties": {
+                  "log": {
+                    "type": "long"
+                  },
+                  "alert": {
+                    "type": "long"
+                  },
+                  "block": {
+                    "type": "long"
+                  }
+                }
+              },
+              "response_match_names": {
+                "type": "array",
+                "items": {
+                  "type": "keyword"
+                }
+              },
+              "response_exclude_names": {
+                "type": "array",
+                "items": {
+                  "type": "keyword"
+                }
               }
             }
           }

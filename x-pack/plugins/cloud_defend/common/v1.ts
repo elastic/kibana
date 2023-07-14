@@ -99,7 +99,7 @@ export interface Selector {
   // process selector properties
   processExecutable?: string[];
   processName?: string[];
-  sessionLeaderInteractive?: string[];
+  sessionLeaderInteractive?: boolean;
 
   // non yaml fields
   type: SelectorType;
