@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { TEST_IDS } from '../../../../constants';
 import { Prompt } from '../../../../../..';
 import * as i18n from './translations';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
@@ -28,6 +29,7 @@ interface Props {
   onSystemPromptDeleted: (systemPromptTitle: string) => void;
   onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
   systemPrompts: Prompt[];
+  autoFocus?: boolean;
   selectedSystemPrompt?: Prompt;
 }
 
@@ -41,6 +43,7 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
  */
 export const SystemPromptSelector: React.FC<Props> = React.memo(
   ({
+    autoFocus = false,
     systemPrompts,
     onSystemPromptDeleted,
     onSystemPromptSelectionChange,
@@ -54,6 +57,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           isNewConversationDefault: sp.isNewConversationDefault ?? false,
         },
         label: sp.name,
+        'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
       }))
     );
     const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
@@ -146,6 +150,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           component={'span'}
           gutterSize={'none'}
           justifyContent="spaceBetween"
+          data-test-subj="systemPromptOptionSelector"
         >
           <EuiFlexItem grow={1} component={'span'}>
             <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
@@ -200,8 +205,11 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
-        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
         aria-label={i18n.SYSTEM_PROMPT_SELECTOR}
+        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
+        compressed
+        data-test-subj={TEST_IDS.SYSTEM_PROMPT_SELECTOR}
+        fullWidth
         placeholder={i18n.SYSTEM_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
         singleSelection={{ asPlainText: true }}
@@ -210,7 +218,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         onChange={onChange}
         onCreateOption={onCreateOption}
         renderOption={renderOption}
-        autoFocus
+        autoFocus={autoFocus}
       />
     );
   }

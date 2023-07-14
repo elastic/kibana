@@ -21,255 +21,217 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 beforeEach(() => jest.resetAllMocks());
 
 describe('bulkExecute()', () => {
-  test('schedules the actions with all given parameters with a preconfigured connector', async () => {
-    const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
-      taskManager: mockTaskManager,
-      connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
-        {
-          id: '123',
-          actionTypeId: '.email',
-          config: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'x',
-          secrets: {},
-        },
-      ],
-    });
-
-    internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '234',
-          type: 'action_task_params',
-          attributes: {
-            actionId: '123',
-          },
-          references: [],
-        },
-        {
-          id: '345',
-          type: 'action_task_params',
-          attributes: {
-            actionId: '123',
-          },
-          references: [],
-        },
-      ],
-    });
-    await executeFn(internalSavedObjectsRepository, [
-      {
-        id: '123',
-        params: { baz: false },
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-      },
-      {
-        id: '123',
-        params: { baz: true },
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-      },
-    ]);
-    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
-    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "params": Object {
-              "actionTaskParamsId": "234",
-              "spaceId": "default",
-            },
-            "scope": Array [
-              "actions",
-            ],
-            "state": Object {},
-            "taskType": "actions:.email",
-          },
-          Object {
-            "params": Object {
-              "actionTaskParamsId": "345",
-              "spaceId": "default",
-            },
-            "scope": Array [
-              "actions",
-            ],
-            "state": Object {},
-            "taskType": "actions:.email",
-          },
-        ],
-      ]
-  `);
-
-    expect(internalSavedObjectsRepository.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          apiKey: null,
-          source: 'NOTIFICATION',
-        },
-        references: [],
-      },
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: true },
-          apiKey: null,
-          source: 'NOTIFICATION',
-        },
-        references: [],
-      },
-    ]);
-  });
-
-  test('schedules the actions with all given parameters with a preconfigured connector and source specified', async () => {
-    const sourceUuid = uuidv4();
-    const source = { type: 'alert', id: sourceUuid };
-    const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
-      taskManager: mockTaskManager,
-      connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
-        {
-          id: '123',
-          actionTypeId: '.email',
-          config: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'x',
-          secrets: {},
-        },
-      ],
-    });
-
-    internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '234',
-          type: 'action_task_params',
-          attributes: {
-            actionId: '123',
-          },
-          references: [
-            {
-              id: sourceUuid,
-              name: 'source',
-              type: 'alert',
-            },
-          ],
-        },
-        {
-          id: '345',
-          type: 'action_task_params',
-          attributes: {
-            actionId: '123',
-          },
-          references: [],
-        },
-      ],
-    });
-    await executeFn(internalSavedObjectsRepository, [
-      {
-        id: '123',
-        params: { baz: false },
-        source: asSavedObjectExecutionSource(source),
-      },
-      {
-        id: '123',
-        params: { baz: true },
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-      },
-    ]);
-    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
-    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "params": Object {
-              "actionTaskParamsId": "234",
-              "spaceId": "default",
-            },
-            "scope": Array [
-              "actions",
-            ],
-            "state": Object {},
-            "taskType": "actions:.email",
-          },
-          Object {
-            "params": Object {
-              "actionTaskParamsId": "345",
-              "spaceId": "default",
-            },
-            "scope": Array [
-              "actions",
-            ],
-            "state": Object {},
-            "taskType": "actions:.email",
-          },
-        ],
-      ]
-  `);
-
-    expect(internalSavedObjectsRepository.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          apiKey: null,
-          source: 'SAVED_OBJECT',
-        },
-        references: [
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'schedules the actions with all given parameters with an in-memory connector: isPreconfigured: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        inMemoryConnectors: [
           {
-            id: sourceUuid,
-            name: 'source',
-            type: 'alert',
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
           },
         ],
-      },
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: true },
-          apiKey: null,
-          source: 'NOTIFICATION',
-        },
-        references: [],
-      },
-    ]);
-  });
+      });
 
-  test('schedules the actions with all given parameters with a preconfigured connector and relatedSavedObjects specified', async () => {
-    const sourceUuid = uuidv4();
-    const source = { type: 'alert', id: sourceUuid };
-    const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
-      taskManager: mockTaskManager,
-      connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
+      internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '234',
+            type: 'action_task_params',
+            attributes: {
+              actionId: '123',
+            },
+            references: [],
+          },
+          {
+            id: '345',
+            type: 'action_task_params',
+            attributes: {
+              actionId: '123',
+            },
+            references: [],
+          },
+        ],
+      });
+      await executeFn(internalSavedObjectsRepository, [
         {
           id: '123',
-          actionTypeId: '.email',
-          config: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'x',
-          secrets: {},
+          params: { baz: false },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         },
-      ],
-    });
-
-    internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
         {
-          id: '234',
+          id: '123',
+          params: { baz: true },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+        },
+      ]);
+      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "234",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:.email",
+          },
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "345",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:.email",
+          },
+        ],
+      ]
+  `);
+
+      expect(internalSavedObjectsRepository.bulkCreate).toHaveBeenCalledWith([
+        {
           type: 'action_task_params',
           attributes: {
             actionId: '123',
+            params: { baz: false },
+            apiKey: null,
+            source: 'NOTIFICATION',
+          },
+          references: [],
+        },
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: true },
+            apiKey: null,
+            source: 'NOTIFICATION',
+          },
+          references: [],
+        },
+      ]);
+    }
+  );
+
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'schedules the actions with all given parameters with an in-memory connector and source specified: isPreconfigured: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      const sourceUuid = uuidv4();
+      const source = { type: 'alert', id: sourceUuid };
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        inMemoryConnectors: [
+          {
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
+          },
+        ],
+      });
+
+      internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '234',
+            type: 'action_task_params',
+            attributes: {
+              actionId: '123',
+            },
+            references: [
+              {
+                id: sourceUuid,
+                name: 'source',
+                type: 'alert',
+              },
+            ],
+          },
+          {
+            id: '345',
+            type: 'action_task_params',
+            attributes: {
+              actionId: '123',
+            },
+            references: [],
+          },
+        ],
+      });
+      await executeFn(internalSavedObjectsRepository, [
+        {
+          id: '123',
+          params: { baz: false },
+          source: asSavedObjectExecutionSource(source),
+        },
+        {
+          id: '123',
+          params: { baz: true },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+        },
+      ]);
+      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "234",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:.email",
+          },
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "345",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:.email",
+          },
+        ],
+      ]
+  `);
+
+      expect(internalSavedObjectsRepository.bulkCreate).toHaveBeenCalledWith([
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            apiKey: null,
+            source: 'SAVED_OBJECT',
           },
           references: [
             {
@@ -280,10 +242,156 @@ describe('bulkExecute()', () => {
           ],
         },
         {
-          id: '345',
           type: 'action_task_params',
           attributes: {
             actionId: '123',
+            params: { baz: true },
+            apiKey: null,
+            source: 'NOTIFICATION',
+          },
+          references: [],
+        },
+      ]);
+    }
+  );
+
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'schedules the actions with all given parameters with an in-memory connector and relatedSavedObjects specified: isPreconfigured: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      const sourceUuid = uuidv4();
+      const source = { type: 'alert', id: sourceUuid };
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        inMemoryConnectors: [
+          {
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
+          },
+        ],
+      });
+
+      internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '234',
+            type: 'action_task_params',
+            attributes: {
+              actionId: '123',
+            },
+            references: [
+              {
+                id: sourceUuid,
+                name: 'source',
+                type: 'alert',
+              },
+            ],
+          },
+          {
+            id: '345',
+            type: 'action_task_params',
+            attributes: {
+              actionId: '123',
+            },
+            references: [
+              {
+                id: 'some-id',
+                name: 'related_some-type_0',
+                type: 'some-type',
+              },
+            ],
+          },
+        ],
+      });
+      await executeFn(internalSavedObjectsRepository, [
+        {
+          id: '123',
+          params: { baz: false },
+          source: asSavedObjectExecutionSource(source),
+        },
+        {
+          id: '123',
+          params: { baz: true },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          relatedSavedObjects: [
+            {
+              id: 'some-id',
+              namespace: 'some-namespace',
+              type: 'some-type',
+            },
+          ],
+        },
+      ]);
+      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "234",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:.email",
+          },
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "345",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:.email",
+          },
+        ],
+      ]
+  `);
+
+      expect(internalSavedObjectsRepository.bulkCreate).toHaveBeenCalledWith([
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            apiKey: null,
+            source: 'SAVED_OBJECT',
+          },
+          references: [
+            {
+              id: sourceUuid,
+              name: 'source',
+              type: 'alert',
+            },
+          ],
+        },
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: true },
+            apiKey: null,
+            source: 'NOTIFICATION',
+            relatedSavedObjects: [
+              {
+                id: 'related_some-type_0',
+                namespace: 'some-namespace',
+                type: 'some-type',
+              },
+            ],
           },
           references: [
             {
@@ -293,215 +401,143 @@ describe('bulkExecute()', () => {
             },
           ],
         },
-      ],
-    });
-    await executeFn(internalSavedObjectsRepository, [
-      {
-        id: '123',
-        params: { baz: false },
-        source: asSavedObjectExecutionSource(source),
-      },
-      {
-        id: '123',
-        params: { baz: true },
-        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-        relatedSavedObjects: [
+      ]);
+    }
+  );
+
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'throws when scheduling action using non in-memory connector: isPreconfigured: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        inMemoryConnectors: [
           {
-            id: 'some-id',
-            namespace: 'some-namespace',
-            type: 'some-type',
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
           },
         ],
-      },
-    ]);
-    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
-    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "params": Object {
-              "actionTaskParamsId": "234",
-              "spaceId": "default",
-            },
-            "scope": Array [
-              "actions",
-            ],
-            "state": Object {},
-            "taskType": "actions:.email",
-          },
-          Object {
-            "params": Object {
-              "actionTaskParamsId": "345",
-              "spaceId": "default",
-            },
-            "scope": Array [
-              "actions",
-            ],
-            "state": Object {},
-            "taskType": "actions:.email",
-          },
-        ],
-      ]
-  `);
-
-    expect(internalSavedObjectsRepository.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          apiKey: null,
-          source: 'SAVED_OBJECT',
-        },
-        references: [
+      });
+      await expect(
+        executeFn(internalSavedObjectsRepository, [
           {
-            id: sourceUuid,
-            name: 'source',
-            type: 'alert',
+            id: '123',
+            params: { baz: false },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
           },
-        ],
-      },
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: true },
-          apiKey: null,
-          source: 'NOTIFICATION',
-          relatedSavedObjects: [
-            {
-              id: 'related_some-type_0',
-              namespace: 'some-namespace',
-              type: 'some-type',
-            },
-          ],
-        },
-        references: [
           {
-            id: 'some-id',
-            name: 'related_some-type_0',
-            type: 'some-type',
+            id: 'not-preconfigured',
+            params: { baz: true },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          },
+        ])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"not-preconfigured are not in-memory connectors and can't be scheduled for unsecured actions execution"`
+      );
+    }
+  );
+
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'throws when connector type is not enabled: isPreconfigured: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      const mockedConnectorTypeRegistry = actionTypeRegistryMock.create();
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: mockedConnectorTypeRegistry,
+        inMemoryConnectors: [
+          {
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
           },
         ],
-      },
-    ]);
-  });
+      });
+      mockedConnectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+        throw new Error('Fail');
+      });
 
-  test('throws when scheduling action using non preconfigured connector', async () => {
-    const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
-      taskManager: mockTaskManager,
-      connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
-        {
-          id: '123',
-          actionTypeId: '.email',
-          config: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'x',
-          secrets: {},
-        },
-      ],
-    });
-    await expect(
-      executeFn(internalSavedObjectsRepository, [
-        {
-          id: '123',
-          params: { baz: false },
-          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-        },
-        {
-          id: 'not-preconfigured',
-          params: { baz: true },
-          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-        },
-      ])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"not-preconfigured are not preconfigured connectors and can't be scheduled for unsecured actions execution"`
-    );
-  });
+      await expect(
+        executeFn(internalSavedObjectsRepository, [
+          {
+            id: '123',
+            params: { baz: false },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          },
+          {
+            id: '123',
+            params: { baz: true },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          },
+        ])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    }
+  );
 
-  test('throws when connector type is not enabled', async () => {
-    const mockedConnectorTypeRegistry = actionTypeRegistryMock.create();
-    const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
-      taskManager: mockTaskManager,
-      connectorTypeRegistry: mockedConnectorTypeRegistry,
-      preconfiguredConnectors: [
-        {
-          id: '123',
-          actionTypeId: '.email',
-          config: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'x',
-          secrets: {},
-        },
-      ],
-    });
-    mockedConnectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
-      throw new Error('Fail');
-    });
-
-    await expect(
-      executeFn(internalSavedObjectsRepository, [
-        {
-          id: '123',
-          params: { baz: false },
-          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-        },
-        {
-          id: '123',
-          params: { baz: true },
-          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-        },
-      ])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-  });
-
-  test('throws when scheduling action using non allow-listed preconfigured connector', async () => {
-    const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
-      taskManager: mockTaskManager,
-      connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
-        {
-          id: '123',
-          actionTypeId: '.email',
-          config: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'x',
-          secrets: {},
-        },
-        {
-          id: '456',
-          actionTypeId: 'not-in-allowlist',
-          config: {},
-          isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-          name: 'x',
-          secrets: {},
-        },
-      ],
-    });
-    await expect(
-      executeFn(internalSavedObjectsRepository, [
-        {
-          id: '123',
-          params: { baz: false },
-          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-        },
-        {
-          id: '456',
-          params: { baz: true },
-          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
-        },
-      ])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"not-in-allowlist actions cannot be scheduled for unsecured actions execution"`
-    );
-  });
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'throws when scheduling action using non allow-listed in-memory connector: isPreconfigured: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        inMemoryConnectors: [
+          {
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
+          },
+          {
+            id: '456',
+            actionTypeId: 'not-in-allowlist',
+            config: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            name: 'x',
+            secrets: {},
+          },
+        ],
+      });
+      await expect(
+        executeFn(internalSavedObjectsRepository, [
+          {
+            id: '123',
+            params: { baz: false },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          },
+          {
+            id: '456',
+            params: { baz: true },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          },
+        ])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"not-in-allowlist actions cannot be scheduled for unsecured actions execution"`
+      );
+    }
+  );
 });

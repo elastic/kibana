@@ -80,6 +80,40 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         });
     });
 
+    it(`shouldn't create a preconfigured action with the same id as an existing one`, async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/custom-system-abc-connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My action',
+          connector_type_id: 'system-abc-action-type',
+          config: {},
+          secrets: {},
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'This custom-system-abc-connector already exists in a preconfigured action.',
+        });
+    });
+
+    it(`shouldn't create a system action`, async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My system action',
+          connector_type_id: 'test.system-action',
+          config: {},
+          secrets: {},
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'System action creation is forbidden. Action type: test.system-action.',
+        });
+    });
+
     describe('legacy', () => {
       it('should handle create action request appropriately', async () => {
         const response = await supertest
