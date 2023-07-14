@@ -936,36 +936,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [
-          {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
-            package_policies: [
-              {
-                name: 'fleet-server-123',
-                package: {
-                  name: 'fleet_server',
-                },
-              },
-            ],
-          },
-          {
-            name: 'agent policy 1',
-            id: 'agent_policy_1',
-            is_managed: false,
-            package_policies: [
-              {
-                name: 'nginx',
-                package: {
-                  name: 'nginx',
-                },
-              },
-            ],
-          },
-        ],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyResolvedValue);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(soClient, esClientMock, 'output-test', {
@@ -994,36 +965,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [
-          {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
-            package_policies: [
-              {
-                name: 'fleet-server-123',
-                package: {
-                  name: 'fleet_server',
-                },
-              },
-            ],
-          },
-          {
-            name: 'agent policy 1',
-            id: 'agent_policy_1',
-            is_managed: false,
-            package_policies: [
-              {
-                name: 'nginx',
-                package: {
-                  name: 'nginx',
-                },
-              },
-            ],
-          },
-        ],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyResolvedValue);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(
@@ -1058,17 +1000,31 @@ describe('Output Service', () => {
 
     it('Should return an error if trying to change the output to logstash for fleet server policy', async () => {
       const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyResolvedValue);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-es-output', {
+          type: 'logstash',
+          hosts: ['test:4343'],
+        })
+      ).rejects.toThrowError(
+        'Logstash output cannot be used with Fleet server integration in fleet server policy. Please create a new ElasticSearch output.'
+      );
+    });
+
+    it('Should return an error if trying to change the output to logstash for synthetics policy', async () => {
+      const soClient = getMockedSoClient({});
       mockedAgentPolicyService.list.mockResolvedValue({
         items: [
           {
-            name: 'fleet server policy',
-            id: 'fleet_server_policy',
-            is_default_fleet_server: true,
+            name: 'synthetics policy',
+            id: 'synthetics_policy',
             package_policies: [
               {
-                name: 'fleet-server-123',
+                name: 'synthetics-123',
                 package: {
-                  name: 'fleet_server',
+                  name: 'synthetics',
                 },
               },
             ],
@@ -1088,7 +1044,8 @@ describe('Output Service', () => {
           },
         ],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
-      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(true);
 
       await expect(
         outputService.update(soClient, esClientMock, 'existing-es-output', {
@@ -1096,7 +1053,7 @@ describe('Output Service', () => {
           hosts: ['test:4343'],
         })
       ).rejects.toThrowError(
-        'Logstash output cannot be used with Fleet Server integration in fleet server policy. Please create a new ElasticSearch output.'
+        'Logstash output cannot be used with Synthetics integration in synthetics policy. Please create a new ElasticSearch output.'
       );
     });
 
@@ -1123,6 +1080,7 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
 
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'kafka',
