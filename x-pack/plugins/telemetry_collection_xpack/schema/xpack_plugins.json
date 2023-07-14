@@ -5575,101 +5575,126 @@
               "policy_yaml": {
                 "type": "keyword"
               },
-              "policy_json": {
-                "type": "keyword"
-              },
-              "selector_counts": {
-                "properties": {
-                  "file": {
-                    "type": "long"
-                  },
-                  "process": {
-                    "type": "long"
-                  }
-                }
-              },
-              "response_counts": {
-                "properties": {
-                  "file": {
-                    "type": "long"
-                  },
-                  "process": {
-                    "type": "long"
-                  }
-                }
-              },
-              "selector_conditions_counts": {
-                "properties": {
-                  "containerImageFullName": {
-                    "type": "long"
-                  },
-                  "containerImageName": {
-                    "type": "long"
-                  },
-                  "containerImageTag": {
-                    "type": "long"
-                  },
-                  "ignoreVolumeFiles": {
-                    "type": "long"
-                  },
-                  "ignoreVolumeMounts": {
-                    "type": "long"
-                  },
-                  "kubernetesClusterId": {
-                    "type": "long"
-                  },
-                  "kubernetesClusterName": {
-                    "type": "long"
-                  },
-                  "kubernetesNamespace": {
-                    "type": "long"
-                  },
-                  "kubernetesPodLabel": {
-                    "type": "long"
-                  },
-                  "kubernetesPodName": {
-                    "type": "long"
-                  },
-                  "operation": {
-                    "type": "long"
-                  },
-                  "processExecutable": {
-                    "type": "long"
-                  },
-                  "processName": {
-                    "type": "long"
-                  },
-                  "sessionLeaderInteractive": {
-                    "type": "long"
-                  },
-                  "targetFilePath": {
-                    "type": "long"
-                  }
-                }
-              },
-              "response_actions_counts": {
-                "properties": {
-                  "log": {
-                    "type": "long"
-                  },
-                  "alert": {
-                    "type": "long"
-                  },
-                  "block": {
-                    "type": "long"
-                  }
-                }
-              },
-              "response_match_names": {
+              "selectors": {
                 "type": "array",
                 "items": {
-                  "type": "keyword"
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "operation": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageFullName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "containerImageTag": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesClusterId": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesClusterName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesNamespace": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesPodLabel": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "kubernetesPodName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "targetFilePath": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "ignoreVolumeFiles": {
+                      "type": "boolean"
+                    },
+                    "ignoreVolumeMounts": {
+                      "type": "boolean"
+                    },
+                    "processExecutable": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "processName": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "sessionLeaderInteractive": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               },
-              "response_exclude_names": {
+              "responses": {
                 "type": "array",
                 "items": {
-                  "type": "keyword"
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "match": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "exclude": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
                 }
               }
             }

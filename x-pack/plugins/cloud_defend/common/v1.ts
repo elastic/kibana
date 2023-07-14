@@ -57,7 +57,7 @@ export interface CloudDefendPolicy {
  * cloud_defend/control types
  */
 
-// Currently we support file and process selectors (which match on their respective set of lsm hook points)
+// Currently we support file and process selectors (which match on their respective set of hook points)
 export type SelectorType = 'file' | 'process';
 
 export type SelectorCondition =

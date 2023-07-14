@@ -4,7 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Selector, Response, SelectorType, SelectorCondition, ResponseAction } from '../../../../common';
+
+// for some reason we can't reference common/index.ts because
+// the `node scripts/check_telemetry.js --fix` command fails with the error
+// ERROR Error: Error extracting collector in x-pack/plugins/cloud_defend/server/lib/telemetry/collectors/register.ts
+//      Error: Unable to find identifier in source Selector
+//          at createFailError (dev_cli_errors.ts:27:24)
+//          at parseUsageCollection (ts_parser.ts:226:32)
+//          at parseUsageCollection.next (<anonymous>)
+//          at extractCollectors (extract_collectors.ts:58:32)
+//          at extractCollectors.next (<anonymous>)
+//          at Task.task (extract_collectors_task.ts:43:53)
+//          at runMicrotasks (<anonymous>)
+//          at processTicksAndRejections (node:internal/process/task_queues:96:5)
+//
+// I guess the intermediate import/export is causing problems
+// for now we will just point to the current version (v1)
+import type {
+  Selector,
+  Response,
+  SelectorType,
+  SelectorCondition,
+  ResponseAction,
+} from '../../../../common/v1';
 
 export interface CloudDefendUsage {
   indices: CloudDefendIndicesStats;
