@@ -553,12 +553,16 @@ describe('MlInferenceLogic', () => {
           ...DEFAULT_VALUES,
           addInferencePipelineModal: {
             ...mockModelConfiguration,
-            selectedSourceFields: ['my_source_field1', 'my_source_field2'],
+            configuration: {
+              ...mockModelConfiguration.configuration,
+              modelID: textExpansionModel.model_id,
+            },
           },
         });
         jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
 
         MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
+        MLInferenceLogic.actions.selectFields(['my_source_field1', 'my_source_field2']);
         MLInferenceLogic.actions.addSelectedFieldsToMapping();
         MLInferenceLogic.actions.createPipeline();
 
@@ -585,6 +589,10 @@ describe('MlInferenceLogic', () => {
           ...DEFAULT_VALUES,
           addInferencePipelineModal: {
             ...mockModelConfiguration,
+            configuration: {
+              ...mockModelConfiguration.configuration,
+              modelID: nerModel.model_id,
+            },
           },
         });
         jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
