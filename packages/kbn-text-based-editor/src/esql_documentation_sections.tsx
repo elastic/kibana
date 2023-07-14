@@ -45,9 +45,12 @@ export const sourceCommands = {
   ),
   items: [
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from', {
-        defaultMessage: 'FROM',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from',
+        {
+          defaultMessage: 'FROM',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -68,9 +71,12 @@ FROM index
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row', {
-        defaultMessage: 'ROW',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row',
+        {
+          defaultMessage: 'ROW',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -103,9 +109,12 @@ ROW a = ROUND(1.23, 0)
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show', {
-        defaultMessage: 'SHOW',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show',
+        {
+          defaultMessage: 'SHOW',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -168,9 +177,12 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop', {
-        defaultMessage: 'DROP',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop',
+        {
+          defaultMessage: 'DROP',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -199,9 +211,12 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich', {
-        defaultMessage: 'ENRICH',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich',
+        {
+          defaultMessage: 'ENRICH',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -250,9 +265,12 @@ In case of name collisions, the newly created fields will override the existing 
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval', {
-        defaultMessage: 'EVAL',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval',
+        {
+          defaultMessage: 'EVAL',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -286,9 +304,12 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok', {
-        defaultMessage: 'GROK',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok',
+        {
+          defaultMessage: 'GROK',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -312,9 +333,12 @@ ROW a = "12 15.5 15.6 true"
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep', {
-        defaultMessage: 'KEEP',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep',
+        {
+          defaultMessage: 'KEEP',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -352,9 +376,12 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit', {
-        defaultMessage: 'LIMIT',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit',
+        {
+          defaultMessage: 'LIMIT',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -402,9 +429,12 @@ ROW a=[1,2,3], b="b", j=["a","b"]
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename', {
-        defaultMessage: 'RENAME',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename',
+        {
+          defaultMessage: 'RENAME',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -443,9 +473,12 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort', {
-        defaultMessage: 'SORT',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort',
+        {
+          defaultMessage: 'SORT',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
@@ -546,9 +579,12 @@ Refer to **Aggregation functions** for a list of functions that can be used with
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where', {
-        defaultMessage: 'WHERE',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where',
+        {
+          defaultMessage: 'WHERE',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
