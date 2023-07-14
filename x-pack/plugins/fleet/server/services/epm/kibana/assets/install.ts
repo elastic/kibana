@@ -45,7 +45,12 @@ type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof Archive
 };
 export type ArchiveAsset = Pick<
   SavedObject,
-  'id' | 'attributes' | 'migrationVersion' | 'references'
+  | 'id'
+  | 'attributes'
+  | 'migrationVersion'
+  | 'references'
+  | 'coreMigrationVersion'
+  | 'typeMigrationVersion'
 > & {
   type: KibanaSavedObjectType;
 };
@@ -86,7 +91,9 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
     id: asset.id,
     attributes: asset.attributes,
     references: asset.references || [],
-    migrationVersion: asset.migrationVersion || {},
+    migrationVersion: asset.migrationVersion,
+    coreMigrationVersion: asset.coreMigrationVersion,
+    typeMigrationVersion: asset.typeMigrationVersion,
   };
 }
 
