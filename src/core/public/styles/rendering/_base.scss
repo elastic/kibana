@@ -62,7 +62,7 @@
   @include kbnAffordForHeader($kbnHeaderOffset);
 
   &.kbnBody--hasHeaderBanner {
-    padding-top: $kbnHeaderBannerHeight; // fixme
+    padding-top: $kbnHeaderBannerHeight;
 
     @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
 
