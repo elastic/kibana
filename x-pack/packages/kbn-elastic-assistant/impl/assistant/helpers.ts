@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { BASE_CONVERSATIONS, Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
+import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
+import { enterpriseMessaging } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (rawResponse: string): Message => {
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
@@ -22,4 +25,28 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
       timestamp: dateTimeString,
     };
   }
+};
+
+export const getWelcomeConversation = (isAssistantEnabled: boolean): Conversation => {
+  const conversation = BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
+  const doesConversationHaveMessages = conversation.messages.length > 0;
+
+  if (!isAssistantEnabled) {
+    if (
+      !doesConversationHaveMessages ||
+      conversation.messages[conversation.messages.length - 1].content !==
+        enterpriseMessaging[0].content
+    ) {
+      return {
+        ...conversation,
+        messages: [...conversation.messages, ...enterpriseMessaging],
+      };
+    }
+    return conversation;
+  }
+
+  return {
+    ...conversation,
+    messages: BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE].messages,
+  };
 };

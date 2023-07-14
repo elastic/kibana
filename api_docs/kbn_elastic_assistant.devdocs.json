@@ -122,7 +122,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, }: React.PropsWithChildren<AssistantProviderProps>) => JSX.Element"
+          "({ actionTypeRegistry, augmentMessageCodeBlocks, baseAllow, baseAllowReplacement, defaultAllow, defaultAllowReplacement, docLinks, basePromptContexts, baseQuickPrompts, baseSystemPrompts, children, getComments, http, getInitialConversations, nameSpace, setConversations, setDefaultAllow, setDefaultAllowReplacement, title, }: React.PropsWithChildren<AssistantProviderProps>) => JSX.Element"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/index.tsx",
         "deprecated": false,
@@ -133,7 +133,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
+            "label": "{\n  actionTypeRegistry,\n  augmentMessageCodeBlocks,\n  baseAllow,\n  baseAllowReplacement,\n  defaultAllow,\n  defaultAllowReplacement,\n  docLinks,\n  basePromptContexts = [],\n  baseQuickPrompts = [],\n  baseSystemPrompts = BASE_SYSTEM_PROMPTS,\n  children,\n  getComments,\n  http,\n  getInitialConversations,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  setConversations,\n  setDefaultAllow,\n  setDefaultAllowReplacement,\n  title = DEFAULT_ASSISTANT_TITLE,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AssistantProviderProps>"
@@ -406,17 +406,19 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.CodeBlockDetails.controlContainer",
-            "type": "CompoundType",
+            "id": "def-public.CodeBlockDetails.getControlContainer",
+            "type": "Function",
             "tags": [],
-            "label": "controlContainer",
+            "label": "getControlContainer",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "(() => Element | undefined) | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/helpers.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
@@ -458,7 +460,7 @@
             "signature": [
               "{ connectorId?: string | undefined; defaultSystemPromptId?: string | undefined; provider?: ",
               "OpenAiProviderType",
-              " | undefined; }"
+              " | undefined; model?: string | undefined; }"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -531,6 +533,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Conversation.excludeFromLastConversationStorage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeFromLastConversationStorage",
             "description": [],
             "signature": [
               "boolean | undefined"

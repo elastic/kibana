@@ -74,7 +74,7 @@ const ActionTypeFieldComponent = ({
         helpText: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.commandDescription"
-            defaultMessage="Select an Endpoint response action. The response action only runs on hosts with Elastic Defend installed. {docs}"
+            defaultMessage="Select an endpoint response action. The response action only runs on hosts with Elastic Defend installed. {docs}"
             values={{
               docs: (
                 <EuiLink href={responseActions} target="_blank">

@@ -52,6 +52,7 @@ import type {
   UpdatePackageRequestSchema,
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
+  CreateCustomIntegrationRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -389,6 +390,45 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     authorizationHeader,
+  });
+
+  if (!res.error) {
+    const body: InstallPackageResponse = {
+      items: res.assets || [],
+      _meta: {
+        install_source: res.installSource,
+      },
+    };
+    return response.ok({ body });
+  } else {
+    return await defaultFleetErrorHandler({ error: res.error, response });
+  }
+};
+export const createCustomIntegrationHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof CreateCustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const kibanaVersion = appContextService.getKibanaVersion();
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const spaceId = fleetContext.spaceId;
+  const { integrationName, force, datasets } = request.body;
+
+  const res = await installPackage({
+    installSource: 'custom',
+    savedObjectsClient,
+    pkgName: integrationName,
+    datasets,
+    esClient,
+    spaceId,
+    force,
+    authorizationHeader,
+    kibanaVersion,
   });
 
   if (!res.error) {
