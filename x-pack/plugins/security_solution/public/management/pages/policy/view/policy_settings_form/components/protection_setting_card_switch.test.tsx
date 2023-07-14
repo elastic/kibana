@@ -14,8 +14,7 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { ProtectionSettingCardSwitchProps } from './protection_setting_card_switch';
 import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
-import { exactMatchText, expectIsViewOnly } from '../mocks';
-import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
+import { exactMatchText, expectIsViewOnly, setMalwareMode } from '../mocks';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { cloneDeep, set } from 'lodash';
 import userEvent from '@testing-library/user-event';
@@ -28,26 +27,6 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
   let formProps: ProtectionSettingCardSwitchProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-
-  // NOTE: it mutates `policy` provided in input
-  const setMalwareMode = (
-    policy: PolicyConfig,
-    turnOff: boolean = false,
-    includePopup: boolean = true
-  ) => {
-    const mode = turnOff ? ProtectionModes.off : ProtectionModes.prevent;
-    const popupEnabled = mode !== ProtectionModes.off;
-
-    set(policy, 'windows.malware.mode', mode);
-    set(policy, 'mac.malware.mode', mode);
-    set(policy, 'linux.malware.mode', mode);
-
-    if (includePopup) {
-      set(policy, 'windows.popup.malware.enabled', popupEnabled);
-      set(policy, 'mac.popup.malware.enabled', popupEnabled);
-      set(policy, 'linux.popup.malware.enabled', popupEnabled);
-    }
-  };
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();

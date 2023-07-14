@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { set } from 'lodash';
+import type { PolicyConfig } from '../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../common/endpoint/types';
+
 interface TestSubjGenerator {
   (suffix?: string): string;
   withPrefix: (prefix: string) => TestSubjGenerator;
@@ -55,6 +59,8 @@ export const getPolicySettingsFormTestSubjects = (
       notifyCustomMessageTooltipInfo: malwareTestSubj('notifyUser-tooltipInfo'),
       osValuesContainer: malwareTestSubj('osValues'),
       rulesCallout: malwareTestSubj('rulesCallout'),
+      blocklistContainer: malwareTestSubj('blocklist'),
+      blocklistEnableDisableSwitch: malwareTestSubj('blocklist-enableDisableSwitch'),
     },
     ransomware: {
       card: ransomwareTestSubj(),
@@ -177,4 +183,36 @@ export const expectIsViewOnly = (ele: HTMLElement): void => {
 export const exactMatchText = (text: string): RegExp => {
   // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
   return new RegExp(`^${text.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')}$`);
+};
+
+/**
+ * Sets malware off or on (to prevent protection level) in the given policy settings
+ *
+ * NOTE: this utiliy MUTATES `policy` provided on input
+ *
+ * @param policy
+ * @param turnOff
+ * @param includePopup
+ */
+export const setMalwareMode = (
+  policy: PolicyConfig,
+  turnOff: boolean = false,
+  includePopup: boolean = true
+) => {
+  const mode = turnOff ? ProtectionModes.off : ProtectionModes.prevent;
+  const enableValue = mode !== ProtectionModes.off;
+
+  set(policy, 'windows.malware.mode', mode);
+  set(policy, 'mac.malware.mode', mode);
+  set(policy, 'linux.malware.mode', mode);
+
+  set(policy, 'windows.malware.blocklist', enableValue);
+  set(policy, 'mac.malware.blocklist', enableValue);
+  set(policy, 'linux.malware.blocklist', enableValue);
+
+  if (includePopup) {
+    set(policy, 'windows.popup.malware.enabled', enableValue);
+    set(policy, 'mac.popup.malware.enabled', enableValue);
+    set(policy, 'linux.popup.malware.enabled', enableValue);
+  }
 };
