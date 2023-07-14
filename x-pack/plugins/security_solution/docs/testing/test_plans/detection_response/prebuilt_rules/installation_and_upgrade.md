@@ -533,7 +533,7 @@ Then user should NOT see the Rule Updates tab until the package installation is 
 
 #### **Scenario: Error is handled when any operation on prebuilt rules fails**
 
-**Automation**: unit tests.
+**Automation**: e2e test with mock rules
 
 ```Gherkin
 When user is <operation> prebuilt rules
