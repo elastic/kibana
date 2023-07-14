@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 
 import {
   LOGS_APP_ID,
@@ -27,7 +28,7 @@ export type AppId =
   | ApmApp
   | MetricsApp;
 
-export type DiscoverLogExplorerId = 'discover:log-explorer';
+export type DiscoverLogExplorerId = `${typeof DISCOVER_APP_ID}:log-explorer`;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
