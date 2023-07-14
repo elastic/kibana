@@ -116,7 +116,7 @@ export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
 
 export const isExternalId = (id: string): boolean => id.includes(':');
 
-const getAppIdsFromId = (id: string): { appId?: string; deepLinkId?: string } => {
+export const getAppIdsFromId = (id: string): { appId?: string; deepLinkId?: string } => {
   if (isExternalId(id)) {
     const [appId, deepLinkId] = id.split(':');
     return { appId, deepLinkId };
@@ -124,12 +124,12 @@ const getAppIdsFromId = (id: string): { appId?: string; deepLinkId?: string } =>
   return { deepLinkId: id }; // undefined `appId` for internal Security Solution links
 };
 
-const formatPath = (path: string, urlState: string) => {
+export const formatPath = (path: string, urlState: string) => {
   const urlStateClean = urlState.replace('?', '');
   const [urlPath, parameterPath] = path.split('?');
   let queryParams = '';
   if (urlStateClean && parameterPath) {
-    queryParams = `?${queryParams}&${urlStateClean}`;
+    queryParams = `?${parameterPath}&${urlStateClean}`;
   } else if (parameterPath) {
     queryParams = `?${parameterPath}`;
   } else if (urlStateClean) {
@@ -138,5 +138,5 @@ const formatPath = (path: string, urlState: string) => {
   return `${urlPath}${queryParams}`;
 };
 
-const isModified = (event: MouseEvent) =>
+export const isModified = (event: MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;

@@ -7,14 +7,14 @@
 
 import { mockGetAppUrl, mockNavigateTo } from '../../mocks/navigation';
 
-export const useGetAppUrl = () => {
+export const useGetAppUrl = jest.fn(() => {
   return { getAppUrl: mockGetAppUrl };
-};
+});
 
-export const useNavigateTo = () => {
+export const useNavigateTo = jest.fn(() => {
   return { navigateTo: mockNavigateTo };
-};
+});
 
-export const useNavigation = () => {
+export const useNavigation = jest.fn(() => {
   return { navigateTo: mockGetAppUrl, getAppUrl: mockNavigateTo };
-};
+});
