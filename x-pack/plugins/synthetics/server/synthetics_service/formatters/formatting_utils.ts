@@ -24,10 +24,17 @@ export const replaceStringWithParams = (
   try {
     if (typeof value !== 'string') {
       const strValue = JSON.stringify(value);
+      if (hasNoParams(strValue)) {
+        return value as string | null;
+      }
+
       const parsedVars: ParsedVars = variableParser.parse(strValue);
 
       const parseValue = replaceVarsWithParams(parsedVars, params);
       return JSON.parse(parseValue);
+    }
+    if (hasNoParams(value)) {
+      return value as string | null;
     }
 
     const parsedVars: ParsedVars = variableParser.parse(value);
@@ -38,6 +45,12 @@ export const replaceStringWithParams = (
   }
 
   return value as string | null;
+};
+
+export const hasNoParams = (strVal: string) => {
+  const startIndex = strVal.indexOf('${');
+  const endIndex = strVal.indexOf('}');
+  return startIndex === -1 || endIndex === -1 || startIndex > endIndex;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
