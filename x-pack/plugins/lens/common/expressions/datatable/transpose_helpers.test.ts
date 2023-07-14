@@ -109,187 +109,187 @@ describe('transpose_helpers', () => {
     } as unknown as Record<string, FieldFormat>;
   }
 
-  // it('should transpose table by one column', () => {
-  //   const table = buildTable();
-  //   const args = buildArgs();
-  //   args.columns[0].isTransposed = true;
-  //   transposeTable(args, table, buildFormatters());
+  it('should transpose table by one column', () => {
+    const table = buildTable();
+    const args = buildArgs();
+    args.columns[0].isTransposed = true;
+    transposeTable(args, table, buildFormatters());
 
-  //   // one metric for each unique value of bucket1
-  //   expect(table.columns.map((c) => c.id)).toEqual([
-  //     'bucket2',
-  //     'bucket3',
-  //     'A---metric1',
-  //     'B---metric1',
-  //     'C---metric1',
-  //     'A---metric2',
-  //     'B---metric2',
-  //     'C---metric2',
-  //   ]);
+    // one metric for each unique value of bucket1
+    expect(table.columns.map((c) => c.id)).toEqual([
+      'bucket2',
+      'bucket3',
+      'A---metric1',
+      'B---metric1',
+      'C---metric1',
+      'A---metric2',
+      'B---metric2',
+      'C---metric2',
+    ]);
 
-  //   // order is different for args to visually group unique values
-  //   const expectedColumns = [
-  //     'bucket2',
-  //     'bucket3',
-  //     'A---metric1',
-  //     'A---metric2',
-  //     'B---metric1',
-  //     'B---metric2',
-  //     'C---metric1',
-  //     'C---metric2',
-  //   ];
+    // order is different for args to visually group unique values
+    const expectedColumns = [
+      'bucket2',
+      'bucket3',
+      'A---metric1',
+      'A---metric2',
+      'B---metric1',
+      'B---metric2',
+      'C---metric1',
+      'C---metric2',
+    ];
 
-  //   // args should be in sync
-  //   expect(args.columns.map((c) => c.columnId)).toEqual(expectedColumns);
-  //   // original column id should stay preserved
-  //   expect(args.columns.slice(2).map((c) => c.originalColumnId)).toEqual([
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //   ]);
+    // args should be in sync
+    expect(args.columns.map((c) => c.columnId)).toEqual(expectedColumns);
+    // original column id should stay preserved
+    expect(args.columns.slice(2).map((c) => c.originalColumnId)).toEqual([
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+    ]);
 
-  //   // data should stay consistent
-  //   expect(table.rows.length).toEqual(9);
-  //   table.rows.forEach((row, index) => {
-  //     expect(row['A---metric1']).toEqual(index * 2 + 1);
-  //     expect(row['A---metric2']).toEqual(index * 2 + 2);
-  //     // B metrics start with offset 18 because there are 18 A metrics (2 metrics * 3 bucket2 metrics * 3 bucket3 metrics)
-  //     expect(row['B---metric1']).toEqual(18 + index * 2 + 1);
-  //     expect(row['B---metric2']).toEqual(18 + index * 2 + 2);
-  //     // B metrics start with offset 36 because there are 18 A metrics and 18 B metrics (2 metrics * 3 bucket2 values * 3 bucket3 values)
-  //     expect(row['C---metric1']).toEqual(36 + index * 2 + 1);
-  //     expect(row['C---metric2']).toEqual(36 + index * 2 + 2);
-  //   });
+    // data should stay consistent
+    expect(table.rows.length).toEqual(9);
+    table.rows.forEach((row, index) => {
+      expect(row['A---metric1']).toEqual(index * 2 + 1);
+      expect(row['A---metric2']).toEqual(index * 2 + 2);
+      // B metrics start with offset 18 because there are 18 A metrics (2 metrics * 3 bucket2 metrics * 3 bucket3 metrics)
+      expect(row['B---metric1']).toEqual(18 + index * 2 + 1);
+      expect(row['B---metric2']).toEqual(18 + index * 2 + 2);
+      // B metrics start with offset 36 because there are 18 A metrics and 18 B metrics (2 metrics * 3 bucket2 values * 3 bucket3 values)
+      expect(row['C---metric1']).toEqual(36 + index * 2 + 1);
+      expect(row['C---metric2']).toEqual(36 + index * 2 + 2);
+    });
 
-  //   // visible name should use separator
-  //   expect(table.columns[2].name).toEqual(`A › metric1`);
-  // });
+    // visible name should use separator
+    expect(table.columns[2].name).toEqual(`A › metric1`);
+  });
 
-  // it('should transpose table by two columns', () => {
-  //   const table = buildTable();
-  //   const args = buildArgs();
-  //   args.columns[0].isTransposed = true;
-  //   args.columns[1].isTransposed = true;
-  //   transposeTable(args, table, buildFormatters());
+  it('should transpose table by two columns', () => {
+    const table = buildTable();
+    const args = buildArgs();
+    args.columns[0].isTransposed = true;
+    args.columns[1].isTransposed = true;
+    transposeTable(args, table, buildFormatters());
 
-  //   // one metric for each unique value of bucket1
-  //   expect(table.columns.map((c) => c.id)).toEqual([
-  //     'bucket3',
-  //     'A---D---metric1',
-  //     'B---D---metric1',
-  //     'C---D---metric1',
-  //     'A---E---metric1',
-  //     'B---E---metric1',
-  //     'C---E---metric1',
-  //     'A---F---metric1',
-  //     'B---F---metric1',
-  //     'C---F---metric1',
-  //     'A---D---metric2',
-  //     'B---D---metric2',
-  //     'C---D---metric2',
-  //     'A---E---metric2',
-  //     'B---E---metric2',
-  //     'C---E---metric2',
-  //     'A---F---metric2',
-  //     'B---F---metric2',
-  //     'C---F---metric2',
-  //   ]);
+    // one metric for each unique value of bucket1
+    expect(table.columns.map((c) => c.id)).toEqual([
+      'bucket3',
+      'A---D---metric1',
+      'B---D---metric1',
+      'C---D---metric1',
+      'A---E---metric1',
+      'B---E---metric1',
+      'C---E---metric1',
+      'A---F---metric1',
+      'B---F---metric1',
+      'C---F---metric1',
+      'A---D---metric2',
+      'B---D---metric2',
+      'C---D---metric2',
+      'A---E---metric2',
+      'B---E---metric2',
+      'C---E---metric2',
+      'A---F---metric2',
+      'B---F---metric2',
+      'C---F---metric2',
+    ]);
 
-  //   // order is different for args to visually group unique values
-  //   const expectedColumns = [
-  //     'bucket3',
-  //     'A---D---metric1',
-  //     'A---D---metric2',
-  //     'A---E---metric1',
-  //     'A---E---metric2',
-  //     'A---F---metric1',
-  //     'A---F---metric2',
-  //     'B---D---metric1',
-  //     'B---D---metric2',
-  //     'B---E---metric1',
-  //     'B---E---metric2',
-  //     'B---F---metric1',
-  //     'B---F---metric2',
-  //     'C---D---metric1',
-  //     'C---D---metric2',
-  //     'C---E---metric1',
-  //     'C---E---metric2',
-  //     'C---F---metric1',
-  //     'C---F---metric2',
-  //   ];
+    // order is different for args to visually group unique values
+    const expectedColumns = [
+      'bucket3',
+      'A---D---metric1',
+      'A---D---metric2',
+      'A---E---metric1',
+      'A---E---metric2',
+      'A---F---metric1',
+      'A---F---metric2',
+      'B---D---metric1',
+      'B---D---metric2',
+      'B---E---metric1',
+      'B---E---metric2',
+      'B---F---metric1',
+      'B---F---metric2',
+      'C---D---metric1',
+      'C---D---metric2',
+      'C---E---metric1',
+      'C---E---metric2',
+      'C---F---metric1',
+      'C---F---metric2',
+    ];
 
-  //   // args should be in sync
-  //   expect(args.columns.map((c) => c.columnId)).toEqual(expectedColumns);
-  //   // original column id should stay preserved
-  //   expect(args.columns.slice(1).map((c) => c.originalColumnId)).toEqual([
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //     'metric1',
-  //     'metric2',
-  //   ]);
+    // args should be in sync
+    expect(args.columns.map((c) => c.columnId)).toEqual(expectedColumns);
+    // original column id should stay preserved
+    expect(args.columns.slice(1).map((c) => c.originalColumnId)).toEqual([
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+      'metric1',
+      'metric2',
+    ]);
 
-  //   // data should stay consistent
-  //   expect(table.rows.length).toEqual(3);
-  //   table.rows.forEach((row, index) => {
-  //     // each metric block has an additional offset of 6 because there are 6 metrics for each bucket1/bucket2 combination (2 metrics * 3 bucket3 values)
-  //     expect(row['A---D---metric1']).toEqual(index * 2 + 1);
-  //     expect(row['A---D---metric2']).toEqual(index * 2 + 2);
-  //     expect(row['A---E---metric1']).toEqual(index * 2 + 6 + 1);
-  //     expect(row['A---E---metric2']).toEqual(index * 2 + 6 + 2);
-  //     expect(row['A---F---metric1']).toEqual(index * 2 + 12 + 1);
-  //     expect(row['A---F---metric2']).toEqual(index * 2 + 12 + 2);
+    // data should stay consistent
+    expect(table.rows.length).toEqual(3);
+    table.rows.forEach((row, index) => {
+      // each metric block has an additional offset of 6 because there are 6 metrics for each bucket1/bucket2 combination (2 metrics * 3 bucket3 values)
+      expect(row['A---D---metric1']).toEqual(index * 2 + 1);
+      expect(row['A---D---metric2']).toEqual(index * 2 + 2);
+      expect(row['A---E---metric1']).toEqual(index * 2 + 6 + 1);
+      expect(row['A---E---metric2']).toEqual(index * 2 + 6 + 2);
+      expect(row['A---F---metric1']).toEqual(index * 2 + 12 + 1);
+      expect(row['A---F---metric2']).toEqual(index * 2 + 12 + 2);
 
-  //     expect(row['B---D---metric1']).toEqual(index * 2 + 18 + 1);
-  //     expect(row['B---D---metric2']).toEqual(index * 2 + 18 + 2);
-  //     expect(row['B---E---metric1']).toEqual(index * 2 + 24 + 1);
-  //     expect(row['B---E---metric2']).toEqual(index * 2 + 24 + 2);
-  //     expect(row['B---F---metric1']).toEqual(index * 2 + 30 + 1);
-  //     expect(row['B---F---metric2']).toEqual(index * 2 + 30 + 2);
+      expect(row['B---D---metric1']).toEqual(index * 2 + 18 + 1);
+      expect(row['B---D---metric2']).toEqual(index * 2 + 18 + 2);
+      expect(row['B---E---metric1']).toEqual(index * 2 + 24 + 1);
+      expect(row['B---E---metric2']).toEqual(index * 2 + 24 + 2);
+      expect(row['B---F---metric1']).toEqual(index * 2 + 30 + 1);
+      expect(row['B---F---metric2']).toEqual(index * 2 + 30 + 2);
 
-  //     expect(row['C---D---metric1']).toEqual(index * 2 + 36 + 1);
-  //     expect(row['C---D---metric2']).toEqual(index * 2 + 36 + 2);
-  //     expect(row['C---E---metric1']).toEqual(index * 2 + 42 + 1);
-  //     expect(row['C---E---metric2']).toEqual(index * 2 + 42 + 2);
-  //     expect(row['C---F---metric1']).toEqual(index * 2 + 48 + 1);
-  //     expect(row['C---F---metric2']).toEqual(index * 2 + 48 + 2);
-  //   });
-  // });
+      expect(row['C---D---metric1']).toEqual(index * 2 + 36 + 1);
+      expect(row['C---D---metric2']).toEqual(index * 2 + 36 + 2);
+      expect(row['C---E---metric1']).toEqual(index * 2 + 42 + 1);
+      expect(row['C---E---metric2']).toEqual(index * 2 + 42 + 2);
+      expect(row['C---F---metric1']).toEqual(index * 2 + 48 + 1);
+      expect(row['C---F---metric2']).toEqual(index * 2 + 48 + 2);
+    });
+  });
 
-  // it('should be able to handle missing values', () => {
-  //   const table = buildTable();
-  //   const args = buildArgs();
-  //   args.columns[0].isTransposed = true;
-  //   args.columns[1].isTransposed = true;
-  //   // delete A-E-Z bucket
-  //   table.rows.splice(5, 1);
-  //   transposeTable(args, table, buildFormatters());
-  //   expect(args.columns.length).toEqual(19);
-  //   expect(table.columns.length).toEqual(19);
-  //   expect(table.rows.length).toEqual(3);
-  //   expect(table.rows[2]['A---E---metric1']).toEqual(undefined);
-  //   expect(table.rows[2]['A---E---metric2']).toEqual(undefined);
-  //   // 1 bucket column and 2 missing from the regular 18 columns
-  //   expect(Object.values(table.rows[2]).filter((val) => val !== undefined).length).toEqual(
-  //     1 + 18 - 2
-  //   );
-  // });
+  it('should be able to handle missing values', () => {
+    const table = buildTable();
+    const args = buildArgs();
+    args.columns[0].isTransposed = true;
+    args.columns[1].isTransposed = true;
+    // delete A-E-Z bucket
+    table.rows.splice(5, 1);
+    transposeTable(args, table, buildFormatters());
+    expect(args.columns.length).toEqual(19);
+    expect(table.columns.length).toEqual(19);
+    expect(table.rows.length).toEqual(3);
+    expect(table.rows[2]['A---E---metric1']).toEqual(undefined);
+    expect(table.rows[2]['A---E---metric2']).toEqual(undefined);
+    // 1 bucket column and 2 missing from the regular 18 columns
+    expect(Object.values(table.rows[2]).filter((val) => val !== undefined).length).toEqual(
+      1 + 18 - 2
+    );
+  });
 
   it('should not fail for no data', () => {
     const table = buildTable();
