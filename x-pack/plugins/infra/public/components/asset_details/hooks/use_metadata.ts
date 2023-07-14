@@ -20,7 +20,7 @@ export function useMetadata(
   nodeType: InventoryItemType,
   requiredMetrics: InventoryMetric[],
   sourceId: string,
-  timeRangeTs: {
+  timeRange: {
     from: number;
     to: number;
   }
@@ -35,7 +35,7 @@ export function useMetadata(
       nodeId,
       nodeType,
       sourceId,
-      timeRange: { from: timeRangeTs.from, to: timeRangeTs.to },
+      timeRange,
     }),
     decodeResponse
   );

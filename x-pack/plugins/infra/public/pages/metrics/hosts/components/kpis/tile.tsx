@@ -8,17 +8,10 @@ import React, { useMemo, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import {
-  EuiIcon,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiI18n,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import {
   buildCombinedHostsFilter,
@@ -126,9 +119,9 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
-              <EuiI18n
-                token="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
-                default="There was an error trying to load Lens Plugin."
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.errorOnLoadingLensDependencies"
+                defaultMessage="There was an error trying to load Lens Plugin."
               />
             </EuiText>
           </EuiFlexItem>

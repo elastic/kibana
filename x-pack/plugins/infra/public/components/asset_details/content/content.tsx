@@ -13,13 +13,7 @@ import { FlyoutTabIds, type TabState } from '../types';
 import { toTimestampRange } from '../utils';
 
 export const Content = () => {
-  const {
-    node,
-    nodeType,
-    overrides,
-    dateRange: timeRange,
-    onTabsStateChange,
-  } = useAssetDetailsStateContext();
+  const { node, nodeType, overrides, dateRange, onTabsStateChange } = useAssetDetailsStateContext();
 
   const onChange = (state: TabState) => {
     if (!onTabsStateChange) {
@@ -29,7 +23,7 @@ export const Content = () => {
     onTabsStateChange(state);
   };
 
-  const timeRangeTs = toTimestampRange(timeRange);
+  const dateRangeTs = toTimestampRange(dateRange);
   return (
     <>
       <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
@@ -37,7 +31,7 @@ export const Content = () => {
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
         <Overview
-          dateRange={timeRange}
+          dateRange={dateRange}
           nodeName={node.name}
           nodeType={nodeType}
           metricsDataView={overrides?.overview?.metricsDataView}
@@ -48,7 +42,7 @@ export const Content = () => {
         <Logs
           nodeName={node.name}
           nodeType={nodeType}
-          currentTimestamp={timeRangeTs.to}
+          currentTimestamp={dateRangeTs.to}
           logViewReference={overrides?.logs?.logView?.reference}
           logViewLoading={overrides?.logs?.logView?.loading}
           search={overrides?.logs?.query}
@@ -57,7 +51,7 @@ export const Content = () => {
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
-          dateRange={timeRange}
+          dateRange={dateRange}
           nodeName={node.name}
           nodeType={nodeType}
           showActionsColumn={overrides?.metadata?.showActionsColumn}
@@ -66,13 +60,13 @@ export const Content = () => {
         />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
-        <Osquery nodeName={node.name} nodeType={nodeType} dateRange={timeRange} />
+        <Osquery nodeName={node.name} nodeType={nodeType} dateRange={dateRange} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
         <Processes
           nodeName={node.name}
           nodeType={nodeType}
-          currentTimestamp={timeRangeTs.to}
+          currentTimestamp={dateRangeTs.to}
           search={overrides?.processes?.query}
           onSearchFilterChange={(query) => onChange({ processes: { query } })}
         />

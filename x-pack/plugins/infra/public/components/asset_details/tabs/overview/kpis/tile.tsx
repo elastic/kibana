@@ -7,18 +7,11 @@
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiIcon,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiI18n,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
@@ -99,9 +92,9 @@ export const Tile = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
-              <EuiI18n
-                token="'xpack.infra.assetDetailsEmbeddable.overview.errorOnLoadingLensDependencies'"
-                default="There was an error trying to load Lens Plugin."
+              <FormattedMessage
+                id="xpack.infra.assetDetailsEmbeddable.overview.errorOnLoadingLensDependencies"
+                defaultMessage="There was an error trying to load Lens Plugin."
               />
             </EuiText>
           </EuiFlexItem>

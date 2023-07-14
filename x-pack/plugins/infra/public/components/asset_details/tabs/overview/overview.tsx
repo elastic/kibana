@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { css } from '@emotion/react';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
@@ -55,7 +56,7 @@ export const Overview = ({
   );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <KPIGrid nodeName={nodeName} timeRange={dateRange} dataView={metricsDataView} />
       </EuiFlexItem>
@@ -89,6 +90,7 @@ export const Overview = ({
         ) : (
           <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
         )}
+        <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MetricsGrid
@@ -101,3 +103,12 @@ export const Overview = ({
     </EuiFlexGroup>
   );
 };
+
+const SectionSeparator = () => (
+  <EuiHorizontalRule
+    margin="m"
+    css={css`
+      margin-bottom: 0;
+    `}
+  />
+);

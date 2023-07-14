@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiTitle, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
@@ -262,31 +262,34 @@ export interface MetricsGridProps {
 export const MetricsGrid = React.memo(
   ({ nodeName, metricsDataView, logsDataView, timeRange }: MetricsGridProps) => {
     return (
-      <>
-        <EuiTitle size="xxxs" textTransform="uppercase">
-          <span>
-            <FormattedMessage
-              id="xpack.infra.assetDetails.overview.metricsSectionTitle"
-              defaultMessage="Metrics"
-            />
-          </span>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <HostMetricsDocsLink />
-        <EuiSpacer size="s" />
-        <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
-          {CHARTS_IN_ORDER.map(({ dataViewType, ...chartProp }, index) => (
-            <EuiFlexItem key={index} grow={false}>
-              <MetricChart
-                nodeName={nodeName}
-                dataView={dataViewType === 'metrics' ? metricsDataView : logsDataView}
-                timeRange={timeRange}
-                {...chartProp}
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs" textTransform="uppercase">
+            <h5>
+              <FormattedMessage
+                id="xpack.infra.assetDetails.overview.metricsSectionTitle"
+                defaultMessage="Metrics"
               />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </>
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <HostMetricsDocsLink />
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="assetDetailsMetricsChartGrid">
+            {CHARTS_IN_ORDER.map(({ dataViewType, ...chartProp }, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                <MetricChart
+                  nodeName={nodeName}
+                  dataView={dataViewType === 'metrics' ? metricsDataView : logsDataView}
+                  timeRange={timeRange}
+                  {...chartProp}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );
