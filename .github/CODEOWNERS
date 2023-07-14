@@ -874,7 +874,6 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/uptime
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/uptime
 
-
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/rum_dashboard @elastic/uptime
@@ -883,6 +882,9 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 # Observability onboarding tour
 /x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
 /x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
+
+# Observability settings
+/x-pack/plugins/observability/server/ui_settings.ts @elastic/obs-docs
 
 ### END Observability Plugins
 
@@ -913,6 +915,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 
 # Additional plugins and packages maintained by the ML team.
 /x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/aiops/ @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
@@ -1118,8 +1121,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/detection_engine/rule_monitoring @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
 
-/x-pack/plugins/security_solution/cypress/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
-/x-pack/plugins/security_solution/cypress/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
 
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management

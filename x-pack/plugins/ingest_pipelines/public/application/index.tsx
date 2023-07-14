@@ -67,7 +67,7 @@ export const renderApp = (
     >
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={services}>
+          <KibanaContextProvider services={{ ...services, theme: { theme$ } }}>
             <App />
           </KibanaContextProvider>
         </KibanaThemeProvider>
