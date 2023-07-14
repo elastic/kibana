@@ -12,10 +12,7 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  buildCombinedHostsFilter,
-  buildExistsHostsFilter,
-} from '../../../../../utils/filters/build';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
 import { useLensAttributes, type Layer } from '../../../../../hooks/use_lens_attributes';
 import type { FormulaConfig, XYLayerOptions } from '../../../../../common/visualizations';
@@ -55,7 +52,6 @@ export const MetricChart = ({
         values: [nodeName],
         dataView,
       }),
-      buildExistsHostsFilter({ field: 'host.name', dataView }),
     ];
   }, [dataView, nodeName]);
 

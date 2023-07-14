@@ -15,10 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { LensWrapper } from '../../../../../common/visualizations/lens/lens_wrapper';
-import {
-  buildCombinedHostsFilter,
-  buildExistsHostsFilter,
-} from '../../../../../utils/filters/build';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { TooltipContent } from '../../../../../common/visualizations/metric_explanation/tooltip_content';
 
 const MIN_HEIGHT = 150;
@@ -57,7 +54,6 @@ export const Tile = ({
         values: [nodeName],
         dataView,
       }),
-      buildExistsHostsFilter({ field: 'host.name', dataView }),
     ];
   }, [dataView, nodeName]);
 
