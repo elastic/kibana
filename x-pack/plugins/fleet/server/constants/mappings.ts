@@ -77,6 +77,9 @@ export const PACKAGE_POLICIES_MAPPINGS = {
 
 export const AGENT_MAPPINGS = {
   properties: {
+    access_api_key_id: {
+      type: 'keyword',
+    },
     action_seq_no: {
       type: 'integer',
     },
@@ -94,6 +97,12 @@ export const AGENT_MAPPINGS = {
       },
     },
     default_api_key: {
+      type: 'keyword',
+    },
+    default_api_key_id: {
+      type: 'keyword',
+    },
+    enrollment_id: {
       type: 'keyword',
     },
     enrolled_at: {
