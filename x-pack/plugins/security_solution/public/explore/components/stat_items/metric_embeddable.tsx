@@ -17,7 +17,7 @@ export interface MetricEmbeddableProps {
   inspectTitle?: string;
 }
 
-const CHART_HEIGHT = 36;
+const CHART_HEIGHT = 64;
 
 const MetricEmbeddableComponent = ({
   fields,
