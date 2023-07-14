@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 // for some reason we can't reference common/index.ts because
 // the `node scripts/check_telemetry.js --fix` command fails with the error
 // ERROR Error: Error extracting collector in x-pack/plugins/cloud_defend/server/lib/telemetry/collectors/register.ts
