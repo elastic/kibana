@@ -63,6 +63,9 @@ describe('secrets validation', () => {
     const secrets: Record<string, string> = {
       user: 'bob',
       password: 'supersecret',
+      crt: null,
+      key: null,
+      pfx: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
@@ -75,21 +78,32 @@ describe('secrets validation', () => {
     );
   });
 
-  test('succeeds when basic authentication credentials are omitted', () => {
-    expect(validateSecrets(connectorType, {}, { configurationUtilities })).toEqual({});
+  test('succeeds when authentication credentials are omitted', () => {
+    expect(validateSecrets(connectorType, {}, { configurationUtilities })).toEqual({
+      crt: null,
+      key: null,
+      password: null,
+      pfx: null,
+      user: null,
+    });
   });
 
   test('succeeds when secrets contains a certificate and keyfile', () => {
-    const secrets: Record<string, string> = {
+    const secrets: Record<string, string | null> = {
       password: 'supersecret',
       crt: CRT_FILE,
       key: KEY_FILE,
+      pfx: null,
+      user: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
-    const secretsWithoutPassword: Record<string, string> = {
+    const secretsWithoutPassword: Record<string, string | null> = {
       crt: CRT_FILE,
       key: KEY_FILE,
+      pfx: null,
+      user: null,
+      password: null,
     };
 
     expect(
@@ -98,14 +112,21 @@ describe('secrets validation', () => {
   });
 
   test('succeeds when secrets contains a pfx', () => {
-    const secrets: Record<string, string> = {
+    const secrets: Record<string, string | null> = {
       password: 'supersecret',
       pfx: PFX_FILE,
+      user: null,
+      crt: null,
+      key: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
-    const secretsWithoutPassword: Record<string, string> = {
+    const secretsWithoutPassword: Record<string, string | null> = {
       pfx: PFX_FILE,
+      user: null,
+      password: null,
+      crt: null,
+      key: null,
     };
 
     expect(
@@ -355,12 +376,13 @@ describe('execute()', () => {
           "warn": [MockFunction],
         },
         "method": "post",
+        "sslOverrides": Object {},
         "url": "https://abc.def/my-webhook",
       }
     `);
   });
 
-  test('execute with ssl adds ssl settings to configuration utilities', async () => {
+  test('execute with ssl adds ssl settings to sslOverrides', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
       method: WebhookMethods.POST,
@@ -380,130 +402,164 @@ describe('execute()', () => {
       logger: mockedLogger,
     });
 
-    expect(configurationUtilities.getSSLSettings()).toMatchInlineSnapshot(`
+    delete requestMock.mock.calls[0][0].configurationUtilities;
+
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "cert": Object {
-          "data": Array [
-            10,
-            45,
-            45,
-            45,
-            45,
-            45,
-            66,
-            69,
-            71,
-            73,
-            78,
-            32,
-            67,
-            69,
-            82,
-            84,
-            73,
-            70,
-            73,
-            67,
-            65,
-            84,
-            69,
-            45,
-            45,
-            45,
-            45,
-            45,
-            10,
-            45,
-            45,
-            45,
-            45,
-            45,
-            69,
-            78,
-            68,
-            32,
-            67,
-            69,
-            82,
-            84,
-            73,
-            70,
-            73,
-            67,
-            65,
-            84,
-            69,
-            45,
-            45,
-            45,
-            45,
-            45,
-            10,
-          ],
-          "type": "Buffer",
+        "axios": undefined,
+        "data": "some data",
+        "headers": Object {
+          "aheader": "a value",
         },
-        "key": Object {
-          "data": Array [
-            10,
-            45,
-            45,
-            45,
-            45,
-            45,
-            66,
-            69,
-            71,
-            73,
-            78,
-            32,
-            80,
-            82,
-            73,
-            86,
-            65,
-            84,
-            69,
-            32,
-            75,
-            69,
-            89,
-            45,
-            45,
-            45,
-            45,
-            45,
-            10,
-            45,
-            45,
-            45,
-            45,
-            45,
-            69,
-            78,
-            68,
-            32,
-            80,
-            82,
-            73,
-            86,
-            65,
-            84,
-            69,
-            32,
-            75,
-            69,
-            89,
-            45,
-            45,
-            45,
-            45,
-            45,
-            10,
-          ],
-          "type": "Buffer",
+        "logger": Object {
+          "context": Array [],
+          "debug": [MockFunction] {
+            "calls": Array [
+              Array [
+                "response from webhook action \\"some-id\\": [HTTP 200] ",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "isLevelEnabled": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
         },
-        "passphrase": "passss",
-        "verificationMode": "none",
+        "method": "post",
+        "sslOverrides": Object {
+          "cert": Object {
+            "data": Array [
+              10,
+              45,
+              45,
+              45,
+              45,
+              45,
+              66,
+              69,
+              71,
+              73,
+              78,
+              32,
+              67,
+              69,
+              82,
+              84,
+              73,
+              70,
+              73,
+              67,
+              65,
+              84,
+              69,
+              45,
+              45,
+              45,
+              45,
+              45,
+              10,
+              45,
+              45,
+              45,
+              45,
+              45,
+              69,
+              78,
+              68,
+              32,
+              67,
+              69,
+              82,
+              84,
+              73,
+              70,
+              73,
+              67,
+              65,
+              84,
+              69,
+              45,
+              45,
+              45,
+              45,
+              45,
+              10,
+            ],
+            "type": "Buffer",
+          },
+          "key": Object {
+            "data": Array [
+              10,
+              45,
+              45,
+              45,
+              45,
+              45,
+              66,
+              69,
+              71,
+              73,
+              78,
+              32,
+              80,
+              82,
+              73,
+              86,
+              65,
+              84,
+              69,
+              32,
+              75,
+              69,
+              89,
+              45,
+              45,
+              45,
+              45,
+              45,
+              10,
+              45,
+              45,
+              45,
+              45,
+              45,
+              69,
+              78,
+              68,
+              32,
+              80,
+              82,
+              73,
+              86,
+              65,
+              84,
+              69,
+              32,
+              75,
+              69,
+              89,
+              45,
+              45,
+              45,
+              45,
+              45,
+              10,
+            ],
+            "type": "Buffer",
+          },
+          "passphrase": "passss",
+        },
+        "url": "https://abc.def/my-webhook",
       }
     `);
   });
@@ -596,6 +652,7 @@ describe('execute()', () => {
           "warn": [MockFunction],
         },
         "method": "post",
+        "sslOverrides": Object {},
         "url": "https://abc.def/my-webhook",
       }
     `);

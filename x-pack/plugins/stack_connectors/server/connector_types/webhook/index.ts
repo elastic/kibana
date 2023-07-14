@@ -182,17 +182,16 @@ export async function executor(
       : {};
   const sslCertificate =
     authType === WebhookAuthType.SSL &&
-    isString(secrets.password) &&
     ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
       ? isString(secrets.pfx)
         ? {
             pfx: Buffer.from(secrets.pfx, 'base64'),
-            passphrase: secrets.password,
+            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
           }
         : {
             cert: Buffer.from(secrets.crt!, 'base64'),
             key: Buffer.from(secrets.key!, 'base64'),
-            passphrase: secrets.password,
+            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
           }
       : {};
 
