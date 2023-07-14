@@ -7,12 +7,12 @@
 
 import { Duration, DurationUnit } from '../../../domain/models';
 
-export function oneQuarter(): Duration {
-  return new Duration(1, DurationUnit.Quarter);
-}
-
 export function thirtyDays(): Duration {
   return new Duration(30, DurationUnit.Day);
+}
+
+export function ninetyDays(): Duration {
+  return new Duration(90, DurationUnit.Day);
 }
 
 export function oneMonth(): Duration {
