@@ -94,7 +94,7 @@ export function ProfilingAppPageTemplate({
         },
       }}
     >
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" style={{ maxWidth: '100%' }}>
         {!hideSearchBar && (
           <EuiFlexItem grow={false}>
             <PrimaryProfilingSearchBar />
