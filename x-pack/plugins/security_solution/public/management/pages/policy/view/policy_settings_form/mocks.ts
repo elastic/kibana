@@ -197,7 +197,8 @@ export const exactMatchText = (text: string): RegExp => {
 export const setMalwareMode = (
   policy: PolicyConfig,
   turnOff: boolean = false,
-  includePopup: boolean = true
+  includePopup: boolean = true,
+  includeBlocklist: boolean = true
 ) => {
   const mode = turnOff ? ProtectionModes.off : ProtectionModes.prevent;
   const enableValue = mode !== ProtectionModes.off;
@@ -206,9 +207,11 @@ export const setMalwareMode = (
   set(policy, 'mac.malware.mode', mode);
   set(policy, 'linux.malware.mode', mode);
 
-  set(policy, 'windows.malware.blocklist', enableValue);
-  set(policy, 'mac.malware.blocklist', enableValue);
-  set(policy, 'linux.malware.blocklist', enableValue);
+  if (includeBlocklist) {
+    set(policy, 'windows.malware.blocklist', enableValue);
+    set(policy, 'mac.malware.blocklist', enableValue);
+    set(policy, 'linux.malware.blocklist', enableValue);
+  }
 
   if (includePopup) {
     set(policy, 'windows.popup.malware.enabled', enableValue);
