@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
+import type { CommentAttributes } from '@kbn/cases-plugin/common';
 
 export const getRuleIdToCasesMap = (
   cases: Array<SavedObjectsFindResult<CommentAttributes>>

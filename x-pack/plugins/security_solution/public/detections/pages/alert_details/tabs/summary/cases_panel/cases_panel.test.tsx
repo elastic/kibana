@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { RelatedCaseInfo } from '@kbn/cases-plugin/common/api';
-import { CaseStatuses } from '@kbn/cases-plugin/common/api';
+import type { RelatedCase } from '@kbn/cases-plugin/common';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CasesPanel, CASES_PANEL_CASES_COUNT_MAX } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import {
@@ -137,7 +137,7 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
     });
   });
   describe('has a single related cases', () => {
-    const mockRelatedCase: RelatedCaseInfo = {
+    const mockRelatedCase: RelatedCase = {
       createdAt: '2022-11-04T17:22:13.267Z',
       title: 'test case',
       description: 'Test case description',
@@ -174,7 +174,7 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
     });
   });
   describe(`has more than ${CASES_PANEL_CASES_COUNT_MAX} related cases`, () => {
-    const mockRelatedCase: RelatedCaseInfo = {
+    const mockRelatedCase: RelatedCase = {
       createdAt: '2022-11-04T17:22:13.267Z',
       title: 'test case',
       description: 'Test case description',

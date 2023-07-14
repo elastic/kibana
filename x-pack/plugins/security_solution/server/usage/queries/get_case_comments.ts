@@ -12,8 +12,8 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
 } from '@kbn/core/server';
 
-import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
+import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common';
+import type { CommentAttributes } from '@kbn/cases-plugin/common';
 
 export interface GetCasesOptions {
   savedObjectsClient: SavedObjectsClientContract;

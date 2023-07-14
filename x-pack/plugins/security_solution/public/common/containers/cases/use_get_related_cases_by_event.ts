@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import type { RelatedCase } from '@kbn/cases-plugin/common/api';
+import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { useKibana, useToasts } from '../../lib/kibana';
 import { CASES_ERROR_TOAST } from '../../components/event_details/insights/translations';
 import { APP_ID } from '../../../../common/constants';
