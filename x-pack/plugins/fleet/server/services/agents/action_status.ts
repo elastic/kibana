@@ -31,7 +31,7 @@ const PRECISION_THRESHOLD = 40000;
  */
 export async function getActionStatuses(
   esClient: ElasticsearchClient,
-  options: ListWithKuery & { errorSize: number }
+  options: Omit<ListWithKuery, 'kuery'> & { errorSize: number }
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
   const cancelledActions = await getCancelledActions(esClient);
@@ -235,7 +235,7 @@ export async function getCancelledActions(
 
 async function _getActions(
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: Omit<ListWithKuery, 'kuery'>
 ): Promise<ActionStatus[]> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,

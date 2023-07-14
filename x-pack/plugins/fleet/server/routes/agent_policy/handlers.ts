@@ -56,8 +56,6 @@ import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { validateKuery } from '../utils/filter_utils';
 
-import { normalizeKuery } from '../../services/saved_object';
-
 export async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
@@ -90,29 +88,25 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     kuery,
     ...restOfQuery
   } = request.query;
-  let newKuery = kuery;
   try {
-    // validate kuery parameters
-    if (kuery && kuery !== '') {
-      newKuery = normalizeKuery(AGENT_POLICY_SAVED_OBJECT_TYPE, kuery);
-      const validationObj = validateKuery(
-        newKuery,
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS
-      );
-      if (validationObj?.error) {
-        return response.badRequest({
-          body: {
-            message: validationObj.error,
-          },
-        });
-      }
+    const validationObj = validateKuery(
+      kuery,
+      [AGENT_POLICY_SAVED_OBJECT_TYPE],
+      AGENT_POLICY_MAPPINGS,
+      true
+    );
+    if (validationObj?.error) {
+      return response.badRequest({
+        body: {
+          message: validationObj.error,
+        },
+      });
     }
 
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       esClient,
-      kuery: newKuery,
+      kuery,
       ...restOfQuery,
       withAgentCount: !noAgentCount,
     });

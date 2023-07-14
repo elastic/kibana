@@ -239,7 +239,6 @@ export const getAgentTagsHandler: RequestHandler<
   const { kuery } = request.query;
 
   try {
-    // validate kuery
     validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
 
     const tags = await AgentService.getAgentTags(soClient, esClient, {

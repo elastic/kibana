@@ -59,7 +59,6 @@ import {
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 import { validateKuery } from '../utils/filter_utils';
-import { normalizeKuery } from '../../services/saved_object';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -73,27 +72,23 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   const limitedToPackages = fleetContext.limitedToPackages;
 
   const { kuery, ...restOfQuery } = request.query;
-  let newKuery = kuery;
   try {
-    // normalize kuery and validate it
-    if (kuery && kuery !== '') {
-      newKuery = normalizeKuery(PACKAGE_POLICY_SAVED_OBJECT_TYPE, kuery);
-      const validationObj = validateKuery(
-        newKuery,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS
-      );
-      if (validationObj?.error) {
-        return response.badRequest({
-          body: {
-            message: validationObj.error,
-          },
-        });
-      }
+    const validationObj = validateKuery(
+      kuery,
+      [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+      PACKAGE_POLICIES_MAPPINGS,
+      true
+    );
+    if (validationObj?.error) {
+      return response.badRequest({
+        body: {
+          message: validationObj.error,
+        },
+      });
     }
 
     const { items, total, page, perPage } = await packagePolicyService.list(soClient, {
-      kuery: newKuery,
+      kuery,
       ...restOfQuery,
     });
 

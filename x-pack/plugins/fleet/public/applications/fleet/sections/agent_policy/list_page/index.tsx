@@ -24,7 +24,6 @@ import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
-
 import {
   useAuthz,
   useGetAgentPolicies,

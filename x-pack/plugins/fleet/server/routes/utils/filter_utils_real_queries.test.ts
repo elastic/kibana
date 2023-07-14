@@ -160,8 +160,8 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
     });
   });
 
-  describe('Package policies kuerys', () => {
-    it('Test 1', async () => {
+  describe('Package policies', () => {
+    it('Search by package name', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`
       );
@@ -228,7 +228,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
   });
 
   describe('Agents', () => {
-    it('Test 1 - search policy id', async () => {
+    it('Search policy id', async () => {
       const astFilter = esKuery.fromKueryExpression(`${AGENTS_PREFIX}.policy_id: "policy_id"`);
       const validationObject = validateFilterKueryNode({
         astFilter,
@@ -247,7 +247,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 2 - search by multiple ids', async () => {
+    it('Search by multiple ids', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${AGENTS_PREFIX}.attributes.agent.id : (id_1 or id_2)`
       );
@@ -276,7 +276,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 3 - search agent by policy Id and enrolled since more than 10m', async () => {
+    it('Search agent by policy Id and enrolled since more than 10m', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${AGENTS_PREFIX}.policy_id: "policyId" and not (_exists_: "${AGENTS_PREFIX}.unenrolled_at") and ${AGENTS_PREFIX}.enrolled_at >= now-10m`
       );
@@ -311,7 +311,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 4 - search agent by multiple policy Ids and tags', async () => {
+    it('Search agent by multiple policy Ids and tags', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${AGENTS_PREFIX}.policy_id: (policyId1 or policyId2) and ${AGENTS_PREFIX}.tags: (tag1)`
       );
@@ -346,7 +346,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 5 - search agent by multiple tags', async () => {
+    it('Search agent by multiple tags', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${AGENTS_PREFIX}.tags: (tag1 or tag2 or tag3)`
       );
@@ -381,7 +381,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 6 - returns error if kuery is passed without a reference to the index', async () => {
+    it('Returns error if kuery is passed without a reference to the index', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`
       );
@@ -425,7 +425,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
   });
 
   describe('Enrollment Api keys', () => {
-    it('Test 1', async () => {
+    it('Search by policy id', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: policyId1`
       );
@@ -454,7 +454,18 @@ describe('validateKuery validates real kueries', () => {
       const validationObj = validateKuery(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
         [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS
+        AGENT_POLICY_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by name', async () => {
+      const validationObj = validateKuery(
+        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: test_id`,
+        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        AGENT_POLICY_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(true);
     });
@@ -463,7 +474,8 @@ describe('validateKuery validates real kueries', () => {
       const validationObj = validateKuery(
         'test%3A',
         [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS
+        AGENT_POLICY_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toContain(
@@ -477,7 +489,8 @@ describe('validateKuery validates real kueries', () => {
       const validationObj = validateKuery(
         `${AGENTS_PREFIX}.policy_id: "policy_id"`,
         [AGENTS_PREFIX],
-        AGENT_MAPPINGS
+        AGENT_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(true);
     });
@@ -486,7 +499,8 @@ describe('validateKuery validates real kueries', () => {
       const validationObj = validateKuery(
         `status:online or (status:updating or status:unenrolling or status:enrolling)`,
         [AGENTS_PREFIX],
-        AGENT_MAPPINGS
+        AGENT_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toContain(
@@ -498,7 +512,8 @@ describe('validateKuery validates real kueries', () => {
       const validationObj = validateKuery(
         `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`,
         [AGENTS_PREFIX],
-        AGENT_MAPPINGS
+        AGENT_MAPPINGS,
+        true
       );
       expect(validationObj?.isValid).toEqual(true);
     });
@@ -512,10 +527,40 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(validationObj?.isValid).toEqual(true);
     });
+
+    it('Search by multiple agent ids', async () => {
+      const validationObj = validateKuery(
+        `${AGENTS_PREFIX}.agent.id : (id_1 or id_2)`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by complex query', async () => {
+      const validationObj = validateKuery(
+        `${AGENTS_PREFIX}.policy_id: "policyId" and not (_exists_: "${AGENTS_PREFIX}.unenrolled_at") and ${AGENTS_PREFIX}.enrolled_at >= now-10m`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by tags', async () => {
+      const validationObj = validateKuery(
+        `${AGENTS_PREFIX}.tags: (tag1 or tag2 or tag3)`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
   });
 
   describe('Package policies', () => {
-    it('Test 1 - search by package name', async () => {
+    it('Search by package name', async () => {
       const validationObj = validateKuery(
         `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
@@ -524,7 +569,7 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Test 2 - invalid search by package name', async () => {
+    it('Invalid search by package name', async () => {
       const validationObj = validateKuery(
         `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
@@ -534,6 +579,37 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.error).toEqual(
         `KQLSyntaxError: This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`
       );
+    });
+
+    it('Search by package name works without attributes if skipNormalization is passed', async () => {
+      const validationObj = validateKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by name and version', async () => {
+      const validationObj = validateKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "TestName" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version: "8.8.0"`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+  });
+
+  describe('Enrollment keys', () => {
+    it('Search by policy id', async () => {
+      const validationObj = validateKuery(
+        `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: policyId1`,
+        [FLEET_ENROLLMENT_API_PREFIX],
+        ENROLLMENT_API_KEY_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(true);
     });
   });
 });
