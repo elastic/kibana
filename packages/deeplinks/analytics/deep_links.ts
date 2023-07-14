@@ -8,12 +8,6 @@
 
 import { DASHBOARD_APP_ID, DISCOVER_APP_ID, VISUALIZE_APP_ID } from './constants';
 
-export type DiscoverApp = typeof DISCOVER_APP_ID;
-export type DashboardApp = typeof DASHBOARD_APP_ID;
-export type VisualizeApp = typeof VISUALIZE_APP_ID;
+export type AppId = typeof DISCOVER_APP_ID | typeof DASHBOARD_APP_ID | typeof VISUALIZE_APP_ID;
 
-export type AppId = DiscoverApp | DashboardApp | VisualizeApp;
-
-export type DiscoverAppProfile = 'log-explorer';
-
-export type DeepLinkId = AppId | `${DiscoverApp}:${DiscoverAppProfile}`;
+export type DeepLinkId = AppId;

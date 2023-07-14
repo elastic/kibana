@@ -27,6 +27,8 @@ export type AppId =
   | ApmApp
   | MetricsApp;
 
+export type DiscoverLogExplorerId = 'discover:log-explorer';
+
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
 export type ObservabilityOverviewLinkId =
@@ -52,6 +54,7 @@ export type LinkId = LogsLinkId | ObservabilityOverviewLinkId | MetricsLinkId | 
 
 export type DeepLinkId =
   | AppId
+  | DiscoverLogExplorerId
   | `${LogsApp}:${LogsLinkId}`
   | `${ObservabilityOverviewApp}:${ObservabilityOverviewLinkId}`
   | `${MetricsApp}:${MetricsLinkId}`
