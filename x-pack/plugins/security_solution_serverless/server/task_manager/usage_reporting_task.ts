@@ -15,8 +15,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 
-import type { UsageRecord } from '../../types';
-import { securityUsageReportingService } from '../services';
+import type { UsageRecord } from '../types';
+import { usageReportingService } from '../common/services';
 
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';
@@ -129,7 +129,7 @@ export class SecurityUsageReportingTask {
     let usageReportResponse: Response | undefined;
 
     try {
-      usageReportResponse = await securityUsageReportingService.reportUsage(usageRecords);
+      usageReportResponse = await usageReportingService.reportUsage(usageRecords);
     } catch (e) {
       this.logger.warn(JSON.stringify(e));
     }
