@@ -44,7 +44,6 @@ import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
-import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate/csv_searchsource_immediate';
 import { CsvV2ExportType } from './export_types/csv_v2';
 import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PdfExportType } from './export_types/printable_pdf_v2';
@@ -55,6 +54,7 @@ import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
+import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -112,7 +112,6 @@ export class ReportingCore {
   private executing: Set<string>;
   private csvSearchSourceExport: CsvSearchSourceExportType;
   private csvV2ExportType: CsvV2ExportType;
-  private csvSearchSourceImmediateExport: CsvSearchSourceImmediateExportType;
   private pdfExport: PdfExportType;
   private pdfV1Export: PdfV1ExportType;
   private pngExport: PngExportType;
@@ -152,16 +151,8 @@ export class ReportingCore {
     // deprecated export types for tests
     this.pdfV1Export = new PdfV1ExportType(this.core, this.config, this.logger, this.context);
     this.pngV1Export = new PngV1ExportType(this.core, this.config, this.logger, this.context);
-    this.csvSearchSourceImmediateExport = new CsvSearchSourceImmediateExportType(
-      this.core,
-      this.config,
-      this.logger,
-      this.context
-    );
     this.exportTypesRegistry.register(this.pdfV1Export);
     this.exportTypesRegistry.register(this.pngV1Export);
-    // @ts-ignore known issue with csv searchsource immediate
-    this.exportTypesRegistry.register(this.csvSearchSourceImmediateExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -190,7 +181,6 @@ export class ReportingCore {
 
     this.csvSearchSourceExport.setup(setupDeps);
     this.csvV2ExportType.setup(setupDeps);
-    this.csvSearchSourceImmediateExport.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
     this.pdfV1Export.setup(setupDeps);
     this.pngExport.setup(setupDeps);
@@ -215,7 +205,6 @@ export class ReportingCore {
 
     this.csvSearchSourceExport.start(exportTypeStartDeps);
     this.csvV2ExportType.start(exportTypeStartDeps);
-    this.csvSearchSourceImmediateExport.start(exportTypeStartDeps);
     this.pdfExport.start(exportTypeStartDeps);
     this.pdfV1Export.start(exportTypeStartDeps);
     this.pngExport.start(exportTypeStartDeps);
@@ -465,5 +454,14 @@ export class ReportingCore {
   public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
+  }
+
+  public async getCsvSearchSourceImmediate() {
+    return new CsvSearchSourceImmediateExportType(
+      this.core,
+      this.config,
+      this.logger,
+      this.context
+    );
   }
 }

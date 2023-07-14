@@ -11,7 +11,6 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import moment from 'moment';
 import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
-import { CsvSearchSourceImmediateExportType } from '../../export_types/csv_searchsource_immediate';
 import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../lib';
 import { authorizedUserPreRouting, getCounters } from '../lib';
@@ -73,11 +72,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
         const logger = parentLogger.get(CSV_SEARCHSOURCE_IMMEDIATE_TYPE);
-        const csvSearchSourceImmediateExport = reporting
-          .getExportTypesRegistry()
-          .get(
-            (e) => e.jobType === 'csv_searchsource_immediate'
-          ) as unknown as CsvSearchSourceImmediateExportType;
+        const csvSearchSourceImmediateExport = await reporting.getCsvSearchSourceImmediate();
 
         const stream = new PassThroughStream();
         const eventLog = reporting.getEventLogger({

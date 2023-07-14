@@ -7,9 +7,18 @@
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
-import { mergeMap, finalize, takeUntil, tap, map } from 'rxjs';
 import { Writable } from 'stream';
-import * as Rx from 'rxjs';
+import {
+  fromEventPattern,
+  mergeMap,
+  finalize,
+  takeUntil,
+  tap,
+  map,
+  Observable,
+  of,
+  lastValueFrom,
+} from 'rxjs';
 import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 import { decryptJobHeaders, ExportType, generatePngObservable, getFullUrls } from '../common';
@@ -49,7 +58,7 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
   }
 
   // PR 161712 needs these out of reporting
-  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult> {
+  public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
     return this.startDeps.screenshotting.getScreenshots({
       ...options,
       urls: options?.urls?.map((url) =>
@@ -73,33 +82,22 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
-    {
-      const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
-      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
-      let apmGeneratePng: { end: () => void } | null | undefined;
-      const { encryptionKey } = this.config;
-      const jobLogger = this.logger.get(`execute:${jobId}`);
+    const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
+    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
+    let apmGeneratePng: { end: () => void } | null | undefined;
+    const { encryptionKey } = this.config;
+    const jobLogger = this.logger.get(`execute:${jobId}`);
 
-      const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-        mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-        mergeMap((headers) => {
-          const [url] = getFullUrls(this.getServerInfo(), this.config, job);
+    const process$: Observable<TaskRunResult> = of(1).pipe(
+      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
+      mergeMap((headers) => {
+        const [url] = getFullUrls(this.getServerInfo(), this.config, job);
 
-          apmGetAssets?.end();
-          apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
-          return generatePngObservable(
-            () =>
-              this.getScreenshots({
-                headers,
-                urls: [url],
-                browserTimezone: job.browserTimezone,
-                layout: {
-                  ...job.layout,
-                  id: 'preserve_layout',
-                },
-              }),
-            jobLogger,
-            {
+        apmGetAssets?.end();
+        apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
+        return generatePngObservable(
+          () =>
+            this.getScreenshots({
               headers,
               urls: [url],
               browserTimezone: job.browserTimezone,
@@ -107,21 +105,30 @@ export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayl
                 ...job.layout,
                 id: 'preserve_layout',
               },
-            }
-          );
-        }),
-        tap(({ buffer }) => stream.write(buffer)),
-        map(({ metrics, warnings }) => ({
-          content_type: 'image/png',
-          metrics: { png: metrics },
-          warnings,
-        })),
-        tap({ error: (error) => jobLogger.error(error) }),
-        finalize(() => apmGeneratePng?.end())
-      );
+            }),
+          jobLogger,
+          {
+            headers,
+            urls: [url],
+            browserTimezone: job.browserTimezone,
+            layout: {
+              ...job.layout,
+              id: 'preserve_layout',
+            },
+          }
+        );
+      }),
+      tap(({ buffer }) => stream.write(buffer)),
+      map(({ metrics, warnings }) => ({
+        content_type: 'image/png',
+        metrics: { png: metrics },
+        warnings,
+      })),
+      tap({ error: (error) => jobLogger.error(error) }),
+      finalize(() => apmGeneratePng?.end())
+    );
 
-      const stop$ = Rx.fromEventPattern(cancellationToken.on);
-      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
-    }
+    const stop$ = fromEventPattern(cancellationToken.on);
+    return lastValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }
