@@ -15,10 +15,11 @@ import type {
   GetUninstallTokenResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
+import type { RequestError } from './use_request';
 import { sendRequest, sendRequestForRq } from './use_request';
 
 export const useGetUninstallTokens = (query: GetUninstallTokensMetadataRequest['query'] = {}) =>
-  useQuery<GetUninstallTokensMetadataResponse>(['useGetUninstallTokens', query], () =>
+  useQuery<GetUninstallTokensMetadataResponse, RequestError>(['useGetUninstallTokens', query], () =>
     sendRequestForRq({
       method: 'get',
       path: uninstallTokensRouteService.getListPath(),
@@ -27,11 +28,13 @@ export const useGetUninstallTokens = (query: GetUninstallTokensMetadataRequest['
   );
 
 export const useGetUninstallToken = (uninstallTokenId: string) =>
-  useQuery<GetUninstallTokenResponse>(['useGetUninstallToken', uninstallTokenId], () =>
-    sendRequestForRq({
-      method: 'get',
-      path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
-    })
+  useQuery<GetUninstallTokenResponse, RequestError>(
+    ['useGetUninstallToken', uninstallTokenId],
+    () =>
+      sendRequestForRq({
+        method: 'get',
+        path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
+      })
   );
 
 export const sendGetUninstallToken = (uninstallTokenId: string) =>
