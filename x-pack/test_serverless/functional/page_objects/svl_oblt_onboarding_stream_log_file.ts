@@ -7,17 +7,12 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlObltOnboardingPageProvider({ getService }: FtrProviderContext) {
+export function SvlObltOnboardingStreamLogFilePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertQuickstartBadgeExists() {
-      await testSubjects.existOrFail('obltOnboardingHomeQuickstartBadge');
-    },
-
-    async goToStreamLogFiles() {
-      await testSubjects.click('obltOnboardingHomeStartLogFileStream');
-      await testSubjects.missingOrFail('obltOnboardingHomeStartLogFileStream');
+    async assertPageHeaderExists() {
+      await testSubjects.existOrFail('obltOnboardingStreamLogFilePageHeader');
     },
   };
 }
