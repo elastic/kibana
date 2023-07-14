@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { Properties } from 'csstype';
 import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
@@ -34,6 +35,7 @@ export interface TextAreaWithAutocompleteProps {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
 }
+const selectableListProps = { className: 'euiSelectableMsgAutoComplete' };
 
 export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutocompleteProps> = ({
   editAction,
@@ -87,6 +89,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
         editAction(paramsProperty, newInputText.trim(), index);
         setMatches([]);
         textAreaRef.current.focus();
+        // We use setTimeout here, because editAction is async function and we need to wait before it executes
         setTimeout(() => {
           if (textAreaRef.current) {
             textAreaRef.current.selectionStart =
@@ -122,6 +125,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
 
   useEffect(() => {
     if (!isListOpen) return;
+    // E.g. we have a case, that warning appeared and disappeared from time to time, but without recalculation of
+    // a menu position, a menu will be in a wrong place. To prevent such cases I recalculate a menu position every 300 ms.
     const interval = setInterval(recalcMenuPosition, 300);
     return () => clearInterval(interval);
   }, [isListOpen, recalcMenuPosition]);
@@ -130,10 +135,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     if (!textAreaRef.current) return;
     const { value, selectionStart } = textAreaRef.current;
 
-    setTimeout(() => {
-      recalcMenuPosition();
-    }, 100);
-
+    recalcMenuPosition();
     const lastSpaceIndex = value.slice(0, selectionStart).lastIndexOf(' ');
     const lastOpenDoubleCurlyBracketsIndex = value.slice(0, selectionStart).lastIndexOf('{{');
     const currentWordStartIndex = Math.max(lastSpaceIndex, lastOpenDoubleCurlyBracketsIndex);
@@ -256,6 +258,16 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     return option.label;
   };
 
+  const selectableStyle: Properties<string | number> = {
+    position: 'absolute',
+    top: popupPosition.top,
+    width: popupPosition.width,
+    left: popupPosition.left,
+    border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    background: backgroundColor,
+    zIndex: 3000,
+  };
+
   return (
     <EuiFormRow
       error={errors}
@@ -296,21 +308,13 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
           <EuiPortal>
             <EuiSelectable
               ref={selectableRef}
-              style={{
-                position: 'absolute',
-                top: popupPosition.top,
-                width: popupPosition.width,
-                left: popupPosition.left,
-                border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                background: backgroundColor,
-                zIndex: 3000,
-              }}
+              style={selectableStyle}
               height={matches.length > 5 ? 32 * 5.5 : matches.length * 32}
               options={optionsToShow}
               onChange={onOptionPick}
               singleSelection
               renderOption={renderSelectableOption}
-              listProps={{ className: 'euiSelectableMsgAutoComplete' }}
+              listProps={selectableListProps}
             >
               {(list) => list}
             </EuiSelectable>
