@@ -102,15 +102,12 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & { dataTestSubj?
           );
         }
 
-        const { ...copy } = item as GroupDefinition;
-        delete (copy as any).type;
-
-        return copy.children ? (
-          <Navigation.Group {...copy} key={id}>
-            {renderItems(copy.children, [...path, id])}
+        return item.children || (item as GroupDefinition).type === 'navGroup' ? (
+          <Navigation.Group {...item} key={id}>
+            {renderItems(item.children, [...path, id])}
           </Navigation.Group>
         ) : (
-          <Navigation.Item {...copy} key={id} />
+          <Navigation.Item {...item} key={id} />
         );
       });
     },

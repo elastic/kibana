@@ -20,6 +20,7 @@ import { navigationStyles as styles } from '../../styles';
 import { useNavigation as useServices } from '../../services';
 import { ChromeProjectNavigationNodeEnhanced } from '../types';
 import { isAbsoluteLink } from '../../utils';
+import { GroupAsLink } from './group_as_link';
 
 type RenderItem = EuiSideNavItemType<unknown>['renderItem'];
 
@@ -108,6 +109,10 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
   });
 
   const groupHasLink = Boolean(navNode.deepLink) || Boolean(navNode.href);
+  const groupHasChildren = filteredItems.some(itemHasLinkOrChildren);
+  // Group with a link and no children will be rendered as a link and not an EUI accordion
+  const groupIsLink = groupHasLink && !groupHasChildren;
+  const groupHref = navNode.deepLink?.url ?? navNode.href!;
 
   useEffect(() => {
     if (doCollapseFromActiveState) {
@@ -115,17 +120,32 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
     }
   }, [isActive, doCollapseFromActiveState]);
 
-  if (!groupHasLink && !filteredItems.some(itemHasLinkOrChildren)) {
+  if (!groupHasLink && !groupHasChildren) {
     return null;
   }
+
+  const propsForGroupAsLink = groupIsLink
+    ? {
+        buttonElement: 'div' as const,
+        buttonContent: (
+          <GroupAsLink
+            title={title}
+            iconType={icon}
+            href={groupHref}
+            navigateToUrl={navigateToUrl}
+          />
+        ),
+        arrowProps: { style: { display: 'none' } },
+      }
+    : {};
 
   return (
     <EuiCollapsibleNavGroup
       id={id}
       title={title}
       iconType={icon}
-      iconSize={'m'}
-      isCollapsible={true}
+      iconSize="m"
+      isCollapsible
       initialIsOpen={isActive}
       onToggle={(isOpen) => {
         setIsCollapsed(!isOpen);
@@ -133,6 +153,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
       }}
       forceState={isCollapsed ? 'closed' : 'open'}
       data-test-subj={`nav-bucket-${id}`}
+      {...propsForGroupAsLink}
     >
       <EuiText color="default">
         <EuiSideNav
