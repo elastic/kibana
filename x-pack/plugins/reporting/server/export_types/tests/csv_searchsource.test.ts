@@ -16,59 +16,22 @@ jest.mock('@kbn/generate-csv', () => ({
   },
 }));
 
-import nodeCrypto from '@elastic/node-crypto';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
-import { createMockConfigSchema } from '../../test_helpers';
 import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
-import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
+import { encryptedHeaders, mockPluginCsvSearchSourceExportType } from '../mocks/mocks';
 
-const mockLogger = loggingSystemMock.createLogger();
-const encryptionKey = 'tetkey';
-const headers = { sid: 'cooltestheaders' };
-let encryptedHeaders: string;
 let stream: jest.Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
 
 beforeAll(async () => {
-  const crypto = nodeCrypto({ encryptionKey });
+  // const crypto = nodeCrypto({ encryptionKey });
 
-  encryptedHeaders = await crypto.encrypt(headers);
-  const configType = createMockConfigSchema({
-    encryptionKey,
-    csv: {
-      checkForFormulas: true,
-      escapeFormulaValues: true,
-      maxSizeBytes: 180000,
-      scroll: { size: 500, duration: '30s' },
-    },
-  });
-  const mockCoreSetup = coreMock.createSetup();
-  const mockCoreStart = coreMock.createStart();
-  const context = coreMock.createPluginInitializerContext(configType);
+  // encryptedHeaders = await crypto.encrypt(headers);
 
-  mockCsvSearchSourceExportType = new CsvSearchSourceExportType(
-    mockCoreSetup,
-    configType,
-    mockLogger,
-    context
-  );
-
-  mockCsvSearchSourceExportType.setup({
-    basePath: { set: jest.fn() },
-  });
-
-  mockCsvSearchSourceExportType.start({
-    esClient: elasticsearchServiceMock.createClusterClient(),
-    savedObjects: mockCoreStart.savedObjects,
-    uiSettings: mockCoreStart.uiSettings,
-    discover: discoverPluginMock.createStartContract(),
-    data: dataPluginMock.createStartContract(),
-    screenshotting: createMockScreenshottingStart(),
-  });
+  mockCsvSearchSourceExportType = mockPluginCsvSearchSourceExportType.create();
+  mockPluginCsvSearchSourceExportType.setup();
+  mockPluginCsvSearchSourceExportType.start();
 });
 
 beforeEach(() => {
@@ -79,7 +42,7 @@ test('gets the csv content from job parameters', async () => {
   const payload = await mockCsvSearchSourceExportType.runTask(
     'cool-job-id',
     {
-      headers: encryptedHeaders,
+      headers: await encryptedHeaders(),
       browserTimezone: 'US/Alaska',
       searchSource: {},
       objectType: 'search',
