@@ -17,8 +17,8 @@ describe('toDateRange', () => {
     it('computes the date range for weekly calendar', () => {
       const timeWindow = aCalendarTimeWindow(oneWeek());
       expect(toDateRange(timeWindow, NOW)).toEqual({
-        from: new Date('2022-08-07T00:00:00.000Z'),
-        to: new Date('2022-08-13T23:59:59.999Z'),
+        from: new Date('2022-08-08T00:00:00.000Z'),
+        to: new Date('2022-08-14T23:59:59.999Z'),
       });
     });
 
