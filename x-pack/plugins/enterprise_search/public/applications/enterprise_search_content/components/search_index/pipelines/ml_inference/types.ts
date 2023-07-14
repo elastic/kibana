@@ -17,6 +17,7 @@ export interface InferencePipelineConfiguration {
   pipelineName: string;
   sourceField: string;
   fieldMappings?: FieldMapping[];
+  targetField: string;
 }
 
 export interface AddInferencePipelineFormErrors {
