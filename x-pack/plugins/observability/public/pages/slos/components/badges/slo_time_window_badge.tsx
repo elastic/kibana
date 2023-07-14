@@ -37,8 +37,8 @@ export function SloTimeWindowBadge({ slo }: Props) {
   const unitMoment = toMomentUnitOfTime(unit);
   const now = moment.utc();
 
-  const periodStart = now.clone().startOf(unitMoment!);
-  const periodEnd = now.clone().endOf(unitMoment!);
+  const periodStart = now.clone().startOf(unitMoment!).add(1, 'day');
+  const periodEnd = now.clone().endOf(unitMoment!).add(1, 'day');
 
   const totalDurationInDays = periodEnd.diff(periodStart, 'days') + 1;
   const elapsedDurationInDays = now.diff(periodStart, 'days') + 1;
