@@ -146,7 +146,7 @@ describe('Assistant', () => {
   });
 
   describe('when no connectors are loaded', () => {
-    it('should clear conversation id in local storage', async () => {
+    it('should set welcome conversation id in local storage', async () => {
       const emptyConnectors: unknown[] = [];
 
       jest.mocked(useLoadConnectors).mockReturnValue({
@@ -157,7 +157,7 @@ describe('Assistant', () => {
       renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith('');
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
     });
   });
 });

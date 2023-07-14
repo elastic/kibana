@@ -11,6 +11,7 @@ export const TEST_IDS = {
   ADD_SYSTEM_PROMPT: 'addSystemPrompt',
   PROMPT_SUPERSELECT: 'promptSuperSelect',
   CONVERSATIONS_MULTISELECTOR_OPTION: (id: string) => `conversationMultiSelectorOption-${id}`,
+  SETTINGS_MODAL: 'settingsModal',
   SYSTEM_PROMPT_MODAL: {
     ID: 'systemPromptModal',
     PROMPT_TEXT: 'systemPromptModalPromptText',

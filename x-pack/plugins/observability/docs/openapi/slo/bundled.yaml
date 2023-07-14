@@ -8,17 +8,14 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
-servers:
-  - url: http://localhost:5601
-    description: local
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
   - name: composite slo
     description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
+servers:
+  - url: http://localhost:5601
+    description: local
 paths:
   /s/{spaceId}/api/observability/slos:
     post:
@@ -835,11 +832,11 @@ components:
           description: the target objective between 0 and 1 excluded
           type: number
           example: 0.99
-        timeslicesTarget:
+        timesliceTarget:
           description: the target objective for each slice when using a timeslices budgeting method
           type: number
           example: 0.995
-        timeslicesWindow:
+        timesliceWindow:
           description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
           type: string
           example: 5m
@@ -1157,3 +1154,6 @@ components:
               example: 0.9836
             errorBudget:
               $ref: '#/components/schemas/error_budget'
+security:
+  - basicAuth: []
+  - apiKeyAuth: []

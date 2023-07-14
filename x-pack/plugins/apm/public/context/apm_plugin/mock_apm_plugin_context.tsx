@@ -79,6 +79,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    fastRefreshAvailable: false,
   },
   serverless: { enabled: false },
 };

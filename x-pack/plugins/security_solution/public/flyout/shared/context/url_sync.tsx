@@ -14,6 +14,9 @@ export const SecuritySolutionFlyoutCloseContext = createContext<
   SecuritySolutionFlyoutCloseContextValue | undefined
 >(undefined);
 
+/**
+ * Exposes the flyout close context value (returned from syncUrl) as a hook.
+ */
 export const useSecurityFlyoutUrlSync = () => {
   const contextValue = useContext(SecuritySolutionFlyoutCloseContext);
 
@@ -24,6 +27,10 @@ export const useSecurityFlyoutUrlSync = () => {
   return contextValue;
 };
 
+/**
+ * Provides urlSync hook return value as a context value, for reuse in other components.
+ * Main goal here is to avoid calling useSyncFlyoutStateWithUrl multiple times.
+ */
 export const SecuritySolutionFlyoutUrlSyncProvider: FC = ({ children }) => {
   const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
 
