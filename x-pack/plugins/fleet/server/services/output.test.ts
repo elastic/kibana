@@ -1009,7 +1009,7 @@ describe('Output Service', () => {
           hosts: ['test:4343'],
         })
       ).rejects.toThrowError(
-        'Logstash output cannot be used with Fleet server integration in fleet server policy. Please create a new ElasticSearch output.'
+        'Logstash output cannot be used with Fleet Server integration in fleet server policy. Please create a new ElasticSearch output.'
       );
     });
 

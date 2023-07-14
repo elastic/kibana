@@ -205,7 +205,7 @@ async function validateTypeChanges(
     (data?.type === outputType.Logstash || data?.type === outputType.Kafka)
   ) {
     // Validate no policy with fleet server use that policy
-    validateOutputNotUsedInPolicy(policiesWithFleetServer, data.type, 'Fleet server');
+    validateOutputNotUsedInPolicy(policiesWithFleetServer, data.type, 'Fleet Server');
     validateOutputNotUsedInPolicy(policiesWithSynthetics, data.type, 'Synthetics');
   }
   await updateAgentPoliciesDataOutputId(
