@@ -92,7 +92,7 @@ export function loadInitial(
     initialInput,
     history,
   }: {
-    redirectCallback: (savedObjectId?: string) => void;
+    redirectCallback?: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
     history?: History<unknown>;
   },
@@ -269,7 +269,7 @@ export function loadInitial(
         notifications.toasts.addDanger({
           title: e.message,
         });
-        redirectCallback();
+        redirectCallback?.();
       });
   }
 
@@ -376,7 +376,7 @@ export function loadInitial(
               })
             );
         } else {
-          redirectCallback();
+          redirectCallback?.();
         }
       },
       () => {
@@ -385,13 +385,13 @@ export function loadInitial(
             isLoading: false,
           })
         );
-        redirectCallback();
+        redirectCallback?.();
       }
     )
     .catch((e: { message: string }) => {
       notifications.toasts.addDanger({
         title: e.message,
       });
-      redirectCallback();
+      redirectCallback?.();
     });
 }
