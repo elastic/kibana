@@ -35,7 +35,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';

@@ -20,8 +20,8 @@ import { setDocViewsRegistry } from '../../kibana_services';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, EsHitRecord } from '../../types';
-import { buildDataTableRecord } from '../../utils/build_data_record';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 

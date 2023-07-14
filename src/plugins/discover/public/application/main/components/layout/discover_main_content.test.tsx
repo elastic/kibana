@@ -23,7 +23,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';

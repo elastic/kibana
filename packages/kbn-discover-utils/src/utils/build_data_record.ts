@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { flattenHit } from '@kbn/data-plugin/common';
-import { getDocId } from './get_doc_id';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { flattenHit } from '@kbn/data-service';
 import type { DataTableRecord, EsHitRecord } from '../types';
+import { getDocId } from './get_doc_id';
 
 /**
  * Build a record for data table, explorer + classic one

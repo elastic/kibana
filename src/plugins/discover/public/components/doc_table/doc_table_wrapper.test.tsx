@@ -13,8 +13,8 @@ import { dataViewMock } from '../../__mocks__/data_view';
 import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../utils/build_data_record';
-import { EsHitRecord } from '../../types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
 describe('Doc table component', () => {

@@ -9,8 +9,8 @@
 import { dataViewMock as dataViewMock } from '../__mocks__/data_view';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
-import { DataTableRecord, EsHitRecord } from '../types';
-import { buildDataTableRecord } from './build_data_record';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 describe('formatHit', () => {
   let row: DataTableRecord;
