@@ -11,7 +11,7 @@ import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules'
 import { createAndInstallMockedPrebuiltRules } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
-import { login, logout, waitForPageWithoutDateRange } from '../../tasks/login';
+import { login, waitForPageWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import { ROLES } from '../../../common/test';
 import {
@@ -76,10 +76,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Authorizatio
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
       loadPageAsReadOnlyUser(SECURITY_DETECTIONS_RULES_URL);
       waitForRulesTableToBeLoaded();
-    });
-
-    afterEach(() => {
-      logout();
     });
 
     it('should not be able to install prebuilt rules', () => {
