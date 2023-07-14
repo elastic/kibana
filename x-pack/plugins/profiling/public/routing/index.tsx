@@ -202,6 +202,9 @@ const routes = {
                     <TopNFunctionsView />
                   </RouteBreadcrumb>
                 ),
+                params: t.type({
+                  query: t.partial({ pageIndex: toNumberRt }),
+                }),
               },
               '/functions/differential': {
                 element: (
@@ -228,6 +231,7 @@ const routes = {
                     t.partial({
                       baseline: toNumberRt,
                       comparison: toNumberRt,
+                      pageIndex: toNumberRt,
                     }),
                   ]),
                 }),
