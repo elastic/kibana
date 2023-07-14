@@ -60,6 +60,7 @@ export const LandingLinksIconsCategories: React.FC<LandingLinksIconsCategoriesPr
                 urlState={urlState}
                 onLinkClick={onLinkClick}
               />
+              <EuiSpacer size="l" />
             </div>
           )
         )}
@@ -73,12 +74,7 @@ const CategoryHeading: React.FC<{ type?: LinkCategoryType; label?: string; index
     const styles = useStyles();
     return (
       <>
-        {index > 0 && (
-          <>
-            <EuiSpacer size="xl" />
-            <EuiSpacer size="xl" />
-          </>
-        )}
+        {index > 0 && <EuiSpacer size="xl" />}
         {type === LinkCategoryType.title && (
           <>
             <EuiTitle size="xxxs">
@@ -87,12 +83,9 @@ const CategoryHeading: React.FC<{ type?: LinkCategoryType; label?: string; index
             <EuiHorizontalRule css={styles.horizontalRule} />
           </>
         )}
-        {type === LinkCategoryType.separator &&
-          (index === 0 ? (
-            <EuiSpacer size="l" />
-          ) : (
-            <EuiHorizontalRule css={styles.horizontalRule} />
-          ))}
+        {type === LinkCategoryType.separator && index > 0 && (
+          <EuiHorizontalRule css={styles.horizontalRule} />
+        )}
       </>
     );
   });

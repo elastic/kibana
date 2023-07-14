@@ -53,8 +53,9 @@ export default {
     (storyFn: Function) => (
       <div
         css={{
-          height: '100vh',
-          display: 'flex',
+          height: '100%',
+          width: '100%',
+          background: '#fff',
         }}
       >
         {storyFn()}
