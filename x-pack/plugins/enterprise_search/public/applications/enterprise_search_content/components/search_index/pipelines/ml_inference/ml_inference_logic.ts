@@ -93,6 +93,7 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
   pipelineName: '',
   sourceField: '',
+  targetField: '',
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
@@ -166,6 +167,7 @@ interface MLInferenceProcessorsActions {
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
   };
+  setTargetField: (targetFieldName: string) => { targetFieldName: string };
   startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
@@ -217,6 +219,7 @@ export const MLInferenceLogic = kea<
     setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => ({
       configuration,
     }),
+    setTargetField: (targetFieldName: string) => ({ targetFieldName }),
   },
   connect: {
     actions: [
@@ -314,6 +317,7 @@ export const MLInferenceLogic = kea<
         pipelineName,
         sourceField: params.source_field,
         fieldMappings: params.field_mappings,
+        targetField: params.destination_field ?? '',
       });
     },
     setIndexName: ({ indexName }) => {
@@ -372,7 +376,7 @@ export const MLInferenceLogic = kea<
       {
         addSelectedFieldsToMapping: (modal) => {
           const {
-            configuration: { fieldMappings },
+            configuration: { fieldMappings, targetField },
             selectedSourceFields,
           } = modal;
 
@@ -380,7 +384,7 @@ export const MLInferenceLogic = kea<
             ...(fieldMappings || []),
             ...(selectedSourceFields || []).map((fieldName) => ({
               sourceField: fieldName,
-              targetField: getMlInferencePrefixedFieldName(`${fieldName}_expanded`),
+              targetField: getMlInferencePrefixedFieldName((targetField ?? '').length > 0 ? targetField! : fieldName),
             })),
           ];
 
@@ -389,6 +393,7 @@ export const MLInferenceLogic = kea<
             configuration: {
               ...modal.configuration,
               fieldMappings: mergedFieldMappings,
+              targetField: '',
             },
             selectedSourceFields: [],
           };
@@ -436,6 +441,13 @@ export const MLInferenceLogic = kea<
         setInferencePipelineConfiguration: (modal, { configuration }) => ({
           ...modal,
           configuration,
+        }),
+        setTargetField: (modal, { targetFieldName }) => ({
+          ...modal,
+          configuration: {
+            ...modal.configuration,
+            targetField: targetFieldName,
+          },
         }),
       },
     ],

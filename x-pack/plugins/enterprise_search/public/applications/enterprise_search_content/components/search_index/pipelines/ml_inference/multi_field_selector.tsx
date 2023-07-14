@@ -31,13 +31,30 @@ import { MLInferenceLogic } from './ml_inference_logic';
 
 type FieldNames = Array<{ label: string }>;
 
+const TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.placeholder.noFields',
+  {
+    defaultMessage: 'Select a source field',
+  }
+);
+
+const TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.placeholder.multipleFields',
+  {
+    defaultMessage: 'Automatically created for multi-select',
+  }
+);
+
 export const MultiFieldMapping: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration, selectedSourceFields = [] },
     sourceFields,
   } = useValues(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
-  const { addSelectedFieldsToMapping, selectFields } = useActions(MLInferenceLogic);
+  const { addSelectedFieldsToMapping, selectFields, setTargetField } = useActions(MLInferenceLogic);
+  const [placeholderText, setPlaceholderText] = React.useState<string>(
+    TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS
+  );
 
   const mappedSourceFields =
     configuration.fieldMappings?.map(({ sourceField }) => sourceField) ?? [];
@@ -50,9 +67,19 @@ export const MultiFieldMapping: React.FC = () => {
   const selectedFields = selectedSourceFields.map((fieldName) => ({
     label: fieldName,
   }));
+  const targetField = configuration.targetField;
+  const isExactlyOneSourceFieldSelected = selectedSourceFields.length === 1;
 
   const onChangeSelectedFields = (selectedFieldNames: FieldNames) => {
     selectFields(selectedFieldNames.map(({ label }) => label));
+    setTargetField(isExactlyOneSourceFieldSelected ? selectedFieldNames[0].label : '');
+    setPlaceholderText(
+      selectedFieldNames.length === 0
+        ? TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS
+        : isExactlyOneSourceFieldSelected
+        ? selectedFieldNames[0].label
+        : TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS
+    );
   };
 
   const onCreateField = (fieldName: string) => {
@@ -61,6 +88,12 @@ export const MultiFieldMapping: React.FC = () => {
 
     selectedFields.push({ label: normalizedFieldName });
     selectFields([...selectedSourceFields, fieldName]);
+  };
+
+  const onAddSelectedFields = () => {
+    addSelectedFieldsToMapping();
+    setTargetField('');
+    setPlaceholderText(TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS);
   };
 
   return (
@@ -112,20 +145,21 @@ export const MultiFieldMapping: React.FC = () => {
             helpText={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText',
               {
-                defaultMessage: 'This name is automatically created based on your source field.',
+                defaultMessage: 'Optional. Field name where inference results should be saved.',
               }
             )}
             fullWidth
           >
             <EuiFieldText
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
-              disabled
-              value={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.defaultValue',
-                {
-                  defaultMessage: 'This is automatically created',
-                }
+              prepend={i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.documentId',
+                { defaultMessage: 'ml.inference.' }
               )}
+              onChange={(e) => setTargetField(e.target.value)}
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
+              disabled={!isExactlyOneSourceFieldSelected}
+              value={targetField}
+              placeholder={placeholderText}
               fullWidth
             />
           </EuiFormRow>
@@ -136,7 +170,7 @@ export const MultiFieldMapping: React.FC = () => {
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
             disabled={selectedFields.length === 0}
             iconType="plusInCircle"
-            onClick={addSelectedFieldsToMapping}
+            onClick={onAddSelectedFields}
             style={{ width: '60px' }}
           >
             {i18n.translate(
