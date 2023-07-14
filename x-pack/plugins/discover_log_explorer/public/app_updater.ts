@@ -14,7 +14,7 @@ import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
 const logExplorerDeepLink = {
   id: LOG_EXPLORER_PROFILE_ID,
   title: i18n.translate('xpack.discoverLogExplorer.deepLink', {
-    defaultMessage: 'Log Explorer',
+    defaultMessage: 'Logs Explorer',
   }),
   path: `#/p/log-explorer`,
   category: DEFAULT_APP_CATEGORIES.observability,
