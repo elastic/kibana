@@ -221,6 +221,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
+        // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
