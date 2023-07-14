@@ -73,7 +73,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         } else if ('navId' in by) {
           await testSubjects.existOrFail(`~nav-item-id-${by.navId} & ~nav-item-isActive`);
         } else {
-          await retry.tryForTime(1000, async () => {
+          await retry.try(async () => {
             const link = await getByVisibleText('~nav-item', by.text);
             expect(await link!.elementHasClass(`nav-item-isActive`)).to.be(true);
           });
@@ -86,7 +86,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         } else if ('navId' in by) {
           await testSubjects.click(`~nav-item-id-${by.navId}`);
         } else {
-          await retry.tryForTime(1000, async () => {
+          await retry.try(async () => {
             const link = await getByVisibleText('~nav-item', by.text);
             await link!.click();
           });
@@ -142,7 +142,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
         } else {
-          await retry.tryForTime(1000, async () => {
+          await retry.try(async () => {
             expect(await getByVisibleText('~breadcrumb', by.text)).not.be(null);
           });
         }
@@ -159,7 +159,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async expectLinkExists(text: string) {
         await this.expectExists();
         let foundLink: WebElementWrapper | null = null;
-        await retry.tryForTime(1000, async () => {
+        await retry.try(async () => {
           foundLink = await getByVisibleText(
             async () =>
               (await testSubjects.find('nav-bucket-recentlyAccessed')).findAllByTagName('a'),
