@@ -31,8 +31,13 @@ const LockedPolicyDiv = styled.div`
   }
 `;
 
+export interface SettingLockedCardProps {
+  title: string;
+  'data-test-subj'?: string;
+}
+
 export const SettingLockedCard = memo(
-  ({ title, 'data-test-subj': dataTestSubj }: { title: string; 'data-test-subj'?: string }) => {
+  ({ title, 'data-test-subj': dataTestSubj }: SettingLockedCardProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
