@@ -6,12 +6,14 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
-export const mockNavigateToApp = jest.fn();
 export const mockGetUrlForApp = jest.fn();
+export const mockNavigateToApp = jest.fn();
+export const mockNavigateToUrl = jest.fn();
 
 export const mockCoreStart = {
   application: {
-    navigateToApp: mockNavigateToApp,
     getUrlForApp: mockGetUrlForApp,
+    navigateToApp: mockNavigateToApp,
+    navigateToUrl: mockNavigateToUrl,
   },
 } as unknown as CoreStart;
