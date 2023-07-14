@@ -7,8 +7,7 @@
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-
+import { getSLOTransformId, SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
@@ -34,7 +33,7 @@ export class DeleteSLO {
 
   private async deleteRollupData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: `${SLO_INDEX_TEMPLATE_NAME}*`,
+      index: SLO_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {
         match: {
