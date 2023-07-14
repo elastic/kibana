@@ -127,7 +127,7 @@ const navigationTree: NavigationTreeDefinition = {
   footer: [
     {
       type: 'navGroup',
-      id: 'projest_settings_project_nav',
+      id: 'project_settings_project_nav',
       title: 'Project settings',
       icon: 'gear',
       defaultIsCollapsed: true,

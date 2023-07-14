@@ -20,7 +20,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlSearchNavigation.navigateToLandingPage();
     });
 
-    it('navigate serverless sidenav & breadcrumbs', async () => {
+    it('navigate search sidenav & breadcrumbs', async () => {
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
       // check serverless search side nav exists
@@ -31,29 +31,38 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check side nav links
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
       await svlCommonNavigation.sidenav.expectSectionOpen('search_project_nav');
-      await svlCommonNavigation.sidenav.expectDeepLinkActive('serverlessElasticsearch');
-      await svlCommonNavigation.breadcrumbs.expectExistsByDeepLink('serverlessElasticsearch');
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'serverlessElasticsearch',
+      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'serverlessElasticsearch',
+      });
       await svlCommonNavigation.sidenav.expectSectionClosed('rootNav:ml');
 
+      // TODO: test something search project specific instead of generic discover
       // navigate to discover
-      await svlCommonNavigation.sidenav.clickDeepLink('discover');
-      await svlCommonNavigation.sidenav.expectDeepLinkActive('discover');
-      await svlCommonNavigation.breadcrumbs.expectExistsByText(`Explore`);
-      await svlCommonNavigation.breadcrumbs.expectExistsByDeepLink('discover');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Explore` });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'discover' });
       await expect(await browser.getCurrentUrl()).contain('/app/discover');
 
       // navigate to a different section
       await svlCommonNavigation.sidenav.openSection('rootNav:ml');
-      await svlCommonNavigation.sidenav.clickDeepLink('ml:notifications');
-      await svlCommonNavigation.sidenav.expectDeepLinkActive('ml:notifications');
-      await svlCommonNavigation.breadcrumbs.expectExistsByText(`Machine Learning`);
-      await svlCommonNavigation.breadcrumbs.expectExistsByDeepLink('ml:notifications');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:notifications' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:notifications' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Machine Learning` });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'ml:notifications',
+      });
       await testSubjects.existOrFail(`mlPageNotifications`);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.breadcrumbs.clickHome();
-      await svlCommonNavigation.sidenav.expectDeepLinkActive('serverlessElasticsearch');
-      await svlCommonNavigation.breadcrumbs.expectExistsByText(`Getting started`);
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'serverlessElasticsearch',
+      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Getting started` });
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
       await svlCommonNavigation.sidenav.expectSectionOpen(`rootNav:ml`); // remains open
 
@@ -62,7 +71,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('active sidenav section is auto opened on load', async () => {
       await svlCommonNavigation.sidenav.openSection('rootNav:ml');
-      await svlCommonNavigation.sidenav.clickDeepLink('ml:notifications');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:notifications' });
       await browser.refresh();
       await testSubjects.existOrFail(`mlPageNotifications`);
       await svlCommonNavigation.sidenav.expectSectionOpen('rootNav:ml');
@@ -70,6 +79,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
+      // TODO: test something search project specific instead of generic discover
       await svlCommonNavigation.search.searchFor('discover');
       await svlCommonNavigation.search.clickOnOption(0);
       await svlCommonNavigation.search.hideSearch();

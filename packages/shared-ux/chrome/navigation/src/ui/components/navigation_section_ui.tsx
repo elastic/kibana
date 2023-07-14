@@ -32,8 +32,9 @@ const navigationNodeToEuiItem = (
   const id = item.path ? item.path.join('.') : item.id;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
   const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
-  const dataTestSubj = classnames(`nav-item-${id}`, {
+  const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
     [`nav-item-deepLinkId-${item.deepLink?.id}`]: !!item.deepLink,
+    [`nav-item-id-${item.id}`]: item.id,
     [`nav-item-isActive`]: isSelected,
   });
 

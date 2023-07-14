@@ -22,6 +22,24 @@ import type { WebElementWrapper } from '../../../../test/functional/services/lib
 export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
+  const retry = ctx.getService('retry');
+
+  async function getByVisibleText(
+    selector: string | (() => Promise<WebElementWrapper[]>),
+    text: string
+  ) {
+    const subjects =
+      typeof selector === 'string' ? await testSubjects.findAll(selector) : await selector();
+    let found: WebElementWrapper | null = null;
+    for (const subject of subjects) {
+      const visibleText = await subject.getVisibleText();
+      if (visibleText === text) {
+        found = subject;
+        break;
+      }
+    }
+    return found;
+  }
 
   return {
     // check that chrome ui is in the serverless (project) mode
@@ -33,18 +51,46 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
     },
     // side nav related actions
     sidenav: {
-      async expectDeepLinkExists(appDeepLinkId: AppDeepLinkId) {
-        await testSubjects.existOrFail(`~nav-item-deepLinkId-${appDeepLinkId}`);
+      async expectLinkExists(
+        by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
+      ) {
+        if ('deepLinkId' in by) {
+          await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
+        } else if ('navId' in by) {
+          await testSubjects.existOrFail(`~nav-item-id-${by.navId}`);
+        } else {
+          expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
+        }
       },
-      async expectDeepLinkActive(appDeepLinkId: AppDeepLinkId) {
-        await this.expectDeepLinkExists(appDeepLinkId);
-        await testSubjects.existOrFail(
-          `~nav-item-deepLinkId-${appDeepLinkId} & ~nav-item-isActive`
-        );
+      async expectLinkActive(
+        by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
+      ) {
+        await this.expectLinkExists(by);
+        if ('deepLinkId' in by) {
+          await testSubjects.existOrFail(
+            `~nav-item-deepLinkId-${by.deepLinkId} & ~nav-item-isActive`
+          );
+        } else if ('navId' in by) {
+          await testSubjects.existOrFail(`~nav-item-id-${by.navId} & ~nav-item-isActive`);
+        } else {
+          await retry.tryForTime(1000, async () => {
+            const link = await getByVisibleText('~nav-item', by.text);
+            expect(await link!.elementHasClass(`nav-item-isActive`)).to.be(true);
+          });
+        }
       },
-      async clickDeepLink(appDeepLinkId: AppDeepLinkId) {
-        await this.expectDeepLinkExists(appDeepLinkId);
-        await testSubjects.click(`~nav-item-deepLinkId-${appDeepLinkId}`);
+      async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
+        await this.expectLinkExists(by);
+        if ('deepLinkId' in by) {
+          await testSubjects.click(`~nav-item-deepLinkId-${by.deepLinkId}`);
+        } else if ('navId' in by) {
+          await testSubjects.click(`~nav-item-id-${by.navId}`);
+        } else {
+          await retry.tryForTime(1000, async () => {
+            const link = await getByVisibleText('~nav-item', by.text);
+            await link!.click();
+          });
+        }
       },
       async expectSectionExists(sectionId: NavigationId) {
         await testSubjects.existOrFail(`~nav-bucket-${sectionId}`);
@@ -92,20 +138,14 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async clickHome() {
         await testSubjects.click('~breadcrumb-home');
       },
-      async expectExistsByDeepLink(appDeepLinkId: AppDeepLinkId) {
-        await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${appDeepLinkId}`);
-      },
-      async expectExistsByText(text: string) {
-        const breadcrumbs = await testSubjects.findAll(`~breadcrumb`);
-        let exists = false;
-        for (const breadcrumb of breadcrumbs) {
-          const breadcrumbText = await breadcrumb.getVisibleText();
-          if (breadcrumbText === text) {
-            exists = true;
-            break;
-          }
+      async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          await retry.tryForTime(1000, async () => {
+            expect(await getByVisibleText('~breadcrumb', by.text)).not.be(null);
+          });
         }
-        expect(exists).to.be(true);
       },
     },
     search: new SvlNavigationSearchPageObject(ctx),
@@ -118,19 +158,17 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       },
       async expectLinkExists(text: string) {
         await this.expectExists();
-        const links = await (
-          await testSubjects.find('nav-bucket-recentlyAccessed')
-        ).findAllByTagName('a');
         let foundLink: WebElementWrapper | null = null;
-        for (const link of links) {
-          const linkText = await link.getVisibleText();
-          if (linkText === text) {
-            foundLink = link;
-            break;
-          }
-        }
-        expect(!!foundLink).to.be(true);
-        return foundLink;
+        await retry.tryForTime(1000, async () => {
+          foundLink = await getByVisibleText(
+            async () =>
+              (await testSubjects.find('nav-bucket-recentlyAccessed')).findAllByTagName('a'),
+            text
+          );
+          expect(!!foundLink).to.be(true);
+        });
+
+        return foundLink!;
       },
       async clickLink(text: string) {
         const link = await this.expectLinkExists(text);
