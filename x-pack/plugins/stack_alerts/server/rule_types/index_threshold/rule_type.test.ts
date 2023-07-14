@@ -60,7 +60,7 @@ describe('ruleType', () => {
             "name": "group",
           },
           Object {
-            "description": "The date the alert the threshold was exceeded.",
+            "description": "The date the threshold was exceeded.",
             "name": "date",
           },
           Object {
@@ -110,7 +110,7 @@ describe('ruleType', () => {
             "name": "filterKuery",
           },
           Object {
-            "description": The number of groups that are checked against the threshold.",
+            "description": "The number of groups that are checked against the threshold.",
             "name": "termSize",
           },
           Object {
