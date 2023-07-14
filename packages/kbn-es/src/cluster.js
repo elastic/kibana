@@ -571,14 +571,31 @@ exports.Cluster = class Cluster {
   }
 
   /**
+   * Common initial setup for running Docker and Serverless
+   */
+  async setupDocker() {
+    if (this._process || this._outcome) {
+      throw new Error('ES has already been started');
+    }
+
+    await verifyDockerInstalled(this._log);
+    await maybeCreateDockerNetwork(this._log);
+  }
+
+  /**
    * Run an Elasticsearch Docker container
    *
    * @param {DockerOptions} options
    */
   async runDocker(options = {}) {
+    await this.setupDocker();
+
     const dockerCmd = resolveDockerCmd(options);
 
-    await this._execDocker(dockerCmd);
+    this._log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
+    this._process = await execa('docker', dockerCmd);
+    // TODO: logging
+    // TODO: not detached?
   }
 
   /**
@@ -587,8 +604,7 @@ exports.Cluster = class Cluster {
    * @param {ServerlessOptions} options
    */
   async runServerless(options = {}) {
-    await verifyDockerInstalled(this._log);
-    await maybeCreateDockerNetwork(this._log);
+    await this.setupDocker();
 
     const volumeParentPath = await setupServerlessVolumes(this._log, options);
     const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
@@ -661,49 +677,5 @@ exports.Cluster = class Cluster {
     this._log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold('docker container stop es01 es02 es03')}
     `);
-  }
-
-  /**
-   * Common logic for starting Docker containers
-   *
-   * @private
-   * @param {String[]} dockerCmd
-   * @returns {Promise<void>}
-   */
-  async _execDocker(dockerCmd) {
-    if (this._process || this._outcome) {
-      throw new Error('ES has already been started');
-    }
-
-    this._log.info('docker %s', dockerCmd.join(' '));
-
-    // iterate over for serverless?
-    this._process = await execa('docker', dockerCmd);
-
-    // TODO: handle detached with inherit does not properly detach
-    // TODO: better way to do this? attach to docker process?
-    // this._process.stdout = process.stdout;
-    // this._process.stderr = process.stderr;
-
-    // const reportSent = false;
-    // parse and forward es stdout to the log
-    // this._process.stdout.on('data', (data) => {
-    //   const chunk = data.toString();
-    //   const lines = parseEsDockerLog(chunk);
-    //   lines.forEach((line) => {
-    //     // if (!reportSent && line.message.includes('publish_address')) {
-    //     //   reportSent = true;
-    //     //   reportTime(startTime, 'ready', {
-    //     //     success: true,
-    //     //   });
-    //     // }
-
-    //     // if (stdioTarget) {
-    //     //   stdioTarget.write(chunk);
-    //     // } else {
-    //     this._log.info(line.formattedMessage);
-    //     // }
-    //   });
-    // });
   }
 };

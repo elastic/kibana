@@ -46,6 +46,9 @@ const DOCKER_BASE_CMD = [
 
   '--detach',
 
+  '--net',
+  'elastic',
+
   '--name',
   'es01',
 

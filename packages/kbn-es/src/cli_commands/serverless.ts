@@ -54,6 +54,7 @@ export const serverless: Command = {
       default: defaults,
     });
 
+    // TODO: FIX
     // const pullStartTime = Date.now();
     // reportTime(pullStartTime, 'pulled', {
     //   success: true,
