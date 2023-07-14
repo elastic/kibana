@@ -112,6 +112,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     const { deploymentUrl, profileUrl, billingUrl, organizationUrl } = this.getCloudUrls();
 
+    let decodedId: DecodedCloudId | undefined;
+    if (this.config.id) {
+      decodedId = decodeCloudId(this.config.id, this.logger);
+    }
+
     return {
       CloudContextProvider,
       isCloudEnabled: this.isCloudEnabled,
@@ -120,6 +125,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       deploymentUrl,
       profileUrl,
       organizationUrl,
+      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      kibanaUrl: decodedId?.kibanaUrl,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
         projectId: this.config.serverless?.project_id,
