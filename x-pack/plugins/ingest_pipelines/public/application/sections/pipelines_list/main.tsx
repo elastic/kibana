@@ -18,9 +18,12 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiSpacer,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiFilterSelectItem,
 } from '@elastic/eui';
 
-import { FilterListButton, Filters } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
@@ -34,12 +37,95 @@ import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
+interface Filter {
+  name: string;
+  checked: 'on' | 'off';
+  handleFilter?: (allPipelines: Pipeline[]) => Pipeline[];
+}
+
+interface Props<T extends string> {
+  filters: Filters<T>;
+  onChange(filters: Filters<T>): void;
+}
+
+export type Filters<T extends string> = {
+  [key in T]: Filter;
+};
+
+export function FilterListButton<T extends string>({ onChange, filters }: Props<T>) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const activeFilters = Object.values(filters).filter((v) => (v as Filter).checked === 'on');
+
+  const onButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const toggleFilter = (filter: T) => {
+    const previousValue = filters[filter].checked;
+    onChange({
+      ...filters,
+      [filter]: {
+        ...filters[filter],
+        checked: previousValue === 'on' ? 'off' : 'on',
+      },
+    });
+  };
+
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      onClick={onButtonClick}
+      isSelected={isPopoverOpen}
+      numFilters={Object.keys(filters).length}
+      hasActiveFilters={activeFilters.length > 0}
+      numActiveFilters={activeFilters.length}
+      data-test-subj="viewButton"
+    >
+      <FormattedMessage
+        id="xpack.ingestPipelines.indexTemplatesList.viewButtonLabel"
+        defaultMessage="View"
+      />
+    </EuiFilterButton>
+  );
+
+  return (
+    <EuiFilterGroup>
+      <EuiPopover
+        ownFocus
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        data-test-subj="filterList"
+      >
+        <div className="euiFilterSelect__items">
+          {Object.entries(filters).map(([filter, item], index) => (
+            <EuiFilterSelectItem
+              checked={(item as Filter).checked}
+              key={index}
+              onClick={() => toggleFilter(filter as T)}
+              data-test-subj="filterItem"
+            >
+              {(item as Filter).name}
+            </EuiFilterSelectItem>
+          ))}
+        </div>
+      </EuiPopover>
+    </EuiFilterGroup>
+  );
+}
+
 const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));
   return pipeline;
 };
 
-type FilterName = 'managed' | 'notManaged';
+export type FilterName = 'managed' | 'notManaged';
 
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   history,

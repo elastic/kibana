@@ -14,8 +14,6 @@ import * as Forms from './forms';
 import * as ace from './ace';
 import * as GlobalFlyout from './global_flyout';
 import * as XJson from './xjson';
-import { FilterListButton } from './components/filter_list_button';
-import type { Filters } from './components/filter_list_button';
 
 export type { OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
 export { JsonEditor } from './components/json_editor';
@@ -50,7 +48,7 @@ export {
   useAuthorizationContext,
 } from './authorization';
 
-export { Forms, ace, GlobalFlyout, XJson, FilterListButton, Filters };
+export { Forms, ace, GlobalFlyout, XJson };
 
 export { extractQueryParams, attemptToURIDecode } from './url';
 

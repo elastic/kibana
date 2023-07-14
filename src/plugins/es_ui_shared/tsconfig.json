@@ -23,7 +23,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/storybook",
-    "@kbn/ingest-pipelines-plugin",
   ],
   "exclude": [
     "target/**/*",

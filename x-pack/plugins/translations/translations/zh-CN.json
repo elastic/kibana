@@ -19282,6 +19282,7 @@
     "xpack.ingestPipelines.form.savePip10mbelineError.showFewerButton": "隐藏 {hiddenErrorsCount, plural, other {# 个错误}}",
     "xpack.ingestPipelines.form.savePipelineError.processorLabel": "{type} 处理器",
     "xpack.ingestPipelines.form.savePipelineError.showAllButton": "显示{hiddenErrorsCount, plural, other {另 # 个错误}}",
+    "xpack.ingestPipelines.indexTemplatesList.viewButtonLabel": "查看",
     "xpack.ingestPipelines.list.table.deletePipelinesButtonLabel": "删除 {count, plural, other {管道}}",
     "xpack.ingestPipelines.mapToIngestPipeline.error.invalidFormatAction": "格式操作 [{formatAction}] 无效。有效操作为 {formatActions}",
     "xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders": "缺少所需标题：在 CSV 文件中包括 {missingHeaders} 个{missingHeadersCount, plural, other {标题}}。",
