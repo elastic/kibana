@@ -77,10 +77,12 @@ const PromptEditorComponent: React.FC<Props> = ({
       conversation,
       editingSystemPromptId,
       isNewConversation,
+      isSettingsModalVisible,
       onSystemPromptSelectionChange,
       promptContexts,
       promptTextPreview,
       selectedPromptContexts,
+      setIsSettingsModalVisible,
       setSelectedPromptContexts,
     ]
   );

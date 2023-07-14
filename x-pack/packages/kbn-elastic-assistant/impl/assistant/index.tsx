@@ -469,6 +469,7 @@ const AssistantComponent: React.FC<Props> = ({
       editingSystemPromptId,
       getComments,
       handleOnSystemPromptSelectionChange,
+      isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
       selectedPromptContexts,
@@ -591,7 +592,7 @@ const AssistantComponent: React.FC<Props> = ({
       <EuiModalBody>
         {comments}
 
-        {!isDisabled && showMissingConnectorCallout && (
+        {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
           <>
             <EuiSpacer />
             <EuiFlexGroup justifyContent="spaceAround">
