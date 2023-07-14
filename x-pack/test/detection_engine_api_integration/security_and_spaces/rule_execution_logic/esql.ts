@@ -12,14 +12,7 @@ import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/detect
 import { getEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
 
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-  getOpenSignals,
-  getPreviewAlerts,
-  previewRule,
-} from '../../utils';
+import { deleteAllRules, deleteAllAlerts, getPreviewAlerts, previewRule } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
