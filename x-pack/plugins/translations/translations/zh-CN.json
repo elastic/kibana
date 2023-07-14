@@ -18362,7 +18362,6 @@
     "xpack.infra.hosts.searchPlaceholder": "搜索主机（例如，cloud.provider:gcp AND system.load.1 > 0.5）",
     "xpack.infra.hostsPage.goToMetricsSettings": "检查设置",
     "xpack.infra.hostsPage.tellUsWhatYouThinkLink": "告诉我们您的看法！",
-    "xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel": "APM 服务",
     "xpack.infra.hostsViewPage.flyout.uptimeLinkLabel": "运行时间",
     "xpack.infra.hostsViewPage.hostLimit": "主机限制",
     "xpack.infra.hostsViewPage.hostLimit.tooltip": "为确保更快的查询性能，对返回的主机数量实施了限制",
