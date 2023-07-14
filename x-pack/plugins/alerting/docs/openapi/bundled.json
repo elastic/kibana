@@ -3406,6 +3406,10 @@
             ],
             "default": "count"
           },
+          "filterKuery": {
+            "description": "A KQL expression thats limits the scope of alerts.",
+            "type": "string"
+          },
           "groupBy": {
             "description": "Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.\n",
             "type": "string",
@@ -3439,7 +3443,7 @@
             "example": 4000
           },
           "thresholdComparator": {
-            "description": "The comparison operator for the condition. For example, \"is above\", \"is above or equals\", \"is below\", \"is below or equals\", and \"is between\".",
+            "description": "The comparison function for the threshold. For example, \"is above\", \"is above or equals\", \"is below\", \"is below or equals\", and \"is between\".",
             "type": "string",
             "enum": [
               ">",
@@ -3452,7 +3456,7 @@
             "example": ">"
           },
           "timeField": {
-            "description": "The field that is used to determine the time window.",
+            "description": "The field that is used to calculate the time window.",
             "type": "string"
           },
           "timeWindowSize": {
