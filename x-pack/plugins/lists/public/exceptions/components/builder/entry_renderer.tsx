@@ -78,8 +78,6 @@ export interface EntryItemProps {
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: OsTypeArray
   ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;

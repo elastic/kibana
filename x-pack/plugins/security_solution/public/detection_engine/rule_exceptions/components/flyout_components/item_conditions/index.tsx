@@ -87,8 +87,6 @@ interface ExceptionsFlyoutConditionsComponentProps {
   onSetErrorExists: (errorExists: boolean) => void;
   onFilterIndexPatterns: (
     patterns: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: Array<'linux' | 'macos' | 'windows'> | undefined
   ) => DataViewBase;
 
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;

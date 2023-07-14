@@ -91,7 +91,6 @@ export interface ExceptionBuilderProps {
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: DataViewBase,
-    type: ExceptionListType
   ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName?: string;

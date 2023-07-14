@@ -55,8 +55,6 @@ interface BuilderExceptionListItemProps {
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: OsTypeArray
   ) => DataViewBase;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
