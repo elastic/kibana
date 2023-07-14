@@ -16,7 +16,7 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../../common/compone
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { allFleetHttpMocks } from '../../../../mocks';
 import userEvent from '@testing-library/user-event';
-import { getPolicySettingsFormTestSubjects } from '../policy_settings_form/mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../policy_settings_form/mocks';
 import { cloneDeep, set } from 'lodash';
 import { ProtectionModes } from '../../../../../../common/endpoint/types';
 import { waitFor, cleanup } from '@testing-library/react';
@@ -200,6 +200,16 @@ describe('When rendering PolicySettingsLayout', () => {
       useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
     });
 
-    // FIXME:PT implement
+    it('should render form in view mode', () => {
+      render();
+
+      expectIsViewOnly(renderResult.getByTestId(testSubj.form));
+    });
+
+    it('should not include the Save button', () => {
+      render();
+
+      expect(renderResult.queryByTestId('policyDetailsSaveButton')).toBeNull();
+    });
   });
 });
