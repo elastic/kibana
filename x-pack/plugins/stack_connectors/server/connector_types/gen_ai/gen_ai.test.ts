@@ -117,9 +117,9 @@ describe('GenAiConnector', () => {
       });
     });
 
-    describe('executeApi', () => {
+    describe('streamApi', () => {
       it('the OpenAI API call is successful with correct parameters when stream = false', async () => {
-        const response = await connector.executeApi({
+        const response = await connector.streamApi({
           body: JSON.stringify(sampleOpenAiBody),
           stream: false,
         });
@@ -138,7 +138,7 @@ describe('GenAiConnector', () => {
       });
 
       it('the OpenAI API call is successful with correct parameters when stream = true', async () => {
-        const response = await connector.executeApi({
+        const response = await connector.streamApi({
           body: JSON.stringify(sampleOpenAiBody),
           stream: true,
         });
@@ -170,7 +170,7 @@ describe('GenAiConnector', () => {
             },
           ],
         };
-        const response = await connector.executeApi({
+        const response = await connector.streamApi({
           body: JSON.stringify({
             ...body,
             stream: false,
@@ -202,9 +202,9 @@ describe('GenAiConnector', () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(connector.runApi({ body: JSON.stringify(sampleOpenAiBody) })).rejects.toThrow(
-          'API Error'
-        );
+        await expect(
+          connector.streamApi({ body: JSON.stringify(sampleOpenAiBody), stream: true })
+        ).rejects.toThrow('API Error');
       });
     });
   });
@@ -291,9 +291,9 @@ describe('GenAiConnector', () => {
       });
     });
 
-    describe('executeApi', () => {
+    describe('streamApi', () => {
       it('the AzureAI API call is successful with correct parameters when stream = false', async () => {
-        const response = await connector.executeApi({
+        const response = await connector.streamApi({
           body: JSON.stringify(sampleAzureAiBody),
           stream: false,
         });
@@ -312,7 +312,7 @@ describe('GenAiConnector', () => {
       });
 
       it('the AzureAI API call is successful with correct parameters when stream = true', async () => {
-        const response = await connector.executeApi({
+        const response = await connector.streamApi({
           body: JSON.stringify(sampleAzureAiBody),
           stream: true,
         });
@@ -343,7 +343,7 @@ describe('GenAiConnector', () => {
             },
           ],
         };
-        const response = await connector.executeApi({
+        const response = await connector.streamApi({
           body: JSON.stringify({ ...body, stream: false }),
           stream: true,
         });
@@ -372,9 +372,9 @@ describe('GenAiConnector', () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(connector.runApi({ body: JSON.stringify(sampleAzureAiBody) })).rejects.toThrow(
-          'API Error'
-        );
+        await expect(
+          connector.streamApi({ body: JSON.stringify(sampleAzureAiBody), stream: true })
+        ).rejects.toThrow('API Error');
       });
     });
   });

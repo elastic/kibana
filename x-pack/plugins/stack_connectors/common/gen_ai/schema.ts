@@ -25,7 +25,7 @@ export const GenAiRunActionParamsSchema = schema.object({
 });
 
 // Execute action schema
-export const GenAiExecuteActionParamsSchema = schema.object({
+export const GenAiStreamActionParamsSchema = schema.object({
   body: schema.string(),
   stream: schema.boolean({ defaultValue: false }),
 });

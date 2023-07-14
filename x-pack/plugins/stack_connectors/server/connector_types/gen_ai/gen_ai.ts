@@ -12,7 +12,7 @@ import {
   GenAiRunActionParamsSchema,
   GenAiRunActionResponseSchema,
   GenAiDashboardActionParamsSchema,
-  GenAiExecuteActionParamsSchema,
+  GenAiStreamActionParamsSchema,
   GenAiStreamingResponseSchema,
 } from '../../../common/gen_ai/schema';
 import type {
@@ -20,7 +20,7 @@ import type {
   GenAiSecrets,
   GenAiRunActionParams,
   GenAiRunActionResponse,
-  GenAiExecuteActionParams,
+  GenAiStreamActionParams,
 } from '../../../common/gen_ai/types';
 import { SUB_ACTION } from '../../../common/gen_ai/constants';
 import {
@@ -58,8 +58,14 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
 
     this.registerSubAction({
       name: SUB_ACTION.TEST,
-      method: 'executeApi',
-      schema: GenAiExecuteActionParamsSchema,
+      method: 'runApi',
+      schema: GenAiRunActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.STREAM,
+      method: 'streamApi',
+      schema: GenAiStreamActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -92,10 +98,10 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     return response.data;
   }
 
-  public async executeApi({
+  public async streamApi({
     body,
     stream,
-  }: GenAiExecuteActionParams): Promise<GenAiRunActionResponse> {
+  }: GenAiStreamActionParams): Promise<GenAiRunActionResponse> {
     const executeBody = getRequestWithStreamOption(this.provider, this.url, body, stream);
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     const response = await this.request({

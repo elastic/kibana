@@ -48,7 +48,6 @@ export const fetchConnectorExecuteAction = async ({
     params: {
       subActionParams: {
         body: JSON.stringify(body),
-        stream: false,
       },
       subAction: 'test',
     },

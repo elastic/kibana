@@ -94,7 +94,7 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
         const executeResult = await actionsClient.execute({
           actionId: request.body.connector_id,
           params: {
-            subAction: 'test',
+            subAction: 'stream',
             subActionParams: {
               body: JSON.stringify(messageBody),
               stream: true,
