@@ -25,6 +25,7 @@ export const ExternalLinkDestinationPicker = ({
   initialSelection?: string;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
+  const [currentUrl, setCurrentUrl] = useState<string>(initialSelection ?? '');
 
   useMount(() => {
     if (initialSelection) {
@@ -37,13 +38,14 @@ export const ExternalLinkDestinationPicker = ({
   return (
     <div {...other}>
       <EuiFieldText
-        value={initialSelection || ''}
+        value={currentUrl}
         placeholder={ExternalLinkEmbeddableStrings.getPlaceholder()}
         isInvalid={!validUrl}
         onChange={(e) => {
           const url = e.target.value;
           const isValid = isValidUrl.test(url);
           setValidUrl(isValid);
+          setCurrentUrl(url);
           if (isValid) {
             onDestinationPicked(url);
           }
