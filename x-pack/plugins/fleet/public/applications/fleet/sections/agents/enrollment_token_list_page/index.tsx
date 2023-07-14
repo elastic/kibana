@@ -25,7 +25,11 @@ import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/reques
 import { ApiKeyField } from '../../../../../components/api_key_field';
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../../../common/types';
-import { ENROLLMENT_API_KEYS_INDEX, SO_SEARCH_LIMIT } from '../../../constants';
+import {
+  ENROLLMENT_API_KEYS_INDEX,
+  SO_SEARCH_LIMIT,
+  FLEET_ENROLLMENT_API_PREFIX,
+} from '../../../constants';
 import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
@@ -249,6 +253,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               setSearch(newSearch);
             }}
             indexPattern={ENROLLMENT_API_KEYS_INDEX}
+            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
+            dataTestSubj="enrollmentKeysList.queryInput"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
