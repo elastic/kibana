@@ -67,7 +67,7 @@ export const useEmbeddablePanelBadges = (
    * input updates to refresh them
    */
   useEffect(() => {
-    let mounted = true;
+    let canceled = false;
     let subscription: Subscription;
 
     const updateNotificationsAndBadges = async () => {
@@ -75,28 +75,28 @@ export const useEmbeddablePanelBadges = (
         getAllBadgesFromEmbeddable(),
         getAllNotificationsFromEmbeddable(),
       ]);
-      if (!mounted) return;
+      if (canceled) return;
       setBadges(newBadges);
       setNotifications(newNotifications);
     };
 
     updateNotificationsAndBadges().then(() => {
-      if (mounted) {
-        /**
-         * since any piece of state could theoretically change which actions are available we need to
-         * recalculate them on any input change or any parent input change.
-         */
-        subscription = embeddable.getInput$().subscribe(() => updateNotificationsAndBadges());
-        if (embeddable.parent) {
-          subscription.add(
-            embeddable.parent.getInput$().subscribe(() => updateNotificationsAndBadges())
-          );
-        }
+      if (canceled) return;
+
+      /**
+       * since any piece of state could theoretically change which actions are available we need to
+       * recalculate them on any input change or any parent input change.
+       */
+      subscription = embeddable.getInput$().subscribe(() => updateNotificationsAndBadges());
+      if (embeddable.parent) {
+        subscription.add(
+          embeddable.parent.getInput$().subscribe(() => updateNotificationsAndBadges())
+        );
       }
     });
     return () => {
       subscription?.unsubscribe();
-      mounted = false;
+      canceled = true;
     };
   }, [embeddable, getAllBadgesFromEmbeddable, getAllNotificationsFromEmbeddable]);
 
