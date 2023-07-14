@@ -12,7 +12,7 @@ import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const deleteAccessControlIndex = async (client: IScopedClusterClient, index: string) => {
   try {
-    await client.asCurrentUser.indices.delete({
+    return await client.asCurrentUser.indices.delete({
       index: index.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX),
     });
   } catch (e) {
