@@ -13,7 +13,8 @@ import { EuiPageSection, EuiPageBody } from '@elastic/eui';
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
-import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
+import { RemoteClusterPageTitle } from '../components';
+import { RemoteClusterWizard } from './wizard_form';
 
 export class RemoteClusterAdd extends PureComponent {
   static propTypes = {
@@ -74,12 +75,7 @@ export class RemoteClusterAdd extends PureComponent {
             }
           />
 
-          <RemoteClusterForm
-            isSaving={isAddingCluster}
-            saveError={addClusterError}
-            save={this.save}
-            cancel={this.cancel}
-          />
+          <RemoteClusterWizard saveRemoteClusterConfig={this.save} />
         </EuiPageSection>
       </EuiPageBody>
     );
