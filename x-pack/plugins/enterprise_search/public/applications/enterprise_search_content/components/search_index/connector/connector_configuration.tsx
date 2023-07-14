@@ -154,8 +154,12 @@ export const ConnectorConfiguration: React.FC = () => {
                         {`connectors:
   -
     connector_id: "${index.connector.id}"
-    service_type: "${index.connector.service_type || 'changeme'}"${apiKeyData?.encoded ? `
-    api_key: "${apiKeyData?.encoded}"` : ''}`}
+    service_type: "${index.connector.service_type || 'changeme'}"${
+                          apiKeyData?.encoded
+                            ? `
+    api_key: "${apiKeyData?.encoded}"`
+                            : ''
+                        }`}
                       </EuiCodeBlock>
                       <EuiSpacer />
                       <EuiText size="s">
