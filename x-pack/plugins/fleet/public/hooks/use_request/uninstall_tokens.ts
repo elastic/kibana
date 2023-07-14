@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import { uninstallTokensRouteService } from '../../../common/services';
 
 import type {
@@ -13,31 +15,24 @@ import type {
   GetUninstallTokenResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
-import { sendRequest, useRequest } from './use_request';
+import { sendRequest, sendRequestForRq } from './use_request';
 
-export const useGetUninstallTokens = ({
-  policyId,
-  page,
-  perPage,
-}: GetUninstallTokensMetadataRequest['query'] = {}) => {
-  const query: GetUninstallTokensMetadataRequest['query'] = {
-    policyId,
-    page,
-    perPage,
-  };
-
-  return useRequest<GetUninstallTokensMetadataResponse>({
-    method: 'get',
-    path: uninstallTokensRouteService.getListPath(),
-    query,
-  });
-};
+export const useGetUninstallTokens = (query: GetUninstallTokensMetadataRequest['query'] = {}) =>
+  useQuery<GetUninstallTokensMetadataResponse>(['useGetUninstallTokens', query], () =>
+    sendRequestForRq({
+      method: 'get',
+      path: uninstallTokensRouteService.getListPath(),
+      query,
+    })
+  );
 
 export const useGetUninstallToken = (uninstallTokenId: string) =>
-  useRequest<GetUninstallTokenResponse>({
-    method: 'get',
-    path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
-  });
+  useQuery<GetUninstallTokenResponse>(['useGetUninstallToken', uninstallTokenId], () =>
+    sendRequestForRq({
+      method: 'get',
+      path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
+    })
+  );
 
 export const sendGetUninstallToken = (uninstallTokenId: string) =>
   sendRequest<GetUninstallTokenResponse>({
