@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  matchExactTextContent,
-} from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -48,7 +44,7 @@ describe('Policy Mac Event Collection Card', () => {
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
-    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(matchExactTextContent('Mac'));
+    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(exactMatchText('Mac'));
   });
 
   describe('and is displayed in View mode', () => {
@@ -62,7 +58,7 @@ describe('Policy Mac Event Collection Card', () => {
 
       expectIsViewOnly(card);
       expect(card).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Event collection' +
             'Operating system' +
@@ -84,7 +80,7 @@ describe('Policy Mac Event Collection Card', () => {
 
       expectIsViewOnly(card);
       expect(card).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Event collection' +
             'Operating system' +

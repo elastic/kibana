@@ -19,7 +19,7 @@ import {
   NOTIFY_USER_SECTION_TITLE,
   NotifyUserOption,
 } from './notify_user_option';
-import { expectIsViewOnly, matchExactTextContent } from '../mocks';
+import { expectIsViewOnly, exactMatchText } from '../mocks';
 import { cloneDeep, set } from 'lodash';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import userEvent from '@testing-library/user-event';
@@ -60,16 +60,14 @@ describe('Policy form Detect Prevent Protection level component', () => {
     set(formProps.policy, 'windows.popup.malware.message', 'hello world');
     const { getByTestId } = render();
 
-    expect(getByTestId('test-title')).toHaveTextContent(
-      matchExactTextContent(NOTIFY_USER_SECTION_TITLE)
-    );
+    expect(getByTestId('test-title')).toHaveTextContent(exactMatchText(NOTIFY_USER_SECTION_TITLE));
     expect(getByTestId('test-supportedVersion')).toHaveTextContent(
-      matchExactTextContent('Agent version 7.11+')
+      exactMatchText('Agent version 7.11+')
     );
     expect(isChecked('test-checkbox')).toBe(true);
     expect(renderResult.getByLabelText(NOTIFY_USER_CHECKBOX_LABEL));
     expect(getByTestId('test-customMessageTitle')).toHaveTextContent(
-      matchExactTextContent(CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL)
+      exactMatchText(CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL)
     );
     expect(getByTestId('test-customMessage')).toHaveValue('hello world');
   });
@@ -169,7 +167,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'User notification' +
             'Agent version 7.11+' +
             'Notify user' +
@@ -184,9 +182,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        matchExactTextContent(
-          'User notificationAgent version 7.11+Notify userNotification message—'
-        )
+        exactMatchText('User notificationAgent version 7.11+Notify userNotification message—')
       );
     });
 
@@ -195,7 +191,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        matchExactTextContent("User notificationAgent version 7.11+Don't notify user")
+        exactMatchText("User notificationAgent version 7.11+Don't notify user")
       );
     });
   });

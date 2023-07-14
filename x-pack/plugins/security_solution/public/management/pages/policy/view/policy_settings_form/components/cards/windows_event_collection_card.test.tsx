@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  matchExactTextContent,
-} from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -54,9 +50,7 @@ describe('Policy Windows Event Collection Card', () => {
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.registryCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.securityCheckbox)).toBeChecked();
-    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(
-      matchExactTextContent('Windows')
-    );
+    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(exactMatchText('Windows'));
   });
 
   describe('and is displayed in View mode', () => {
@@ -70,7 +64,7 @@ describe('Policy Windows Event Collection Card', () => {
 
       expectIsViewOnly(card);
       expect(card).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Event collection' +
             'Operating system' +
@@ -97,7 +91,7 @@ describe('Policy Windows Event Collection Card', () => {
 
       expectIsViewOnly(card);
       expect(card).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Event collection' +
             'Operating system' +

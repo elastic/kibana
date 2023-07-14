@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  matchExactTextContent,
-} from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -64,7 +60,7 @@ describe('Policy Ransomware Protections Card', () => {
     render();
 
     expect(renderResult.getByTestId(testSubj.osValuesContainer)).toHaveTextContent(
-      matchExactTextContent('Windows')
+      exactMatchText('Windows')
     );
   });
 
@@ -84,7 +80,7 @@ describe('Policy Ransomware Protections Card', () => {
       render();
 
       expect(renderResult.getByTestId(testSubj.lockedCardTitle)).toHaveTextContent(
-        matchExactTextContent(LOCKED_CARD_RAMSOMWARE_TITLE)
+        exactMatchText(LOCKED_CARD_RAMSOMWARE_TITLE)
       );
     });
   });
@@ -100,7 +96,7 @@ describe('Policy Ransomware Protections Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Ransomware' +
             'Operating system' +
@@ -125,7 +121,7 @@ describe('Policy Ransomware Protections Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Ransomware' +
             'Operating system' +
@@ -151,7 +147,7 @@ describe('Policy Ransomware Protections Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Ransomware' +
             'Operating system' +

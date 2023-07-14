@@ -15,7 +15,7 @@ import type {
 } from './event_collection_card';
 import { EventCollectionCard } from './event_collection_card';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { expectIsViewOnly, matchExactTextContent } from '../mocks';
+import { expectIsViewOnly, exactMatchText } from '../mocks';
 import userEvent from '@testing-library/user-event';
 import { cloneDeep, set } from 'lodash';
 import { within } from '@testing-library/dom';
@@ -69,9 +69,9 @@ describe('Policy Event Collection Card common component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test-selectedCount')).toHaveTextContent(
-      matchExactTextContent('2 / 2 event collections enabled')
+      exactMatchText('2 / 2 event collections enabled')
     );
-    expect(getByTestId('test-osValues')).toHaveTextContent(matchExactTextContent('Windows'));
+    expect(getByTestId('test-osValues')).toHaveTextContent(exactMatchText('Windows'));
     expect(isChecked('test-file')).toBe(true);
     expect(isChecked('test-network')).toBe(true);
   });
@@ -98,7 +98,7 @@ describe('Policy Event Collection Card common component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test-selectedCount')).toHaveTextContent(
-      matchExactTextContent('1 / 2 event collections enabled')
+      exactMatchText('1 / 2 event collections enabled')
     );
     expect(isChecked('test-file')).toBe(false);
 
@@ -131,17 +131,17 @@ describe('Policy Event Collection Card common component', () => {
       const { getByTestId } = render();
 
       expect(getByTestId('test-selectedCount')).toHaveTextContent(
-        matchExactTextContent('2 / 2 event collections enabled')
+        exactMatchText('2 / 2 event collections enabled')
       );
       expect(isChecked('test-dns')).toBe(true);
 
       const optionContainer = within(getByTestId('test-dnsContainer'));
 
       expect(optionContainer.getByTestId('test-dnsTitle')).toHaveTextContent(
-        matchExactTextContent(supplementalEntry.title!)
+        exactMatchText(supplementalEntry.title!)
       );
       expect(optionContainer.getByTestId('test-dnsDescription')).toHaveTextContent(
-        matchExactTextContent(supplementalEntry.description!)
+        exactMatchText(supplementalEntry.description!)
       );
       expect(optionContainer.getAllByLabelText(supplementalEntry.name));
       expect(optionContainer.getByTestId('test-dnsTooltipIcon'));
@@ -156,7 +156,7 @@ describe('Policy Event Collection Card common component', () => {
       render();
 
       expect(renderResult.getByTestId('test-dnsContainer')).toHaveTextContent(
-        matchExactTextContent(supplementalEntry.name)
+        exactMatchText(supplementalEntry.name)
       );
     });
 
@@ -164,9 +164,7 @@ describe('Policy Event Collection Card common component', () => {
       supplementalEntry.beta = true;
       render();
 
-      expect(renderResult.getByTestId('test-dnsBadge')).toHaveTextContent(
-        matchExactTextContent('beta')
-      );
+      expect(renderResult.getByTestId('test-dnsBadge')).toHaveTextContent(exactMatchText('beta'));
     });
 
     it('should indent entry', () => {
@@ -196,10 +194,10 @@ describe('Policy Event Collection Card common component', () => {
 
       expectIsViewOnly(renderResult.getByTestId('test'));
       expect(renderResult.getByTestId('test-selectedCount')).toHaveTextContent(
-        matchExactTextContent('2 / 2 event collections enabled')
+        exactMatchText('2 / 2 event collections enabled')
       );
       expect(renderResult.getByTestId('test-options')).toHaveTextContent(
-        matchExactTextContent('FileNetwork')
+        exactMatchText('FileNetwork')
       );
     });
 
@@ -209,11 +207,9 @@ describe('Policy Event Collection Card common component', () => {
       render();
 
       expect(renderResult.getByTestId('test-selectedCount')).toHaveTextContent(
-        matchExactTextContent('1 / 2 event collections enabled')
+        exactMatchText('1 / 2 event collections enabled')
       );
-      expect(renderResult.getByTestId('test-options')).toHaveTextContent(
-        matchExactTextContent('Network')
-      );
+      expect(renderResult.getByTestId('test-options')).toHaveTextContent(exactMatchText('Network'));
     });
 
     it('should show empty value if no events are selected', () => {
@@ -224,11 +220,9 @@ describe('Policy Event Collection Card common component', () => {
       render();
 
       expect(renderResult.getByTestId('test-selectedCount')).toHaveTextContent(
-        matchExactTextContent('0 / 2 event collections enabled')
+        exactMatchText('0 / 2 event collections enabled')
       );
-      expect(renderResult.getByTestId('test-options')).toHaveTextContent(
-        matchExactTextContent('—')
-      );
+      expect(renderResult.getByTestId('test-options')).toHaveTextContent(exactMatchText('—'));
     });
 
     describe('and supplemental options are used', () => {
@@ -254,7 +248,7 @@ describe('Policy Event Collection Card common component', () => {
 
         expectIsViewOnly(dnsOption);
         expect(dnsOption).toHaveTextContent(
-          matchExactTextContent('DNS collectionThis collects info about DNSCollect DNSInfo')
+          exactMatchText('DNS collectionThis collects info about DNSCollect DNSInfo')
         );
       });
 

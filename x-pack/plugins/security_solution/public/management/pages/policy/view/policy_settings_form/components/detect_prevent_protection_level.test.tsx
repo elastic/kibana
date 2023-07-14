@@ -14,7 +14,7 @@ import { DetectPreventProtectionLevel } from './detect_prevent_protection_level'
 import userEvent from '@testing-library/user-event';
 import { cloneDeep, set } from 'lodash';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { expectIsViewOnly, matchExactTextContent } from '../mocks';
+import { expectIsViewOnly, exactMatchText } from '../mocks';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
@@ -139,7 +139,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
 
       expectIsViewOnly(renderResult.getByTestId('test'));
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        matchExactTextContent('Protection levelPrevent')
+        exactMatchText('Protection levelPrevent')
       );
     });
 
@@ -149,7 +149,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
 
       expectIsViewOnly(renderResult.getByTestId('test'));
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        matchExactTextContent('Protection levelDetect')
+        exactMatchText('Protection levelDetect')
       );
     });
   });

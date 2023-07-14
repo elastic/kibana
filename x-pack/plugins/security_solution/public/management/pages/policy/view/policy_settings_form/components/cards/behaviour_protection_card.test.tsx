@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  matchExactTextContent,
-} from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -118,7 +114,7 @@ describe('Policy Behaviour Protection Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Malicious behavior' +
             'Operating system' +
@@ -144,7 +140,7 @@ describe('Policy Behaviour Protection Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Malicious behavior' +
             'Operating system' +

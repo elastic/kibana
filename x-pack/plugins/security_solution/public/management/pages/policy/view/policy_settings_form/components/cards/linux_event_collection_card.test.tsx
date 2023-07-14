@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  matchExactTextContent,
-} from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -49,9 +45,7 @@ describe('Policy Linux Event Collection Card', () => {
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
-    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(
-      matchExactTextContent('Linux')
-    );
+    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(exactMatchText('Linux'));
     expect(getByTestId(testSubj.sessionDataCheckbox)).not.toBeChecked();
     expect(getByTestId(testSubj.captureTerminalCheckbox)).toBeDisabled();
   });
@@ -67,7 +61,7 @@ describe('Policy Linux Event Collection Card', () => {
 
       expectIsViewOnly(card);
       expect(card).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Event collection' +
             'Operating system' +
@@ -91,7 +85,7 @@ describe('Policy Linux Event Collection Card', () => {
 
       expectIsViewOnly(card);
       expect(card).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Event collection' +
             'Operating system' +

@@ -174,7 +174,7 @@ export const expectIsViewOnly = (ele: HTMLElement): void => {
  * Create a regular expression with the provided text that ensure it matches the entire string.
  * @param text
  */
-export const matchExactTextContent = (text: string): RegExp => {
+export const exactMatchText = (text: string): RegExp => {
   // RegExp below taken from: https://github.com/sindresorhus/escape-string-regexp/blob/main/index.js
   return new RegExp(`^${text.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')}$`);
 };

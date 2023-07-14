@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  matchExactTextContent,
-} from '../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../mocks';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -98,7 +94,7 @@ describe('Policy Advanced Settings section', () => {
 
       expect(renderedRow.getByTestId(optionTestSubj.textField));
       expect(renderedRow.getByTestId(optionTestSubj.label)).toHaveTextContent(
-        matchExactTextContent(advancedOption.key)
+        exactMatchText(advancedOption.key)
       );
       expect(renderedRow.getByTestId(optionTestSubj.versionInfo)).toHaveTextContent(
         advancedOption.first_supported_version
@@ -175,10 +171,10 @@ describe('Policy Advanced Settings section', () => {
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.settingsContainer));
       expect(getByTestId(testSubj.settingRowTestSubjects(option1.key).container)).toHaveTextContent(
-        matchExactTextContent('linux.advanced.agent.connection_delayInfo 7.9+foo')
+        exactMatchText('linux.advanced.agent.connection_delayInfo 7.9+foo')
       );
       expect(getByTestId(testSubj.settingRowTestSubjects(option2.key).container)).toHaveTextContent(
-        matchExactTextContent('linux.advanced.artifacts.global.intervalInfo 7.9+—')
+        exactMatchText('linux.advanced.artifacts.global.intervalInfo 7.9+—')
       );
     });
   });

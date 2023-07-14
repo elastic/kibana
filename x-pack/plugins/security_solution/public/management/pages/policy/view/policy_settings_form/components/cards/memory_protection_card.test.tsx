@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  expectIsViewOnly,
-  getPolicySettingsFormTestSubjects,
-  matchExactTextContent,
-} from '../../mocks';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -80,7 +76,7 @@ describe('Policy Memory Protections Card', () => {
       render();
 
       expect(renderResult.getByTestId(testSubj.lockedCardTitle)).toHaveTextContent(
-        matchExactTextContent(LOCKED_CARD_MEMORY_TITLE)
+        exactMatchText(LOCKED_CARD_MEMORY_TITLE)
       );
     });
   });
@@ -96,7 +92,7 @@ describe('Policy Memory Protections Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Memory threat' +
             'Operating system' +
@@ -121,7 +117,7 @@ describe('Policy Memory Protections Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Memory threat' +
             'Operating system' +
@@ -147,7 +143,7 @@ describe('Policy Memory Protections Card', () => {
       expectIsViewOnly(getByTestId(testSubj.card));
 
       expect(getByTestId(testSubj.card)).toHaveTextContent(
-        matchExactTextContent(
+        exactMatchText(
           'Type' +
             'Memory threat' +
             'Operating system' +
