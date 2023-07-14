@@ -48,7 +48,7 @@ export function getRuleType(
   const actionVariableContextDateLabel = i18n.translate(
     'xpack.stackAlerts.indexThreshold.actionVariableContextDateLabel',
     {
-      defaultMessage: 'The date the threshold was exceeded.',
+      defaultMessage: 'The date the alert met the threshold conditions.',
     }
   );
 
