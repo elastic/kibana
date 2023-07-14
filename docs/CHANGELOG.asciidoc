@@ -50,6 +50,36 @@ Review important information about the {kib} 8.x releases.
 Review the following information about the {kib} 8.8.2 release.
 
 [float]
+[[known-issues-8.8.2]]
+=== Known issues
+
+// tag::known-issue-161249[]
+[discrete]
+.Kibana can run out of memory during an upgrade when there are many {fleet} agent policies.
+[%collapsible]
+====
+*Details* +
+Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed. 
+This action triggers a lot of queries to the Elastic Package Registry (EPR) to fetch integration packages.  As a result,
+there is an increase in Kibana's resident memory usage (RSS). 
+
+*Impact* +
+Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can 
+cause Kibana to run out of memory during an upgrade.  For example, we have observed 1GB Kibana instances run
+out of memory during an upgrade when there were 20 agent policies with 5 integrations in each. 
+
+*Workaround* +
+Two workaround options are available:
+
+* Increase the Kibana instance size to 2GB. So far, we are not able to reproduce the issue with 2GB instances.
+* Set `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` to `2` in the `kibana.yml` and restart the Kibana instance(s).
+
+In 8.9.0, we are addressing this by changing the default batch size to `2`.
+
+====
+// end::known-issue-161249[]
+
+[float]
 [[fixes-v8.8.2]]
 === Bug Fixes
 
@@ -105,6 +135,32 @@ Review the following information about the {kib} 8.8.1 release.
 [float]
 [[known-issues-8.8.1]]
 === Known issues
+
+// tag::known-issue-161249[]
+[discrete]
+.Kibana can run out of memory during an upgrade when there are many {fleet} agent policies.
+[%collapsible]
+====
+*Details* +
+Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed. 
+This action triggers a lot of queries to the Elastic Package Registry (EPR) to fetch integration packages.  As a result,
+there is an increase in Kibana's resident memory usage (RSS). 
+
+*Impact* +
+Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can 
+cause Kibana to run out of memory during an upgrade.  For example, we have observed 1GB Kibana instances run
+out of memory during an upgrade when there were 20 agent policies with 5 integrations in each. 
+
+*Workaround* +
+Two workaround options are available:
+
+* Increase the Kibana instance size to 2GB. So far, we are not able to reproduce the issue with 2GB instances.
+* Set `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` to `2` in the `kibana.yml` and restart the Kibana instance(s).
+
+In 8.9.0, we are addressing this by changing the default batch size to `2`.
+
+====
+// end::known-issue-161249[]
 
 // tag::known-issue-159807[]
 [discrete]
@@ -198,6 +254,32 @@ Review the following information about the {kib} 8.8.0 release.
 [[known-issues-8.8.0]]
 === Known issues
 
+// tag::known-issue-161249[]
+[discrete]
+.Kibana can run out of memory during an upgrade when there are many {fleet} agent policies.
+[%collapsible]
+====
+*Details* +
+Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed. 
+This action triggers a lot of queries to the Elastic Package Registry (EPR) to fetch integration packages.  As a result,
+there is an increase in Kibana's resident memory usage (RSS). 
+
+*Impact* +
+Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can 
+cause Kibana to run out of memory during an upgrade.  For example, we have observed 1GB Kibana instances run
+out of memory during an upgrade when there were 20 agent policies with 5 integrations in each. 
+
+*Workaround* +
+Two workaround options are available:
+
+* Increase the Kibana instance size to 2GB. So far, we are not able to reproduce the issue with 2GB instances.
+* Set `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` to `2` in the `kibana.yml` and restart the Kibana instance(s).
+
+In 8.9.0, we are addressing this by changing the default batch size to `2`.
+
+====
+// end::known-issue-161249[]
+
 // tag::known-issue-158940[]
 [discrete]
 .Failed upgrades to 8.8.0 can cause bootlooping and data loss
@@ -221,6 +303,7 @@ The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Custo
 *Details* +
 {fleet} introduced audit logging for various CRUD (create, read, update, and delete) operations in version 8.8.0.
 While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of {fleet} audit logging that can result in poor {kib} performance, and in some cases {kib} instances being terminated by the OS kernel's oom-killer. This memory leak can occur even when {kib} audit logging is not explicitly enabled (regardless of whether `xpack.security.audit.enabled` is set in the `kibana.yml` settings file).
+
 *Impact* +
 The version 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. If you are using {fleet} integrations
 and {kib} audit logging in version 8.8.0 or 8.8.1, you should upgrade to 8.8.2 or above to obtain the fix.
