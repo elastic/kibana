@@ -40,7 +40,8 @@
     "@kbn/saved-search-plugin",
     "@kbn/reporting-export-types-csv",
     "@kbn/reporting-export-types-pdf",
-    "@kbn/reporting-export-types-png"
+    "@kbn/reporting-export-types-png",
+    "@kbn/core-logging-browser-mocks"
   ],
   "exclude": [
     "target/**/*",
