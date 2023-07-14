@@ -22,6 +22,11 @@ interface EndpointDescription {
   data_autocomplete_rules?: Record<string, unknown>;
   url_components?: Record<string, unknown>;
   priority?: number;
+  availability?: Record<string, boolean>;
+}
+
+export interface SpecDefinitionsDependencies {
+  endpointsAvailability: string;
 }
 
 export class SpecDefinitionsService {
@@ -29,7 +34,6 @@ export class SpecDefinitionsService {
 
   private readonly globalRules: Record<string, any> = {};
   private readonly endpoints: Record<string, any> = {};
-  private readonly extensionSpecFilePaths: string[] = [];
 
   private hasLoadedSpec = false;
 
@@ -82,19 +86,9 @@ export class SpecDefinitionsService {
     };
   }
 
-  public addExtensionSpecFilePath(path: string) {
-    this.extensionSpecFilePaths.push(path);
-  }
-
-  public setup() {
-    return {
-      addExtensionSpecFilePath: this.addExtensionSpecFilePath.bind(this),
-    };
-  }
-
-  public start() {
+  public start({ endpointsAvailability }: SpecDefinitionsDependencies) {
     if (!this.hasLoadedSpec) {
-      this.loadJsonSpec();
+      this.loadJsonSpec(endpointsAvailability);
       this.loadJSSpec();
       this.hasLoadedSpec = true;
     } else {
@@ -127,14 +121,19 @@ export class SpecDefinitionsService {
     }, {} as Record<string, EndpointDescription>);
   }
 
-  private loadJsonSpec() {
+  private loadJsonSpec(endpointsAvailability: string) {
     const result = this.loadJSONSpecInDir(AUTOCOMPLETE_DEFINITIONS_FOLDER);
-    this.extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
-      merge(result, this.loadJSONSpecInDir(extensionSpecFilePath));
-    });
 
     Object.keys(result).forEach((endpoint) => {
-      this.addEndpointDescription(endpoint, result[endpoint]);
+      const description = result[endpoint];
+      const addEndpoint =
+        // If the 'availability' property doesn't exist, display the endpoint by default
+        !description.availability ||
+        (endpointsAvailability === 'stack' && description.availability.stack) ||
+        (endpointsAvailability === 'serverless' && description.availability.serverless);
+      if (addEndpoint) {
+        this.addEndpointDescription(endpoint, description);
+      }
     });
   }
 

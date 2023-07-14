@@ -13,10 +13,7 @@ import styled from 'styled-components';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KPIChartProps } from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
-import {
-  buildCombinedHostsFilter,
-  buildExistsHostsFilter,
-} from '../../../../../utils/filters/build';
+import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -32,6 +29,8 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
+
+  const shouldUseSearchCriteria = hostNodes.length === 0;
 
   const getSubtitle = () => {
     return searchCriteria.limit < (hostCountData?.count.value ?? 0)
@@ -54,16 +53,43 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
   });
 
   const filters = useMemo(() => {
-    return [
-      ...searchCriteria.filters,
-      buildCombinedHostsFilter({
-        field: 'host.name',
-        values: hostNodes.map((p) => p.name),
-        dataView,
+    return shouldUseSearchCriteria
+      ? searchCriteria.filters
+      : [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: hostNodes.map((p) => p.name),
+            dataView,
+          }),
+        ];
+  }, [shouldUseSearchCriteria, searchCriteria.filters, hostNodes, dataView]);
+
+  const loading = hostsLoading || !attributes || hostCountLoading;
+
+  // prevents requestTs and serchCriteria states from reloading the chart
+  // we want it to reload only once the host count and table have finished loading
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    attributes,
+    lastReloadRequestTime: requestTs,
+    ...searchCriteria,
+    filters,
+  });
+
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: afterLoadedState.dateRange,
+        query: shouldUseSearchCriteria ? afterLoadedState.query : undefined,
+        filters,
       }),
-      buildExistsHostsFilter({ field: 'host.name', dataView }),
-    ];
-  }, [searchCriteria.filters, hostNodes, dataView]);
+    [
+      afterLoadedState.dateRange,
+      afterLoadedState.query,
+      filters,
+      getExtraActions,
+      shouldUseSearchCriteria,
+    ]
+  );
 
   const handleBrushEnd = useCallback(
     ({ range }: BrushTriggerEvent['data']) => {
@@ -77,27 +103,6 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
       });
     },
     [onSubmit]
-  );
-
-  const loading = hostsLoading || !attributes || hostCountLoading;
-
-  // prevents requestTs and serchCriteria states from reloading the chart
-  // we want it to reload only once the table has finished loading
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    attributes,
-    lastReloadRequestTime: requestTs,
-    ...searchCriteria,
-    filters,
-  });
-
-  const extraActions: Action[] = useMemo(
-    () =>
-      getExtraActions({
-        timeRange: afterLoadedState.dateRange,
-        query: searchCriteria.query,
-        filters,
-      }),
-    [afterLoadedState.dateRange, filters, getExtraActions, searchCriteria.query]
   );
 
   return (
@@ -141,7 +146,7 @@ export const Tile = ({ id, title, layers, style, toolTip, ...props }: KPIChartPr
               lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
               dateRange={afterLoadedState.dateRange}
               filters={afterLoadedState.filters}
-              query={afterLoadedState.query}
+              query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
               onBrushEnd={handleBrushEnd}
               loading={loading}
             />
