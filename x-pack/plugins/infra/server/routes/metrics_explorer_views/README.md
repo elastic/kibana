@@ -100,7 +100,9 @@ Status code: 200
         "from": "now-1h",
         "to": "now",
         "interval": ">=10s"
-      }
+      },
+      "isDefault": false,
+      "isStatic": false
     }
   }
 }
@@ -204,7 +206,9 @@ Status code: 201
         "from": "now-1h",
         "to": "now",
         "interval": ">=10s"
-      }
+      },
+      "isDefault": false,
+      "isStatic": false
     }
   }
 }
@@ -307,7 +311,9 @@ Status code: 200
         "from": "now-1h",
         "to": "now",
         "interval": ">=10s"
-      }
+      },
+      "isDefault": false,
+      "isStatic": false
     }
   }
 }
