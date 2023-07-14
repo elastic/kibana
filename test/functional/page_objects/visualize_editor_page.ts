@@ -441,6 +441,8 @@ export class VisualizeEditorPageObject extends FtrService {
     const newValueString = `${newValue}`;
     const { type = 'default', aggNth = 2, append = false } = options;
     this.log.debug(`visEditor.setInterval(${newValueString}, {${type}, ${aggNth}, ${append}})`);
+    const comboBoxElement = await this.testSubjects.find('visEditorInterval');
+    await this.comboBox.openOptionsList(comboBoxElement);
     if (type === 'default') {
       await this.comboBox.set('visEditorInterval', newValueString);
     } else if (type === 'custom') {
