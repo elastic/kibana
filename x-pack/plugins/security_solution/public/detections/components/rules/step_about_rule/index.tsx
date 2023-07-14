@@ -14,11 +14,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
-import type {
-  RuleStepProps,
-  AboutStepRule,
-  DefineStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { RuleStepProps, AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
@@ -49,7 +45,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   dataViewId: string | undefined;
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
-  getDefineFormData: () => DefineStepRule;
+  esqlQuery?: string | undefined;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -79,7 +75,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isUpdateView = false,
   isLoading,
   form,
-  getDefineFormData,
+  esqlQuery,
 }) => {
   const { data } = useKibana().services;
 
@@ -320,7 +316,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 path="ruleNameOverride"
                 component={EsqlAutocomplete}
                 componentProps={{
-                  getFormData: getDefineFormData,
+                  esqlQuery,
+                  fieldType: 'string',
                 }}
               />
             ) : (

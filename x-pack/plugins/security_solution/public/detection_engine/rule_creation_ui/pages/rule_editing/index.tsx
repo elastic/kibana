@@ -147,13 +147,19 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
-  const esqlQuery = useMemo(
-    () =>
-      typeof defineStepData.queryBar.query.query === 'string' && isEsqlRule(defineStepData.ruleType)
-        ? defineStepData.queryBar.query.query
-        : undefined,
-    [defineStepData.queryBar.query.query, defineStepData.ruleType]
-  );
+  // if about step not active, passing query as undefined to prevent unnecessary re-renders
+  // esql query can change frequently when user types it in, so we don't want it trigger about form form re-render, when it is ot active
+  // when it is active, query would not change
+  const esqlQueryForAboutStep = useMemo(() => {
+    if (activeStep !== RuleStep.aboutRule) {
+      return undefined;
+    }
+    return typeof defineStepData.queryBar.query.query === 'string' &&
+      isEsqlRule(defineStepData.ruleType)
+      ? defineStepData.queryBar.query.query
+      : undefined;
+  }, [defineStepData.queryBar.query.query, defineStepData.ruleType, activeStep]);
+
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
   const memoizedIndex = useMemo(
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
@@ -291,7 +297,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   dataViewId={defineStepData.dataViewId}
                   timestampOverride={aboutStepData.timestampOverride}
                   form={aboutStepForm}
-                  getDefineFormData={defineStepForm.getFormData}
+                  esqlQuery={esqlQueryForAboutStep}
                   key="aboutStep"
                 />
               )}
@@ -384,6 +390,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       actionMessageParams,
       actionsStepForm,
       memoizedIndex,
+      esqlQueryForAboutStep,
     ]
   );
 

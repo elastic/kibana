@@ -216,6 +216,18 @@ const CreateRulePageComponent: React.FC = () => {
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
+  // if about step not active, passing query as undefined to prevent unnecessary re-renders
+  // esql query can change frequently when user types it in, so we don't want it trigger about form form re-render, when it is ot active
+  // when it is active, query would not change
+  const esqlQueryForAboutStep = useMemo(() => {
+    if (activeStep !== RuleStep.aboutRule) {
+      return undefined;
+    }
+    return typeof defineStepData.queryBar.query.query === 'string' &&
+      isEsqlRule(defineStepData.ruleType)
+      ? defineStepData.queryBar.query.query
+      : undefined;
+  }, [defineStepData.queryBar.query.query, defineStepData.ruleType, activeStep]);
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType);
   const memoizedIndex = useMemo(
     () => (isEsqlRuleValue ? esqlIndex : defineStepData.index),
@@ -599,7 +611,7 @@ const CreateRulePageComponent: React.FC = () => {
             timestampOverride={aboutStepData.timestampOverride}
             isLoading={isCreateRuleLoading || loading}
             form={aboutStepForm}
-            getDefineFormData={defineStepForm.getFormData}
+            esqlQuery={esqlQueryForAboutStep}
           />
 
           <NextStep
@@ -623,7 +635,7 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       loading,
       memoAboutStepReadOnly,
-      defineStepForm.getFormData,
+      esqlQueryForAboutStep,
     ]
   );
   const memoAboutStepExtraAction = useMemo(

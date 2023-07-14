@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
+import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 
 import { KibanaServices } from '../../../../common/lib/kibana';
 import { securitySolutionQueryClient } from '../../../../common/containers/query_client/query_client_provider';
@@ -15,6 +16,8 @@ import type { ValidationError, ValidationFunc } from '../../../../shared_imports
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import type { FieldValueQueryBar } from '../query_bar';
+
+export type FieldType = 'string';
 
 export enum ERROR_CODES {
   INVALID_ESQL = 'ERR_INVALID_ESQL',
@@ -39,27 +42,55 @@ const constructGroupingFieldsValidationError = (error: Error) => {
   };
 };
 
-const fetchEsqlFields = (esqlQuery: string) => {
-  const services = KibanaServices.get();
+export const getEsqlQueryConfig = ({
+  esqlQuery,
+  expressions,
+}: {
+  esqlQuery: string | undefined;
+  expressions: ExpressionsStart;
+}) => {
   const emptyResultsEsqlQuery = `${esqlQuery} | limit 0`;
-
-  return securitySolutionQueryClient.fetchQuery({
-    queryKey: [esqlQuery.trim()],
+  return {
+    queryKey: [esqlQuery ?? ''.trim()],
     queryFn: async () => {
+      if (!esqlQuery) {
+        return undefined;
+      }
       try {
-        const res = await fetchFieldsFromESQL(
-          { esql: emptyResultsEsqlQuery },
-          services.expressions
-        );
+        const res = await fetchFieldsFromESQL({ esql: emptyResultsEsqlQuery }, expressions);
         return res;
       } catch (e) {
         // TODO: separate network error?
         return { error: e };
       }
     },
-
     staleTime: 60 * 1000,
-  });
+  };
+};
+
+const fetchEsqlFields = (esqlQuery: string) => {
+  const services = KibanaServices.get();
+
+  return securitySolutionQueryClient.fetchQuery(
+    getEsqlQueryConfig({ esqlQuery, expressions: services.expressions })
+  );
+};
+
+export const esqlToOptions = (
+  data: { error: unknown } | Datatable | undefined,
+  fieldType?: FieldType
+) => {
+  if (data && 'error' in data) {
+    return [];
+  }
+
+  const options = (data?.columns ?? [])
+    .filter(({ meta }) => {
+      return fieldType === meta.type;
+    })
+    .map(({ id }) => ({ label: id }));
+
+  return options;
 };
 
 // TODO: implement filter by type
@@ -67,13 +98,7 @@ export const fetchEsqlOptions = async (esqlQuery: string) => {
   try {
     const data = await fetchEsqlFields(esqlQuery);
 
-    if (data && 'error' in data) {
-      return [];
-    }
-
-    const options = (data?.columns ?? []).map(({ id }) => ({ label: id }));
-
-    return options;
+    return esqlToOptions(data);
   } catch (e) {
     return [];
   }
