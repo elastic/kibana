@@ -24,21 +24,31 @@ import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
-import { isActiveState } from '../hooks/use_monitor_errors';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
-export function isErrorActive(item: PingState, lastErrorId?: string, latestPingStatus?: string) {
-  // if the error is the most recent, `isActiveState`, and the monitor
-  // is not yet back up, label the error as active
-  return isActiveState(item) && lastErrorId === item.state.id && latestPingStatus !== 'up';
+function isErrorActive(lastError: PingState, currentError: PingState, latestPing?: Ping) {
+  return (
+    latestPing?.monitor.status === 'down' &&
+    lastError['@timestamp'] === currentError['@timestamp'] &&
+    typeof currentError['@timestamp'] !== undefined
+  );
+}
+
+function getNextUpStateForResolvedError(errorState: PingState, upStates: PingState[]) {
+  for (const upState of upStates) {
+    if (moment(upState.state.started_at).valueOf() > moment(errorState['@timestamp']).valueOf())
+      return upState;
+  }
 }
 
 export const ErrorsList = ({
   errorStates,
+  upStates,
   loading,
   location,
 }: {
   errorStates: PingState[];
+  upStates: PingState[];
   loading: boolean;
   location: ReturnType<typeof useSelectedLocation>;
 }) => {
@@ -64,7 +74,6 @@ export const ErrorsList = ({
   const lastErrorTestRun = errorStates?.sort((a, b) => {
     return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
   })?.[0];
-
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const columns = [
@@ -83,7 +92,8 @@ export const ErrorsList = ({
             locationId={location?.id}
           />
         );
-        if (isErrorActive(item, lastErrorTestRun?.state.id, latestPing?.monitor.status)) {
+
+        if (isErrorActive(lastErrorTestRun, item, latestPing)) {
           return (
             <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false} className="eui-textNoWrap">
@@ -118,7 +128,7 @@ export const ErrorsList = ({
               }
               return failedStep.synthetics?.step?.name;
             },
-            render: (value: string, item: PingState) => {
+            render: (value: string) => {
               const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
               if (!failedStep) {
                 return <>--</>;
@@ -142,19 +152,20 @@ export const ErrorsList = ({
       align: 'right' as const,
       sortable: true,
       render: (value: string, item: PingState) => {
-        const isActive = isActiveState(item);
         let activeDuration = 0;
         if (item.monitor.timespan) {
           const diff = moment(item.monitor.timespan.lt).diff(
             moment(item.monitor.timespan.gte),
             'millisecond'
           );
-          if (isActive) {
+          if (isErrorActive(lastErrorTestRun, item, latestPing)) {
             const currentDiff = moment().diff(item['@timestamp']);
 
             activeDuration = currentDiff < diff ? currentDiff : diff;
           } else {
-            activeDuration = diff;
+            const resolvedState = getNextUpStateForResolvedError(item, upStates);
+
+            activeDuration = moment(resolvedState?.state.started_at).diff(item['@timestamp']) ?? 0;
           }
         }
         return (
