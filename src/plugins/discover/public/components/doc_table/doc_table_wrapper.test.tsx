@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

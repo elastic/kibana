@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getEuiGridColumns, getVisibleColumns } from './discover_grid_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
@@ -207,7 +207,7 @@ describe('Discover grid columns', function () {
             >
               <React.Fragment>
                 timestamp
-                 
+
                 <EuiIcon
                   type="clock"
                 />
@@ -392,7 +392,7 @@ describe('Discover grid columns', function () {
             >
               <React.Fragment>
                 timestamp
-                 
+
                 <EuiIcon
                   type="clock"
                 />

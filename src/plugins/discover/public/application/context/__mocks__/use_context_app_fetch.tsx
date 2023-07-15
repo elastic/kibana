@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 
 export const mockAnchorHit = buildDataTableRecord(

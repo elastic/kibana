@@ -15,7 +15,7 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const getDeps = () =>
   ({

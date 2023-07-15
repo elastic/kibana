@@ -10,8 +10,7 @@ import { ReactWrapper } from 'enzyme';
 import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { esHits } from '../../__mocks__/es_hits';
-import { buildDataViewMock, deepMockedFields } from '../../__mocks__/data_view';
+import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -47,7 +46,7 @@ function getProps() {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    rows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     sampleSize: 30,
     searchDescription: '',
     searchTitle: '',
@@ -121,17 +120,17 @@ describe('DiscoverGrid', () => {
     });
 
     test('Allows selection/deselection of multiple documents', async () => {
-      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHitsMock[0]);
       expect(getSelectedDocNr(component)).toBe(1);
-      await toggleDocSelection(component, esHits[1]);
+      await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
-      await toggleDocSelection(component, esHits[1]);
+      await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(1);
     });
 
     test('deselection of all selected documents', async () => {
-      await toggleDocSelection(component, esHits[0]);
-      await toggleDocSelection(component, esHits[1]);
+      await toggleDocSelection(component, esHitsMock[0]);
+      await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
@@ -139,8 +138,8 @@ describe('DiscoverGrid', () => {
     });
 
     test('showing only selected documents and undo selection', async () => {
-      await toggleDocSelection(component, esHits[0]);
-      await toggleDocSelection(component, esHits[1]);
+      await toggleDocSelection(component, esHitsMock[0]);
+      await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
@@ -152,8 +151,8 @@ describe('DiscoverGrid', () => {
     });
 
     test('showing selected documents, underlying data changes, all documents are displayed, selection is gone', async () => {
-      await toggleDocSelection(component, esHits[0]);
-      await toggleDocSelection(component, esHits[1]);
+      await toggleDocSelection(component, esHitsMock[0]);
+      await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
@@ -178,18 +177,18 @@ describe('DiscoverGrid', () => {
     });
 
     test('showing only selected documents and remove filter deselecting each doc manually', async () => {
-      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHitsMock[0]);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(1);
-      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHitsMock[0]);
       expect(getDisplayedDocNr(component)).toBe(5);
-      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHitsMock[0]);
       expect(getDisplayedDocNr(component)).toBe(5);
     });
 
     test('copying selected documents to clipboard', async () => {
-      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHitsMock[0]);
       findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
       expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
         `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
