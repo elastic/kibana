@@ -37,7 +37,7 @@ describe('Diagnostics', () => {
     });
 
     it('can display documents tab for "viewer" user', () => {
-      cy.loginAs({ username: 'viewer', password: 'changeme' });
+      cy.loginAsViewerUser();
       cy.visitKibana('/app/apm/diagnostics');
       cy.get('[data-test-subj="documents-tab"]').click();
 
