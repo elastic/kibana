@@ -14,7 +14,7 @@ interface Props {
   prepend?: string;
 }
 
-export function GetLabel({ value, prepend, append }: Props) {
+export function Label({ value, prepend, append }: Props) {
   const { label, color, icon } = getColorLabel(value);
   return (
     <EuiTextColor color={color}>
