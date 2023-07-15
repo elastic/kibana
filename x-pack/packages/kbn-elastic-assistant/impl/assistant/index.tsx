@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { AssistantTitle } from './assistant_title';
 import { UpgradeButtons } from '../upgrade/upgrade_buttons';
 import { getMessageFromRawResponse, getWelcomeConversation } from './helpers';
@@ -46,7 +47,6 @@ import * as i18n from './translations';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
-import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { AssistantSettingsButton } from './settings/assistant_settings_button';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 
@@ -63,7 +63,7 @@ export interface Props {
  * quick prompts for common actions, settings, and prompt context providers.
  */
 const AssistantComponent: React.FC<Props> = ({
-  conversationId = WELCOME_CONVERSATION_TITLE,
+  conversationId,
   isAssistantEnabled,
   promptContextId = '',
   shouldRefocusPrompt = false,
@@ -80,9 +80,11 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     promptContexts,
     setLastConversationId,
+    localStorageLastConversationId,
     title,
     allSystemPrompts,
   } = useAssistantContext();
+
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
   >({});
@@ -109,23 +111,38 @@ const AssistantComponent: React.FC<Props> = ({
     [connectors]
   );
 
+  const [selectedConversationId, setSelectedConversationId] = useState<string>(
+    isAssistantEnabled
+      ? // if a conversationId has been provided, use that
+        // if not, check local storage
+        // last resort, go to welcome conversation
+        conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE
+      : WELCOME_CONVERSATION_TITLE
+  );
+
+  const currentConversation = useMemo(
+    () =>
+      conversations[selectedConversationId] ??
+      createConversation({ conversationId: selectedConversationId }),
+    [conversations, createConversation, selectedConversationId]
+  );
+
   // Welcome setup state
-  const isWelcomeSetup = useMemo(() => (connectors?.length ?? 0) === 0, [connectors?.length]);
+  const isWelcomeSetup = useMemo(() => {
+    // if any conversation has a connector id, we're not in welcome set up
+    return Object.keys(conversations).some(
+      (conversation) => conversations[conversation].apiConfig.connectorId != null
+    )
+      ? false
+      : (connectors?.length ?? 0) === 0;
+  }, [connectors?.length, conversations]);
   const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const welcomeConversation = useMemo(
-    () => getWelcomeConversation(isAssistantEnabled),
-    [isAssistantEnabled]
-  );
-
-  const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    isWelcomeSetup ? welcomeConversation.id : conversationId
-  );
-  const currentConversation = useMemo(
-    () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
-    [conversationId, conversations, createConversation, selectedConversationId]
+    () => getWelcomeConversation(currentConversation, isAssistantEnabled),
+    [currentConversation, isAssistantEnabled]
   );
 
   // Remember last selection for reuse after keyboard shortcut is pressed.
@@ -519,7 +536,7 @@ const AssistantComponent: React.FC<Props> = ({
       <EuiModalBody>
         {comments}
 
-        {!isWelcomeSetup && showMissingConnectorCallout && (
+        {!isDisabled && showMissingConnectorCallout && (
           <>
             <EuiSpacer />
             <EuiFlexGroup justifyContent="spaceAround">
@@ -569,8 +586,8 @@ const AssistantComponent: React.FC<Props> = ({
               onPromptSubmit={handleSendMessage}
               ref={promptTextAreaRef}
               handlePromptChange={setPromptTextPreview}
-              value={isDisabled ? '' : suggestedUserPrompt ?? ''}
-              isDisabled={isDisabled}
+              value={isSendingDisabled ? '' : suggestedUserPrompt ?? ''}
+              isDisabled={isSendingDisabled}
             />
           </EuiFlexItem>
 
@@ -594,7 +611,7 @@ const AssistantComponent: React.FC<Props> = ({
                   <EuiButtonIcon
                     display="base"
                     iconType="cross"
-                    isDisabled={isDisabled}
+                    isDisabled={isSendingDisabled}
                     aria-label={i18n.CLEAR_CHAT}
                     color="danger"
                     onClick={() => {
