@@ -60,7 +60,6 @@ export interface CloudDefendPodsStats {
   pod_name: string;
   container_image_name: string;
   container_image_tag: string;
-  cloud_provider: string;
   file_doc_count: number;
   process_doc_count: number;
   alert_doc_count: number;
@@ -69,6 +68,7 @@ export interface CloudDefendPodsStats {
 export interface CloudDefendAccountsStats {
   account_id: string;
   total_doc_count: number;
+  cloud_provider: string;
   kubernetes_version: string | null;
   file_doc_count: number;
   process_doc_count: number;

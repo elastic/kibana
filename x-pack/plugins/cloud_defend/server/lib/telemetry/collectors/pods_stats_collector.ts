@@ -23,9 +23,6 @@ interface Bucket {
 export interface AccountEntity {
   key: string; // orchestrator.cluster.id
   doc_count: number;
-  cloud_provider: {
-    buckets: Bucket[];
-  };
   pods: {
     buckets: Pod[];
   };
@@ -60,12 +57,6 @@ const getPodsStatsQuery = (index: string): SearchRequest => ({
         size: 100,
       },
       aggs: {
-        cloud_provider: {
-          terms: {
-            field: 'cloud.provider',
-            size: 1,
-          },
-        },
         // all cloud-defend logs are from the viewpoint of an orchestrator.resource.type = "pod"
         // so no need to filter by orchestrator.resource.type.
         pods: {
@@ -172,7 +163,6 @@ const getCloudDefendPodsStats = (
         pod_name: pod.key,
         container_image_name: pod.container_image_name?.buckets?.[0]?.key,
         container_image_tag: pod.container_image_tag?.buckets?.[0]?.key,
-        cloud_provider: account.cloud_provider?.buckets?.[0]?.key,
         file_doc_count: pod.file_doc_count,
         process_doc_count: pod.process_doc_count,
         alert_doc_count: pod.alert_doc_count,

@@ -21,6 +21,10 @@ interface KubernetesVersion {
   metrics: { 'orchestrator.version': string };
 }
 
+interface CloudProvider {
+  metrics: { 'cloud.provider': string };
+}
+
 interface AccountsStats {
   accounts: {
     buckets: AccountEntity[];
@@ -32,6 +36,7 @@ interface AccountEntity {
   process_doc_count: AggregationsMultiBucketBase;
   file_doc_count: AggregationsMultiBucketBase;
   alert_doc_count: AggregationsMultiBucketBase;
+  cloud_provider: { top: CloudProvider[] };
   kubernetes_version: { top: KubernetesVersion[] };
   agents_count: Value;
   nodes_count: Value;
@@ -70,6 +75,17 @@ const getAccountsStatsQuery = (): SearchRequest => ({
           top_metrics: {
             metrics: {
               field: 'orchestrator.version',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        cloud_provider: {
+          top_metrics: {
+            metrics: {
+              field: 'cloud.provider',
             },
             size: 1,
             sort: {
@@ -163,6 +179,7 @@ const getCloudDefendAccountsStats = (
     process_doc_count: account.process_doc_count.doc_count,
     alert_doc_count: account.alert_doc_count.doc_count,
     kubernetes_version: account.kubernetes_version?.top?.[0]?.metrics['orchestrator.version'],
+    cloud_provider: account.cloud_provider?.top?.[0]?.metrics['cloud.provider'],
     agents_count: account.agents_count.value,
     nodes_count: account.nodes_count.value,
     pods_count: account.pods_count.value,

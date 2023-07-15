@@ -5501,9 +5501,6 @@
               "container_image_tag": {
                 "type": "keyword"
               },
-              "cloud_provider": {
-                "type": "keyword"
-              },
               "pod_name": {
                 "type": "keyword"
               },
@@ -5526,6 +5523,12 @@
               "account_id": {
                 "type": "keyword"
               },
+              "cloud_provider": {
+                "type": "keyword"
+              },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
               "total_doc_count": {
                 "type": "long"
               },
@@ -5537,9 +5540,6 @@
               },
               "alert_doc_count": {
                 "type": "long"
-              },
-              "kubernetes_version": {
-                "type": "keyword"
               },
               "agents_count": {
                 "type": "short"
