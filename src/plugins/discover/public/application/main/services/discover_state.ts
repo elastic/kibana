@@ -78,11 +78,6 @@ export interface LoadParams {
    * the data view spec to use, if undefined, the saved search's data view will be used
    */
   dataViewSpec?: DataViewSpec;
-  /**
-   * determines if AppState should be used to update the saved search
-   * URL is overwriting savedSearch params in this case
-   */
-  useAppState?: boolean;
 }
 
 export interface DiscoverStateContainer {
@@ -227,7 +222,7 @@ export function getDiscoverStateContainer({
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    savedSearchContainer,
+    savedSearch: savedSearchContainer.getState(),
     services,
   });
 
