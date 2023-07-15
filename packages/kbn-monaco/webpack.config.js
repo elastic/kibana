@@ -39,14 +39,11 @@ const getWorkerConfig = (language) => ({
         test: /\.(jsx?|tsx?)$/,
         exclude: /node_modules(?!\/@kbn\/)(\/[^\/]+\/)/,
         use: {
-          loader: 'swc-loader',
+          loader: 'babel-loader',
           options: {
-            parseMap: true,
-            jsc: {
-              parser: {
-                jsx: true,
-              },
-            },
+            babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
           },
         },
       },
