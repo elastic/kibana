@@ -43,19 +43,13 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loaders: 'babel-loader',
-        options: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-        },
+        loaders: 'swc-loader',
       },
       {
         test: /\.tsx?$/,
         use: [
           {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
+            loader: 'swc-loader',
           },
         ],
         sideEffects: false,
@@ -110,7 +104,7 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              implementation: require('node-sass'),
+              implementation: require('sass'),
               sourceMap: !isProd,
             },
           },
@@ -147,7 +141,7 @@ module.exports = {
                   path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                 )};\n${content}`;
               },
-              implementation: require('node-sass'),
+              implementation: require('sass'),
               webpackImporter: false,
               sassOptions: {
                 outputStyle: 'nested',

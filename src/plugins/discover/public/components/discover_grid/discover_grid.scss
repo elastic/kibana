@@ -68,8 +68,8 @@
 .dscDiscoverGrid__footer {
   flex-shrink: 0;
   background-color: $euiColorLightShade;
-  padding: $euiSize / 2 $euiSize;
-  margin-top: $euiSize / 4;
+  padding: calc($euiSize / 2) $euiSize;
+  margin-top: calc($euiSize / 4);
   text-align: center;
 }
 

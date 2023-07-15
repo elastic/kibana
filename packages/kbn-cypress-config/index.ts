@@ -32,11 +32,14 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
                     test: /\.(js|tsx?)$/,
                     exclude: /node_modules/,
                     use: {
-                      loader: 'babel-loader',
+                      loader: 'swc-loader',
                       options: {
-                        babelrc: false,
-                        envName: 'development',
-                        presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+                        parseMap: true,
+                        jsc: {
+                          parser: {
+                            jsx: true,
+                          },
+                        },
                       },
                     },
                   },
