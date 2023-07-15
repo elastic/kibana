@@ -530,6 +530,7 @@
     "@kbn/newsfeed-test-plugin": "link:test/common/plugins/newsfeed",
     "@kbn/notifications-plugin": "link:x-pack/plugins/notifications",
     "@kbn/object-versioning": "link:packages/kbn-object-versioning",
+    "@kbn/observability-ai-assistant-plugin": "link:x-pack/plugins/observability_ai_assistant",
     "@kbn/observability-alert-details": "link:x-pack/packages/observability/alert_details",
     "@kbn/observability-fixtures-plugin": "link:x-pack/test/cases_api_integration/common/plugins/observability",
     "@kbn/observability-onboarding-plugin": "link:x-pack/plugins/observability_onboarding",
