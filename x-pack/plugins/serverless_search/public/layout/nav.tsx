@@ -36,13 +36,6 @@ const navigationTree: NavigationTreeDefinition = {
           link: 'serverlessElasticsearch',
         },
         {
-          id: 'dev_tools',
-          title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-            defaultMessage: 'Dev Tools',
-          }),
-          children: getPresets('devtools').children[0].children,
-        },
-        {
           id: 'explore',
           title: i18n.translate('xpack.serverlessSearch.nav.explore', {
             defaultMessage: 'Explore',
