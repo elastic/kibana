@@ -60,7 +60,7 @@ export const fetchFleetUsage = async (
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
-    ...(await getAgentData(esClient, abortController)),
+    ...(await getAgentData(esClient, soClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
     agent_policies: await getAgentPoliciesUsage(soClient),
     ...(await getPanicLogsLastHour(esClient)),

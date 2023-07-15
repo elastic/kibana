@@ -39,8 +39,11 @@ export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-
 
 export const DATA_PROVIDERS = '.field-value';
 
-export const DATAGRID_HEADERS =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj^="dataGridHeaderCell-"]';
+export const DATAGRID_HEADERS = '[data-test-subj^="dataGridHeaderCell-"]';
+
+export const DATAGRID_HEADER = (header: string) => {
+  return `[data-test-subj="dataGridHeaderCell-${header}"]`;
+};
 
 export const DATE_PICKER_END = '[data-test-subj="superDatePickerendDatePopoverButton"]';
 
