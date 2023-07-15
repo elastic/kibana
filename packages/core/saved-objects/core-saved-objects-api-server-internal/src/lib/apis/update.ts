@@ -26,7 +26,7 @@ import { merge } from 'lodash';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { getCurrentTime, getSavedObjectFromSource } from './utils';
 import { ApiExecutionContext } from './types';
-import { isValidRequest, errorMap, canUpsertDoc } from '../utils';
+import { isValidRequest, errorMap } from '../utils';
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;
@@ -73,21 +73,20 @@ export const performUpdate = async <T>(
   } = options;
 
   // Preflight calls to get the doc and check namespaces for multinamespace types.
-  const preflightGetDocForUpdateResult = await preflightHelper.preflightGetDocForUpdate({
+  const preflightDocResult = await preflightHelper.preflightGetDocForUpdate({
     type,
     id,
     namespace,
   });
 
-  const preflightCheckNamespacesForUpdateResult =
-    await preflightHelper.preflightCheckNamespacesForUpdate({
-      type,
-      id,
-      namespace,
-      preflightGetDocForUpdateResult,
-    });
+  const preflightDocNSResult = await preflightHelper.preflightCheckNamespacesForUpdate({
+    type,
+    id,
+    namespace,
+    preflightDocResult,
+  });
 
-  const existingNamespaces = preflightCheckNamespacesForUpdateResult?.savedObjectNamespaces ?? [];
+  const existingNamespaces = preflightDocNSResult?.savedObjectNamespaces ?? [];
 
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
@@ -98,10 +97,10 @@ export const performUpdate = async <T>(
   // extract into canUpdate and canUpsert method instead where it mustn't be possible for BOTH to be true. It's either an update existing thing or create non-existing thing
   // can perform request START
   if (
-    preflightCheckNamespacesForUpdateResult?.checkResult === 'found_outside_namespace' ||
+    preflightDocNSResult?.checkResult === 'found_outside_namespace' ||
     (!upsert &&
-      (preflightCheckNamespacesForUpdateResult?.checkResult === 'not_found' ||
-        preflightGetDocForUpdateResult.checkDocFound === 'not_found'))
+      (preflightDocNSResult?.checkResult === 'not_found' ||
+        preflightDocResult.checkDocFound === 'not_found'))
   ) {
     // error helper
     const mappedError = errorMap(
@@ -114,22 +113,21 @@ export const performUpdate = async <T>(
     throw mappedError;
   }
 
-  if (upsert && preflightCheckNamespacesForUpdateResult?.checkResult === 'not_found') {
+  if (upsert && preflightDocNSResult?.checkResult === 'not_found') {
     // we only need to check multi-namespace objects. Single and agnostic types do not have aliases.
     // throws SavedObjectsErrorHelpers.createConflictError(type, id) if there is one
     await preflightHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
   }
-  // END ALL PRE_CLIENT CALL CHECKS;
 
   // MIGRATE EXISTING DOC IF THERE IS ONE START.
   // For implementations, see https://github.com/elastic/kibana/pull/158251/files#diff-d95c8ca5c3f61caa523ceed8ae8665eb34d0fcd198e85870286d0c8c2ddbcef4R242
   let migrated: SavedObject<T>;
-  if (preflightGetDocForUpdateResult.checkDocFound === 'found') {
+  if (preflightDocResult.checkDocFound === 'found') {
     const document = getSavedObjectFromSource<T>(
       registry,
       type,
       id,
-      preflightGetDocForUpdateResult.rawDocSource!,
+      preflightDocResult.rawDocSource!,
       { migrationVersionCompatibility }
     );
     try {
@@ -145,100 +143,99 @@ export const performUpdate = async <T>(
       throw mappedError;
     }
   }
+  // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
 
-  // MIGRATE EXISTING DOC IF THERE IS ONE END
+  // migrate inputs & make client calls
   const time = getCurrentTime();
 
-  // UPSERT CASE START
-  let rawUpsert: SavedObjectsRawDoc | undefined;
-  // ignore attributes if creating a new doc: only use the upsert attributes
-  // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
-  // replace inners of conditional with helper function
-  if (
-    canUpsertDoc({
-      useUpsert: upsert !== undefined,
-      preflightGetDocForUpdateResult,
-      preflightCheckNamespacesForUpdateResult,
-    })
-  ) {
-    let savedObjectNamespace: string | undefined;
-    let savedObjectNamespaces: string[] | undefined;
+  if (upsert) {
+    let rawUpsert: SavedObjectsRawDoc | undefined;
+    // ignore attributes if creating a new doc: only use the upsert attributes
+    // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
+    // replace inners of conditional with helper function
+    if (
+      preflightDocResult?.checkDocFound === 'not_found' ||
+      preflightDocNSResult?.checkResult === 'not_found'
+    ) {
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
 
-    if (registry.isSingleNamespace(type) && namespace) {
-      savedObjectNamespace = namespace;
-    } else if (registry.isMultiNamespace(type)) {
-      savedObjectNamespaces = preflightCheckNamespacesForUpdateResult!.savedObjectNamespaces;
+      if (namespace && registry.isSingleNamespace(type)) {
+        savedObjectNamespace = namespace;
+      } else if (registry.isMultiNamespace(type)) {
+        savedObjectNamespaces = preflightDocNSResult.savedObjectNamespaces;
+      }
+
+      const migratedUpsert = migrationHelper.migrateInputDocument({
+        id,
+        type,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+        attributes: {
+          ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
+        },
+        updated_at: time,
+        ...(Array.isArray(references) && { references }),
+      });
+      validationHelper.validateObjectForCreate(type, migratedUpsert as SavedObjectSanitizedDoc<T>);
+      rawUpsert = serializer.savedObjectToRaw(migratedUpsert as SavedObjectSanitizedDoc);
     }
 
-    const migratedUpsert = migrationHelper.migrateInputDocument({
-      id,
-      type,
-      ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: {
-        ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
-      },
-      updated_at: time,
-      ...(Array.isArray(references) && { references }),
-    });
-    validationHelper.validateObjectForCreate(type, migratedUpsert as SavedObjectSanitizedDoc<T>);
-    rawUpsert = serializer.savedObjectToRaw(migratedUpsert as SavedObjectSanitizedDoc);
-  }
+    if (typeof rawUpsert !== 'undefined') {
+      const createRequestParams = {
+        id: rawUpsert._id,
+        index: commonHelper.getIndexForType(type),
+        refresh,
+        body: rawUpsert._source,
+        ...(version ? decodeRequestVersion(version) : {}),
+        require_alias: true,
+      };
 
-  if (rawUpsert !== undefined) {
-    const createRequestParams = {
-      id: rawUpsert._id,
-      index: commonHelper.getIndexForType(type),
-      refresh,
-      body: rawUpsert._source,
-      ...(version ? decodeRequestVersion(version) : {}),
-      require_alias: true,
-    };
-
-    const {
-      body: createDocResponseBody,
-      statusCode,
-      headers,
-    } = await client.create(createRequestParams, { meta: true }).catch((err) => {
-      if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
+      const {
+        body: createDocResponseBody,
+        statusCode,
+        headers,
+      } = await client.create(createRequestParams, { meta: true }).catch((err) => {
+        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
+          throw err;
+        }
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          // see "404s from missing index" above
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
         throw err;
+      });
+      if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
       }
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        // see "404s from missing index" above
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      // client.create doesn't return the index document.
+      // Use rawUpsert as the _source
+      const upsertedSavedObject = serializer.rawToSavedObject<T>(
+        {
+          ...rawUpsert,
+          ...createDocResponseBody,
+        },
+        { migrationVersionCompatibility }
+      );
+      const { originId } = upsertedSavedObject ?? {};
+      let namespaces: string[] = [];
+      if (!registry.isNamespaceAgnostic(type)) {
+        namespaces = upsertedSavedObject.namespaces ?? [
+          SavedObjectsUtils.namespaceIdToString(upsertedSavedObject.namespace),
+        ];
       }
-      throw err;
-    });
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
-    }
-    // client.create doesn't return the index document.
-    // Use rawUpsert as the _source
-    const upsertedSavedObject = serializer.rawToSavedObject<T>(
-      {
-        ...rawUpsert,
-        ...createDocResponseBody,
-      },
-      { migrationVersionCompatibility }
-    );
-    const { originId } = upsertedSavedObject ?? {};
-    let namespaces: string[] = [];
-    if (!registry.isNamespaceAgnostic(type)) {
-      namespaces = upsertedSavedObject.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(upsertedSavedObject.namespace),
-      ];
-    }
 
-    updatedOrCreatedSavedObject = {
-      id,
-      type,
-      updated_at: time,
-      version: encodeHitVersion(createDocResponseBody),
-      namespaces,
-      ...(originId && { originId }),
-      references,
-      attributes: upsert, // these ignore the attribute values provided in the main request body.
-    } as SavedObject<T>;
+      updatedOrCreatedSavedObject = {
+        id,
+        type,
+        updated_at: time,
+        version: encodeHitVersion(createDocResponseBody),
+        namespaces,
+        ...(originId && { originId }),
+        references,
+        attributes: upsert, // these ignore the attribute values provided in the main request body.
+      } as SavedObject<T>;
+    }
   }
   // UPSERT CASE END
   let docToSend: SavedObjectsRawDoc | undefined;
@@ -247,8 +244,8 @@ export const performUpdate = async <T>(
   // DO CLIENT_SIDE UPDATE DOC: I'm assuming that if we reach this point, there hasn't been an error
   if (
     (registry.isMultiNamespace(type) &&
-      preflightCheckNamespacesForUpdateResult.checkResult === 'found_in_namespace') ||
-    (!registry.isMultiNamespace(type) && preflightGetDocForUpdateResult.checkDocFound === 'found')
+      preflightDocNSResult.checkResult === 'found_in_namespace') ||
+    (!registry.isMultiNamespace(type) && preflightDocResult.checkDocFound === 'found')
   ) {
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
@@ -266,7 +263,7 @@ export const performUpdate = async <T>(
     );
   }
 
-  if (preflightGetDocForUpdateResult.checkDocFound === 'found' && docToSend !== undefined) {
+  if (preflightDocResult.checkDocFound === 'found' && !(typeof docToSend === 'undefined')) {
     // implement creating the call params
     const indexRequestParams = {
       id: docToSend._id,

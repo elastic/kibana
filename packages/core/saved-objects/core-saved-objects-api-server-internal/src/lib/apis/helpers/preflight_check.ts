@@ -200,9 +200,9 @@ rawDocSource
     id,
     namespace,
     initialNamespaces,
-    preflightGetDocForUpdateResult,
+    preflightDocResult,
   }: PreflightCheckNamespacesForUpdateParams): Promise<PreflightCheckNamespacesForUpdateResult> {
-    const { checkDocFound, rawDocSource } = preflightGetDocForUpdateResult;
+    const { checkDocFound, rawDocSource } = preflightDocResult;
     if (!this.registry.isMultiNamespace(type)) {
       return {
         checkSkipped: true,
@@ -285,7 +285,7 @@ export interface PreflightCheckNamespacesForUpdateParams {
   /** Optional; for an object that is being created, this specifies the initial namespace(s) it will exist in (overriding the current space) */
   initialNamespaces?: string[];
   /** Optional; for a pre-fetched object */
-  preflightGetDocForUpdateResult: PreflightGetDocForUpdateResult;
+  preflightDocResult: PreflightGetDocForUpdateResult;
 }
 /**
  * @internal
