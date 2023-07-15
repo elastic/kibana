@@ -58,7 +58,7 @@ export const loadSavedSearch = async (
   services.filterManager.setAppFilters([]);
   services.data.query.queryString.clearQuery();
   if (!useAppState) {
-    appStateContainer.set({});
+    appStateContainer.resetToDefaultState();
   }
 
   // Update saved search by a given app state (in URL)

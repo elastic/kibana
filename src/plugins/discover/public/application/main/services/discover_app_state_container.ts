@@ -23,12 +23,13 @@ import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { DiscoverGridSettings } from '../../../components/discover_grid/types';
+import type { DiscoverGridSettings } from '../../../components/discover_grid/types';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
@@ -55,6 +56,10 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param merge if true, the given state is merged with the current state
    */
   replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => Promise<void>;
+  /**
+   * Resets the current state to the default state
+   */
+  resetToDefaultState: () => void;
   /**
    * Resets the current state to the initial state
    */
@@ -141,15 +146,15 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  */
 export const getDiscoverAppStateContainer = ({
   stateStorage,
-  savedSearch,
+  savedSearchContainer,
   services,
 }: {
   stateStorage: IKbnUrlStateStorage;
-  savedSearch: SavedSearch;
+  savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
-  let previousState: DiscoverAppState = {};
-  let initialState = getInitialState(stateStorage, savedSearch, services);
+  let initialState = getInitialState(stateStorage, savedSearchContainer.getState(), services);
+  let previousState: DiscoverAppState = { ...initialState };
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
 
   const enhancedAppContainer = {
@@ -164,6 +169,12 @@ export const getDiscoverAppStateContainer = ({
 
   const hasChanged = () => {
     return !isEqualState(initialState, appStateContainer.getState());
+  };
+
+  const resetToDefaultState = () => {
+    enhancedAppContainer.set(
+      getInitialState(stateStorage, savedSearchContainer.getState(), services)
+    );
   };
 
   const resetInitialState = () => {
@@ -245,6 +256,7 @@ export const getDiscoverAppStateContainer = ({
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,
+    resetToDefaultState,
     resetInitialState,
     replaceUrlState,
     syncState: startAppStateUrlSync,
