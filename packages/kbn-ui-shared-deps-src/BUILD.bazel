@@ -13,7 +13,7 @@ webpack_cli(
     "@npm//webpack",
     "@npm//mini-css-extract-plugin",
     "@npm//moment",
-    "@npm//babel-loader",
+    "@npm//swc-loader",
     "@npm//css-loader",
     "@npm//url-loader",
     "//packages/kbn-ui-shared-deps-npm",

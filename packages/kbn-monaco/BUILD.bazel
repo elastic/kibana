@@ -37,7 +37,7 @@ webpack_cli(
     "//:.browserslistrc",
     "//packages/kbn-babel-preset",
     "@npm//@babel/runtime",
-    "@npm//babel-loader",
+    "@npm//swc-loader",
     "@npm//raw-loader",
     "@npm//rxjs",
 

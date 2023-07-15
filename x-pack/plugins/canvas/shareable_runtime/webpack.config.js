@@ -43,19 +43,13 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loaders: 'babel-loader',
-        options: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-        },
+        loaders: 'swc-loader',
       },
       {
         test: /\.tsx?$/,
         use: [
           {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
+            loader: 'swc-loader',
           },
         ],
         sideEffects: false,

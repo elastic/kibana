@@ -77,12 +77,7 @@ module.exports = {
       {
         test: /\.(js|tsx?)$/,
         exclude: /[\/\\]node_modules[\/\\](?!@kbn)([^\/\\]+)[\/\\]/,
-        loader: 'babel-loader',
-        options: {
-          babelrc: false,
-          envName: process.env.NODE_ENV || 'development',
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-        },
+        loader: 'swc-loader',
       },
     ],
   },
