@@ -3268,6 +3268,14 @@
                 "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/get.ts"
               },
               {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/get.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/get.ts"
+              },
+              {
                 "plugin": "@kbn/core-status-server-internal",
                 "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
               },
@@ -6104,6 +6112,22 @@
               {
                 "plugin": "@kbn/core-ui-settings-server-internal",
                 "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/set.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set_many.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set_many.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
               },
               {
                 "plugin": "@kbn/core-capabilities-server-internal",
@@ -9646,6 +9670,14 @@
               {
                 "plugin": "@kbn/core-ui-settings-server-internal",
                 "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/delete.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/delete.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/delete.ts"
               },
               {
                 "plugin": "home",
