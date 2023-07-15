@@ -15,6 +15,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { RecordsFetchResponse } from '../../../types';
 
 interface SQLErrorResponse {
   error: {
