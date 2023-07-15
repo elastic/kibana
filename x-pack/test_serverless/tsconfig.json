@@ -26,6 +26,7 @@
     "@kbn/telemetry-plugin",
     "@kbn/telemetry-collection-xpack-plugin",
     "@kbn/telemetry-tools",
+    "@kbn/ftr-common-functional-services",
     "@kbn/core-chrome-browser",
     "@kbn/default-nav-ml",
     "@kbn/default-nav-analytics",
