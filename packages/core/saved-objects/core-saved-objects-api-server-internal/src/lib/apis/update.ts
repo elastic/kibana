@@ -255,7 +255,7 @@ export const performUpdate = async <T>(
       id,
       type,
       attributes: await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, {
-        ...merge(attributes, migrated!.attributes),
+        ...merge(migrated!.attributes, attributes),
       }),
       updated_at: time,
       ...(Array.isArray(references) && { references }),
