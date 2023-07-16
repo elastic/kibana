@@ -191,16 +191,6 @@ const GcpInputVarFields = ({
       <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
         <>
           {field.id === 'credentials_file' && (
-            // <EuiComboBox
-            //   id={field.id}
-            //   placeholder="Select Credentials File"
-            //   singleSelection={{ asPlainText: true }}
-            //   options={jsonOptionsHolder}
-            //   isClearable={false}
-            //   fullWidth
-            //   selectedOptions={jsonOptionsHolder.filter((o) => o.label === field.value)}
-            //   onChange={(event) => onChange(field.id, event[0].label)}
-            // />
             <EuiSelect
               fullWidth
               options={jsonOptionsHolder}
