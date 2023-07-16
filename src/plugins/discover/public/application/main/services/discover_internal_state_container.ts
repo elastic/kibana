@@ -12,6 +12,7 @@ import {
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 import { DataTableRecord } from '../../../types';
 
 export interface InternalState {
@@ -19,6 +20,7 @@ export interface InternalState {
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
+  datasetFilters: Filter[];
 }
 
 interface InternalStateTransitions {
@@ -35,6 +37,7 @@ interface InternalStateTransitions {
   setExpandedDoc: (
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
+  setDatasetFilters: (state: InternalState) => (datasetFilters: Filter[]) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -52,6 +55,7 @@ export function getInternalStateContainer() {
       adHocDataViews: [],
       savedDataViews: [],
       expandedDoc: undefined,
+      datasetFilters: [],
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -96,6 +100,10 @@ export function getInternalStateContainer() {
       setExpandedDoc: (prevState: InternalState) => (expandedDoc: DataTableRecord | undefined) => ({
         ...prevState,
         expandedDoc,
+      }),
+      setDatasetFilters: (prevState: InternalState) => (datasetFilters: Filter[]) => ({
+        ...prevState,
+        datasetFilters,
       }),
     },
     {},

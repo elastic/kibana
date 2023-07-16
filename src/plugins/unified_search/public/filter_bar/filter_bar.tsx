@@ -9,7 +9,7 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
-import React, { useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import FilterItems, { type FilterItemsProps } from './filter_item/filter_items';
 
@@ -33,6 +33,8 @@ export interface Props {
    * Disable all interactive actions
    */
   isDisabled?: boolean;
+
+  prepend?: ReactNode;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -50,6 +52,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       alignItems="center"
       tabIndex={-1}
     >
+      {props.prepend}
       <FilterItems
         filters={props.filters!}
         onFiltersUpdated={props.onFiltersUpdated}

@@ -227,6 +227,11 @@ export const DiscoverTopNav = ({
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
       }
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+      prependFilterBar={
+        searchBarCustomization?.PrependFilterBar ? (
+          <searchBarCustomization.PrependFilterBar />
+        ) : undefined
+      }
     />
   );
 };

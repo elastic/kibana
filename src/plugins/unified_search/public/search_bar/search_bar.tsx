@@ -57,6 +57,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   filters?: Filter[];
   filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
+  prependFilterBar?: React.ReactNode;
   // Date picker
   isRefreshPaused?: boolean;
   refreshInterval?: number;
@@ -542,6 +543,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
+          prepend={this.props.prependFilterBar}
         />
       );
     }

@@ -68,5 +68,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect(title).to.eql(expected.title);
       expect(description).to.eql(expected.description);
     });
+
+    it('Search bar Prepend Filters', async () => {
+      await testSubjects.existOrFail('customPrependedFilter');
+      await testSubjects.click('customPrependedFilter');
+      await testSubjects.existOrFail('optionsList-control-selection-exists');
+
+      const optionListItem = await testSubjects.find('optionsList-control-selection-exists');
+      const visibleText = await optionListItem.getVisibleText();
+
+      expect(visibleText).to.eql('Exists');
+    });
   });
 };

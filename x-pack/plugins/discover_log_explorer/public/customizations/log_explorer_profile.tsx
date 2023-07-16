@@ -6,18 +6,21 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { dynamic } from '../utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 
 interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
+  data: DataPublicPluginStart;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({ core, data }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     const { DatasetsService } = await import('../services/datasets');
     const datasetsService = new DatasetsService().start({
@@ -34,6 +37,9 @@ export const createLogExplorerProfileCustomizations =
           datasetsClient={datasetsService.client}
           stateContainer={stateContainer}
         />
+      ),
+      PrependFilterBar: () => (
+        <LazyCustomDatasetFilters stateContainer={stateContainer} data={data} />
       ),
     });
 
