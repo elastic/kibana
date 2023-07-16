@@ -18,6 +18,8 @@ import { type SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
+import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
@@ -39,6 +41,7 @@ import {
   TimeRange,
 } from './types';
 import { computeChi2PValue } from './data_comparison_utils';
+import { getErrorMessagesFromEsShardFailures } from '../common/util/get_error_messages_from_es_shard_failures';
 
 export const getDataComparisonType = (kibanaType: string): DataComparisonField['type'] => {
   switch (kibanaType) {
@@ -258,25 +261,32 @@ const getDataComparisonQuery = ({
   return refDataQuery;
 };
 
-export const useFetchDataComparisonResult = ({
-  fields,
-  currentDataView,
-  timeRanges,
-  searchQuery,
-  searchString,
-}: {
-  fields?: DataComparisonField[];
-  currentDataView?: DataView;
-  timeRanges?: { reference: TimeRange; production: TimeRange };
-  searchQuery?: Query['query'];
-  searchString?: Query['query'];
-  searchQueryLanguage?: SearchQueryLanguage;
-} = {}) => {
+export const useFetchDataComparisonResult = (
+  {
+    fields,
+    currentDataView,
+    timeRanges,
+    searchQuery,
+    searchString,
+    lastRefresh,
+    randomSampler,
+  }: {
+    lastRefresh: number;
+    randomSampler?: RandomSampler;
+    fields?: DataComparisonField[];
+    currentDataView?: DataView;
+    timeRanges?: { reference: TimeRange; production: TimeRange };
+    searchQuery?: Query['query'];
+    searchString?: Query['query'];
+    searchQueryLanguage?: SearchQueryLanguage;
+  } = { lastRefresh: 0 }
+) => {
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<Result<Feature[]>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
     error: undefined,
+    errorBody: undefined,
   });
   const [loaded, setLoaded] = useState<number>(0);
   const [progressMessage, setProgressMessage] = useState<string | undefined>();
@@ -287,6 +297,10 @@ export const useFetchDataComparisonResult = ({
 
       const doFetchEsRequest = async function () {
         controller.abort();
+
+        if (!randomSampler) return;
+
+        const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
         setLoaded(0);
         setResult({
@@ -372,6 +386,7 @@ export const useFetchDataComparisonResult = ({
               values: { fieldsCount },
             })
           );
+
           const baselineResponse = await dataSearch(baselineRequest, signal);
 
           setProgressMessage(
@@ -387,6 +402,9 @@ export const useFetchDataComparisonResult = ({
               data: undefined,
               status: FETCH_STATUS.FAILURE,
               error: `Unable to fetch percentiles data from ${referenceIndex}`,
+              errorBody:
+                getErrorMessagesFromEsShardFailures(baselineResponse).join('\n') ??
+                extractErrorMessage(baselineResponse),
             });
             return;
           }
@@ -478,6 +496,9 @@ export const useFetchDataComparisonResult = ({
               data: undefined,
               status: FETCH_STATUS.FAILURE,
               error: `Unable to fetch drift data from ${productionIndex}`,
+              errorBody:
+                getErrorMessagesFromEsShardFailures(driftedResp).join('\n') ??
+                extractErrorMessage(driftedResp),
             });
             return;
           }
@@ -603,12 +624,11 @@ export const useFetchDataComparisonResult = ({
           });
           setLoaded(1);
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error(`An error occurred while fetching data comparison data:`, e);
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
-            error: e,
+            error: 'An error occurred while fetching data comparison data',
+            errorBody: JSON.stringify(e),
           });
         }
       };
@@ -620,7 +640,16 @@ export const useFetchDataComparisonResult = ({
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataSearch, JSON.stringify({ fields, timeRanges }), currentDataView?.id, searchString]
+    [
+      dataSearch,
+      JSON.stringify({
+        fields,
+        timeRanges,
+        currentDataView: currentDataView?.id,
+        searchString,
+        lastRefresh,
+      }),
+    ]
   );
   const dataComparisonResult = useMemo(
     () => ({ ...result, loaded, progressMessage }),

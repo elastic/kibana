@@ -10,9 +10,11 @@ import React, { FC } from 'react';
 import { DocumentCountChart, type DocumentCountChartPoint } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocumentCountChartProps } from '@kbn/aiops-components';
+import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
+import { SamplingMenu } from '../common/components/random_sampling_menu/random_sampling_menu';
 
 export interface DocumentCountContentProps
   extends Omit<
@@ -38,9 +40,13 @@ export interface DocumentCountContentProps
   barHighlightColorOverride?: string;
   windowParameters?: WindowParameters;
   incomingInitialAnalysisStart?: number | WindowParameters;
+  randomSampler: RandomSampler;
+  reload: () => void;
 }
 
 export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
+  randomSampler,
+  reload,
   brushSelectionUpdateHandler,
   documentCountStats,
   documentCountStatsSplit,
@@ -92,9 +98,15 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
-      <EuiFlexItem>
-        <TotalCountHeader totalCount={totalCount} />
-      </EuiFlexItem>
+      <EuiFlexGroup gutterSize="m" direction="row">
+        <EuiFlexItem>
+          <TotalCountHeader totalCount={totalCount} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SamplingMenu randomSampler={randomSampler} reload={reload} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
           <DocumentCountChart

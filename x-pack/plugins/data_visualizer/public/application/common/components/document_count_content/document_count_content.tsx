@@ -30,7 +30,7 @@ import {
 import { TotalCountHeader } from './total_count_header';
 import type { DocumentCountStats } from '../../../../../common/types/field_stats';
 import { DocumentCountChart } from './document_count_chart';
-import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
+import { RandomSamplerRangeSlider } from '../random_sampling_menu/random_sampler_range_slider';
 
 export interface Props {
   documentCountStats?: DocumentCountStats;

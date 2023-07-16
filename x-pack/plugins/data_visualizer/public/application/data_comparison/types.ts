@@ -72,6 +72,7 @@ export interface Result<T extends unknown> {
   status: FETCH_STATUS;
   data?: T;
   error?: string;
+  errorBody?: string;
 }
 
 export interface TimeRange {

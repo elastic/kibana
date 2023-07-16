@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { isDefined } from '@kbn/ml-is-defined';
 import { EuiButton, EuiFlexItem, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isDefined } from '@kbn/ml-is-defined';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_PROBABILITIES,

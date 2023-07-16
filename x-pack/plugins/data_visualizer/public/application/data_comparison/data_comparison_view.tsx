@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
 import type { DataComparisonField, Feature, TimeRange } from './types';
 import { DataComparisonOverviewTable } from './data_comparison_overview_table';
@@ -34,6 +35,8 @@ interface DataComparisonViewProps {
   isBrushCleared: boolean;
   runAnalysisDisabled?: boolean;
   onReset: () => void;
+  lastRefresh: number;
+  randomSampler: RandomSampler;
 }
 // Data drift view
 export const DataComparisonView = ({
@@ -44,6 +47,8 @@ export const DataComparisonView = ({
   searchQueryLanguage,
   onReset,
   isBrushCleared,
+  lastRefresh,
+  randomSampler,
 }: DataComparisonViewProps) => {
   const [showDataComparisonedOnly, setShowDataComparisonedOnly] = useState(false);
 
@@ -102,6 +107,8 @@ export const DataComparisonView = ({
   }, [dataView, windowParameters]);
   const result = useFetchDataComparisonResult({
     ...fetchInfo,
+    lastRefresh,
+    randomSampler,
     searchString,
     searchQueryLanguage,
     searchQuery,
@@ -187,16 +194,26 @@ export const DataComparisonView = ({
           </EuiFormRow>
         </EuiFlexItem>
       </ProgressControls>
-      {result.error ? <EuiEmptyPrompt color="danger" body={<p>{result.error}</p>} /> : null}
+      <EuiSpacer size="m" />
 
-      <DataComparisonOverviewTable
-        data={filteredData}
-        onTableChange={onTableChange}
-        pagination={pagination}
-        sorting={sorting}
-        setPageIndex={setPageIndex}
-        status={result.status}
-      />
+      {result.error ? (
+        <EuiEmptyPrompt
+          css={{ minWidth: '100%' }}
+          color="danger"
+          title={<h2>{result.error}</h2>}
+          titleSize="xs"
+          body={<p>{result.errorBody}</p>}
+        />
+      ) : (
+        <DataComparisonOverviewTable
+          data={filteredData}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          sorting={sorting}
+          setPageIndex={setPageIndex}
+          status={result.status}
+        />
+      )}
     </div>
   );
 };

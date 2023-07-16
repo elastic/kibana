@@ -35,9 +35,13 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
+import { RANDOM_SAMPLER_OPTION, RandomSampler } from '@kbn/ml-random-sampler-utils';
+import { MIN_SAMPLER_PROBABILITY } from '../index_data_visualizer/constants/random_sampler';
 import { useData } from '../common/hooks/use_data';
 import {
   DV_FROZEN_TIER_PREFERENCE,
+  DV_RANDOM_SAMPLER_P_VALUE,
+  DV_RANDOM_SAMPLER_PREFERENCE,
   DVKey,
   DVStorageMapped,
 } from '../index_data_visualizer/types/storage';
@@ -130,6 +134,32 @@ export const DataComparisonPage: FC = () => {
     pageKey: 'DV_DATA_COMP';
     pageUrlState: DataComparisonFullAppState;
   }>('DV_DATA_COMP', getDefaultDataComparisonState());
+
+  const [randomSamplerMode, setRandomSamplerMode] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
+  >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
+
+  const [randomSamplerProbability, setRandomSamplerProbability] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_RANDOM_SAMPLER_P_VALUE>
+  >(DV_RANDOM_SAMPLER_P_VALUE, MIN_SAMPLER_PROBABILITY);
+  const [lastRefresh, setLastRefresh] = useState(0);
+
+  const forceRefresh = useCallback(() => setLastRefresh(Date.now()), [setLastRefresh]);
+
+  const randomSampler = useMemo(
+    () =>
+      new RandomSampler(
+        randomSamplerMode,
+        setRandomSamplerMode,
+        randomSamplerProbability,
+        setRandomSamplerProbability
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
@@ -278,6 +308,8 @@ export const DataComparisonPage: FC = () => {
             <EuiFlexItem>
               <EuiPanel paddingSize="m">
                 <DocumentCountWithDualBrush
+                  randomSampler={randomSampler}
+                  reload={forceRefresh}
                   brushSelectionUpdateHandler={brushSelectionUpdate}
                   documentCountStats={documentCountStats}
                   documentCountStatsSplit={documentCountStatsCompare}
@@ -344,6 +376,8 @@ export const DataComparisonPage: FC = () => {
                   searchString={searchString ?? ''}
                   searchQuery={searchQuery}
                   searchQueryLanguage={searchQueryLanguage}
+                  lastRefresh={lastRefresh}
+                  randomSampler={randomSampler}
                 />
               )}
             </EuiPanel>

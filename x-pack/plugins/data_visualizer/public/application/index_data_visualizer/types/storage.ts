@@ -7,7 +7,7 @@
 
 import { type FrozenTierPreference } from '@kbn/ml-date-picker';
 
-import { RandomSamplerOption } from '../constants/random_sampler';
+import { type RandomSamplerOption } from '../constants/random_sampler';
 
 export const DV_FROZEN_TIER_PREFERENCE = 'dataVisualizer.frozenDataTierPreference';
 export const DV_RANDOM_SAMPLER_PREFERENCE = 'dataVisualizer.randomSamplerPreference';
@@ -26,7 +26,7 @@ export type DVStorageMapped<T extends DVKey> = T extends typeof DV_FROZEN_TIER_P
   : T extends typeof DV_RANDOM_SAMPLER_PREFERENCE
   ? RandomSamplerOption | undefined
   : T extends typeof DV_RANDOM_SAMPLER_P_VALUE
-  ? number | undefined
+  ? number | null
   : null;
 
 export const DV_STORAGE_KEYS = [
