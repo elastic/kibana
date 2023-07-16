@@ -8,9 +8,9 @@
 import { AreaSeries, Chart, CurveType, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ComparisionHistogram, DataComparisonField } from '../types';
+import type { ComparisionHistogram, DataComparisonField } from '../types';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
-import { COMPARISON_LABEL, DATA_COMPARISON_TYPE } from '../constants';
+import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
 
 export const OverlapDistributionComparison = ({
   data,
@@ -34,8 +34,12 @@ export const OverlapDistributionComparison = ({
           'xpack.dataVisualizer.dataComparison.distributionComparisonChartName',
           {
             defaultMessage:
-              'Distribution comparison of reference and comparison data for {fieldName}',
-            values: { fieldName },
+              'Distribution comparison of {referenceLabel} and {comparisonLabel} data for {fieldName}',
+            values: {
+              referenceLabel: REFERENCE_LABEL.toLowerCase(),
+              comparisonLabel: COMPARISON_LABEL.toLowerCase(),
+              fieldName,
+            },
           }
         )}
         xScaleType={
@@ -46,7 +50,7 @@ export const OverlapDistributionComparison = ({
         yAccessors={['percentage']}
         splitSeriesAccessors={['g']}
         data={data}
-        curve={CurveType.CURVE_STEP_AFTER}
+        curve={CurveType.CURVE_STEP}
         color={(identifier) => {
           const key = identifier.seriesKeys[0];
           return key === COMPARISON_LABEL ? colors.productionColor : colors.referenceColor;
