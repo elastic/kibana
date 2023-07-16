@@ -26,12 +26,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { ConfigSchema } from '..';
+import { customLogsRoutes } from '../components/app/custom_logs/wizard';
 import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
-import { routes } from '../routes';
+import { baseRoutes, routes } from '../routes';
+import { CustomLogs } from '../routes/templates/custom_logs';
 
 export type BreadcrumbTitle<
   T extends { [K in keyof T]?: string | undefined } = {}
@@ -56,19 +58,42 @@ export const breadcrumbsApp = {
 };
 
 function App() {
+  const customLogRoutesPaths = Object.keys(customLogsRoutes);
+
   return (
     <>
       <Routes>
-        {Object.keys(routes).map((key) => {
+        {Object.keys(baseRoutes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
           const Wrapper = () => {
             return handler();
           };
+
           return (
             <Route key={path} path={path} exact={exact} component={Wrapper} />
           );
         })}
+        <Route exact path={customLogRoutesPaths}>
+          <CustomLogs>
+            {customLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return (
+                <Route
+                  key={path}
+                  path={path}
+                  exact={exact}
+                  component={Wrapper}
+                />
+              );
+            })}
+          </CustomLogs>
+        </Route>
       </Routes>
     </>
   );
