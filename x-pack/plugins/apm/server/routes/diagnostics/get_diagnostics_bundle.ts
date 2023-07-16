@@ -16,6 +16,7 @@ import { getIndicesStates } from './bundle/get_indices_states';
 import { getApmEvents } from './bundle/get_apm_events';
 import { getApmIndexTemplates } from './helpers/get_apm_index_template_names';
 import { handle403Exception } from './helpers/handle_403_exception';
+import { getDiagnosticsPrivileges } from './helpers/get_diagnostic_privileges';
 
 const DEFEAULT_START = Date.now() - 60 * 5 * 1000; // 5 minutes
 const DEFAULT_END = Date.now();
@@ -33,6 +34,11 @@ export async function getDiagnosticsBundle({
   end: number | undefined;
   kuery: string | undefined;
 }) {
+  const diagnosticsPrivileges = await getDiagnosticsPrivileges({
+    esClient,
+    apmIndices,
+  });
+
   const indexTemplatesByIndexPattern = await handle403Exception(
     getIndexTemplatesByIndexPattern({
       esClient,
@@ -92,6 +98,7 @@ export async function getDiagnosticsBundle({
 
   return {
     created_at: new Date().toISOString(),
+    diagnosticsPrivileges,
     apmIndices,
     elasticsearchVersion,
     esResponses: {
