@@ -28,7 +28,10 @@ import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar
 import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
 import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
@@ -106,6 +109,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   isScreenshotMode?: boolean;
 
   /**
@@ -517,6 +521,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
               )
             : undefined
         }
+        suggestionsAbstraction={this.props.suggestionsAbstraction}
       />
     ) : undefined;
 
@@ -531,6 +536,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           readOnly={this.props.isDisabled}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       ) : (
         <FilterBar
@@ -544,6 +550,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
           prepend={this.props.prependFilterBar}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       );
     }
@@ -598,6 +605,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}
           onTextLangQueryChange={this.onTextLangQueryChange}
           submitOnBlur={this.props.submitOnBlur}
+          suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
       </div>
     );

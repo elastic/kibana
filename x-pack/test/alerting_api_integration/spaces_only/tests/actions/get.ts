@@ -77,7 +77,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should handle get action request from preconfigured list', async () => {
+    it('should handle get a preconfigured connector', async () => {
       await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-slack1`)
         .expect(200, {
@@ -90,7 +90,24 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should handle get action request for deprecated connectors from preconfigured list', async () => {
+    it('should handle get a system connector', async () => {
+      await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/actions/connector/system-connector-test.system-action`
+        )
+        .expect(200, {
+          id: 'system-connector-test.system-action',
+          connector_type_id: 'test.system-action',
+          name: 'System action: test.system-action',
+          is_preconfigured: false,
+          is_system_action: true,
+          is_deprecated: false,
+        });
+    });
+
+    it('should handle get a deprecated connector', async () => {
       await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-deprecated-servicenow`)
         .expect(200, {
@@ -176,7 +193,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should handle get action request from preconfigured list', async () => {
+      it('should handle get a preconfigured connector', async () => {
         await supertest
           .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/my-slack1`)
           .expect(200, {
@@ -186,6 +203,23 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             isSystemAction: false,
             actionTypeId: '.slack',
             name: 'Slack#xyz',
+          });
+      });
+
+      it('should handle get a system connector', async () => {
+        await supertest
+          .get(
+            `${getUrlPrefix(
+              Spaces.space1.id
+            )}/api/actions/action/system-connector-test.system-action`
+          )
+          .expect(200, {
+            id: 'system-connector-test.system-action',
+            actionTypeId: 'test.system-action',
+            name: 'System action: test.system-action',
+            isPreconfigured: false,
+            isSystemAction: true,
+            isDeprecated: false,
           });
       });
     });

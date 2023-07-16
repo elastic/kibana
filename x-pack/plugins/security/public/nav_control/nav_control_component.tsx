@@ -8,13 +8,15 @@
 import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
 import {
   EuiContextMenu,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
+import React, { Fragment, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
@@ -32,7 +34,40 @@ export interface UserMenuLink {
   href: string;
   order?: number;
   setAsProfile?: boolean;
+  /** Render a custom ReactNode instead of the default <EuiContextMenuItem /> */
+  content?: ReactNode;
 }
+
+type ContextMenuItem = EuiContextMenuPanelItemDescriptor & { content?: ReactNode };
+
+interface ContextMenuProps {
+  items: ContextMenuItem[];
+}
+
+const ContextMenuContent = ({ items }: ContextMenuProps) => {
+  return (
+    <>
+      <EuiContextMenuPanel>
+        {items.map((item, i) => {
+          if (item.content) {
+            return <Fragment key={i}>{item.content}</Fragment>;
+          }
+          return (
+            <EuiContextMenuItem
+              key={i}
+              icon={item.icon}
+              size="s"
+              href={item.href}
+              data-test-subj={item['data-test-subj']}
+            >
+              {item.name}
+            </EuiContextMenuItem>
+          );
+        })}
+      </EuiContextMenuPanel>
+    </>
+  );
+};
 
 interface SecurityNavControlProps {
   editProfileUrl: string;
@@ -48,7 +83,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar');
+  const userProfile = useUserProfile<{ avatar: UserProfileAvatarData }>('avatar,userSettings');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
@@ -80,15 +115,16 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
     </EuiHeaderSectionItemButton>
   );
 
-  const items: EuiContextMenuPanelItemDescriptor[] = [];
+  const items: ContextMenuItem[] = [];
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href }: UserMenuLink) => ({
+      .map(({ label, iconType, href, content }: UserMenuLink) => ({
         name: label,
         icon: <EuiIcon type={iconType} size="m" />,
         href,
         'data-test-subj': `userMenuLink__${label}`,
+        content,
       }));
     items.push(...userMenuLinkMenuItems);
   }
@@ -153,7 +189,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
             {
               id: 0,
               title: displayName,
-              items,
+              content: <ContextMenuContent items={items} />,
             },
           ]}
         />

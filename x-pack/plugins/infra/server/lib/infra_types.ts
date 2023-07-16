@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import type { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { ILogsSharedLogEntriesDomain } from '@kbn/logs-shared-plugin/server';
 import { RulesServiceSetup } from '../services/rules';
@@ -33,6 +34,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   metricsRules: RulesServiceSetup;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
+  getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];
   getStartServices: InfraPluginStartServicesAccessor;
   handleEsError: typeof handleEsError;
   logger: Logger;

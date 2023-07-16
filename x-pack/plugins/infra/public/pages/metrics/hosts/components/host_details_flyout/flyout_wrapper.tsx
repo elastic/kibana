@@ -13,6 +13,7 @@ import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_u
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
 import { orderedFlyoutTabs } from './tabs';
 import { useLogViewReference } from '../../hooks/use_log_view_reference';
+import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 
 export interface Props {
   node: HostNodeRow;
@@ -23,6 +24,8 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
+  const { dataView } = useMetricsDataViewContext();
   const { logViewReference, loading } = useLogViewReference({
     id: 'hosts-flyout-logs-view',
   });
@@ -43,6 +46,10 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
       currentTimeRange={currentTimeRange}
       activeTabId={hostFlyoutState?.tabId}
       overrides={{
+        overview: {
+          dateRange: searchCriteria.dateRange,
+          dataView,
+        },
         metadata: {
           query: hostFlyoutState?.metadataSearch,
           showActionsColumn: true,
@@ -67,7 +74,7 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
         })
       }
       tabs={orderedFlyoutTabs}
-      links={['apmServices', 'uptime']}
+      links={['apmServices', 'nodeDetails']}
       renderMode={{
         showInFlyout: true,
         closeFlyout,
