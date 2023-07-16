@@ -11,10 +11,13 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTableColumn,
   EuiButtonIcon,
+  EuiIcon,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
   EuiTableFieldDataColumnType,
+  EuiToolTip,
 } from '@elastic/eui';
+import { COLLAPSE_ROW, EXPAND_ROW } from '../../../common/i18n_constants';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE_LABEL, REFERENCE_LABEL } from './constants';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { DataComparisonField, Feature, FETCH_STATUS } from './types';
@@ -77,7 +80,7 @@ export const DataComparisonOverviewTable = ({
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
-          <span>Expand rows</span>
+          <span>{EXPAND_ROW}</span>
         </EuiScreenReaderOnly>
       ),
       render: (item: Feature) => {
@@ -86,7 +89,7 @@ export const DataComparisonOverviewTable = ({
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(item)}
-            aria-label={itemIdToExpandedRowMapValues[item.featureName] ? 'Collapse' : 'Expand'}
+            aria-label={itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW}
             iconType={itemIdToExpandedRowMapValues[item.featureName] ? 'arrowDown' : 'arrowRight'}
           />
         );
@@ -128,11 +131,25 @@ export const DataComparisonOverviewTable = ({
     },
     {
       field: 'similarityTestPValue',
-      name: 'Similarity test p-value',
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.dataVisualizer.dataComparison.pValueTooltip', {
+            defaultMessage:
+              'Indicates how extreme the change is. Lower values indicate greater change.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.dataVisualizer.dataComparison.pValueLabel', {
+              defaultMessage: 'Similarity p-value',
+            })}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       'data-test-subj': 'mlDataComparisonOverviewTableSimilarityTestPValue',
       sortable: true,
       textOnly: true,
-      render: (similarityTestPValue: number, feature: Feature) => {
+      render: (similarityTestPValue: number) => {
         return <span>{formatSignificanceLevel(similarityTestPValue)}</span>;
       },
     },
