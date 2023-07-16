@@ -8,7 +8,7 @@
     "server": false,
     "browser": true,
     "configPath": ["xpack", "discover_log_explorer"],
-    "requiredPlugins": ["data", "discover", "fleet", "kibanaReact", "kibanaUtils", "controls", "embeddable"],
+    "requiredPlugins": ["data", "dataViews", "discover", "fleet", "kibanaReact", "kibanaUtils", "controls", "embeddable"],
     "optionalPlugins": [],
     "requiredBundles": []
   }
