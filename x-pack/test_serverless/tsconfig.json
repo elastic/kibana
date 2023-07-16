@@ -29,5 +29,6 @@
     "@kbn/infra-plugin",
     "@kbn/observability-plugin",
     "@kbn/infra-forge",
+    "@kbn/ftr-common-functional-services",
   ]
 }
