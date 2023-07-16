@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiFieldText,
   EuiFieldPassword,
@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiComboBox,
+  EuiSelect,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
@@ -29,7 +29,7 @@ const GCPSetupInfoContent = () => (
     <EuiTitle size="s">
       <h2>
         <FormattedMessage
-          id="xpack.csp.eksIntegration.setupInfoContentTitle"
+          id="xpack.csp.gcpIntegration.setupInfoContentTitle"
           defaultMessage="Setup Access"
         />
       </h2>
@@ -37,7 +37,7 @@ const GCPSetupInfoContent = () => (
     <EuiSpacer size="l" />
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.eksIntegration.setupInfoContent"
+        id="xpack.csp.gcpIntegration.setupInfoContent"
         defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
     method of providing the GCP credentials this integration will use. You can follow these
     step-by-step instructions to generate the necessary credentials."
@@ -88,7 +88,10 @@ const gcpField: GcpFields = {
   },
 };
 
-const jsonOptionsHolder = [{ label: 'Option A' }, { label: 'Option B' }];
+const jsonOptionsHolder = [
+  { label: 'Option A', text: 'Option A' },
+  { label: 'Option B', text: 'Option B' },
+];
 
 const getSetupFormatOptions = (): Array<{
   id: SetupFormatGCP;
@@ -139,14 +142,12 @@ export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   // const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
   //   const group = gcpField;
   const fields = getInputVarsFields(input, gcpField.fields);
-  const [radioIdSelected, setRadioIdSelected] = useState('manual');
 
   return (
     <>
       <GCPSetupInfoContent />
       <EuiSpacer size="l" />
       <GcpSetupAccessSelector
-        type={radioIdSelected}
         onChange={(optionId) =>
           updatePolicy(
             getPosturePolicy(newPolicy, input.type, {
@@ -169,17 +170,11 @@ export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   );
 };
 
-const GcpSetupAccessSelector = ({
-  type,
-  onChange,
-}: {
-  onChange(type: AwsCredentialsType): void;
-  type: string;
-}) => (
+const GcpSetupAccessSelector = ({ onChange }: { onChange(type: AwsCredentialsType): void }) => (
   <RadioGroup
     size="s"
     options={getSetupFormatOptions()}
-    idSelected={type}
+    idSelected={'manual'}
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
 );
@@ -196,14 +191,23 @@ const GcpInputVarFields = ({
       <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
         <>
           {field.id === 'credentials_file' && (
-            <EuiComboBox
-              id={field.id}
-              placeholder="Select Credentials File"
-              singleSelection={{ asPlainText: true }}
-              options={jsonOptionsHolder}
+            // <EuiComboBox
+            //   id={field.id}
+            //   placeholder="Select Credentials File"
+            //   singleSelection={{ asPlainText: true }}
+            //   options={jsonOptionsHolder}
+            //   isClearable={false}
+            //   fullWidth
+            //   selectedOptions={jsonOptionsHolder.filter((o) => o.label === field.value)}
+            //   onChange={(event) => onChange(field.id, event[0].label)}
+            // />
+            <EuiSelect
               fullWidth
-              selectedOptions={jsonOptionsHolder.filter((o) => o.label === field.value)}
-              onChange={(event) => onChange(field.id, event[0].label)}
+              options={jsonOptionsHolder}
+              value={field.value || ''}
+              onChange={(optionElem) => {
+                onChange(field.id, optionElem.target.value);
+              }}
             />
           )}
           {field.type === 'password' && (
