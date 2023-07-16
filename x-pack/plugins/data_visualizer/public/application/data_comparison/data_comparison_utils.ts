@@ -27,6 +27,8 @@ export const computeChi2PValue = (
     ])
   ).slice(0, 100); // Only get 100 terms
 
+  if (allKeys.length <= 1) return 1;
+
   const orderedBaselineDocCount: number[] = [];
   const orderedDriftedDocCount: number[] = [];
 
