@@ -68,6 +68,13 @@ describe('test fetchAll', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       getAppState: () => ({}),
+      getInternalState: () => ({
+        dataView: undefined,
+        savedDataViews: [],
+        adHocDataViews: [],
+        expandedDoc: undefined,
+        datasetFilters: [],
+      }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       useNewFieldsApi: true,
@@ -258,6 +265,13 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
+      getInternalState: () => ({
+        dataView: undefined,
+        savedDataViews: [],
+        adHocDataViews: [],
+        expandedDoc: undefined,
+        datasetFilters: [],
+      }),
     };
     fetchAll(subjects, false, deps);
     await waitForNextTick();

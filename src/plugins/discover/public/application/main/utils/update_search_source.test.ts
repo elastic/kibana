@@ -27,6 +27,7 @@ describe('updateVolatileSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
+      datasetFilters: [],
     });
     expect(searchSource.getField('fields')).toBe(undefined);
   });
@@ -38,6 +39,7 @@ describe('updateVolatileSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
+      datasetFilters: [],
     });
     expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
@@ -50,6 +52,7 @@ describe('updateVolatileSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
+      datasetFilters: [],
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
@@ -64,6 +67,7 @@ describe('updateVolatileSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
+      datasetFilters: [],
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
