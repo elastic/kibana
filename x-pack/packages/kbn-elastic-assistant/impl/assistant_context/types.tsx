@@ -47,6 +47,7 @@ export interface Conversation {
     connectorId?: string;
     defaultSystemPromptId?: string;
     provider?: OpenAiProviderType;
+    model?: string;
   };
   id: string;
   messages: Message[];

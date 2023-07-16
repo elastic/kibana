@@ -32,6 +32,7 @@ import {
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
+import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -74,7 +75,7 @@ interface AssistantProviderProps {
   title?: string;
 }
 
-interface UseAssistantContext {
+export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
@@ -104,12 +105,14 @@ interface UseAssistantContext {
   promptContexts: Record<string, PromptContext>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
+  selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   title: string;
@@ -155,12 +158,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     baseSystemPrompts
   );
 
-  // if basePrompt has been updated, the localstorage should be accordingly updated
-  // if it exists
-  useEffect(() => {
-    setLocalStorageSystemPrompts(baseSystemPrompts);
-  }, [baseSystemPrompts, setLocalStorageSystemPrompts]);
-
   const [localStorageLastConversationId, setLocalStorageLastConversationId] =
     useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
 
@@ -203,6 +200,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(
     (showAssistant) => {}
   );
+
+  /**
+   * Settings State
+   */
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
   const [conversations, setConversationsInternal] = useState(getInitialConversations());
   const conversationIds = useMemo(() => Object.keys(conversations).sort(), [conversations]);
@@ -256,11 +258,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       promptContexts,
       nameSpace,
       registerPromptContext,
+      selectedSettingsTab,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
       setAllSystemPrompts: setLocalStorageSystemPrompts,
       setConversations: onConversationsUpdated,
       setDefaultAllow,
       setDefaultAllowReplacement,
+      setSelectedSettingsTab,
       setShowAssistantOverlay,
       showAssistantOverlay,
       title,
@@ -290,11 +294,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       onConversationsUpdated,
       promptContexts,
       registerPromptContext,
+      selectedSettingsTab,
       setDefaultAllow,
       setDefaultAllowReplacement,
       setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
+      setSelectedSettingsTab,
       showAssistantOverlay,
       title,
       unRegisterPromptContext,

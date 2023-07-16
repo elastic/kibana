@@ -61,7 +61,7 @@
             "section": "def-common.ClientApiMockInstance",
             "text": "ClientApiMockInstance"
           },
-          "<T, Y> extends jest.MockInstance<T, Y>"
+          "<T, Y> extends jest.MockInstance<T, Y, any>"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,
@@ -1366,7 +1366,7 @@
                 "section": "def-common.ScopedClusterClientMock",
                 "text": "ScopedClusterClientMock"
               },
-              ", []> & (() => ",
+              ", [], unknown> & (() => ",
               {
                 "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
                 "scope": "common",
@@ -3584,7 +3584,7 @@
         "label": "CustomClusterClientMock",
         "description": [],
         "signature": [
-          "{ close: jest.MockInstance<Promise<void>, []>; readonly asInternalUser: ",
+          "{ close: jest.MockInstance<Promise<void>, [], unknown>; readonly asInternalUser: ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "common",
@@ -3608,7 +3608,7 @@
             "section": "def-common.ScopeableRequest",
             "text": "ScopeableRequest"
           },
-          "]>; } & ",
+          "], unknown>; } & ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "common",
