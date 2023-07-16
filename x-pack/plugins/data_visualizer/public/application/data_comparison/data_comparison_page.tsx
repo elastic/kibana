@@ -212,6 +212,10 @@ export const DataComparisonPage: FC = () => {
     documentStats;
 
   useEffect(() => {
+    randomSampler.setDocCount(totalCount);
+  }, [totalCount, randomSampler]);
+
+  useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({
         from: globalState.time.from,

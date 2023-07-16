@@ -13,13 +13,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
 import { cloneDeep } from 'lodash';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type SearchQueryLanguage } from '@kbn/ml-query-utils';
-
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { ErrorType, extractErrorMessage } from '@kbn/ml-error-utils';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
@@ -55,7 +54,7 @@ export const getDataComparisonType = (kibanaType: string): DataComparisonField['
   }
 };
 
-export const useDataSearch = () => {
+export const useDataSearch = <T>() => {
   const { data } = useDataVisualizerKibana().services;
 
   return useCallback(
@@ -75,7 +74,7 @@ export const useDataSearch = () => {
         if (error.name === 'AbortError') {
           // ignore abort errors
         } else {
-          return error;
+          throw Error(error);
         }
       }
     },
@@ -352,18 +351,19 @@ export const useFetchDataComparisonResult = (
             },
           };
 
+          const baselineRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
           const fieldsCount = fields.length;
           // for each field with type "numeric", add a percentiles agg to the request
           for (const { field, type } of fields) {
             // if the field is numeric, add a percentiles and stats aggregations to the request
             if (type === DATA_COMPARISON_TYPE.NUMERIC) {
-              baselineRequest.body.aggs[`${field}_percentiles`] = {
+              baselineRequestAggs[`${field}_percentiles`] = {
                 percentiles: {
                   field,
                   percents,
                 },
               };
-              baselineRequest.body.aggs[`${field}_stats`] = {
+              baselineRequestAggs[`${field}_stats`] = {
                 stats: {
                   field,
                 },
@@ -371,7 +371,7 @@ export const useFetchDataComparisonResult = (
             }
             // if the field is categorical, add a terms aggregation to the request
             if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
-              baselineRequest.body.aggs[`${field}_terms`] = {
+              baselineRequestAggs[`${field}_terms`] = {
                 terms: {
                   field,
                   size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
@@ -387,6 +387,7 @@ export const useFetchDataComparisonResult = (
             })
           );
 
+          baselineRequest.body.aggs = wrap(baselineRequestAggs);
           const baselineResponse = await dataSearch(baselineRequest, signal);
 
           setProgressMessage(
@@ -404,7 +405,7 @@ export const useFetchDataComparisonResult = (
               error: `Unable to fetch percentiles data from ${referenceIndex}`,
               errorBody:
                 getErrorMessagesFromEsShardFailures(baselineResponse).join('\n') ??
-                extractErrorMessage(baselineResponse),
+                extractErrorMessage(baselineResponse as ErrorType),
             });
             return;
           }
@@ -431,16 +432,19 @@ export const useFetchDataComparisonResult = (
               ...prodDataQuery,
             },
           };
+          const driftedRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+          const baselineResponseAggs = unwrap(baselineResponse?.aggregations);
 
           // retrieve p-values for each numeric field
           for (const { field, type } of fields) {
             if (
-              isPopulatedObject(baselineResponse?.aggregations, [`${field}_percentiles`]) &&
+              isPopulatedObject(baselineResponseAggs, [`${field}_percentiles`]) &&
               type === DATA_COMPARISON_TYPE.NUMERIC
             ) {
               // create ranges based on percentiles
               const percentiles = Object.values<number>(
-                baselineResponse.aggregations[`${field}_percentiles`].values
+                (baselineResponseAggs[`${field}_percentiles`] as Record<string, { values: number }>)
+                  .values
               );
               const ranges: Array<{ from?: number; to?: number }> = [];
               percentiles.forEach((val: number, idx) => {
@@ -453,20 +457,20 @@ export const useFetchDataComparisonResult = (
                 }
               });
               // add range and bucket_count_ks_test to the request
-              driftedRequest.body.aggs[`${field}_ranges`] = {
+              driftedRequestAggs[`${field}_ranges`] = {
                 range: {
                   field,
                   ranges,
                 },
               };
-              driftedRequest.body.aggs[`${field}_ks_test`] = {
+              driftedRequestAggs[`${field}_ks_test`] = {
                 bucket_count_ks_test: {
                   buckets_path: `${field}_ranges>_count`,
                   alternative: ['two_sided'],
                 },
               };
               // add stats aggregation to the request
-              driftedRequest.body.aggs[`${field}_stats`] = {
+              driftedRequestAggs[`${field}_stats`] = {
                 stats: {
                   field,
                 },
@@ -474,7 +478,7 @@ export const useFetchDataComparisonResult = (
             }
             // if feature is categoric perform terms aggregation
             if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
-              driftedRequest.body.aggs[`${field}_terms`] = {
+              driftedRequestAggs[`${field}_terms`] = {
                 terms: {
                   field,
                   size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
@@ -483,25 +487,29 @@ export const useFetchDataComparisonResult = (
             }
           }
 
+          driftedRequest.body.aggs = wrap(driftedRequestAggs);
           const driftedResp = await dataSearch(driftedRequest, signal);
+
           setLoaded(0.5);
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedBaseline', {
-              defaultMessage: `Loaded production data.`,
+              defaultMessage: `Loaded comparison data.`,
             })
           );
 
-          if (!driftedResp.aggregations) {
+          if (!driftedResp || !driftedResp.aggregations) {
             setResult({
               data: undefined,
               status: FETCH_STATUS.FAILURE,
               error: `Unable to fetch drift data from ${productionIndex}`,
               errorBody:
                 getErrorMessagesFromEsShardFailures(driftedResp).join('\n') ??
-                extractErrorMessage(driftedResp),
+                extractErrorMessage(driftedResp as ErrorType),
             });
             return;
           }
+
+          const driftedRespAggs = unwrap(driftedResp.aggregations);
 
           const referenceHistogramRequest = {
             index: referenceIndex,
@@ -521,6 +529,15 @@ export const useFetchDataComparisonResult = (
             },
           };
 
+          const referenceHistogramRequestAggs: Record<
+            string,
+            estypes.AggregationsAggregationContainer
+          > = {};
+          const productionHistogramRequestAggs: Record<
+            string,
+            estypes.AggregationsAggregationContainer
+          > = {};
+
           const fieldRange: { [field: string]: Range } = {};
 
           for (const { field, type } of fields) {
@@ -528,12 +545,12 @@ export const useFetchDataComparisonResult = (
             if (type === DATA_COMPARISON_TYPE.NUMERIC) {
               const numBins = 10;
               const min = Math.min(
-                baselineResponse.aggregations[`${field}_stats`].min,
-                driftedResp.aggregations[`${field}_stats`].min
+                baselineResponseAggs[`${field}_stats`].min,
+                driftedRespAggs[`${field}_stats`].min
               );
               const max = Math.max(
-                baselineResponse.aggregations[`${field}_stats`].max,
-                driftedResp.aggregations[`${field}_stats`].max
+                baselineResponseAggs[`${field}_stats`].max,
+                driftedRespAggs[`${field}_stats`].max
               );
               const interval = (max - min) / numBins;
 
@@ -542,7 +559,7 @@ export const useFetchDataComparisonResult = (
               }
               const offset = min;
               fieldRange[field] = { min, max, interval };
-              referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
+              referenceHistogramRequestAggs[`${field}_histogram`] = {
                 histogram: {
                   field,
                   interval,
@@ -553,7 +570,7 @@ export const useFetchDataComparisonResult = (
                   },
                 },
               };
-              productionHistogramRequest.body.aggs[`${field}_histogram`] = {
+              productionHistogramRequestAggs[`${field}_histogram`] = {
                 histogram: {
                   field,
                   interval,
@@ -573,10 +590,15 @@ export const useFetchDataComparisonResult = (
             })
           );
 
-          const [productionHistogramResponse, referenceHistogramResponse] = await Promise.all([
-            dataSearch(productionHistogramRequest, signal),
-            dataSearch(referenceHistogramRequest, signal),
-          ]);
+          referenceHistogramRequest.body.aggs = referenceHistogramRequestAggs;
+          productionHistogramRequest.body.aggs = productionHistogramRequestAggs;
+
+          const [productionHistogramResponse, referenceHistogramResponse] = (
+            await Promise.all([
+              dataSearch(productionHistogramRequest, signal),
+              dataSearch(referenceHistogramRequest, signal),
+            ])
+          ).map((r) => ({ ...r, aggregations: unwrap(r.aggregations) }));
 
           const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
           for (const { field, type } of fields) {
@@ -587,7 +609,7 @@ export const useFetchDataComparisonResult = (
             ) {
               data[field] = {
                 type: DATA_COMPARISON_TYPE.NUMERIC,
-                pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
+                pValue: driftedRespAggs[`${field}_ks_test`].two_sided,
                 range: fieldRange[field],
                 referenceHistogram:
                   referenceHistogramResponse.aggregations[`${field}_histogram`]?.buckets ?? [],
@@ -597,17 +619,16 @@ export const useFetchDataComparisonResult = (
             }
             if (
               type === DATA_COMPARISON_TYPE.CATEGORICAL &&
-              driftedResp.aggregations &&
-              baselineResponse.aggregations
+              driftedRespAggs &&
+              baselineResponseAggs
             ) {
               data[field] = {
                 type: DATA_COMPARISON_TYPE.CATEGORICAL,
-                driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
-                driftedSumOtherDocCount:
-                  driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
-                baselineTerms: baselineResponse.aggregations[`${field}_terms`].buckets,
+                driftedTerms: driftedRespAggs[`${field}_terms`].buckets,
+                driftedSumOtherDocCount: driftedRespAggs[`${field}_terms`].sum_other_doc_count,
+                baselineTerms: baselineResponseAggs[`${field}_terms`].buckets,
                 baselineSumOtherDocCount:
-                  baselineResponse.aggregations[`${field}_terms`].sum_other_doc_count,
+                  baselineResponseAggs[`${field}_terms`].sum_other_doc_count,
               };
             }
           }
@@ -628,7 +649,7 @@ export const useFetchDataComparisonResult = (
             data: undefined,
             status: FETCH_STATUS.FAILURE,
             error: 'An error occurred while fetching data comparison data',
-            errorBody: JSON.stringify(e),
+            errorBody: extractErrorMessage(e),
           });
         }
       };
@@ -642,6 +663,7 @@ export const useFetchDataComparisonResult = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       dataSearch,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({
         fields,
         timeRanges,

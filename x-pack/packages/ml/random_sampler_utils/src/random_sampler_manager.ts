@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { createRandomSamplerWrapper } from './random_sampler_wrapper';
 
@@ -25,34 +24,6 @@ export const RANDOM_SAMPLER_OPTION = {
 
 export type RandomSamplerOption = typeof RANDOM_SAMPLER_OPTION[keyof typeof RANDOM_SAMPLER_OPTION];
 export type RandomSamplerProbability = number | null;
-
-export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{
-  value: RandomSamplerOption;
-  text: string;
-  'data-test-subj': string;
-}> = [
-  {
-    'data-test-subj': 'mlRandomSamplerOptionOnAutomatic',
-    value: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-    text: i18n.translate('xpack.ml.randomSamplerPreference.onAutomaticLabel', {
-      defaultMessage: 'On - automatic',
-    }),
-  },
-  {
-    'data-test-subj': 'mlRandomSamplerOptionOnManual',
-    value: RANDOM_SAMPLER_OPTION.ON_MANUAL,
-    text: i18n.translate('xpack.ml.randomSamplerPreference.onManualLabel', {
-      defaultMessage: 'On - manual',
-    }),
-  },
-  {
-    'data-test-subj': 'mlRandomSamplerOptionOff',
-    value: RANDOM_SAMPLER_OPTION.OFF,
-    text: i18n.translate('xpack.ml.randomSamplerPreference.offLabel', {
-      defaultMessage: 'Off',
-    }),
-  },
-];
 
 export class RandomSampler {
   private docCount$ = new BehaviorSubject<number>(0);

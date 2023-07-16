@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RandomSampler } from '@kbn/aiops-plugin/public/components/log_categorization/sampling_menu';
+import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 import {
   RANDOM_SAMPLER_OPTION,
@@ -61,14 +61,14 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
       case RANDOM_SAMPLER_OPTION.OFF:
         return {
           calloutInfoMessage: i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.message',
+            'xpack.dataVisualizer.randomSamplerSettingsPopUp.offCallout.message',
             {
               defaultMessage:
                 'Random sampling can be turned on to increase the speed of analysis, although some accuracy will be lost.',
             }
           ),
           buttonText: i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.button',
+            'xpack.dataVisualizer.randomSamplerSettingsPopUp.offCallout.button',
             {
               defaultMessage: 'No sampling',
             }
@@ -77,14 +77,14 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
       case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
         return {
           calloutInfoMessage: i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.message',
+            'xpack.dataVisualizer.randomSamplerSettingsPopUp.onAutomaticCallout.message',
             {
               defaultMessage:
-                'The pattern analysis will use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
+                'The view will use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
             }
           ),
           buttonText: i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.button',
+            'xpack.dataVisualizer.randomSamplerSettingsPopUp.onAutomaticCallout.button',
             {
               defaultMessage: 'Auto sampling',
             }
@@ -95,14 +95,14 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
       default:
         return {
           calloutInfoMessage: i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.message',
+            'xpack.dataVisualizer.randomSamplerSettingsPopUp.onManualCallout.message',
             {
               defaultMessage:
-                'The pattern analysis will use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
+                'The view will use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
             }
           ),
           buttonText: i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.button',
+            'xpack.dataVisualizer.randomSamplerSettingsPopUp.onManualCallout.button',
             {
               defaultMessage: 'Manual sampling',
             }
@@ -138,7 +138,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
         <EuiFormRow
           data-test-subj="aiopsRandomSamplerOptionsFormRow"
           label={i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
+            'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerRowLabel',
             {
               defaultMessage: 'Random sampling',
             }
@@ -175,7 +175,7 @@ const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
       <EuiSpacer size="m" />
 
       <FormattedMessage
-        id="xpack.aiops.logCategorization.randomSamplerSettingsPopUp.probabilityLabel"
+        id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
         defaultMessage="Probability used: {samplingProbability}%"
         values={{ samplingProbability: samplingProbability * 100 }}
       />
