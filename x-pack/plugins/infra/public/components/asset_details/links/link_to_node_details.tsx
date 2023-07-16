@@ -35,8 +35,6 @@ export const LinkToNodeDetails = ({ nodeName, nodeType, currentTime }: LinkToNod
     <EuiButtonEmpty
       data-test-subj="infraNodeContextPopoverOpenAsPageButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       {...nodeDetailMenuItemLinkProps}
     >
