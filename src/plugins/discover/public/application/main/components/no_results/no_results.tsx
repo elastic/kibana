@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { NoResultsSuggestions } from './no_results_suggestions';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import { WarningsCallout } from '../../../../components/common/warnings_callout';
 import { useDataState } from '../../hooks/use_data_state';
 import './_no_results.scss';
