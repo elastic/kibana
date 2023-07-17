@@ -8,25 +8,34 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useIntersectedOnce } from '../../../hooks/use_intersection_once';
 import { ChartLoader } from './chart_loader';
 import type { LensAttributes } from '../types';
 
-export interface LensWrapperProps
-  extends Pick<
-    TypedLensByValueInput,
-    'id' | 'overrides' | 'query' | 'filters' | 'style' | 'onBrushEnd' | 'onLoad' | 'disableTriggers'
-  > {
+export type LensWrapperProps = Pick<
+  TypedLensByValueInput,
+  | 'id'
+  | 'filters'
+  | 'query'
+  | 'style'
+  | 'onBrushEnd'
+  | 'hidePanelTitles'
+  | 'overrides'
+  | 'hidePanelTitles'
+  | 'disabledActions'
+  | 'disableTriggers'
+> & {
   attributes: LensAttributes | null;
   dateRange: TimeRange;
   extraActions: Action[];
   lastReloadRequestTime?: number;
   loading?: boolean;
   hasTitle?: boolean;
-}
+};
 
 export const LensWrapper = React.memo(
   ({
@@ -92,7 +101,14 @@ export const LensWrapper = React.memo(
     }, [loadedOnce]);
 
     return (
-      <div ref={intersectionRef}>
+      <div
+        ref={intersectionRef}
+        css={css`
+          .echLegend .echLegendList {
+            display: flex;
+          }
+        `}
+      >
         <ChartLoader
           loading={loading || !isReady}
           loadedOnce={loadedOnce}
