@@ -39,7 +39,7 @@ const processNavLinks = (
 ): ProjectNavigationLink[] => {
   const projectNavLinks: ProjectNavigationLink[] = [...securityNavLinks];
 
-  // ML. injecting external links and categories definition
+  // ML. injecting external sub-links and categories definition to the landing
   const mlLinkIndex = projectNavLinks.findIndex(({ id }) => id === SecurityPageName.mlLanding);
   if (mlLinkIndex !== -1) {
     projectNavLinks[mlLinkIndex] = {
@@ -49,8 +49,10 @@ const processNavLinks = (
     };
   }
 
-  // Dev Tools. pushing at the end
+  // Dev Tools. just pushing it
   projectNavLinks.push(devToolsNavLink);
+
+  // TODO: Project Settings. Override "Settings" link
 
   return filterDisabled(projectNavLinks, chromeNavLinks);
 };

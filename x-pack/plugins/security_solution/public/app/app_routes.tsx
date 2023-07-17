@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
-
 import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
+import { EuiLoadingElastic } from '@elastic/eui';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import type { Capabilities } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { CASES_FEATURE_ID, CASES_PATH, LANDING_PATH, SERVER_APP_ID } from '../../common/constants';
@@ -23,20 +23,21 @@ export interface AppRoutesProps {
 
 export const AppRoutes: React.FC<AppRoutesProps> = ({ services, subPluginRoutes }) => {
   const extraRoutes = useObservable(services.extraRoutes$, null);
-  if (extraRoutes === null) {
-    // The `extraRoutes` are defaulted to [], we need to discard the first `null` render
-    // to prevent the fallback redirection to take place before `extraRoutes` are actually rendered
-    return null;
-  }
 
   return (
     <Routes>
       {subPluginRoutes.map((route, index) => {
         return <Route key={`route-${index}`} {...route} />;
       })}
-      {extraRoutes.map((route, index) => {
+      {extraRoutes?.map((route, index) => {
         return <Route key={`extra-route-${index}`} {...route} />;
-      })}
+      }) ?? (
+        // `extraRoutes$` have array value (defaults to []), the first render we receive `null` from the useObservable initialization.
+        // We need to wait until we receive the array value to prevent the fallback redirection to the landing page.
+        <Route>
+          <EuiLoadingElastic size="xl" style={{ display: 'flex', margin: 'auto' }} />
+        </Route>
+      )}
       <Route>
         <RedirectRoute capabilities={services.application.capabilities} />
       </Route>
