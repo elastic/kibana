@@ -6,8 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_SUGGESTED_PROFILES } from '../constants';
-import { limitedNumberSchema } from '../schema';
 
 const UserWithoutProfileUidRt = rt.strict({
   email: rt.union([rt.undefined, rt.null, rt.string]),
@@ -43,33 +41,6 @@ export const UsersRt = rt.array(UserRt);
 export type User = rt.TypeOf<typeof UserRt>;
 export type UserWithProfileInfo = rt.TypeOf<typeof UserWithProfileInfoRt>;
 
-export const GetCaseUsersResponseRt = rt.strict({
-  assignees: rt.array(UserWithProfileInfoRt),
-  unassignedUsers: rt.array(UserWithProfileInfoRt),
-  participants: rt.array(UserWithProfileInfoRt),
-  reporter: UserWithProfileInfoRt,
-});
-
-export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;
-
-/**
- * User Profiles
- */
-
-export const SuggestUserProfilesRequestRt = rt.intersection([
-  rt.strict({
-    name: rt.string,
-    owners: rt.array(rt.string),
-  }),
-  rt.exact(
-    rt.partial({
-      size: limitedNumberSchema({ fieldName: 'size', min: 1, max: MAX_SUGGESTED_PROFILES }),
-    })
-  ),
-]);
-
-export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;
-
 export const CaseUserProfileRt = rt.strict({
   uid: rt.string,
 });
@@ -79,6 +50,5 @@ export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
 /**
  * Assignees
  */
-
 export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
 export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;

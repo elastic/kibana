@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { UserRt } from '../../../api';
+import { UserRt } from '../user/v1';
 
 /**
  * This represents the push to service UserAction. It lacks the connector_id because that is stored in a different field

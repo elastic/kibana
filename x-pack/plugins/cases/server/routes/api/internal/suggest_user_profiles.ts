@@ -10,6 +10,7 @@ import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '../../../../common/constants
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
+import type { userApiV1 } from '../../../../common/types/api';
 
 export const suggestUserProfilesRoute = (userProfileService: UserProfileService) =>
   createCasesRoute({
@@ -23,8 +24,15 @@ export const suggestUserProfilesRoute = (userProfileService: UserProfileService)
     },
     handler: async ({ request, response }) => {
       try {
+        const body = request.body as userApiV1.SuggestUserProfilesRequest;
+
+        const res = await userProfileService.suggest({
+          ...request,
+          body,
+        });
+
         return response.ok({
-          body: await userProfileService.suggest(request),
+          body: res,
         });
       } catch (error) {
         throw createCaseError({
