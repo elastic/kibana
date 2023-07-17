@@ -33,7 +33,6 @@ describe('usePostCase', () => {
   };
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('init', async () => {
