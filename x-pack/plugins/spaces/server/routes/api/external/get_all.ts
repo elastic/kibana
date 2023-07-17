@@ -7,15 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { ExternalRouteDeps } from '.';
+import type { ConfigurableRouteDeps } from '.';
 import type { Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
-export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, log, getSpacesService } = deps;
+export function initGetAllSpacesApi(deps: ConfigurableRouteDeps) {
+  const { router, log, getSpacesService, config } = deps;
 
-  externalRouter.get(
+  router.get(
     {
       path: '/api/spaces/space',
       validate: {
@@ -35,6 +35,7 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
           ),
         }),
       },
+      options: { access: config?.enablePublicApi ? 'public' : 'internal' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside GET /api/spaces/space`);

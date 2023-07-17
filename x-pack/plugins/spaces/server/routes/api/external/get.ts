@@ -8,14 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { ExternalRouteDeps } from '.';
+import type { ConfigurableRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
-export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSpacesService } = deps;
+export function initGetSpaceApi(deps: ConfigurableRouteDeps) {
+  const { router, getSpacesService, config } = deps;
 
-  externalRouter.get(
+  router.get(
     {
       path: '/api/spaces/space/{id}',
       validate: {
@@ -23,6 +23,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
           id: schema.string(),
         }),
       },
+      options: { access: config?.enablePublicApi ? 'public' : 'internal' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spaceId = request.params.id;

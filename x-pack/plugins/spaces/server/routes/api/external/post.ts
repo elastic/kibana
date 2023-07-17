@@ -15,14 +15,15 @@ import { spaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, log, getSpacesService } = deps;
+  const { router, log, getSpacesService } = deps;
 
-  externalRouter.post(
+  router.post(
     {
       path: '/api/spaces/space',
       validate: {
         body: spaceSchema,
       },
+      options: { access: 'public' },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);

@@ -42,6 +42,20 @@ export const ConfigSchema = schema.object({
       defaultValue: true,
     })
   ),
+  enablePublicApi: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.literal(false), // Only allow false when used
+    schema.boolean({
+      validate: (rawValue) => {
+        // This setting should not be configurable on-prem
+        if (rawValue === false) {
+          return 'Public HTTP API can only be disabled on serverless';
+        }
+      },
+      defaultValue: true,
+    })
+  ),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

@@ -69,5 +69,8 @@ server.versioned.strictClientVersionCheck: false
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
 
+# Disable Spaces Public HTTP API
+xpack.spaces.enablePublicApi: false
+
 # Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
 elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]

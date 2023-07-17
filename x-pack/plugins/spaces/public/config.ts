@@ -8,4 +8,5 @@
 export interface ConfigType {
   maxSpaces: number;
   allowFeatureVisibility: boolean;
+  enablePublicApi: boolean;
 }

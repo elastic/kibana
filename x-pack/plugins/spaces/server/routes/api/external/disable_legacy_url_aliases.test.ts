@@ -65,7 +65,7 @@ describe('_disable_legacy_url_aliases', () => {
     });
 
     initDisableLegacyUrlAliasesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,

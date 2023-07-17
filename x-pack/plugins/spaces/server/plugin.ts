@@ -28,7 +28,7 @@ import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { initExternalSpacesApi } from './routes/api/external';
+import { initConfigurableSpacesApi, initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
 import { SpacesSavedObjectsService } from './saved_objects';
@@ -148,18 +148,30 @@ export class SpacesPlugin
       logger: this.log,
     });
 
-    const externalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
-    initExternalSpacesApi({
-      externalRouter,
+    let routeConfig: ConfigType | undefined;
+    this.config$.subscribe((config) => {
+      routeConfig = config;
+    });
+    const router = core.http.createRouter<SpacesRequestHandlerContext>();
+    if (routeConfig?.enablePublicApi) {
+      initExternalSpacesApi({
+        router,
+        log: this.log,
+        getStartServices: core.getStartServices,
+        getSpacesService,
+        usageStatsServicePromise,
+      });
+    }
+    initConfigurableSpacesApi({
+      router,
       log: this.log,
       getStartServices: core.getStartServices,
       getSpacesService,
       usageStatsServicePromise,
+      config: routeConfig,
     });
-
-    const internalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initInternalSpacesApi({
-      internalRouter,
+      router,
       getSpacesService,
     });
 

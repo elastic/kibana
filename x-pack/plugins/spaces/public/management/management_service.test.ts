@@ -19,6 +19,7 @@ describe('ManagementService', () => {
   const config: ConfigType = {
     maxSpaces: 1000,
     allowFeatureVisibility: true,
+    enablePublicApi: true,
   };
 
   describe('#setup', () => {
