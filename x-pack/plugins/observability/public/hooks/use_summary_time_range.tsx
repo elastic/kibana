@@ -6,16 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import {
-  calculateTimeRangeBucketSize,
-  getAlertSummaryTimeRange,
-  useTimeBuckets,
-} from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from './constants';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { calculateTimeRangeBucketSize, getAlertSummaryTimeRange, useTimeBuckets } from '..';
+import { DEFAULT_INTERVAL, DEFAULT_DATE_FORMAT } from '../constants';
 
 export const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
   const timeBuckets = useTimeBuckets();
+  const dateFormat = useUiSetting<string>('dateFormat');
 
   const bucketSize = useMemo(
     () => calculateTimeRangeBucketSize(unifiedSearchDateRange, timeBuckets),
@@ -24,7 +22,7 @@ export const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
 
   return getAlertSummaryTimeRange(
     unifiedSearchDateRange,
-    bucketSize?.intervalString || DEFAULT_INTERVAL,
-    bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
+    bucketSize?.intervalString ?? DEFAULT_INTERVAL,
+    bucketSize?.dateFormat ?? dateFormat ?? DEFAULT_DATE_FORMAT
   );
 };

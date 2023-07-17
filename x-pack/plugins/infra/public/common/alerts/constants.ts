@@ -55,6 +55,3 @@ export const ALERTS_DOC_HREF =
   'https://www.elastic.co/guide/en/observability/current/create-alerts.html';
 
 export const ALERTS_PATH = '/app/observability/alerts';
-
-export const DEFAULT_INTERVAL = '60s';
-export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
