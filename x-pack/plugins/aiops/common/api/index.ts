@@ -11,13 +11,16 @@ import type {
 } from './log_rate_analysis';
 import { streamReducer } from './stream_reducer';
 
-export const API_ENDPOINT = {
+export const AIOPS_API_ENDPOINT = {
   EXPLAIN_LOG_RATE_SPIKES: '/internal/aiops/explain_log_rate_spikes',
   LOG_RATE_ANALYSIS: '/internal/aiops/log_rate_analysis',
 } as const;
 
-export interface ApiLogRateAnalysis {
-  endpoint: typeof API_ENDPOINT.LOG_RATE_ANALYSIS;
+type AiopsApiEndpointKeys = keyof typeof AIOPS_API_ENDPOINT;
+export type AiopsApiEndpoint = typeof AIOPS_API_ENDPOINT[AiopsApiEndpointKeys];
+
+export interface AiopsApiLogRateAnalysis {
+  endpoint: AiopsApiEndpoint;
   apiVersion: string;
   reducer: typeof streamReducer;
   body: AiopsLogRateAnalysisSchema;
