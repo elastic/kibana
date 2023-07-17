@@ -94,7 +94,7 @@ export class AnomalySwimlaneEmbeddableFactory
   public async create(
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
-  ): Promise<any> {
+  ): Promise<InstanceType<typeof AnomalySwimlaneEmbeddable>> {
     const services = await this.getServices();
     const { AnomalySwimlaneEmbeddable } = await import('./anomaly_swimlane_embeddable');
     return new AnomalySwimlaneEmbeddable(initialInput, services, parent);

@@ -13,11 +13,13 @@
       "lens",
       "licensing",
       "uiActions",
+      "embeddable",
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "embeddable",
     ],
     "extraPublicDirs": [
       "common"

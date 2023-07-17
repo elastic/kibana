@@ -1,0 +1,92 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EmbeddableFactoryDefinition,
+  ErrorEmbeddable,
+  IContainer,
+} from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
+import {
+  EmbeddableChangePointChart,
+  EmbeddableChangePointChartInput,
+} from './embeddable_change_point_chart';
+
+export interface EmbeddableChangePointChartStartServices {
+  data: DataPublicPluginStart;
+}
+
+export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart';
+
+export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefinition {
+  type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+
+  public readonly grouping = [
+    {
+      id: 'ml',
+      getDisplayName: () =>
+        i18n.translate('xpack.ml.navMenu.mlAppNameText', {
+          defaultMessage: 'Machine Learning',
+        }),
+      getIconType: () => 'machineLearningApp',
+    },
+  ];
+
+  constructor(
+    private readonly getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
+  ) {}
+
+  /**
+   * TODO
+   */
+  public isEditable = async () => {
+    return true;
+  };
+
+  /**
+   * TODO
+   */
+  canCreateNew() {
+    return true;
+  }
+
+  public async getExplicitInput(): Promise<Partial<any>> {
+    return Promise.resolve({});
+  }
+
+  getDisplayName() {
+    return i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
+      defaultMessage: 'Change point detection',
+    });
+  }
+
+  async create(input: EmbeddableChangePointChartInput, parent?: IContainer) {
+    try {
+      const [{ i18n: i18nService, theme, http, uiSettings, notifications }, { lens, data }] =
+        await this.getStartServices();
+
+      return new EmbeddableChangePointChart(
+        {
+          theme,
+          http,
+          i18n: i18nService,
+          uiSettings,
+          data,
+          notifications,
+          lens,
+        },
+        input,
+        parent
+      );
+    } catch (e) {
+      return new ErrorEmbeddable(e, input, parent);
+    }
+  }
+}

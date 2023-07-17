@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCommonChartProps } from './use_common_chart_props';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
@@ -14,6 +15,42 @@ export interface ChartComponentProps {
   fieldConfig: FieldConfig;
   annotation: ChangePointAnnotation;
 }
+
+export interface ChartComponentPropsAll {
+  fn: string;
+  metricField: string;
+  splitField?: string;
+  maxResults: number;
+  timeRange: TimeRange;
+  filters?: Filter[];
+  query?: Query;
+}
+
+export const ChartComponentP: FC<ChartComponentPropsAll> = ({ filters, query, timeRange }) => {
+  const {
+    lens: { EmbeddableComponent },
+  } = useAiopsAppContext();
+
+  const attributes = [];
+
+  return (
+    <EmbeddableComponent
+      id={`changePointChart_`}
+      style={{ height: 350 }}
+      timeRange={timeRange}
+      query={query}
+      filters={filters}
+      // @ts-ignore
+      attributes={attributes}
+      renderMode={'view'}
+      executionContext={{
+        type: 'aiops_change_point_detection_chart',
+        name: 'Change point detection',
+      }}
+      disableTriggers
+    />
+  );
+};
 
 export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation, fieldConfig }) => {
   const {

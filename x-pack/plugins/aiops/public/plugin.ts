@@ -8,7 +8,10 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 
-import {
+import { type CoreSetup } from '@kbn/core/public';
+import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
+import { EmbeddableChangePointChartFactory } from './embeddable';
+import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
@@ -18,11 +21,17 @@ import {
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
-  public setup() {
-    return {};
+  public setup(
+    core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
+    { embeddable }: AiopsPluginSetupDeps
+  ) {
+    if (embeddable) {
+      const factory = new EmbeddableChangePointChartFactory(core.getStartServices);
+      embeddable.registerEmbeddableFactory(factory.type, factory);
+    }
   }
 
-  public start(core: CoreStart, plugins: AiopsPluginStartDeps) {
+  public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     // importing async to keep the aiops plugin size to a minimum
     Promise.all([
       import('@kbn/ui-actions-plugin/public'),
@@ -42,7 +51,9 @@ export class AiopsPlugin
       }
     });
 
-    return {};
+    return {
+      EmbeddableChangePointChart: getEmbeddableChangePointChart(core, plugins),
+    };
   }
 
   public stop() {}
