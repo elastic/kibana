@@ -58,17 +58,20 @@ export default function ({ getService }: FtrProviderContext) {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
-        privateLocations: ['Test private location 0'],
+        privateLocations: ['Test private location 7'],
       };
       const testMonitors = [
         projectMonitors.monitors[0],
-        { ...secondMonitor, name: '!@#$%^&*()_++[\\-\\]- wow name' },
+        {
+          ...secondMonitor,
+          name: '!@#$%^&*()_++[\\-\\]- wow name',
+        },
       ];
       try {
         const body = await monitorTestService.addProjectMonitors(project, testMonitors);
         expect(body.createdMonitors.length).eql(1);
         expect(body.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
+          "Couldn't save or update monitor because of an invalid configuration."
         );
       } finally {
         await Promise.all([
@@ -96,16 +99,17 @@ export default function ({ getService }: FtrProviderContext) {
         expect(editedBody.updatedMonitors.length).eql(2);
 
         testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
+        testMonitors[1].privateLocations = ['Test private location 8'];
 
         const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
         expect(editedBodyError.createdMonitors.length).eql(0);
         expect(editedBodyError.updatedMonitors.length).eql(1);
         expect(editedBodyError.failedMonitors.length).eql(1);
         expect(editedBodyError.failedMonitors[0].details).eql(
-          'Failed to update journey: test-id-2'
+          'Invalid private location: "Test private location 8". Remove it or replace it with a valid private location.'
         );
         expect(editedBodyError.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
+          "Couldn't save or update monitor because of an invalid configuration."
         );
       } finally {
         await Promise.all([
