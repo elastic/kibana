@@ -351,18 +351,22 @@ export const RuleForm = ({
       >,
       ruleTypeValue
     ) => {
-      const producer = ruleTypeValue.ruleType.producer;
-      if (producer) {
+      const producers = Array.isArray(ruleTypeValue.ruleType.producer)
+        ? ruleTypeValue.ruleType.producer
+        : [ruleTypeValue.ruleType.producer];
+      if (producers.length > 0) {
         const checkEnabledResult = checkRuleTypeEnabled(ruleTypeValue.ruleType);
-        if (!checkEnabledResult.isEnabled) {
-          hasDisabledByLicenseRuleTypes = true;
+        for (const producer of producers) {
+          if (!checkEnabledResult.isEnabled) {
+            hasDisabledByLicenseRuleTypes = true;
+          }
+          (result[producer] = result[producer] || []).push({
+            name: ruleTypeValue.ruleType.name,
+            id: ruleTypeValue.ruleTypeModel.id,
+            checkEnabledResult,
+            ruleTypeItem: ruleTypeValue.ruleTypeModel,
+          });
         }
-        (result[producer] = result[producer] || []).push({
-          name: ruleTypeValue.ruleType.name,
-          id: ruleTypeValue.ruleTypeModel.id,
-          checkEnabledResult,
-          ruleTypeItem: ruleTypeValue.ruleTypeModel,
-        });
       }
       return result;
     },
