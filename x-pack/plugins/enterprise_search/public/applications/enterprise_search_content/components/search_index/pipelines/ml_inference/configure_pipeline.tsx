@@ -278,8 +278,7 @@ export const ConfigurePipeline: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.docsLink',
                 {
-                  defaultMessage:
-                    'Learn more about importing and using ML models in Enterprise Search',
+                  defaultMessage: 'Learn more about importing and using ML models in Search',
                 }
               )}
             </EuiLink>

@@ -26,13 +26,16 @@ import * as i18n from '../translations';
 
 interface OwnProps {
   currentConversation: Conversation;
-  isDisabled: boolean;
+  currentTitle: { title: string | JSX.Element; titleIcon: string };
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
-  currentTitle: { title: string | JSX.Element; titleIcon: string };
   docLinks: Omit<DocLinksStart, 'links'>;
-  selectedConversationId: string;
+  isDisabled: boolean;
+  isSettingsModalVisible: boolean;
+  onConversationSelected: (cId: string) => void;
   onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
+  selectedConversationId: string;
+  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
@@ -47,8 +50,11 @@ export const AssistantHeader: FunctionComponent<Props> = ({
   defaultProvider,
   docLinks,
   isDisabled,
+  isSettingsModalVisible,
+  onConversationSelected,
   onToggleShowAnonymizedValues,
   selectedConversationId,
+  setIsSettingsModalVisible,
   setSelectedConversationId,
   shouldDisableKeyboardShortcut,
   showAnonymizedValues,
@@ -76,7 +82,7 @@ export const AssistantHeader: FunctionComponent<Props> = ({
             defaultConnectorId={defaultConnectorId}
             defaultProvider={defaultProvider}
             selectedConversationId={selectedConversationId}
-            setSelectedConversationId={setSelectedConversationId}
+            onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
             isDisabled={isDisabled}
           />
@@ -106,8 +112,12 @@ export const AssistantHeader: FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <AssistantSettingsButton
+                  defaultConnectorId={defaultConnectorId}
+                  defaultProvider={defaultProvider}
                   isDisabled={isDisabled}
+                  isSettingsModalVisible={isSettingsModalVisible}
                   selectedConversation={currentConversation}
+                  setIsSettingsModalVisible={setIsSettingsModalVisible}
                   setSelectedConversationId={setSelectedConversationId}
                 />
               </EuiFlexItem>

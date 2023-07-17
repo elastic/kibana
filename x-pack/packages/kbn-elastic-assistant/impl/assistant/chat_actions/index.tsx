@@ -11,18 +11,18 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import * as i18n from '../translations';
 
 interface OwnProps {
-  clearTextArea: () => void;
   isDisabled: boolean;
   isLoading: boolean;
+  onChatCleared: () => void;
   onSendMessage: () => void;
 }
 
 type Props = OwnProps;
 
 export const ChatActions: FunctionComponent<Props> = ({
-  clearTextArea,
   isDisabled,
   isLoading,
+  onChatCleared,
   onSendMessage,
 }) => {
   return (
@@ -49,7 +49,7 @@ export const ChatActions: FunctionComponent<Props> = ({
               display="base"
               iconType="cross"
               isDisabled={isDisabled}
-              onClick={clearTextArea}
+              onClick={onChatCleared}
             />
           </EuiToolTip>
         </EuiFlexItem>

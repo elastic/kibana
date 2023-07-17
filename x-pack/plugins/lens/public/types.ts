@@ -380,11 +380,6 @@ export interface Datasource<T = unknown, P = unknown> {
     props: GetDropPropsArgs<T>
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean | undefined;
-  /**
-   * The datasource is allowed to cancel a close event on the dimension editor,
-   * mainly used for formulas
-   */
-  canCloseDimensionEditor?: (state: T) => boolean;
   getCustomWorkspaceRenderer?: (
     state: T,
     dragging: DraggingIdentifier,
