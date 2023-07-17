@@ -11,7 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { SavedObjectsClientCommon } from '../types';
+import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -89,7 +89,7 @@ export interface DataViewsServiceDeps {
   /**
    * Saved objects client interface wrapped in a common interface
    */
-  savedObjectsClient: SavedObjectsClientCommon;
+  savedObjectsClient: PersistenceAPI;
   /**
    * Wrapper around http call functionality so it can be used on client or server
    */
@@ -292,7 +292,7 @@ export interface DataViewsServicePublicMethods {
  */
 export class DataViewsService {
   private config: UiSettingsCommon;
-  private savedObjectsClient: SavedObjectsClientCommon;
+  private savedObjectsClient: PersistenceAPI;
   private savedObjectsCache?: Array<SavedObject<DataViewSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;

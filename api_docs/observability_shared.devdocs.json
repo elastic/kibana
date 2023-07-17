@@ -923,6 +923,39 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.TechnicalPreviewBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "TechnicalPreviewBadge",
+        "description": [],
+        "signature": [
+          "({ icon = 'beaker', size, style }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/technical_preview_badge/technical_preview_badge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TechnicalPreviewBadge.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ icon = 'beaker', size, style }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/technical_preview_badge/technical_preview_badge.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.useBreadcrumbs",
         "type": "Function",
         "tags": [],

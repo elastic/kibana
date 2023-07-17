@@ -10,16 +10,20 @@ import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 import { AGENTS_INDEX } from '../../common';
 import * as AgentService from '../services/agents';
 import { appContextService } from '../services';
+import { getAgentStatusForAgentPolicy } from '../services/agents';
 
-export interface AgentUsage {
-  total_enrolled: number;
+export interface AgentStatus {
   healthy: number;
   unhealthy: number;
   offline: number;
   inactive: number;
   unenrolled: number;
-  total_all_statuses: number;
   updating: number;
+}
+
+export interface AgentUsage extends AgentStatus {
+  total_enrolled: number;
+  total_all_statuses: number;
 }
 
 export const getAgentUsage = async (
@@ -55,10 +59,12 @@ export const getAgentUsage = async (
 };
 
 export interface AgentData {
-  agents_per_version: Array<{
-    version: string;
-    count: number;
-  }>;
+  agents_per_version: Array<
+    {
+      version: string;
+      count: number;
+    } & AgentStatus
+  >;
   agent_checkin_status: {
     error: number;
     degraded: number;
@@ -74,6 +80,7 @@ const DEFAULT_AGENT_DATA = {
 
 export const getAgentData = async (
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClient,
   abortController: AbortController
 ): Promise<AgentData> => {
   try {
@@ -115,8 +122,44 @@ export const getAgentData = async (
       { signal: abortController.signal }
     );
     const agentsPerVersion = ((response?.aggregations?.versions as any).buckets ?? []).map(
-      (bucket: any) => ({ version: bucket.key, count: bucket.doc_count })
+      (bucket: any) => ({
+        version: bucket.key,
+        count: bucket.doc_count,
+        healthy: 0,
+        unhealthy: 0,
+        updating: 0,
+        inactive: 0,
+        unenrolled: 0,
+        offline: 0,
+      })
     );
+
+    const getAgentStatusesPerVersion = async (version: string) => {
+      return await getAgentStatusForAgentPolicy(
+        esClient,
+        soClient,
+        undefined,
+        `agent.version:${version}`
+      );
+    };
+
+    for (const agent of agentsPerVersion) {
+      const {
+        inactive,
+        online: healthy,
+        error: unhealthy,
+        updating,
+        offline,
+        unenrolled,
+      } = await getAgentStatusesPerVersion(agent.version);
+      agent.healthy = healthy;
+      agent.unhealthy = unhealthy;
+      agent.updating = updating;
+      agent.inactive = inactive;
+      agent.unenrolled = unenrolled;
+      agent.offline = offline;
+    }
+
     const statuses = transformLastCheckinStatusBuckets(response);
 
     const agentsPerPolicy = ((response?.aggregations?.policies as any).buckets ?? []).map(

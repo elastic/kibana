@@ -12,20 +12,20 @@ import { getNodeDetailUrl } from '../../../pages/link_to';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
-export interface LinkToAlertsRule {
+export interface LinkToNodeDetailsProps {
   currentTime: number;
-  nodeId: string;
+  nodeName: string;
   nodeType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ nodeId, nodeType, currentTime }: LinkToAlertsRule) => {
+export const LinkToNodeDetails = ({ nodeName, nodeType, currentTime }: LinkToNodeDetailsProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
       nodeType,
-      nodeId,
+      nodeId: nodeName,
       from: nodeDetailFrom,
       to: currentTime,
     }),
@@ -35,8 +35,6 @@ export const LinkToNodeDetails = ({ nodeId, nodeType, currentTime }: LinkToAlert
     <EuiButtonEmpty
       data-test-subj="infraNodeContextPopoverOpenAsPageButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       {...nodeDetailMenuItemLinkProps}
     >

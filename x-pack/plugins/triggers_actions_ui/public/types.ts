@@ -594,7 +594,7 @@ export interface BulkActionsConfig {
 
 interface PanelConfig {
   id: number;
-  title?: string;
+  title?: JSX.Element | string;
   'data-test-subj'?: string;
 }
 
@@ -757,6 +757,7 @@ export interface RulesListFilters {
   searchText: string;
   tags: string[];
   types: string[];
+  kueryNode?: KueryNode;
 }
 
 export type UpdateFiltersProps =
@@ -775,6 +776,10 @@ export type UpdateFiltersProps =
   | {
       filter: 'ruleParams';
       value: Record<string, string | number | object>;
+    }
+  | {
+      filter: 'kueryNode';
+      value: KueryNode;
     };
 
 export interface RulesPageContainerState {
