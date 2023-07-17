@@ -56,7 +56,7 @@ export const ENROLLMENT_TOKENS = {
 export const UNINSTALL_TOKENS = {
   POLICY_ID_SEARCH_FIELD: 'uninstallTokensPolicyIdSearchInput',
   POLICY_ID_TABLE_FIELD: 'uninstallTokensPolicyIdField',
-  UNINSTALL_BUTTON: 'uninstallTokensUninstallButton',
+  VIEW_UNINSTALL_COMMAND_BUTTON: 'uninstallTokensViewCommandButton',
   UNINSTALL_COMMAND_FLYOUT: 'uninstall-command-flyout',
   TOKEN_FIELD: 'apiKeyField',
   SHOW_HIDE_TOKEN_BUTTON: 'showHideTokenButton',

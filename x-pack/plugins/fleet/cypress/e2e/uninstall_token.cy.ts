@@ -51,8 +51,8 @@ describe('Uninstall token page', () => {
     });
   });
 
-  it('should show flyout by clicking on delete button', () => {
-    cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_BUTTON).first().click();
+  it("should show flyout by clicking on 'View uninstall command' button", () => {
+    cy.getBySel(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON).first().click();
 
     waitForFetchingUninstallToken().then((fetchedToken) => {
       cy.get('@policyIdInFirstLine').should('equal', fetchedToken.policy_id);

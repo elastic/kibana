@@ -29,7 +29,7 @@ import { UninstallCommandFlyout } from '../../../components';
 import {
   ACTIONS_TITLE,
   CREATED_AT_TITLE,
-  GET_UNINSTALL_COMMAND_LABEL,
+  VIEW_UNINSTALL_COMMAND_LABEL,
   POLICY_ID_TITLE,
   SEARCH_BY_POLICY_ID_PLACEHOLDER,
   TOKEN_TITLE,
@@ -46,14 +46,14 @@ const PolicyIdField = ({ policyId }: { policyId: string }) => (
   </EuiText>
 );
 
-const GetUninstallCommandButton = ({ onClick }: { onClick: () => void }) => (
-  <EuiToolTip content={GET_UNINSTALL_COMMAND_LABEL}>
+const ViewUninstallCommandButton = ({ onClick }: { onClick: () => void }) => (
+  <EuiToolTip content={VIEW_UNINSTALL_COMMAND_LABEL}>
     <EuiButtonIcon
-      data-test-subj="uninstallTokensUninstallButton"
-      aria-label={GET_UNINSTALL_COMMAND_LABEL}
+      data-test-subj="uninstallTokensViewCommandButton"
+      aria-label={VIEW_UNINSTALL_COMMAND_LABEL}
       onClick={onClick}
-      iconType="minusInCircle"
-      color="danger"
+      iconType="inspect"
+      color="text"
     />
   </EuiToolTip>
 );
@@ -125,7 +125,7 @@ export const UninstallTokenListPage = () => {
         align: 'center',
         width: '70px',
         render: (_: any, { id }: UninstallTokenMetadata) => (
-          <GetUninstallCommandButton onClick={() => setTokenIdForFlyout(id)} />
+          <ViewUninstallCommandButton onClick={() => setTokenIdForFlyout(id)} />
         ),
       },
     ],

@@ -172,7 +172,7 @@ describe('Home page', () => {
       checkA11y({ skipFailures: false });
     });
     it('Uninstall Command Flyout', () => {
-      cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_BUTTON).first().click();
+      cy.getBySel(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON).first().click();
       cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT).should('be.visible');
       checkA11y({ skipFailures: false });
     });

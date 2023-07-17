@@ -22,9 +22,9 @@ export const ACTIONS_TITLE = i18n.translate('xpack.fleet.uninstallTokenList.acti
   defaultMessage: 'Actions',
 });
 
-export const GET_UNINSTALL_COMMAND_LABEL = i18n.translate(
-  'xpack.fleet.uninstallTokenList.getUninstallCommandLabel',
-  { defaultMessage: 'Get uninstall command' }
+export const VIEW_UNINSTALL_COMMAND_LABEL = i18n.translate(
+  'xpack.fleet.uninstallTokenList.viewUninstallCommandLabel',
+  { defaultMessage: 'View uninstall command' }
 );
 
 export const SEARCH_BY_POLICY_ID_PLACEHOLDER = i18n.translate(

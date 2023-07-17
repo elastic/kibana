@@ -151,11 +151,11 @@ describe('UninstallTokenList page', () => {
       expect(sendGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenMetadataFixture1.id);
     });
 
-    it('should show flyout for uninstall command when clicking on the "Get uninstall command" button', async () => {
+    it('should show flyout for uninstall command when clicking on the "View uninstall command" button', async () => {
       useGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
       const renderResult = render();
 
-      renderResult.getAllByTestId('uninstallTokensUninstallButton')[0].click();
+      renderResult.getAllByTestId('uninstallTokensViewCommandButton')[0].click();
 
       await waitFor(() => {
         expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
