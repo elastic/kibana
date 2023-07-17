@@ -8,15 +8,14 @@ import React, { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimeRange } from '@kbn/es-query';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
 import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import { infraAlertFeatureIds } from '../../../../pages/metrics/hosts/components/tabs/config';
-import type { StringDateRange } from '../../types';
 
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LinkToAlertsRule } from '../../links/link_to_alerts';
@@ -32,7 +31,7 @@ export const AlertsSummaryContent = ({
 }: {
   nodeName: string;
   nodeType: InventoryItemType;
-  dateRange: StringDateRange;
+  dateRange: TimeRange;
 }) => {
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
 
