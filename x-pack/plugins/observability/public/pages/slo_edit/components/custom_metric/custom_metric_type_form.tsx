@@ -11,12 +11,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIconTip,
-  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
@@ -129,92 +132,40 @@ export function CustomMetricIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
-      <EuiPanel hasBorder={true}>
-        <MetricIndicator
-          type="good"
-          indexFields={indexFields}
-          isLoadingIndex={isLoading}
-          equationLabel={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customMetric.goodEquationLabel',
-            { defaultMessage: 'Good equation' }
-          )}
-          metricLabel={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetricLabel',
-            { defaultMessage: 'Good metric' }
-          )}
-          filterLabel={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customMetric.goodFilterLabel',
-            { defaultMessage: 'Good filter' }
-          )}
-          metricTooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetric.tooltip',
-                {
-                  defaultMessage:
-                    'This data from this field will be aggregated with the "sum" aggregation.',
-                }
-              )}
-              position="top"
+
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.observability.slo.sloEdit.sliType.customMetric.goodTitle"
+              defaultMessage="Good events"
             />
-          }
-          equationTooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customMetric.goodEquation.tooltip',
-                {
-                  defaultMessage:
-                    'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
-                }
-              )}
-              position="top"
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <MetricIndicator type="good" indexFields={indexFields} isLoadingIndex={isLoading} />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.observability.slo.sloEdit.sliType.customMetric.totalTitle"
+              defaultMessage="Total events"
             />
-          }
-        />
-      </EuiPanel>
-      <EuiPanel hasBorder={true}>
-        <MetricIndicator
-          type="total"
-          indexFields={indexFields}
-          isLoadingIndex={isLoading}
-          equationLabel={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquationLabel',
-            { defaultMessage: 'Total equation' }
-          )}
-          metricLabel={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetricLabel',
-            { defaultMessage: 'Total metric' }
-          )}
-          filterLabel={i18n.translate(
-            'xpack.observability.slo.sloEdit.sliType.customMetric.totalFilterLabel',
-            { defaultMessage: 'Total filter' }
-          )}
-          metricTooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetric.tooltip',
-                {
-                  defaultMessage:
-                    'This data from this field will be aggregated with the "sum" aggregation.',
-                }
-              )}
-              position="top"
-            />
-          }
-          equationTooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.observability.slo.sloEdit.sliType.customMetric.totalEquation.tooltip',
-                {
-                  defaultMessage:
-                    'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
-                }
-              )}
-              position="top"
-            />
-          }
-        />
-      </EuiPanel>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <MetricIndicator type="total" indexFields={indexFields} isLoadingIndex={isLoading} />
+      </EuiFlexItem>
       <DataPreviewChart />
     </EuiFlexGroup>
   );

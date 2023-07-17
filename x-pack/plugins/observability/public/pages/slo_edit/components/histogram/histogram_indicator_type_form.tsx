@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
   EuiTitle,
@@ -119,7 +120,9 @@ export function HistogramIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
-
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
@@ -132,7 +135,9 @@ export function HistogramIndicatorTypeForm() {
         <EuiSpacer size="s" />
         <HistogramIndicator type="good" indexFields={indexFields} isLoadingIndex={isLoading} />
       </EuiFlexItem>
-
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>
