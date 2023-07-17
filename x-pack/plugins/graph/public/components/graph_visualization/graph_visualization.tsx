@@ -8,9 +8,9 @@
 import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
-import { isColorDark, hexToRgb } from '@elastic/eui';
 import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
+import { IconRenderer } from '../icon_renderer';
 
 export interface GraphVisualizationProps {
   workspace: Workspace;
@@ -144,90 +144,85 @@ export function GraphVisualization({
         {workspace.nodes &&
           workspace.nodes
             .filter((node) => !node.parent)
-            .map((node) => (
-              <g
-                key={makeNodeId(node.data.field, node.data.term)}
-                onClick={(e) => {
-                  nodeClick(node, e);
-                }}
-                onMouseDown={(e) => {
-                  // avoid selecting text when selecting nodes
-                  if (e.ctrlKey || e.shiftKey) {
-                    e.preventDefault();
-                  }
-                }}
-                className="gphNode"
-              >
-                <circle
-                  cx={node.kx}
-                  cy={node.ky}
-                  r={node.scaledSize}
-                  className={classNames('gphNode__circle', {
-                    'gphNode__circle--selected': node.isSelected,
-                  })}
-                  style={{ fill: node.color }}
-                />
-                {node.icon && (
-                  <text
-                    className={classNames('fa gphNode__text', {
-                      'gphNode__text--inverse': isColorDark(...hexToRgb(node.color)),
+            .map((node) => {
+              return (
+                <g
+                  key={makeNodeId(node.data.field, node.data.term)}
+                  onClick={(e) => {
+                    nodeClick(node, e);
+                  }}
+                  onMouseDown={(e) => {
+                    // avoid selecting text when selecting nodes
+                    if (e.ctrlKey || e.shiftKey) {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="gphNode"
+                >
+                  <circle
+                    cx={node.kx}
+                    cy={node.ky}
+                    r={node.scaledSize}
+                    className={classNames('gphNode__circle', {
+                      'gphNode__circle--selected': node.isSelected,
                     })}
-                    transform="translate(0,5)"
-                    textAnchor="middle"
-                    x={node.kx}
-                    y={node.ky}
-                  >
-                    {node.icon.code}
-                  </text>
-                )}
+                    style={{ fill: node.color }}
+                  />
+                  <IconRenderer
+                    icon={node.icon}
+                    color={node.color}
+                    x={node.kx - 7.5}
+                    y={node.ky - 8.5}
+                  />
 
-                {node.label.length < 30 && (
-                  <text
-                    className="gphNode__label"
-                    textAnchor="middle"
-                    transform="translate(0,22)"
-                    x={node.kx}
-                    y={node.ky}
-                  >
-                    {node.label}
-                  </text>
-                )}
-                {node.label.length >= 30 && (
-                  <foreignObject
-                    width="100"
-                    height="20"
-                    transform="translate(-50,15)"
-                    x={node.kx}
-                    y={node.ky}
-                  >
-                    <p className="gphNode__label gphNode__label--html gphNoUserSelect">
-                      {node.label}
-                    </p>
-                  </foreignObject>
-                )}
-
-                {node.numChildren > 0 && (
-                  <g>
-                    <circle
-                      r="5"
-                      className="gphNode__markerCircle"
-                      transform="translate(10,10)"
-                      cx={node.kx}
-                      cy={node.ky}
-                    />
+                  {node.label.length < 30 && (
                     <text
-                      className="gphNode__markerText"
+                      className="gphNode__label"
                       textAnchor="middle"
-                      transform="translate(10,12)"
+                      transform="translate(0,22)"
                       x={node.kx}
                       y={node.ky}
                     >
-                      {node.numChildren}
+                      {node.label}
                     </text>
-                  </g>
-                )}
-              </g>
-            ))}
+                  )}
+                  {node.label.length >= 30 && (
+                    <foreignObject
+                      width="100"
+                      height="20"
+                      transform="translate(-50,15)"
+                      x={node.kx}
+                      y={node.ky}
+                    >
+                      <p className="gphNode__label gphNode__label--html gphNoUserSelect">
+                        {node.label}
+                      </p>
+                    </foreignObject>
+                  )}
+
+                  {node.numChildren > 0 && (
+                    <g>
+                      <circle
+                        r="5"
+                        className="gphNode__markerCircle"
+                        transform="translate(10,10)"
+                        cx={node.kx}
+                        cy={node.ky}
+                      />
+                      <text
+                        className="gphNode__markerText"
+                        textAnchor="middle"
+                        transform="translate(10,12)"
+                        x={node.kx}
+                        y={node.ky}
+                      >
+                        {node.numChildren}
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
       </g>
     </svg>
   );
