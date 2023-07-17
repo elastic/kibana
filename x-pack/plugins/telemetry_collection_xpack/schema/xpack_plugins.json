@@ -5504,7 +5504,7 @@
               "pod_name": {
                 "type": "keyword"
               },
-              "doc_count": {
+              "total_doc_count": {
                 "type": "long"
               },
               "process_doc_count": {

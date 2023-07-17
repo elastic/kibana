@@ -169,7 +169,7 @@ const getCloudDefendPodsStats = (
         pod_name: pod.key,
         container_image_name: pod.container_image_name?.buckets?.[0]?.key,
         container_image_tag: pod.container_image_tag?.buckets?.[0]?.key,
-        doc_count: pod.doc_count,
+        total_doc_count: pod.doc_count,
         file_doc_count: pod.file_doc_count.doc_count,
         process_doc_count: pod.process_doc_count.doc_count,
         alert_doc_count: pod.alert_doc_count.doc_count,
