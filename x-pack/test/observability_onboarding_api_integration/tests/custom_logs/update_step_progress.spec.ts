@@ -100,10 +100,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           id: onboardingId,
         });
 
-        expect(savedState.attributes.progress?.[step.name]).to.eql({
-          status: step.status,
-          message: '',
-        });
+        const stepProgress = savedState.attributes.progress?.[step.name];
+        expect(stepProgress).to.have.property('status', step.status);
       });
 
       it('updates step status with message', async () => {
@@ -124,10 +122,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           id: onboardingId,
         });
 
-        expect(savedState.attributes.progress?.[step.name]).to.eql({
-          status: step.status,
-          message: step.message,
-        });
+        const stepProgress = savedState.attributes.progress?.[step.name];
+        expect(stepProgress).to.have.property('status', step.status);
+        expect(stepProgress).to.have.property('message', step.message);
       });
 
       afterEach(async () => {

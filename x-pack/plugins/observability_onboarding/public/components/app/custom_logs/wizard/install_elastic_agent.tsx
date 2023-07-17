@@ -16,11 +16,8 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiStepsProps,
-  EuiPanel,
   EuiSwitch,
   EuiText,
-  EuiCallOut,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Buffer } from 'buffer';
@@ -36,6 +33,7 @@ import {
 } from '../../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
+import { StepStatus } from './step_status';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
@@ -210,14 +208,13 @@ export function InstallElasticAgent() {
           title,
           children: null,
           status: stepStatus ?? ('incomplete' as const),
-          message: progress?.[id]?.message ?? '',
+          message: progress?.[id]?.message,
         };
       }
       return {
         title: incompleteTitle,
         children: null,
         status: 'incomplete' as const,
-        message: '',
       };
     },
     [progressData?.progress]
@@ -644,59 +641,4 @@ function oneLine(parts: TemplateStringsArray, ...args: string[]) {
 type WizardState = ReturnType<ReturnType<typeof useWizard>['getState']>;
 function hasAlreadySavedFlow({ apiKeyEncoded, onboardingId }: WizardState) {
   return Boolean(apiKeyEncoded && onboardingId);
-}
-
-function StepStatus({
-  status,
-  title,
-  message,
-}: {
-  status: EuiStepsProps['steps'][number]['status'];
-  title: string;
-  message: string;
-}) {
-  if (status === 'loading') {
-    return (
-      <EuiFlexItem>
-        <EuiPanel color="transparent">
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued">{title}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    );
-  }
-  if (status === 'complete') {
-    return (
-      <EuiFlexItem>
-        <EuiCallOut title={title} color="success" iconType="check">
-          {message}
-        </EuiCallOut>
-      </EuiFlexItem>
-    );
-  }
-  if (status === 'danger') {
-    return (
-      <EuiFlexItem>
-        <EuiCallOut title={title} color="danger" iconType="warning">
-          {message}
-        </EuiCallOut>
-      </EuiFlexItem>
-    );
-  }
-  if (status === 'warning') {
-    return (
-      <EuiFlexItem>
-        <EuiCallOut title={title} color="warning" iconType="warning">
-          {message}
-        </EuiCallOut>
-      </EuiFlexItem>
-    );
-  }
-  return null;
 }

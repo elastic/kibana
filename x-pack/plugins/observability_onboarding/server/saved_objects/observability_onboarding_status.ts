@@ -22,7 +22,7 @@ export interface ObservabilityOnboardingState {
     string,
     {
       status: string;
-      message: string;
+      message?: string;
     }
   >;
 }

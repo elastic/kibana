@@ -148,16 +148,18 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       id: t.string,
       name: t.string,
     }),
-    body: t.type({
-      status: t.string,
-      message: t.union([t.string, t.undefined]),
-    }),
+    body: t.intersection([
+      t.type({
+        status: t.string,
+      }),
+      t.partial({ message: t.string }),
+    ]),
   }),
-  async handler(resources): Promise<object> {
+  async handler(resources) {
     const {
       params: {
         path: { id, name },
-        body: { status, message = '' },
+        body: { status, message },
       },
       core,
     } = resources;
@@ -208,7 +210,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     }),
   }),
   async handler(resources): Promise<{
-    progress: Record<string, { status: string; message: string }>;
+    progress: Record<string, { status: string; message?: string }>;
   }> {
     const {
       params: {
@@ -247,15 +249,15 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
           esClient,
         });
         if (hasLogs) {
-          progress['logs-ingest'] = { status: 'complete', message: '' };
+          progress['logs-ingest'] = { status: 'complete' };
         } else {
-          progress['logs-ingest'] = { status: 'loading', message: '' };
+          progress['logs-ingest'] = { status: 'loading' };
         }
       } catch (error) {
         progress['logs-ingest'] = { status: 'warning', message: error.message };
       }
     } else {
-      progress['logs-ingest'] = { status: 'incomplete', message: '' };
+      progress['logs-ingest'] = { status: 'incomplete' };
     }
 
     return { progress };
