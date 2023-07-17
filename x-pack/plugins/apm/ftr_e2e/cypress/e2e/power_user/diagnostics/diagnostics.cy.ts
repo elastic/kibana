@@ -131,17 +131,13 @@ describe('Diagnostics', () => {
         );
       });
 
-      it('can navigate all tabs without encountering errors', () => {
+      it('hides the tabs that require cluster privileges', () => {
         cy.visitKibana('/app/apm/diagnostics');
 
-        cy.get('[data-test-subj="index-templates-tab"]').click();
-        cy.get('[data-test-subj="data-streams-tab"]').click();
-        cy.get('[data-test-subj="indices-tab"]').click();
-        cy.get('[data-test-subj="documents-tab"]').click();
-        cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
-          'have.length',
-          8
-        );
+        const tabs = ['Summary', 'Documents', 'Import/Export'];
+        cy.get(
+          '[data-test-subj="apmDiagnosticsTemplate"] .euiTabs .euiTab'
+        ).each((tab, i) => cy.wrap(tab).should('have.text', tabs[i]));
       });
     });
 

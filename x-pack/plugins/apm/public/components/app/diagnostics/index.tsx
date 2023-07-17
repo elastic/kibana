@@ -205,6 +205,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
 
   return (
     <ApmMainTemplate
+      data-test-subj="apmDiagnosticsTemplate"
       pageTitle="Diagnostics"
       environmentFilter={false}
       showServiceGroupSaveButton={false}

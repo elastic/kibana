@@ -132,11 +132,7 @@ export function getHasAllClusterPrivileges(
     return true;
   }
 
-  const hasAll = Object.values(
-    diagnosticsBundle.diagnosticsPrivileges.cluster
-  ).every((v) => v);
-
-  console.log('as', { hasAll });
-
-  return hasAll;
+  return Object.values(diagnosticsBundle.diagnosticsPrivileges.cluster).every(
+    (v) => v
+  );
 }
