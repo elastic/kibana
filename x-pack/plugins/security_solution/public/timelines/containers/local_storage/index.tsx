@@ -142,8 +142,8 @@ export const migrateTriggerActionsVisibleColumnsAlertTable88xTo89 = (storage: St
     if ('visibleColumns' in alertTableData) {
       const visibleColumns =
         alertTableData.visibleColumns as DataTableState['dataTable']['tableById'][string]['columns'];
-      const compliant = visibleColumns.every((val: unknown) => typeof val === 'string');
-      if (compliant) {
+      const v89CompliantFormat = visibleColumns.every((val: unknown) => typeof val === 'string');
+      if (v89CompliantFormat) {
         return;
       }
       const newVisibleColumns = visibleColumns
