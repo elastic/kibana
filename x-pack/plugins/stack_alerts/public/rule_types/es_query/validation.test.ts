@@ -278,4 +278,16 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.size.length).toBe(0);
     expect(hasExpressionValidationErrors(initialParams)).toBe(false);
   });
+
+  test('if esqlQuery property is not set should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      searchType: SearchType.esqlQuery,
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.esqlQuery.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.esqlQuery[0]).toBe(`ESQL query is required.`);
+  });
 });

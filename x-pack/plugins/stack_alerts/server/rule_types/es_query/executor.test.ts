@@ -17,6 +17,7 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { EsQueryRuleParams } from './rule_type_params';
 import { FetchEsQueryOpts } from './lib/fetch_es_query';
 import { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
+import { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -43,6 +44,10 @@ const mockFetchSearchSourceQuery = jest.fn();
 jest.mock('./lib/fetch_search_source_query', () => ({
   fetchSearchSourceQuery: (...args: [FetchSearchSourceQueryOpts]) =>
     mockFetchSearchSourceQuery(...args),
+}));
+const mockFetchEsqlQuery = jest.fn();
+jest.mock('./lib/fetch_esql_query', () => ({
+  fetchEsqlQuery: (...args: [FetchEsqlQueryOpts]) => mockFetchEsqlQuery(...args),
 }));
 
 const scheduleActions = jest.fn();
@@ -78,6 +83,7 @@ describe('es_query executor', () => {
     excludeHitsFromPreviousRun: true,
     aggType: 'count',
     groupBy: 'all',
+    searchConfiguration: {},
     esqlQuery: { esql: 'test-query' },
   };
 
@@ -173,12 +179,12 @@ describe('es_query executor', () => {
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,
-        params: { ...defaultProps, searchConfiguration: {}, searchType: 'searchSource' },
+        params: { ...defaultProps, searchType: 'searchSource' },
       });
       expect(mockFetchSearchSourceQuery).toHaveBeenCalledWith({
         ruleId: 'test-rule-id',
         alertLimit: 1000,
-        params: { ...defaultProps, searchConfiguration: {}, searchType: 'searchSource' },
+        params: { ...defaultProps, searchType: 'searchSource' },
         latestTimestamp: undefined,
         services: {
           searchSourceClient: searchSourceClientMock,
@@ -188,6 +194,41 @@ describe('es_query executor', () => {
         spacePrefix: '',
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
+    });
+
+    it('should call fetchEsqlQuery if searchType is esqlQuery', async () => {
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 491,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        params: { ...defaultProps, searchType: 'esqlQuery' },
+      });
+      expect(mockFetchEsqlQuery).toHaveBeenCalledWith({
+        ruleId: 'test-rule-id',
+        alertLimit: 1000,
+        params: { ...defaultProps, searchType: 'esqlQuery' },
+        services: {
+          scopedClusterClient: scopedClusterClientMock,
+          logger,
+          share: undefined,
+          dataViews: undefined,
+        },
+        spacePrefix: '',
+      });
+      expect(mockFetchEsQuery).not.toHaveBeenCalled();
+      expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();
     });
 
     it('should not create alert if compare function returns false for ungrouped alert', async () => {
@@ -352,6 +393,53 @@ describe('es_query executor', () => {
       expect(mockSetLimitReached).toHaveBeenCalledWith(false);
     });
 
+    it('should create alert if there are hits for ESQL alert', async () => {
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [
+            {
+              group: 'all documents',
+              count: 198,
+              hits: [],
+            },
+          ],
+          truncated: false,
+        },
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        params: {
+          ...defaultProps,
+          searchType: 'esqlQuery',
+          threshold: [0],
+          thresholdComparator: '>=' as Comparator,
+        },
+      });
+
+      expect(mockCreateAlert).toHaveBeenCalledTimes(1);
+      expect(mockCreateAlert).toHaveBeenNthCalledWith(1, 'query matched');
+      expect(scheduleActions).toHaveBeenCalledTimes(1);
+      expect(scheduleActions).toHaveBeenNthCalledWith(1, 'query matched', {
+        conditions: 'Query matched documents',
+        date: new Date(mockNow).toISOString(),
+        hits: [],
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        message: `rule 'test-rule-name' is active:
+
+- Value: 198
+- Conditions Met: Query matched documents over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+        title: "rule 'test-rule-name' matched query",
+        value: 198,
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
     it('should set limit as reached if results are truncated', async () => {
       mockFetchEsQuery.mockResolvedValueOnce({
         parsedResults: {
@@ -504,6 +592,53 @@ describe('es_query executor', () => {
 
 - Value: 0
 - Conditions Met: Number of matching documents for group "host-2" is NOT greater than or equal to 200 over 5m
+- Timestamp: ${new Date(mockNow).toISOString()}
+- Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
+        title: "rule 'test-rule-name' recovered",
+        value: 0,
+      });
+      expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
+      expect(mockSetLimitReached).toHaveBeenCalledWith(false);
+    });
+
+    it('should correctly handle recovered alerts for ESQL alert', async () => {
+      const mockSetContext = jest.fn();
+      mockGetRecoveredAlerts.mockReturnValueOnce([
+        {
+          getId: () => 'query matched',
+          setContext: mockSetContext,
+        },
+      ]);
+      mockFetchEsqlQuery.mockResolvedValueOnce({
+        parsedResults: {
+          results: [],
+          truncated: false,
+        },
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+      });
+      await executor(coreMock, {
+        ...defaultExecutorOptions,
+        params: {
+          ...defaultProps,
+          searchType: 'esqlQuery',
+          threshold: [0],
+          thresholdComparator: '>=' as Comparator,
+        },
+      });
+
+      expect(mockCreateAlert).not.toHaveBeenCalled();
+      expect(mockSetContext).toHaveBeenCalledTimes(1);
+      expect(mockSetContext).toHaveBeenNthCalledWith(1, {
+        conditions: 'Query did NOT match documents',
+        date: new Date(mockNow).toISOString(),
+        hits: [],
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+        message: `rule 'test-rule-name' is recovered:
+
+- Value: 0
+- Conditions Met: Query did NOT match documents over 5m
 - Timestamp: ${new Date(mockNow).toISOString()}
 - Link: https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id`,
         title: "rule 'test-rule-name' recovered",

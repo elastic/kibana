@@ -75,6 +75,20 @@ const defaultSearchSourceRuleParams: EsQueryRuleParams<SearchType.searchSource> 
   aggType: 'count',
 };
 
+const defaultEsqlRuleParams: EsQueryRuleParams<SearchType.esqlQuery> = {
+  size: 100,
+  thresholdComparator: '>',
+  threshold: [0],
+  timeWindowSize: 15,
+  timeWindowUnit: 's',
+  index: ['test-index'],
+  timeField: '@timestamp',
+  searchType: SearchType.esqlQuery,
+  esqlQuery: { esql: 'test' },
+  excludeHitsFromPreviousRun: true,
+  aggType: 'count',
+};
+
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
@@ -150,7 +164,10 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
 (httpMock.post as jest.Mock).mockImplementation(() => Promise.resolve({ fields: [] }));
 
 const Wrapper: React.FC<{
-  ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>;
+  ruleParams:
+    | EsQueryRuleParams<SearchType.searchSource>
+    | EsQueryRuleParams<SearchType.esQuery>
+    | EsQueryRuleParams<SearchType.esqlQuery>;
   metadata?: EsQueryRuleMetaData;
 }> = ({ ruleParams, metadata }) => {
   const [currentRuleParams, setCurrentRuleParams] = useState<CommonEsQueryRuleParams>(ruleParams);
@@ -192,7 +209,10 @@ const Wrapper: React.FC<{
 };
 
 const setup = (
-  ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>,
+  ruleParams:
+    | EsQueryRuleParams<SearchType.searchSource>
+    | EsQueryRuleParams<SearchType.esQuery>
+    | EsQueryRuleParams<SearchType.esqlQuery>,
   metadata?: EsQueryRuleMetaData
 ) => {
   return mountWithIntl(
@@ -218,6 +238,7 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_searchSource').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_esQuery').exists()).toBeTruthy();
+    expect(findTestSubject(wrapper, 'queryFormType_esqlQuery').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
   });
 
@@ -257,6 +278,23 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
   });
 
+  test('should switch to ESQL form type on selection and return back on cancel', async () => {
+    let wrapper = setup({} as EsQueryRuleParams<SearchType.searchSource>);
+    await act(async () => {
+      findTestSubject(wrapper, 'queryFormType_esqlQuery').simulate('click');
+    });
+    wrapper = await wrapper.update();
+    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
+    expect(wrapper.exists('[data-test-subj="queryEsqlEditor"]')).toBeTruthy();
+
+    await act(async () => {
+      findTestSubject(wrapper, 'queryFormTypeChooserCancel').simulate('click');
+    });
+    wrapper = await wrapper.update();
+    expect(wrapper.exists('[data-test-subj="queryEsqlEditor"]')).toBeFalsy();
+    expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
+  });
+
   test('should render QueryDSL view without the form type chooser', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
@@ -281,5 +319,20 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
     expect(findTestSubject(wrapper!, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
     expect(findTestSubject(wrapper!, 'selectDataViewExpression').exists()).toBeTruthy();
+  });
+
+  test('should render ESQL view without the form type chooser', async () => {
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = setup(defaultEsqlRuleParams, {
+        adHocDataViewList: [],
+        isManagementPage: false,
+      });
+      wrapper = await wrapper.update();
+    });
+    wrapper = await wrapper!.update();
+    expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
+    expect(findTestSubject(wrapper!, 'queryFormTypeChooserCancel').exists()).toBeFalsy();
+    expect(wrapper.exists('[data-test-subj="queryEsqlEditor"]')).toBeTruthy();
   });
 });

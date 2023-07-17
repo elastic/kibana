@@ -21,7 +21,11 @@ import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
-import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import {
+  OnlyEsqlQueryRuleParams,
+  OnlyEsQueryRuleParams,
+  OnlySearchSourceRuleParams,
+} from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
@@ -646,6 +650,149 @@ describe('ruleType', () => {
       expect(instance.scheduleActions).toHaveBeenCalled();
     });
   });
+
+  describe('ESQL query', () => {
+    const dataViewMock = {
+      id: 'test-id',
+      title: 'test-title',
+      timeFieldName: 'time-field',
+      fields: [
+        {
+          name: 'message',
+          type: 'string',
+          displayName: 'message',
+          scripted: false,
+          filterable: false,
+          aggregatable: false,
+        },
+        {
+          name: 'timestamp',
+          type: 'date',
+          displayName: 'timestamp',
+          scripted: false,
+          filterable: false,
+          aggregatable: false,
+        },
+      ],
+      toSpec: () => {
+        return { id: 'test-id', title: 'test-title', timeFieldName: 'time-field', fields: [] };
+      },
+    };
+    const defaultParams: OnlyEsqlQueryRuleParams = {
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: Comparator.LT,
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      searchType: 'esqlQuery',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
+    };
+
+    afterAll(() => {
+      jest.resetAllMocks();
+    });
+
+    it('validator succeeds with valid ESQL query params', async () => {
+      expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
+    });
+
+    it('validator fails with invalid ESQL query params - esQuery provided', async () => {
+      const paramsSchema = ruleType.validate.params;
+      const params: Partial<Writable<EsQueryRuleParams>> = {
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.LT,
+        threshold: [0],
+        esQuery: '',
+        searchType: 'esqlQuery',
+        aggType: 'count',
+        groupBy: 'all',
+      };
+
+      expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
+        `"[esQuery]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('rule executor handles no documents returned by ES', async () => {
+      const params = defaultParams;
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+
+      (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
+        dataViewMock.toSpec(),
+      ]);
+      (ruleServices.dataViews.get as jest.Mock).mockResolvedValueOnce({
+        ...dataViewMock.toSpec(),
+        toSpec: () => dataViewMock.toSpec(),
+      });
+
+      const searchResult = {
+        columns: [
+          { name: 'timestamp', type: 'date' },
+          { name: 'message', type: 'keyword' },
+        ],
+        values: [],
+      };
+      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        searchResult
+      );
+
+      await invokeExecutor({ params, ruleServices });
+      expect(ruleServices.alertFactory.create).not.toHaveBeenCalled();
+    });
+
+    it('rule executor throws an error when index does not have time field', async () => {
+      const params = defaultParams;
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+
+      (ruleServices.dataViews.get as jest.Mock).mockResolvedValueOnce({
+        ...dataViewMock.toSpec(),
+        timeFieldName: null,
+        toSpec: () => dataViewMock.toSpec(),
+      });
+
+      await expect(invokeExecutor({ params, ruleServices })).rejects.toThrow(
+        'Invalid data view without timeFieldName.'
+      );
+    });
+
+    it('rule executor schedule actions when condition met', async () => {
+      const params = defaultParams;
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+
+      (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
+        dataViewMock.toSpec(),
+      ]);
+      (ruleServices.dataViews.get as jest.Mock).mockResolvedValueOnce({
+        ...dataViewMock.toSpec(),
+        toSpec: () => dataViewMock.toSpec(),
+      });
+
+      const searchResult = {
+        columns: [
+          { name: 'timestamp', type: 'date' },
+          { name: 'message', type: 'keyword' },
+        ],
+        values: [
+          ['', 'message'],
+          ['', 'message'],
+          ['', 'message'],
+        ],
+      };
+      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        searchResult
+      );
+
+      await invokeExecutor({ params, ruleServices });
+
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
+      expect(instance.scheduleActions).toHaveBeenCalled();
+    });
+  });
 });
 
 function generateResults(
@@ -692,7 +839,7 @@ async function invokeExecutor({
   ruleServices,
   state,
 }: {
-  params: OnlySearchSourceRuleParams | OnlyEsQueryRuleParams;
+  params: OnlySearchSourceRuleParams | OnlyEsQueryRuleParams | OnlyEsqlQueryRuleParams;
   ruleServices: RuleExecutorServicesMock;
   state?: EsQueryRuleState;
 }) {
