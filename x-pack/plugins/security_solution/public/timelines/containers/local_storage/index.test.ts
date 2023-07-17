@@ -1491,7 +1491,7 @@ describe('SiemLocalStorage', () => {
   describe('should migrate Alert Table visible columns from v8.8.x', () => {
     // PR: https://github.com/elastic/kibana/pull/161054
     beforeEach(() => storage.clear());
-    it('should be a no-op when upgrading from 8.8.x -> 8.9', () => {
+    it('should migrate correctly when upgrading from 8.8.x -> 8.9', () => {
       Object.keys(v88xAlertOrignalData).forEach((k) => {
         storage.set(k, v88xAlertOrignalData[k as keyof typeof v88xAlertOrignalData]);
       });
