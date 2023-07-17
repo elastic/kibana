@@ -33,7 +33,7 @@ export const Error: React.FC<Props> = ({ message }) => {
 
 export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
   return (
-    <EuiPageTemplate offset={0} restrictWidth={false} bottomBorder={false}>
+    <EuiPageTemplate offset={0} restrictWidth={false} bottomBorder={false} grow={false}>
       <EuiPageTemplate.Header>
         <EuiTitle size="m">
           <h1>
@@ -55,17 +55,5 @@ export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
         </EuiCallOut>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
-    // <EuiPage style={{ flex: '1 0 auto' }}>
-    //   <EuiPageBody>
-    //     <EuiPageHeader>
-    //       <EuiPageHeaderSection>
-
-    //       </EuiPageHeaderSection>
-    //     </EuiPageHeader>
-    //     <EuiPageSection>
-
-    //     </EuiPageSection>
-    //   </EuiPageBody>
-    // </EuiPage>
   );
 };

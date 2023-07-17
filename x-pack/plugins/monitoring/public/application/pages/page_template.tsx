@@ -111,7 +111,12 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   const { supported, enabled } = getSetupModeState();
 
   return (
-    <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="monitoringAppContainer">
+    <EuiPageTemplate
+      offset={0}
+      restrictWidth={false}
+      grow={false}
+      data-test-subj="monitoringAppContainer"
+    >
       <EuiPageTemplate.Section>
         {setHeaderActionMenu && theme$ && (
           <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
