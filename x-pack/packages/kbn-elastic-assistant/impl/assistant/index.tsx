@@ -29,7 +29,7 @@ import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/typ
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { AssistantTitle } from './assistant_title';
 import { UpgradeButtons } from '../upgrade/upgrade_buttons';
-import { getMessageFromRawResponse, getWelcomeConversation } from './helpers';
+import { getDefaultConnector, getMessageFromRawResponse, getWelcomeConversation } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
@@ -37,7 +37,7 @@ import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selec
 import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
-import { CodeBlockDetails } from './use_conversation/helpers';
+import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversations/conversation_selector';
@@ -103,11 +103,15 @@ const AssistantComponent: React.FC<Props> = ({
     isSuccess: areConnectorsFetched,
     refetch: refetchConnectors,
   } = useLoadConnectors({ http });
-  const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
+  const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
   const defaultProvider = useMemo(
     () =>
-      (connectors?.[0] as ActionConnectorProps<{ apiProvider: OpenAiProviderType }, unknown>)
-        ?.config?.apiProvider,
+      (
+        getDefaultConnector(connectors) as ActionConnectorProps<
+          { apiProvider: OpenAiProviderType },
+          unknown
+        >
+      )?.config?.apiProvider,
     [connectors]
   );
 
@@ -145,6 +149,9 @@ const AssistantComponent: React.FC<Props> = ({
     [currentConversation, isAssistantEnabled]
   );
 
+  // Settings modal state (so it isn't shared between assistant instances like Timeline)
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+
   // Remember last selection for reuse after keyboard shortcut is pressed.
   // Clear it if there is no connectors
   useEffect(() => {
@@ -178,7 +185,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
-  const [suggestedUserPrompt, setSuggestedUserPrompt] = useState<string | null>(null);
+  const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
   const [showMissingConnectorCallout, setShowMissingConnectorCallout] = useState<boolean>(false);
 
@@ -234,13 +241,29 @@ const AssistantComponent: React.FC<Props> = ({
   ////
   //
 
-  const selectedSystemPrompt = useMemo(() => {
-    if (currentConversation.apiConfig.defaultSystemPromptId) {
-      return allSystemPrompts.find(
-        (prompt) => prompt.id === currentConversation.apiConfig.defaultSystemPromptId
+  const selectedSystemPrompt = useMemo(
+    () => getDefaultSystemPrompt({ allSystemPrompts, conversation: currentConversation }),
+    [allSystemPrompts, currentConversation]
+  );
+
+  const [editingSystemPromptId, setEditingSystemPromptId] = useState<string | undefined>(
+    selectedSystemPrompt?.id
+  );
+
+  const handleOnConversationSelected = useCallback(
+    (cId: string) => {
+      setSelectedConversationId(cId);
+      setEditingSystemPromptId(
+        getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cId] })?.id
       );
-    }
-  }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPromptId]);
+    },
+    [allSystemPrompts, conversations]
+  );
+
+  const handlePromptChange = useCallback((prompt: string) => {
+    setPromptTextPreview(prompt);
+    setUserPrompt(prompt);
+  }, []);
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -251,13 +274,15 @@ const AssistantComponent: React.FC<Props> = ({
           replacements: newReplacements,
         });
 
+      const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
+
       const message = await getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
         currentReplacements: currentConversation.replacements,
         onNewReplacements,
         promptText,
         selectedPromptContexts,
-        selectedSystemPrompt,
+        selectedSystemPrompt: systemPrompt,
       });
 
       const updatedMessages = appendMessage({
@@ -278,22 +303,41 @@ const AssistantComponent: React.FC<Props> = ({
       appendMessage({ conversationId: selectedConversationId, message: responseMessage });
     },
     [
-      selectedSystemPrompt,
-      appendMessage,
-      appendReplacements,
-      currentConversation.apiConfig,
+      allSystemPrompts,
       currentConversation.messages.length,
       currentConversation.replacements,
-      http,
-      selectedConversationId,
+      currentConversation.apiConfig,
       selectedPromptContexts,
+      appendMessage,
+      selectedConversationId,
       sendMessages,
+      http,
+      appendReplacements,
+      editingSystemPromptId,
     ]
   );
 
   const handleButtonSendMessage = useCallback(() => {
     handleSendMessage(promptTextAreaRef.current?.value?.trim() ?? '');
+    setUserPrompt('');
   }, [handleSendMessage, promptTextAreaRef]);
+
+  const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
+    setEditingSystemPromptId(systemPromptId);
+  }, []);
+
+  const handleOnChatCleared = useCallback(() => {
+    const defaultSystemPromptId = getDefaultSystemPrompt({
+      allSystemPrompts,
+      conversation: conversations[selectedConversationId],
+    })?.id;
+
+    setPromptTextPreview('');
+    setUserPrompt('');
+    setSelectedPromptContexts({});
+    clearConversation(selectedConversationId);
+    setEditingSystemPromptId(defaultSystemPromptId);
+  }, [allSystemPrompts, clearConversation, conversations, selectedConversationId]);
 
   const shouldDisableConversationSelectorHotkeys = useCallback(() => {
     const promptTextAreaHasFocus = document.activeElement === promptTextAreaRef.current;
@@ -347,7 +391,7 @@ const AssistantComponent: React.FC<Props> = ({
       }
 
       if (promptContext.suggestedUserPrompt != null) {
-        setSuggestedUserPrompt(promptContext.suggestedUserPrompt);
+        setUserPrompt(promptContext.suggestedUserPrompt);
       }
     }
   }, [
@@ -398,16 +442,21 @@ const AssistantComponent: React.FC<Props> = ({
           `}
         />
 
-        <EuiSpacer size={'m'} />
+        {currentConversation.messages.length !== 0 &&
+          Object.keys(selectedPromptContexts).length > 0 && <EuiSpacer size={'m'} />}
 
         {(currentConversation.messages.length === 0 ||
           Object.keys(selectedPromptContexts).length > 0) && (
           <PromptEditor
             conversation={currentConversation}
+            editingSystemPromptId={editingSystemPromptId}
             isNewConversation={currentConversation.messages.length === 0}
+            isSettingsModalVisible={isSettingsModalVisible}
             promptContexts={promptContexts}
             promptTextPreview={promptTextPreview}
+            onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPromptContexts={selectedPromptContexts}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
             setSelectedPromptContexts={setSelectedPromptContexts}
           />
         )}
@@ -417,7 +466,10 @@ const AssistantComponent: React.FC<Props> = ({
     ),
     [
       currentConversation,
+      editingSystemPromptId,
       getComments,
+      handleOnSystemPromptSelectionChange,
+      isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
       selectedPromptContexts,
@@ -474,7 +526,7 @@ const AssistantComponent: React.FC<Props> = ({
                   defaultConnectorId={defaultConnectorId}
                   defaultProvider={defaultProvider}
                   selectedConversationId={selectedConversationId}
-                  setSelectedConversationId={setSelectedConversationId}
+                  onConversationSelected={handleOnConversationSelected}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                   isDisabled={isDisabled}
                 />
@@ -504,8 +556,12 @@ const AssistantComponent: React.FC<Props> = ({
 
                     <EuiFlexItem grow={false}>
                       <AssistantSettingsButton
+                        defaultConnectorId={defaultConnectorId}
+                        defaultProvider={defaultProvider}
                         isDisabled={isDisabled}
+                        isSettingsModalVisible={isSettingsModalVisible}
                         selectedConversation={currentConversation}
+                        setIsSettingsModalVisible={setIsSettingsModalVisible}
                         setSelectedConversationId={setSelectedConversationId}
                       />
                     </EuiFlexItem>
@@ -536,12 +592,15 @@ const AssistantComponent: React.FC<Props> = ({
       <EuiModalBody>
         {comments}
 
-        {!isDisabled && showMissingConnectorCallout && (
+        {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
           <>
             <EuiSpacer />
             <EuiFlexGroup justifyContent="spaceAround">
               <EuiFlexItem grow={false}>
-                <ConnectorMissingCallout />
+                <ConnectorMissingCallout
+                  isSettingsModalVisible={isSettingsModalVisible}
+                  setIsSettingsModalVisible={setIsSettingsModalVisible}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
@@ -585,8 +644,8 @@ const AssistantComponent: React.FC<Props> = ({
             <PromptTextArea
               onPromptSubmit={handleSendMessage}
               ref={promptTextAreaRef}
-              handlePromptChange={setPromptTextPreview}
-              value={isSendingDisabled ? '' : suggestedUserPrompt ?? ''}
+              handlePromptChange={handlePromptChange}
+              value={isSendingDisabled ? '' : userPrompt ?? ''}
               isDisabled={isSendingDisabled}
             />
           </EuiFlexItem>
@@ -614,12 +673,7 @@ const AssistantComponent: React.FC<Props> = ({
                     isDisabled={isSendingDisabled}
                     aria-label={i18n.CLEAR_CHAT}
                     color="danger"
-                    onClick={() => {
-                      setPromptTextPreview('');
-                      clearConversation(selectedConversationId);
-                      setSelectedPromptContexts({});
-                      setSuggestedUserPrompt('');
-                    }}
+                    onClick={handleOnChatCleared}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -639,7 +693,12 @@ const AssistantComponent: React.FC<Props> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {!isDisabled && <QuickPrompts setInput={setSuggestedUserPrompt} />}
+        {!isDisabled && (
+          <QuickPrompts
+            setInput={setUserPrompt}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
+          />
+        )}
       </EuiModalFooter>
     </>
   );
