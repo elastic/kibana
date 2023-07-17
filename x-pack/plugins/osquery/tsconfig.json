@@ -72,6 +72,7 @@
     "@kbn/licensing-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/io-ts-utils"
   ]
 }
