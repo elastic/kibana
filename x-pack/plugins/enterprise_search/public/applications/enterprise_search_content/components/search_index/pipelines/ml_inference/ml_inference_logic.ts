@@ -99,6 +99,22 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
 const DEFAULT_CONNECTOR_FIELDS = ['body', 'title', 'id', 'type', 'url'];
 
+const getFullTargetFieldName = (
+  modelId: string,
+  sourceField: string,
+  targetField: string | undefined
+) => {
+  let suffixedTargetField = (targetField ?? '').length > 0 ? targetField! : sourceField;
+
+  // Temporary hardcoding of condition with ELSER model name
+  // This will get removed or modified once the naming pattern for all models has been defined
+  if (modelId.startsWith('.elser_model')) {
+    suffixedTargetField = `${suffixedTargetField}_expanded`;
+  }
+
+  return getMlInferencePrefixedFieldName(suffixedTargetField);
+};
+
 export interface MLInferencePipelineOption {
   disabled: boolean;
   disabledReason?: string;
@@ -376,7 +392,7 @@ export const MLInferenceLogic = kea<
       {
         addSelectedFieldsToMapping: (modal) => {
           const {
-            configuration: { fieldMappings, targetField },
+            configuration: { fieldMappings, modelID, targetField },
             selectedSourceFields,
           } = modal;
 
@@ -384,7 +400,7 @@ export const MLInferenceLogic = kea<
             ...(fieldMappings || []),
             ...(selectedSourceFields || []).map((fieldName) => ({
               sourceField: fieldName,
-              targetField: getMlInferencePrefixedFieldName((targetField ?? '').length > 0 ? targetField! : fieldName),
+              targetField: getFullTargetFieldName(modelID, fieldName, targetField),
             })),
           ];
 
