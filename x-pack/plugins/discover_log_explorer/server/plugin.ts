@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { DiscoverLogExplorerServerPlugin } from './plugin';
+import { Plugin } from '@kbn/core/server';
 
-export { config } from './config';
+export class DiscoverLogExplorerServerPlugin implements Plugin {
+  setup() {}
 
-export const plugin = () => new DiscoverLogExplorerServerPlugin();
+  start() {}
+}
