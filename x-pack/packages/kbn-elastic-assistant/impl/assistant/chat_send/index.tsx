@@ -19,7 +19,7 @@ import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 
-interface Props {
+export interface Props {
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>

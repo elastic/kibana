@@ -61,7 +61,7 @@ export const AssistantTitle: FunctionComponent<{
     <EuiModalHeaderTitle>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={currentTitle.titleIcon} size="xl" />
+          <EuiIcon data-test-subj="titleIcon" type={currentTitle.titleIcon} size="xl" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{currentTitle.title}</EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -69,6 +69,7 @@ export const AssistantTitle: FunctionComponent<{
             button={
               <EuiButtonIcon
                 aria-label={i18n.TOOLTIP_ARIA_LABEL}
+                data-test-subj="tooltipIcon"
                 iconSize="l"
                 iconType="iInCircle"
                 onClick={onButtonClick}
@@ -78,7 +79,7 @@ export const AssistantTitle: FunctionComponent<{
             closePopover={closePopover}
             anchorPosition="upCenter"
           >
-            <EuiText grow={false} css={{ maxWidth: '400px' }}>
+            <EuiText data-test-subj="tooltipContent" grow={false} css={{ maxWidth: '400px' }}>
               <h4>{i18n.TOOLTIP_TITLE}</h4>
               <p>{content}</p>
             </EuiText>

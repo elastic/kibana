@@ -42,7 +42,7 @@ export const BlockBotCallToAction: FunctionComponent<Props> = ({
         width: 100%;
       `}
     >
-      <EuiFlexItem>{connectorPrompt}</EuiFlexItem>
+      <EuiFlexItem data-test-subj="connector-prompt">{connectorPrompt}</EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
 };

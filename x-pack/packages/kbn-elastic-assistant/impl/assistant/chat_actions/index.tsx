@@ -38,6 +38,7 @@ export const ChatActions: FunctionComponent<Props> = ({
           <EuiButtonIcon
             aria-label={i18n.CLEAR_CHAT}
             color="danger"
+            data-test-subj="clear-chat"
             display="base"
             iconType="cross"
             isDisabled={isDisabled}
@@ -49,6 +50,7 @@ export const ChatActions: FunctionComponent<Props> = ({
         <EuiToolTip position="right" content={i18n.SUBMIT_MESSAGE}>
           <EuiButtonIcon
             aria-label={i18n.SUBMIT_MESSAGE}
+            data-test-subj="submit-chat"
             color="primary"
             display="base"
             iconType="returnKey"
