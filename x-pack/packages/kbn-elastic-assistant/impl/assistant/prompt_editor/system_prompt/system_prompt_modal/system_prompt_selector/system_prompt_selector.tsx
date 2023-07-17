@@ -148,25 +148,33 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           alignItems="center"
           className={'parentFlexGroup'}
           component={'span'}
-          gutterSize={'none'}
           justifyContent="spaceBetween"
           data-test-subj="systemPromptOptionSelector"
         >
-          <EuiFlexItem grow={1} component={'span'}>
+          <EuiFlexItem
+            grow={false}
+            component={'span'}
+            css={css`
+              width: calc(100% - 60px);
+            `}
+          >
             <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
-              <EuiFlexItem grow={false} component={'span'}>
-                <span className={contentClassName}>
-                  <EuiHighlight
-                    search={searchValue}
-                    css={css`
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                      max-width: 70%;
-                    `}
-                  >
-                    {label}
-                  </EuiHighlight>
-                </span>
+              <EuiFlexItem
+                component={'span'}
+                grow={false}
+                css={css`
+                  max-width: 100%;
+                `}
+              >
+                <EuiHighlight
+                  search={searchValue}
+                  css={css`
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  `}
+                >
+                  {label}
+                </EuiHighlight>
               </EuiFlexItem>
               {value?.isNewConversationDefault && (
                 <EuiFlexItem grow={false} component={'span'}>
@@ -179,7 +187,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           </EuiFlexItem>
 
           {!value?.isDefault && (
-            <EuiFlexItem grow={2} component={'span'}>
+            <EuiFlexItem grow={false} component={'span'}>
               <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
                 <EuiButtonIcon
                   iconType="cross"
