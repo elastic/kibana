@@ -30,7 +30,7 @@ export const getSearchResponseInterceptedWarnings = ({
 
   const interceptedWarnings: SearchResponseInterceptedWarning[] = [];
 
-  services.data.search.showWarnings?.(adapter, (warning, meta) => {
+  services.data.search.showWarnings(adapter, (warning, meta) => {
     const { request, response } = meta;
 
     interceptedWarnings.push({
