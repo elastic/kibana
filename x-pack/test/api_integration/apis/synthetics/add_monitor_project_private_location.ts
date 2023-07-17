@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
 
     let projectMonitors: ProjectMonitorsRequest;
 
@@ -44,6 +45,10 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(() => {
