@@ -72,7 +72,7 @@ describe('ruleType', () => {
         ],
         "params": Array [
           Object {
-            "description": "The number of hits to retrieve for each query.",
+            "description": "The number of documents to pass to the configured actions when the threshold condition is met.",
             "name": "size",
           },
           Object {
