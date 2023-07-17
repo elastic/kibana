@@ -42,7 +42,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   elasticsearch_sdk: { title: 'Elasticsearch SDK', parent_id: undefined },
   elastic_stack: { title: 'Elastic Stack', parent_id: undefined },
   email_security: { title: 'Email', parent_id: 'security' },
-  enterprise_search: { title: 'Enterprise Search', parent_id: undefined },
+  enterprise_search: { title: 'Search', parent_id: undefined },
   firewall_security: { title: 'Firewall', parent_id: 'security' },
   google_cloud: { title: 'Google Cloud', parent_id: undefined },
   iam: { title: 'Identity and Access Management', parent_id: 'security' },

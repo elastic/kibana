@@ -26,5 +26,6 @@
     "@kbn/telemetry-plugin",
     "@kbn/telemetry-collection-xpack-plugin",
     "@kbn/telemetry-tools",
+    "@kbn/ftr-common-functional-services",
   ]
 }

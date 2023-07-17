@@ -540,9 +540,9 @@
             "section": "def-common.ExpandableFlyoutProps",
             "text": "ExpandableFlyoutProps"
           },
-          " extends ",
+          " extends Omit<",
           "EuiFlyoutProps",
-          "<\"div\">"
+          "<\"div\">, \"onClose\">"
         ],
         "path": "packages/kbn-expandable-flyout/src/index.tsx",
         "deprecated": false,
