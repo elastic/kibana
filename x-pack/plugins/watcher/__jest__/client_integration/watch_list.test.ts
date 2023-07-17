@@ -13,7 +13,7 @@ import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchList;
 
-describe.skip('<WatchList />', () => {
+describe('<WatchList />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchListTestBed;
 
