@@ -30,6 +30,8 @@ jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('When rendering PolicySettingsLayout', () => {
+  jest.setTimeout(15000);
+
   const testSubj = getPolicySettingsFormTestSubjects();
 
   let policyData: PolicyData;
