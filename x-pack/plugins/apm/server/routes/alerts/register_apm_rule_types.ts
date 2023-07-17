@@ -20,6 +20,7 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import {
   AGENT_NAME,
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
@@ -54,6 +55,10 @@ export const apmRuleTypeAlertFieldMap = {
     required: false,
   },
   [ERROR_GROUP_ID]: {
+    type: 'keyword',
+    required: false,
+  },
+  [ERROR_GROUP_NAME]: {
     type: 'keyword',
     required: false,
   },

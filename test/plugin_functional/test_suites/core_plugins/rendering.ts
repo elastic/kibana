@@ -83,6 +83,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // what types of config settings can be exposed to the browser.
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
+        'console.autocompleteDefinitions.endpointsAvailability (string)',
         'console.ui.enabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
@@ -220,6 +221,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
+        // can't be used to infer urls or customer id from the outside
+        'xpack.cloud.serverless.project_id (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
