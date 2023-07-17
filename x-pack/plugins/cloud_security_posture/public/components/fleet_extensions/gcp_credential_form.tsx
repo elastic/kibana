@@ -46,6 +46,7 @@ const GCPSetupInfoContent = () => (
   </>
 );
 
+/* NEED TO FIND THE REAL URL HERE LATER*/
 const DocsLink = (
   <EuiText color={'subdued'} size="s">
     <FormattedMessage
@@ -53,10 +54,7 @@ const DocsLink = (
       defaultMessage="Read the {docs} for more details"
       values={{
         docs: (
-          <EuiLink
-            href="https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html"
-            external
-          >
+          <EuiLink href="https://cloud.google.com/docs/authentication" external>
             documentation
           </EuiLink>
         ),
@@ -66,7 +64,7 @@ const DocsLink = (
 );
 
 interface GcpFields {
-  fields: Record<string, { label: string; type?: 'password' | 'text' }>;
+  fields: Record<string, { label: string; type: 'password' | 'text' }>;
 }
 const gcpField: GcpFields = {
   fields: {
@@ -74,16 +72,19 @@ const gcpField: GcpFields = {
       label: i18n.translate('xpack.csp.gcpIntegration.projectidLabel', {
         defaultMessage: 'Project ID',
       }),
+      type: 'text',
     },
     credentials_file: {
       label: i18n.translate('xpack.csp.gcpIntegration.credentialsLabel', {
         defaultMessage: 'Credentials File',
       }),
+      type: 'text',
     },
     credentials_json: {
       label: i18n.translate('xpack.csp.gcpIntegration.credentialsjsonLabel', {
         defaultMessage: 'Credentials JSON',
       }),
+      type: 'text',
     },
   },
 };
@@ -112,7 +113,7 @@ const getSetupFormatOptions = (): Array<{
   },
 ];
 
-export type AwsCredentialsType = keyof typeof gcpField;
+type GcpCredentialsType = keyof typeof gcpField;
 
 interface Props {
   newPolicy: NewPackagePolicy;
@@ -137,10 +138,6 @@ const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields[keyo
     });
 
 export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
-  // We only have a value for 'aws.credentials.type' once the form has mounted.
-  // On initial render we don't have that value so we default to the first option.
-  // const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
-  //   const group = gcpField;
   const fields = getInputVarsFields(input, gcpField.fields);
 
   return (
@@ -148,13 +145,7 @@ export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       <GCPSetupInfoContent />
       <EuiSpacer size="l" />
       <GcpSetupAccessSelector
-        onChange={(optionId) =>
-          updatePolicy(
-            getPosturePolicy(newPolicy, input.type, {
-              'aws.credentials.type': { value: optionId },
-            })
-          )
-        }
+        onChange={(optionId) => updatePolicy(getPosturePolicy(newPolicy, input.type))}
       />
       <EuiSpacer size="l" />
       <GcpInputVarFields
@@ -170,12 +161,12 @@ export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
   );
 };
 
-const GcpSetupAccessSelector = ({ onChange }: { onChange(type: AwsCredentialsType): void }) => (
+const GcpSetupAccessSelector = ({ onChange }: { onChange(type: GcpCredentialsType): void }) => (
   <RadioGroup
     size="s"
     options={getSetupFormatOptions()}
     idSelected={'manual'}
-    onChange={(id) => onChange(id as AwsCredentialsType)}
+    onChange={(id: GcpCredentialsType) => onChange(id)}
   />
 );
 
