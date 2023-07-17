@@ -7,7 +7,7 @@
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
-import type { AlertStatus } from './types';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { ALERT_STATUS_QUERY } from './constants';
 import { buildCombinedHostsFilter } from '../../utils/filters/build';
 import type { AlertsEsQuery } from './types';

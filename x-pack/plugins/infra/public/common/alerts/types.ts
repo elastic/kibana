@@ -6,14 +6,7 @@
  */
 
 import type { BoolQuery, Filter } from '@kbn/es-query';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { ALERT_STATUS_ALL } from './constants';
-
-export type AlertStatus =
-  | typeof ALERT_STATUS_ACTIVE
-  | typeof ALERT_STATUS_RECOVERED
-  | typeof ALERT_STATUS_ALL;
-
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 export interface AlertStatusFilter {
   status: AlertStatus;
   query?: Filter['query'];

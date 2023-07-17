@@ -8,12 +8,12 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import {
   ACTIVE_ALERTS,
   ALL_ALERTS,
   RECOVERED_ALERTS,
 } from '../../../../../../common/alerts/constants';
-import { AlertStatus } from '../../../../../../common/alerts/types';
 export interface AlertStatusFilterProps {
   status: AlertStatus;
   onChange: (id: AlertStatus) => void;

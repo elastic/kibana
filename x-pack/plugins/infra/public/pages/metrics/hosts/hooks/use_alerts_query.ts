@@ -6,7 +6,7 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
-import type { AlertStatus } from '../../../../common/alerts/types';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsViewContext } from './use_hosts_view';
