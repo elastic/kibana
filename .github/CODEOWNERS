@@ -1110,11 +1110,16 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/stack_connectors/common/gen_ai @elastic/security-threat-hunting-explore
 
 ## Security Solution sub teams - Detection Rule Management
+/x-pack/plugins/security_solution/common/api/detection_engine/fleet_integrations @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/common/api/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/common/api/detection_engine/rule_management @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/common/api/detection_engine/rule_monitoring @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
+
 /x-pack/plugins/security_solution/common/detection_engine/fleet_integrations @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_monitoring @elastic/security-detection-rule-management
-/x-pack/plugins/security_solution/common/detection_engine/rule_schema @elastic/security-detection-rule-management @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
@@ -1149,7 +1154,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 ## Security Solution sub teams - Detection Engine
 
-/x-pack/plugins/security_solution/common/detection_engine/schemas/alerts @elastic/security-detection-engine
+/x-pack/plugins/security_solution/common/api/detection_engine @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/field_maps @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
