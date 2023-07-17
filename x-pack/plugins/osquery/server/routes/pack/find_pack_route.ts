@@ -9,14 +9,14 @@ import { filter, map, omit } from 'lodash';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import type { FindPacksRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID } from '../../../common';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
-import type { FindPacksRequestQuerySchema } from '../../../common/api/packs/find_packs_route';
-import { findPacksRequestQuerySchema } from '../../../common/api/packs/find_packs_route';
+import { findPacksRequestQuerySchema } from '../../../common/api';
 
 export const findPackRoute = (router: IRouter) => {
   router.versioned

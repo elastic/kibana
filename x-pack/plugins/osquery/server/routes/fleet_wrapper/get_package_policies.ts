@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { GetPackagePoliciesRequestQuerySchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getInternalSavedObjectsClient } from '../utils';
+import { getPackagePoliciesRequestQuerySchema } from '../../../common/api';
 
 export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -25,7 +27,10 @@ export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: Osquery
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: schema.object({}, { unknowns: 'allow' }),
+            query: buildRouteValidation<
+              typeof getPackagePoliciesRequestQuerySchema,
+              GetPackagePoliciesRequestQuerySchema
+            >(getPackagePoliciesRequestQuerySchema),
           },
         },
       },

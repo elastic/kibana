@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import { getAgentsRequestQuerySchema } from '../../../common/api';
+import type { GetAgentsRequestQuerySchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -23,7 +25,10 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: schema.object({}, { unknowns: 'allow' }),
+            query: buildRouteValidation<
+              typeof getAgentsRequestQuerySchema,
+              GetAgentsRequestQuerySchema
+            >(getAgentsRequestQuerySchema),
           },
         },
       },

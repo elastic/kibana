@@ -15,6 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -30,8 +31,7 @@ import {
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
-import type { CreatePackRequestBodySchema } from '../../../common/api/packs/create_pack_route';
-import { createPackRequestBodySchema } from '../../../common/api/packs/create_pack_route';
+import { createPackRequestBodySchema } from '../../../common/api';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 

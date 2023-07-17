@@ -6,6 +6,12 @@
  */
 
 export * from './common/utils';
+export * from './fleet_wrapper/get_agent_policies_route';
+export * from './fleet_wrapper/get_agent_details_route';
+export * from './fleet_wrapper/get_agent_policy_route';
+export * from './fleet_wrapper/get_agent_status_for_agent_policy_route';
+export * from './fleet_wrapper/get_agents_route';
+export * from './fleet_wrapper/get_package_policies_route';
 export * from './live_query/create_live_query_route';
 export * from './live_query/find_live_query_route';
 export * from './live_query/get_live_query_results_route';

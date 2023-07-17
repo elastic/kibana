@@ -16,6 +16,10 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import type {
+  UpdatePacksRequestParamsSchema,
+  UpdatePacksRequestBodySchema,
+} from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
@@ -33,14 +37,7 @@ import {
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
-import type {
-  UpdatePacksRequestParamsSchema,
-  UpdatePacksRequestBodySchema,
-} from '../../../common/api/packs/update_packs_route';
-import {
-  updatePacksRequestBodySchema,
-  updatePacksRequestParamsSchema,
-} from '../../../common/api/packs/update_packs_route';
+import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
