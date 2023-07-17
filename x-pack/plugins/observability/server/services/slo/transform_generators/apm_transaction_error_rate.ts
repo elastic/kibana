@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import {
-  MappingRuntimeFields,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALL_VALUE,
   apmTransactionErrorRateIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-
-import { InvalidTransformError } from '../../../errors';
-import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../assets/constants';
+import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
-import { Query } from './types';
+import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
+import { Query } from './types';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -33,11 +29,21 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
+    // These groupBy fields must be the one specified in the source query, otherwise
+    // the transform will create many permutation for each field values
     const extraGroupByFields = {
-      'service.name': { terms: { field: 'service.name' } },
-      'service.environment': { terms: { field: 'service.environment' } },
-      'transaction.name': { terms: { field: 'transaction.name' } },
-      'transaction.type': { terms: { field: 'transaction.type' } },
+      ...(slo.indicator.params.service !== ALL_VALUE && {
+        'service.name': { terms: { field: 'service.name' } },
+      }),
+      ...(slo.indicator.params.environment !== ALL_VALUE && {
+        'service.environment': { terms: { field: 'service.environment' } },
+      }),
+      ...(slo.indicator.params.transactionName !== ALL_VALUE && {
+        'transaction.name': { terms: { field: 'transaction.name' } },
+      }),
+      ...(slo.indicator.params.transactionType !== ALL_VALUE && {
+        'transaction.type': { terms: { field: 'transaction.type' } },
+      }),
     };
 
     return getSLOTransformTemplate(
@@ -56,7 +62,6 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const extraRuntimeMappings: MappingRuntimeFields = {};
     const queryFilter: Query[] = [
       {
         range: {
@@ -73,12 +78,6 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'service.name': indicator.params.service,
         },
       });
-      extraRuntimeMappings['service.name'] = {
-        type: 'keyword',
-        script: {
-          source: `emit('${indicator.params.service}')`,
-        },
-      };
     }
 
     if (indicator.params.environment !== ALL_VALUE) {
@@ -87,12 +86,6 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'service.environment': indicator.params.environment,
         },
       });
-      extraRuntimeMappings['service.environment'] = {
-        type: 'keyword',
-        script: {
-          source: `emit('${indicator.params.environment}')`,
-        },
-      };
     }
 
     if (indicator.params.transactionName !== ALL_VALUE) {
@@ -101,12 +94,6 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'transaction.name': indicator.params.transactionName,
         },
       });
-      extraRuntimeMappings['transaction.name'] = {
-        type: 'keyword',
-        script: {
-          source: `emit('${indicator.params.transactionName}')`,
-        },
-      };
     }
 
     if (indicator.params.transactionType !== ALL_VALUE) {
@@ -115,12 +102,6 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'transaction.type': indicator.params.transactionType,
         },
       });
-      extraRuntimeMappings['transaction.type'] = {
-        type: 'keyword',
-        script: {
-          source: `emit('${indicator.params.transactionType}')`,
-        },
-      };
     }
 
     if (indicator.params.filter) {
@@ -129,7 +110,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo, extraRuntimeMappings),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [

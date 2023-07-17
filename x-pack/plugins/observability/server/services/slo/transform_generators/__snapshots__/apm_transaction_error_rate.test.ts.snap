@@ -313,18 +313,6 @@ Object {
       },
     },
     "runtime_mappings": Object {
-      "service.environment": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "service.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
       "slo.budgetingMethod": Object {
         "script": Object {
           "source": "emit('timeslices')",
@@ -394,18 +382,6 @@ Object {
       "slo.timeWindow.type": Object {
         "script": Object {
           "source": "emit('rolling')",
-        },
-        "type": "keyword",
-      },
-      "transaction.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "transaction.type": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -589,18 +565,6 @@ Object {
       },
     },
     "runtime_mappings": Object {
-      "service.environment": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "service.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
       "slo.budgetingMethod": Object {
         "script": Object {
           "source": "emit('occurrences')",
@@ -664,18 +628,6 @@ Object {
       "slo.timeWindow.type": Object {
         "script": Object {
           "source": "emit('rolling')",
-        },
-        "type": "keyword",
-      },
-      "transaction.name": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "transaction.type": Object {
-        "script": Object {
-          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },

@@ -16,10 +16,7 @@ import { SLO } from '../../../domain/models';
 export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
-  public buildCommonRuntimeMappings(
-    slo: SLO,
-    extraRuntimeMappings: MappingRuntimeFields = {}
-  ): MappingRuntimeFields {
+  public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
     return {
       'slo.id': {
         type: 'keyword',
@@ -95,7 +92,6 @@ export abstract class TransformGenerator {
           source: `emit('${slo.timeWindow.type}')`,
         },
       },
-      ...extraRuntimeMappings,
     };
   }
 
