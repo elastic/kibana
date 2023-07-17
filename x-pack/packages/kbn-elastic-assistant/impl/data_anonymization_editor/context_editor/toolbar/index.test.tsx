@@ -40,6 +40,7 @@ describe('Toolbar', () => {
   const defaultProps = {
     onListUpdated: jest.fn(),
     onlyDefaults: false,
+    onReset: jest.fn(),
     onSelectAll: jest.fn(),
     selected: [], // no rows selected
     totalFields: 5,
