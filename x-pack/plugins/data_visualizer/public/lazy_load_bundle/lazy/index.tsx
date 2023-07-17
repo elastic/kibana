@@ -6,4 +6,5 @@
  */
 
 export type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../../application';
-export { FileDataVisualizer, IndexDataVisualizer, DataComparison } from '../../application';
+export { FileDataVisualizer, IndexDataVisualizer } from '../../application';
+export { DataComparison } from '../component_wrapper';
