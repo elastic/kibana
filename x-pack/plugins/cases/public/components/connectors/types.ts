@@ -12,10 +12,10 @@ import type {
   ActionType as ThirdPartySupportedActions,
   CaseField,
   ConnectorTypeFields,
-} from '../../../common/api';
+} from '../../../common/types/domain';
 import type { CaseActionConnector } from '../types';
 
-export type { ThirdPartyField as AllThirdPartyFields } from '../../../common/api';
+export type { ThirdPartyField as AllThirdPartyFields } from '../../../common/types/domain';
 
 export interface ThirdPartyField {
   label: string;

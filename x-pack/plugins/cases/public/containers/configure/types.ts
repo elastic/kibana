@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { ClosureType, ConfigurationAttributes } from '../../../common/types/domain';
-import type { CaseUser } from '../types';
 import type {
+  ClosureType,
+  ConfigurationAttributes,
   ActionConnector,
   ActionTypeConnector,
   ActionType,
   CaseConnector,
   CaseField,
   ThirdPartyField,
-} from '../../../common/api';
+} from '../../../common/types/domain';
+import type { CaseUser } from '../types';
 
 export type {
   ActionConnector,
