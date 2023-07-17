@@ -74,6 +74,7 @@ export async function openEditorFlyout(
         ownFocus: true,
         outsideClickCloses: false,
         onClose: onCancel,
+        className: 'navEmbeddablePanelEditor',
       }
     );
 
