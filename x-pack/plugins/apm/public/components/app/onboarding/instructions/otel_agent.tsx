@@ -196,6 +196,7 @@ export function OpenTelemetryInstructions({
   const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
     {
       field: 'setting',
+      width: '23%',
       name: i18n.translate(
         'xpack.apm.onboarding.config_otel.column.configSettings',
         {
@@ -205,6 +206,7 @@ export function OpenTelemetryInstructions({
     },
     {
       field: 'value',
+      width: '55%',
       name: i18n.translate(
         'xpack.apm.onboarding.config_otel.column.configValue',
         {
