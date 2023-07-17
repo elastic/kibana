@@ -34,6 +34,30 @@ export abstract class TransformGenerator {
           source: `emit('${ALL_VALUE}')`,
         },
       },
+      'slo.name': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${slo.name}')`,
+        },
+      },
+      'slo.description': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${slo.description}')`,
+        },
+      },
+      'slo.tags': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${slo.tags}')`,
+        },
+      },
+      'slo.indicator.type': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${slo.indicator.type}')`,
+        },
+      },
       'slo.objective.target': {
         type: 'double' as MappingRuntimeFieldType,
         script: {
@@ -83,6 +107,10 @@ export abstract class TransformGenerator {
       'slo.id': { terms: { field: 'slo.id' } },
       'slo.revision': { terms: { field: 'slo.revision' } },
       'slo.instanceId': { terms: { field: 'slo.instanceId' } },
+      'slo.name': { terms: { field: 'slo.name' } },
+      'slo.description': { terms: { field: 'slo.description' } },
+      'slo.tags': { terms: { field: 'slo.tags' } },
+      'slo.indicator.type': { terms: { field: 'slo.indicator.type' } },
       'slo.objective.target': { terms: { field: 'slo.objective.target' } },
       ...(slo.objective.timesliceWindow && {
         'slo.objective.sliceDurationInSeconds': {

@@ -158,14 +158,29 @@ Object {
           "field": "slo.budgetingMethod",
         },
       },
+      "slo.description": Object {
+        "terms": Object {
+          "field": "slo.description",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
         },
       },
+      "slo.indicator.type": Object {
+        "terms": Object {
+          "field": "slo.indicator.type",
+        },
+      },
       "slo.instanceId": Object {
         "terms": Object {
           "field": "slo.instanceId",
+        },
+      },
+      "slo.name": Object {
+        "terms": Object {
+          "field": "slo.name",
         },
       },
       "slo.objective.sliceDurationInSeconds": Object {
@@ -181,6 +196,11 @@ Object {
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
+        },
+      },
+      "slo.tags": Object {
+        "terms": Object {
+          "field": "slo.tags",
         },
       },
       "slo.timeWindow.duration": Object {
@@ -219,15 +239,33 @@ Object {
         },
         "type": "keyword",
       },
+      "slo.description": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
       "slo.id": Object {
         "script": Object {
           "source": Any<String>,
         },
         "type": "keyword",
       },
+      "slo.indicator.type": Object {
+        "script": Object {
+          "source": "emit('sli.kql.custom')",
+        },
+        "type": "keyword",
+      },
       "slo.instanceId": Object {
         "script": Object {
           "source": "emit('*')",
+        },
+        "type": "keyword",
+      },
+      "slo.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -248,6 +286,12 @@ Object {
           "source": "emit(1)",
         },
         "type": "long",
+      },
+      "slo.tags": Object {
+        "script": Object {
+          "source": "emit('critical,k8s')",
+        },
+        "type": "keyword",
       },
       "slo.timeWindow.duration": Object {
         "script": Object {
@@ -322,14 +366,29 @@ Object {
           "field": "slo.budgetingMethod",
         },
       },
+      "slo.description": Object {
+        "terms": Object {
+          "field": "slo.description",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
         },
       },
+      "slo.indicator.type": Object {
+        "terms": Object {
+          "field": "slo.indicator.type",
+        },
+      },
       "slo.instanceId": Object {
         "terms": Object {
           "field": "slo.instanceId",
+        },
+      },
+      "slo.name": Object {
+        "terms": Object {
+          "field": "slo.name",
         },
       },
       "slo.objective.target": Object {
@@ -340,6 +399,11 @@ Object {
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
+        },
+      },
+      "slo.tags": Object {
+        "terms": Object {
+          "field": "slo.tags",
         },
       },
       "slo.timeWindow.duration": Object {
@@ -378,15 +442,33 @@ Object {
         },
         "type": "keyword",
       },
+      "slo.description": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
       "slo.id": Object {
         "script": Object {
           "source": Any<String>,
         },
         "type": "keyword",
       },
+      "slo.indicator.type": Object {
+        "script": Object {
+          "source": "emit('sli.kql.custom')",
+        },
+        "type": "keyword",
+      },
       "slo.instanceId": Object {
         "script": Object {
           "source": "emit('*')",
+        },
+        "type": "keyword",
+      },
+      "slo.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -401,6 +483,12 @@ Object {
           "source": "emit(1)",
         },
         "type": "long",
+      },
+      "slo.tags": Object {
+        "script": Object {
+          "source": "emit('critical,k8s')",
+        },
+        "type": "keyword",
       },
       "slo.timeWindow.duration": Object {
         "script": Object {
