@@ -11,11 +11,8 @@ import {
   EuiCallOut,
   EuiDescriptionList,
   EuiSpacer,
-  EuiLoadingLogo,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isPending } from '../../../../hooks/use_fetcher';
+
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
@@ -26,24 +23,7 @@ import { useDiagnosticsContext } from '../context/use_diagnostics';
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsSummary() {
-  const { diagnosticsBundle, status } = useDiagnosticsContext();
-
-  const isLoading = isPending(status);
-
-  if (isLoading) {
-    return (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
-        title={
-          <h2>
-            {i18n.translate('xpack.apm.serviceMetrics.loading', {
-              defaultMessage: 'Loading diagnostics',
-            })}
-          </h2>
-        }
-      />
-    );
-  }
+  const { diagnosticsBundle } = useDiagnosticsContext();
 
   const hasLimitedPrivileges =
     diagnosticsBundle &&

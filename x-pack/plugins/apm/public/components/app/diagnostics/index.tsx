@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import * as t from 'io-ts';
-import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiIcon,
+  EuiLoadingLogo,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
@@ -29,6 +35,7 @@ import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
 import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
 import { getIndicesTabStatus } from './summary_tab/indicies_status';
 import { DiagnosticsApmDocuments } from './apm_documents_tab';
+import { isPending } from '../../../hooks/use_fetcher';
 
 const params = t.type({
   query: t.intersection([
@@ -90,10 +97,25 @@ export const diagnosticsRoute = {
 function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
   const routePath = useApmRoutePath();
   const router = useApmRouter();
-  const { diagnosticsBundle } = useDiagnosticsContext();
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
   const { query } = useApmParams('/diagnostics/*');
-
   const isCrossCluster = getIsCrossCluster(diagnosticsBundle);
+  const isLoading = isPending(status);
+
+  if (isLoading) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.serviceMetrics.loading', {
+              defaultMessage: 'Loading diagnostics',
+            })}
+          </h2>
+        }
+      />
+    );
+  }
 
   const tabs = [
     {
