@@ -23,7 +23,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data, metadata, onChangeMetaData }) => {
+> = ({ ruleParams, setRuleParams, setRuleProperty }) => {
   const { expressions } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit } = ruleParams;
 
@@ -103,9 +103,6 @@ export const EsqlQueryExpression: React.FC<
         rawResults: {
           cols: esqlTable.columns.map((col) => ({
             id: col.name,
-            field: col.name,
-            name: col.name,
-            actions: false,
           })),
           rows: esqlTable.values.slice(0, 5).map((row) => rowToDocument(esqlTable.columns, row)),
         },

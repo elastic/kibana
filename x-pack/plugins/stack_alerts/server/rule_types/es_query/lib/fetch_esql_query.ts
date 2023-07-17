@@ -84,7 +84,11 @@ export async function fetchEsqlQuery({
   };
 }
 
-const getEsqlQuery = (index: DataView, params: OnlyEsqlQueryRuleParams, alertLimit?: number) => {
+export const getEsqlQuery = (
+  index: DataView,
+  params: OnlyEsqlQueryRuleParams,
+  alertLimit?: number
+) => {
   const timeFieldName = index.timeFieldName;
 
   if (!timeFieldName) {
@@ -111,7 +115,7 @@ const getEsqlQuery = (index: DataView, params: OnlyEsqlQueryRuleParams, alertLim
   ];
 
   const query = {
-    query: `${params.esqlQuery.esql} | limit ${alertLimit}`,
+    query: alertLimit ? `${params.esqlQuery.esql} | limit ${alertLimit}` : params.esqlQuery.esql,
     filter: {
       bool: {
         filter: rangeFilter,
