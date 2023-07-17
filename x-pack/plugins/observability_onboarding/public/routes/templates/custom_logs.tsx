@@ -9,33 +9,37 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { ComponentType, useRef, useState } from 'react';
-import { breadcrumbsApp } from '../../../application/app';
+import { breadcrumbsApp } from '../../application/app';
+import { HorizontalSteps } from '../../components/app/custom_logs/wizard/horizontal_steps';
+import { Provider as WizardProvider } from '../../components/app/custom_logs/wizard';
 import {
   FilmstripFrame,
   FilmstripTransition,
   TransitionState,
-} from '../../shared/filmstrip_transition';
-import { Provider as WizardProvider, Step as WizardStep } from './wizard';
-import { HorizontalSteps } from './wizard/horizontal_steps';
+} from '../../components/shared/filmstrip_transition';
 
-export function CustomLogs() {
+interface Props {
+  children: React.ReactNode;
+}
+
+export function CustomLogs({ children }: Props) {
   useBreadcrumbs(
     [
       {
         text: i18n.translate(
-          'xpack.observability_onboarding.breadcrumbs.logs',
-          { defaultMessage: 'Logs' }
+          'xpack.observability_onboarding.breadcrumbs.customLogs',
+          { defaultMessage: 'Custom Logs' }
         ),
       },
     ],
     breadcrumbsApp
   );
-  return <AnimatedTransitionsWizard />;
+  return <AnimatedTransitionsWizard>{children}</AnimatedTransitionsWizard>;
 }
 
 const TRANSITION_DURATION = 180;
 
-function AnimatedTransitionsWizard() {
+function AnimatedTransitionsWizard({ children }: Props) {
   const [transition, setTransition] = useState<TransitionState>('ready');
   const TransitionComponent = useRef<ComponentType>(() => null);
 
@@ -89,9 +93,7 @@ function AnimatedTransitionsWizard() {
                 transition === 'back' ? <TransitionComponent.current /> : null
               }
             </FilmstripFrame>
-            <FilmstripFrame position="center">
-              <WizardStep />
-            </FilmstripFrame>
+            <FilmstripFrame position="center">{children}</FilmstripFrame>
             <FilmstripFrame position="right">
               {
                 // eslint-disable-next-line react/jsx-pascal-case
