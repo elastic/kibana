@@ -15,6 +15,8 @@ import type {
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
+import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
+import { cspmMetringTaskProperties } from './task_manager/cspmMetringTask';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -26,6 +28,7 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityConfig;
+  private cspmUsageReportingTask: SecurityUsageReportingTask | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
@@ -40,12 +43,27 @@ export class SecuritySolutionServerlessPlugin
     if (shouldRegister) {
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
     }
-
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
+
+    this.cspmUsageReportingTask = new SecurityUsageReportingTask({
+      core: _coreSetup,
+      logFactory: this.initializerContext.logger,
+      taskManager: pluginsSetup.taskManager,
+      taskType: cspmMetringTaskProperties.taskType,
+      taskTitle: cspmMetringTaskProperties.taskTitle,
+      meteringCallback: cspmMetringTaskProperties.meteringCallback,
+    });
+
     return {};
   }
 
   public start(_coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
+    this.cspmUsageReportingTask?.start({
+      taskManager: pluginsSetup.taskManager,
+      taskType: cspmMetringTaskProperties.taskType,
+      interval: cspmMetringTaskProperties.interval,
+      version: cspmMetringTaskProperties.version,
+    });
     return {};
   }
 
