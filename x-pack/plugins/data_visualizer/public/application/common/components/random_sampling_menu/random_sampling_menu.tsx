@@ -18,7 +18,6 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 import {
@@ -26,6 +25,7 @@ import {
   RANDOM_SAMPLER_SELECT_OPTIONS,
   RandomSamplerOption,
 } from '../../../index_data_visualizer/constants/random_sampler';
+import { ProbabilityUsedMessage } from './probability_used';
 
 interface Props {
   randomSampler: RandomSampler;
@@ -165,20 +165,4 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
       </EuiPanel>
     </EuiPopover>
   );
-};
-
-const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
-  samplingProbability,
-}) => {
-  return samplingProbability !== null ? (
-    <div data-test-subj="aiopsRandomSamplerProbabilityUsedMsg">
-      <EuiSpacer size="m" />
-
-      <FormattedMessage
-        id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
-        defaultMessage="Probability used: {samplingProbability}%"
-        values={{ samplingProbability: samplingProbability * 100 }}
-      />
-    </div>
-  ) : null;
 };
