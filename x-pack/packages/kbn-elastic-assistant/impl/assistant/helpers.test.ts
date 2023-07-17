@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { getWelcomeConversation } from './helpers';
+import { getDefaultConnector, getWelcomeConversation } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('getWelcomeConversation', () => {
   describe('isAssistantEnabled = false', () => {
@@ -110,6 +111,83 @@ describe('getWelcomeConversation', () => {
       };
       const result = getWelcomeConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(4);
+    });
+  });
+
+  describe('getDefaultConnector', () => {
+    it('should return undefined if connectors array is undefined', () => {
+      const connectors = undefined;
+      const result = getDefaultConnector(connectors);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined if connectors array is empty', () => {
+      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> =
+        [];
+      const result = getDefaultConnector(connectors);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return the connector id if there is only one connector', () => {
+      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+        {
+          actionTypeId: '.gen-ai',
+          isPreconfigured: false,
+          isDeprecated: false,
+          referencedByCount: 0,
+          isMissingSecrets: false,
+          isSystemAction: false,
+          secrets: {},
+          id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
+          name: 'OpenAI',
+          config: {
+            apiProvider: 'OpenAI',
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+          },
+        },
+      ];
+      const result = getDefaultConnector(connectors);
+
+      expect(result).toBe(connectors[0]);
+    });
+
+    it('should return undefined if there are multiple connectors', () => {
+      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+        {
+          actionTypeId: '.gen-ai',
+          isPreconfigured: false,
+          isDeprecated: false,
+          referencedByCount: 0,
+          isMissingSecrets: false,
+          isSystemAction: false,
+          secrets: {},
+          id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
+          name: 'OpenAI',
+          config: {
+            apiProvider: 'OpenAI 1',
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+          },
+        },
+        {
+          actionTypeId: '.gen-ai',
+          isPreconfigured: false,
+          isDeprecated: false,
+          referencedByCount: 0,
+          isMissingSecrets: false,
+          isSystemAction: false,
+          secrets: {},
+          id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
+          name: 'OpenAI',
+          config: {
+            apiProvider: 'OpenAI 2',
+            apiUrl: 'https://api.openai.com/v1/chat/completions',
+          },
+        },
+      ];
+      const result = getDefaultConnector(connectors);
+      expect(result).toBeUndefined();
     });
   });
 });
