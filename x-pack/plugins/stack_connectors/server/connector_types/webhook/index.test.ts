@@ -158,6 +158,7 @@ describe('config validation', () => {
     const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
       authType: WebhookAuthType.Basic,
+      hasAuth: true,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -171,6 +172,7 @@ describe('config validation', () => {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
         authType: WebhookAuthType.Basic,
+        hasAuth: true,
       };
       expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
         ...defaultValues,
@@ -197,6 +199,7 @@ describe('config validation', () => {
     const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
       authType: WebhookAuthType.Basic,
+      hasAuth: true,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -224,6 +227,7 @@ describe('config validation', () => {
         'Content-Type': 'application/json',
       },
       authType: WebhookAuthType.Basic,
+      hasAuth: true,
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -254,6 +258,7 @@ describe('config validation', () => {
         'Content-Type': 'application/json',
       },
       authType: WebhookAuthType.Basic,
+      hasAuth: true,
     };
 
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
