@@ -257,7 +257,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiText[data-test-subj="themeOverrideMessage"]');
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(0);
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
@@ -343,8 +343,9 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(1);
+      expect(overrideMsg.getElement().props.content).not.toEqual('');
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
       expect(themeMenu).toHaveLength(1);
@@ -380,8 +381,9 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(1);
+      expect(overrideMsg.getElement().props.content).not.toEqual('');
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
       expect(themeMenu).toHaveLength(1);
