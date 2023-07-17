@@ -18,7 +18,7 @@ oneOf:
       groupBy:
         $ref: 'groupby.yaml'
       searchConfiguration:
-        description: The query definition, which uses KQL or Lucene.
+        description: The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
         type: object
         properties:
           filter:

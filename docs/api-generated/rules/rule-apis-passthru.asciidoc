@@ -4448,7 +4448,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="params_es_query_rule_oneOf_searchConfiguration"><code>params_es_query_rule_oneOf_searchConfiguration</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The query definition, which uses KQL or Lucene.</div>
+    <div class='model-description'>The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.</div>
     <div class="field-items">
       <div class="param">filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#filter">array[filter]</a></span>  </div>
 <div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#oneOf<string,array>">oneOf<string,array></a></span> The indices to query. </div>
