@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.deleteIndices(`user-${jobIdSpace3}`);
       await ml.api.deleteIndices(`user-${jobIdSpace4}`);
       await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects([idSpace3, idSpace4]);
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('should stop job from same space', async () => {

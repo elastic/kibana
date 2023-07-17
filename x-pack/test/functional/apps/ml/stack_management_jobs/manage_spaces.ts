@@ -114,6 +114,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
 
+      await spacesService.create({
+        id: spaceIds.idSpace1,
+        name: 'space_one',
+        disabledFeatures: [],
+      });
+
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
@@ -135,8 +141,8 @@ export default function ({ getService }: FtrProviderContext) {
           await spacesService.delete(spaceId);
         }
       }
-      await ml.testResources.cleanMLSavedObjects([spaceIds.idSpaceDefault, spaceIds.idSpace1]);
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
     });
