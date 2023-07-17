@@ -14,7 +14,6 @@ import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import {
-  CSV_JOB_TYPE,
   CSV_REPORT_TYPE_V2,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -45,8 +44,8 @@ export class CsvV2ExportType extends ExportType<
   CsvV2ExportTypeStartDeps
 > {
   id = CSV_REPORT_TYPE_V2;
-  name = CSV_JOB_TYPE;
-  jobType = CSV_JOB_TYPE;
+  name = CSV_REPORT_TYPE_V2; // CSV_JOB_TYPE in main
+  jobType = CSV_REPORT_TYPE_V2; // CSV_JOB_TYPE in main;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [

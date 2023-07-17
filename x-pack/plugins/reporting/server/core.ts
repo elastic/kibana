@@ -44,7 +44,7 @@ import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
-// import { CsvV2ExportType } from './export_types/csv_v2';
+import { CsvV2ExportType } from './export_types/csv_v2';
 import { PdfV1ExportType } from './export_types/printable_pdf';
 import { PdfExportType } from './export_types/printable_pdf_v2';
 import { PngV1ExportType } from './export_types/png';
@@ -111,7 +111,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private csvSearchSourceExport: CsvSearchSourceExportType;
-  // private csvV2ExportType: CsvV2ExportType;
+  private csvV2ExportType: CsvV2ExportType;
   private pdfExport: PdfExportType;
   private pdfV1Export: PdfV1ExportType;
   private pngExport: PngExportType;
@@ -139,8 +139,8 @@ export class ReportingCore {
     );
     this.exportTypesRegistry.register(this.csvSearchSourceExport);
 
-    // this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
-    // this.exportTypesRegistry.register(this.csvV2ExportType);
+    this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.csvV2ExportType);
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
@@ -180,7 +180,7 @@ export class ReportingCore {
     this.pluginSetupDeps = setupDeps; // cache
 
     this.csvSearchSourceExport.setup(setupDeps);
-    // this.csvV2ExportType.setup(setupDeps);
+    this.csvV2ExportType.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
     this.pdfV1Export.setup(setupDeps);
     this.pngExport.setup(setupDeps);
@@ -204,7 +204,7 @@ export class ReportingCore {
     const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
 
     this.csvSearchSourceExport.start(exportTypeStartDeps);
-    // this.csvV2ExportType.start(exportTypeStartDeps);
+    this.csvV2ExportType.start(exportTypeStartDeps);
     this.pdfExport.start(exportTypeStartDeps);
     this.pdfV1Export.start(exportTypeStartDeps);
     this.pngExport.start(exportTypeStartDeps);
