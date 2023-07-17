@@ -81,7 +81,7 @@ export class FleetServerHostUnauthorizedError extends FleetUnauthorizedError {}
 export class FleetProxyUnauthorizedError extends FleetUnauthorizedError {}
 
 export class ArtifactsClientError extends FleetError {}
-export class KQLSyntaxError extends FleetError {}
+
 export class ArtifactsClientAccessDeniedError extends FleetError {
   constructor(deniedPackageName: string, allowedPackageName: string) {
     super(

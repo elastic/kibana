@@ -223,12 +223,11 @@ export const getAgentTagsHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  const { kuery } = request.query;
 
   try {
     const tags = await AgentService.getAgentTags(soClient, esClient, {
       showInactive: request.query.showInactive,
-      kuery,
+      kuery: request.query.kuery,
     });
 
     const body: GetAgentTagsResponse = {

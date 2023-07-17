@@ -22,7 +22,7 @@ import type {
 } from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -30,13 +30,12 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const { kuery } = request.query;
 
   try {
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
-      kuery,
+      kuery: request.query.kuery,
     });
     const body: GetEnrollmentAPIKeysResponse = {
       list: items, // deprecated
@@ -94,13 +93,7 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    } else if (error.isBoom && error.output.statusCode === 404) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
       });
