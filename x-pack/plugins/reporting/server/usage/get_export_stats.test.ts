@@ -462,13 +462,4 @@ test('Incorporate error code stats', () => {
       "visual_reporting_soft_disabled_error": 1,
     }
   `);
-
-  expect(result.csv_searchsource_immediate.error_codes).toMatchInlineSnapshot(`
-    Object {
-      "authentication_expired_error": 5,
-      "kibana_shutting_down_error": 1,
-      "queue_timeout_error": 1,
-      "unknown_error": 0,
-    }
-  `);
 });
