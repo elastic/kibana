@@ -64,43 +64,7 @@ const testProps: Props = {
       },
       user: {},
     },
-    messages: [
-      {
-        content:
-          'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\nhow do i write host.name: * in EQL?',
-        role: 'user',
-        timestamp: '7/17/2023, 1:00:36 PM',
-      },
-      {
-        role: 'assistant',
-        content:
-          "In EQL (Event Query Language), you can write the equivalent of `host.name: *` using the `exists` operator. Here's how you can write it:\n\n```\nexists(host.name)\n```\n\nThis query will match all events where the `host.name` field exists, effectively giving you the same result as `host.name: *`.",
-        timestamp: '7/17/2023, 1:00:40 PM',
-      },
-      {
-        content:
-          '\n\nWhich Fleet enabled Elastic Agent integration should I use to collect logs and events from:',
-        role: 'user',
-        timestamp: '7/17/2023, 1:01:04 PM',
-      },
-      {
-        role: 'assistant',
-        content:
-          'To collect logs and events from a host using Elastic Agent, you can use the "Logs" integration. The "Logs" integration is specifically designed to collect log files and events from various sources on a host.\n\nBy enabling the "Logs" integration, you can configure it to monitor specific log files or directories on the host and send the collected logs to Elasticsearch for further analysis and visualization in Elastic Security.\n\nPlease note that Elastic Agent supports multiple integrations, so depending on your specific use case, you may also consider other integrations such as "Auditd" for collecting Linux audit logs or "Winlog" for collecting Windows event logs.',
-        timestamp: '7/17/2023, 1:01:10 PM',
-      },
-      {
-        content: '\n\nwhat?',
-        role: 'user',
-        timestamp: '7/17/2023, 1:02:33 PM',
-      },
-      {
-        role: 'assistant',
-        content:
-          'Apologies for the confusion. To collect logs and events from a host using Elastic Agent, you can use the "Endpoint Security" integration. The "Endpoint Security" integration is specifically designed to collect security-related logs and events from endpoints.\n\nBy enabling the "Endpoint Security" integration, you can configure it to collect logs such as process events, network events, file events, and more from the host. These logs are then sent to Elasticsearch for analysis and visualization in Elastic Security.\n\nPlease note that Elastic Agent supports multiple integrations, so depending on your specific use case, you may also consider other integrations such as "Auditd" for collecting Linux audit logs or "Winlog" for collecting Windows event logs.',
-        timestamp: '7/17/2023, 1:02:39 PM',
-      },
-    ],
+    messages: [],
     apiConfig: {
       connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
       provider: OpenAiProviderType.OpenAi,
@@ -134,7 +98,7 @@ describe('ChatSend', () => {
       clearConversation,
     });
   });
-  it('a message is sent when a valid prompt text is provided', async () => {
+  it('a message is sent with context when a valid prompt text is provided', async () => {
     const { getByTestId, rerender } = render(<ChatSend {...testProps} />, {
       wrapper: TestProviders,
     });
@@ -148,10 +112,48 @@ describe('ChatSend', () => {
       expect(sendMessages).toHaveBeenCalled();
       const appendMessageSend = appendMessage.mock.calls[0][0];
       const appendMessageResponse = appendMessage.mock.calls[1][0];
-      expect(appendMessageSend.message.content).toEqual(`\n\n${promptText}`);
+      expect(appendMessageSend.message.content).toEqual(
+        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
+      );
       expect(appendMessageSend.message.role).toEqual('user');
       expect(appendMessageResponse.message.content).toEqual(robotMessage);
       expect(appendMessageResponse.message.role).toEqual('assistant');
+    });
+  });
+  it('a message is sent with only provided prompt text and context already exists in convo history', async () => {
+    const props: Props = {
+      ...testProps,
+
+      currentConversation: {
+        ...testProps.currentConversation,
+        messages: [
+          {
+            content:
+              'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\nhow do i write host.name: * in EQL?',
+            role: 'user',
+            timestamp: '7/17/2023, 1:00:36 PM',
+          },
+          {
+            role: 'assistant',
+            content:
+              "In EQL (Event Query Language), you can write the equivalent of `host.name: *` using the `exists` operator. Here's how you can write it:\n\n```\nexists(host.name)\n```\n\nThis query will match all events where the `host.name` field exists, effectively giving you the same result as `host.name: *`.",
+            timestamp: '7/17/2023, 1:00:40 PM',
+          },
+        ],
+      },
+    };
+
+    const { getByTestId, rerender } = render(<ChatSend {...props} />, {
+      wrapper: TestProviders,
+    });
+    const promptTextArea = getByTestId('prompt-textarea');
+    const promptText = 'valid prompt text';
+    fireEvent.change(promptTextArea, { target: { value: promptText } });
+    expect(setUserPrompt).toHaveBeenCalledWith(promptText);
+    rerender(<ChatSend {...props} userPrompt={promptText} />);
+    fireEvent.click(getByTestId('submit-chat'));
+    await waitFor(() => {
+      expect(appendMessage.mock.calls[0][0].message.content).toEqual(`\n\n${promptText}`);
     });
   });
 
