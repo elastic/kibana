@@ -5,37 +5,14 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
 import React, { useState, useCallback } from 'react';
-import styled, { css } from 'styled-components';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldText,
-  EuiButtonIcon,
-  EuiLoadingSpinner,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
-import { Title } from './title';
+import { TitleExperimentalBadge, TitleBetaBadge } from './title';
 import { useCasesContext } from '../cases_context/use_cases_context';
-
-const MyEuiButtonIcon = styled(EuiButtonIcon)`
-  ${({ theme }) => css`
-    margin-left: ${theme.eui.euiSize};
-  `}
-`;
-
-const MySpinner = styled(EuiLoadingSpinner)`
-  ${({ theme }) => css`
-    margin-left: ${theme.eui.euiSize};
-  `}
-`;
 
 export interface EditableTitleProps {
   isLoading: boolean;
@@ -47,93 +24,71 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
   const { releasePhase, permissions } = useCasesContext();
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [newTitle, setNewTitle] = useState<string>(title);
 
-  const onCancel = useCallback(() => {
+  const onClickSubmit = useCallback(
+    (newTitleValue: string): boolean => {
+      if (!newTitleValue.trim().length) {
+        setErrors([i18n.TITLE_REQUIRED]);
+        return false;
+      }
+
+      if (newTitleValue.trim().length > MAX_TITLE_LENGTH) {
+        setErrors([i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH)]);
+        return false;
+      }
+
+      if (newTitleValue !== title) {
+        onSubmit(newTitleValue);
+      }
+      setEditMode(false);
+      setErrors([]);
+
+      return true;
+    },
+    [onSubmit, title]
+  );
+
+  const onCancel = () => {
+    setErrors([]);
     setEditMode(false);
-    setErrors([]);
-    setNewTitle(title);
-  }, [title]);
-
-  const onClickEditIcon = useCallback(() => setEditMode(true), []);
-  const onClickSubmit = useCallback((): void => {
-    if (!newTitle.trim().length) {
-      setErrors([i18n.TITLE_REQUIRED]);
-      return;
-    }
-
-    if (newTitle.trim().length > MAX_TITLE_LENGTH) {
-      setErrors([i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH)]);
-      return;
-    }
-
-    if (newTitle !== title) {
-      onSubmit(newTitle);
-    }
-    setEditMode(false);
-    setErrors([]);
-  }, [newTitle, onSubmit, title]);
-
-  const handleOnChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setNewTitle(e.target.value);
-    setErrors([]);
-  }, []);
+  };
 
   const hasErrors = errors.length > 0;
 
-  return editMode ? (
-    <EuiFormRow isInvalid={hasErrors} error={errors} fullWidth>
-      <EuiFlexGroup
-        alignItems="center"
-        responsive={true}
-        gutterSize="m"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem grow={true}>
-          <EuiFieldText
-            fullWidth={true}
-            onChange={handleOnChange}
-            value={`${newTitle}`}
-            data-test-subj="editable-title-input-field"
+  const euiInlineEditComponent = (
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={true} css={releasePhase && { overflow: 'hidden' }}>
+          <EuiInlineEditTitle
+            defaultValue={title}
+            readModeProps={{ onClick: () => setEditMode(true) }}
+            editModeProps={{
+              formRowProps: { error: errors },
+              cancelButtonProps: {
+                onClick: () => onCancel(),
+              },
+            }}
+            inputAriaLabel="Editable title input field"
+            heading="h1"
+            size="s"
+            isInvalid={hasErrors}
+            isLoading={isLoading}
+            isReadOnly={!permissions.update}
+            onSave={(value) => {
+              return onClickSubmit(value);
+            }}
+            startWithEditOpen={editMode}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="success"
-            data-test-subj="editable-title-submit-btn"
-            fill
-            iconType="save"
-            onClick={onClickSubmit}
-            size="s"
-          >
-            {i18n.SAVE}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="editable-title-cancel-btn"
-            iconType="cross"
-            onClick={onCancel}
-            size="s"
-          >
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
+          {releasePhase === 'experimental' && <TitleExperimentalBadge />}
+          {releasePhase === 'beta' && <TitleBetaBadge />}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
-  ) : (
-    <Title title={title} releasePhase={releasePhase}>
-      {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
-      {!isLoading && permissions.update && (
-        <MyEuiButtonIcon
-          aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
-          iconType="pencil"
-          onClick={onClickEditIcon}
-          data-test-subj="editable-title-edit-icon"
-        />
-      )}
-    </Title>
+    </>
   );
+
+  return euiInlineEditComponent;
 };
 EditableTitleComponent.displayName = 'EditableTitle';
 
