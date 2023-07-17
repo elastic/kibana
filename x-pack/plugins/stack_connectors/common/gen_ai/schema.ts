@@ -6,10 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { OpenAiProviderType } from './constants';
 
 // Connector schema
 export const GenAiConfigSchema = schema.object({
-  apiProvider: schema.string(),
+  apiProvider: schema.oneOf([
+    schema.literal(OpenAiProviderType.OpenAi as string),
+    schema.literal(OpenAiProviderType.AzureAi as string),
+  ]),
   apiUrl: schema.string(),
 });
 
@@ -20,6 +24,13 @@ export const GenAiRunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
+// Execute action schema
+export const GenAiStreamActionParamsSchema = schema.object({
+  body: schema.string(),
+  stream: schema.boolean({ defaultValue: false }),
+});
+
+export const GenAiStreamingResponseSchema = schema.any();
 export const GenAiRunActionResponseSchema = schema.object(
   {
     id: schema.string(),

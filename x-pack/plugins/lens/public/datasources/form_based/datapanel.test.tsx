@@ -7,7 +7,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createMockedDragDropContext } from '../../mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import {
   dataViewPluginMocks,
@@ -408,9 +407,6 @@ describe('FormBased Data Panel', () => {
           dataViews,
         }),
         setState: jest.fn(),
-        dragDropContext: createMockedDragDropContext({
-          dragging: { id: '1', humanData: { label: 'Label' } },
-        }),
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         frame: getFrameAPIMock({
           indexPatterns: indexPatterns as unknown as DataViewsState['indexPatterns'],

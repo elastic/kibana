@@ -36,6 +36,9 @@ xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 
+# Disable index management actions from the UI
+xpack.index_management.enableIndexActions: false
+
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
 management.deeplinks.navLinkStatus: visible
@@ -69,6 +72,8 @@ server.versioned.strictClientVersionCheck: false
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
 
-# Temporarily allow unauthenticated access to task manager utilization & status/stats APIs for autoscaling
-status.allowAnonymous: true
-xpack.task_manager.unsafe.authenticate_background_task_utilization: false
+# Only display console autocomplete suggestions for ES endpoints that are available in serverless
+console.autocompleteDefinitions.endpointsAvailability: serverless
+
+# Allow authentication via the Elasticsearch JWT realm with the `shared_secret` client authentication type.
+elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authentication"]
