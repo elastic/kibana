@@ -570,7 +570,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
   ruleType: RuleType;
 }) {
   let updatedRule = cloneDeep(rule);
-  const updatedRuleActions = ruleActions;
+  let updatedRuleActions = ruleActions;
   let hasUpdateApiKeyOperation = false;
   let isAttributesUpdateSkipped = true;
 
@@ -608,7 +608,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           }
         );
         if (isAttributeModified) {
-          ruleActions = modifiedAttributes.actions;
+          updatedRuleActions = modifiedAttributes.actions;
           isAttributesUpdateSkipped = false;
         }
 
