@@ -80,7 +80,7 @@ export async function validateOutputForPolicy(
   // Validate output when the policy has fleet server
   if (policyHasFleetServer(data as AgentPolicy)) return;
 
-  // Validate output when the policy has synthetics server
+  // Validate output when the policy has synthetics integration
   if (policyHasSyntheticsIntegration(data as AgentPolicy)) return;
 
   const hasLicence = appContextService
