@@ -134,6 +134,7 @@
     "@kbn/telemetry-tools",
     "@kbn/profiling-plugin",
     "@kbn/observability-onboarding-plugin",
+    "@kbn/bfetch-plugin",
     "@kbn/uptime-plugin"
   ]
 }

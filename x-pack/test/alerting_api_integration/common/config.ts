@@ -64,6 +64,7 @@ const enabledActionTypes = [
   'test.throw',
   'test.excluded',
   'test.capped',
+  'test.system-action',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {

@@ -23,7 +23,7 @@ import styled from 'styled-components';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
-import { AGENTS_INDEX } from '../../../../constants';
+import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
 import { useFleetServerStandalone } from '../../../../hooks';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
@@ -182,6 +182,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                     onSubmitSearch(newSearch);
                   }
                 }}
+                fieldPrefix={AGENTS_PREFIX}
                 indexPattern={AGENTS_INDEX}
                 dataTestSubj="agentList.queryInput"
               />
