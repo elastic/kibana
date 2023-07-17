@@ -245,11 +245,6 @@ const AssistantComponent: React.FC<Props> = ({
     setEditingSystemPromptId(systemPromptId);
   }, []);
 
-  // const shouldDisableConversationSelectorHotkeys = useCallback(() => {
-  //   const promptTextAreaHasFocus = document.activeElement === promptTextAreaRef.current;
-  //   return promptTextAreaHasFocus;
-  // }, [promptTextAreaRef]);
-
   // Add min-height to all codeblocks so timeline icon doesn't overflow
   const codeBlockContainers = [...document.getElementsByClassName('euiCodeBlock')];
   // @ts-ignore-expect-error
