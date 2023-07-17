@@ -10,10 +10,9 @@ import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { formatHit } from '../../../utils/format_hit';
+import { formatHit } from '@kbn/discover-utils';
 
 import './row_formatter.scss';
-import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;
@@ -41,7 +40,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
 export const formatRow = (
   hit: DataTableRecord,
   dataView: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+  shouldShowFieldHandler: (fieldName: string) => boolean,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ) => {

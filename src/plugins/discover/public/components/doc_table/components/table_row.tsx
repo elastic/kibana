@@ -13,7 +13,7 @@ import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { formatFieldValue } from '../../../utils/format_value';
+import { formatFieldValue } from '@kbn/discover-utils';
 import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
@@ -21,7 +21,6 @@ import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
@@ -37,7 +36,7 @@ export interface TableRowProps {
   rows: DataTableRecord[];
   dataView: DataView;
   useNewFieldsApi: boolean;
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  shouldShowFieldHandler: (fieldName: string) => boolean;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
   DocViewer: React.ComponentType<DocViewRenderProps>;

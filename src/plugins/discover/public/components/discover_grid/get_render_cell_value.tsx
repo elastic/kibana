@@ -22,14 +22,12 @@ import {
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { formatFieldValue } from '../../utils/format_value';
-import { formatHit } from '../../utils/format_hit';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
-import { type ShouldShowFieldInTableHandler } from '../../utils/get_should_show_field_handler';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 
@@ -38,7 +36,7 @@ export const getRenderCellValueFn =
     dataView: DataView,
     rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
-    shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+    shouldShowFieldHandler: (fieldName: string) => boolean,
     maxDocFieldsDisplayed: number,
     closePopover: () => void
   ) =>
@@ -241,7 +239,7 @@ function getTopLevelObjectPairs(
   row: EsHitRecord,
   columnId: string,
   dataView: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler
+  shouldShowFieldHandler: (fieldName: string) => boolean
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first

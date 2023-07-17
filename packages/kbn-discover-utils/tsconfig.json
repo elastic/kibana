@@ -16,7 +16,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/data-views-plugin",
+    "@kbn/data-plugin",
     "@kbn/data-service",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/i18n"
   ]
 }
