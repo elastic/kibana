@@ -380,4 +380,37 @@ describe('EPM index template install', () => {
       })
     );
   });
+
+  it('test prepareTemplate to set a lifecycle field in index_template if ILM policies are disabled', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      lifecycle: {
+        data_retention: '3d',
+      },
+    } as RegistryDataStream;
+
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    if (!('lifecycle' in packageTemplate)) {
+      throw new Error('no lifecycle on package template');
+    }
+
+    expect(packageTemplate.lifecycle).toEqual({ data_retention: '3d' });
+  });
 });
