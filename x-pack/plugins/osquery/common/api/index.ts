@@ -6,6 +6,8 @@
  */
 
 export * from './common/utils';
+export * from './asset/get_assets_status_route';
+export * from './asset/update_assets_status_route';
 export * from './fleet_wrapper/get_agent_policies_route';
 export * from './fleet_wrapper/get_agent_details_route';
 export * from './fleet_wrapper/get_agent_policy_route';
