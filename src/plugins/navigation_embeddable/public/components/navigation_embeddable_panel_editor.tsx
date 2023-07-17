@@ -192,7 +192,7 @@ const NavigationEmbeddablePanelEditor = ({
               ) : (
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
-                    <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA">
+                    <EuiDroppable droppableId="navEmbeddableDroppableLinksArea">
                       {orderedLinks.map((link, idx) => (
                         <EuiDraggable
                           spacing="m"
