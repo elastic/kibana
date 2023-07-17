@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiCallOut, EuiDescriptionList } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiCallOut,
+  EuiDescriptionList,
+  EuiSpacer,
+  EuiLoadingLogo,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
@@ -17,21 +26,47 @@ import { useDiagnosticsContext } from '../context/use_diagnostics';
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsSummary() {
-  const { diagnosticsBundle } = useDiagnosticsContext();
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
 
   const isCrossCluster = Object.values(
     diagnosticsBundle?.apmIndices ?? {}
   ).some((indicies) => indicies.includes(':'));
 
-  if (isCrossCluster) {
-    return <CrossClusterSearchCallout />;
+  const hasLimitedPrivileges =
+    diagnosticsBundle &&
+    diagnosticsBundle.diagnosticsPrivileges.hasAllPrivileges === false;
+
+  const isLoading = isPending(status);
+
+  if (isLoading) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.serviceMetrics.loading', {
+              defaultMessage: 'Loading diagnostics',
+            })}
+          </h2>
+        }
+      />
+    );
   }
 
-  if (
-    diagnosticsBundle &&
-    diagnosticsBundle.diagnosticsPrivileges.hasAllPrivileges === false
-  ) {
-    return <PrivilegesCallout diagnosticsBundle={diagnosticsBundle} />;
+  if (isCrossCluster || hasLimitedPrivileges) {
+    return (
+      <>
+        {isCrossCluster && (
+          <>
+            <CrossClusterSearchCallout />
+            <EuiSpacer />
+          </>
+        )}
+        {hasLimitedPrivileges && (
+          <PrivilegesCallout diagnosticsBundle={diagnosticsBundle} />
+        )}
+      </>
+    );
   }
 
   return (
@@ -47,9 +82,9 @@ export function DiagnosticsSummary() {
 function CrossClusterSearchCallout() {
   return (
     <EuiCallOut title="Cross cluster search not supported" color="warning">
-      The APM index settings is targetting remote clusters. Please note: this is
-      not currently supported by the Diagnostics Tool and functionality will
-      therefore be limited.
+      The APM index settings is targetting remote clusters. Please note that
+      this is not currently supported by the Diagnostics Tool and functionality
+      will therefore be limited.
     </EuiCallOut>
   );
 }
@@ -98,7 +133,6 @@ function PrivilegesCallout({
               : []),
           ]}
         />
-        <br />
       </EuiCallOut>
     </>
   );
