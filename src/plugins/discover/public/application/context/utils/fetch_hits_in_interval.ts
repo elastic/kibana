@@ -60,7 +60,7 @@ export async function fetchHitsInInterval(
     range[sortDir === SortDirection.asc ? 'lte' : 'gte'] = convertTimeValueToIso(stop, nanosValue);
   }
 
-  const inspectorAdapters = { requests: new RequestAdapter() };
+  const adapter = new RequestAdapter();
   const fetch$ = searchSource
     .setField('size', maxCount)
     .setField('query', {
@@ -90,7 +90,7 @@ export async function fetchHitsInInterval(
     .fetch$({
       disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
       inspector: {
-        adapter: inspectorAdapters.requests,
+        adapter,
         title: type,
       },
     });
@@ -103,7 +103,7 @@ export async function fetchHitsInInterval(
     rows: rows ?? [],
     interceptedWarnings: getSearchResponseInterceptedWarnings({
       services,
-      adapter: inspectorAdapters.requests,
+      adapter,
       options: {
         disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
       },

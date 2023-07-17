@@ -33,12 +33,12 @@ export async function fetchAnchor(
 }> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
 
-  const inspectorAdapters = { requests: new RequestAdapter() };
+  const adapter = new RequestAdapter();
   const { rawResponse } = await lastValueFrom(
     searchSource.fetch$({
       disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
       inspector: {
-        adapter: inspectorAdapters.requests,
+        adapter,
         title: 'anchor',
       },
     })
@@ -56,7 +56,7 @@ export async function fetchAnchor(
     anchorRow: buildDataTableRecord(doc, dataView, true),
     interceptedWarnings: getSearchResponseInterceptedWarnings({
       services,
-      adapter: inspectorAdapters.requests,
+      adapter,
       options: {
         disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
       },

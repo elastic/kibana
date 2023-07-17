@@ -15,13 +15,13 @@ import { discoverServiceMock } from '../__mocks__/services';
 import { searchResponseWarningsMock } from '../__mocks__/search_response_warnings';
 
 describe('getSearchResponseInterceptedWarnings', () => {
-  const inspectorAdapters = { requests: new RequestAdapter() };
+  const adapter = new RequestAdapter();
 
   it('should catch warnings correctly', () => {
     const services = {
       ...discoverServiceMock,
     };
-    services.data.search.showWarnings = jest.fn((adapter, callback) => {
+    services.data.search.showWarnings = jest.fn((_, callback) => {
       // @ts-expect-error for empty meta
       callback?.(searchResponseWarningsMock[0], {});
       // @ts-expect-error for empty meta
@@ -42,7 +42,7 @@ describe('getSearchResponseInterceptedWarnings', () => {
     expect(
       getSearchResponseInterceptedWarnings({
         services,
-        adapter: inspectorAdapters.requests,
+        adapter,
         options: {
           disableShardFailureWarning: true,
         },
@@ -140,14 +140,14 @@ describe('getSearchResponseInterceptedWarnings', () => {
     const services = {
       ...discoverServiceMock,
     };
-    services.data.search.showWarnings = jest.fn((adapter, callback) => {
+    services.data.search.showWarnings = jest.fn((_, callback) => {
       // @ts-expect-error for empty meta
       callback?.(searchResponseWarningsMock[0], {});
     });
     expect(
       getSearchResponseInterceptedWarnings({
         services,
-        adapter: inspectorAdapters.requests,
+        adapter,
         options: {
           disableShardFailureWarning: false,
         },
