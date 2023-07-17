@@ -53,41 +53,49 @@ export const WarningsCallout = ({
 
   if (variant === 'inline') {
     return (
-      <>
+      <ul
+        className="eui-yScroll"
+        css={css`
+          max-height: calc(${euiTheme.size.base} * 10);
+          overflow: auto;
+          list-style: none;
+        `}
+      >
         {interceptedWarnings.map((warning, index) => {
           if (isCalloutVisibleMap[index] === false) {
             return null;
           }
           return (
-            <EuiCallOut
-              key={`warning-${index}`}
-              title={
-                <CalloutTitleWrapper
-                  onCloseCallout={() =>
-                    setIsCalloutVisibleMap((prev) => ({ ...prev, [index]: false }))
-                  }
-                >
-                  <WarningContent
-                    warning={warning}
-                    groupStyles={{ alignItems: 'center', direction: 'row' }}
-                    data-test-subj={dataTestSubj}
-                  />
-                </CalloutTitleWrapper>
-              }
-              color="warning"
-              iconType="warning"
-              size="s"
-              css={css`
-                .euiTitle {
-                  display: flex;
-                  align-items: center;
+            <li key={`warning-${index}`}>
+              <EuiCallOut
+                title={
+                  <CalloutTitleWrapper
+                    onCloseCallout={() =>
+                      setIsCalloutVisibleMap((prev) => ({ ...prev, [index]: false }))
+                    }
+                  >
+                    <WarningContent
+                      warning={warning}
+                      groupStyles={{ alignItems: 'center', direction: 'row' }}
+                      data-test-subj={dataTestSubj}
+                    />
+                  </CalloutTitleWrapper>
                 }
-              `}
-              data-test-subj={dataTestSubj}
-            />
+                color="warning"
+                iconType="warning"
+                size="s"
+                css={css`
+                  .euiTitle {
+                    display: flex;
+                    align-items: center;
+                  }
+                `}
+                data-test-subj={dataTestSubj}
+              />
+            </li>
           );
         })}
-      </>
+      </ul>
     );
   }
 
