@@ -328,7 +328,7 @@ describe('update_agent_tags', () => {
     await updateAgentTags(
       soClient,
       esClient,
-      { kuery: 'status:healthy OR status:offline' },
+      { kuery: 'fleet-agents.status:healthy OR fleet-agents.status:offline' },
       [],
       ['remove']
     );
@@ -338,7 +338,7 @@ describe('update_agent_tags', () => {
       expect.anything(),
       expect.objectContaining({
         batchSize: 10000,
-        kuery: '(status:healthy OR status:offline) AND (tags:remove)',
+        kuery: '(fleet-agents.status:healthy OR fleet-agents.status:offline) AND (tags:remove)',
         tagsToAdd: [],
         tagsToRemove: ['remove'],
       }),

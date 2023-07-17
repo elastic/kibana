@@ -52,7 +52,7 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { validateKuery } from '../utils/filter_utils';
 
@@ -88,6 +88,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     kuery,
     ...restOfQuery
   } = request.query;
+
   try {
     const validationObj = validateKuery(
       kuery,
@@ -119,6 +120,13 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
+    if (error instanceof KQLSyntaxError) {
+      return response.badRequest({
+        body: {
+          message: error.message,
+        },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

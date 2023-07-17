@@ -482,6 +482,19 @@ describe('validateKuery validates real kueries', () => {
         `KQLSyntaxError: The key is empty and needs to be wrapped by a saved object type like ingest-agent-policies`
       );
     });
+
+    it('Kuery with non existent parameter', async () => {
+      const validationObj = validateKuery(
+        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter: 'test_id'`,
+        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        AGENT_POLICY_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toContain(
+        `KQLSyntaxError: This key 'ingest-agent-policies.non_existent_parameter' does NOT exist in ingest-agent-policies saved object index patterns`
+      );
+    });
   });
 
   describe('Agents', () => {
@@ -578,6 +591,28 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(false);
       expect(validationObj?.error).toEqual(
         `KQLSyntaxError: This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`
+      );
+    });
+
+    it('Invalid search by broken query', async () => {
+      const validationObj = validateKuery(
+        `package.name:packageName`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toEqual(`KQLSyntaxError: This type package is not allowed`);
+    });
+
+    it('Invalid search by non existent parameter', async () => {
+      const validationObj = validateKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter:packageName`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(false);
+      expect(validationObj?.error).toEqual(
+        `KQLSyntaxError: This key 'ingest-package-policies.non_existent_parameter' does NOT exist in ingest-package-policies saved object index patterns`
       );
     });
 

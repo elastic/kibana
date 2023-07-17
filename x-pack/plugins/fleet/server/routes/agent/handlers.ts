@@ -225,6 +225,13 @@ export const getAgentsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
+    if (error instanceof KQLSyntaxError) {
+      return response.badRequest({
+        body: {
+          message: error.message,
+        },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

@@ -43,7 +43,7 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, PackagePolicyNotFoundError, KQLSyntaxError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
@@ -111,6 +111,13 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
+    if (error instanceof KQLSyntaxError) {
+      return response.badRequest({
+        body: {
+          message: error.message,
+        },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
