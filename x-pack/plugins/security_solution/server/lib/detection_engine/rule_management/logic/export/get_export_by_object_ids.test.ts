@@ -60,7 +60,6 @@ describe('get_export_by_object_ids', () => {
   const actionsClient = actionsClientMock.create();
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
