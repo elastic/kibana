@@ -36,6 +36,7 @@ export const StdErrorLogs = ({
   title,
   summaryMessage,
   hideTitle = false,
+  pageSize = 5,
 }: {
   monitorId?: string;
   checkGroup?: string;
@@ -43,6 +44,7 @@ export const StdErrorLogs = ({
   title?: string;
   summaryMessage?: string;
   hideTitle?: boolean;
+  pageSize?: number;
 }) => {
   const columns = [
     {
@@ -50,6 +52,11 @@ export const StdErrorLogs = ({
       name: TIMESTAMP_LABEL,
       sortable: true,
       render: (date: string) => formatDate(date, 'dateTime'),
+    },
+    {
+      field: 'synthetics.type',
+      name: TYPE_LABEL,
+      sortable: true,
     },
     {
       field: 'synthetics.payload.message',
@@ -111,9 +118,11 @@ export const StdErrorLogs = ({
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
-            <p>{summaryMessage}</p>
-          </EuiCallOut>
+          {summaryMessage && (
+            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
+              <p>{summaryMessage}</p>
+            </EuiCallOut>
+          )}
         </>
       )}
 
@@ -129,6 +138,9 @@ export const StdErrorLogs = ({
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
+        pagination={{
+          pageSize,
+        }}
       />
     </>
   );
@@ -136,6 +148,10 @@ export const StdErrorLogs = ({
 
 export const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.monitorList.timestamp', {
   defaultMessage: 'Timestamp',
+});
+
+export const TYPE_LABEL = i18n.translate('xpack.synthetics.monitorList.type', {
+  defaultMessage: 'Type',
 });
 
 export const ERROR_SUMMARY_LABEL = i18n.translate('xpack.synthetics.monitorList.errorSummary', {

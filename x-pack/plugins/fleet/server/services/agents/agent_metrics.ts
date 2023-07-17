@@ -54,7 +54,7 @@ async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents
     return {
       ...agent,
       metrics: {
-        cpu_avg: results?.sum_cpu ? Math.trunc(results.sum_cpu * 10000) / 10000 : undefined,
+        cpu_avg: results?.sum_cpu ? Math.trunc(results.sum_cpu * 100000) / 100000 : undefined,
         memory_size_byte_avg: results?.sum_memory_size
           ? Math.trunc(results?.sum_memory_size)
           : undefined,

@@ -306,6 +306,7 @@ export function MonitorDetailFlyout(props: Props) {
                       position="default"
                       iconHasPanel={false}
                       iconSize="xs"
+                      locationId={locationId}
                     />
                   )}
                 </EuiFlexItem>
@@ -324,12 +325,13 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlyoutBody>
             <DetailFlyoutDurationChart {...props} location={props.location} />
             <MonitorDetailsPanel
+              hasBorder={false}
               hideEnabled
               latestPing={monitorDetail.data}
               configId={configId}
               monitor={{
                 ...monitorSavedObject.attributes,
-                id: monitorSavedObject.id,
+                id,
                 updated_at: monitorSavedObject.updated_at!,
                 created_at: monitorSavedObject.created_at!,
               }}

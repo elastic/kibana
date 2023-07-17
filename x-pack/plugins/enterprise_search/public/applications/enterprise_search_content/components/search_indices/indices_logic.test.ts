@@ -85,7 +85,7 @@ describe('IndicesLogic', () => {
     describe('openDeleteModal', () => {
       it('should set deleteIndexName and set isDeleteModalVisible to true', () => {
         IndicesLogic.actions.fetchIndexDetails = jest.fn();
-        IndicesLogic.actions.openDeleteModal(connectorIndex);
+        IndicesLogic.actions.openDeleteModal(connectorIndex.name);
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
           deleteModalIndexName: 'connector',
@@ -98,7 +98,7 @@ describe('IndicesLogic', () => {
     });
     describe('closeDeleteModal', () => {
       it('should set deleteIndexName to empty and set isDeleteModalVisible to false', () => {
-        IndicesLogic.actions.openDeleteModal(connectorIndex);
+        IndicesLogic.actions.openDeleteModal(connectorIndex.name);
         IndicesLogic.actions.fetchIndexDetails = jest.fn();
         IndicesLogic.actions.closeDeleteModal();
         expect(IndicesLogic.values).toEqual({

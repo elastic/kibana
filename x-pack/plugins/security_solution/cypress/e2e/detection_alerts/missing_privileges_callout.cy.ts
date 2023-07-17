@@ -12,7 +12,7 @@ import { PAGE_TITLE } from '../../screens/common/page';
 
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
+import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../../tasks/common/callouts';
 
 const loadPageAsReadOnlyUser = (url: string) => {
@@ -71,7 +71,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createCustomRule(getNewRule());
+        createRule(getNewRule());
         loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();
         goToRuleDetails();
@@ -121,7 +121,7 @@ describe('Detections > Callouts', () => {
 
     context('On Rule Details page', () => {
       beforeEach(() => {
-        createCustomRule(getNewRule());
+        createRule(getNewRule());
         loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForPageTitleToBeShown();
         goToRuleDetails();

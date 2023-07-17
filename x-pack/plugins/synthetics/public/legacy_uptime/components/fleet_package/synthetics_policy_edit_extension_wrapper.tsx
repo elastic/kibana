@@ -7,11 +7,15 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import type {
+  FleetStartServices,
+  PackagePolicyEditExtensionComponentProps,
+} from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PolicyConfig, MonitorFields } from './types';
-import { ConfigKey, DataStream, TLSFields } from './types';
+import { useEditMonitorLocator } from '../../../apps/synthetics/hooks';
+import type { PolicyConfig, MonitorFields, TLSFields } from './types';
+import { ConfigKey, DataStream } from './types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
 import {
   PolicyConfigContextProvider,
@@ -76,10 +80,10 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         };
 
         enableTLS =
-          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_tls_enabled ||
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA]?.is_tls_enabled ??
           Boolean(vars?.[ConfigKey.TLS_VERIFICATION_MODE]?.value);
         enableZipUrlTLS =
-          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_zip_url_tls_enabled ||
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA]?.is_zip_url_tls_enabled ??
           Boolean(vars?.[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]?.value);
 
         const formattedDefaultConfig: Partial<PolicyConfig> = {
@@ -99,15 +103,18 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
       return getDefaultConfig();
     }, [currentPolicy]);
 
-    const { http } = useKibana().services;
+    const locators = useKibana<FleetStartServices>().services?.share?.url?.locators;
+
+    const { config_id: configId } = defaultConfig;
+
+    const url = useEditMonitorLocator({ configId, locators });
 
     if (currentPolicy.is_managed) {
       return (
         <EuiCallOut>
-          <p>{EDIT_IN_UPTIME_DESC}</p>
-          {/* TODO Add a link to exact monitor*/}
-          <EuiButton href={`${http?.basePath.get()}/app/uptime/manage-monitors/all`}>
-            {EDIT_IN_UPTIME_LABEL}
+          <p>{EDIT_IN_SYNTHETICS_DESC}</p>
+          <EuiButton isLoading={!url} href={url} data-test-subj="syntheticsEditMonitorButton">
+            {EDIT_IN_SYNTHETICS_LABEL}
           </EuiButton>
         </EuiCallOut>
       );
@@ -143,10 +150,13 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 );
 SyntheticsPolicyEditExtensionWrapper.displayName = 'SyntheticsPolicyEditExtensionWrapper';
 
-const EDIT_IN_UPTIME_LABEL = i18n.translate('xpack.synthetics.editPackagePolicy.inUptime', {
-  defaultMessage: 'Edit in uptime',
+const EDIT_IN_SYNTHETICS_LABEL = i18n.translate('xpack.synthetics.editPackagePolicy.inSynthetics', {
+  defaultMessage: 'Edit in Synthetics',
 });
 
-const EDIT_IN_UPTIME_DESC = i18n.translate('xpack.synthetics.editPackagePolicy.inUptimeDesc', {
-  defaultMessage: 'This package policy is managed by uptime app.',
-});
+const EDIT_IN_SYNTHETICS_DESC = i18n.translate(
+  'xpack.synthetics.editPackagePolicy.inSyntheticsDesc',
+  {
+    defaultMessage: 'This package policy is managed by the Synthetics app.',
+  }
+);

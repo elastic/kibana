@@ -162,13 +162,6 @@ export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
     },
   });
 
-export const groupActionVariableDescription = i18n.translate(
-  'xpack.infra.metrics.alerting.groupActionVariableDescription',
-  {
-    defaultMessage: 'Name of the group reporting data',
-  }
-);
-
 export const groupByKeysActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.groupByKeysActionVariableDescription',
   {

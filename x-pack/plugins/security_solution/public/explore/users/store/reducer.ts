@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { set } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
 
 import {

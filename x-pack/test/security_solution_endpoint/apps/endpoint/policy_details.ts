@@ -25,8 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  // Failing: See https://github.com/elastic/kibana/issues/138776
-  describe.skip('When on the Endpoint Policy Details Page', function () {
+  describe('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -230,7 +229,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql(undefined);
+        expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql({
+          capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+        });
       });
     });
 
@@ -290,7 +291,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('should show trusted apps card and link should go back to policy', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/138776
+      it.skip('should show trusted apps card and link should go back to policy', async () => {
         await testSubjects.existOrFail('trustedApps-fleet-integration-card');
         await (await testSubjects.find('trustedApps-link-to-exceptions')).click();
         await (await testSubjects.find('confirmModalConfirmButton')).click(); // Fleet show a confirm modal on unsaved changes
@@ -298,7 +300,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
-      it('should show event filters card and link should go back to policy', async () => {
+      it.skip('should show event filters card and link should go back to policy', async () => {
         await testSubjects.existOrFail('eventFilters-fleet-integration-card');
         const eventFiltersCard = await testSubjects.find('eventFilters-fleet-integration-card');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(eventFiltersCard);
@@ -308,7 +310,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
-      it('should show blocklists card and link should go back to policy', async () => {
+      it.skip('should show blocklists card and link should go back to policy', async () => {
         await testSubjects.existOrFail('blocklists-fleet-integration-card');
         const blocklistsCard = await testSubjects.find('blocklists-fleet-integration-card');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(blocklistsCard);
@@ -318,7 +320,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
-      it('should not show host isolation exceptions card because no entries', async () => {
+      it.skip('should not show host isolation exceptions card because no entries', async () => {
         await testSubjects.missingOrFail('hostIsolationExceptions-fleet-integration-card');
       });
     });

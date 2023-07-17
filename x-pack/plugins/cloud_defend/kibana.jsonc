@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-defend-plugin",
+  "owner": "@elastic/sec-cloudnative-integrations",
+  "description": "Defend for Containers",
+  "plugin": {
+    "id": "cloudDefend",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "fleet",
+      "kibanaReact"
+    ]
+  }
+}

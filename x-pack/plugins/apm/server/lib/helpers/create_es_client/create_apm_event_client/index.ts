@@ -175,7 +175,8 @@ export class APMEventClient {
         ...params.body,
         query: {
           bool: {
-            filter: compact([params.body.query, ...filters]),
+            filter: filters,
+            must: compact([params.body.query]),
           },
         },
       },

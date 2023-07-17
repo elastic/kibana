@@ -87,6 +87,7 @@ export class HeatmapLayer extends AbstractLayer {
 
   async syncData(syncContext: DataRequestContext) {
     await syncMvtSourceData({
+      buffer: 0,
       hasLabels: false,
       layerId: this.getId(),
       layerName: await this.getDisplayName(),

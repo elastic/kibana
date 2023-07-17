@@ -9,29 +9,18 @@ import React, { MouseEvent, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiPanel, EuiText } from '@elastic/eui';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
-import { MONITOR_HISTORY_ROUTE, MONITOR_TYPES } from '../../../../../../common/constants';
+import { TestRunsTableHeader } from './test_runs_table_header';
+import { MONITOR_TYPES } from '../../../../../../common/constants';
 import {
   getTestRunDetailRelativeLink,
   TestDetailsLink,
 } from '../../common/links/test_details_link';
 import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
-import { useGetUrlParams } from '../../../hooks';
-import { stringifyUrlParams } from '../../../utils/url_params';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
@@ -58,7 +47,6 @@ export const TestRunsTable = ({
   showViewHistoryButton = true,
 }: TestRunsTableProps) => {
   const history = useHistory();
-  const params = useGetUrlParams();
   const { monitorId } = useParams<{ monitorId: string }>();
   const [page, setPage] = useState({ index: 0, size: 10 });
 
@@ -110,8 +98,12 @@ export const TestRunsTable = ({
             align: 'left',
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
-            render: (_timestamp: string, item) => (
-              <JourneyLastScreenshot checkGroupId={item.monitor.check_group} size={[100, 64]} />
+            render: (timestamp: string, item) => (
+              <JourneyLastScreenshot
+                checkGroupId={item.monitor.check_group}
+                size={[100, 64]}
+                timestamp={timestamp}
+              />
             ),
           },
         ]
@@ -182,44 +174,11 @@ export const TestRunsTable = ({
 
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{paginable || pings?.length < 10 ? TEST_RUNS : LAST_10_TEST_RUNS}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={true} />
-        <EuiFlexItem grow={false}>
-          {showViewHistoryButton ? (
-            <EuiLink
-              href={
-                monitor?.[ConfigKey.CONFIG_ID]
-                  ? history.createHref({
-                      pathname: MONITOR_HISTORY_ROUTE.replace(
-                        ':monitorId',
-                        monitor[ConfigKey.CONFIG_ID]
-                      ),
-                      search: stringifyUrlParams(
-                        { ...params, dateRangeStart: 'now-24h', dateRangeEnd: 'now' },
-                        true
-                      ),
-                    })
-                  : undefined
-              }
-            >
-              <EuiButtonEmpty
-                data-test-subj="monitorStatusChartViewHistoryButton"
-                size="xs"
-                iconType="list"
-              >
-                {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
-                  defaultMessage: 'View History',
-                })}
-              </EuiButtonEmpty>
-            </EuiLink>
-          ) : null}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <TestRunsTableHeader
+        paginable={paginable}
+        showViewHistoryButton={showViewHistoryButton}
+        pings={pings}
+      />
       <EuiBasicTable
         compressed={false}
         loading={pingsLoading}
@@ -253,10 +212,6 @@ export const TestRunsTable = ({
     </EuiPanel>
   );
 };
-
-const TEST_RUNS = i18n.translate('xpack.synthetics.monitorDetails.summary.testRuns', {
-  defaultMessage: 'Test Runs',
-});
 
 export const LAST_10_TEST_RUNS = i18n.translate(
   'xpack.synthetics.monitorDetails.summary.lastTenTestRuns',

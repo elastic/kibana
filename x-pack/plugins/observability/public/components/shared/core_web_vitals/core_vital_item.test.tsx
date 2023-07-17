@@ -8,7 +8,12 @@
 import React from 'react';
 import { render } from '../../../utils/test_helper';
 import { CoreVitalItem } from './core_vital_item';
-import { NO_DATA } from './translations';
+import {
+  NO_DATA,
+  LEGEND_GOOD_LABEL,
+  LEGEND_NEEDS_IMPROVEMENT_LABEL,
+  LEGEND_POOR_LABEL,
+} from './translations';
 
 describe('CoreVitalItem', () => {
   const value = '0.005';
@@ -18,7 +23,7 @@ describe('CoreVitalItem', () => {
   const helpLabel = 'sample help label';
 
   it('renders if value is truthy', () => {
-    const { getByText } = render(
+    const { getByText, getByTestId } = render(
       <CoreVitalItem
         title={title}
         value={value}
@@ -31,9 +36,10 @@ describe('CoreVitalItem', () => {
 
     expect(getByText(title)).toBeInTheDocument();
     expect(getByText(value)).toBeInTheDocument();
-    expect(getByText('Good (85%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (10%)')).toBeInTheDocument();
-    expect(getByText('Poor (5%)')).toBeInTheDocument();
+
+    expect(getByTestId(`${LEGEND_GOOD_LABEL}-85`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-10`)).toBeInTheDocument();
+    expect(getByTestId(`${LEGEND_POOR_LABEL}-5`)).toBeInTheDocument();
   });
 
   it('renders loading state when loading is truthy', () => {

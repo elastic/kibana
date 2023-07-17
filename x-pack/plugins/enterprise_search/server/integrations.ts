@@ -617,14 +617,14 @@ export const registerEnterpriseSearchIntegrations = (
   });
 
   customIntegrations.registerCustomIntegration({
-    id: 'azure_cloud_storage',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.azureCloud', {
-      defaultMessage: 'Azure Cloud Storage',
+    id: 'azure_blob_storage',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.azureBlob', {
+      defaultMessage: 'Azure Blob Storage',
     }),
     description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.azureCloudDescription',
+      'xpack.enterpriseSearch.workplaceSearch.integrations.azureBlobDescription',
       {
-        defaultMessage: 'Search over your content on Azure Cloud Storage with Enterprise Search.',
+        defaultMessage: 'Search over your content on Azure Blob Storage with Enterprise Search.',
       }
     ),
     categories: ['enterprise_search', 'elastic_stack', 'custom'],
@@ -632,7 +632,7 @@ export const registerEnterpriseSearchIntegrations = (
     icons: [
       {
         type: 'svg',
-        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/azure_cloud.svg'),
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/azure_blob.svg'),
       },
     ],
     shipper: 'enterprise_search',

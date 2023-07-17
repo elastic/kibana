@@ -36,6 +36,27 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.warning('❗️❗️❗️');
   }
 
+  const settingOverrides = {
+    mochaOpts: {
+      bail: options.bail,
+      dryRun: options.dryRun,
+      grep: options.grep,
+    },
+    kbnTestServer: {
+      installDir: options.installDir,
+    },
+    suiteFiles: {
+      include: options.suiteFilters.include,
+      exclude: options.suiteFilters.exclude,
+    },
+    suiteTags: {
+      include: options.suiteTags.include,
+      exclude: options.suiteTags.exclude,
+    },
+    updateBaselines: options.updateBaselines,
+    updateSnapshots: options.updateSnapshots,
+  };
+
   for (const [i, path] of options.configs.entries()) {
     await log.indent(0, async () => {
       if (options.configs.length > 1) {
@@ -43,7 +64,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
       }
 
-      const config = await readConfigFile(log, options.esVersion, path);
+      const config = await readConfigFile(log, options.esVersion, path, settingOverrides);
 
       const hasTests = await checkForEnabledTestsInFtrConfig({
         config,

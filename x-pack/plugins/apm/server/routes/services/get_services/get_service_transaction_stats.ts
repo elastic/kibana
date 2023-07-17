@@ -16,10 +16,7 @@ import {
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
@@ -31,6 +28,7 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
+import { maybe } from '../../../../common/utils/maybe';
 
 interface AggregationParams {
   environment: string;
@@ -143,30 +141,33 @@ export async function getServiceTransactionStats({
   return {
     serviceStats:
       response.aggregations?.sample.services.buckets.map((bucket) => {
-        const topTransactionTypeBucket =
-          bucket.transactionType.buckets.find(
-            ({ key }) =>
-              key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-          ) ?? bucket.transactionType.buckets[0];
+        const topTransactionTypeBucket = maybe(
+          bucket.transactionType.buckets.find(({ key }) =>
+            isDefaultTransactionType(key as string)
+          ) ?? bucket.transactionType.buckets[0]
+        );
 
         return {
           serviceName: bucket.key as string,
-          transactionType: topTransactionTypeBucket.key as string,
-          environments: topTransactionTypeBucket.environments.buckets.map(
-            (environmentBucket) => environmentBucket.key as string
-          ),
-          agentName: topTransactionTypeBucket.sample.top[0].metrics[
+          transactionType: topTransactionTypeBucket?.key as string | undefined,
+          environments:
+            topTransactionTypeBucket?.environments.buckets.map(
+              (environmentBucket) => environmentBucket.key as string
+            ) ?? [],
+          agentName: topTransactionTypeBucket?.sample.top[0].metrics[
             AGENT_NAME
-          ] as AgentName,
-          latency: topTransactionTypeBucket.avg_duration.value,
-          transactionErrorRate: calculateFailedTransactionRate(
-            topTransactionTypeBucket
-          ),
-          throughput: calculateThroughputWithRange({
-            start,
-            end,
-            value: topTransactionTypeBucket.doc_count,
-          }),
+          ] as AgentName | undefined,
+          latency: topTransactionTypeBucket?.avg_duration.value,
+          transactionErrorRate: topTransactionTypeBucket
+            ? calculateFailedTransactionRate(topTransactionTypeBucket)
+            : undefined,
+          throughput: topTransactionTypeBucket
+            ? calculateThroughputWithRange({
+                start,
+                end,
+                value: topTransactionTypeBucket?.doc_count,
+              })
+            : undefined,
         };
       }) ?? [],
     serviceOverflowCount:

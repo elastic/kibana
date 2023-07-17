@@ -10,9 +10,20 @@ import {
   RulesSettingsFlapping,
   RulesSettingsFlappingProperties,
 } from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export const updateFlappingSettings = ({
+const rewriteBodyRes: RewriteRequestCase<RulesSettingsFlapping> = ({
+  look_back_window: lookBackWindow,
+  status_change_threshold: statusChangeThreshold,
+  ...rest
+}: any) => ({
+  ...rest,
+  lookBackWindow,
+  statusChangeThreshold,
+});
+
+export const updateFlappingSettings = async ({
   http,
   flappingSettings,
 }: {
@@ -21,14 +32,21 @@ export const updateFlappingSettings = ({
 }) => {
   let body: string;
   try {
-    body = JSON.stringify(flappingSettings);
+    body = JSON.stringify({
+      enabled: flappingSettings.enabled,
+      look_back_window: flappingSettings.lookBackWindow,
+      status_change_threshold: flappingSettings.statusChangeThreshold,
+    });
   } catch (e) {
     throw new Error(`Unable to parse flapping settings update params: ${e}`);
   }
-  return http.post<RulesSettingsFlapping>(
+
+  const res = await http.post<AsApiContract<RulesSettingsFlapping>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_flapping`,
     {
       body,
     }
   );
+
+  return rewriteBodyRes(res);
 };

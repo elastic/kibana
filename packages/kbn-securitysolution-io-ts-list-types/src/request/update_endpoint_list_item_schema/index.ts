@@ -21,7 +21,6 @@ import { Tags, tags } from '../../common/tags';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { UpdateCommentsArray } from '../../common/update_comment';
 import { EntriesArray } from '../../common/entries';
-import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
 
 export const updateEndpointListItemSchema = t.intersection([
   t.exact(
@@ -41,7 +40,6 @@ export const updateEndpointListItemSchema = t.intersection([
       meta, // defaults to undefined if not set during decode
       os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
       tags, // defaults to empty array if not set during decode
-      expire_time: expireTimeOrUndefined,
     })
   ),
 ]);
@@ -51,11 +49,10 @@ export type UpdateEndpointListItemSchema = t.OutputOf<typeof updateEndpointListI
 // This type is used after a decode since some things are defaults after a decode.
 export type UpdateEndpointListItemSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof updateEndpointListItemSchema>>,
-  'tags' | 'entries' | 'comments' | 'expire_time'
+  'tags' | 'entries' | 'comments'
 > & {
   comments: UpdateCommentsArray;
   tags: Tags;
   entries: EntriesArray;
   os_types: OsTypeArray;
-  expire_time: ExpireTimeOrUndefined;
 };

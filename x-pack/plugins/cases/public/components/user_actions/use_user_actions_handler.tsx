@@ -37,6 +37,13 @@ const isAddCommentRef = (
   return commentRef?.addQuote != null;
 };
 
+const isSetCommentRef = (
+  ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
+): ref is AddCommentRefObject => {
+  const commentRef = ref as UserActionMarkdownRefObject;
+  return commentRef?.setComment != null;
+};
+
 export const useUserActionsHandler = (): UseUserActionsHandler => {
   const { detailName: caseId } = useCaseViewParams();
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
@@ -122,7 +129,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   );
 
   useEffect(() => {
-    if (draftComment?.commentId) {
+    if (draftComment?.commentId && draftComment?.commentId !== 'description') {
       setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
         if (
           NEW_COMMENT_ID !== draftComment?.commentId &&
@@ -135,7 +142,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
 
       const ref = commentRefs?.current?.[draftComment.commentId];
 
-      if (isAddCommentRef(ref) && ref.editor?.textarea) {
+      if (isSetCommentRef(ref) && ref.editor?.textarea) {
         ref.setComment(draftComment.comment);
         if (hasIncomingLensState) {
           openLensModal({ editorRef: ref.editor });

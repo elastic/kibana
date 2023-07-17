@@ -7,8 +7,11 @@
  */
 
 import { AxisTypeId, computeInputCombinations, PosType } from './_mocks';
-import { computeChartMargins } from './utils';
-import { AxisConfiguration } from '../../helpers';
+import { computeChartMargins, getLineAnnotationProps } from './utils';
+import { AxesMap, AxisConfiguration, Marker, MarkerBody } from '../../helpers';
+import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
+import { Position } from '@elastic/charts';
+import React from 'react';
 
 describe('reference lines helpers', () => {
   describe('computeChartMargins', () => {
@@ -35,5 +38,123 @@ describe('reference lines helpers', () => {
         ).toEqual(result);
       }
     );
+  });
+
+  describe('getLineAnnotationProps', () => {
+    function getAxesMap({ left, right }: Partial<AxesMap> = {}): AxesMap {
+      return {
+        left: { groupId: 'yLeft', position: Position.Left, series: [], ...left },
+        right: { groupId: 'yRight', position: Position.Right, series: [], ...right },
+      };
+    }
+    function getConfig(
+      customPartialConfig: Partial<ReferenceLineAnnotationConfig> = {}
+    ): ReferenceLineAnnotationConfig {
+      return {
+        id: 'id',
+        value: 3,
+        lineWidth: 5,
+        textVisibility: false,
+        iconPosition: 'auto',
+        axisGroup: getAxesMap().left,
+        ...customPartialConfig,
+      };
+    }
+
+    it('should render only the line with no marker', () => {
+      const config = getConfig();
+      expect(getLineAnnotationProps(config, 'myLabel', getAxesMap(), false, false)).toEqual(
+        expect.objectContaining({
+          groupId: 'yLeft',
+          markerPosition: Position.Left,
+          marker: (
+            <Marker
+              config={config}
+              label={'myLabel'}
+              isHorizontal={false}
+              hasReducedPadding={false}
+            />
+          ),
+          markerBody: <MarkerBody label={undefined} isHorizontal={false} />,
+        })
+      );
+    });
+    it('should render an icon marker', () => {
+      const config = getConfig({ icon: 'triangle' });
+      expect(getLineAnnotationProps(config, 'myLabel', getAxesMap(), false, false)).toEqual(
+        expect.objectContaining({
+          groupId: 'yLeft',
+          markerPosition: Position.Left,
+          marker: (
+            <Marker
+              config={config}
+              label={'myLabel'}
+              isHorizontal={false}
+              hasReducedPadding={false}
+            />
+          ),
+          markerBody: <MarkerBody label={undefined} isHorizontal={false} />,
+        })
+      );
+    });
+    it('should render only the label', () => {
+      const config = getConfig({ textVisibility: true });
+      expect(getLineAnnotationProps(config, 'myLabel', getAxesMap(), false, true)).toEqual(
+        expect.objectContaining({
+          groupId: 'yLeft',
+          markerPosition: Position.Left,
+          marker: (
+            <Marker
+              config={config}
+              label={'myLabel'}
+              isHorizontal={false}
+              hasReducedPadding={true}
+            />
+          ),
+          markerBody: <MarkerBody label={undefined} isHorizontal={false} />,
+        })
+      );
+    });
+    it('should render both icon and text', () => {
+      const config = getConfig({ icon: 'triangle', textVisibility: true });
+      expect(getLineAnnotationProps(config, 'myLabel', getAxesMap(), false, false)).toEqual(
+        expect.objectContaining({
+          groupId: 'yLeft',
+          markerPosition: Position.Left,
+          marker: (
+            <Marker
+              config={config}
+              label={'myLabel'}
+              isHorizontal={false}
+              hasReducedPadding={false}
+            />
+          ),
+          markerBody: <MarkerBody label={'myLabel'} isHorizontal={false} />,
+        })
+      );
+    });
+
+    it('should handle marker rotated label', () => {
+      const config = getConfig({
+        icon: 'triangle',
+        textVisibility: true,
+        axisGroup: { groupId: 'x', position: Position.Bottom, series: [] },
+      });
+      expect(getLineAnnotationProps(config, 'myLabel', getAxesMap(), false, false)).toEqual(
+        expect.objectContaining({
+          groupId: 'x',
+          markerPosition: Position.Top,
+          marker: (
+            <Marker
+              config={config}
+              label={'myLabel'}
+              isHorizontal={true}
+              hasReducedPadding={false}
+            />
+          ),
+          markerBody: <MarkerBody label={'myLabel'} isHorizontal={true} />,
+        })
+      );
+    });
   });
 });

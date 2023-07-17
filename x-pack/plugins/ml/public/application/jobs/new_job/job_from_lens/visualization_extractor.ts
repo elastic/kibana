@@ -55,7 +55,9 @@ export class VisualizationExtractor {
       );
     }
 
-    const timeField = layer.dimensions.find(({ operation }) => operation.dataType === 'date');
+    const timeField = layer.dimensions.find(
+      (dimension) => dimension.operation?.dataType === 'date'
+    );
     if (timeField === undefined || !timeField.operation.fields?.length) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDateField', {

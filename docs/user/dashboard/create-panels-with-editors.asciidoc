@@ -62,7 +62,7 @@
 |
 
 | Gauge and Goal
-|
+| &check;
 | &check;
 | &check;
 | &check;
@@ -136,7 +136,7 @@
 | &check;
 
 | Synchronized tooltips
-|
+| &check;
 | &check;
 |
 |
@@ -196,7 +196,7 @@
 |
 
 | Annotations
-| 
+| &check;
 | &check;
 |
 |
@@ -256,11 +256,11 @@
 | &check;
 
 | <<tsvb-function-reference, Series agg>>
-|
+| Use <<lens-formulas, formula>>
 | &check;
 
 | Static value
-|
+| &check;
 | &check;
 
 |===
@@ -301,7 +301,7 @@ Metric aggregations are calculated from the values in the aggregated documents. 
 | &check;
 
 | Percentiles Rank
-|
+| &check;
 | &check;
 | &check;
 | &check;
@@ -325,13 +325,13 @@ Metric aggregations are calculated from the values in the aggregated documents. 
 | &check;
 
 | Value count 
-| 
+| &check;
 | 
 | &check;
 | &check;
 
 | Variance
-| 
+| &check;
 | &check;
 | 
 | &check;
@@ -364,7 +364,7 @@ Bucket aggregations group, or bucket, documents based on the aggregation type. T
 
 | Date range
 | Use filters
-| 
+| &check;
 | &check;
 | &check;
 

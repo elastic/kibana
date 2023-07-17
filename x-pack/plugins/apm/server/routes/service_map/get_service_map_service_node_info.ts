@@ -17,10 +17,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import { NodeStats } from '../../../common/service_map';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
@@ -144,7 +141,7 @@ async function getFailedTransactionsRateStats({
       end,
       kuery: '',
       numBuckets,
-      transactionTypes: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
+      transactionTypes: defaultTransactionTypes,
     });
     return {
       value: average,
@@ -183,10 +180,7 @@ async function getTransactionStats({
             ),
             {
               terms: {
-                [TRANSACTION_TYPE]: [
-                  TRANSACTION_REQUEST,
-                  TRANSACTION_PAGE_LOAD,
-                ],
+                [TRANSACTION_TYPE]: defaultTransactionTypes,
               },
             },
           ],

@@ -101,9 +101,12 @@ export class PackageActionFormatter {
     code: number,
     status: FleetServerAgentComponentStatus
   ): PackageActions {
-    if (code === ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR) {
+    if (
+      code === ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR ||
+      code === ENDPOINT_ERROR_CODES.OUTPUT_SERVER_ERROR
+    ) {
       return 'es_connection';
-    } else if (status === 'failed') {
+    } else if (status === 'FAILED' || status === 'DEGRADED') {
       return 'policy_failure';
     } else {
       throw new Error(`Invalid error code ${code}`);

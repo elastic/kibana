@@ -128,17 +128,19 @@ function toString(error: any): ImportError {
       return { msg: error.msg };
     } else if (error.error !== undefined) {
       if (typeof error.error === 'object') {
-        if (error.error.reason !== undefined) {
-          // this will catch a bulk ingest failure
-          const errorObj: ImportError = { msg: error.error.reason };
-          if (error.error.root_cause !== undefined) {
-            errorObj.more = JSON.stringify(error.error.root_cause);
+        // this will catch a bulk ingest failure
+        const reason = error.error.reason ?? error.error.meta.body.error.reason;
+        if (reason !== undefined) {
+          const errorObj: ImportError = { msg: reason };
+          const rootCause = error.error.root_cause ?? error.error.meta.body.error.root_cause;
+          if (rootCause !== undefined) {
+            errorObj.more = JSON.stringify(rootCause);
           }
           return errorObj;
         }
 
+        // this will catch javascript errors such as JSON parsing issues
         if (error.error.message !== undefined) {
-          // this will catch javascript errors such as JSON parsing issues
           return { msg: error.error.message };
         }
       } else {

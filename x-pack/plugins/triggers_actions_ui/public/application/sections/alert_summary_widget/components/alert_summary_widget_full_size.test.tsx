@@ -8,17 +8,17 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
-  AlertsSummaryWidgetFullSize,
-  AlertsSummaryWidgetFullSizeProps,
+  AlertSummaryWidgetFullSize,
+  AlertSummaryWidgetFullSizeProps,
 } from './alert_summary_widget_full_size';
 import { render } from '@testing-library/react';
 import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
 
 describe('AlertSummaryWidgetFullSize', () => {
-  const renderComponent = (props: Partial<AlertsSummaryWidgetFullSizeProps> = {}) =>
+  const renderComponent = (props: Partial<AlertSummaryWidgetFullSizeProps> = {}) =>
     render(
       <IntlProvider locale="en">
-        <AlertsSummaryWidgetFullSize
+        <AlertSummaryWidgetFullSize
           chartThemes={mockedChartThemes}
           {...mockedAlertSummaryResponse}
           {...props}

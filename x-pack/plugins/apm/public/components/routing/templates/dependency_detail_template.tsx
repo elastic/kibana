@@ -18,7 +18,7 @@ import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { BetaBadge } from '../../shared/beta_badge';
-import { SearchBar } from '../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { SpanIcon } from '../../shared/span_icon';
 import { ApmMainTemplate } from './apm_main_template';
 

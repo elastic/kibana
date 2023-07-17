@@ -4,6 +4,11 @@
 <titleabbrev>Install with Docker</titleabbrev>
 ++++
 
+:docker-repo:     docker.elastic.co/kibana/kibana
+:docker-image:    {docker-repo}:{version}
+:es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
+:es-docker-image: {es-docker-repo}:{version}
+
 Docker images for {kib} are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/ubuntu[ubuntu:20.04].
 

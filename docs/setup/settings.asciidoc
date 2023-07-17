@@ -559,14 +559,13 @@ setting this to `true` enables unauthenticated users to access the {kib}
 server status API and status page. *Default: `false`*
 
 [[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
-When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`, users cannot change the opt-in status through *Advanced Settings*, and
+When `false`, users cannot change the opt-in status through <<advanced-options, Advanced Settings>>, and
 {kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. *Default: `true`*.
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
+Set to `false` to stop sending any telemetry data to Elastic.
 Reporting your cluster statistics helps
 us improve your user experience.
-Set to `true` to allow telemetry data to be sent to Elastic.
 When `false`, the telemetry data is never sent to Elastic. +
 +
 This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
@@ -619,7 +618,7 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 Set this value to change the {kib} interface language.
 Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 
-include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
+include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
 include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]

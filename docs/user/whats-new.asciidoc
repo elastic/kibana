@@ -5,12 +5,221 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2]
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
+[discrete]
+=== Discover: Break down the histogram by value
+In *Discover*,
+you can now resize the histogram and break down fields by value,
+which is often used for logs exploration. The updated histogram is especially useful for
+*Observability* use cases. For more information, check {kibana-ref}/discover.html[Discover].
 
-// tag::notable-highlights[]
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt46fc7c55a9f1fc21/640133897b2256107c86d31f/highlights-discover-histogram.gif[Break down the histogram in Discover by value]
 
-// end::notable-highlights[]
+
+[discrete]
+=== Lens: Convert your visualizations
+Convert your TSVB and aggregation-based visualizations to the drag-and-drop *Lens* visualization editor,
+directly from your dashboards. In *Edit* mode, the TSVB and aggregation-based dashboard panels
+that display a dot support the *Convert to Lens* functionality.
+For more information, check {kibana-ref}/tsvb.html#edit-visualizations-in-lens[Open and edit TSVB visualizations in Lens]
+and
+{kibana-ref}/add-aggregation-based-visualization-panels.html#edit-agg-based-visualizations-in-lens[Open and edit aggregation-based visualizations in Lens].
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blteea23d2cff80c4f4/64013478e70dd635488d0398/highlights-lens-convert.gif[Convert visualizations to Lens]
+
+[discrete]
+=== Dashboard
+
+[discrete]
+==== Time slider updates
+Selecting just the right time range is now even easier with the improvements to the time slider control.
+Pin the start time to the beginning of your time range to show how data builds over a period of time. For more information, check {kibana-ref}/add-controls.html[Filter dashboard data with controls].
+
+[discrete]
+==== Complex filters
+preview:[] Create and apply multiple filters simultaneously for nested queries,
+and use the logical OR and AND operators using the improved dropdown menu experience. For more information, check {kibana-ref}/kibana-concepts-analysts.html#autocomplete-suggestions[Additional filters with AND].
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt5fbd962a383ae3c3/640138b2e35cc90ebcbd2a0f/highlights-complex-filters.gif[Complex filters]
+
+[discrete]
+==== Interactive chart filters
+
+Filtering your data just got easier with interactive chart filters. When you right-click your chart data,
+you can select one or more filter values from the menu that appears, and link the filters with the OR operator.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt1a969a88d51822a9/640139393acc576c5603410c/highlights-chart-filters.gif[Interactive chart filters]
+
+[discrete]
+=== Maps
+
+[discrete]
+==== Label positioning
+
+Use the new *Label position* style setting to position labels above, below, or in the center of markers and icons.
+
+[role="screenshot"]
+image::images/highlights-labels-maps.png[Label positioning in maps]
+
+[discrete]
+==== Hexagon clustering
+
+Hexagon clustering was added to {kib} 8.2, but only for geo_point fields.
+This release extends support for hexagon clustering to include geo_shape fields.
+
+[discrete]
+==== Controls time slider
+
+The *Maps* time slider now uses the controls time slider, which includes enhancements
+such as pinning the start time. Refer
+to {kibana-ref}/add-controls.html[Controls] for details.
+
+[discrete]
+=== Machine Learning
+
+[discrete]
+==== Natural language processing (NLP)
+
+In 8.7, the NLP capabilities of the Elastic product became generally available.
+Deploy and manage your trained NLP models to perform tasks,
+such as text classification (including zero-shot), question answering, named entity recognition, and more.
+Refer to https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-overview.html[Natural language processing]
+for details.
+
+
+[discrete]
+==== Anomaly detection jobs on geo data
+
+A new geo wizard is available for creating lat_long anomaly detection jobs. This makes it easier
+to create jobs to detect anomalies in the geographic location of your input data.
+
+[role="screenshot"]
+image::images/highlights-jobs-geo-data.png[Anomaly detection jobs on geo data]
+
+A new action enables you to quickly create anomaly detection jobs from map visualizations.
+You can create the jobs directly from a flyout in *Dashboard*.
+For a more advanced configuration, follow the link that takes you to the ML job wizard.
+
+[role="screenshot"]
+image::images/highlights-anomaly-maps.png[Create anomaly detection jobs from map visualizations]
+
+[discrete]
+==== Memory usage by machine learning jobs
+
+Beginning in 8.7, you can view the memory usage of the open anomaly detection jobs
+and the started data frame analytics jobs in the *Memory Usage* view.
+This new view displays the total and available memory of your ML nodes,
+the memory usage of the deployed trained models,
+and active machine learning jobs.
+
+[role="screenshot"]
+image::images/highlights-memory-usage.png[New view for memory usage by machine learning jobs]
+
+[discrete]
+==== Change point detection in AIOps Labs
+
+preview:[] Change point detection identifies distribution changes, dips, spikes, and other
+statistically significant change points in a metric. The *Change point detection* UI
+visualizes the change points in a bucket identified by the change point aggregation.
+
+[role="screenshot"]
+image::images/highlights-change-point-detection.png[New change point detection UI, width="75%"]
+
+[discrete]
+==== Field statistics in machine learning job and transform wizards
+
+You are now able to view the statistics of the selectable fields in the anomaly detection,
+the data frame analytics, and the transforms wizards. The field statistics
+provide more meaningful context to help you select relevant fields.
+
+[role="screenshot"]
+image::images/highlights-jobs-multi-metric.png[New view of field statistics in machine learning jobs and transform wizards]
+
+[discrete]
+=== Alerting
+
+[discrete]
+==== Alert flapping detection
+
+Flapping occurs when the state of monitored assets, such as services, change too frequently,
+resulting in multiple alerts that might distract you from more important issues.
+To reduce the time to respond (MTTR), you can now identify frequent changes
+in your monitored assets by using pre-built configurations, highlighting alerts in the UI,
+and suppressing related notifications. For more information, check <<create-and-manage-rules>>.
+
+[role="screenshot"]
+image::images/highlights-alert-flapping.png[Alert flapping detection, width="75%"]
+
+[role="screenshot"]
+image::images/highlights-alerts.png[Alerts UI]
+
+[discrete]
+==== Alert action summarization
+
+Currently, alert actions are triggered when the rule runs or when the alert status changes.
+This behavior might lead to a notification storm when an alerting rule detects a high cardinality of alerts.
+These situations increase the time to respond to each event and affect the overall MTTR.
+With the new alert actions summarization feature, you can define how
+to aggregate several actions into a single one with these options:
+
+* *Summary of alerts on check intervals* For example, all the alerts that are
+detected by the same rule run will be sent in a single notification.
+* *Summary of alerts on custom action intervals*
+For example, all the alerts that are detected in the last 10 hours will be sent in a single email.
+
+This feature aims to improve the way you consume notifications from third parties
+and improve the MTTR by reducing unnecessary noise.
+For more information, check <<alerting-getting-started>>.
+
+[role="screenshot"]
+image::images/highlights-alert-summaries.png[Alert summaries UI, width="75%"]
+
+[role="screenshot"]
+image::images/highlights-alert-summary-actions.png[Alert action summary example]
+
+[discrete]
+==== New actions in Case management
+
+The *Case* table view streamlines case management with these new actions:
+
+* More sorting and filtering options (by severity, status, last updates, and more)
+* Bulk action for maintaining case assignees
+
+[discrete]
+==== New connector log
+
+A new connector log is available for you to troubleshoot connector
+behaviors and react when something goes wrong.
+
+[role="screenshot"]
+image::images/highlights-connector-management.png[Connection management UI]
+
+[discrete]
+==== Bulk action for enabling rules
+
+A new bulk action for enabling and disabling rules is now supported in the *Rule* table view.
+
+[discrete]
+=== {kib} Security
+
+[discrete]
+==== Control concurrent user sessions
+
+Administrators can now control the number of concurrent user sessions by configuring
+a limit through the `maxSessions` setting, for increased security. Once the limit is reached,
+a newly created user session will displace the oldest one (by creating a timestamp) for the same user.
+
+[role="screenshot"]
+image::images/highlights-concurrent-users.png[Setting for controlling the number of concurrent user sessions, width="75%"]
+
+[discrete]
+==== {kib} audit logging enhanced
+
+Since its introduction, the {kibana-ref}/xpack-security-audit-logging.html[{kib} audit logging] has been enhanced with
+additional data of security audit interest. This release adds the client IP address field.

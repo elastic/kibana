@@ -4,11 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 import { periodToMs } from './overview_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
+import { RouteContext } from '../../legacy_uptime/routes';
+import { getStatus } from './overview_status';
 import times from 'lodash/times';
+import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+
+jest.mock('../../saved_objects/synthetics_monitor/get_all_monitors', () => ({
+  ...jest.requireActual('../../saved_objects/synthetics_monitor/get_all_monitors'),
+  getAllMonitors: jest.fn(),
+}));
 
 jest.mock('../common', () => ({
   getMonitors: jest.fn().mockReturnValue({
@@ -34,6 +44,7 @@ jest.mock('../common', () => ({
       },
     ],
   }),
+  getMonitorFilters: () => '',
 }));
 
 jest.mock('../../legacy_uptime/lib/requests/get_snapshot_counts', () => ({
@@ -61,7 +72,7 @@ describe('current status route', () => {
     });
   });
 
-  describe('getStats', () => {
+  describe('queryMonitorStatus', () => {
     it('parses expected agg fields', async () => {
       const { esClient, uptimeEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
@@ -514,7 +525,7 @@ describe('current status route', () => {
           }
         )
       ).toEqual({
-        pending: 2,
+        pending: 4,
         down: 1,
         enabledMonitorQueryIds: ['id1', 'id2', 'project-monitor-id', 'id4'],
         up: 2,
@@ -573,6 +584,239 @@ describe('current status route', () => {
           },
         },
       });
+    });
+  });
+
+  describe('getStatus', () => {
+    it.each([
+      [['US Central QA'], 1],
+      [['North America - US Central'], 1],
+      [['North America - US Central', 'US Central QA'], 2],
+      [undefined, 2],
+    ])('handles disabled count when using location filters', async (locations, disabledCount) => {
+      jest.spyOn(monitorsFns, 'getAllMonitors').mockResolvedValue([
+        {
+          type: 'synthetics-monitor',
+          id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
+          attributes: {
+            enabled: false,
+            schedule: {
+              number: '3',
+              unit: 'm',
+            },
+            config_id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
+            locations: [
+              {
+                color: 'default',
+                isServiceManaged: true,
+                label: 'US Central QA',
+                id: 'us_central_qa',
+              },
+              {
+                isServiceManaged: true,
+                label: 'North America - US Central',
+                id: 'us_central',
+              },
+            ],
+            origin: 'project',
+            id: 'a-test2-default',
+          },
+          references: [],
+          migrationVersion: {
+            'synthetics-monitor': '8.6.0',
+          },
+          coreMigrationVersion: '8.0.0',
+          updated_at: '2023-02-28T14:31:37.641Z',
+          created_at: '2023-02-28T14:31:37.641Z',
+          version: 'Wzg0MzkzLDVd',
+          namespaces: ['default'],
+          score: null,
+          sort: ['a', 3013],
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+      ]);
+      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse([
+          {
+            key: 'id1',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:08:16.724Z',
+                            monitor: {
+                              status: 'up',
+                              id: 'id1',
+                            },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
+                            config_id: 'id1',
+                            observer: {
+                              geo: {
+                                name: 'Asia/Pacific - Japan',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: 'id2',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:09:16.724Z',
+                            monitor: {
+                              status: 'up',
+                              id: 'id2',
+                            },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'Asia/Pacific - Japan',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: 'Europe - Germany',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:19:16.724Z',
+                            monitor: {
+                              status: 'down',
+                              id: 'id2',
+                            },
+                            summary: {
+                              down: 1,
+                              up: 0,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'Europe - Germany',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ])
+      );
+      expect(
+        await getStatus(
+          {
+            uptimeEsClient,
+            savedObjectsClient: savedObjectsClientMock.create(),
+          } as unknown as RouteContext,
+          {
+            locations,
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          disabledCount,
+        })
+      );
+    });
+
+    it.each([
+      [['US Central QA'], 1],
+      [['North America - US Central'], 1],
+      [['North America - US Central', 'US Central QA'], 2],
+      [undefined, 2],
+    ])('handles pending count when using location filters', async (locations, pending) => {
+      jest.spyOn(monitorsFns, 'getAllMonitors').mockResolvedValue([
+        {
+          type: 'synthetics-monitor',
+          id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
+          attributes: {
+            enabled: true,
+            schedule: {
+              number: '3',
+              unit: 'm',
+            },
+            config_id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
+            locations: [
+              {
+                color: 'default',
+                isServiceManaged: true,
+                label: 'US Central QA',
+                id: 'us_central_qa',
+              },
+              {
+                isServiceManaged: true,
+                label: 'North America - US Central',
+                id: 'us_central',
+              },
+            ],
+            origin: 'project',
+            id: 'a-test2-default',
+          },
+          references: [],
+          migrationVersion: {
+            'synthetics-monitor': '8.6.0',
+          },
+          coreMigrationVersion: '8.0.0',
+          updated_at: '2023-02-28T14:31:37.641Z',
+          created_at: '2023-02-28T14:31:37.641Z',
+          version: 'Wzg0MzkzLDVd',
+          namespaces: ['default'],
+          score: null,
+          sort: ['a', 3013],
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+      ]);
+      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(getEsResponse([]));
+      expect(
+        await getStatus(
+          {
+            uptimeEsClient,
+            savedObjectsClient: savedObjectsClientMock.create(),
+          } as unknown as RouteContext,
+          {
+            locations,
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          pending,
+        })
+      );
     });
   });
 });

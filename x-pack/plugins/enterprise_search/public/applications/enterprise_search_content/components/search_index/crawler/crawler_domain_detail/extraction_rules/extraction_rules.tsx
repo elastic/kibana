@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
+import { docLinks } from '../../../../../../shared/doc_links';
 
 import { EditExtractionRule } from './edit_extraction_rule';
 import { ExtractionRulesLogic } from './extraction_rules_logic';
@@ -116,7 +117,7 @@ export const ExtractionRules: React.FC = () => {
             defaultMessage="Create a content extraction rule to change where the documents get their data during a sync. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href="TODO">
+                <EuiLink href={`${docLinks.crawlerExtractionRules}`} external>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.crawler.extractionRules.learnMoreLink',
                     {
@@ -129,6 +130,7 @@ export const ExtractionRules: React.FC = () => {
           />
         </p>
       </EuiText>
+      <EuiSpacer />
       {editingExtractionRule ? (
         <EditExtractionRule
           cancelEditing={cancelEditExtractionRule}

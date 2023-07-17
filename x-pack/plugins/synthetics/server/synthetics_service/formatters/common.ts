@@ -21,6 +21,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.CONFIG_ID]: null,
   [ConfigKey.LOCATIONS]: null,
+  [ConfigKey.PARAMS]: (fields) => stringToObjectFormatter(fields[ConfigKey.PARAMS] || ''),
   [ConfigKey.SCHEDULE]: (fields) =>
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.APM_SERVICE_NAME]: null,

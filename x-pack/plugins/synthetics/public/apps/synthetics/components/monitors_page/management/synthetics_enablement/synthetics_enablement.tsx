@@ -90,7 +90,8 @@ export const EnablementEmptyState = () => {
             <h3>{labels.LEARN_MORE_LABEL}</h3>
           </EuiTitle>
           <EuiLink
-            href="https://docs.google.com/document/d/1hkzFibu9LggPWXQqfbAd0mMlV75wCME7_BebXlEH-oI"
+            data-test-subj="syntheticsEnablementEmptyStateLink"
+            href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started-ui.html#uptime-set-up-prereq"
             target="_blank"
           >
             {labels.DOCS_LABEL}

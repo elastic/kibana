@@ -83,10 +83,10 @@ const ExperimentalDataStreamFeatures = schema.arrayOf(
   schema.object({
     data_stream: schema.string(),
     features: schema.object({
-      synthetic_source: schema.boolean(),
-      tsdb: schema.boolean(),
-      doc_value_only_numeric: schema.boolean(),
-      doc_value_only_other: schema.boolean(),
+      synthetic_source: schema.maybe(schema.boolean({ defaultValue: false })),
+      tsdb: schema.maybe(schema.boolean({ defaultValue: false })),
+      doc_value_only_numeric: schema.maybe(schema.boolean({ defaultValue: false })),
+      doc_value_only_other: schema.maybe(schema.boolean({ defaultValue: false })),
     }),
   })
 );

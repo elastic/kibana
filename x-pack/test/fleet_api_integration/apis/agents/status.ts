@@ -257,5 +257,54 @@ export default function ({ getService }: FtrProviderContext) {
           statusCode: 403,
         });
     });
+
+    it('should not perform inactivity check if there are too many agent policies with inactivity timeout', async () => {
+      // the test server is started with --xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout=10
+      // so we create 11 policies with inactivity timeout then no agents should turn inactive
+
+      const policiesToAdd = new Array(11).fill(0).map((_, i) => `policy-inactivity-timeout-${i}`);
+
+      await Promise.all(
+        policiesToAdd.map((policyId) =>
+          es.create({
+            id: 'ingest-agent-policies:' + policyId,
+            index: '.kibana',
+            refresh: 'wait_for',
+            document: {
+              type: 'ingest-agent-policies',
+              'ingest-agent-policies': {
+                name: policyId,
+                namespace: 'default',
+                description: 'Policy with inactivity timeout',
+                status: 'active',
+                is_default: true,
+                monitoring_enabled: ['logs', 'metrics'],
+                revision: 2,
+                updated_at: '2020-05-07T19:34:42.533Z',
+                updated_by: 'system',
+                inactivity_timeout: 60,
+              },
+              migrationVersion: {
+                'ingest-agent-policies': '7.10.0',
+              },
+            },
+          })
+        )
+      );
+      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
+      expect(apiResponse).to.eql({
+        results: {
+          events: 0,
+          other: 0,
+          total: 10,
+          online: 3,
+          error: 2,
+          offline: 1,
+          updating: 4,
+          inactive: 0,
+          unenrolled: 1,
+        },
+      });
+    });
   });
 }

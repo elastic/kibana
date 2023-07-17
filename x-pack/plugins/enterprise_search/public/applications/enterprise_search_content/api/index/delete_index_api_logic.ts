@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface DeleteIndexApiLogicArgs {
@@ -36,3 +36,5 @@ export const DeleteIndexApiLogic = createApiLogic(['delete_index_api_logic'], de
       },
     }),
 });
+
+export type DeleteIndexApiActions = Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>;

@@ -16,12 +16,12 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../../utils';
 
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     describe('"kql" rule type', () => {
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: 'event.dataset: "dataset_name_1"',
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 8, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         expect(signalsOpen.hits.hits.length).to.eql(8);
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: 'event.dataset: "dataset_name_1"',
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 8, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 8, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         expect(signalsOpen.hits.hits.length).to.eql(8);
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 8, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map((hit) => hit._source?.['event.dataset']).sort();
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits

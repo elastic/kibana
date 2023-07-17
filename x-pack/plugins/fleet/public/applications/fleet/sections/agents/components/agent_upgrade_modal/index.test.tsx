@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { waitFor } from '@testing-library/react';
+
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { AgentUpgradeAgentModal } from '.';
@@ -23,6 +25,17 @@ jest.mock('@elastic/eui', () => {
   return {
     ...jest.requireActual('@elastic/eui'),
     EuiConfirmModal: ({ children }: any) => <>{children}</>,
+  };
+});
+
+jest.mock('../../../../hooks', () => {
+  return {
+    ...jest.requireActual('../../../../hooks'),
+    sendGetAgentsAvailableVersions: jest.fn().mockResolvedValue({
+      data: {
+        items: ['8.7.0'],
+      },
+    }),
   };
 });
 
@@ -74,5 +87,17 @@ describe('AgentUpgradeAgentModal', () => {
 
     expect(el).not.toBeNull();
     expect(el?.textContent).toBe('1 hour');
+  });
+
+  it('should enable the version combo if agents is a query', async () => {
+    const { utils } = renderAgentUpgradeAgentModal({
+      agents: '*',
+      agentCount: 30,
+    });
+
+    const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+    await waitFor(() => {
+      expect(el.classList.contains('euiComboBox-isDisabled')).toBe(false);
+    });
   });
 });

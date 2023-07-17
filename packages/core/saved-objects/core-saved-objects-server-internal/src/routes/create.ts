@@ -8,16 +8,22 @@
 
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerCreateRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { coreUsageData, logger }: RouteDependencies
 ) => {
   router.post(
     {
@@ -48,6 +54,12 @@ export const registerCreateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'post',
+        path: '/api/saved_objects/{type}/{id?}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { overwrite } = req.query;
       const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =

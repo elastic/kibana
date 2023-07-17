@@ -51,6 +51,7 @@ describe('ExpressionRow', () => {
           timeWindowSize: [],
         }}
         expression={expression}
+        dataView={{ fields: [], title: 'metricbeat-*' }}
       />
     );
 

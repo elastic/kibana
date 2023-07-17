@@ -37,7 +37,7 @@ export function getPluginForPath(
 ): PluginOrPackage | undefined {
   if (filePath.indexOf('@') >= 0) {
     return plugins.find(
-      (plugin) => !plugin.isPlugin && filePath.indexOf(plugin.manifest.id + path.sep) >= 0
+      (plugin) => !plugin.isPlugin && filePath.indexOf(plugin.id + path.sep) >= 0
     );
   } else {
     return plugins.find((plugin) => filePath.startsWith(plugin.directory + path.sep));

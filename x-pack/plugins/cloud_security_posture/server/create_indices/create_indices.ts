@@ -6,6 +6,7 @@
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -64,7 +65,16 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
       priority: 500,
     });
 
-    await createIndexSafe(esClient, logger, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+    const result = await createIndexSafe(esClient, logger, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+
+    if (result === 'already-exists') {
+      await updateIndexSafe(
+        esClient,
+        logger,
+        BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+        benchmarkScoreMapping
+      );
+    }
   } catch (e) {
     logger.error(
       `Failed to upsert index template [Template: ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}]`
@@ -107,7 +117,21 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
       composed_of,
     });
 
-    await createIndexSafe(esClient, logger, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+    const result = await createIndexSafe(esClient, logger, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+
+    if (result === 'already-exists') {
+      // Make sure mappings are up-to-date
+      const simulateResponse = await esClient.indices.simulateTemplate({
+        name: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
+      });
+
+      await updateIndexSafe(
+        esClient,
+        logger,
+        LATEST_FINDINGS_INDEX_DEFAULT_NS,
+        simulateResponse.template.mappings
+      );
+    }
   } catch (e) {
     logger.error(
       `Failed to upsert index template [Template: ${LATEST_FINDINGS_INDEX_TEMPLATE_NAME}]`
@@ -155,11 +179,32 @@ const createIndexSafe = async (esClient: ElasticsearchClient, logger: Logger, in
       });
 
       logger.info(`Created index successfully [Name: ${index}]`);
+      return 'success';
     } else {
       logger.trace(`Index already exists [Name: ${index}]`);
+      return 'already-exists';
     }
   } catch (e) {
     logger.error(`Failed to create index [Name: ${index}]`);
+    logger.error(e);
+    return 'fail';
+  }
+};
+
+const updateIndexSafe = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  index: string,
+  mappings: MappingTypeMapping
+) => {
+  try {
+    await esClient.indices.putMapping({
+      index,
+      properties: mappings.properties,
+    });
+    logger.info(`Updated index successfully [Name: ${index}]`);
+  } catch (e) {
+    logger.error(`Failed to update index [Name: ${index}]`);
     logger.error(e);
   }
 };

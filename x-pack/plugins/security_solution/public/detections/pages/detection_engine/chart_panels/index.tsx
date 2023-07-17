@@ -32,6 +32,7 @@ import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_p
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import type { AddFilterProps } from '../../../components/alerts_kpis/common/types';
 
 const TREND_CHART_HEIGHT = 280; // px
 const CHART_PANEL_HEIGHT = 375; // px
@@ -47,7 +48,7 @@ const ChartSelectContainer = styled.div`
 `;
 
 export interface Props {
-  addFilter: ({ field, value }: { field: string; value: string | number }) => void;
+  addFilter: ({ field, value, negate }: AddFilterProps) => void;
   alertsDefaultFilters: Filter[];
   isLoadingIndexPattern: boolean;
   query: Query;
@@ -252,7 +253,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               chartOptionsContextMenu={chartOptionsContextMenu}
               extraActions={resetGroupByFieldAction}
               filters={alertsDefaultFilters}
-              inspectTitle={i18n.TABLE}
+              inspectTitle={isAlertsPageChartsEnabled ? i18n.COUNTS : i18n.TABLE}
               panelHeight={CHART_PANEL_HEIGHT}
               query={query}
               runtimeMappings={runtimeMappings}

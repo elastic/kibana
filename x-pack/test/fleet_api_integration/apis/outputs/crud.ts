@@ -16,7 +16,9 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('fleet_output_crud', async function () {
+  let pkgVersion: string;
+
+  describe('fleet_outputs_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -25,8 +27,67 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     let defaultOutputId: string;
+    let ESOutputId: string;
+    let fleetServerPolicyId: string;
+    let fleetServerPolicyWithCustomOutputId: string;
 
     before(async function () {
+      // we must first force install the fleet_server package to override package verification error on policy create
+      // https://github.com/elastic/kibana/issues/137450
+      const getPkRes = await supertest
+        .get(`/api/fleet/epm/packages/fleet_server`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      pkgVersion = getPkRes.body.item.version;
+
+      await supertest
+        .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      let { body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Fleet Server policy 1',
+          namespace: 'default',
+          has_fleet_server: true,
+        })
+        .expect(200);
+      const fleetServerPolicy = apiResponse.item;
+      fleetServerPolicyId = fleetServerPolicy.id;
+
+      ({ body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Agent policy 1',
+          namespace: 'default',
+        })
+        .expect(200));
+
+      const agentPolicy = apiResponse.item;
+
+      if (!fleetServerPolicy) {
+        throw new Error('No Fleet server policy');
+      }
+
+      if (!agentPolicy) {
+        throw new Error('No agent policy');
+      }
+
+      await supertest
+        .post(`/api/fleet/fleet_server_hosts`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'test-default-123',
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://test.fr:8080'],
+        })
+        .expect(200);
+
       const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
       const defaultOutput = getOutputsRes.items.find((item: any) => item.is_default);
@@ -35,6 +96,30 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       defaultOutputId = defaultOutput.id;
+
+      const { body: postResponse1 } = await supertest
+        .post(`/api/fleet/outputs`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'ESoutput',
+          type: 'elasticsearch',
+          hosts: ['https://test.fr'],
+        })
+        .expect(200);
+      ESOutputId = postResponse1.item.id;
+
+      ({ body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Preconfigured Fleet Server policy',
+          namespace: 'default',
+          has_fleet_server: true,
+          data_output_id: `${ESOutputId}`,
+        })
+        .expect(200));
+      const fleetServerPolicyWithCustomOutput = apiResponse.item;
+      fleetServerPolicyWithCustomOutputId = fleetServerPolicyWithCustomOutput.id;
     });
 
     after(async () => {
@@ -43,10 +128,12 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET /outputs', () => {
-      it('should list the default output', async () => {
+      it('should list all the outputs', async () => {
         const { body: getOutputsRes } = await supertest.get(`/api/fleet/outputs`).expect(200);
 
-        expect(getOutputsRes.items.length).to.eql(1);
+        expect(getOutputsRes.items.length).to.eql(2);
+        const findDefault = getOutputsRes.items.find((item: any) => item.is_default === true);
+        expect(findDefault.id).to.eql(defaultOutputId);
       });
     });
 
@@ -82,9 +169,146 @@ export default function (providerContext: FtrProviderContext) {
           .send({ hosts: ['https://test.fr'] })
           .expect(404);
       });
-      it('should allow to update an output with the shipper values', async function () {
+
+      it('should not allow to update a default ES output to logstash', async function () {
+        const { body } = await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(400);
+        expect(body.message).to.eql(
+          'Logstash output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+        );
+      });
+
+      it('should allow to update a default ES output if keeping it ES', async function () {
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Default ES Output',
+            type: 'elasticsearch',
+            hosts: ['test.fr:443'],
+          })
+          .expect(200);
+      });
+
+      it('should allow to update a non-default ES output to logstash', async function () {
+        const { body: postResponse2 } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'A Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { id: logstashOutput1Id } = postResponse2.item;
+        await supertest
+          .put(`/api/fleet/outputs/${logstashOutput1Id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'A Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
+      it('should allow to update a default logstash output to logstash and fleet server policies should be updated', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Logstash Output 1',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+        const { id: logstashOutput2Id } = postResponse.item;
+
+        await supertest
+          .put(`/api/fleet/outputs/${logstashOutput2Id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443', 'test.com:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        await supertest.get(`/api/fleet/outputs`).expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
+      it('should allow to update a logstash output with the shipper values', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+        const { id: newOutputId } = postResponse.item;
+
+        await supertest
+          .put(`/api/fleet/outputs/${newOutputId}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'My Logstash Output',
@@ -107,7 +331,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { items: outputs },
         } = await supertest.get(`/api/fleet/outputs`).expect(200);
-        const newOutput = outputs.filter((o: any) => o.id === defaultOutputId);
+        const newOutput = outputs.filter((o: any) => o.id === newOutputId);
 
         expect(newOutput[0].shipper).to.eql({
           compression_level: null,
@@ -148,7 +372,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /outputs', () => {
-      it('should allow to create an output ', async function () {
+      it('should allow to create an ES output ', async function () {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -165,7 +389,29 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should allow to create a logstash output ', async function () {
+      it('should allow to create a new default ES output ', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default ES output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+            is_default: true,
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'Default ES output',
+          type: 'elasticsearch',
+          hosts: ['https://test.fr:443'],
+          is_default: true,
+          is_default_monitoring: false,
+        });
+      });
+
+      it('should allow to create a new logstash output', async function () {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -196,6 +442,48 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should allow to create a new logstash default output and fleet server policies should not change', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            is_default: true,
+            ssl: {
+              certificate: 'CERTIFICATE',
+              key: 'KEY',
+              certificate_authorities: ['CA1', 'CA2'],
+            },
+          })
+          .expect(200);
+
+        const { id: _, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId).to.eql({
+          name: 'Default Logstash Output',
+          type: 'logstash',
+          hosts: ['test.fr:443'],
+          is_default: true,
+          is_default_monitoring: false,
+          ssl: {
+            certificate: 'CERTIFICATE',
+            key: 'KEY',
+            certificate_authorities: ['CA1', 'CA2'],
+          },
+        });
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${fleetServerPolicyId}`);
+        const updatedFleetServerPolicy = body.item;
+        expect(updatedFleetServerPolicy.data_output_id === defaultOutputId);
+
+        const { body: bodyWithOutput } = await supertest.get(
+          `/api/fleet/agent_policies/${fleetServerPolicyWithCustomOutputId}`
+        );
+        const updatedFleetServerPolicyWithCustomOutput = bodyWithOutput.item;
+        expect(updatedFleetServerPolicyWithCustomOutput.data_output_id === ESOutputId);
+      });
+
       it('should not allow to create a logstash output with http hosts ', async function () {
         const { body: postResponse } = await supertest
           .post(`/api/fleet/outputs`)
@@ -217,7 +505,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should toggle default output when creating a new default output ', async function () {
+      it('should toggle the default output when creating a new one', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')

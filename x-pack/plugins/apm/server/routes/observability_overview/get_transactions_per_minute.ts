@@ -6,10 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../common/transaction_types';
 import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import {
   getDocumentTypeFilterForTransactions,
@@ -82,10 +79,8 @@ export async function getTransactionsPerMinute({
   }
 
   const topTransactionTypeBucket =
-    aggregations.transactionType.buckets.find(
-      ({ key: transactionType }) =>
-        transactionType === TRANSACTION_REQUEST ||
-        transactionType === TRANSACTION_PAGE_LOAD
+    aggregations.transactionType.buckets.find(({ key: transactionType }) =>
+      isDefaultTransactionType(transactionType as string)
     ) || aggregations.transactionType.buckets[0];
 
   return {

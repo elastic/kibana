@@ -26,6 +26,8 @@ paths:
   /service_tokens:
     $ref: paths/service_tokens.yaml
   # EPM / integrations endpoints
+  /epm/verification_key_id:
+    $ref: paths/epm@verification_key_id.yaml
   /epm/categories:
     $ref: paths/epm@categories.yaml
   /epm/packages/limited:

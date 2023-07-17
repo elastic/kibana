@@ -26,7 +26,7 @@ import {
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
 } from '../../../../common/constants';
-import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
@@ -36,15 +36,12 @@ import {
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 
-export const getClusterIdQuery = (cluster: Cluster) => {
+export const getClusterIdQuery = (cluster: Cluster): NavFilter => {
   if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
-    return { 'cloud.account.name': cluster.meta.cloud?.account.name };
+    // TODO: remove assertion after typing CspFinding as discriminating union
+    return { 'cloud.account.id': cluster.meta.cloud!.account.id };
   }
-  if (cluster.meta.benchmark.posture_type === 'kspm') {
-    return { cluster_id: cluster.meta.assetIdentifierId };
-  }
-
-  return {};
+  return { cluster_id: cluster.meta.assetIdentifierId };
 };
 
 export const BenchmarksSection = ({
@@ -139,8 +136,8 @@ export const BenchmarksSection = ({
             <EuiTitle size="xxs">
               <div>
                 <FormattedMessage
-                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
-                  defaultMessage="Compliance Score"
+                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.postureScoreTitle"
+                  defaultMessage="Posture Score"
                 />
                 <EuiIcon className="euiTableSortIcon" type={clusterSortingIcon} />
               </div>
@@ -173,6 +170,9 @@ export const BenchmarksSection = ({
           </EuiFlexItem>
           <EuiFlexItem
             grow={dashboardColumnsGrow.second}
+            css={css`
+              margin-left: -${euiTheme.size.s};
+            `}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
             <CloudPostureScoreChart
@@ -195,7 +195,13 @@ export const BenchmarksSection = ({
               }
               viewAllButtonTitle={i18n.translate(
                 'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
-                { defaultMessage: 'View all failed findings for this cluster' }
+                {
+                  defaultMessage: 'View all failed findings for this {postureAsset}',
+                  values: {
+                    postureAsset:
+                      dashboardType === CSPM_POLICY_TEMPLATE ? 'cloud account' : 'cluster',
+                  },
+                }
               )}
               onViewAllClick={() => navToFailedFindingsByCluster(cluster)}
             />

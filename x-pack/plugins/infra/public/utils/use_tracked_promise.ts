@@ -201,9 +201,9 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
               if (shouldTriggerOrThrow()) {
                 if (onReject) {
                   onReject(value);
+                } else {
+                  throw value;
                 }
-
-                throw value;
               }
             }
           ),

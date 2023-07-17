@@ -32,6 +32,28 @@ const context = {
   field: { name: 'user.name', value, type: 'text' },
 } as CellActionExecutionContext;
 
+const defaultDataProvider = {
+  type: addProvider.type,
+  payload: {
+    id: TimelineId.active,
+    providers: [
+      {
+        and: [],
+        enabled: true,
+        excluded: false,
+        id: 'event-field-default-timeline-1-user_name-0-the-value',
+        kqlQuery: '',
+        name: 'user.name',
+        queryMatch: {
+          field: 'user.name',
+          operator: ':',
+          value: 'the-value',
+        },
+      },
+    ],
+  },
+};
+
 describe('Default createAddToTimelineAction', () => {
   const addToTimelineAction = createAddToTimelineAction({ store, order: 1 });
 
@@ -62,27 +84,7 @@ describe('Default createAddToTimelineAction', () => {
   describe('execute', () => {
     it('should execute normally', async () => {
       await addToTimelineAction.execute(context);
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: addProvider.type,
-        payload: {
-          id: TimelineId.active,
-          providers: [
-            {
-              and: [],
-              enabled: true,
-              excluded: false,
-              id: 'event-field-default-timeline-1-user_name-0-the-value',
-              kqlQuery: '',
-              name: 'user.name',
-              queryMatch: {
-                field: 'user.name',
-                operator: ':',
-                value: 'the-value',
-              },
-            },
-          ],
-        },
-      });
+      expect(mockDispatch).toHaveBeenCalledWith(defaultDataProvider);
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
@@ -96,6 +98,36 @@ describe('Default createAddToTimelineAction', () => {
       });
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();
+    });
+
+    describe('should execute correctly when negateFilters is provided', () => {
+      it('should not exclude if negateFilters is false', async () => {
+        await addToTimelineAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: false,
+          },
+        });
+        expect(mockDispatch).toHaveBeenCalledWith(defaultDataProvider);
+        expect(mockWarningToast).not.toHaveBeenCalled();
+      });
+
+      it('should exclude if negateFilters is true', async () => {
+        await addToTimelineAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: true,
+          },
+        });
+        expect(mockDispatch).toHaveBeenCalledWith({
+          ...defaultDataProvider,
+          payload: {
+            ...defaultDataProvider.payload,
+            providers: [{ ...defaultDataProvider.payload.providers[0], excluded: true }],
+          },
+        });
+        expect(mockWarningToast).not.toHaveBeenCalled();
+      });
     });
   });
 });

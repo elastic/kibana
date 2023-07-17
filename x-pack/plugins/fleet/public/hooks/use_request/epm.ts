@@ -24,6 +24,7 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  GetVerificationKeyIdResponse,
 } from '../../types';
 import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 
@@ -140,6 +141,22 @@ export const useGetPackageStats = (pkgName: string) => {
     path: epmRouteService.getStatsPath(pkgName),
     method: 'get',
   });
+};
+
+export const useGetPackageVerificationKeyId = () => {
+  const { data, ...rest } = useQuery<GetVerificationKeyIdResponse, RequestError>(
+    ['verification_key_id'],
+    () =>
+      sendRequestForRq<GetVerificationKeyIdResponse>({
+        path: epmRouteService.getVerificationKeyIdPath(),
+        method: 'get',
+      })
+  );
+
+  return {
+    packageVerificationKeyId: data?.id || undefined,
+    ...rest,
+  };
 };
 
 export const sendGetPackageInfoByKey = (

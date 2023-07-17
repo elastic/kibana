@@ -7,7 +7,8 @@
  */
 
 import { toExpression } from './to_expression';
-import { cloneDeep, set, unset } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, unset } from 'lodash';
 
 describe('toExpression', () => {
   describe('single expression', () => {

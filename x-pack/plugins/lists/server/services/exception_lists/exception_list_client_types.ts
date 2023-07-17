@@ -274,8 +274,6 @@ export interface CreateEndpointListItemOptions {
   comments: CreateCommentsArray;
   /** The entries of the endpoint list item */
   entries: EntriesArray;
-  /** an optional datetime string with an expiration time */
-  expireTime: ExpireTimeOrUndefined;
   /** The item id of the list item */
   itemId: ItemId;
   /** The name of the list item */
@@ -347,8 +345,6 @@ export interface UpdateEndpointListItemOptions {
   comments: UpdateCommentsArray;
   /** The entries of the endpoint list item */
   entries: EntriesArray;
-  /** an optional datetime string with an expiration time */
-  expireTime: ExpireTimeOrUndefined;
   /** The id of the list item (Either this or itemId has to be defined) */
   id: IdOrUndefined;
   /** The item id of the list item (Either this or id has to be defined) */

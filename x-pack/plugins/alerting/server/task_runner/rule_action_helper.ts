@@ -69,7 +69,7 @@ export const isSummaryActionThrottled = ({
 };
 
 export const generateActionHash = (action: RuleAction) => {
-  return `${action.actionTypeId}:${action.group || 'summary'}:${
+  return `${action.actionTypeId}:${action.frequency?.summary ? 'summary' : action.group}:${
     action.frequency?.throttle || 'no-throttling'
   }`;
 };
@@ -82,7 +82,9 @@ export const getSummaryActionsFromTaskState = ({
   summaryActions?: ThrottledActions;
 }) => {
   return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
-    const actionExists = actions.some((action) => generateActionHash(action) === key);
+    const actionExists = actions.some(
+      (action) => action.frequency?.summary && generateActionHash(action) === key
+    );
     if (actionExists) {
       return { ...newObj, [key]: val };
     } else {

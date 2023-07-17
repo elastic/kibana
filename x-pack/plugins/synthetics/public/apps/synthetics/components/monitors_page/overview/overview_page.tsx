@@ -16,7 +16,7 @@ import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refres
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  selectOverviewPageState,
+  selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
@@ -42,7 +42,6 @@ export const OverviewPage: React.FC = () => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { search } = useLocation();
 
-  const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
@@ -57,10 +56,16 @@ export const OverviewPage: React.FC = () => {
   } = useEnablement();
 
   const {
-    syntheticsMonitors,
+    loaded: overviewLoaded,
+    data: { monitors },
+    pageState,
+  } = useSelector(selectOverviewState);
+
+  const {
     loading: monitorsLoading,
     loaded: monitorsLoaded,
     handleFilterChange,
+    absoluteTotal,
   } = useMonitorList();
 
   // fetch overview for all other page state changes
@@ -80,8 +85,7 @@ export const OverviewPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, lastRefresh]);
 
-  const hasNoMonitors =
-    !search && !enablementLoading && monitorsLoaded && syntheticsMonitors.length === 0;
+  const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
@@ -90,6 +94,8 @@ export const OverviewPage: React.FC = () => {
   if (!isEnabled && hasNoMonitors) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
+
+  const noMonitorFound = monitorsLoaded && overviewLoaded && monitors?.length === 0;
 
   return (
     <>
@@ -105,10 +111,10 @@ export const OverviewPage: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
+      {!noMonitorFound ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
             <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
@@ -121,8 +127,9 @@ export const OverviewPage: React.FC = () => {
           <EuiSpacer />
           <OverviewGrid />
         </>
+      ) : (
+        <NoMonitorsFound />
       )}
-      {monitorsLoaded && syntheticsMonitors?.length === 0 && <NoMonitorsFound />}
     </>
   );
 };

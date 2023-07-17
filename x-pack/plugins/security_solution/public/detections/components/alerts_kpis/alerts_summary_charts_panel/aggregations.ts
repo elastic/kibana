@@ -18,7 +18,7 @@ export const severityAggregations = {
 };
 
 export const alertTypeAggregations = {
-  alertsByRule: {
+  alertsByType: {
     terms: {
       field: ALERT_RULE_NAME,
       size: DEFAULT_QUERY_SIZE,
@@ -34,6 +34,15 @@ export const alertTypeAggregations = {
   },
 };
 
+export const alertRuleAggregations = {
+  alertsByRule: {
+    terms: {
+      field: ALERT_RULE_NAME,
+      size: DEFAULT_QUERY_SIZE,
+    },
+  },
+};
+
 export const alertsGroupingAggregations = (stackByField: GroupBySelection) => {
   return {
     alertsByGrouping: {
@@ -41,6 +50,9 @@ export const alertsGroupingAggregations = (stackByField: GroupBySelection) => {
         field: stackByField,
         size: 10,
       },
+    },
+    missingFields: {
+      missing: { field: stackByField },
     },
   };
 };

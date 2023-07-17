@@ -4,16 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiFlexItem, EuiFlexGroup, EuiSelect } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { DataViewBase } from '@kbn/es-query';
+import { MetricsExplorerKueryBar } from '../../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
 import { MetricRowBaseProps } from './types';
@@ -21,6 +16,7 @@ import { MetricRowBaseProps } from './types';
 interface MetricRowWithCountProps extends MetricRowBaseProps {
   agg?: Aggregators;
   filter?: string;
+  dataView: DataViewBase;
 }
 
 export const MetricRowWithCount = ({
@@ -31,6 +27,7 @@ export const MetricRowWithCount = ({
   disableDelete,
   onChange,
   aggregationTypes,
+  dataView,
 }: MetricRowWithCountProps) => {
   const aggOptions = useMemo(
     () =>
@@ -59,10 +56,10 @@ export const MetricRowWithCount = ({
   );
 
   const handleFilterChange = useCallback(
-    (el: React.ChangeEvent<HTMLInputElement>) => {
+    (filterString: string) => {
       onChange({
         name,
-        filter: el.target.value,
+        filter: filterString,
         aggType: agg as CustomMetricAggTypes,
       });
     },
@@ -89,7 +86,14 @@ export const MetricRowWithCount = ({
               { defaultMessage: 'KQL Filter {name}', values: { name } }
             )}
           >
-            <EuiFieldText compressed value={filter} onChange={handleFilterChange} />
+            <MetricsExplorerKueryBar
+              placeholder={' '}
+              compressed
+              derivedIndexPattern={dataView}
+              onChange={handleFilterChange}
+              onSubmit={handleFilterChange}
+              value={filter}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />

@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
+import { TestRunDetailsStatus } from './components/test_run_details_status';
 import { RouteProps } from '../../routes';
-import { MonitorDetailsStatus } from '../monitor_details/monitor_details_status';
 import { TestRunDate } from './components/test_run_date';
 import { TEST_RUN_DETAILS_ROUTE } from '../../../../../common/constants';
 import { TestRunDetails } from './test_run_details';
@@ -43,7 +43,7 @@ export const getTestRunDetailsRoute = (
           defaultMessage="Test run details"
         />
       ),
-      rightSideItems: [<TestRunDate />, <MonitorDetailsStatus />, <MonitorDetailsLocation />],
+      rightSideItems: [<TestRunDate />, <TestRunDetailsStatus />, <MonitorDetailsLocation />],
     },
   };
 };

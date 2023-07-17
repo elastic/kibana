@@ -9,7 +9,13 @@
 import fastIsEqual from 'fast-deep-equal';
 
 import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
-import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  isFilterPinned,
+  onlyDisabledFiltersChanged,
+} from '@kbn/es-query';
+import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { DashboardContainerByValueInput } from '../../../../../common';
@@ -32,10 +38,11 @@ export type DashboardDiffFunctions = {
 
 export const isKeyEqual = async (
   key: keyof DashboardContainerByValueInput,
-  diffFunctionProps: DiffFunctionProps<typeof key>
+  diffFunctionProps: DiffFunctionProps<typeof key>,
+  diffingFunctions: DashboardDiffFunctions
 ) => {
   const propsAsNever = diffFunctionProps as never; // todo figure out why props has conflicting types in some constituents.
-  const diffingFunction = dashboardDiffingFunctions[key];
+  const diffingFunction = diffingFunctions[key];
   if (diffingFunction) {
     return diffingFunction?.prototype?.name === 'AsyncFunction'
       ? await diffingFunction(propsAsNever)
@@ -48,7 +55,7 @@ export const isKeyEqual = async (
  * A collection of functions which diff individual keys of dashboard state. If a key is missing from this list it is
  * diffed by the default diffing function, fastIsEqual.
  */
-export const dashboardDiffingFunctions: DashboardDiffFunctions = {
+export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   panels: async ({ currentValue, lastValue, container }) => {
     if (!getPanelLayoutsAreEqual(currentValue, lastValue)) return false;
 
@@ -81,6 +88,7 @@ export const dashboardDiffingFunctions: DashboardDiffFunctions = {
     return await Promise.any(explicitInputComparePromises).catch(() => true);
   },
 
+  // exclude pinned filters from comparision because pinned filters are not part of application state
   filters: ({ currentValue, lastValue }) =>
     compareFilters(
       currentValue.filter((f) => !isFilterPinned(f)),
@@ -108,4 +116,10 @@ export const dashboardDiffingFunctions: DashboardDiffFunctions = {
     persistableControlGroupInputIsEqual(currentValue, lastValue),
 
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
+};
+
+export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
+  ...unsavedChangesDiffingFunctions,
+  filters: ({ currentValue, lastValue }) =>
+    onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
 };

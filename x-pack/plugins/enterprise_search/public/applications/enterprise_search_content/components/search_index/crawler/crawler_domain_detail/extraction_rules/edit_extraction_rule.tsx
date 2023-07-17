@@ -27,6 +27,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -34,6 +35,7 @@ import {
   ExtractionRule,
   ExtractionRuleBase,
 } from '../../../../../../../../common/types/extraction_rules';
+import { docLinks } from '../../../../../../shared/doc_links';
 
 import { ContentFieldsPanel } from './content_fields_panel';
 import { EditFieldRuleFlyout } from './edit_field_rule_flyout';
@@ -101,7 +103,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
   saveRule,
 }) => {
   const { closeEditRuleFlyout, openEditRuleFlyout } = useActions(ExtractionRulesLogic);
-  const { fieldRuleFlyoutVisible, fieldRuleToEdit, fieldRuleToEditIndex, fieldRuleToEditIsNew } =
+  const { fieldRuleFlyoutVisible, fieldRuleToEdit, fieldRuleToEditIsNew } =
     useValues(ExtractionRulesLogic);
   const [urlToggle, setUrlToggle] = useState<UrlState>(UrlState.ALL);
   const { control, formState, getValues, handleSubmit, reset, setValue } =
@@ -362,7 +364,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
         <EuiSpacer />
         <EuiLink
           data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreUrlFilters"
-          href="TODO"
+          href={`${docLinks.crawlerExtractionRules}#crawler-extraction-rules-html-filters`}
           external
         >
           {i18n.translate(
@@ -435,6 +437,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
             if (fieldRuleToEditIsNew) {
               appendRule(fieldRule);
             } else {
+              const fieldRuleToEditIndex = rulesFields.findIndex(({ id: ruleId }) => ruleId === id);
               updateRule(fieldRuleToEditIndex ?? 0, fieldRule);
             }
             closeEditRuleFlyout();

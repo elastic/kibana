@@ -39,7 +39,12 @@ import { getNewsFeed } from '../../../../services/get_news_feed';
 import { buildEsQuery } from '../../../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 
-import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
+import {
+  ALERTS_PER_PAGE,
+  ALERTS_TABLE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_INTERVAL,
+} from './constants';
 import { calculateBucketSize, useOverviewMetrics } from './helpers';
 
 export function OverviewPage() {
@@ -91,7 +96,17 @@ export function OverviewPage() {
       to: relativeEnd,
     })
   );
+
   const timeBuckets = useTimeBuckets();
+  const bucketSize = useMemo(
+    () =>
+      calculateBucketSize({
+        start: absoluteStart,
+        end: absoluteEnd,
+        timeBuckets,
+      }),
+    [absoluteStart, absoluteEnd, timeBuckets]
+  );
   const alertSummaryTimeRange = useMemo(
     () =>
       getAlertSummaryTimeRange(
@@ -99,24 +114,16 @@ export function OverviewPage() {
           from: relativeStart,
           to: relativeEnd,
         },
-        timeBuckets
+        bucketSize?.intervalString || DEFAULT_INTERVAL,
+        bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
       ),
-    [relativeEnd, relativeStart, timeBuckets]
+    [bucketSize, relativeEnd, relativeStart]
   );
 
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
-
-  const bucketSize = useMemo(
-    () =>
-      calculateBucketSize({
-        start: absoluteStart,
-        end: absoluteEnd,
-      }),
-    [absoluteStart, absoluteEnd]
-  );
 
   useEffect(() => {
     setEsQuery(
@@ -211,9 +218,10 @@ export function OverviewPage() {
               <AlertsStateTable
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
-                id={ALERTS_TABLE_ID}
                 flyoutSize="s"
                 featureIds={observabilityAlertFeatureIds}
+                hideLazyLoader
+                id={ALERTS_TABLE_ID}
                 pageSize={ALERTS_PER_PAGE}
                 query={esQuery}
                 showExpandToDetails={false}

@@ -16,6 +16,11 @@ export const ErrorStrings = {
           index,
         },
       }),
+    getConvertToLensUnsupportedSavedVisualization: () =>
+      i18n.translate('xpack.canvas.error.actionsElements.convertToLensUnsupportedErrrorMessage', {
+        defaultMessage:
+          "The legacy 'savedVisualization' Canvas function does not support Lens visualizations. Try replacing this element with an 'embeddable' Canvas function.",
+      }),
   },
   esPersist: {
     getSaveFailureTitle: () =>

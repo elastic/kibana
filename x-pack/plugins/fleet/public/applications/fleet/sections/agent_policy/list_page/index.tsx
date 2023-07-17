@@ -103,7 +103,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        width: '20%',
+        width: '25%',
         render: (name: string, agentPolicy: AgentPolicy) => (
           <AgentPolicySummaryLine policy={agentPolicy} />
         ),

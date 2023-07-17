@@ -6,7 +6,6 @@
  */
 
 import { GeoJsonImporter } from './geojson_importer';
-import '@loaders.gl/polyfills';
 
 const FEATURE_COLLECTION = {
   type: 'FeatureCollection',

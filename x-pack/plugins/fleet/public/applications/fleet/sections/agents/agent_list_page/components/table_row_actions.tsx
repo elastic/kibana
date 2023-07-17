@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
@@ -114,7 +116,7 @@ export const TableRowActions: React.FunctionComponent<{
       menuItems.push(
         <EuiContextMenuItem
           icon="download"
-          disabled={!hasFleetAllPrivileges}
+          disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
           onClick={() => {
             onRequestDiagnosticsClick();
           }}

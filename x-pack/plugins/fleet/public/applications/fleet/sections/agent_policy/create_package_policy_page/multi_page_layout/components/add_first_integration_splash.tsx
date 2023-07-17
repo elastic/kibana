@@ -277,10 +277,12 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         <CreatePackagePolicyBottomBar
           cancelUrl={cancelUrl}
           cancelMessage={
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicyBottomBar.skipAddAgentButton"
-              defaultMessage="Add integration only (skip agent installation)"
-            />
+            <span data-test-subj="skipAgentInstallation">
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicyBottomBar.skipAddAgentButton"
+                defaultMessage="Add integration only (skip agent installation)"
+              />
+            </span>
           }
           cancelClickHandler={cancelClickHandler}
           isLoading={isLoading}

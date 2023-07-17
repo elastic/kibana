@@ -13,6 +13,7 @@ import type {
   AggregationsTopHitsAggregate,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { CspFinding } from '../../../common/schemas/csp_finding';
 import type { Cluster } from '../../../common/types';
 import {
@@ -22,7 +23,7 @@ import {
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
-import { getIdentifierRuntimeMapping } from '../../lib/get_identifier_runtime_mapping';
+import { getIdentifierRuntimeMapping } from '../../../common/runtime_mappings/get_identifier_runtime_mapping';
 
 export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   failed_findings: {
@@ -40,9 +41,15 @@ interface ClustersQueryResult {
 
 export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
 
-export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
+export const getClustersQuery = (
+  query: QueryDslQueryContainer,
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
+): SearchRequest => ({
   size: 0,
-  runtime_mappings: getIdentifierRuntimeMapping(),
+  // creates the `asset_identifier` and `safe_posture_type` runtime fields,
+  // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
+  runtime_mappings: { ...runtimeMappings, ...getIdentifierRuntimeMapping() },
   query,
   aggs: {
     aggs_by_asset_identifier: {
@@ -101,10 +108,11 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
 export const getClusters = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
 ): Promise<ClusterWithoutTrend[]> => {
   const queryResult = await esClient.search<unknown, ClustersQueryResult>(
-    getClustersQuery(query, pitId)
+    getClustersQuery(query, pitId, runtimeMappings)
   );
 
   const clusters = queryResult.aggregations?.aggs_by_asset_identifier.buckets;

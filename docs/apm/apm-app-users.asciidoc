@@ -175,7 +175,7 @@ See <<apm-app-api-user>>.
 [[apm-app-central-config-manager]]
 ==== Central configuration manager
 
-Central configuration users need to be able to view, create, update, and delete Agent configurations.
+Central configuration users need to be able to view, create, update, and delete APM agent configurations.
 
 . Create a new role, named something like `central-config-manager`, and assign the following privileges:
 +

@@ -408,7 +408,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [defaultFiltersMemo, getGlobalQuery, takeActionItems]
   );
 
-  if (loading || isLoadingGroups || isEmpty(selectedPatterns)) {
+  if (isEmpty(selectedPatterns)) {
     return null;
   }
 
@@ -443,6 +443,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             selectedGroup={selectedGroup}
             groupsSelector={groupsSelector}
             inspectButton={inspect}
+            isLoading={loading || isLoadingGroups}
             takeActionItems={getTakeActionItems}
             data={alertsGroupsData?.aggregations ?? {}}
             renderChildComponent={(groupFilter) => (

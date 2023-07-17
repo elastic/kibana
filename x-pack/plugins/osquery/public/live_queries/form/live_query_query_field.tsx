@@ -8,10 +8,11 @@
 import { isEmpty } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import type { LiveQueryFormFields } from '.';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
@@ -22,6 +23,9 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
   .euiAccordion__button {
     color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+  .euiAccordion__childWrapper {
+    -webkit-transition: none;
   }
 `;
 
@@ -38,12 +42,12 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   disabled,
   handleSubmitForm,
 }) => {
-  const { watch, resetField } = useFormContext();
-  const [advancedContentState, setAdvancedContentState] =
-    useState<EuiAccordionProps['forceState']>('closed');
+  const { formState, watch, resetField } = useFormContext<LiveQueryFormFields>();
+  const [advancedContentState, setAdvancedContentState] = useState<EuiAccordionProps['forceState']>(
+    () => (isEmpty(formState.defaultValues?.ecs_mapping) ? 'closed' : 'open')
+  );
   const permissions = useKibana().services.application.capabilities.osquery;
-  const [ecsMapping, queryType] = watch(['ecs_mapping', 'queryType']);
-
+  const [queryType] = watch(['queryType']);
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -59,12 +63,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     },
     defaultValue: '',
   });
-
-  useEffect(() => {
-    if (!isEmpty(ecsMapping) && advancedContentState === 'closed') {
-      setAdvancedContentState('open');
-    }
-  }, [advancedContentState, ecsMapping]);
 
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
     (savedQuery) => {
@@ -155,6 +153,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
           forceState={advancedContentState}
           onToggle={handleToggle}
           buttonContent="Advanced"
+          data-test-subj="advanced-accordion-content"
         >
           <EuiSpacer size="xs" />
           <ECSMappingEditorField euiFieldProps={ecsFieldProps} />

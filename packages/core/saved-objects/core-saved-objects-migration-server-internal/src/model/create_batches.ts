@@ -7,27 +7,50 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { createBulkOperationBody } from '../actions/bulk_overwrite_transformed_documents';
+import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import { createBulkDeleteOperationBody, createBulkIndexOperationTuple } from './helpers';
+import type { TransformErrorObjects } from '../core';
+
+export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
+export type BulkOperation = BulkIndexOperationTuple | BulkOperationContainer;
+
+export interface CreateBatchesParams {
+  documents: SavedObjectsRawDoc[];
+  corruptDocumentIds?: string[];
+  transformErrors?: TransformErrorObjects[];
+  maxBatchSizeBytes: number;
+}
+
+export interface DocumentExceedsBatchSize {
+  documentId: string;
+  type: 'document_exceeds_batch_size_bytes';
+  docSizeBytes: number;
+  maxBatchSizeBytes: number;
+}
 
 /**
  * Creates batches of documents to be used by the bulk API. Each batch will
  * have a request body content length that's <= maxBatchSizeBytes
  */
-export function createBatches(
-  docs: SavedObjectsRawDoc[],
-  index: string,
-  maxBatchSizeBytes: number
-) {
+export function createBatches({
+  documents,
+  corruptDocumentIds = [],
+  transformErrors = [],
+  maxBatchSizeBytes,
+}: CreateBatchesParams): Either.Either<DocumentExceedsBatchSize, BulkOperation[][]> {
   /* To build up the NDJSON request body we construct an array of objects like:
    * [
    *   {"index": ...}
    *   {"title": "my saved object"}
+   *   {"delete": ...}
+   *   {"delete": ...}
    *   ...
    * ]
-   * However, when we call JSON.stringify on this array the resulting string
-   * will be surrounded by `[]` which won't be present in the NDJSON so these
-   * two characters need to be removed from the size calculation.
+   * For indexing operations, createBulkIndexOperationTuple
+   * returns a tuple of the form [{operation, id}, {document}]
+   * Thus, for batch size calculations, we must take into account
+   * that this tuple's surrounding brackets `[]` won't be present in the NDJSON
    */
   const BRACKETS_BYTES = 2;
   /* Each document in the NDJSON (including the last one) needs to be
@@ -36,29 +59,68 @@ export function createBatches(
    */
   const NDJSON_NEW_LINE_BYTES = 1;
 
-  const batches = [[]] as [SavedObjectsRawDoc[]];
+  const BASE_DELETE_OPERATION_SIZE = Buffer.byteLength(
+    JSON.stringify(createBulkDeleteOperationBody('')),
+    'utf8'
+  );
+
+  const batches: BulkOperation[][] = [[]];
   let currBatch = 0;
   let currBatchSizeBytes = 0;
-  for (const doc of docs) {
-    const bulkOperationBody = createBulkOperationBody(doc, index);
-    const docSizeBytes =
-      Buffer.byteLength(JSON.stringify(bulkOperationBody), 'utf8') -
-      BRACKETS_BYTES +
-      NDJSON_NEW_LINE_BYTES;
-    if (docSizeBytes > maxBatchSizeBytes) {
-      return Either.left({
-        type: 'document_exceeds_batch_size_bytes',
-        docSizeBytes,
-        maxBatchSizeBytes,
-        document: doc,
-      });
-    } else if (currBatchSizeBytes + docSizeBytes <= maxBatchSizeBytes) {
-      batches[currBatch].push(doc);
-      currBatchSizeBytes = currBatchSizeBytes + docSizeBytes;
+
+  // group operations in batches of at most maxBatchSize
+  const assignToBatch = (
+    operation: BulkOperationContainer | BulkIndexOperationTuple,
+    operationSizeBytes: number
+  ): boolean => {
+    operationSizeBytes += NDJSON_NEW_LINE_BYTES;
+
+    if (operationSizeBytes > maxBatchSizeBytes) {
+      // the current operation (+ payload) does not even fit a single batch, fail!
+      return false;
+    } else if (currBatchSizeBytes + operationSizeBytes <= maxBatchSizeBytes) {
+      batches[currBatch].push(operation);
+      currBatchSizeBytes = currBatchSizeBytes + operationSizeBytes;
     } else {
       currBatch++;
-      batches[currBatch] = [doc];
-      currBatchSizeBytes = docSizeBytes;
+      batches[currBatch] = [operation];
+      currBatchSizeBytes = operationSizeBytes;
+    }
+    return true;
+  };
+
+  // create index (update) operations for all transformed documents
+  for (const document of documents) {
+    const bulkIndexOperationBody = createBulkIndexOperationTuple(document);
+    // take into account that this tuple's surrounding brackets `[]` won't be present in the NDJSON
+    const docSizeBytes =
+      Buffer.byteLength(JSON.stringify(bulkIndexOperationBody), 'utf8') - BRACKETS_BYTES;
+    if (!assignToBatch(bulkIndexOperationBody, docSizeBytes)) {
+      return Either.left({
+        documentId: document._id,
+        type: 'document_exceeds_batch_size_bytes' as const,
+        docSizeBytes,
+        maxBatchSizeBytes,
+      });
+    }
+  }
+
+  // create delete operations for all corrupt documents + transform errors
+  const unwantedDocumentIds = [
+    ...corruptDocumentIds,
+    ...transformErrors.map(({ rawId: documentId }) => documentId),
+  ];
+
+  for (const documentId of unwantedDocumentIds) {
+    const bulkDeleteOperationBody = createBulkDeleteOperationBody(documentId);
+    const docSizeBytes = BASE_DELETE_OPERATION_SIZE + Buffer.byteLength(documentId, 'utf8');
+    if (!assignToBatch(bulkDeleteOperationBody, docSizeBytes)) {
+      return Either.left({
+        documentId,
+        type: 'document_exceeds_batch_size_bytes' as const,
+        docSizeBytes,
+        maxBatchSizeBytes,
+      });
     }
   }
 

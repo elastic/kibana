@@ -233,7 +233,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           content={i18n.translate(
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.impactLabelColumnTooltip',
             {
-              defaultMessage: 'The level of impact of the field on the message rate difference',
+              defaultMessage: 'The level of impact of the field on the message rate difference.',
             }
           )}
         >

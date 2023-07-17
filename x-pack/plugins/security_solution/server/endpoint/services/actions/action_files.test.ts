@@ -21,7 +21,6 @@ import {
 import { BaseDataGenerator } from '../../../../common/endpoint/data_generators/base_data_generator';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { generateFileMetadataDocumentMock } from './mocks';
-import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('@kbn/files-plugin/server');
 const createEsFileClient = _createEsFileClient as jest.Mock;
@@ -61,6 +60,7 @@ describe('Action Files service', () => {
   });
 
   describe('#getFileInfo()', () => {
+    let fileMetaEsResponseMock: estypes.SearchResponse;
     let fileChunksEsResponseMock: estypes.SearchResponse;
 
     beforeEach(() => {
@@ -68,30 +68,23 @@ describe('Action Files service', () => {
         BaseDataGenerator.toEsSearchHit({}),
       ]);
 
-      esClientMock.search.mockImplementation(async (searchRequest) => {
-        if (searchRequest && searchRequest.index === FILE_STORAGE_DATA_INDEX) {
+      fileMetaEsResponseMock = BaseDataGenerator.toEsSearchResponse([
+        BaseDataGenerator.toEsSearchHit(
+          generateFileMetadataDocumentMock(),
+          FILE_STORAGE_METADATA_INDEX
+        ),
+      ]);
+
+      esClientMock.search.mockImplementation(async (searchRequest = {}) => {
+        if (searchRequest.index === FILE_STORAGE_DATA_INDEX) {
           return fileChunksEsResponseMock;
         }
 
-        return BaseDataGenerator.toEsSearchResponse([]);
-      });
-
-      esClientMock.get.mockImplementation(async (reqOptions): Promise<GetResponse> => {
-        if (reqOptions.index === FILE_STORAGE_METADATA_INDEX) {
-          return {
-            _index: FILE_STORAGE_METADATA_INDEX,
-            _id: '123',
-            found: true,
-            _source: generateFileMetadataDocumentMock(),
-          };
+        if (searchRequest.index === FILE_STORAGE_METADATA_INDEX) {
+          return fileMetaEsResponseMock;
         }
 
-        return {
-          _index: FILE_STORAGE_METADATA_INDEX,
-          _id: '123',
-          found: false,
-          _source: undefined,
-        };
+        return BaseDataGenerator.toEsSearchResponse([]);
       });
     });
 
@@ -128,11 +121,7 @@ describe('Action Files service', () => {
     });
 
     it('should return a `NotFoundError` if file id is not found', async () => {
-      esClientMock.get.mockRejectedValue(
-        new errors.ResponseError({
-          statusCode: 404,
-        } as DiagnosticResult)
-      );
+      fileMetaEsResponseMock.hits.hits = [];
 
       await expect(getFileInfo(esClientMock, loggerMock, '123')).rejects.toBeInstanceOf(
         NotFoundError

@@ -15,6 +15,7 @@ exports[`EventsPanel renders 1`] = `
         Object {
           "field": "date",
           "name": "Time",
+          "render": [Function],
           "width": "50%",
         },
       ]
@@ -22,27 +23,27 @@ exports[`EventsPanel renders 1`] = `
     items={
       Array [
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Canceled",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Cancelation requested",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Completed",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Last updated",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Sync started",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Sync requested manually",
         },
       ]
@@ -74,6 +75,7 @@ exports[`EventsPanel renders with some values missing 1`] = `
         Object {
           "field": "date",
           "name": "Time",
+          "render": [Function],
           "width": "50%",
         },
       ]
@@ -81,23 +83,23 @@ exports[`EventsPanel renders with some values missing 1`] = `
     items={
       Array [
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Canceled",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Completed",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Last updated",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Sync started",
         },
         Object {
-          "date": "Mon Oct 24 2022 02:44:19 GMT+0000",
+          "date": "2022-10-24T02:44:19.660365+00:00",
           "title": "Sync requested manually",
         },
       ]

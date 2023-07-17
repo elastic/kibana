@@ -8,9 +8,10 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import { Jsonc } from '@kbn/repo-packages';
 
 import { BundleCache } from './bundle_cache';
-import { UnknownVals } from './ts_helpers';
+import { UnknownVals, isObj } from './ts_helpers';
 import { omit } from './obj_helpers';
 import { includes } from './array_helpers';
 import type { Hashes } from './hashes';
@@ -20,15 +21,13 @@ const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
 const DEFAULT_IMPLICIT_BUNDLE_DEPS = ['core'];
 
-const isStringArray = (input: any): input is string[] =>
-  Array.isArray(input) && input.every((x) => typeof x === 'string');
+const toStringArray = (input: any): string[] | null =>
+  Array.isArray(input) && input.every((x) => typeof x === 'string') ? input : null;
 
 export interface BundleSpec {
   readonly type: typeof VALID_BUNDLE_TYPES[0];
   /** Unique id for this bundle */
   readonly id: string;
-  /** directory names relative to the contextDir that can be imported from */
-  readonly publicDirNames: string[];
   /** Absolute path to the plugin source directory */
   readonly contextDir: string;
   /** Absolute path to the root of the repository */
@@ -41,6 +40,15 @@ export interface BundleSpec {
   readonly manifestPath?: string;
   /** Maximum allowed page load asset size for the bundles page load asset */
   readonly pageLoadAssetSizeLimit?: number;
+  /** Information about how this bundle can be referenced by other bundles */
+  readonly remoteInfo: {
+    /** the root package id that maps to this bundle */
+    pkgId: string;
+    /** the valid sub-package imports, importing from the root of other bundles is not supported */
+    targets: string[];
+  };
+  /** set this to `true` if the metrics for this bundle should be ignored */
+  readonly ignoreMetrics: boolean;
 }
 
 export class Bundle {
@@ -48,8 +56,6 @@ export class Bundle {
   public readonly type: BundleSpec['type'];
   /** Unique identifier for this bundle */
   public readonly id: BundleSpec['id'];
-  /** directory names relative to the contextDir that can be imported from */
-  public readonly publicDirNames: BundleSpec['publicDirNames'];
   /**
    * Absolute path to the root of the bundle context (plugin directory)
    * where the entry is resolved relative to and the default output paths
@@ -64,25 +70,30 @@ export class Bundle {
   public readonly banner: BundleSpec['banner'];
   /**
    * Absolute path to a manifest file with "requiredBundles" which will be
-   * used to allow bundleRefs from this bundle to the exports of another bundle.
-   * Every bundle mentioned in the `requiredBundles` must be built together.
+   * used to allow references from this bundle to the exports of another bundle.
    */
   public readonly manifestPath: BundleSpec['manifestPath'];
   /** Maximum allowed page load asset size for the bundles page load asset */
   public readonly pageLoadAssetSizeLimit: BundleSpec['pageLoadAssetSizeLimit'];
+  /** Information about how this bundle can be references remotely */
+  public readonly remoteInfo: BundleSpec['remoteInfo'];
 
   public readonly cache: BundleCache;
+
+  /** should this bundle's metrics be ignored? */
+  public readonly ignoreMetrics: boolean;
 
   constructor(spec: BundleSpec) {
     this.type = spec.type;
     this.id = spec.id;
-    this.publicDirNames = spec.publicDirNames;
     this.contextDir = spec.contextDir;
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
     this.manifestPath = spec.manifestPath;
     this.banner = spec.banner;
     this.pageLoadAssetSizeLimit = spec.pageLoadAssetSizeLimit;
+    this.remoteInfo = spec.remoteInfo;
+    this.ignoreMetrics = spec.ignoreMetrics;
 
     this.cache = new BundleCache(this.outputDir);
   }
@@ -114,13 +125,14 @@ export class Bundle {
     return {
       type: this.type,
       id: this.id,
-      publicDirNames: this.publicDirNames,
       contextDir: this.contextDir,
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
       manifestPath: this.manifestPath,
       banner: this.banner,
       pageLoadAssetSizeLimit: this.pageLoadAssetSizeLimit,
+      remoteInfo: this.remoteInfo,
+      ignoreMetrics: this.ignoreMetrics,
     };
   }
 
@@ -143,30 +155,48 @@ export class Bundle {
       json = '{}';
     }
 
-    let parsedManifest: { requiredPlugins?: string[]; requiredBundles?: string[] };
+    let parsed;
     try {
-      parsedManifest = JSON.parse(json);
+      parsed = Jsonc.parse(json);
     } catch (error) {
       throw new Error(
         `unable to parse manifest at [${this.manifestPath}], error: [${error.message}]`
       );
     }
 
-    if (typeof parsedManifest === 'object' && parsedManifest) {
-      const explicit = parsedManifest.requiredBundles || [];
-      const implicit = [...DEFAULT_IMPLICIT_BUNDLE_DEPS, ...(parsedManifest.requiredPlugins || [])];
+    // TODO: remove once we improve the third party plugin build workflow
+    // This is only used to build legacy third party plugins in the @kbn/plugin-helpers
 
-      if (isStringArray(explicit) && isStringArray(implicit)) {
-        return {
-          explicit,
-          implicit,
-        };
-      }
+    if (!isObj(parsed)) {
+      throw new Error(`Expected [${this.manifestPath}] to be a jsonc parseable file`);
     }
 
-    throw new Error(
-      `Expected "requiredBundles" and "requiredPlugins" in manifest file [${this.manifestPath}] to be arrays of strings`
-    );
+    const requiredBundles = isObj(parsed.plugin)
+      ? parsed.plugin.requiredBundles
+      : parsed.requiredBundles;
+    const requiredPlugins = isObj(parsed.plugin)
+      ? parsed.plugin.requiredPlugins
+      : parsed.requiredPlugins;
+    const requiredBundlesStringArray = toStringArray(requiredBundles);
+    const requiredPluginsStringArray = toStringArray(requiredPlugins);
+    // END-OF-TD: we just need to check for parse.plugin and not for legacy plugins manifest types
+
+    if (!requiredBundlesStringArray && requiredBundles) {
+      throw new Error(
+        `Expected "requiredBundles" in manifest file [${this.manifestPath}] to be an array of strings`
+      );
+    }
+
+    if (!requiredPluginsStringArray && requiredPlugins) {
+      throw new Error(
+        `Expected "requiredPlugins" in manifest file [${this.manifestPath}] to be an array of strings`
+      );
+    }
+
+    return {
+      explicit: [...(requiredBundlesStringArray || [])],
+      implicit: [...DEFAULT_IMPLICIT_BUNDLE_DEPS, ...(requiredPluginsStringArray || [])],
+    };
   }
 }
 
@@ -201,11 +231,6 @@ export function parseBundles(json: string) {
         throw new Error('`bundles[]` must have a string `id` property');
       }
 
-      const { publicDirNames } = spec;
-      if (!Array.isArray(publicDirNames) || !publicDirNames.every((d) => typeof d === 'string')) {
-        throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
-      }
-
       const { contextDir } = spec;
       if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
         throw new Error('`bundles[]` must have an absolute path `contextDir` property');
@@ -235,6 +260,11 @@ export function parseBundles(json: string) {
         }
       }
 
+      const { ignoreMetrics } = spec;
+      if (!(typeof ignoreMetrics === 'boolean')) {
+        throw new Error('`bundles[]` must have a boolean `ignoreMetrics` property');
+      }
+
       const { pageLoadAssetSizeLimit } = spec;
       if (pageLoadAssetSizeLimit !== undefined) {
         if (!(typeof pageLoadAssetSizeLimit === 'number')) {
@@ -242,16 +272,38 @@ export function parseBundles(json: string) {
         }
       }
 
+      const { remoteInfo } = spec;
+      if (!(typeof remoteInfo === 'object' && remoteInfo !== null)) {
+        throw new Error('`bundles[]` must have a `remoteInfo` property which is an object');
+      }
+
+      const { pkgId, targets } = remoteInfo as UnknownVals<BundleSpec['remoteInfo']>;
+      if (typeof pkgId !== 'string') {
+        throw new Error('`bundles[].remoteInfo` must have a `pkgId` property which is a string');
+      }
+      if (
+        !Array.isArray(targets) ||
+        targets.some((i) => typeof i !== 'string' || i.endsWith('/'))
+      ) {
+        throw new Error(
+          '`bundles[].remoteInfo` must have a `targets` property which is an array of strings that do not end with "/"'
+        );
+      }
+
       return new Bundle({
         type,
         id,
-        publicDirNames,
         contextDir,
         sourceRoot,
         outputDir,
         banner,
         manifestPath,
         pageLoadAssetSizeLimit,
+        remoteInfo: {
+          pkgId,
+          targets,
+        },
+        ignoreMetrics,
       });
     });
   } catch (error) {

@@ -155,9 +155,17 @@ export async function getServiceInstancesSystemMetricStatistics<
               ...(isComparisonSearch && serviceNodeIds
                 ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
                 : []),
+              {
+                bool: {
+                  should: [
+                    cgroupMemoryFilter,
+                    systemMemoryFilter,
+                    cpuUsageFilter,
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             ],
-            should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],
-            minimum_should_match: 1,
           },
         },
         aggs: {

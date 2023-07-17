@@ -29,6 +29,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -189,16 +190,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     },
   });
 
-  const handleSetRuleFromTimeline = useCallback(
-    ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
-      setFieldValue('index', timelineIndex);
-      setFieldValue('queryBar', timelineQueryBar);
-    },
-    [setFieldValue]
-  );
-  const { onOpenTimeline, loading: timelineQueryLoading } =
-    useRuleFromTimeline(handleSetRuleFromTimeline);
-
   const {
     index: formIndex,
     ruleType: formRuleType,
@@ -222,6 +213,38 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const dataSourceType = formDataSourceType || initialState.dataSourceType;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const queryBar = formQuery ?? initialState.queryBar;
+
+  const setRuleTypeCallback = useSetFieldValueWithCallback({
+    field: 'ruleType',
+    value: ruleType,
+    setFieldValue,
+  });
+
+  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
+    initialState.eqlOptions || {}
+  );
+
+  const handleSetRuleFromTimeline = useCallback(
+    ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
+      const setQuery = () => {
+        setFieldValue('index', timelineIndex);
+        setFieldValue('queryBar', timelineQueryBar);
+      };
+      if (timelineQueryBar.query.language === 'eql') {
+        setRuleTypeCallback('eql', setQuery);
+        setOptionsSelected((prevOptions) => ({
+          ...prevOptions,
+          ...(eqlOptions != null ? eqlOptions : {}),
+        }));
+      } else {
+        setQuery();
+      }
+    },
+    [setFieldValue, setRuleTypeCallback]
+  );
+
+  const { onOpenTimeline, loading: timelineQueryLoading } =
+    useRuleFromTimeline(handleSetRuleFromTimeline);
 
   const [isPreviewValid, setIsPreviewValid] = useState(false);
   useEffect(() => {
@@ -263,9 +286,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
-    initialState.eqlOptions || {}
-  );
   const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
     index,
     false
@@ -535,6 +555,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         onChange={(id: string) => {
           groupByRadioSelection.setValue(id);
         }}
+        data-test-subj="groupByDurationOptions"
       />
     ),
     [license, groupByFields]
@@ -847,7 +868,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           )}
 
-          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
+          <RuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionInput"
+          >
             <UseField
               path="groupByFields"
               component={GroupByFields}
@@ -859,7 +883,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               }}
             />
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow $isVisible={isQueryRule(ruleType)}>
+          <RuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionDuration"
+          >
             <UseMultiFields
               fields={{
                 groupByRadioSelection: {

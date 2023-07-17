@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const find = getService('find');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
@@ -330,6 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await deleteDataView(outputDataViewId);
       await deleteConnector(connectorId);
       await security.testUser.restoreDefaults();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should create an alert when there is no data view', async () => {
@@ -534,6 +536,61 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
       await checkInitialDataViewState(SOURCE_DATA_VIEW);
+    });
+
+    it('should check that there are no errors detected after an alert is created', async () => {
+      const newAlert = 'New Alert for checking its status';
+      await createDataView('search-source*');
+
+      await PageObjects.common.navigateToApp('management');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('triggersActions');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('createRuleButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await retry.waitFor('rule name value is correct', async () => {
+        await testSubjects.setValue('ruleNameInput', newAlert);
+        const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        return ruleName === newAlert;
+      });
+
+      await testSubjects.click('.es-query-SelectOption');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('queryFormType_searchSource');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('selectDataViewExpression');
+      await testSubjects.click('indexPattern-switcher--input');
+      if (await testSubjects.exists('clearSearchButton')) {
+        await testSubjects.click('clearSearchButton');
+      }
+      const dataViewsElem = await testSubjects.find('euiSelectableList');
+      const sourceDataViewOption = await dataViewsElem.findByCssSelector(
+        `[title="search-source*"]`
+      );
+      await sourceDataViewOption.click();
+
+      await testSubjects.click('saveRuleButton');
+
+      await retry.waitFor('confirmation modal', async () => {
+        return await testSubjects.exists('confirmModalConfirmButton');
+      });
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await openAlertRuleInManagement(newAlert);
+
+      await retry.waitFor('success status', async () => {
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        return await testSubjects.exists('ruleStatus-ok');
+      });
     });
   });
 }

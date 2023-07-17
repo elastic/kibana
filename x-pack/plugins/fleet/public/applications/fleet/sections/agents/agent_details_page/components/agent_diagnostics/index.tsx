@@ -26,6 +26,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  isAgentRequestDiagnosticsSupported,
+  MINIMUM_DIAGNOSTICS_AGENT_VERSION,
+} from '../../../../../../../../common/services';
+
+import {
   sendGetAgentUploads,
   sendPostRequestDiagnostics,
   useLink,
@@ -215,6 +220,20 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }
 
+  const requestDiagnosticsButton = (
+    <EuiButton
+      fill
+      size="m"
+      onClick={onSubmit}
+      disabled={isSubmitting || !isAgentRequestDiagnosticsSupported(agent)}
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentList.diagnosticsOneButton"
+        defaultMessage="Request diagnostics .zip"
+      />
+    </EuiButton>
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
@@ -230,17 +249,26 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         >
           <FormattedMessage
             id="xpack.fleet.requestDiagnostics.calloutText"
-            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. Fleet will automatically remove old diagnostics files after 30 days."
+            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
           />
         </EuiCallOut>
       </EuiFlexItem>
       <FlexStartEuiFlexItem>
-        <EuiButton fill size="m" onClick={onSubmit} disabled={isSubmitting}>
-          <FormattedMessage
-            id="xpack.fleet.agentList.diagnosticsOneButton"
-            defaultMessage="Request diagnostics .zip"
-          />
-        </EuiButton>
+        {isAgentRequestDiagnosticsSupported(agent) ? (
+          requestDiagnosticsButton
+        ) : (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.requestDiagnostics.notSupportedTooltip"
+                defaultMessage="Requesting agent diagnostics is not supported for agents before version {version}."
+                values={{ version: MINIMUM_DIAGNOSTICS_AGENT_VERSION }}
+              />
+            }
+          >
+            {requestDiagnosticsButton}
+          </EuiToolTip>
+        )}
       </FlexStartEuiFlexItem>
       <EuiFlexItem>
         {isLoading ? (

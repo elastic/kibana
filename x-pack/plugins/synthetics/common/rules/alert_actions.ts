@@ -36,6 +36,7 @@ interface Translations {
   defaultActionMessage: string;
   defaultRecoveryMessage: string;
   defaultSubjectMessage: string;
+  defaultRecoverySubjectMessage: string;
 }
 
 export function populateAlertActions({
@@ -43,11 +44,13 @@ export function populateAlertActions({
   defaultEmail,
   groupId,
   translations,
+  isLegacy = false,
 }: {
   groupId: string;
   defaultActions: ActionConnector[];
   defaultEmail?: DefaultEmail;
   translations: Translations;
+  isLegacy?: boolean;
 }) {
   const actions: RuleAction[] = [];
   defaultActions.forEach((aId) => {
@@ -78,8 +81,8 @@ export function populateAlertActions({
         actions.push(recoveredAction);
         break;
       case INDEX_ACTION_ID:
-        action.params = getIndexActionParams(translations);
-        recoveredAction.params = getIndexActionParams(translations, true);
+        action.params = getIndexActionParams(translations, false, isLegacy);
+        recoveredAction.params = getIndexActionParams(translations, true, isLegacy);
         actions.push(recoveredAction);
         break;
       case SERVICE_NOW_ACTION_ID:
@@ -105,6 +108,8 @@ export function populateAlertActions({
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
           action.params = getEmailActionParams(translations, defaultEmail);
+          recoveredAction.params = getEmailActionParams(translations, defaultEmail, true);
+          actions.push(recoveredAction);
         }
         break;
       default:
@@ -119,8 +124,12 @@ export function populateAlertActions({
   return actions;
 }
 
-function getIndexActionParams(translations: Translations, recovery = false): IndexActionParams {
-  if (recovery) {
+function getIndexActionParams(
+  translations: Translations,
+  recovery = false,
+  isLegacy = false
+): IndexActionParams {
+  if (isLegacy && recovery) {
     return {
       documents: [
         {
@@ -134,14 +143,45 @@ function getIndexActionParams(translations: Translations, recovery = false): Ind
       indexOverride: null,
     };
   }
+
+  if (isLegacy) {
+    return {
+      documents: [
+        {
+          monitorName: '{{context.monitorName}}',
+          monitorUrl: '{{{context.monitorUrl}}}',
+          statusMessage: '{{{context.statusMessage}}}',
+          latestErrorMessage: '{{{context.latestErrorMessage}}}',
+          observerLocation: '{{context.observerLocation}}',
+        },
+      ],
+      indexOverride: null,
+    };
+  }
+
+  if (recovery) {
+    return {
+      documents: [
+        {
+          monitorName: '{{context.monitorName}}',
+          monitorUrl: '{{{context.monitorUrl}}}',
+          statusMessage: '{{{context.status}}}',
+          latestErrorMessage: '{{{context.latestErrorMessage}}}',
+          observerLocation: '{{context.locationName}}',
+          recoveryReason: '{{context.recoveryReason}}',
+        },
+      ],
+      indexOverride: null,
+    };
+  }
   return {
     documents: [
       {
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
-        statusMessage: '{{{context.statusMessage}}}',
-        latestErrorMessage: '{{{context.latestErrorMessage}}}',
-        observerLocation: '{{context.observerLocation}}',
+        statusMessage: '{{{context.status}}}',
+        latestErrorMessage: '{{{context.lastErrorMessage}}}',
+        observerLocation: '{{context.locationName}}',
       },
     ],
     indexOverride: null,
@@ -233,13 +273,19 @@ function getJiraActionParams({ defaultActionMessage }: Translations): JiraAction
 }
 
 function getEmailActionParams(
-  { defaultActionMessage, defaultSubjectMessage }: Translations,
-  defaultEmail: DefaultEmail
+  {
+    defaultActionMessage,
+    defaultSubjectMessage,
+    defaultRecoverySubjectMessage,
+    defaultRecoveryMessage,
+  }: Translations,
+  defaultEmail: DefaultEmail,
+  isRecovery?: boolean
 ): EmailActionParams {
   return {
     to: defaultEmail.to,
-    subject: defaultSubjectMessage,
-    message: defaultActionMessage,
+    subject: isRecovery ? defaultRecoverySubjectMessage : defaultSubjectMessage,
+    message: isRecovery ? defaultRecoveryMessage : defaultActionMessage,
     cc: defaultEmail.cc ?? [],
     bcc: defaultEmail.bcc ?? [],
     kibanaFooterLink: {

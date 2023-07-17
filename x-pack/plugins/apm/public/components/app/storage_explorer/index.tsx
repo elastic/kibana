@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
-import { SearchBar } from '../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { StorageChart } from './storage_chart';
 import { PermissionDenied } from './prompts/permission_denied';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';

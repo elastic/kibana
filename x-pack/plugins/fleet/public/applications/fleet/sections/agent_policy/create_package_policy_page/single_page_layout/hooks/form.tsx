@@ -219,6 +219,15 @@ export function useOnSubmit({
     init();
   }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
 
+  useEffect(() => {
+    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+      updatePackagePolicy({
+        policy_id: agentPolicy.id,
+        namespace: agentPolicy.namespace,
+      });
+    }
+  }, [packagePolicy, agentPolicy, updatePackagePolicy]);
+
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
     queryParamsPolicyId,

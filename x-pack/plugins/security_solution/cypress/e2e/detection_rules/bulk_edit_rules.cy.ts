@@ -27,7 +27,6 @@ import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
 import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
 
 import {
-  changeRowsPerPageTo,
   waitForRulesTableToBeLoaded,
   selectAllRules,
   goToTheRuleDetailsOf,
@@ -77,14 +76,7 @@ import { hasIndexPatterns, getDetails } from '../../tasks/rule_details';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import {
-  createCustomRule,
-  createMachineLearningRule,
-  createCustomIndicatorRule,
-  createEventCorrelationRule,
-  createThresholdRule,
-  createNewTermsRule,
-} from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 
@@ -96,10 +88,10 @@ import {
   getMachineLearningRule,
   getNewTermsRule,
 } from '../../objects/rule';
-import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
 
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -109,7 +101,6 @@ const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
 const expectedNumberOfCustomRulesToBeEdited = 6;
 const expectedNumberOfMachineLearningRulesToBeEdited = 1;
 
-const timelineTemplate = getIndicatorMatchTimelineTemplate();
 /**
  * total number of custom rules that are not Machine learning
  */
@@ -117,12 +108,11 @@ const expectedNumberOfNotMLRules =
   expectedNumberOfCustomRulesToBeEdited - expectedNumberOfMachineLearningRulesToBeEdited;
 const numberOfRulesPerPage = 5;
 
-const indexDataSource = { index: prePopulatedIndexPatterns, type: 'indexPatterns' } as const;
-
 const defaultRuleData = {
-  dataSource: indexDataSource,
+  index: prePopulatedIndexPatterns,
   tags: prePopulatedTags,
-  timeline: timelineTemplate,
+  timeline_title: 'Generic Threat Match Timeline',
+  timeline_id: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 };
 
 describe('Detection rules, bulk edit', () => {
@@ -135,19 +125,12 @@ describe('Detection rules, bulk edit', () => {
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
-    createCustomRule(
-      {
-        ...getNewRule(),
-        name: RULE_NAME,
-        ...defaultRuleData,
-      },
-      '1'
-    );
-    createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
-    createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData });
-    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '4');
-    createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '5');
-    createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '6');
+    createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' }));
+    createRule(getEqlRule({ ...defaultRuleData, rule_id: '2' }));
+    createRule(getMachineLearningRule({ tags: ['test-default-tag-1', 'test-default-tag-2'] }));
+    createRule(getNewThreatIndicatorRule({ ...defaultRuleData, rule_id: '4' }));
+    createRule(getNewThresholdRule({ ...defaultRuleData, rule_id: '5' }));
+    createRule(getNewTermsRule({ ...defaultRuleData, rule_id: '6' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -224,7 +207,7 @@ describe('Detection rules, bulk edit', () => {
     it('should not lose rules selection after edit action', () => {
       const rulesCount = 4;
       // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
-      changeRowsPerPageTo(numberOfRulesPerPage);
+      setRowsPerPageTo(numberOfRulesPerPage);
       selectNumberOfRules(rulesCount);
 
       // open add tags form and add 2 new tags

@@ -8,16 +8,18 @@
 
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { throwIfTypeNotVisibleByAPI } from './utils';
+import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerResolveRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { coreUsageData, logger }: RouteDependencies
 ) => {
   router.get(
     {
@@ -30,6 +32,12 @@ export const registerResolveRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/resolve/{type}/{id}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { savedObjects } = await context.core;
 

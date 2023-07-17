@@ -27,8 +27,13 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, 
     });
   if (tooltipEnabled === true) {
     return (
-      <EuiToolTip position="left" content={label} anchorClassName="dvFieldTypeIcon__anchor">
-        <FieldIcon type={type} />
+      <EuiToolTip
+        anchorClassName="dvFieldTypeIcon__anchor"
+        content={label}
+        data-test-subj="dvFieldTypeTooltip"
+        position="left"
+      >
+        <FieldIcon type={type} data-test-subj={`dvFieldTypeIcon-${type}`} />
       </EuiToolTip>
     );
   }

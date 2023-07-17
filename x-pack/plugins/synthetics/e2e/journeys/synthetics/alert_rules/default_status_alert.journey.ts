@@ -50,7 +50,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Go to monitors page', async () => {
-    await syntheticsApp.navigateToOverview(true);
+    await syntheticsApp.navigateToOverview(true, 15);
   });
 
   step('should create default status alert', async () => {
@@ -193,7 +193,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     });
 
     await page.click(byTestId('alert-status-filter-active-button'));
-    await page.waitForTimeout(5 * 1000);
+    await syntheticsApp.waitForLoadingToFinish();
+    await page.waitForTimeout(10 * 1000);
 
     await page.click('[aria-label="View in app"]');
     await page.click(byTestId('syntheticsMonitorOverviewTab'));

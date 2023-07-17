@@ -109,15 +109,7 @@ export type UMRouteHandler = ({
   subject?: Subject<unknown>;
 }) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
-export type SyntheticsRouteHandler = ({
-  uptimeEsClient,
-  context,
-  request,
-  response,
-  server,
-  savedObjectsClient,
-  subject: Subject,
-}: {
+export interface RouteContext {
   uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
   request: SyntheticsRequest;
@@ -126,7 +118,17 @@ export type SyntheticsRouteHandler = ({
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   subject?: Subject<unknown>;
-}) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+}
+
+export type SyntheticsRouteHandler = ({
+  uptimeEsClient,
+  context,
+  request,
+  response,
+  server,
+  savedObjectsClient,
+  subject: Subject,
+}: RouteContext) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 export type SyntheticsStreamingRouteHandler = ({
   uptimeEsClient,

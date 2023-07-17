@@ -185,6 +185,7 @@ export const GroupByExpression = ({
               <EuiFlexItem grow={false}>
                 <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
+                    data-test-subj="fieldsNumberSelect"
                     css={css`
                       min-width: 50px;
                     `}

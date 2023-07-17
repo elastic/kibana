@@ -132,7 +132,7 @@ export const useFilters = (): FiltersList => {
           })) ?? [],
       schedules:
         schedules?.buckets?.map(({ key, doc_count: count }) => ({
-          label: key,
+          label: String(key),
           count,
         })) ?? [],
     };

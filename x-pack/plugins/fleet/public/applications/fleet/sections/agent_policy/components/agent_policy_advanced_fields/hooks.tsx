@@ -17,7 +17,10 @@ import {
   useGetFleetServerHosts,
 } from '../../../../hooks';
 import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
-import { getAllowedOutputTypeForPolicy } from '../../../../../../../common/services';
+import {
+  getAllowedOutputTypeForPolicy,
+  policyHasFleetServer,
+} from '../../../../../../../common/services';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
 // The super select component do not support null or '' as a value
@@ -59,7 +62,11 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   const outputsRequest = useGetOutputs();
   const licenseService = useLicense();
 
-  const isLicenceAllowingPolicyPerOutput = licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT);
+  const hasFleetServer = policyHasFleetServer(agentPolicy as AgentPolicy);
+
+  // Allow changing output when agent policy has fleet server
+  const isLicenceAllowingPolicyPerOutput =
+    licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT) || hasFleetServer;
   const allowedOutputTypes = useMemo(
     () => getAllowedOutputTypeForPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]

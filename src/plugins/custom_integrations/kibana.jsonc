@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/custom-integrations-plugin",
+  "owner": "@elastic/fleet",
+  "description": "Add custom data integrations so they can be displayed in the Fleet integrations app",
+  "plugin": {
+    "id": "customIntegrations",
+    "server": true,
+    "browser": true,
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

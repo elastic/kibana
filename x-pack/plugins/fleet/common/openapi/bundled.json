@@ -234,6 +234,72 @@
         ]
       }
     },
+    "/epm/verification_key_id": {
+      "get": {
+        "summary": "Get package signature verification key ID",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "the key ID of the GPG key used to verify package signatures"
+                        }
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "headers": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "packages-get-verification-key-id"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgVersion",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "filePath",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
     "/epm/categories": {
       "get": {
         "summary": "Package categories",
@@ -325,44 +391,120 @@
             }
           }
         },
-        "operationId": "list-all-packages"
+        "operationId": "list-all-packages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "excludeInstallStatus",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to exclude the install status of each package. Enabling this option will opt in to caching for the response via `cache-control` headers. If you don't need up-to-date installation info for a package, and are querying for a list of available packages, providing this flag can improve performance substantially."
+          },
+          {
+            "in": "query",
+            "name": "prerelease",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+          },
+          {
+            "in": "query",
+            "name": "experimental",
+            "deprecated": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
-      "parameters": [
-        {
-          "in": "query",
-          "name": "excludeInstallStatus",
-          "schema": {
-            "type": "boolean",
-            "default": false
-          },
-          "description": "Whether to exclude the install status of each package. Enabling this option will opt in to caching for the response via `cache-control` headers. If you don't need up-to-date installation info for a package, and are querying for a list of available packages, providing this flag can improve performance substantially."
-        },
-        {
-          "in": "query",
-          "name": "prerelease",
-          "schema": {
-            "type": "boolean",
-            "default": false
-          },
-          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
-        },
-        {
-          "in": "query",
-          "name": "experimental",
-          "deprecated": true,
-          "schema": {
-            "type": "boolean",
-            "default": false
+      "post": {
+        "summary": "Packages - Install by upload",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ]
+                      }
+                    },
+                    "_meta": {
+                      "type": "object",
+                      "properties": {
+                        "install_source": {
+                          "type": "string",
+                          "enum": [
+                            "upload",
+                            "registry",
+                            "bundled"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
           }
         },
-        {
-          "in": "query",
-          "name": "category",
-          "schema": {
-            "type": "string"
+        "operationId": "install-package-by-upload",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/zip": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
           }
         }
-      ]
+      }
     },
     "/epm/packages/_bulk": {
       "post": {
@@ -2435,6 +2577,14 @@
             "in": "query",
             "name": "full",
             "description": "When set to true, retrieve the related package policies for each agent policy."
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "noAgentCount",
+            "description": "When set to true, do not count how many agents are in the agent policy, this can improve performance if you are searching over a large number of agent policies. The \"agents\" property will always be 0 if set to true."
           }
         ],
         "description": ""
@@ -2464,7 +2614,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/new_agent_policy"
+                "$ref": "#/components/schemas/agent_policy_create_request"
               }
             }
           }
@@ -2543,7 +2693,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/new_agent_policy"
+                "$ref": "#/components/schemas/agent_policy_update_request"
               }
             }
           }
@@ -4870,6 +5020,33 @@
           "items"
         ]
       },
+      "kibana_saved_object_type": {
+        "title": "Kibana saved object asset type",
+        "type": "string",
+        "enum": [
+          "dashboard",
+          "visualization",
+          "search",
+          "index-pattern",
+          "map",
+          "lens",
+          "ml-module",
+          "security-rule",
+          "csp_rule_template"
+        ]
+      },
+      "elasticsearch_asset_type": {
+        "title": "Elasticsearch asset type",
+        "type": "string",
+        "enum": [
+          "component_template",
+          "ingest_pipeline",
+          "index_template",
+          "ilm_policy",
+          "transform",
+          "data_stream_ilm_policy"
+        ]
+      },
       "bulk_install_packages_response": {
         "title": "Bulk install packages response",
         "type": "object",
@@ -5117,33 +5294,6 @@
           "format_version",
           "download",
           "path"
-        ]
-      },
-      "kibana_saved_object_type": {
-        "title": "Kibana saved object asset type",
-        "type": "string",
-        "enum": [
-          "dashboard",
-          "visualization",
-          "search",
-          "index-pattern",
-          "map",
-          "lens",
-          "ml-module",
-          "security-rule",
-          "csp_rule_template"
-        ]
-      },
-      "elasticsearch_asset_type": {
-        "title": "Elasticsearch asset type",
-        "type": "string",
-        "enum": [
-          "component_template",
-          "ingest_pipeline",
-          "index_template",
-          "ilm_policy",
-          "transform",
-          "data_stream_ilm_policy"
         ]
       },
       "package_usage_stats": {
@@ -5589,62 +5739,6 @@
           }
         }
       },
-      "new_agent_policy": {
-        "title": "New agent policy",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "namespace": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "monitoring_enabled": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "metrics",
-                "logs"
-              ]
-            }
-          },
-          "data_output_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "monitoring_output_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "fleet_server_host_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "download_source_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "unenroll_timeout": {
-            "type": "number",
-            "nullable": true
-          },
-          "inactivity_timeout": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name",
-          "namespace"
-        ]
-      },
       "new_package_policy": {
         "title": "New package policy",
         "type": "object",
@@ -5755,83 +5849,238 @@
         ]
       },
       "agent_policy": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/new_agent_policy"
+        "title": "Agent Policy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "active",
-                  "inactive"
-                ]
-              },
-              "package_policies": {
-                "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/package_policy"
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "package_policies": {
+            "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/package_policy"
+            }
+          },
+          "updated_on": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "agents": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
                 }
               },
-              "updated_on": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "updated_by": {
-                "type": "string"
-              },
-              "data_output_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "monitoring_output_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "fleet_server_host_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "download_source_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "revision": {
-                "type": "number"
-              },
-              "agents": {
-                "type": "number"
-              },
-              "agent_features": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "enabled": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "name",
-                    "enabled"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "status"
-            ]
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
           }
+        },
+        "required": [
+          "id",
+          "status",
+          "name",
+          "namespace"
+        ]
+      },
+      "agent_policy_create_request": {
+        "title": "Create agent policy request",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ]
+      },
+      "agent_policy_update_request": {
+        "title": "Update agent policy request",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
         ]
       },
       "full_agent_policy_output": {

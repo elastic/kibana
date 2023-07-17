@@ -7,7 +7,8 @@
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { useAbsoluteDate, useUrlParams } from '../../../hooks';
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
+import { useRefreshedRangeFromUrl, useUrlParams } from '../../../hooks';
 import { useDimensions } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { AvailabilityPanel } from '../monitor_summary/availability_panel';
@@ -27,9 +28,8 @@ import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 const STATS_WIDTH_SINGLE_COLUMN_THRESHOLD = 360; // ✨ determined by trial and error
 
 export const MonitorHistory = () => {
-  const [useGetUrlParams, updateUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
-  const { from, to } = useAbsoluteDate({ from: dateRangeStart, to: dateRangeEnd });
+  const [, updateUrlParams] = useUrlParams();
+  const { from, to } = useRefreshedRangeFromUrl();
 
   const { elementRef: statsRef, width: statsWidth } = useDimensions<HTMLDivElement>();
   const statsColumns = statsWidth && statsWidth < STATS_WIDTH_SINGLE_COLUMN_THRESHOLD ? 1 : 2;
@@ -42,6 +42,10 @@ export const MonitorHistory = () => {
   );
 
   const monitorId = useMonitorQueryId();
+  const redirect = useMonitorDetailsPage();
+  if (redirect) {
+    return redirect;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -70,10 +74,14 @@ export const MonitorHistory = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
-                      <AvailabilityPanel from={from} to={to} />
+                      <AvailabilityPanel from={from} to={to} id="availabilityPercentageHistory" />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <AvailabilitySparklines from={from} to={to} />
+                      <AvailabilitySparklines
+                        from={from}
+                        to={to}
+                        id="availabilitySparklineHistory"
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -81,12 +89,22 @@ export const MonitorHistory = () => {
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
                       {monitorId && (
-                        <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />
+                        <MonitorErrorsCount
+                          from={from}
+                          to={to}
+                          monitorId={[monitorId]}
+                          id="monitorErrorsCountHistory"
+                        />
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem>
                       {monitorId && (
-                        <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
+                        <MonitorErrorSparklines
+                          from={from}
+                          to={to}
+                          monitorId={[monitorId]}
+                          id="monitorErrorsSparklineHistory"
+                        />
                       )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -94,10 +112,10 @@ export const MonitorHistory = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
-                      <DurationPanel from={from} to={to} />
+                      <DurationPanel from={from} to={to} id="durationAvgValueHistory" />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <DurationSparklines from={from} to={to} />
+                      <DurationSparklines from={from} to={to} id="durationAvgSparklineHistory" />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

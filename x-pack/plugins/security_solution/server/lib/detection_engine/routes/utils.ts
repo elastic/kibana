@@ -21,7 +21,9 @@ export interface OutputError {
   statusCode: number;
 }
 export interface BulkError {
+  // Id can be single id or stringified ids.
   id?: string;
+  // rule_id can be single rule_id or stringified rules ids.
   rule_id?: string;
   error: {
     status_code: number;

@@ -52,7 +52,7 @@ export const ImportExceptionListFlyout = React.memo(
     const filePickerRef = useRef<EuiFilePicker | null>(null);
 
     const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
-    const [file, setFile] = useState<File | null>(null);
+    const [files, setFiles] = useState<FileList | null>(null);
     const [overwrite, setOverwrite] = useState(false);
     const [asNewList, setAsNewList] = useState(false);
     const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
@@ -62,7 +62,7 @@ export const ImportExceptionListFlyout = React.memo(
         filePickerRef.current.fileInput.value = '';
         filePickerRef.current.handleChange();
       }
-      setFile(null);
+      setFiles(null);
       setAlreadyExistingItem(false);
       setAsNewList(false);
       setOverwrite(false);
@@ -71,31 +71,30 @@ export const ImportExceptionListFlyout = React.memo(
     const ctrl = useRef(new AbortController());
 
     const handleImportExceptionList = useCallback(() => {
-      if (!importExceptionListState.loading && file) {
+      if (!importExceptionListState.loading && files) {
         ctrl.current = new AbortController();
 
-        importExceptionList({
-          file,
-          http,
-          signal: ctrl.current.signal,
-          overwrite,
-          overwriteExceptions: overwrite,
-          asNewList,
-        });
+        Array.from(files).forEach((file) =>
+          importExceptionList({
+            file,
+            http,
+            signal: ctrl.current.signal,
+            overwrite,
+            overwriteExceptions: overwrite,
+            asNewList,
+          })
+        );
       }
-    }, [asNewList, file, http, importExceptionList, importExceptionListState.loading, overwrite]);
+    }, [asNewList, files, http, importExceptionList, importExceptionListState.loading, overwrite]);
 
     const handleImportSuccess = useCallback(
       (response: ImportExceptionsResponseSchema) => {
         resetForm();
         addSuccess({
-          text: i18n.uploadSuccessMessage(file?.name ?? ''),
           title: i18n.UPLOAD_SUCCESS_TITLE,
         });
         handleRefresh();
       },
-      // looking for file.name but we don't wan't to render success every time file name changes.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [resetForm, addSuccess, handleRefresh]
     );
 
@@ -142,8 +141,8 @@ export const ImportExceptionListFlyout = React.memo(
       importExceptionListState?.result,
       importExceptionListState?.result?.errors,
     ]);
-    const handleFileChange = useCallback((files: FileList | null) => {
-      setFile(files?.item(0) ?? null);
+    const handleFileChange = useCallback((inputFiles: FileList | null) => {
+      setFiles(inputFiles ?? null);
     }, []);
     return (
       <EuiFlyout ownFocus size="s" onClose={() => setDisplayImportListFlyout(false)}>
@@ -205,7 +204,7 @@ export const ImportExceptionListFlyout = React.memo(
               <EuiButton
                 data-test-subj="exception-lists-form-import-action"
                 onClick={handleImportExceptionList}
-                disabled={file == null || importExceptionListState.loading}
+                disabled={files == null || importExceptionListState.loading}
               >
                 {i18n.UPLOAD_BUTTON}
               </EuiButton>

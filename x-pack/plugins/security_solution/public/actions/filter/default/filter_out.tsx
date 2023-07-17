@@ -25,14 +25,15 @@ export const createFilterOutAction = ({ order }: { order?: number }): CellAction
   getDisplayName: () => FILTER_OUT,
   getDisplayNameTooltip: () => FILTER_OUT,
   isCompatible: async ({ field }) => fieldHasCellActions(field.name),
-  execute: async ({ field }) => {
+  execute: async ({ field, metadata }) => {
     const services = KibanaServices.get();
     const filterManager = services.data.query.filterManager;
+    const negate = !metadata?.negateFilters;
 
     const makeFilter = (currentVal: string | string[] | null | undefined) =>
       currentVal == null || currentVal?.length === 0
         ? createFilter(field.name, null, false)
-        : createFilter(field.name, currentVal, true);
+        : createFilter(field.name, currentVal, negate);
 
     if (filterManager != null) {
       filterManager.addFilters(makeFilter(field.value));

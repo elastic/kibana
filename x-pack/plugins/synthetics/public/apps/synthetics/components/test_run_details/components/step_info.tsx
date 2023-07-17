@@ -69,7 +69,7 @@ export const StepMetaInfo = ({
         <EuiFlexItem grow={false}>
           <StepDetailsLinkIcon
             asButton
-            checkGroup={checkGroupId}
+            checkGroup={checkGroupId ?? step.monitor.check_group}
             configId={monitorId}
             stepIndex={stepIndex}
             label={VIEW_PERFORMANCE}

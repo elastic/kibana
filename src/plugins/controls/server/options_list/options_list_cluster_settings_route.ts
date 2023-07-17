@@ -13,12 +13,16 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   const router = http.createRouter();
   router.get(
     {
-      path: '/api/kibana/controls/optionsList/getClusterSettings',
+      path: '/api/kibana/controls/optionsList/getExpensiveQueriesSetting',
       validate: false,
     },
     async (context, _, response) => {
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        /**
+         *  using internal user here because in many cases the logged in user will not have the monitor permission required
+         * to check cluster settings. This endpoint does not take a query, params, or a body, so there is no chance of leaking info.
+         */
+        const esClient = (await context.core).elasticsearch.client.asInternalUser;
         const settings = await esClient.cluster.getSettings({
           include_defaults: true,
           filter_path: '**.allow_expensive_queries',

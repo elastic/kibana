@@ -69,10 +69,10 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getDetailsPageFilter('hosts', 'mockHost'),
       ...hostNameExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 
@@ -95,10 +95,10 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getNetworkDetailsPageFilter('192.168.1.1'),
       ...sourceOrDestinationIpExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 
@@ -121,9 +121,9 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getDetailsPageFilter('user', 'elastic'),
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 

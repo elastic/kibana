@@ -39,6 +39,11 @@ export const COLUMNS_WITH_LINKS = [
     label: i18n.VIEW_RULE_DETAILS,
     linkField: 'signal.rule.id',
   },
+  {
+    columnId: 'kibana.alert.rule.name',
+    label: i18n.VIEW_RULE_DETAILS,
+    linkField: 'kibana.alert.rule.uuid',
+  },
   ...PORT_NAMES.map((p) => ({
     columnId: p,
     label: i18n.VIEW_PORT_DETAILS,

@@ -9,6 +9,7 @@ import { NONE_GROUP_KEY } from './types';
 
 export * from './container';
 export * from './query';
+export * from './query/types';
 export * from './groups_selector';
 export * from './types';
 

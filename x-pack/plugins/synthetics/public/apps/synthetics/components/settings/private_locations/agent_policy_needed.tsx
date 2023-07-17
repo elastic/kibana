@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LEARN_MORE, READ_DOCS } from './empty_locations';
 
-export const AgentPolicyNeeded = () => {
+export const AgentPolicyNeeded = ({ disabled }: { disabled: boolean }) => {
   const { basePath } = useSyntheticsSettingsContext();
 
   return (
@@ -20,7 +20,12 @@ export const AgentPolicyNeeded = () => {
       title={<h2>{AGENT_POLICY_NEEDED}</h2>}
       body={<p>{ADD_AGENT_POLICY_DESCRIPTION}</p>}
       actions={
-        <EuiButton fill href={`${basePath}/app/fleet/policies?create`} color="primary">
+        <EuiButton
+          fill
+          href={`${basePath}/app/fleet/policies?create`}
+          color="primary"
+          isDisabled={disabled}
+        >
           {CREATE_AGENT_POLICY}
         </EuiButton>
       }

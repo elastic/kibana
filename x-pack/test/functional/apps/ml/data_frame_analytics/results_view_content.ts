@@ -294,6 +294,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
 
+        it('should display the feature importance decision path after changing page', async () => {
+          await ml.dataFrameAnalyticsResults.selectResultsTablePage(3);
+          await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
+        });
+
         it('should display the histogram charts', async () => {
           await ml.testExecution.logTestStep(
             'displays the histogram charts when option is enabled'

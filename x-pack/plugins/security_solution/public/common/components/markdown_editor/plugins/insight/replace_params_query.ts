@@ -19,7 +19,7 @@ export const replaceParamsQuery = (
     };
   }
   const regex = /\{{([^}]+)\}}/g;
-  const matchedBrackets = query.match(regex);
+  const matchedBrackets = query.match(new RegExp(regex));
   let resultQuery = query;
 
   if (matchedBrackets && data) {
@@ -37,7 +37,7 @@ export const replaceParamsQuery = (
     });
   }
 
-  const skipped = regex.test(resultQuery);
+  const skipped = new RegExp(regex).test(resultQuery);
 
   return {
     result: resultQuery,

@@ -8,7 +8,7 @@
 import React from 'react';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
-import { TlsTranslationsLegacy } from '../../../../common/translations';
+import { TlsTranslationsLegacy } from '../../../../common/rules/legacy_uptime/translations';
 import { AlertTypeInitializer } from '.';
 
 const { defaultActionMessage, description } = TlsTranslationsLegacy;

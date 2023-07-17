@@ -48,7 +48,7 @@ describe('Error details', () => {
     });
 
     describe('when error has no occurrences', () => {
-      it('shows an empty message', () => {
+      it('shows zero occurrences', () => {
         cy.visitKibana(
           url.format({
             pathname:
@@ -60,7 +60,7 @@ describe('Error details', () => {
             },
           })
         );
-        cy.contains('No data to display');
+        cy.contains('0 occ');
       });
     });
 

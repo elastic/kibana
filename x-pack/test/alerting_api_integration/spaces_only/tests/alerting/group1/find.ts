@@ -34,10 +34,38 @@ const findTestUtils = (
   describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
     it('should handle find alert request appropriately', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData())
+        .send(
+          getTestRuleData({
+            actions: [
+              {
+                group: 'default',
+                id: createdAction.id,
+                params: {},
+                frequency: {
+                  summary: false,
+                  notify_when: 'onThrottleInterval',
+                  throttle: '1m',
+                },
+              },
+            ],
+            notify_when: undefined,
+            throttle: undefined,
+          })
+        )
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -63,14 +91,26 @@ const findTestUtils = (
         consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,
-        actions: [],
+        actions: [
+          {
+            group: 'default',
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            params: {},
+            frequency: {
+              summary: false,
+              notify_when: 'onThrottleInterval',
+              throttle: '1m',
+            },
+          },
+        ],
         params: {},
         created_by: null,
         api_key_owner: null,
         scheduled_task_id: match.scheduled_task_id,
         updated_by: null,
-        throttle: '1m',
-        notify_when: 'onThrottleInterval',
+        throttle: null,
+        notify_when: null,
         mute_all: false,
         muted_alert_ids: [],
         created_at: match.created_at,

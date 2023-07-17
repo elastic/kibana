@@ -1283,6 +1283,38 @@ describe('merge_missing_fields_with_source', () => {
           foo: 'other_value_1',
         });
       });
+
+      test('does not add multi field values such as "process.command_line.text" to nested source when "process.command_line" has value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          '@timestamp': '2023-02-10T10:15:50Z',
+          process: {
+            command_line: 'string longer than 10 characters',
+          },
+        };
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+          '@timestamp': ['2023-02-10T10:15:50.000Z'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not add multi field values such as "process.command_line.text" to nested source when "process.command_line" has array value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          '@timestamp': '2023-02-10T10:15:50Z',
+          process: {
+            command_line: ['string longer than 10 characters'],
+          },
+        };
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+          '@timestamp': ['2023-02-10T10:15:50.000Z'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
     });
 
     describe('flattened keys for the _source', () => {
@@ -1330,6 +1362,36 @@ describe('merge_missing_fields_with_source', () => {
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: 'other_value_1',
         });
+      });
+
+      test('does not add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          '@timestamp': '2023-02-10T10:15:50Z',
+          'process.command_line': 'string longer than 10 characters',
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+          '@timestamp': ['2023-02-10T10:15:50.000Z'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has array value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          '@timestamp': '2023-02-10T10:15:50Z',
+          'process.command_line': ['string longer than 10 characters'],
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+          '@timestamp': ['2023-02-10T10:15:50.000Z'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeMissingFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
     });
   });

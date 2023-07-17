@@ -32,7 +32,7 @@ const IlmPhasesEmptyPromptComponent: React.FC = () => {
   const body = useMemo(() => <p>{i18n.BODY}</p>, []);
   const footer = useMemo(
     () => (
-      <>
+      <div data-test-subj="ilmPhasesEmptyPrompt">
         <EuiTitle size="xxs">
           <h3>{i18n.ILM_PHASES_THAT_CAN_BE_CHECKED}</h3>
         </EuiTitle>
@@ -81,7 +81,7 @@ const IlmPhasesEmptyPromptComponent: React.FC = () => {
             {FROZEN_DESCRIPTION}
           </Li>
         </Ul>
-      </>
+      </div>
     ),
     []
   );

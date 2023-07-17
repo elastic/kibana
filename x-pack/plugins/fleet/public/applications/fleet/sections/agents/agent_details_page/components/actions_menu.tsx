@@ -9,6 +9,8 @@ import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
@@ -99,7 +101,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     menuItems.push(
       <EuiContextMenuItem
         icon="download"
-        disabled={!hasFleetAllPrivileges}
+        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
         onClick={() => {
           setIsRequestDiagnosticsModalOpen(true);
         }}

@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-search-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "This plugin contains the definition and helper methods around saved searches, used by discover and visualizations.",
+  "plugin": {
+    "id": "savedSearch",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "data"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

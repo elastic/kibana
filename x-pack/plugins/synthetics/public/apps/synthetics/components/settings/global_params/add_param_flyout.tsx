@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -25,7 +26,7 @@ import { useDispatch } from 'react-redux';
 import { apiService } from '../../../../../utils/api_service';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ListParamItem } from './params_list';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
+import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
@@ -46,7 +47,7 @@ export const AddParamFlyout = ({
 
   const { id, ...dataToSave } = isEditingItem ?? {};
 
-  const form = useFormWrapped<SyntheticsParam>({
+  const form = useFormWrapped<SyntheticsParamSO>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
@@ -66,7 +67,7 @@ export const AddParamFlyout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setIsEditingItem]);
 
-  const [paramData, setParamData] = useState<SyntheticsParam | null>(null);
+  const [paramData, setParamData] = useState<SyntheticsParamSO | null>(null);
 
   const { application } = useKibana<ClientPluginsStart>().services;
 
@@ -74,15 +75,24 @@ export const AddParamFlyout = ({
     if (!paramData) {
       return;
     }
+    const { namespaces, ...paramRequest } = paramData;
+    const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
     if (isEditingItem) {
-      return apiService.put(SYNTHETICS_API_URLS.PARAMS, { id, ...paramData });
+      return apiService.put(SYNTHETICS_API_URLS.PARAMS, {
+        id,
+        ...paramRequest,
+        share_across_spaces: shareAcrossSpaces,
+      });
     }
-    return apiService.post(SYNTHETICS_API_URLS.PARAMS, paramData);
+    return apiService.post(SYNTHETICS_API_URLS.PARAMS, {
+      ...paramRequest,
+      share_across_spaces: shareAcrossSpaces,
+    });
   }, [paramData]);
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
 
-  const onSubmit = (formData: SyntheticsParam) => {
+  const onSubmit = (formData: SyntheticsParamSO) => {
     setParamData(formData);
   };
 

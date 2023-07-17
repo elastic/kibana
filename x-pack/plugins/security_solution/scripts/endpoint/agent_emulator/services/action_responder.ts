@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';

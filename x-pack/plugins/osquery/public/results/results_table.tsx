@@ -6,6 +6,7 @@
  */
 
 import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
+import { css } from '@emotion/react';
 import type {
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -391,6 +392,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     ]
   );
 
+  if (isLoading) {
+    return <EuiLoadingContent lines={5} />;
+  }
+
   if (!hasActionResultsPrivileges) {
     return (
       <EuiCallOut
@@ -418,13 +423,17 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (isLoading) {
-    return <EuiLoadingContent lines={5} />;
-  }
-
   return (
     <>
-      {isLive && <EuiProgress color="primary" size="xs" />}
+      {isLive && (
+        <EuiProgress
+          color="primary"
+          size="xs"
+          css={css`
+            margin-top: -2px;
+          `}
+        />
+      )}
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false}>

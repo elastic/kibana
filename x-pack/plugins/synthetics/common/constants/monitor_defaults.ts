@@ -50,6 +50,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.JOURNEY_ID]: '',
   [ConfigKey.CONFIG_HASH]: '',
   [ConfigKey.MONITOR_QUERY_ID]: '',
+  [ConfigKey.PARAMS]: '',
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
@@ -77,7 +78,6 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
     is_zip_url_tls_enabled: false,
   },
   [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-  [ConfigKey.PARAMS]: '',
   [ConfigKey.PORT]: null,
   [ConfigKey.SCHEDULE]: {
     unit: ScheduleUnit.MINUTES,

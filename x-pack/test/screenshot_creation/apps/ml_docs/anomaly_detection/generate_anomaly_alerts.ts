@@ -69,6 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const commonScreenshots = getService('commonScreenshots');
   const browser = getService('browser');
   const actions = getService('actions');
+  const testSubjects = getService('testSubjects');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
@@ -105,12 +106,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
         await ml.alerting.setRuleName('test-ecommerce');
-
-        await ml.alerting.openNotifySelection();
+        const searchBox = await testSubjects.find('ruleSearchField');
+        await searchBox.click();
+        await searchBox.clearValue();
+        await searchBox.type('ml');
+        await searchBox.pressKeys(browser.keys.ENTER);
+        await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot('ml-rule', screenshotDirectories, 1920, 1400);
-
-        // close popover
-        await browser.pressKeys(browser.keys.ESCAPE);
 
         await ml.alerting.selectAnomalyDetectionJobHealthAlertType();
         await ml.alerting.selectJobs([testJobId]);

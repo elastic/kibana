@@ -29,7 +29,6 @@ import {
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
   getFieldIconProps,
-  wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
@@ -77,12 +76,12 @@ const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(
 
     return (
       <EuiHighlight
-        search={wrapFieldNameOnDot(highlight)}
+        search={highlight || ''}
         data-test-subj={`field-${field.name}`}
         title={title}
         className="dscSidebarField__name"
       >
-        {wrapFieldNameOnDot(field.displayName)}
+        {field.displayName}
       </EuiHighlight>
     );
   }
@@ -232,7 +231,7 @@ export interface DiscoverFieldProps {
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
-   * Callback to remove/deselect a the field
+   * Callback to remove a field column from the table
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;

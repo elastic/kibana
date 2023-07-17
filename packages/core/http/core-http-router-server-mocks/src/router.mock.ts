@@ -127,6 +127,7 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   notFound: jest.fn(),
   conflict: jest.fn(),
   customError: jest.fn(),
+  file: jest.fn(),
 });
 
 export const mockRouter = {

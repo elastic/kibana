@@ -13,10 +13,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
@@ -28,6 +25,7 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { maybe } from '../../../../common/utils/maybe';
 
 export async function getServiceTransactionDetailedStats({
   serviceNames,
@@ -136,27 +134,25 @@ export async function getServiceTransactionDetailedStats({
 
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-        ) ?? bucket.transactionType.buckets[0];
+      const topTransactionTypeBucket = maybe(
+        bucket.transactionType.buckets.find(({ key }) =>
+          isDefaultTransactionType(key as string)
+        ) ?? bucket.transactionType.buckets[0]
+      );
 
       return {
         serviceName: bucket.key as string,
-        latency: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+        latency:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: dateBucket.avg_duration.value,
-          })
-        ),
-        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+          })) ?? [],
+        transactionErrorRate:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: calculateFailedTransactionRate(dateBucket),
-          })
-        ),
-        throughput: topTransactionTypeBucket.timeseries.buckets.map(
+          })) ?? undefined,
+        throughput: topTransactionTypeBucket?.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: calculateThroughputWithInterval({

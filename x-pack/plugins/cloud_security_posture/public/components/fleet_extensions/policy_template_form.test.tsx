@@ -49,6 +49,23 @@ describe('<CspPolicyTemplateForm />', () => {
     onChange.mockClear();
   });
 
+  it('updates package policy namespace to default when it changes', () => {
+    const policy = getMockPolicyK8s();
+    const { rerender } = render(<WrappedComponent newPolicy={policy} />);
+
+    rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
+
+    // Listen to the onChange triggered by the test (re-render with new policy namespace)
+    // It should ensure the initial state is valid.
+    expect(onChange).toHaveBeenNthCalledWith(1, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        namespace: 'default',
+      },
+    });
+  });
+
   it('renders and updates name field', () => {
     const policy = getMockPolicyK8s();
     const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);

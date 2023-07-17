@@ -10,6 +10,10 @@
   will fetch the latest available version of the package from EPR (including prerelease versions),
   download that version, and rewrite its version to align with Kibana's.
 
+  The `allowSyncToPrerelease` option is available for packages who wish to opt into allowing sync
+  "bundled" packages whose version contain prerelease tags (e.g. 8.4.3-beta.1). By default, it just
+  updates to stable versions.
+
   Packages will be fetched from https://epr-snapshot.elastic.co by default. This can be overridden
   via the `--epr-registry=production` command line argument when building Kibana. Fetching from the
   snapshot registry allows Kibana to bundle packages that have yet to be published to production in
@@ -20,16 +24,17 @@
 [
   {
     "name": "apm",
-    "version": "8.7.0-preview-1675078021",
-    "forceAlignStackVersion": true
+    "version": "8.7.2-preview-1683021335",
+    "forceAlignStackVersion": true,
+    "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "1.5.1"
+    "version": "1.8.0"
   },
   {
     "name": "endpoint",
-    "version": "8.7.0-next"
+    "version": "8.7.1"
   },
   {
     "name": "fleet_server",
@@ -37,10 +42,10 @@
   },
   {
     "name": "synthetics",
-    "version": "0.11.5"
+    "version": "0.11.8"
   },
   {
     "name": "security_detection_engine",
-    "version": "8.4.2"
+    "version": "8.7.4"
   }
 ]

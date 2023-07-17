@@ -93,9 +93,9 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
+          return [...acc, { value: suggestion.key, docCount: suggestion.doc_count }];
         },
-        {}
+        []
       );
       return {
         suggestions,
@@ -120,14 +120,11 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
     parse: (rawEsResult) => {
       const suggestions = get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket & { key_as_string: string }) => {
-          return {
-            ...acc,
-            [suggestion.key_as_string]: { doc_count: suggestion.doc_count },
-          };
+          return [...acc, { value: suggestion.key_as_string, docCount: suggestion.doc_count }];
         },
-        {}
+        []
       );
-      return { suggestions, totalCardinality: Object.keys(suggestions).length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
+      return { suggestions, totalCardinality: suggestions.length }; // cardinality is only ever 0, 1, or 2 so safe to use length here
     },
   },
 
@@ -185,7 +182,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
-        return { suggestions: {}, totalCardinality: 0 };
+        return { suggestions: [], totalCardinality: 0 };
       }
       const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
@@ -200,11 +197,11 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
               (bucketA: EsBucket, bucketB: EsBucket) => bucketB.doc_count - bucketA.doc_count
             );
 
-      const suggestions: OptionsListSuggestions = sortedSuggestions
+      const suggestions = sortedSuggestions
         .slice(0, request.size)
         .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
-          return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
-        }, {});
+          return [...acc, { value: suggestion.key, docCount: suggestion.doc_count }];
+        }, []);
       const totalCardinality =
         (get(rawEsResult, `aggregations.suggestions.buckets.ipv4.unique_terms.value`) ?? 0) +
         (get(rawEsResult, `aggregations.suggestions.buckets.ipv6.unique_terms.value`) ?? 0);

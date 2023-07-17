@@ -30,13 +30,7 @@ export interface MetricChartProps {
 const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
-  const {
-    unifiedSearchDateRange,
-    unifiedSearchQuery,
-    unifiedSearchFilters,
-    controlPanelFilters,
-    onSubmit,
-  } = useUnifiedSearchContext();
+  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { metricsDataView } = useMetricsDataViewContext();
   const { baseRequest } = useHostsViewContext();
   const {
@@ -54,12 +48,12 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   });
 
   const injectedLensAttributes = injectData({
-    filters: [...unifiedSearchFilters, ...controlPanelFilters],
-    query: unifiedSearchQuery,
+    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters],
+    query: searchCriteria.query,
     title,
   });
 
-  const extraActionOptions = getExtraActions(injectedLensAttributes, unifiedSearchDateRange);
+  const extraActionOptions = getExtraActions(injectedLensAttributes, searchCriteria.dateRange);
   const extraAction: Action[] = [extraActionOptions.openInLens];
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
@@ -109,9 +103,9 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
             style={{ height: MIN_HEIGHT }}
             attributes={injectedLensAttributes}
             viewMode={ViewMode.VIEW}
-            timeRange={unifiedSearchDateRange}
-            query={unifiedSearchQuery}
-            filters={unifiedSearchFilters}
+            timeRange={searchCriteria.dateRange}
+            query={searchCriteria.query}
+            filters={searchCriteria.filters}
             extraActions={extraAction}
             lastReloadRequestTime={baseRequest.requestTs}
             executionContext={{

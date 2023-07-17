@@ -8,8 +8,10 @@
 import {
   BLOCK_LIST_ADD_BUTTON,
   BLOCK_LIST_DESCRIPTION,
+  BLOCK_LIST_FLYOUT_CLOSE_BUTTON,
   BLOCK_LIST_NAME,
   BLOCK_LIST_TOAST_LIST,
+  BLOCK_LIST_VALUE_INPUT,
   FLYOUT_ADD_TO_BLOCK_LIST_ITEM,
   FLYOUT_TAKE_ACTION_BUTTON,
   INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON,
@@ -88,5 +90,23 @@ describe('Block list interactions', () => {
     cy.get(FLYOUT_ADD_TO_BLOCK_LIST_ITEM).first().click();
 
     fillBlocklistForm();
+  });
+
+  it('add to blocklist flyout should have the correct IoC id', () => {
+    // first indicator is a valid indicator for add to blocklist feature
+    const firstIndicatorId = 'd86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f';
+    cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).first().click();
+    cy.get(INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON).first().click();
+
+    cy.get(BLOCK_LIST_VALUE_INPUT(firstIndicatorId)).should('exist');
+
+    cy.get(BLOCK_LIST_FLYOUT_CLOSE_BUTTON).click();
+
+    // second indicator is a valid indicator for add to blocklist feature
+    const secondIndicatorId = 'd3e2cf87eabf84ef929aaf8dad1431b3387f5a26de8ffb7a0c3c2a13f973c0ab';
+    cy.get(INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON).eq(1).click();
+    cy.get(INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON).first().click();
+
+    cy.get(BLOCK_LIST_VALUE_INPUT(secondIndicatorId)).should('exist');
   });
 });

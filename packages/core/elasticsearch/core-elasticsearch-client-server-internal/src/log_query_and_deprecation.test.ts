@@ -96,13 +96,23 @@ describe('instrumentQueryAndDeprecationLogger', () => {
   }
 
   it('creates a query logger context based on the `type` parameter', () => {
-    instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test123' });
+    instrumentEsQueryAndDeprecationLogger({
+      logger,
+      client,
+      type: 'test123',
+      apisToRedactInLogs: [],
+    });
     expect(logger.get).toHaveBeenCalledWith('query', 'test123');
   });
 
   describe('logs each query', () => {
     it('when request body is an object', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createResponseWithBody({
         seq_no_primary_term: true,
@@ -120,7 +130,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('when request body is a string', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createResponseWithBody(
         JSON.stringify({
@@ -140,7 +155,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('when request body is a buffer', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createResponseWithBody(
         Buffer.from(
@@ -162,7 +182,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('when request body is a readable stream', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createResponseWithBody(
         Readable.from(
@@ -184,7 +209,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('when request body is not defined', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createResponseWithBody();
 
@@ -196,7 +226,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('properly encode queries', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         body: {},
@@ -217,7 +252,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs queries even in case of errors', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 500,
@@ -248,7 +288,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs debug when the client emits an @elastic/elasticsearch error', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({ body: {} });
       client.diagnostic.emit('response', new errors.TimeoutError('message', response), response);
@@ -259,7 +304,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs debug when the client emits an ResponseError returned by elasticsearch', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 400,
@@ -285,7 +335,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs default error info when the error response body is empty', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       let response: DiagnosticResult<any, any> = createApiResponse({
         statusCode: 400,
@@ -325,7 +380,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('adds meta information to logs', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       let response = createApiResponse({
         statusCode: 400,
@@ -407,7 +467,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs response size', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createResponseWithBody(
         {
@@ -432,7 +497,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
   describe('deprecation warnings from response headers', () => {
     it('does not log when no deprecation warning header is returned', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 200,
@@ -458,7 +528,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('does not log when warning header comes from a warn-agent that is not elasticsearch', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 200,
@@ -487,7 +562,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs error when the client receives an Elasticsearch error response for a deprecated request originating from a user', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 400,
@@ -519,7 +599,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs warning when the client receives an Elasticsearch error response for a deprecated request originating from kibana', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 400,
@@ -552,7 +637,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs error when the client receives an Elasticsearch success response for a deprecated request originating from a user', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 200,
@@ -584,7 +674,12 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     });
 
     it('logs warning when the client receives an Elasticsearch success response for a deprecated request originating from kibana', () => {
-      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
 
       const response = createApiResponse({
         statusCode: 200,
@@ -615,6 +710,288 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
       );
+    });
+
+    describe('Request body redaction on some APIs', () => {
+      it('redacts for an API in the extended list (path only)', () => {
+        instrumentEsQueryAndDeprecationLogger({
+          logger,
+          client,
+          type: 'test type',
+          apisToRedactInLogs: [{ path: '/foo' }],
+        });
+
+        const response = createApiResponse({
+          body: {},
+          statusCode: 200,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/foo',
+            querystring: { hello: 'dolly' },
+            body: {
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            },
+          },
+        });
+
+        client.diagnostic.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+          "200
+          GET /foo?hello=dolly
+          [redacted]"
+        `);
+      });
+
+      it('redacts for an API that is contained by the declared path (path only)', () => {
+        instrumentEsQueryAndDeprecationLogger({
+          logger,
+          client,
+          type: 'test type',
+          apisToRedactInLogs: [{ path: '/foo' }],
+        });
+
+        const response = createApiResponse({
+          body: {},
+          statusCode: 200,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/foo/something/something-else',
+            querystring: { hello: 'dolly' },
+            body: {
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            },
+          },
+        });
+
+        client.diagnostic.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+          "200
+          GET /foo/something/something-else?hello=dolly
+          [redacted]"
+        `);
+      });
+
+      it('redacts for an API in the extended list (method and path)', () => {
+        instrumentEsQueryAndDeprecationLogger({
+          logger,
+          client,
+          type: 'test type',
+          apisToRedactInLogs: [{ method: 'GET', path: '/foo' }],
+        });
+
+        const response = createApiResponse({
+          body: {},
+          statusCode: 200,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/foo',
+            querystring: { hello: 'dolly' },
+            body: {
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            },
+          },
+        });
+
+        client.diagnostic.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+          "200
+          GET /foo?hello=dolly
+          [redacted]"
+        `);
+      });
+
+      it('does not redact for an API in the extended list when method does not match', () => {
+        instrumentEsQueryAndDeprecationLogger({
+          logger,
+          client,
+          type: 'test type',
+          apisToRedactInLogs: [{ method: 'PUT', path: '/foo' }],
+        });
+
+        const response = createApiResponse({
+          body: {},
+          statusCode: 200,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/foo',
+            querystring: { hello: 'dolly' },
+            body: {
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            },
+          },
+        });
+
+        client.diagnostic.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+          "200
+          GET /foo?hello=dolly
+          {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
+        `);
+      });
+
+      it('does not redact for an API in the extended list when path does not match', () => {
+        instrumentEsQueryAndDeprecationLogger({
+          logger,
+          client,
+          type: 'test type',
+          apisToRedactInLogs: [{ path: '/foo' }],
+        });
+
+        const response = createApiResponse({
+          body: {},
+          statusCode: 200,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/bar',
+            querystring: { hello: 'dolly' },
+            body: {
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            },
+          },
+        });
+
+        client.diagnostic.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+          "200
+          GET /bar?hello=dolly
+          {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
+        `);
+      });
+
+      describe('Known list', () => {
+        beforeEach(() => {
+          instrumentEsQueryAndDeprecationLogger({
+            logger,
+            client,
+            type: 'test type',
+            apisToRedactInLogs: [],
+          });
+        });
+
+        function createResponseWithPath(path: string, method: string = '*') {
+          return createApiResponse({
+            body: {},
+            statusCode: 200,
+            headers: {},
+            params: {
+              method,
+              path,
+              querystring: { hello: 'dolly' },
+              body: { super_secret: 'stuff' },
+            },
+          });
+        }
+
+        it('[*] /_security/', () => {
+          const response = createResponseWithPath('/_security/something');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            * /_security/something?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[*] /_xpack/security/', () => {
+          const response = createResponseWithPath('/_xpack/security/something');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            * /_xpack/security/something?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[POST] /_reindex', () => {
+          const response = createResponseWithPath('/_reindex', 'POST');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            POST /_reindex?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[PUT] /_watcher/watch', () => {
+          const response = createResponseWithPath('/_watcher/watch', 'PUT');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            PUT /_watcher/watch?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[PUT] /_xpack/watcher/watch', () => {
+          const response = createResponseWithPath('/_xpack/watcher/watch', 'PUT');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            PUT /_xpack/watcher/watch?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[PUT] /_snapshot/something', () => {
+          const response = createResponseWithPath('/_snapshot/something', 'PUT');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            PUT /_snapshot/something?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[PUT] /_logstash/pipeline/something', () => {
+          const response = createResponseWithPath('/_logstash/pipeline/something', 'PUT');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            PUT /_logstash/pipeline/something?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[POST] /_nodes/reload_secure_settings', () => {
+          const response = createResponseWithPath('/_nodes/reload_secure_settings', 'POST');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            POST /_nodes/reload_secure_settings?hello=dolly
+            [redacted]"
+          `);
+        });
+
+        it('[POST] /_nodes/*/reload_secure_settings', () => {
+          const response = createResponseWithPath('/_nodes/node-id/reload_secure_settings', 'POST');
+          client.diagnostic.emit('response', null, response);
+          expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+            "200
+            POST /_nodes/node-id/reload_secure_settings?hello=dolly
+            [redacted]"
+          `);
+        });
+      });
     });
   });
 });

@@ -14,7 +14,7 @@ import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
 import { Alert, ChartThemes } from '../types';
 
-export interface AlertsSummaryWidgetCompactProps {
+export interface AlertSummaryWidgetCompactProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
   chartThemes: ChartThemes;
@@ -23,14 +23,14 @@ export interface AlertsSummaryWidgetCompactProps {
   onClick: (status?: AlertStatus) => void;
 }
 
-export const AlertsSummaryWidgetCompact = ({
+export const AlertSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
   chartThemes: { theme, baseTheme },
   recoveredAlertCount,
   timeRangeTitle,
   onClick,
-}: AlertsSummaryWidgetCompactProps) => {
+}: AlertSummaryWidgetCompactProps) => {
   const chartTheme = [
     theme,
     EUI_SPARKLINE_THEME_PARTIAL,

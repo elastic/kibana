@@ -151,7 +151,8 @@ export const TableRow = ({
       />
     );
   } else {
-    columns.forEach(function (column: string) {
+    columns.forEach(function (column: string, index) {
+      const cellKey = `${column}-${index}`;
       if (useNewFieldsApi && !mapping(column) && row.raw.fields && !row.raw.fields[column]) {
         const innerColumns = Object.fromEntries(
           Object.entries(row.raw.fields).filter(([key]) => {
@@ -161,7 +162,7 @@ export const TableRow = ({
 
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={true}
             formatted={formatTopLevelObject(row, innerColumns, dataView, maxEntries)}
@@ -180,7 +181,7 @@ export const TableRow = ({
         );
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={column === '_source'}
             formatted={displayField(column)}

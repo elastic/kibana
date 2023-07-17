@@ -278,15 +278,19 @@ export const useRulesColumns = ({
         field: 'execution_summary.last_execution.date',
         name: i18n.COLUMN_LAST_COMPLETE_RUN,
         render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
+          return (
+            <EuiFlexGroup data-test-subj="ruleLastRun">
+              {value == null ? (
+                getEmptyTagValue()
+              ) : (
+                <FormattedRelativePreferenceDate
+                  tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+                  relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+                  value={value}
+                  tooltipAnchorClassName="eui-textTruncate"
+                />
+              )}
+            </EuiFlexGroup>
           );
         },
         sortable: true,
@@ -438,15 +442,19 @@ export const useMonitoringColumns = ({
         field: 'execution_summary.last_execution.date',
         name: i18n.COLUMN_LAST_COMPLETE_RUN,
         render: (value: RuleExecutionSummary['last_execution']['date'] | undefined) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
+          return (
+            <EuiFlexGroup data-test-subj="ruleLastRun">
+              {value == null ? (
+                getEmptyTagValue()
+              ) : (
+                <FormattedRelativePreferenceDate
+                  tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
+                  relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
+                  value={value}
+                  tooltipAnchorClassName="eui-textTruncate"
+                />
+              )}
+            </EuiFlexGroup>
           );
         },
         sortable: true,

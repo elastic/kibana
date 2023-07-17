@@ -185,7 +185,7 @@ export const GettingStarted = () => {
       <EuiPageTemplate.Section
         alignment="center"
         css={paddingCss}
-        data-test-subj="onboarding--landing-page"
+        data-test-subj="guided-onboarding--landing-page"
       >
         <EuiTitle size="l" className="eui-textCenter">
           <h1>{title}</h1>

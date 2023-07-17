@@ -493,7 +493,7 @@ describe('formatSyntheticsPolicy', () => {
         experimental_data_stream_features: [],
         name: 'synthetics',
         title: 'Elastic Synthetics',
-        version: '0.11.4',
+        version: '0.11.5',
       },
       policy_id: '404812e0-90e1-11ed-8111-f7f9cad30b61',
     });
@@ -1011,7 +1011,7 @@ describe('formatSyntheticsPolicy', () => {
         experimental_data_stream_features: [],
         name: 'synthetics',
         title: 'Elastic Synthetics',
-        version: '0.11.4',
+        version: '0.11.5',
       },
       policy_id: '404812e0-90e1-11ed-8111-f7f9cad30b61',
     });
@@ -1024,7 +1024,7 @@ const testNewPolicy = {
   package: {
     name: 'synthetics',
     title: 'Elastic Synthetics',
-    version: '0.11.4',
+    version: '0.11.5',
     experimental_data_stream_features: [],
   },
   enabled: true,

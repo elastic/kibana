@@ -18,6 +18,7 @@ import {
   registerCreateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { loggerMock } from '@kbn/logging-mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -32,6 +33,7 @@ describe('POST /api/saved_objects/{type}', () => {
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   const clientResponse = {
     id: 'logstash-*',
@@ -52,7 +54,9 @@ describe('POST /api/saved_objects/{type}', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsCreate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerCreateRoute(router, { coreUsageData });
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registerCreateRoute(router, { coreUsageData, logger });
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
       return testTypes
@@ -144,5 +148,17 @@ describe('POST /api/saved_objects/{type}', () => {
       .expect(400);
 
     expect(result.body.message).toContain("Unsupported saved object type: 'hidden-from-http'");
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/index-pattern')
+      .send({
+        attributes: {
+          title: 'Logging test',
+        },
+      })
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

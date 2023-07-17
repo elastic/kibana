@@ -26,5 +26,6 @@
   "origin": "ui",
   "form_monitor_type": "icmp",
   "id": "",
-  "hash": ""
+  "hash": "",
+  "params": ""
 }

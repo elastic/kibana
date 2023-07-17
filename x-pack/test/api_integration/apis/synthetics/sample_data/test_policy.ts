@@ -20,7 +20,7 @@ export const getTestSyntheticsPolicy = (
   version: 'WzE2MjYsMV0=',
   name: 'test-monitor-name-Test private location 0-default',
   namespace: namespace || 'testnamespace',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.4' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.11.5' },
   enabled: true,
   policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
   inputs: [
@@ -298,10 +298,7 @@ export const getTestSyntheticsPolicy = (
           },
           id: 'synthetics/browser-browser.network-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
         {
@@ -317,10 +314,7 @@ export const getTestSyntheticsPolicy = (
           },
           id: 'synthetics/browser-browser.screenshot-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
-            processors: [
-              { add_observer_metadata: { geo: { name: 'Fleet managed' } } },
-              { add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } },
-            ],
+            processors: [{ add_fields: { target: '', fields: { 'monitor.fleet_managed': true } } }],
           },
         },
       ],

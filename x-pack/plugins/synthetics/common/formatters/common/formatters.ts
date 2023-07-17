@@ -35,6 +35,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
   [ConfigKey.MONITOR_QUERY_ID]: null,
+  [ConfigKey.PARAMS]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

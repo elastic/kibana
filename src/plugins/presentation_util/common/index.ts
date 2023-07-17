@@ -39,7 +39,9 @@ export {
   getElasticLogo,
   getElasticOutline,
   isValidUrl,
+  isValidHttpUrl,
   resolveWithMissingImage,
+  resolveFromArgs,
   encode,
   parseDataUrl,
 } from './lib';

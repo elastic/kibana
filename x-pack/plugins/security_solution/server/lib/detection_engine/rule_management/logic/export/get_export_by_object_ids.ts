@@ -13,10 +13,12 @@ import type { ISavedObjectsExporter, KibanaRequest, Logger } from '@kbn/core/ser
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
 import { isAlertType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';
+import { transformRuleToExportableFormat } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
@@ -48,7 +50,8 @@ export const getExportByObjectIds = async (
   objects: Array<{ rule_id: string }>,
   logger: Logger,
   actionsExporter: ISavedObjectsExporter,
-  request: KibanaRequest
+  request: KibanaRequest,
+  actionsClient: ActionsClient
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
@@ -72,7 +75,8 @@ export const getExportByObjectIds = async (
   const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
     rules,
     actionsExporter,
-    request
+    request,
+    actionsClient
   );
 
   const rulesNdjson = transformDataToNdjson(rules);
@@ -133,14 +137,11 @@ export const getRulesFromObjects = async (
       isAlertType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
-      const rule = internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id]);
-
-      // Fields containing runtime information shouldn't be exported. It causes import failures.
-      delete rule.execution_summary;
-
       return {
         statusCode: 200,
-        rule,
+        rule: transformRuleToExportableFormat(
+          internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id])
+        ),
       };
     } else {
       return {

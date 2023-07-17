@@ -3,13 +3,13 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars from '../..';
-import type {
-  DecoratorFunction,
-  DecoratorsHash,
-  ExtendedCompileOptions,
-  ExtendedRuntimeOptions,
-} from '../types';
+import Handlebars, {
+  type CompileOptions,
+  type DecoratorDelegate,
+  type HelperDelegate,
+  type RuntimeOptions,
+} from '../..';
+import type { DecoratorsHash, HelpersHash, PartialsHash, Template } from '../types';
 
 type CompileFns = 'compile' | 'compileAST';
 const compileFns: CompileFns[] = ['compile', 'compileAST'];
@@ -24,6 +24,7 @@ global.kbnHandlebarsEnv = null;
 
 interface TestOptions {
   beforeEach?: Function;
+  beforeRender?: Function;
 }
 
 export function expectTemplate(template: string, options?: TestOptions) {
@@ -39,11 +40,10 @@ export function forEachCompileFunctionName(
 class HandlebarsTestBench {
   private template: string;
   private options: TestOptions;
-  private beforeRenderFn: Function = () => {};
-  private compileOptions?: ExtendedCompileOptions;
-  private runtimeOptions?: ExtendedRuntimeOptions;
-  private helpers: { [name: string]: Handlebars.HelperDelegate | undefined } = {};
-  private partials: { [name: string]: Handlebars.Template } = {};
+  private compileOptions?: CompileOptions;
+  private runtimeOptions?: RuntimeOptions;
+  private helpers: HelpersHash = {};
+  private partials: PartialsHash = {};
   private decorators: DecoratorsHash = {};
   private input: any = {};
 
@@ -52,17 +52,12 @@ class HandlebarsTestBench {
     this.options = options;
   }
 
-  beforeRender(fn: Function) {
-    this.beforeRenderFn = fn;
-    return this;
-  }
-
-  withCompileOptions(compileOptions?: ExtendedCompileOptions) {
+  withCompileOptions(compileOptions?: CompileOptions) {
     this.compileOptions = compileOptions;
     return this;
   }
 
-  withRuntimeOptions(runtimeOptions?: ExtendedRuntimeOptions) {
+  withRuntimeOptions(runtimeOptions?: RuntimeOptions) {
     this.runtimeOptions = runtimeOptions;
     return this;
   }
@@ -72,36 +67,36 @@ class HandlebarsTestBench {
     return this;
   }
 
-  withHelper<F extends Handlebars.HelperDelegate>(name: string, helper?: F) {
+  withHelper<F extends HelperDelegate>(name: string, helper: F) {
     this.helpers[name] = helper;
     return this;
   }
 
-  withHelpers<F extends Handlebars.HelperDelegate>(helperFunctions: { [name: string]: F }) {
+  withHelpers<F extends HelperDelegate>(helperFunctions: Record<string, F>) {
     for (const [name, helper] of Object.entries(helperFunctions)) {
       this.withHelper(name, helper);
     }
     return this;
   }
 
-  withPartial(name: string | number, partial: Handlebars.Template) {
+  withPartial(name: string | number, partial: Template) {
     this.partials[name] = partial;
     return this;
   }
 
-  withPartials(partials: { [name: string]: Handlebars.Template }) {
+  withPartials(partials: Record<string, Template>) {
     for (const [name, partial] of Object.entries(partials)) {
       this.withPartial(name, partial);
     }
     return this;
   }
 
-  withDecorator(name: string, decoratorFunction: DecoratorFunction) {
+  withDecorator(name: string, decoratorFunction: DecoratorDelegate) {
     this.decorators[name] = decoratorFunction;
     return this;
   }
 
-  withDecorators(decoratorFunctions: { [key: string]: DecoratorFunction }) {
+  withDecorators(decoratorFunctions: Record<string, DecoratorDelegate>) {
     for (const [name, decoratorFunction] of Object.entries(decoratorFunctions)) {
       this.withDecorator(name, decoratorFunction);
     }
@@ -159,16 +154,14 @@ class HandlebarsTestBench {
   private compileAndExecuteEval() {
     const renderEval = this.compileEval();
 
-    const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
-      {
-        helpers: this.helpers,
-        partials: this.partials,
-        decorators: this.decorators,
-      },
-      this.runtimeOptions
-    );
+    const runtimeOptions: RuntimeOptions = {
+      helpers: this.helpers,
+      partials: this.partials,
+      decorators: this.decorators,
+      ...this.runtimeOptions,
+    };
 
-    this.beforeRenderFn();
+    this.execBeforeRender();
 
     return renderEval(this.input, runtimeOptions);
   }
@@ -176,16 +169,14 @@ class HandlebarsTestBench {
   private compileAndExecuteAST() {
     const renderAST = this.compileAST();
 
-    const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
-      {
-        helpers: this.helpers,
-        partials: this.partials,
-        decorators: this.decorators,
-      },
-      this.runtimeOptions
-    );
+    const runtimeOptions: RuntimeOptions = {
+      helpers: this.helpers,
+      partials: this.partials,
+      decorators: this.decorators,
+      ...this.runtimeOptions,
+    };
 
-    this.beforeRenderFn();
+    this.execBeforeRender();
 
     return renderAST(this.input, runtimeOptions);
   }
@@ -198,6 +189,10 @@ class HandlebarsTestBench {
   private compileAST(handlebarsEnv = getHandlebarsEnv()) {
     this.execBeforeEach();
     return handlebarsEnv.compileAST(this.template, this.compileOptions);
+  }
+
+  private execBeforeRender() {
+    this.options.beforeRender?.();
   }
 
   private execBeforeEach() {

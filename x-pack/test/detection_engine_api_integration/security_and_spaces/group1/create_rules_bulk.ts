@@ -16,7 +16,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getRuleForSignalTesting,
   getSimpleRule,
@@ -25,7 +25,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('create_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should return a warning header', async () => {
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send([simpleRule])
           .expect(200);
 
-        await waitForRuleSuccessOrStatus(supertest, log, body[0].id);
+        await waitForRuleSuccess({ supertest, log, id: body[0].id });
       });
 
       it('should create a single rule without a rule_id', async () => {

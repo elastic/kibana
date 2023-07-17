@@ -17,6 +17,12 @@ jest.mock('@kbn/repo-packages', () => {
     readHashOfPackageMap() {
       return '<hash of package map>';
     },
+    getPackages() {
+      return [];
+    },
+    getPluginPackagesFilter() {
+      return () => true;
+    },
   };
 });
 

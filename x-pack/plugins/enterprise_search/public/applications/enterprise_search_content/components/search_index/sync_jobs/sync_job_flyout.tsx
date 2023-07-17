@@ -33,7 +33,11 @@ interface SyncJobFlyoutProps {
 }
 
 export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }) => {
-  const filtering = syncJob?.connector.filtering ? syncJob.connector.filtering[0] : null;
+  const filtering = syncJob?.connector.filtering
+    ? Array.isArray(syncJob?.connector.filtering)
+      ? syncJob?.connector.filtering?.[0]
+      : syncJob?.connector.filtering
+    : null;
   const visible = !!syncJob;
   return visible ? (
     <EuiFlyout onClose={onClose}>

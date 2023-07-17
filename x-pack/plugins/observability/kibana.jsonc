@@ -1,0 +1,54 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-plugin",
+  "owner": "@elastic/observability-ui",
+  "plugin": {
+    "id": "observability",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "observability"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "cases",
+      "charts",
+      "data",
+      "dataViews",
+      "features",
+      "inspector",
+      "ruleRegistry",
+      "triggersActionsUi",
+      "inspector",
+      "unifiedSearch",
+      "security",
+      "guidedOnboarding",
+      "share",
+      "spaces"
+    ],
+    "optionalPlugins": [
+      "discover",
+      "embeddable",
+      "home",
+      "lens",
+      "licensing",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "unifiedSearch",
+      "data",
+      "dataViews",
+      "embeddable",
+      "kibanaReact",
+      "kibanaUtils",
+      "lens",
+      "usageCollection",
+      "visualizations"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

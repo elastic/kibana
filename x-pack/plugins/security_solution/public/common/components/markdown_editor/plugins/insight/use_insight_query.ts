@@ -15,10 +15,12 @@ import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import type { TimeRange } from '../../../../store/inputs/model';
 
 export interface UseInsightQuery {
   dataProviders: DataProvider[];
   filters: Filter[];
+  relativeTimerange: TimeRange | null;
 }
 
 export interface UseInsightQueryResult {
@@ -31,6 +33,7 @@ export interface UseInsightQueryResult {
 export const useInsightQuery = ({
   dataProviders,
   filters,
+  relativeTimerange,
 }: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -70,6 +73,9 @@ export const useInsightQuery = ({
     language: 'kuery',
     limit: 1,
     runtimeMappings: {},
+    ...(relativeTimerange
+      ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to }
+      : {}),
   });
   const [oldestEvent] = events;
   const timestamp =

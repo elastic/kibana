@@ -117,6 +117,7 @@ export class RuleDataClient implements IRuleDataClient {
           return (await clusterClient.search({
             ...request,
             index: indexPattern,
+            ignore_unavailable: true,
           })) as unknown as ESSearchResponse<TAlertDoc, TSearchRequest>;
         } catch (err) {
           this.options.logger.error(`Error performing search in RuleDataClient - ${err.message}`);

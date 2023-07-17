@@ -52,7 +52,7 @@ export const ProjectBrowserReadonlyFields = ({ minColumnWidth }: { minColumnWidt
         )}
         id="jsonParamsEditor"
         languageId={MonacoEditorLangId.JSON}
-        value={fields[ConfigKey.PARAMS]}
+        value={fields[ConfigKey.PARAMS] || ''}
         readOnly={true}
         data-test-subj="syntheticsBrowserParams"
       />

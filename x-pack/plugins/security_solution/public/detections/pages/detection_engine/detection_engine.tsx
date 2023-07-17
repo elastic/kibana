@@ -77,6 +77,7 @@ import { DetectionPageFilterSet } from '../../components/detection_page_filters'
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
+import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -177,15 +178,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   }, [isTableLoading, detectionPageFilterHandler]);
 
   const addFilter = useCallback(
-    ({ field, value }: { field: string; value: string | number }) => {
+    ({ field, value, negate }: AddFilterProps) => {
       filterManager.addFilters([
         {
           meta: {
             alias: null,
             disabled: false,
-            negate: false,
+            negate: negate ?? false,
           },
-          query: { match_phrase: { [field]: value } },
+          ...(value != null
+            ? { query: { match_phrase: { [field]: value } } }
+            : { exists: { field } }),
         },
       ]);
     },
@@ -448,6 +451,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <AlertsTable
+              filterGroup={filterGroup}
               tableId={TableId.alertsOnAlertsPage}
               loading={isAlertTableLoading}
               hasIndexWrite={hasIndexWrite ?? false}

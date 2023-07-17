@@ -80,12 +80,14 @@ export const setRecoveredAlertsContext = ({
   getAlertUuid,
   spaceId,
   staleDownConfigs,
+  upConfigs,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
   basePath?: IBasePath;
   getAlertUuid?: (alertId: string) => string | null;
   spaceId?: string;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  upConfigs: AlertOverviewStatus['upConfigs'];
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
   for (const alert of getRecoveredAlerts()) {
@@ -95,6 +97,7 @@ export const setRecoveredAlertsContext = ({
     const state = alert.getState() as SyntheticsCommonState;
 
     let recoveryReason = '';
+    let isUp = false;
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
       const { idWithLocation } = state;
@@ -110,8 +113,16 @@ export const setRecoveredAlertsContext = ({
       }
     }
 
+    if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
+      isUp = Boolean(upConfigs[state.idWithLocation]) || false;
+      recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck', {
+        defaultMessage: `Monitor has recovered with status Up`,
+      });
+    }
+
     alert.setContext({
       ...state,
+      ...(isUp ? { status: 'up' } : {}),
       ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }

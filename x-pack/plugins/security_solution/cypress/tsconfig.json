@@ -27,6 +27,7 @@
       "path": "../tsconfig.json",
       "force": true
     },
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/datemath"
   ]
 }

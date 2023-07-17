@@ -25,11 +25,12 @@ interface ClearOptions {
   withJS: boolean;
 }
 
-const RETRY_CLICK_MAX_ATTEMPTS = 3;
-const RETRY_CLICK_RETRY_ON_ERRORS = [
+const RETRY_MAX_ATTEMPTS = 3;
+const RETRY_ON_ERRORS = [
   'ElementClickInterceptedError',
   'ElementNotInteractableError',
   'StaleElementReferenceError',
+  'WebDriverError',
 ];
 
 export class WebElementWrapper {
@@ -105,25 +106,34 @@ export class WebElementWrapper {
 
   private async retryCall<T>(
     fn: (wrapper: this) => T | Promise<T>,
-    attemptsRemaining: number = RETRY_CLICK_MAX_ATTEMPTS
+    attemptsRemaining: number = RETRY_MAX_ATTEMPTS
   ): Promise<T> {
     try {
       return await fn(this);
     } catch (err) {
-      if (
-        !RETRY_CLICK_RETRY_ON_ERRORS.includes(err.name) ||
-        this.locator === null ||
-        attemptsRemaining === 0
-      ) {
+      if (!RETRY_ON_ERRORS.includes(err.name) || this.locator === null || attemptsRemaining === 0) {
         throw err;
       }
 
-      this.logger.warning(`WebElementWrapper.${fn.name}: ${err.message}`);
+      /*
+        https://bugs.chromium.org/p/chromedriver/issues/detail?id=4440
+        Starting with v113 driver occasionally returns WebDriverError instead of StaleElementReferenceError
+      */
+      if (err.message.includes('"code":-32000,"message":"No node with given id found"')) {
+        // WebDriverError: unknown error: unhandled inspector error: {"code":-32000,"message":"No node with given id found"}
+        this.logger.debug(`Chromedriver issue #4440, WebElementWrapper.${fn.name}: ${err}`);
+      } else {
+        this.logger.warning(`WebElementWrapper.${fn.name}: ${err}`);
+      }
+
       this.logger.debug(
-        `finding element '${this.locator.toString()}' again, ${attemptsRemaining - 1} attempts left`
+        `Searching again for the element '${this.locator?.toString()}', ${
+          attemptsRemaining - 1
+        } attempts left`
       );
 
       await setTimeoutAsync(200);
+      // WebElement reference id will be updated if element is no longer in DOM (StaleElementReferenceError)
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
@@ -466,7 +476,6 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   public async findByCssSelector(selector: string) {
-    this.logger.debug(`WebElementWrapper.findByCssSelector(${selector})`);
     return await this.retryCall(async function findByCssSelector(wrapper) {
       return wrapper._wrap(
         await wrapper._webElement.findElement(wrapper.By.css(selector)),
@@ -576,8 +585,8 @@ export class WebElementWrapper {
   public async findByTagName(tagName: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByTagName(wrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.tagName(tagName)),
-        wrapper.By.tagName(tagName)
+        await wrapper._webElement.findElement(wrapper.By.css(tagName)),
+        wrapper.By.css(tagName)
       );
     });
   }
@@ -602,7 +611,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByTagName(wrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.tagName(tagName)),
+          async () => await wrapper._webElement.findElements(wrapper.By.css(tagName)),
           timeout
         )
       );
@@ -687,16 +696,29 @@ export class WebElementWrapper {
    * @param {string} className
    * @return {Promise<void>}
    */
-  public async waitForDeletedByCssSelector(
-    selector: string,
-    implicitTimeout = 1000
-  ): Promise<void> {
+  public async waitForDeletedByCssSelector(selector: string, implicitTimeout = 200): Promise<void> {
     try {
+      this.logger.debug(
+        `waitForDeletedByCssSelector: implicitTimeout=${implicitTimeout}, wait=${this.timeout}`
+      );
       await this.driver.manage().setTimeouts({ implicit: implicitTimeout });
       await this.driver.wait(
         async () => {
-          const found = await this._webElement.findElements(this.By.css(selector));
-          return found.length === 0;
+          if (this.locator) {
+            try {
+              const parentElement = await this.driver.findElement(this.locator);
+              const found = await parentElement.findElements(this.By.css(selector));
+              return found.length === 0;
+            } catch (err) {
+              this.logger.debug(
+                `waitForDeletedByCssSelector: parent element is no longer in DOM, wait is done`
+              );
+              return true;
+            }
+          } else {
+            const found = await this._webElement.findElements(this.By.css(selector));
+            return found.length === 0;
+          }
         },
         this.timeout,
         `The element with ${selector} selector was still present after ${this.timeout} sec.`

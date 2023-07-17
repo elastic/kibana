@@ -328,7 +328,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
             {
               defaultMessage:
-                'A visual representation of the impact of the group on the message rate difference',
+                'A visual representation of the impact of the group on the message rate difference.',
             }
           )}
         >
@@ -377,7 +377,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueColumnTooltip',
             {
               defaultMessage:
-                'The significance of changes in the frequency of values; lower values indicate greater change',
+                'The significance of changes in the frequency of values; lower values indicate greater change.',
             }
           )}
         >

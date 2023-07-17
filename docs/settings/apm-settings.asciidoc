@@ -69,7 +69,7 @@ Maximum number of traces per request for generating the global service map. Defa
 Set to `false` to hide the APM app from the main menu. Defaults to `true`.
 
 `xpack.apm.ui.maxTraceItems` {ess-icon}::
-Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
+Maximum number of child items displayed when viewing trace details. Defaults to `5000`.
 
 `xpack.observability.annotations.index` {ess-icon}::
 Index name where Observability annotations are stored. Defaults to `observability-annotations`.

@@ -27,7 +27,7 @@ const ErrorEmptyPromptComponent: React.FC<Props> = ({ title }) => (
         <EuiCode>{i18n.VIEW_INDEX_METADATA}</EuiCode>
       </li>
       <li>
-        <EuiCode>{i18n.READ}</EuiCode> {i18n.OR} <EuiCode>{i18n.READ_CROSS_CLUSTER}</EuiCode>
+        <EuiCode>{i18n.READ}</EuiCode>
       </li>
     </ul>
   </EuiCallOut>

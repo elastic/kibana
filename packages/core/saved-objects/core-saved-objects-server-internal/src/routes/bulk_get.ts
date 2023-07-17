@@ -8,16 +8,22 @@
 
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfAnyTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfAnyTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerBulkGetRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { coreUsageData, logger }: RouteDependencies
 ) => {
   router.post(
     {
@@ -34,6 +40,12 @@ export const registerBulkGetRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'post',
+        path: '/api/saved_objects/_bulk_get',
+        req,
+        logger,
+      });
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkGet({ request: req }).catch(() => {});
 

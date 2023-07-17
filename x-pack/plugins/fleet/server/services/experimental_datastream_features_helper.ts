@@ -46,7 +46,11 @@ export const applyDocOnlyValueToMapping = (
     'scaled_float',
     'unsigned_long',
   ];
-  if (isDocValueOnlyNumericChanged && numericTypes.includes(mapping.type ?? '')) {
+  if (
+    isDocValueOnlyNumericChanged &&
+    numericTypes.includes(mapping.type ?? '') &&
+    featureMap.features.doc_value_only_numeric !== undefined
+  ) {
     updateMapping(mapping, featureMap.features.doc_value_only_numeric);
   }
 
@@ -54,7 +58,8 @@ export const applyDocOnlyValueToMapping = (
   if (
     isDocValueOnlyOtherChanged &&
     name !== '@timestamp' &&
-    otherSupportedTypes.includes(mapping.type ?? '')
+    otherSupportedTypes.includes(mapping.type ?? '') &&
+    featureMap.features.doc_value_only_other !== undefined
   ) {
     updateMapping(mapping, featureMap.features.doc_value_only_other);
   }

@@ -9,7 +9,7 @@ import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
-import { createCustomRule, createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
@@ -86,12 +86,11 @@ describe('Add/edit exception from rule details', () => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-        createCustomRule(
-          {
-            ...getNewRule(),
-            customQuery: 'agent.name:*',
-            dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
-            exceptionLists: [
+        createRule(
+          getNewRule({
+            query: 'agent.name:*',
+            index: ['exceptions*'],
+            exceptions_list: [
               {
                 id: response.body.id,
                 list_id: exceptionList.list_id,
@@ -99,8 +98,8 @@ describe('Add/edit exception from rule details', () => {
                 namespace_type: exceptionList.namespace_type,
               },
             ],
-          },
-          '2'
+            rule_id: '2',
+          })
         );
         createExceptionListItem(exceptionList.list_id, {
           list_id: exceptionList.list_id,
@@ -251,18 +250,13 @@ describe('Add/edit exception from rule details', () => {
   describe('rule without existing exceptions', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createCustomRuleEnabled(
-        {
-          ...getNewRule(),
-          customQuery: 'agent.name:*',
-          dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
-          runsEvery: {
-            interval: '10',
-            timeType: 'Seconds',
-            type: 's',
-          },
-        },
-        'rule_testing'
+      createRule(
+        getNewRule({
+          query: 'agent.name:*',
+          index: ['exceptions*'],
+          interval: '10s',
+          rule_id: 'rule_testing',
+        })
       );
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();

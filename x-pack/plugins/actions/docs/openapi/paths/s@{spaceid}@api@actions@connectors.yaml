@@ -56,11 +56,7 @@ get:
             getConnectorsResponse:
               $ref: '../components/examples/get_connectors_response.yaml'
     '401':
-      description: Authorization information is missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '../components/schemas/401_response.yaml'
+      $ref: '../components/responses/401.yaml'
   servers:
     - url: https://localhost:5601
 servers:

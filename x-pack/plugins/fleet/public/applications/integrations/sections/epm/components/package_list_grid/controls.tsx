@@ -49,7 +49,7 @@ export const ControlsColumn = ({ controls, title }: ControlsColumnProps) => {
     );
   }
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" className="kbnStickyMenu">
       {titleContent}
       {controls}
     </EuiFlexGroup>

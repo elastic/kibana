@@ -29,7 +29,7 @@ import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../../common/lib';
 
-import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/translations';
+import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
 import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';

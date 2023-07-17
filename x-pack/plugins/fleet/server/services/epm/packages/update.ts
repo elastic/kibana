@@ -48,7 +48,7 @@ export async function updateDatastreamExperimentalFeatures(
   pkgName: string,
   dataStreamFeatureMapping: Array<{
     data_stream: string;
-    features: Record<ExperimentalIndexingFeature, boolean>;
+    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>
 ) {
   await savedObjectsClient.update<Installation>(

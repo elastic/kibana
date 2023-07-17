@@ -67,11 +67,7 @@ paths:
                 createIndexConnectorResponse:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     servers:
@@ -98,11 +94,7 @@ paths:
                 getConnectorResponse:
                   $ref: '#/components/examples/get_connector_response'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
         '404':
           description: Object is not found.
           content:
@@ -136,11 +128,7 @@ paths:
         '204':
           description: Indicates a successful call.
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
         '404':
           description: Object is not found.
           content:
@@ -214,17 +202,9 @@ paths:
                     type: integer
                     example: 400
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
         '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404_response'
+          $ref: '#/components/responses/404'
       servers:
         - url: https://localhost:5601
     servers:
@@ -288,11 +268,7 @@ paths:
                 getConnectorsResponse:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     servers:
@@ -359,11 +335,7 @@ paths:
                 getConnectorTypesResponse:
                   $ref: '#/components/examples/get_connector_types_response'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     servers:
@@ -463,11 +435,7 @@ paths:
                 runSwimlaneConnectorResponse:
                   $ref: '#/components/examples/run_swimlane_connector_response'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     servers:
@@ -489,11 +457,7 @@ paths:
         '204':
           description: Indicates a successful call.
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     get:
@@ -508,17 +472,9 @@ paths:
         - $ref: '#/components/parameters/space_id'
       responses:
         '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/action_response_properties'
+          $ref: '#/components/responses/200_actions'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     put:
@@ -552,17 +508,9 @@ paths:
                   description: The updated secrets configuration for the connector. Secrets properties vary depending on the connector type.
       responses:
         '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/action_response_properties'
+          $ref: '#/components/responses/200_actions'
         '404':
-          description: Object is not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404_response'
+          $ref: '#/components/responses/404'
       servers:
         - url: https://localhost:5601
     servers:
@@ -587,11 +535,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/action_response_properties'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     post:
@@ -627,17 +571,9 @@ paths:
                     The secrets configuration for the connector. Secrets configuration properties vary depending on the connector type. NOTE: Remember these values. You must provide them each time you update the connector.
       responses:
         '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/action_response_properties'
+          $ref: '#/components/responses/200_actions'
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     servers:
@@ -684,11 +620,7 @@ paths:
                       type: string
                       description: The name of the connector type.
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     servers:
@@ -742,11 +674,7 @@ paths:
                     type: string
                     description: The status of the action.
         '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
+          $ref: '#/components/responses/401'
       servers:
         - url: https://localhost:5601
     servers:
@@ -2279,22 +2207,6 @@ components:
         - $ref: '#/components/schemas/connector_response_properties_xmatters'
       discriminator:
         propertyName: connector_type_id
-    401_response:
-      type: object
-      title: Unsuccessful rule API response
-      properties:
-        error:
-          type: string
-          example: Unauthorized
-          enum:
-            - Unauthorized
-        message:
-          type: string
-        statusCode:
-          type: integer
-          example: 401
-          enum:
-            - 401
     update_connector_request_cases_webhook:
       title: Update Webhook - Case Managment connector request
       type: object
@@ -2422,22 +2334,6 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
-    404_response:
-      type: object
-      properties:
-        error:
-          type: string
-          example: Not Found
-          enum:
-            - Not Found
-        message:
-          type: string
-          example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
-        statusCode:
-          type: integer
-          example: 404
-          enum:
-            - 404
     connector_types:
       title: Connector types
       type: string
@@ -3210,6 +3106,54 @@ components:
             - commentId: 1
               pushedDate: '2022-09-08T16:52:27.865Z'
         status: ok
+  responses:
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            type: object
+            title: Unauthorized response
+            properties:
+              error:
+                type: string
+                example: Unauthorized
+                enum:
+                  - Unauthorized
+              message:
+                type: string
+              statusCode:
+                type: integer
+                example: 401
+                enum:
+                  - 401
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            title: Not found response
+            properties:
+              error:
+                type: string
+                example: Not Found
+                enum:
+                  - Not Found
+              message:
+                type: string
+                example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
+              statusCode:
+                type: integer
+                example: 404
+                enum:
+                  - 404
+    200_actions:
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/action_response_properties'
 security:
   - basicAuth: []
   - apiKeyAuth: []

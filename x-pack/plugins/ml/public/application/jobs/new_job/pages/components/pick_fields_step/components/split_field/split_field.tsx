@@ -62,7 +62,7 @@ export const SplitFieldSelector: FC = () => {
         changeHandler={setSplitField}
         selectedField={splitField}
         isClearable={true}
-        testSubject="mlMultiMetricSplitFieldSelect"
+        testSubject="mlSplitFieldSelect"
       />
     </Description>
   );

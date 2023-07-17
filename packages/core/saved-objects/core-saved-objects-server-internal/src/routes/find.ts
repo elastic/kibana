@@ -8,16 +8,18 @@
 
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
-
+import { logWarnOnExternalRequest } from './utils';
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerFindRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { coreUsageData, logger }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
     type: schema.string(),
@@ -59,6 +61,12 @@ export const registerFindRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/_find',
+        req,
+        logger,
+      });
       const query = req.query;
 
       const namespaces =

@@ -108,6 +108,11 @@ export class Mapping implements BaseMapping {
    */
   public perIndexTypes: Record<string, object> = {};
 
+  /**
+   * Map of the user-input wildcards and actual indices.
+   */
+  public perWildcardIndices: Record<string, string[]> = {};
+
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
 
   /**
@@ -180,6 +185,14 @@ export class Mapping implements BaseMapping {
 
                 autoCompleteContext.asyncResultsState!.isLoading = false;
                 autoCompleteContext.asyncResultsState!.lastFetched = Date.now();
+
+                const mappingsIndices = Object.keys(mapping);
+                if (
+                  mappingsIndices.length > 1 ||
+                  (mappingsIndices[0] && mappingsIndices[0] !== indices)
+                ) {
+                  this.perWildcardIndices[indices as string] = Object.keys(mapping);
+                }
 
                 // cache mappings
                 this.loadMappings(mapping);
