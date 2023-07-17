@@ -72,10 +72,10 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
   const onSearchTypeChange = useCallback(
     (newSearch: string[]) => {
       if (!isEqual(newSearch, filteringOptions.searchByType)) {
-        setFilteringOptions((prevOptions) => ({
-          ...prevOptions,
+        setFilteringOptions({
+          ...filteringOptions,
           searchByType: newSearch,
-        }));
+        });
       }
     },
     [filteringOptions]
