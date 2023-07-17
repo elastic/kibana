@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { ControlType, Workspace, WorkspaceField } from '../../types';
 
 interface ControlPanelToolBarProps {
@@ -90,7 +90,14 @@ export const ControlPanelToolBar = ({
     <EuiFlexGroup gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={undoButtonMsg}>
-          <button
+          <EuiButtonIcon
+            iconType={'editorUndo'}
+            size="xs"
+            aria-label={undoButtonMsg}
+            isDisabled={workspace.undoLog.length < 1}
+            onClick={onUndoClick}
+          />
+          {/* <button
             className="kuiButton kuiButton--basic kuiButton--small"
             aria-label={undoButtonMsg}
             type="button"
@@ -98,13 +105,20 @@ export const ControlPanelToolBar = ({
             disabled={workspace.undoLog.length < 1}
           >
             <span className="kuiIcon fa-history" />
-          </button>
+          </button> */}
         </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={redoButtonMsg}>
-          <button
+          <EuiButtonIcon
+            iconType={'editorRedo'}
+            size="xs"
+            aria-label={redoButtonMsg}
+            isDisabled={workspace.redoLog.length === 0}
+            onClick={onRedoClick}
+          />
+          {/* <button
             className="kuiButton kuiButton--basic kuiButton--small"
             aria-label={redoButtonMsg}
             type="button"
@@ -112,39 +126,53 @@ export const ControlPanelToolBar = ({
             disabled={workspace.redoLog.length === 0}
           >
             <span className="kuiIcon fa-repeat" />
-          </button>
+          </button> */}
         </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={expandButtonMsg}>
-          <button
+          <EuiButtonIcon
+            iconType={'plus'}
+            size="xs"
+            aria-label={expandButtonMsg}
+            isDisabled={liveResponseFields.length === 0 || workspace.nodes.length === 0}
+            onClick={onExpandButtonClick}
+          />
+          {/* <button
             className="kuiButton kuiButton--basic kuiButton--small"
             aria-label={expandButtonMsg}
             disabled={liveResponseFields.length === 0 || workspace.nodes.length === 0}
             onClick={onExpandButtonClick}
           >
             <span className="kuiIcon fa-plus" />
-          </button>
+          </button> */}
         </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={addLinksButtonMsg}>
-          <button
+          {/* <button
             className="kuiButton kuiButton--basic kuiButton--small"
             aria-label={addLinksButtonMsg}
             disabled={haveNodes}
             onClick={onAddLinksClick}
           >
             <span className="kuiIcon fa-link" />
-          </button>
+          </button> */}
+          <EuiButtonIcon
+            iconType={'editorLink'}
+            size="xs"
+            aria-label={addLinksButtonMsg}
+            isDisabled={haveNodes}
+            onClick={onAddLinksClick}
+          />
         </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={removeVerticesButtonMsg}>
-          <button
+          {/* <button
             data-test-subj="graphRemoveSelection"
             className="kuiButton kuiButton--basic kuiButton--small"
             disabled={haveNodes}
@@ -152,53 +180,82 @@ export const ControlPanelToolBar = ({
             onClick={onRemoveVerticesClick}
           >
             <span className="kuiIcon fa-trash" />
-          </button>
+          </button> */}
+          <EuiButtonIcon
+            data-test-subj="graphRemoveSelection"
+            iconType={'trash'}
+            size="xs"
+            aria-label={removeVerticesButtonMsg}
+            isDisabled={haveNodes}
+            onClick={onRemoveVerticesClick}
+          />
         </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={blocklistButtonMsg}>
-          <button
+          {/* <button
             className="kuiButton kuiButton--basic kuiButton--small"
             disabled={workspace.selectedNodes.length === 0}
             aria-label={blocklistButtonMsg}
             onClick={onBlockListClick}
           >
             <span className="kuiIcon fa-ban" />
-          </button>
+          </button> */}
+          <EuiButtonIcon
+            iconType={'filterIgnore'}
+            size="xs"
+            aria-label={blocklistButtonMsg}
+            isDisabled={workspace.selectedNodes.length === 0}
+            onClick={onBlockListClick}
+          />
         </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={customStyleButtonMsg}>
-          <button
+          {/* <button
             className="kuiButton kuiButton--basic kuiButton--small"
             disabled={workspace.selectedNodes.length === 0}
             aria-label={customStyleButtonMsg}
             onClick={onCustomStyleClick}
           >
             <span className="kuiIcon fa-paint-brush" />
-          </button>
+          </button> */}
+          <EuiButtonIcon
+            iconType={'brush'}
+            size="xs"
+            aria-label={customStyleButtonMsg}
+            isDisabled={workspace.selectedNodes.length === 0}
+            onClick={onCustomStyleClick}
+          />
         </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={drillDownButtonMsg}>
-          <button
+          {/* <button
             className="kuiButton kuiButton--basic kuiButton--small"
             disabled={haveNodes}
             aria-label={drillDownButtonMsg}
             onClick={onDrillDownClick}
           >
             <span className="kuiIcon fa-info" />
-          </button>
+          </button> */}
+          <EuiButtonIcon
+            iconType={'iInCircle'}
+            size="xs"
+            aria-label={drillDownButtonMsg}
+            isDisabled={haveNodes}
+            onClick={onDrillDownClick}
+          />
         </EuiToolTip>
       </EuiFlexItem>
 
       {(workspace.nodes.length === 0 || workspace.force === null) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={runLayoutButtonMsg}>
-            <button
+            {/* <button
               data-test-subj="graphResumeLayout"
               className="kuiButton kuiButton--basic kuiButton--small"
               disabled={workspace.nodes.length === 0}
@@ -206,7 +263,15 @@ export const ControlPanelToolBar = ({
               onClick={onRunLayoutClick}
             >
               <span className="kuiIcon fa-play" />
-            </button>
+            </button> */}
+            <EuiButtonIcon
+              data-test-subj="graphResumeLayout"
+              iconType={'playFilled'}
+              size="xs"
+              aria-label={runLayoutButtonMsg}
+              isDisabled={workspace.nodes.length === 0}
+              onClick={onRunLayoutClick}
+            />
           </EuiToolTip>
         </EuiFlexItem>
       )}
@@ -214,14 +279,21 @@ export const ControlPanelToolBar = ({
       {workspace.force !== null && workspace.nodes.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={pauseLayoutButtonMsg}>
-            <button
+            {/* <button
               data-test-subj="graphPauseLayout"
               className="kuiButton kuiButton--basic kuiButton--small"
               aria-label={pauseLayoutButtonMsg}
               onClick={onPauseLayoutClick}
             >
               <span className="kuiIcon fa-pause" />
-            </button>
+            </button> */}
+            <EuiButtonIcon
+              data-test-subj="graphPauseLayout"
+              iconType={'pause'}
+              size="xs"
+              aria-label={pauseLayoutButtonMsg}
+              onClick={onPauseLayoutClick}
+            />
           </EuiToolTip>
         </EuiFlexItem>
       )}

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
 
@@ -44,7 +44,8 @@ export const MergeCandidates = ({
   return (
     <div className="gphSidebar__panel">
       <div className="gphSidebar__header">
-        <span className="kuiIcon fa-link" />
+        {/* <span className="kuiIcon fa-link" /> */}
+        <EuiIcon type="editorLink" />{' '}
         {i18n.translate('xpack.graph.sidebar.linkSummaryTitle', {
           defaultMessage: 'Link summary',
         })}
@@ -102,28 +103,42 @@ export const MergeCandidates = ({
           <div>
             <span>
               <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg}>
-                <button
+                <EuiButtonIcon
+                  iconType={'doubleArrowRight'}
+                  size="xs"
+                  style={{ opacity: 0.2 + mc.overlap / mc.v1 }}
+                  aria-label={mergeTerm1ToTerm2ButtonMsg}
+                  onClick={onMergeTerm1ToTerm2Click}
+                />
+                {/* <button
                   type="button"
                   style={{ opacity: 0.2 + mc.overlap / mc.v1 }}
                   className="kuiButton kuiButton--basic kuiButton--small"
                   onClick={onMergeTerm1ToTerm2Click}
                 >
                   <span className="kuiIcon fa-chevron-circle-right" />
-                </button>
+                </button> */}
               </EuiToolTip>
 
               <span className="gphLinkSummary__term--1">{mc.term1}</span>
               <span className="gphLinkSummary__term--2">{mc.term2}</span>
 
               <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg}>
-                <button
+                <EuiButtonIcon
+                  iconType={'doubleArrowLeft'}
+                  size="xs"
+                  style={{ opacity: 0.2 + mc.overlap / mc.v2 }}
+                  aria-label={mergeTerm2ToTerm1ButtonMsg}
+                  onClick={onMergeTerm2ToTerm1Click}
+                />
+                {/* <button
                   type="button"
                   className="kuiButton kuiButton--basic kuiButton--small"
                   style={{ opacity: 0.2 + mc.overlap / mc.v2 }}
                   onClick={onMergeTerm2ToTerm1Click}
                 >
                   <span className="kuiIcon fa-chevron-circle-left" />
-                </button>
+                </button> */}
               </EuiToolTip>
             </span>
 

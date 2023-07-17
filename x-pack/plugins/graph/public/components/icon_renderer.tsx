@@ -24,9 +24,10 @@ interface IconRendererProps {
   x?: number;
   y?: number;
   className?: string;
+  onClick?: () => void;
 }
 
-export const IconRenderer = ({ icon, color, className, ...coords }: IconRendererProps) => {
+export const IconRenderer = ({ icon, color, className, onClick, ...coords }: IconRendererProps) => {
   if (icon == null) {
     return null;
   }
@@ -38,9 +39,18 @@ export const IconRenderer = ({ icon, color, className, ...coords }: IconRenderer
         title={MAKI_ICONS[icon.id].label}
         color={backgroundColor}
         className={className}
+        onClick={onClick}
         {...coords}
       />
     );
   }
-  return <EuiIcon type={icon.id} color={backgroundColor} {...coords} className={className} />;
+  return (
+    <EuiIcon
+      type={icon.id}
+      color={backgroundColor}
+      {...coords}
+      className={className}
+      onClick={onClick}
+    />
+  );
 };
