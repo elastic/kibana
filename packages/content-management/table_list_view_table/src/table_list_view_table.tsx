@@ -375,7 +375,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = state;
 
   const hasQuery = searchQuery.text !== '';
-  const hasNoItems = hasInitialFetchReturned && items.length === 0 && !hasQuery;
+  const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
@@ -857,17 +857,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Effects
   // ------------
-  useDebounce(
-    () => {
-      // Do not call fetchItems on dependency changes when initial fetch does not load any items
-      // to avoid flashing between empty table and no items view
-      if (!hasNoItems) {
-        fetchItems();
-      }
-    },
-    300,
-    [fetchItems, refreshListBouncer]
-  );
+  useDebounce(fetchItems, 300, [fetchItems]);
 
   useEffect(() => {
     if (!urlStateEnabled) {
