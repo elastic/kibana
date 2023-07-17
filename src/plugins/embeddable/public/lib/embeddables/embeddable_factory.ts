@@ -36,6 +36,12 @@ export interface EmbeddableFactory<
   >,
   TSavedObjectAttributes = unknown
 > extends PersistableState<EmbeddableStateWithType> {
+  /**
+   * The version of this Embeddable factory. This will be used in the client side migration system
+   * to ensure that input from any source is compatible with the latest version of this embeddable.
+   */
+  readonly latestVersion: string;
+
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
   readonly type: string;

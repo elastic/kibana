@@ -27,6 +27,7 @@ import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>
 {
+  public latestVersion = '1.0.0';
   public type = OPTIONS_LIST_CONTROL;
   public canCreateNew = () => false;
 

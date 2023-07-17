@@ -19,6 +19,7 @@ import { ControlInput, IEditableControlFactory } from '../../types';
 export class TimeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<ControlInput>
 {
+  public latestVersion = '1.0.0';
   public type = TIME_SLIDER_CONTROL;
 
   constructor() {}

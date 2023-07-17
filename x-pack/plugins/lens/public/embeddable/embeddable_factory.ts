@@ -56,6 +56,8 @@ export interface LensEmbeddableStartServices {
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
+  latestVersion = '1.0.0';
+
   type = DOC_TYPE;
   savedObjectMetaData = {
     name: i18n.translate('xpack.lens.lensSavedObjectLabel', {

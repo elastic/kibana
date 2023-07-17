@@ -23,6 +23,7 @@ export const CONTACT_CARD_EXPORTABLE_EMBEDDABLE = 'CONTACT_CARD_EXPORTABLE_EMBED
 export class ContactCardExportableEmbeddableFactory
   implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput>
 {
+  public latestVersion = '1.0.0';
   public readonly type = CONTACT_CARD_EXPORTABLE_EMBEDDABLE;
 
   constructor(

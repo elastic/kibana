@@ -223,4 +223,9 @@ export interface IEmbeddable<
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
 
   refreshInputFromParent(): void;
+
+  /**
+   * Allows containers to defer passing state changes down to their children.
+   */
+  initializeParentSubscription(parent: IContainer): void;
 }

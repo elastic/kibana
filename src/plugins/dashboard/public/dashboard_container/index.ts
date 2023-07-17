@@ -8,6 +8,13 @@
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
+/**
+ * This version MUST parse into a number type, or else the Dashboard will not
+ * properly save. This is because the version information in the Dashboard
+ * attributes is number typed.
+ */
+export const LATEST_DASHBOARD_CONTAINER_VERSION = '1';
+
 export type { DashboardContainer } from './embeddable/dashboard_container';
 export {
   type DashboardContainerFactory,

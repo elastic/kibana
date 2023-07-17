@@ -11,20 +11,16 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { SimpleEmbeddableInput } from './migrations_embeddable_factory';
 
 // before 7.3.0 this embeddable received a very simple input with a variable named `number`
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type SimpleEmbeddableInput_pre7_3_0 = EmbeddableInput & {
+type SimpleEmbeddableInputV1 = EmbeddableInput & {
   number: number;
 };
 
-type SimpleEmbeddable730MigrateFn = MigrateFunction<
-  SimpleEmbeddableInput_pre7_3_0,
-  SimpleEmbeddableInput
->;
+type SimpleEmbeddable730MigrateFn = MigrateFunction<SimpleEmbeddableInputV1, SimpleEmbeddableInput>;
 
 // when migrating old state we'll need to set a default title, or we should make title optional in the new state
 const defaultTitle = 'no title';
 
-export const migration730: SimpleEmbeddable730MigrateFn = (state) => {
+export const migrateToVersion2: SimpleEmbeddable730MigrateFn = (state) => {
   const newState: SimpleEmbeddableInput = { ...state, title: defaultTitle, value: state.number };
   return newState;
 };

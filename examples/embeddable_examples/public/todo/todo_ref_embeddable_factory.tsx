@@ -44,6 +44,7 @@ export class TodoRefEmbeddableFactoryDefinition
       TodoSavedObjectAttributes
     >
 {
+  public latestVersion = '1.0.0';
   public readonly type = TODO_REF_EMBEDDABLE;
   public readonly savedObjectMetaData = {
     name: 'Todo',
