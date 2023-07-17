@@ -21,11 +21,10 @@ import {
   type CategorizationAnalyzer,
   type FieldExampleCheck,
   VALIDATION_RESULT,
-} from '@kbn/category_validator';
-import {
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   VALIDATION_CHECK_DESCRIPTION,
-} from '@kbn/category_validator';
+} from '@kbn/ml-category-validator';
+
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 
 interface Props {

@@ -9,12 +9,12 @@ import { Observable } from 'rxjs';
 import { useMemo } from 'react';
 import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type {
-  CategorizationAnalyzer,
-  CategoryFieldExample,
-  FieldExampleCheck,
-} from '@kbn/category_validator';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/category_validator';
+import {
+  type CategorizationAnalyzer,
+  type CategoryFieldExample,
+  type FieldExampleCheck,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+} from '@kbn/ml-category-validator';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 

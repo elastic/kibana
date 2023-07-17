@@ -8,7 +8,7 @@
 import { ReactElement } from 'react';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/category_validator';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import {
   basicJobValidation,
   basicDatafeedValidation,

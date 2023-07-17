@@ -2946,10 +2946,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/category_validator@link:x-pack/packages/ml/category_validator":
-  version "0.0.0"
-  uid ""
-
 "@kbn/cell-actions@link:packages/kbn-cell-actions":
   version "0.0.0"
   uid ""
@@ -4655,6 +4651,10 @@
   uid ""
 
 "@kbn/ml-anomaly-utils@link:x-pack/packages/ml/anomaly_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-category-validator@link:x-pack/packages/ml/category_validator":
   version "0.0.0"
   uid ""
 

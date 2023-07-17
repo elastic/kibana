@@ -20,7 +20,7 @@ import {
   type FieldExampleCheck,
   VALIDATION_RESULT,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
-} from '@kbn/category_validator';
+} from '@kbn/ml-category-validator';
 import { JobCreator } from './job_creator';
 import type {
   Job,

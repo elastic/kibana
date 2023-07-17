@@ -7,8 +7,11 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { CategoryFieldExample, FieldExampleCheck } from '@kbn/category_validator';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/category_validator';
+import {
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+  type CategoryFieldExample,
+  type FieldExampleCheck,
+} from '@kbn/ml-category-validator';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 import { JobCreatorContext } from '../../../job_creator_context';
