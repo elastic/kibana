@@ -11,6 +11,10 @@ import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/server';
+import type {
+  TaskManagerSetupContract as TaskManagerPluginSetup,
+  TaskManagerStartContract as TaskManagerPluginStart,
+} from '@kbn/task-manager-plugin/server';
 
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -26,10 +30,35 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   securitySolutionEss: SecuritySolutionEssPluginSetup;
   features: PluginSetupContract;
   ml: MlPluginSetup;
+  taskManager: TaskManagerPluginSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   features: PluginStartContract;
+  taskManager: TaskManagerPluginStart;
+}
+
+export interface UsageRecord {
+  id: string;
+  usage_timestamp: string;
+  creation_timestamp: string;
+  usage: UsageMetrics;
+  source: UsageSource;
+}
+
+export interface UsageMetrics {
+  type: string;
+  sub_type?: string;
+  quantity: number;
+  period_seconds?: number;
+  cause?: string;
+  metadata?: unknown;
+}
+
+export interface UsageSource {
+  id: string;
+  instance_group_id: string;
+  instance_group_type: string;
 }
