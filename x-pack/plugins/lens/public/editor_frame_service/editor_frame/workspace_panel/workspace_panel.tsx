@@ -788,7 +788,7 @@ export const VisualizationWrapper = ({
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const errorsFromRequest = getOriginalRequestErrorMessages(error);
+          const errorsFromRequest = getOriginalRequestErrorMessages(error, core.docLinks);
           const visibleErrorMessages = errorsFromRequest.length
             ? errorsFromRequest
             : errorMessage
@@ -829,11 +829,15 @@ export const VisualizationWrapper = ({
                       </p>
 
                       {localState.expandError
-                        ? visibleErrorMessages.map((visibleErrorMessage) => (
-                            <p className="eui-textBreakWord" key={visibleErrorMessage}>
-                              {visibleErrorMessage}
-                            </p>
-                          ))
+                        ? visibleErrorMessages.map((visibleErrorMessage) =>
+                            typeof visibleErrorMessage === 'string' ? (
+                              <p className="eui-textBreakWord" key={visibleErrorMessage}>
+                                {visibleErrorMessage}
+                              </p>
+                            ) : (
+                              visibleErrorMessage
+                            )
+                          )
                         : null}
                     </>
                   }

@@ -8,8 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { isEqual, uniqWith } from 'lodash';
 import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { isEsError } from '@kbn/data-plugin/public';
 import type { IEsError, Reason } from '@kbn/data-plugin/public';
+import React from 'react';
+import { EuiLink } from '@elastic/eui';
 
 type ErrorCause = Required<IEsError>['attributes'];
 
@@ -108,7 +111,10 @@ function getErrorSources(e: Error) {
   return [];
 }
 
-export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | null): string[] {
+export function getOriginalRequestErrorMessages(
+  error?: ExpressionRenderError | null,
+  docLinks?: CoreStart['docLinks']
+): Array<string | React.ReactNode> {
   const errorMessages = [];
   if (error && 'original' in error && error.original) {
     if (isEsAggError(error.original)) {
@@ -140,14 +146,22 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
         } else if (isTSDBError(rootError)) {
           const [fieldName, _type, _isCounter, opUsed] = rootError.reason.match(/\[(\w)*\]/g)!;
           errorMessages.push(
-            i18n.translate('xpack.lens.editorFrame.expressionTSDBDetailedMessage', {
-              defaultMessage:
-                'The field {field} of type [counter] has been used with the unsupported operation {op}.',
-              values: {
-                field: fieldName,
-                op: opUsed,
-              },
-            })
+            <p className="eui-textBreakWord">
+              {i18n.translate('xpack.lens.editorFrame.expressionTSDBDetailedMessage', {
+                defaultMessage:
+                  'The field {field} of type [counter] has been used with the unsupported operation {op}.',
+                values: {
+                  field: fieldName,
+                  op: opUsed,
+                },
+              })}
+              <EuiLink href={docLinks?.links.fleet.datastreamsTSDSMetrics}>
+                {i18n.translate('xpack.lens.editorFrame.expressionTSDBCounterInfo', {
+                  defaultMessage:
+                    'More information about [counter] field types and supported aggregations',
+                })}
+              </EuiLink>
+            </p>
           );
         } else {
           errorMessages.push(
