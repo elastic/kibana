@@ -45,15 +45,47 @@ const TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS = i18n.translate(
   }
 );
 
+const TARGET_FIELD_PLACEHOLDER_TEXT_TEXT_EXPANSION_MODEL = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.placeholder.textExpansionModel',
+  {
+    defaultMessage: 'Automatically created',
+  }
+);
+
+const TARGET_FIELD_HELP_TEXT_DEFAULT = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText',
+  {
+    defaultMessage: 'Optional. Field name where inference results should be saved.',
+  }
+);
+
+const TARGET_FIELD_HELP_TEXT_TEXT_EXPANSION_MODEL = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpTextTextExpansionModel',
+  {
+    defaultMessage: 'ELSER target fields are created automatically.',
+  }
+);
+
+const getInitialTargetFieldPlaceholderText = (isTextExpansionModelSelected: boolean) =>
+  isTextExpansionModelSelected
+    ? TARGET_FIELD_PLACEHOLDER_TEXT_TEXT_EXPANSION_MODEL
+    : TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS;
+
+const getTargetFieldHelpText = (isTextExpansionModelSelected: boolean) =>
+  isTextExpansionModelSelected
+    ? TARGET_FIELD_HELP_TEXT_TEXT_EXPANSION_MODEL
+    : TARGET_FIELD_HELP_TEXT_DEFAULT;
+
 export const MultiFieldMapping: React.FC = () => {
   const {
     addInferencePipelineModal: { configuration, selectedSourceFields = [] },
+    isTextExpansionModelSelected,
     sourceFields,
   } = useValues(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { addSelectedFieldsToMapping, selectFields, setTargetField } = useActions(MLInferenceLogic);
   const [placeholderText, setPlaceholderText] = React.useState<string>(
-    TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS
+    getInitialTargetFieldPlaceholderText(isTextExpansionModelSelected)
   );
 
   const mappedSourceFields =
@@ -72,11 +104,17 @@ export const MultiFieldMapping: React.FC = () => {
 
   const onChangeSelectedFields = (selectedFieldNames: FieldNames) => {
     selectFields(selectedFieldNames.map(({ label }) => label));
-    setTargetField(isExactlyOneSourceFieldSelected ? selectedFieldNames[0].label : '');
+    setTargetField(
+      !isTextExpansionModelSelected && selectedFieldNames.length === 1
+        ? selectedFieldNames[0].label
+        : ''
+    );
     setPlaceholderText(
-      selectedFieldNames.length === 0
+      isTextExpansionModelSelected
+        ? TARGET_FIELD_PLACEHOLDER_TEXT_TEXT_EXPANSION_MODEL
+        : selectedFieldNames.length === 0
         ? TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS
-        : isExactlyOneSourceFieldSelected
+        : selectedFieldNames.length === 1
         ? selectedFieldNames[0].label
         : TARGET_FIELD_PLACEHOLDER_TEXT_MULTIPLE_FIELDS
     );
@@ -93,7 +131,7 @@ export const MultiFieldMapping: React.FC = () => {
   const onAddSelectedFields = () => {
     addSelectedFieldsToMapping();
     setTargetField('');
-    setPlaceholderText(TARGET_FIELD_PLACEHOLDER_TEXT_NO_FIELDS);
+    setPlaceholderText(getInitialTargetFieldPlaceholderText(isTextExpansionModelSelected));
   };
 
   return (
@@ -142,12 +180,7 @@ export const MultiFieldMapping: React.FC = () => {
                 defaultMessage: 'Target field',
               }
             )}
-            helpText={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText',
-              {
-                defaultMessage: 'Optional. Field name where inference results should be saved.',
-              }
-            )}
+            helpText={getTargetFieldHelpText(isTextExpansionModelSelected)}
             fullWidth
           >
             <EuiFieldText
@@ -157,7 +190,7 @@ export const MultiFieldMapping: React.FC = () => {
               )}
               onChange={(e) => setTargetField(e.target.value)}
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
-              disabled={!isExactlyOneSourceFieldSelected}
+              disabled={isTextExpansionModelSelected || !isExactlyOneSourceFieldSelected}
               value={targetField}
               placeholder={placeholderText}
               fullWidth
