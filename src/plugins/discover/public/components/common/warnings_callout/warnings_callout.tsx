@@ -101,7 +101,11 @@ export const WarningsCallout = ({
               <EuiIcon type="warning" color="warning" size="l" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <h2>
+              <h2
+                css={css`
+                  text-align: left;
+                `}
+              >
                 {i18n.translate('discover.warningsCallout.noResultsTitle', {
                   defaultMessage: 'No results found',
                 })}
