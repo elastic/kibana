@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { SearchResponseInterceptedWarning } from '../../../types';
+import type { SearchResponseInterceptedWarning } from '../../../types';
 import './warnings_callout.scss';
 
 export interface WarningsCalloutProps {
