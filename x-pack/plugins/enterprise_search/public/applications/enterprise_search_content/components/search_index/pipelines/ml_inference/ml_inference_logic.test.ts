@@ -340,6 +340,7 @@ describe('MlInferenceLogic', () => {
           pipelineName: 'unit-test',
           sourceField: '',
           fieldMappings: [],
+          targetField: '',
         });
 
         expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
@@ -352,6 +353,7 @@ describe('MlInferenceLogic', () => {
           pipelineName: 'unit-test',
           sourceField: 'body',
           fieldMappings: [],
+          targetField: '',
         });
 
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
@@ -364,6 +366,7 @@ describe('MlInferenceLogic', () => {
           pipelineName: '',
           sourceField: '',
           fieldMappings: [],
+          targetField: '',
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
       });
@@ -383,6 +386,7 @@ describe('MlInferenceLogic', () => {
           pipelineName: 'unit-test',
           sourceField: '',
           fieldMappings: [],
+          targetField: '',
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
         expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);

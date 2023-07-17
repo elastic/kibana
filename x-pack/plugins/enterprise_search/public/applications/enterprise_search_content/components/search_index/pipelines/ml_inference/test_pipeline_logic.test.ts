@@ -25,6 +25,7 @@ const DEFAULT_VALUES: TestPipelineValues = {
       modelID: '',
       pipelineName: '',
       sourceField: '',
+      targetField: '',
     },
     indexName: '',
     step: AddInferencePipelineSteps.Configuration,

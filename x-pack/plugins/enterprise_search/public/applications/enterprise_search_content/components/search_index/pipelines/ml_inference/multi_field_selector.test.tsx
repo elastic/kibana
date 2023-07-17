@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiButton, EuiComboBox } from '@elastic/eui';
+import { EuiBasicTable, EuiButton, EuiComboBox, EuiFieldText } from '@elastic/eui';
 
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
 
@@ -91,6 +91,53 @@ describe('MultiFieldMapping', () => {
     expect(wrapper.find(EuiButton)).toHaveLength(1);
     const button = wrapper.find(EuiButton);
     expect(button.prop('disabled')).toBe(false);
+  });
+  it('disables target field text field if no source fields are selected', () => {
+    setMockValues(DEFAULT_VALUES);
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(true);
+  });
+  it('disables target field text field if multiple source fields are selected', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      addInferencePipelineModal: {
+        ...DEFAULT_VALUES.addInferencePipelineModal,
+        selectedSourceFields: ['my-source-field1', 'my-source-field2'],
+      },
+    });
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(true);
+  });
+  it('disables target field text field if text expansion model is selected', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      isTextExpansionModelSelected: true,
+    });
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(true);
+  });
+  it('enables target field text field if a single source field is selected', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      addInferencePipelineModal: {
+        ...DEFAULT_VALUES.addInferencePipelineModal,
+        selectedSourceFields: ['my-source-field1'],
+      },
+    });
+    const wrapper = shallow(<MultiFieldMapping />);
+
+    expect(wrapper.find(EuiFieldText)).toHaveLength(1);
+    const textField = wrapper.find(EuiFieldText);
+    expect(textField.prop('disabled')).toBe(false);
   });
 });
 
