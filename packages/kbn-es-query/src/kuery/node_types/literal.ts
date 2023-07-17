@@ -33,3 +33,7 @@ export function buildNode(value: KqlLiteralType, isQuoted: boolean = false): Kql
 export function toElasticsearchQuery(node: KqlLiteralNode) {
   return node.value;
 }
+
+export function toKqlExpression(node: KqlLiteralNode): string {
+  return node.isQuoted ? `"${node.value}"` : `${node.value}`;
+}
