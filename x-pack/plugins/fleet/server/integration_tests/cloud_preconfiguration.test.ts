@@ -30,8 +30,7 @@ import {
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-// FLAKY: https://github.com/elastic/kibana/issues/133470
-describe.skip('Fleet preconfiguration reset', () => {
+describe('Fleet preconfiguration reset', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
 
@@ -156,7 +155,14 @@ describe.skip('Fleet preconfiguration reset', () => {
         // Remove package version to avoid upgrading this test for each new package dev version
         data.inputs.forEach((input: any) => {
           delete input.meta.package.version;
+          if (input['apm-server']) {
+            input['apm-server'].agent.config.elasticsearch.api_key = '';
+            input['apm-server'].rum.source_mapping.elasticsearch.api_key = '';
+          }
         });
+        data.agent.protection.signing_key = '';
+        data.signed.data = '';
+        data.signed.signature = '';
 
         expect(data).toMatchSnapshot();
       });
@@ -187,13 +193,10 @@ describe.skip('Fleet preconfiguration reset', () => {
           Array [
             Object {
               "compiled_input": Object {
-                "server": Object {
-                  "host": "0.0.0.0",
-                  "port": 8220,
-                },
                 "server.runtime": Object {
                   "gc_percent": 20,
                 },
+                "unused_key": "not_used",
               },
               "enabled": true,
               "keep_enabled": true,
@@ -209,7 +212,6 @@ describe.skip('Fleet preconfiguration reset', () => {
                 },
                 "host": Object {
                   "frozen": true,
-                  "type": "text",
                   "value": "0.0.0.0",
                 },
                 "max_agents": Object {
@@ -220,7 +222,6 @@ describe.skip('Fleet preconfiguration reset', () => {
                 },
                 "port": Object {
                   "frozen": true,
-                  "type": "integer",
                   "value": 8220,
                 },
               },
