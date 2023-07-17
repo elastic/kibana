@@ -184,13 +184,20 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
 }
 
 function TemplateDescription() {
-  const { isImported } = useDiagnosticsContext();
+  const { isImported, setImportedDiagnosticsBundle } = useDiagnosticsContext();
   if (isImported) {
     return (
       <EuiCallOut
         title="Displaying results from the uploaded diagnostics report"
         iconType="exportAction"
-      />
+      >
+        <EuiButton
+          data-test-subj="apmTemplateDescriptionClearBundleButton"
+          onClick={() => setImportedDiagnosticsBundle(undefined)}
+        >
+          Clear bundle
+        </EuiButton>
+      </EuiCallOut>
     );
   }
 

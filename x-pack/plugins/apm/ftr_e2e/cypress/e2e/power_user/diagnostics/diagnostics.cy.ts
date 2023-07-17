@@ -6,137 +6,166 @@
  */
 
 describe('Diagnostics', () => {
-  describe('when no data is loaded', () => {
-    it('can display summary tab for superuser', () => {
-      cy.loginAs({ username: 'elastic', password: 'changeme' });
-      cy.visitKibana('/app/apm/diagnostics');
-
-      // integration package
-      cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
-        'have.text',
-        'OK'
-      );
-
-      // data stream
-      cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
-        'have.text',
-        'OK'
-      );
-
-      // Index template
-      cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
-        'have.text',
-        'OK'
-      );
-
-      // Index template
-      cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
-        'have.text',
-        'OK'
-      );
+  describe('when logging in as superuser', () => {
+    beforeEach(() => {
+      cy.loginAsSuperUser();
     });
 
-    it('can display documents tab for "viewer" user', () => {
-      cy.loginAsViewerUser();
-      cy.visitKibana('/app/apm/diagnostics');
-      cy.get('[data-test-subj="documents-tab"]').click();
+    describe('when no data is loaded', () => {
+      it('can display summary tab for superuser', () => {
+        cy.visitKibana('/app/apm/diagnostics');
 
-      cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
-        'have.length',
-        8
-      );
+        // integration package
+        cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
+          'have.text',
+          'OK'
+        );
+
+        // data stream
+        cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
+          'have.text',
+          'OK'
+        );
+
+        // Index template
+        cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
+          'have.text',
+          'OK'
+        );
+
+        // Index template
+        cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
+          'have.text',
+          'OK'
+        );
+      });
+    });
+
+    describe('when importing a file', () => {
+      it('shows the remove button', () => {
+        importBundle();
+        cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should(
+          'exist'
+        );
+        clearBundle();
+        cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should(
+          'not.exist'
+        );
+      });
+
+      it('can display summary tab', () => {
+        importBundle();
+        cy.get('[data-test-subj="summary-tab"]').click();
+
+        // integration package
+        cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
+          'have.text',
+          'OK'
+        );
+
+        cy.get('[data-test-subj="integrationPackageStatus_Content"]').should(
+          'have.text',
+          'APM integration (8.8.0)'
+        );
+
+        // data stream
+        cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
+          'have.text',
+          'OK'
+        );
+
+        // Index template
+        cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
+          'have.text',
+          'OK'
+        );
+
+        // Index template
+        cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
+          'have.text',
+          'Warning'
+        );
+      });
+
+      it('can display index template tab', () => {
+        importBundle();
+        cy.get('[data-test-subj="index-templates-tab"]').click();
+        cy.get('.euiTableRow').should('have.length', 19);
+      });
+
+      it('can display data streams tab', () => {
+        importBundle();
+        cy.get('[data-test-subj="data-streams-tab"]').click();
+        cy.get('.euiTableRow').should('have.length', 8);
+      });
+
+      it('can display indices tab', () => {
+        importBundle();
+        cy.get('[data-test-subj="indices-tab"]').click();
+
+        cy.get('[data-test-subj="indicedWithProblems"] .euiTableRow').should(
+          'have.length',
+          138
+        );
+
+        cy.get('[data-test-subj="indicedWithoutProblems"] .euiTableRow').should(
+          'have.length',
+          27
+        );
+      });
     });
   });
 
-  describe('when importing a file', () => {
-    it('shows the remove button', () => {
-      importBundleAs({ username: 'elastic' });
-      cy.get('[data-test-subj="apmImportCardRemoveReportButton"]').should(
-        'exist'
-      );
+  describe('when logging in as "viewer" user', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
     });
 
-    it('can display summary tab', () => {
-      importBundleAs({ username: 'elastic' });
-      cy.get('[data-test-subj="summary-tab"]').click();
+    describe('when no data is loaded', () => {
+      it('displays a warning on "summary" tab about missing privileges ', () => {
+        cy.visitKibana('/app/apm/diagnostics');
 
-      // integration package
-      cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
-        'have.text',
-        'OK'
-      );
+        cy.get('.euiPanel > .euiText').should(
+          'contain.text',
+          'Not all features are available due to missing privileges.'
+        );
+      });
 
-      cy.get('[data-test-subj="integrationPackageStatus_Content"]').should(
-        'have.text',
-        'APM integration (8.8.0)'
-      );
+      it('can navigate all tabs without encountering errors', () => {
+        cy.visitKibana('/app/apm/diagnostics');
 
-      // data stream
-      cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
-        'have.text',
-        'OK'
-      );
-
-      // Index template
-      cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
-        'have.text',
-        'OK'
-      );
-
-      // Index template
-      cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
-        'have.text',
-        'Warning'
-      );
+        cy.get('[data-test-subj="index-templates-tab"]').click();
+        cy.get('[data-test-subj="data-streams-tab"]').click();
+        cy.get('[data-test-subj="indices-tab"]').click();
+        cy.get('[data-test-subj="documents-tab"]').click();
+        cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
+          'have.length',
+          8
+        );
+      });
     });
 
-    it('can display index template tab', () => {
-      importBundleAs({ username: 'elastic' });
-      cy.get('[data-test-subj="index-templates-tab"]').click();
-      cy.get('.euiTableRow').should('have.length', 19);
-    });
+    describe('when importing a file', () => {
+      it('displays documents tab for the imported bundle', () => {
+        importBundle();
+        cy.get('[data-test-subj="documents-tab"]').click();
 
-    it('can display data streams tab', () => {
-      importBundleAs({ username: 'elastic' });
-      cy.get('[data-test-subj="data-streams-tab"]').click();
-      cy.get('.euiTableRow').should('have.length', 8);
-    });
-
-    it('can display indices tab', () => {
-      importBundleAs({ username: 'elastic' });
-      cy.get('[data-test-subj="indices-tab"]').click();
-
-      cy.get('[data-test-subj="indicedWithProblems"] .euiTableRow').should(
-        'have.length',
-        138
-      );
-
-      cy.get('[data-test-subj="indicedWithoutProblems"] .euiTableRow').should(
-        'have.length',
-        27
-      );
-    });
-
-    it('can display documents tab', () => {
-      importBundleAs({ username: 'viewer' });
-      cy.get('[data-test-subj="documents-tab"]').click();
-
-      cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
-        'have.length',
-        10
-      );
+        cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
+          'have.length',
+          10
+        );
+      });
     });
   });
 });
 
-function importBundleAs({
-  username,
-}: {
-  username: 'elastic' | 'viewer' | 'editor';
-}) {
-  cy.loginAs({ username, password: 'changeme' });
+function importBundle() {
   cy.visitKibana('/app/apm/diagnostics/import-export');
   cy.get('#file-picker').selectFile(
     './cypress/e2e/power_user/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
   );
+}
+
+function clearBundle() {
+  cy.get('[data-test-subj="apmTemplateDescriptionClearBundleButton"]').click();
 }
