@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
@@ -132,6 +133,14 @@ export const logRateAnalysisIndexOrSearchRouteFactory = (
     />
   ),
   breadcrumbs: getLogRateAnalysisBreadcrumbs(navigateToPath, basePath),
+});
+
+// Deprecated since 8.10, kept here to redirect old bookmarks.
+export const explainLogRateSpikesIndexOrSearchRouteFactory = (): MlRoute => ({
+  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
+  render: () => <Redirect to={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT)} />,
+  // no breadcrumbs since it's just a redirect
+  breadcrumbs: [],
 });
 
 export const logCategorizationIndexOrSearchRouteFactory = (

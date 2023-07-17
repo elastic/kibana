@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { useLocation, Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
@@ -35,6 +36,23 @@ export const logRateAnalysisRouteFactory = (
     },
   ],
 });
+
+// Deprecated since 8.10, kept here to redirect old bookmarks.
+export const explainLogRateSpikesRouteFactory = (): MlRoute => ({
+  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES),
+  render: () => <RedirectWithQueryString />,
+  // no breadcrumbs since it's just a redirect
+  breadcrumbs: [],
+});
+
+const RedirectWithQueryString: FC = () => {
+  const location = useLocation();
+  return (
+    <Redirect
+      to={{ pathname: createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS), search: `${location.search}` }}
+    />
+  );
+};
 
 const PageWrapper: FC = () => {
   const { context } = useRouteResolver('full', ['canUseAiops']);
