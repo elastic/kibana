@@ -13,8 +13,8 @@ import type {
   PersistedIndexPatternLayer,
   TypedLensByValueInput,
   XYState,
-  XYDataLayerConfig,
   FormulaPublicApi,
+  XYLayerConfig,
 } from '@kbn/lens-plugin/public';
 import { hostLensFormulas } from './constants';
 export type LensAttributes = TypedLensByValueInput['attributes'];
@@ -37,7 +37,7 @@ export interface ChartColumn {
 }
 
 // Layer
-export type LensLayerConfig = XYDataLayerConfig | MetricVisualizationState;
+export type LensLayerConfig = XYLayerConfig | MetricVisualizationState;
 
 export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
   getName(): string | undefined;
@@ -69,12 +69,11 @@ export interface ChartConfig<
 
 // Formula
 type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
-export interface FormulaConfig {
-  label?: string;
+export type FormulaConfig = Omit<LensFormula, 'format' | 'formula'> & {
   color?: string;
   format: NonNullable<LensFormula['format']>;
   value: string;
-}
+};
 
 export type HostsLensFormulas = keyof typeof hostLensFormulas;
 export type HostsLensMetricChartFormulas = Exclude<HostsLensFormulas, 'diskIORead' | 'diskIOWrite'>;

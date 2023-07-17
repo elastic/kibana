@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
@@ -141,7 +142,9 @@ export function getEditLensConfiguration(
 
     return getWrapper(
       <Provider store={lensStore}>
-        <LensEditConfigurationFlyout {...configPanelProps} />
+        <KibanaContextProvider services={lensServices}>
+          <LensEditConfigurationFlyout {...configPanelProps} />
+        </KibanaContextProvider>
       </Provider>
     );
   };
