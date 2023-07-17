@@ -8,7 +8,7 @@
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -41,6 +41,7 @@ export const FieldPicker = ({
   selectableProps,
   ...other
 }: FieldPickerProps) => {
+  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [fieldSelectableOptions, setFieldSelectableOptions] = useState<EuiSelectableOption[]>([]);
 
@@ -90,9 +91,14 @@ export const FieldPicker = ({
     [dataView, filterPredicate]
   );
 
+  const setFocusToSearch = useCallback(() => {
+    searchRef?.focus();
+  }, [searchRef]);
+
   const fieldTypeFilter = (
     <EuiFormRow fullWidth={true}>
       <FieldTypeFilter
+        setFocusToSearch={setFocusToSearch}
         onFieldTypesChange={(types) => setTypesFilter(types)}
         fieldTypesValue={typesFilter}
         availableFieldTypes={uniqueTypes}
@@ -128,6 +134,7 @@ export const FieldPicker = ({
           defaultMessage: 'Search field names',
         }),
         disabled: Boolean(selectableProps?.isLoading),
+        inputRef: setSearchRef,
       }}
       listProps={{
         isVirtualized: true,

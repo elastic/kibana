@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import {
   EuiFilterGroup,
@@ -15,7 +16,6 @@ import {
   EuiInputPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiOutsideClickDetector,
   EuiFilterButton,
   EuiPopoverTitle,
   EuiFilterButtonProps,
@@ -25,15 +25,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Props {
   onFieldTypesChange: (value: string[]) => void;
-  fieldTypesValue: string[];
-  availableFieldTypes: string[];
   buttonProps?: Partial<EuiFilterButtonProps>;
+  setFocusToSearch: () => void;
+  availableFieldTypes: string[];
+  fieldTypesValue: string[];
 }
 
 export function FieldTypeFilter({
-  onFieldTypesChange,
-  fieldTypesValue,
   availableFieldTypes,
+  onFieldTypesChange,
+  setFocusToSearch,
+  fieldTypesValue,
   buttonProps,
 }: Props) {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -61,48 +63,51 @@ export function FieldTypeFilter({
   );
 
   return (
-    <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-      <EuiFilterGroup fullWidth>
-        <EuiInputPopover
-          panelPaddingSize="none"
-          display="block"
-          isOpen={isPopoverOpen}
-          closePopover={() => {
-            setPopoverOpen(false);
-          }}
-          fullWidth
-          input={buttonContent}
-        >
-          <EuiPopoverTitle paddingSize="s">
-            {i18n.translate('presentationUtil.fieldSearch.filterByTypeLabel', {
-              defaultMessage: 'Filter by type',
-            })}
-          </EuiPopoverTitle>
-          <EuiContextMenuPanel
-            items={(availableFieldTypes as string[]).map((type) => (
-              <EuiContextMenuItem
-                key={type}
-                icon={fieldTypesValue.includes(type) ? 'check' : 'empty'}
-                data-test-subj={`typeFilter-${type}`}
-                onClick={() => {
-                  if (fieldTypesValue.includes(type)) {
-                    onFieldTypesChange(fieldTypesValue.filter((f) => f !== type));
-                  } else {
-                    onFieldTypesChange([...fieldTypesValue, type]);
-                  }
-                }}
-              >
-                <EuiFlexGroup gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <FieldIcon type={type} label={type} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>{type}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiContextMenuItem>
-            ))}
-          />
-        </EuiInputPopover>
-      </EuiFilterGroup>
-    </EuiOutsideClickDetector>
+    <EuiFilterGroup fullWidth>
+      <EuiInputPopover
+        panelPaddingSize="none"
+        display="block"
+        isOpen={isPopoverOpen}
+        closePopover={() => {
+          setPopoverOpen(false);
+        }}
+        fullWidth
+        input={buttonContent}
+        // BLOCKED BY: https://github.com/elastic/eui/pull/6955
+        focusTrapProps={{
+          returnFocus: false, // we will be manually returning the focus to the search
+          onDeactivation: setFocusToSearch,
+        }}
+      >
+        <EuiPopoverTitle paddingSize="s">
+          {i18n.translate('presentationUtil.fieldSearch.filterByTypeLabel', {
+            defaultMessage: 'Filter by type',
+          })}
+        </EuiPopoverTitle>
+        <EuiContextMenuPanel
+          items={(availableFieldTypes as string[]).map((type) => (
+            <EuiContextMenuItem
+              key={type}
+              icon={fieldTypesValue.includes(type) ? 'check' : 'empty'}
+              data-test-subj={`typeFilter-${type}`}
+              onClick={() => {
+                if (fieldTypesValue.includes(type)) {
+                  onFieldTypesChange(fieldTypesValue.filter((f) => f !== type));
+                } else {
+                  onFieldTypesChange([...fieldTypesValue, type]);
+                }
+              }}
+            >
+              <EuiFlexGroup gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <FieldIcon type={type} label={type} />
+                </EuiFlexItem>
+                <EuiFlexItem>{type}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiContextMenuItem>
+          ))}
+        />
+      </EuiInputPopover>
+    </EuiFilterGroup>
   );
 }
