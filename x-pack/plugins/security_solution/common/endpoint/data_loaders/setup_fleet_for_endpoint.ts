@@ -125,7 +125,9 @@ export const installOrUpgradeEndpointFleetPackage = async (
     if (installResponse.statusCode !== 409) {
       // when `no_shard_available_action_exception` errors re-run install or upgrade after a delay
       if (isNoShardAvailableActionExceptionError(installResponse)) {
-        logger.warning(`Known transient failure detected. Retrying...`);
+        logger.warning(
+          `Known transient failure detected: no_shard_available_action_exception. Retrying...`
+        );
 
         await retryInstallOrUpgradeEndpointFleetPackage(() => {
           return installOrUpgradeEndpointFleetPackage(kbnClient, logger);
@@ -159,31 +161,38 @@ const retryInstallOrUpgradeEndpointFleetPackage = async <T>(
   callback: () => Promise<T>,
   logger: ToolingLog
 ): Promise<T | undefined> => {
+  const log = logger.withType('retryInstallOrUpgradeEndpointFleetPackage');
   let attempt = 1;
-  let lastError: Error;
+  let responsePromise: Promise<T>;
 
   while (attempt <= MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS) {
-    logger.info(`retryInstallOrUpgradeEndpointFleetPackage(): attempt ${attempt}`);
+    const thisAttempt = attempt;
     attempt++;
 
+    log.info(
+      `retryInstallOrUpgradeEndpointFleetPackage(): attempt ${thisAttempt} started at: ${new Date().toISOString()}`
+    );
+
     try {
-      const responsePromise = callback();
-      await callback();
-      return responsePromise; // Success since it did not throw
+      responsePromise = callback();
+      await responsePromise;
+      return responsePromise; // since we got this far, we know that API returned success. Return it
     } catch (err) {
+      log.info(
+        `retryInstallOrUpgradeEndpointFleetPackage(): attempt ${thisAttempt} failed with:`,
+        err
+      );
+
       // If not a no_shard_available_action_exception error, then end loop here and throw
       if (!isNoShardAvailableActionExceptionError(err)) {
-        logger.error(err);
+        log.error(err);
         return Promise.reject(err);
       }
-
-      lastError = err;
     }
 
     await delay(10000);
   }
 
-  // Exhausted all attempts
-  // @ts-expect-error
-  throw lastError;
+  // @ts-expect-error;
+  return responsePromise;
 };
