@@ -62,7 +62,7 @@ export async function getAgentStatusForAgentPolicy(
   if (agentPolicyId) {
     clauses.push({
       term: {
-        policy_id: agentPolicyId,
+        policy_id: `fleet-agents.${agentPolicyId}`,
       },
     });
   }

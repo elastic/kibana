@@ -217,7 +217,16 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
-    kuery: schema.maybe(schema.string()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
   }),
 };
 
