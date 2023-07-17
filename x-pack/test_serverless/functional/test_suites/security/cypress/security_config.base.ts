@@ -28,6 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...svlSharedConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
         '--serverless=security',
       ],
     },
