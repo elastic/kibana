@@ -478,7 +478,9 @@ describe('Output Service', () => {
       mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
         canEncrypt: true,
       } as any);
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.create(
@@ -540,7 +542,9 @@ describe('Output Service', () => {
       mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
         canEncrypt: true,
       } as any);
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.create(
@@ -586,7 +590,9 @@ describe('Output Service', () => {
       mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
         canEncrypt: true,
       } as any);
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.create(
@@ -648,7 +654,9 @@ describe('Output Service', () => {
       mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
         canEncrypt: true,
       } as any);
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.create(
@@ -1031,7 +1039,9 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(soClient, esClientMock, 'output-test', {
@@ -1060,7 +1070,9 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(
@@ -1161,7 +1173,9 @@ describe('Output Service', () => {
 
     it('Should return an error if trying to change the output to logstash for fleet server policy', async () => {
       const soClient = getMockedSoClient({});
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await expect(
@@ -1270,7 +1284,9 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(soClient, esClientMock, 'output-test', {
@@ -1308,7 +1324,9 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      mockedAgentPolicyService.list.mockResolvedValue(mockedAgentPolicyWithFleetServerResolvedValue);
+      mockedAgentPolicyService.list.mockResolvedValue(
+        mockedAgentPolicyWithFleetServerResolvedValue
+      );
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
 
       await outputService.update(
