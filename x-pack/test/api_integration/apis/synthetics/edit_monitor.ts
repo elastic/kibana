@@ -299,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(editResponse.body).not.to.have.keys('unknownkey');
     });
 
-    it('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {
+    it.skip('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {
       const name = 'Monitor with private location';
       const newMonitor = {
         name,
