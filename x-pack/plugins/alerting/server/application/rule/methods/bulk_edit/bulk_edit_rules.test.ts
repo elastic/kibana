@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
@@ -110,10 +111,21 @@ describe('bulkEdit()', () => {
     attributes: {
       enabled: false,
       tags: ['foo'],
+      createdBy: 'user',
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      legacyId: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+      snoozeSchedule: [],
       alertTypeId: 'myType',
       schedule: { interval: '1m' },
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending',
+      },
       params: {},
       throttle: null,
       notifyWhen: null,
@@ -249,6 +261,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {},
               throttle: null,
               notifyWhen: null,
@@ -306,6 +322,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {},
               throttle: null,
               notifyWhen: null,
@@ -359,6 +379,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {},
               throttle: null,
               notifyWhen: null,
@@ -626,8 +650,15 @@ describe('bulkEdit()', () => {
         ],
         { overwrite: true }
       );
+
       expect(result.rules[0]).toEqual({
-        ...existingRule.attributes,
+        ...omit(existingRule.attributes, 'legacyId'),
+        createdAt: new Date(existingRule.attributes.createdAt),
+        updatedAt: new Date(existingRule.attributes.updatedAt),
+        executionStatus: {
+          ...existingRule.attributes.executionStatus,
+          lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
+        },
         actions: [existingAction, { ...newAction, uuid: '222' }],
         id: existingRule.id,
         snoozeSchedule: [],
@@ -832,7 +863,13 @@ describe('bulkEdit()', () => {
         { overwrite: true }
       );
       expect(result.rules[0]).toEqual({
-        ...existingRule.attributes,
+        ...omit(existingRule.attributes, 'legacyId'),
+        createdAt: new Date(existingRule.attributes.createdAt),
+        updatedAt: new Date(existingRule.attributes.updatedAt),
+        executionStatus: {
+          ...existingRule.attributes.executionStatus,
+          lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
+        },
         actions: [
           existingAction,
           {
@@ -880,6 +917,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {
                 index: ['test-1', 'test-2', 'test-4', 'test-5'],
               },
@@ -945,6 +986,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {
                 index: ['test-1'],
               },
@@ -1045,6 +1090,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {},
               throttle: null,
               notifyWhen: null,
@@ -1419,7 +1468,7 @@ describe('bulkEdit()', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes as any)
           .snoozeSchedule
-      ).toBeUndefined();
+      ).toEqual([]);
     });
   });
 
@@ -1496,6 +1545,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {
                 index: ['index-1', 'index-2', 'index-3'],
               },
@@ -1564,6 +1617,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {
                 index: ['index-1', 'index-2'],
               },
@@ -1633,6 +1690,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: {
                 index: ['index-1', 'index-2', 'index-3'],
               },
@@ -2046,6 +2107,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: { index: ['test-index-*'] },
               throttle: null,
               notifyWhen: null,
@@ -2442,6 +2507,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: { index: ['test-index-*'] },
               throttle: null,
               notifyWhen: null,
@@ -2519,6 +2588,10 @@ describe('bulkEdit()', () => {
               schedule: { interval: '1m' },
               consumer: 'myApp',
               scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               params: { index: ['test-index-*'] },
               throttle: null,
               notifyWhen: null,
@@ -2556,6 +2629,10 @@ describe('bulkEdit()', () => {
               tags: ['foo'],
               alertTypeId: 'myType',
               schedule: { interval: '1m' },
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
               consumer: 'myApp',
               params: { index: ['test-index-*'] },
               throttle: null,

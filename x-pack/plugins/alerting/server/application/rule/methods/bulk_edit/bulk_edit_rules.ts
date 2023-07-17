@@ -243,7 +243,7 @@ export async function bulkEditRules<Params extends RuleParams>(
 
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
   const publicRules = updatedRules.map((rule: RuleDomain<Params>) => {
-    return transformRuleDomainToRule<Params>(rule, { isPublic: true });
+    return transformRuleDomainToRule<Params>(rule);
   }) as Array<SanitizedRule<Params>>;
 
   await bulkUpdateSchedules(context, options.operations, updatedRules);
