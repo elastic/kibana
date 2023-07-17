@@ -798,7 +798,20 @@ describe('TableListView', () => {
       let testBed: TestBed;
 
       const initialFilter = 'tag:(tag-1)';
-      const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+      const findItems = jest.fn().mockResolvedValue({
+        total: 1,
+        hits: [
+          {
+            id: 'item-1',
+            type: 'dashboard',
+            updatedAt: new Date('2023-07-15').toISOString(),
+            attributes: {
+              title: 'Item 1',
+            },
+            references: [],
+          },
+        ],
+      });
 
       await act(async () => {
         testBed = await setupInitialFilter({

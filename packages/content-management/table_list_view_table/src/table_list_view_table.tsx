@@ -108,6 +108,7 @@ export interface TableListViewTableProps<
   contentEditor?: ContentEditorConfig;
 
   tableCaption: string;
+  /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
@@ -293,6 +294,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
+
   /**
    * The "onTableSearchChange()" handler has an async behavior. We want to be able to discard
    * previsous search changes and only handle the last one. For that we keep a counter of the changes.
@@ -857,7 +859,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Effects
   // ------------
-  useDebounce(fetchItems, 300, [fetchItems]);
+  useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
   useEffect(() => {
     if (!urlStateEnabled) {
