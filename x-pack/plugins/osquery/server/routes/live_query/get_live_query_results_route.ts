@@ -85,8 +85,8 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
                 factoryQueryType: OsqueryQueries.results,
                 filterQuery: createFilter(request.query.filterQuery),
                 pagination: generateTablePaginationOptions(
-                  (request.query.page as number) ?? 0,
-                  (request.query.pageSize as number) ?? 100
+                  request.query.page ?? 0,
+                  request.query.pageSize ?? 100
                 ),
                 sort: {
                   direction: request.query.sortOrder ?? 'desc',
