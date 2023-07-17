@@ -19,7 +19,6 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
   return (
     <div className="gphSidebar__panel">
       <div className="gphSidebar__header">
-        {/* <span className="kuiIcon fa-paint-brush" /> */}
         <EuiIcon type="brush" size="s" />{' '}
         {i18n.translate('xpack.graph.sidebar.styleVerticesTitle', {
           defaultMessage: 'Style selected vertices',
@@ -40,12 +39,6 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
               aria-hidden="true"
               onClick={onSelectColor}
             />
-            // <span
-            //   aria-hidden="true"
-            //   onClick={onSelectColor}
-            //   style={{ color: c }}
-            //   className="kuiIcon gphColorPicker__color fa-circle"
-            // />
           );
         })}
       </div>

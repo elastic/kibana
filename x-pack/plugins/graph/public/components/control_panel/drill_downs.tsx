@@ -20,7 +20,6 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
   return (
     <div>
       <div className="gphSidebar__header">
-        {/* <span className="kuiIcon fa-info" /> */}
         <EuiIcon type="iInCircle" />{' '}
         {i18n.translate('xpack.graph.sidebar.drillDownsTitle', {
           defaultMessage: 'Drill-downs',

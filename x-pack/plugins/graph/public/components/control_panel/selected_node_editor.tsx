@@ -42,7 +42,6 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
   return (
     <div className="gphSidebar__panel">
       <div className="gphSidebar__header">
-        {/* {selectedNode.icon && <span className={`kuiIcon ${selectedNode.icon.class}`} />} */}
         <IconRenderer icon={selectedNode.icon} color={euiTheme.colors.darkShade} />{' '}
         {selectedNode.data.field} {selectedNode.data.term}
       </div>
@@ -64,16 +63,6 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
               defaultMessage="ungroup"
             />
           </EuiButtonEmpty>
-          {/* <button
-            className="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
-            onClick={onClickUngroup}
-          >
-            <span className="kuiIcon fa-object-ungroup" />
-            <FormattedMessage
-              id="xpack.graph.sidebar.ungroupButtonLabel"
-              defaultMessage="ungroup"
-            />
-          </button> */}
         </EuiToolTip>
       )}
 
