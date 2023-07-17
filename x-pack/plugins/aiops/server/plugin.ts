@@ -10,7 +10,6 @@ import { Subscription } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
-import { AIOPS_ENABLED } from '../common';
 import { AIOPS_API_ENDPOINT } from '../common/api';
 
 import { isActiveLicense } from './lib/license';
@@ -50,26 +49,24 @@ export class AiopsPlugin
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
     // Register server side APIs
-    if (AIOPS_ENABLED) {
-      core.getStartServices().then(([coreStart, depsStart]) => {
-        defineLogRateAnalysisRoute(
-          router,
-          AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS,
-          aiopsLicense,
-          this.logger,
-          coreStart
-        );
-        // Deprecated since version 8.10.0
-        // TODO `AddVersionOpts` doesn't support setting a versioned route as deprecated.
-        defineLogRateAnalysisRoute(
-          router,
-          AIOPS_API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES,
-          aiopsLicense,
-          this.logger,
-          coreStart
-        );
-      });
-    }
+    core.getStartServices().then(([coreStart, depsStart]) => {
+      defineLogRateAnalysisRoute(
+        router,
+        AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS,
+        aiopsLicense,
+        this.logger,
+        coreStart
+      );
+      // Deprecated since version 8.10.0
+      // TODO `AddVersionOpts` doesn't support setting a versioned route as deprecated.
+      defineLogRateAnalysisRoute(
+        router,
+        AIOPS_API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES,
+        aiopsLicense,
+        this.logger,
+        coreStart
+      );
+    });
 
     return {};
   }
