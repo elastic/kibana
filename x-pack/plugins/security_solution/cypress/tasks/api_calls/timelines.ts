@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '../../../common/types/timeline/api';
+import type { TimelineResponse } from '../../../common/api/timeline';
 import type { CompleteTimeline } from '../../objects/timeline';
 import { rootRequest } from '../common';
 
