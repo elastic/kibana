@@ -116,6 +116,12 @@ export interface TableListViewTableProps<
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
+  /**
+   * Flag to indicate if there aren't any item when **no filteres are applied**.
+   * When there are no item we render an empty prompt.
+   * Default to `undefined` to indicate that we don't know yet if there are items or not.
+   */
+  hasNoItems: boolean | undefined;
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -337,9 +343,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const initialState = useMemo<State<T>>(
     () => ({
       items: [],
+      hasNoItems: undefined,
       totalItems: 0,
       hasInitialFetchReturned: false,
-      isFetchingItems: false,
+      isFetchingItems: true,
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
@@ -366,6 +373,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasInitialFetchReturned,
     isFetchingItems,
     items,
+    hasNoItems,
     fetchError,
     showDeleteModal,
     isDeletingItems,
@@ -376,8 +384,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     tableSort,
   } = state;
 
-  const hasQuery = searchQuery.text !== '';
-  const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
