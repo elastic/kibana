@@ -788,9 +788,9 @@ export const VisualizationWrapper = ({
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const errorsFromRequest = getOriginalRequestErrorMessages(error, core.docLinks);
+          const errorsFromRequest = getOriginalRequestErrorMessages(error || null, core.docLinks);
           const visibleErrorMessages = errorsFromRequest.length
-            ? errorsFromRequest
+            ? errorsFromRequest.map((e) => e.longMessage || e.shortMessage)
             : errorMessage
             ? [errorMessage]
             : [];

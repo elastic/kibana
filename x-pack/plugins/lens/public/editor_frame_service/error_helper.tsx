@@ -13,6 +13,7 @@ import { isEsError } from '@kbn/data-plugin/public';
 import type { IEsError, Reason } from '@kbn/data-plugin/public';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { RemovableUserMessage } from '../types';
 
 type ErrorCause = Required<IEsError>['attributes'];
 
@@ -112,10 +113,10 @@ function getErrorSources(e: Error) {
 }
 
 export function getOriginalRequestErrorMessages(
-  error?: ExpressionRenderError | null,
-  docLinks?: CoreStart['docLinks']
-): Array<string | React.ReactNode> {
-  const errorMessages = [];
+  error: ExpressionRenderError | null,
+  docLinks: CoreStart['docLinks']
+): RemovableUserMessage[] {
+  const errorMessages: Array<string | { short: string; long: React.ReactNode }> = [];
   if (error && 'original' in error && error.original) {
     if (isEsAggError(error.original)) {
       if (isNetworkError(error.original)) {
@@ -145,24 +146,32 @@ export function getOriginalRequestErrorMessages(
           );
         } else if (isTSDBError(rootError)) {
           const [fieldName, _type, _isCounter, opUsed] = rootError.reason.match(/\[(\w)*\]/g)!;
-          errorMessages.push(
-            <p className="eui-textBreakWord">
-              {i18n.translate('xpack.lens.editorFrame.expressionTSDBDetailedMessage', {
-                defaultMessage:
-                  'The field {field} of type [counter] has been used with the unsupported operation {op}.',
-                values: {
-                  field: fieldName,
-                  op: opUsed,
-                },
-              })}
-              <EuiLink href={docLinks?.links.fleet.datastreamsTSDSMetrics}>
+          const shortMessage = i18n.translate(
+            'xpack.lens.editorFrame.expressionTSDBDetailedMessage',
+            {
+              defaultMessage:
+                'The field {field} of Time series type [counter] has been used with the unsupported operation {op}.',
+              values: {
+                field: fieldName,
+                op: opUsed,
+              },
+            }
+          );
+          const message = (
+            <>
+              <p className="eui-textBreakWord">{shortMessage}</p>
+              <EuiLink href={docLinks.links.fleet.datastreamsTSDSMetrics} external target="_blank">
                 {i18n.translate('xpack.lens.editorFrame.expressionTSDBCounterInfo', {
                   defaultMessage:
-                    'More information about [counter] field types and supported aggregations',
+                    'See more about Time series field types and [counter] supported aggregations',
                 })}
               </EuiLink>
-            </p>
+            </>
           );
+          errorMessages.push({
+            short: shortMessage,
+            long: message,
+          });
         } else {
           errorMessages.push(
             i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
@@ -177,9 +186,16 @@ export function getOriginalRequestErrorMessages(
       }
     }
   } else if (error?.message) {
-    errorMessages.push(error?.message);
+    errorMessages.push(error.message);
   }
-  return errorMessages;
+  return errorMessages.map((message) => ({
+    uniqueId: typeof message === 'string' ? message : message.short,
+    severity: 'error',
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+    longMessage: typeof message === 'string' ? '' : message.long,
+    shortMessage: typeof message === 'string' ? message : message.short,
+    fixableInEditor: false,
+  }));
 }
 
 // NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages
