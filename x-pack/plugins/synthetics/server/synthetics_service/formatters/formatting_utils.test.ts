@@ -112,4 +112,14 @@ describe('replaceStringWithParams', () => {
 
     expect(result).toEqual('Basic  {$');
   });
+
+  it('works with ${} as part of value', () => {
+    const result = replaceStringWithParams(
+      'Basic  ${} value',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic  ${} value');
+  });
 });
