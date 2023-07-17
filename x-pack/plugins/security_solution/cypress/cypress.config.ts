@@ -22,5 +22,6 @@ export default defineCypressConfig({
   e2e: {
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
+    specPattern: ['./e2e/**/*.cy.ts', '../../../../../../security_solution/cypress/e2e/**/*.cy.ts'],
   },
 });

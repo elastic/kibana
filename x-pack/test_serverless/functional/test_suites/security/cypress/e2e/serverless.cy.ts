@@ -8,7 +8,7 @@
 import { LEFT_NAVIGATION } from '../screens/landing_page';
 import { navigatesToLandingPage } from '../tasks/navigation';
 
-describe('Serverless', () => {
+describe('Serverless', { tags: '@serverless' }, () => {
   it('Should navigate to the landing page', () => {
     navigatesToLandingPage();
     cy.get(LEFT_NAVIGATION).should('exist');

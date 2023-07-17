@@ -9,6 +9,9 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
+  env: {
+    grepFilterSpecs: true,
+  },
   execTimeout: 60000,
   pageLoadTimeout: 60000,
   responseTimeout: 60000,
@@ -18,10 +21,18 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
   e2e: {
+    setupNodeEvents(on, config) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/grep/src/plugin')(config);
+      return config;
+    },
     baseUrl: 'http://localhost:5620/app/security/get_started',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     supportFile: './support/e2e.js',
-    specPattern: './e2e/**/*.cy.ts',
+    specPattern: [
+      './e2e/**/*.cy.ts',
+      '../../../../../plugins/security_solution/cypress/e2e/**/*.cy.ts',
+    ],
   },
 });

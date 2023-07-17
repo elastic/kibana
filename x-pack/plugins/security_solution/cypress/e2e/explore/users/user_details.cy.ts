@@ -20,7 +20,7 @@ import {
 } from '../../../tasks/alerts';
 import { USER_COLUMN } from '../../../screens/alerts';
 
-describe('user details flyout', () => {
+describe('user details flyout', { tags: '@serverless' }, () => {
   beforeEach(() => {
     cleanKibana();
     login();

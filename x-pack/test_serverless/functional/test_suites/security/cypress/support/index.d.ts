@@ -6,6 +6,8 @@
  */
 
 declare namespace Cypress {
+  import registerCypressGrep from '@cypress/grep/src/support';
+  registerCypressGrep();
   interface Chainable<Subject> {
     promisify(): Promise<Subject>;
     attachFile(fileName: string, fileType?: string): Chainable<JQuery>;
