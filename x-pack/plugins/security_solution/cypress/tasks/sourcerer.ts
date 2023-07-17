@@ -7,7 +7,7 @@
 
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
 import { HOSTS_URL } from '../urls/navigation';
-import { visit, waitForPage } from './login';
+import { visit } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
 import { rootRequest } from './common';
@@ -110,7 +110,7 @@ export const addIndexToDefault = (index: string) => {
 
       cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
       cy.get('button[data-test-subj="windowReloadButton"]').click();
-      waitForPage(HOSTS_URL);
+      visit(HOSTS_URL);
     });
 };
 
