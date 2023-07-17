@@ -55,7 +55,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
 
   const hasErrors = errors.length > 0;
 
-  const euiInlineEditComponent = (
+  return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true} css={releasePhase && { overflow: 'hidden' }}>
@@ -87,8 +87,6 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
       </EuiFlexGroup>
     </>
   );
-
-  return euiInlineEditComponent;
 };
 EditableTitleComponent.displayName = 'EditableTitle';
 
