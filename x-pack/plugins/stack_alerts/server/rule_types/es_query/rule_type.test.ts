@@ -682,7 +682,7 @@ describe('ruleType', () => {
       size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
-      thresholdComparator: Comparator.LT,
+      thresholdComparator: Comparator.GT,
       threshold: [0],
       esqlQuery: { esql: 'test' },
       searchType: 'esqlQuery',
@@ -722,6 +722,9 @@ describe('ruleType', () => {
       const params = defaultParams;
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        toSpec: () => dataViewMock.toSpec(),
+      });
       (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
         dataViewMock.toSpec(),
       ]);
@@ -749,6 +752,9 @@ describe('ruleType', () => {
       const params = defaultParams;
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
+      (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
+        dataViewMock.toSpec(),
+      ]);
       (ruleServices.dataViews.get as jest.Mock).mockResolvedValueOnce({
         ...dataViewMock.toSpec(),
         timeFieldName: null,
@@ -764,6 +770,9 @@ describe('ruleType', () => {
       const params = defaultParams;
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        toSpec: () => dataViewMock.toSpec(),
+      });
       (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
         dataViewMock.toSpec(),
       ]);
@@ -778,9 +787,9 @@ describe('ruleType', () => {
           { name: 'message', type: 'keyword' },
         ],
         values: [
-          ['', 'message'],
-          ['', 'message'],
-          ['', 'message'],
+          ['timestamp', 'message'],
+          ['timestamp', 'message'],
+          ['timestamp', 'message'],
         ],
       };
       ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(

@@ -40,6 +40,7 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults
       <EuiDataGrid
         css={styles.grid}
         aria-label="Test query grid"
+        data-test-subj="test-query-row-datagrid"
         columns={rawResults.cols}
         columnVisibility={{
           visibleColumns: rawResults.cols.map((c) => c.id),
@@ -75,7 +76,9 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults
           {alerts.map((alert, index) => {
             return (
               <EuiFlexItem key={index} grow={false}>
-                <EuiBadge color="primary">{alert}</EuiBadge>
+                <EuiBadge data-test-subj="alert-badge" color="primary">
+                  {alert}
+                </EuiBadge>
               </EuiFlexItem>
             );
           })}
