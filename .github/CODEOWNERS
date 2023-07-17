@@ -911,7 +911,6 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui
 /x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
 /x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
-/docs/api/machine-learning/ @elastic/mlr-docs
 
 # Additional plugins and packages maintained by the ML team.
 /x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
@@ -1020,9 +1019,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops
-/docs/api/actions-and-connectors @elastic/mlr-docs
-/docs/api/alerting @elastic/mlr-docs
-/docs/api/cases @elastic/mlr-docs
 
 # Enterprise Search
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
