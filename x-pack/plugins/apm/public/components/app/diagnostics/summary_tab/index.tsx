@@ -28,14 +28,6 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export function DiagnosticsSummary() {
   const { diagnosticsBundle, status } = useDiagnosticsContext();
 
-  const isCrossCluster = Object.values(
-    diagnosticsBundle?.apmIndices ?? {}
-  ).some((indicies) => indicies.includes(':'));
-
-  const hasLimitedPrivileges =
-    diagnosticsBundle &&
-    diagnosticsBundle.diagnosticsPrivileges.hasAllPrivileges === false;
-
   const isLoading = isPending(status);
 
   if (isLoading) {
@@ -52,6 +44,12 @@ export function DiagnosticsSummary() {
       />
     );
   }
+
+  const hasLimitedPrivileges =
+    diagnosticsBundle &&
+    diagnosticsBundle.diagnosticsPrivileges.hasAllPrivileges === false;
+
+  const isCrossCluster = getIsCrossCluster(diagnosticsBundle);
 
   if (isCrossCluster || hasLimitedPrivileges) {
     return (
@@ -135,5 +133,11 @@ function PrivilegesCallout({
         />
       </EuiCallOut>
     </>
+  );
+}
+
+export function getIsCrossCluster(diagnosticsBundle?: DiagnosticsBundle) {
+  return Object.values(diagnosticsBundle?.apmIndices ?? {}).some((indicies) =>
+    indicies.includes(':')
   );
 }
