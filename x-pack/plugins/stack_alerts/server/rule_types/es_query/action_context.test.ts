@@ -272,4 +272,25 @@ describe('getContextConditionsDescription', () => {
       `Number of matching documents for group "host-1" where max of numericField is NOT greater than 10`
     );
   });
+
+  it('should return conditions correctly for ESQL search type', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [0],
+      aggType: 'count',
+      searchType: 'esqlQuery',
+    });
+    expect(result).toBe(`Query matched documents`);
+  });
+
+  it('should return conditions correctly ESQL search type when isRecovered is true', () => {
+    const result = getContextConditionsDescription({
+      comparator: Comparator.GT,
+      threshold: [0],
+      aggType: 'count',
+      isRecovered: true,
+      searchType: 'esqlQuery',
+    });
+    expect(result).toBe(`Query did NOT match documents`);
+  });
 });

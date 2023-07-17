@@ -7,7 +7,7 @@
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
@@ -33,7 +33,9 @@ export const EsqlQueryExpression: React.FC<
     ...ruleParams,
     timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
     timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-    threshold: DEFAULT_VALUES.THRESHOLD,
+    // ESQL queries compare conditions within the ES query
+    // so only 'met' results are returned, therefore the threshold should always be 0
+    threshold: [0],
     thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
     size: DEFAULT_VALUES.SIZE,
     esqlQuery: esqlQuery ?? { esql: '' },
@@ -123,17 +125,19 @@ export const EsqlQueryExpression: React.FC<
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <TextBasedLangEditor
-        query={query}
-        onTextLangQueryChange={(q: AggregateQuery) => {
-          setQuery(q);
-          setParam('esqlQuery', q);
-        }}
-        expandCodeEditor={() => true}
-        isCodeEditorExpanded={true}
-        errors={[]}
-        onTextLangQuerySubmit={() => setTestQuery(!testQuery)}
-      />
+      <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
+        <TextBasedLangEditor
+          query={query}
+          onTextLangQueryChange={(q: AggregateQuery) => {
+            setQuery(q);
+            setParam('esqlQuery', q);
+          }}
+          expandCodeEditor={() => true}
+          isCodeEditorExpanded={true}
+          errors={[]}
+          onTextLangQuerySubmit={() => setTestQuery(!testQuery)}
+        />
+      </EuiFormRow>
       <EuiSpacer />
       <TestQueryRow
         fetch={onTestQuery}

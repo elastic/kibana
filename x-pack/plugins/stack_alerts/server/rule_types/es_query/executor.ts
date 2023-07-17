@@ -102,10 +102,10 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     const alertId = result.group;
     const value = result.value ?? result.count;
 
-    // group aggregations and ESQL queries compare conditions
+    // group aggregations use the bucket selector agg to compare conditions
     // within the ES query, so only 'met' results are returned, therefore we don't need
     // to use the compareFn
-    const met = isGroupAgg || esqlQueryRule ? true : compareFn(value, params.threshold);
+    const met = isGroupAgg ? true : compareFn(value, params.threshold);
     if (!met) {
       unmetGroupValues[alertId] = value;
       continue;
