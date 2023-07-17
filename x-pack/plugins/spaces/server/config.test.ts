@@ -21,6 +21,7 @@ describe('config schema', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
       Object {
         "allowFeatureVisibility": true,
+        "enablePublicApi": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -29,6 +30,7 @@ describe('config schema', () => {
     expect(ConfigSchema.validate({}, { dev: false })).toMatchInlineSnapshot(`
       Object {
         "allowFeatureVisibility": true,
+        "enablePublicApi": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -37,6 +39,7 @@ describe('config schema', () => {
     expect(ConfigSchema.validate({}, { dev: true })).toMatchInlineSnapshot(`
       Object {
         "allowFeatureVisibility": true,
+        "enablePublicApi": true,
         "enabled": true,
         "maxSpaces": 1000,
       }

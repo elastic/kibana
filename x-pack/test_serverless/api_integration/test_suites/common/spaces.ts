@@ -24,11 +24,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       // in a non-serverless environment this would succeed with a 200
+      // the create HTTP API does not exist in serverless
       expect(body).toEqual({
-        statusCode: 400,
-        error: 'Bad Request',
-        message:
-          'Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting',
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
       });
       expect(status).toBe(400);
     });
