@@ -19,6 +19,14 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export function DiagnosticsSummary() {
   const { diagnosticsBundle } = useDiagnosticsContext();
 
+  const isCrossCluster = Object.values(
+    diagnosticsBundle?.apmIndices ?? {}
+  ).some((indicies) => indicies.includes(':'));
+
+  if (isCrossCluster) {
+    return <CrossClusterSearchCallout />;
+  }
+
   if (
     diagnosticsBundle &&
     diagnosticsBundle.diagnosticsPrivileges.hasAllPrivileges === false
@@ -27,38 +35,23 @@ export function DiagnosticsSummary() {
   }
 
   return (
-    <>
-      <CrossClusterSearchCallout diagnosticsBundle={diagnosticsBundle} />
-      <EuiFlexGroup direction="column">
-        <ApmIntegrationPackageStatus />
-        <IndexTemplatesStatus />
-        <DataStreamsStatus />
-        <FieldMappingStatus />
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="column">
+      <ApmIntegrationPackageStatus />
+      <IndexTemplatesStatus />
+      <DataStreamsStatus />
+      <FieldMappingStatus />
+    </EuiFlexGroup>
   );
 }
 
-function CrossClusterSearchCallout({
-  diagnosticsBundle,
-}: {
-  diagnosticsBundle: DiagnosticsBundle | undefined;
-}) {
-  const isCrossCluster = Object.values(
-    diagnosticsBundle?.apmIndices ?? {}
-  ).some((indicies) => indicies.includes(':'));
-
-  if (isCrossCluster) {
-    return (
-      <EuiCallOut title="Cross cluster search not supported" color="warning">
-        The APM index settings is targetting remote clusters. Please note: this
-        is not currently supported by the Diagnostics Tool and functionality
-        will therefore be limited.
-      </EuiCallOut>
-    );
-  }
-
-  return null;
+function CrossClusterSearchCallout() {
+  return (
+    <EuiCallOut title="Cross cluster search not supported" color="warning">
+      The APM index settings is targetting remote clusters. Please note: this is
+      not currently supported by the Diagnostics Tool and functionality will
+      therefore be limited.
+    </EuiCallOut>
+  );
 }
 
 function PrivilegesCallout({
