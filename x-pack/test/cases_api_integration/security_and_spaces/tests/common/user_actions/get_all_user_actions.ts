@@ -16,7 +16,7 @@ import {
   ConnectorTypes,
   getCaseUserActionUrl,
 } from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+import { CreateCaseUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('creates a create case user action when a case is created', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+      const createCaseUserAction = userActions[0] as unknown as CreateCaseUserAction;
 
       expect(userActions.length).to.eql(1);
       expect(createCaseUserAction.action).to.eql('create');

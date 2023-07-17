@@ -18,6 +18,7 @@ import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import {
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -61,6 +62,8 @@ const getFieldNameLabel = (field: string): string => {
       return 'name';
     case ERROR_GROUP_ID:
       return 'error key';
+    case ERROR_GROUP_NAME:
+      return 'error name';
     default:
       return field;
   }
