@@ -12,7 +12,7 @@ import {
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { savedObjectClientsFactory } from './util';
 import { mlSavedObjectServiceFactory } from './service';
