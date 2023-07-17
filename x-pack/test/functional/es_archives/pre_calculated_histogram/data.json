@@ -7,7 +7,12 @@
       "index-pattern": {
         "title": "histogram-test"
       },
-      "type": "index-pattern"
+      "type": "index-pattern",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
     }
   }
 }
@@ -213,3 +218,4 @@
     }
   }
 }
+

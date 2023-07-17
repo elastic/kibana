@@ -2,17 +2,16 @@
   "type": "doc",
   "value": {
     "id": "task:data_enhanced_search_sessions_monitor",
-    "index": ".kibana_task_manager_$KIBANA_PACKAGE_VERSION_001",
+    "index": ".kibana_task_manager",
     "source": {
       "references": [],
       "task": {
         "attempts": 0,
         "ownerId": null,
         "params": "{}",
-        "retryAt": "2020-11-30T15:43:39.626Z",
+        "retryAt": null,
         "runAt": "2020-11-30T15:43:08.277Z",
         "scheduledAt": "2020-11-30T15:43:08.277Z",
-        "retryAt": null,
         "schedule": {
           "interval": "3s"
         },
@@ -25,7 +24,10 @@
         "taskType": "search_sessions_monitor"
       },
       "type": "task",
-      "updated_at": "2020-11-30T15:43:08.277Z"
+      "updated_at": "2020-11-30T15:43:08.277Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.8.0"
     }
   }
 }
+

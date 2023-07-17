@@ -2,43 +2,19 @@
   "type": "doc",
   "value": {
     "id": "config:8.0.0",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "config": {
         "buildNum": 9007199254740991
       },
-      "migrationVersion": {
-        "config": "7.9.0"
-      },
-      "references": [
-      ],
+      "references": [],
       "type": "config",
-      "updated_at": "2020-06-17T15:03:14.532Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "space:default",
-    "index": ".kibana_1",
-    "source": {
-      "migrationVersion": {
-        "space": "6.6.0"
-      },
-      "references": [
+      "updated_at": "2020-06-17T15:03:14.532Z",
+      "namespaces": [
+        "default"
       ],
-      "space": {
-        "_reserved": true,
-        "color": "#00bfb3",
-        "description": "This is your default space!",
-        "disabledFeatures": [
-        ],
-        "name": "Default"
-      },
-      "type": "space",
-      "updated_at": "2020-06-17T15:03:27.426Z"
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "7.9.0"
     }
   }
 }
@@ -47,11 +23,10 @@
   "type": "doc",
   "value": {
     "id": "apm-telemetry:apm-telemetry",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "apm-telemetry": {
-        "agents": {
-        },
+        "agents": {},
         "cardinality": {
           "transaction": {
             "name": {
@@ -194,10 +169,10 @@
           }
         }
       },
-      "references": [
-      ],
+      "references": [],
       "type": "apm-telemetry",
-      "updated_at": "2020-06-17T15:03:47.184Z"
+      "updated_at": "2020-06-17T15:03:47.184Z",
+      "coreMigrationVersion": "8.8.0"
     }
   }
 }
@@ -215,8 +190,7 @@
       "migrationVersion": {
         "saved-object-with-migration": "7.7.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "saved-object-with-migration",
       "updated_at": "2020-06-17T15:35:39.839Z"
     }
@@ -291,15 +265,15 @@
   "type": "doc",
   "value": {
     "id": "ui-metric:kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
-      "references": [
-      ],
+      "references": [],
       "type": "ui-metric",
       "ui-metric": {
         "count": 1
       },
-      "updated_at": "2020-06-17T15:36:23.487Z"
+      "updated_at": "2020-06-17T15:36:23.487Z",
+      "coreMigrationVersion": "8.8.0"
     }
   }
 }
@@ -308,13 +282,14 @@
   "type": "doc",
   "value": {
     "id": "ui-metric:Kibana_home:sampleDataDecline",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "type": "ui-metric",
       "ui-metric": {
         "count": 1
       },
-      "updated_at": "2020-06-17T15:36:23.488Z"
+      "updated_at": "2020-06-17T15:36:23.488Z",
+      "coreMigrationVersion": "8.8.0"
     }
   }
 }
@@ -323,13 +298,14 @@
   "type": "doc",
   "value": {
     "id": "ui-metric:Kibana_home:welcomeScreenMount",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "type": "ui-metric",
       "ui-metric": {
         "count": 1
       },
-      "updated_at": "2020-06-17T15:36:23.488Z"
+      "updated_at": "2020-06-17T15:36:23.488Z",
+      "coreMigrationVersion": "8.8.0"
     }
   }
 }
@@ -338,17 +314,17 @@
   "type": "doc",
   "value": {
     "id": "telemetry:telemetry",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
-      "references": [
-      ],
+      "references": [],
       "telemetry": {
         "lastReported": 1592408310031,
         "reportFailureCount": 0,
         "userHasSeenNotice": true
       },
       "type": "telemetry",
-      "updated_at": "2020-06-17T15:38:30.031Z"
+      "updated_at": "2020-06-17T15:38:30.031Z",
+      "coreMigrationVersion": "8.8.0"
     }
   }
 }
@@ -366,10 +342,8 @@
             "max": 0,
             "min": 0
           },
-          "emsVectorLayersCount": {
-          },
-          "layerTypesCount": {
-          },
+          "emsVectorLayersCount": {},
+          "layerTypesCount": {},
           "layersCount": {
             "avg": 0,
             "max": 0,
@@ -385,10 +359,10 @@
         },
         "timeCaptured": "2020-06-17T16:29:27.563Z"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "maps-telemetry",
       "updated_at": "2020-06-17T16:29:27.563Z"
     }
   }
 }
+
