@@ -17,7 +17,6 @@ export function convertSavedDashboardPanelToPanelState<
 >(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,
-    version: savedDashboardPanel.version,
     gridData: savedDashboardPanel.gridData,
     panelRefName: savedDashboardPanel.panelRefName,
     explicitInput: {
@@ -30,12 +29,10 @@ export function convertSavedDashboardPanelToPanelState<
 }
 
 export function convertPanelStateToSavedDashboardPanel(
-  panelState: DashboardPanelState,
-  version?: string
+  panelState: DashboardPanelState
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
-    version: version ?? (panelState.version as string), // temporary cast. Version will be mandatory at a later date.
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
@@ -54,11 +51,6 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
   return panelsMap;
 };
 
-export const convertPanelMapToSavedPanels = (
-  panels: DashboardPanelMap,
-  versionOverride?: string
-) => {
-  return Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, versionOverride)
-  );
+export const convertPanelMapToSavedPanels = (panels: DashboardPanelMap) => {
+  return Object.values(panels).map((panel) => convertPanelStateToSavedDashboardPanel(panel));
 };

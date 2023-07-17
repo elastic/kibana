@@ -85,22 +85,21 @@ export abstract class Embeddable<
     this.inputSubject.next(this.input);
     this.outputSubject.next(this.output);
 
-    if (parent) {
-      this.parentSubscription = Rx.merge(parent.getInput$(), parent.getOutput$()).subscribe(() => {
-        // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
-        if (!parent.getInput().panels[this.id]) return;
-
-        const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
-        this.onResetInput(newInput);
-      });
-    }
-
     this.getOutput$()
       .pipe(
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
       .subscribe((title) => this.renderComplete.setTitle(title));
+  }
+
+  public initializeParentSubscription(parent: IContainer) {
+    this.parentSubscription = Rx.merge(parent.getInput$(), parent.getOutput$()).subscribe(() => {
+      // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
+      if (!parent.getInput().panels[this.id]) return;
+      const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
+      this.onResetInput(newInput);
+    });
   }
 
   public reportsEmbeddableLoad() {

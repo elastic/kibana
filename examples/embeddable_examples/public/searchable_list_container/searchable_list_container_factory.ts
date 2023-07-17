@@ -30,6 +30,7 @@ export type SearchableListContainerFactory = EmbeddableFactory<
 export class SearchableListContainerFactoryDefinition
   implements EmbeddableFactoryDefinition<SearchableContainerInput, ContainerOutput>
 {
+  public latestVersion = '1.0.0';
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   public readonly isContainerType = true;
 

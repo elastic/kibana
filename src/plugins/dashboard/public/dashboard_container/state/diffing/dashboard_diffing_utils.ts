@@ -55,7 +55,7 @@ export const getPanelLayoutsAreEqual = (
       ]),
     ];
     for (const key of keys) {
-      if (key === undefined) continue;
+      if (key === undefined || key === 'embeddableVersion') continue;
       if (!defaultDiffFunction(originalObj[key], newObj[key])) differences[key] = newObj[key];
     }
     return differences;

@@ -32,6 +32,7 @@ import {
 import { getDefaultControlGroupInput } from '../../../common';
 
 export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition {
+  public latestVersion = '1.0.0';
   public readonly isContainerType = true;
   public readonly type = CONTROL_GROUP_TYPE;
   public inject: EmbeddablePersistableStateService['inject'];

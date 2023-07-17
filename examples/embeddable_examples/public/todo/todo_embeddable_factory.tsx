@@ -46,6 +46,7 @@ export type TodoEmbeddableFactory = EmbeddableFactory<TodoInput, TodoOutput, Tod
 export class TodoEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable>
 {
+  public latestVersion = '1.0.0';
   public readonly type = TODO_EMBEDDABLE;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}

@@ -29,6 +29,7 @@ export class MultiTaskTodoEmbeddableFactoryDefinition
   implements
     EmbeddableFactoryDefinition<MultiTaskTodoInput, MultiTaskTodoOutput, MultiTaskTodoEmbeddable>
 {
+  public latestVersion = '1.0.0';
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
 
   public async isEditable() {

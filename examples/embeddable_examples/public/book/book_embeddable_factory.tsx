@@ -50,6 +50,7 @@ export class BookEmbeddableFactoryDefinition
       BookSavedObjectAttributes
     >
 {
+  public latestVersion = '1.0.0';
   public readonly type = BOOK_EMBEDDABLE;
   public savedObjectMetaData = {
     name: 'Book',

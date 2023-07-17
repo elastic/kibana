@@ -37,8 +37,9 @@ import {
   PanelState,
   EmbeddableContainerSettings,
 } from './i_container';
-import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
+import { initializePanelVersions } from './initialize_panel_versions';
+import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -67,6 +68,7 @@ export abstract class Container<
     settings?: EmbeddableContainerSettings
   ) {
     super(input, output, parent);
+    input.panels = initializePanelVersions(input.panels) as TContainerInput['panels'];
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
 
     // if there is no special initialization logic, we can immediately start updating children on input updates.
@@ -345,6 +347,7 @@ export abstract class Container<
       explicitInput: {
         ...explicitInput,
         id: embeddableId,
+        version: factory.latestVersion,
       } as TEmbeddableInput,
     };
   }
@@ -457,26 +460,29 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
+    const embeddableId = panel.explicitInput.id;
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,
-        [panel.explicitInput.id]: false,
+        [embeddableId]: false,
       },
     } as Partial<TContainerOutput>);
     let embeddable: IEmbeddable | ErrorEmbeddable | undefined;
-    const inputForChild = this.getInputForChild(panel.explicitInput.id);
+    const inputForChild = this.getInputForChild(embeddableId);
     try {
       const factory = this.getFactory(panel.type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
+      // in anticipation of the clientside embeddable migrations being run, the container needs to be aware of the latest version
+
       // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
       embeddable = isSavedObjectEmbeddableInput(inputForChild)
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
     } catch (e) {
-      embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
+      embeddable = new ErrorEmbeddable(e, { id: embeddableId }, this);
     }
 
     // EmbeddableFactory.create can return undefined without throwing an error, which indicates that an embeddable
@@ -484,13 +490,35 @@ export abstract class Container<
     // visualizations being created from the add panel, which redirects the user to the visualize app. Once we
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
-    if (embeddable) {
-      if (!embeddable.deferEmbeddableLoad) {
-        this.setChildLoaded(embeddable);
-      }
-    } else if (embeddable === undefined) {
+    if (embeddable === undefined) {
       this.removeEmbeddable(panel.explicitInput.id);
+      return;
     }
+
+    /**
+     * If the embeddable's version is different than the version that this container initialized it with, that means
+     * there has been a migration for this embeddable. The container needs to update this panel's version.
+     */
+    if (embeddable.getInput().version !== inputForChild.version) {
+      const currentPanels = this.getInput().panels;
+      this.updateInput({
+        panels: {
+          ...currentPanels,
+          [embeddableId]: {
+            ...currentPanels[embeddableId],
+            explicitInput: {
+              ...currentPanels[embeddableId].explicitInput,
+              version: embeddable.getInput().version,
+            },
+          },
+        },
+      } as Partial<TContainerInput>);
+    }
+    embeddable.initializeParentSubscription(this);
+    if (!embeddable.deferEmbeddableLoad) {
+      this.setChildLoaded(embeddable);
+    }
+
     return embeddable;
   }
 

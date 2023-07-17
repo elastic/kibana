@@ -16,6 +16,7 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from '.';
 
 export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {
+  public latestVersion = '1.0.0';
   public readonly type = PLACEHOLDER_EMBEDDABLE;
 
   constructor() {}

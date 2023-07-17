@@ -24,6 +24,7 @@ export type ListContainerFactory = EmbeddableFactory<ContainerInput, ContainerOu
 export class ListContainerFactoryDefinition
   implements EmbeddableFactoryDefinition<ContainerInput, ContainerOutput>
 {
+  public latestVersion = '1.0.0';
   public readonly type = LIST_CONTAINER;
   public readonly isContainerType = true;
 

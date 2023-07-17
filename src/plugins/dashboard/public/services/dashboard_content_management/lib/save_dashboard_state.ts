@@ -29,6 +29,7 @@ import {
 } from '../types';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
 import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 
@@ -75,7 +76,6 @@ export const saveDashboardState = async ({
   savedObjectsTagging,
   dashboardSessionStorage,
   notifications: { toasts },
-  initializerContext: { kibanaVersion },
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
     search: dataSearchService,
@@ -90,6 +90,7 @@ export const saveDashboardState = async ({
     title,
     panels,
     filters,
+    version,
     timeRestore,
     description,
     controlGroupInput,
@@ -128,7 +129,7 @@ export const saveDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
   });
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, kibanaVersion));
+  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels));
 
   /**
    * Parse global time filter settings
@@ -156,7 +157,7 @@ export const saveDashboardState = async ({
     timeFrom,
     title,
     timeTo,
-    version: 1, // todo - where does version come from? Why is it needed?
+    version: +(version ?? LATEST_DASHBOARD_CONTAINER_VERSION),
   };
 
   /**

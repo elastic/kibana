@@ -46,7 +46,14 @@ export interface ImageEmbeddableInput extends EmbeddableInput {
 export class ImageEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<ImageEmbeddableInput>
 {
+  public latestVersion = '1.0.0';
   public readonly type = IMAGE_EMBEDDABLE_TYPE;
+  // public migrations = {
+  //   '2.0.0': (input: ImageEmbeddableInput) => {
+  //     input.imageConfig.altText = `Test migrated alt text. Old text was: ${input.imageConfig.altText}`;
+  //     return input;
+  //   },
+  // };
 
   constructor(private deps: ImageEmbeddableFactoryDeps) {}
 

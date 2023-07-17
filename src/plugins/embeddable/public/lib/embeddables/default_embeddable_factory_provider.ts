@@ -7,11 +7,13 @@
  */
 
 import { SavedObjectAttributes } from '@kbn/core/public';
-import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
+
+import { IContainer } from '..';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableStateWithType } from '../../../common/types';
-import { IContainer } from '..';
+import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 export const defaultEmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
@@ -22,6 +24,7 @@ export const defaultEmbeddableFactoryProvider = <
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ): EmbeddableFactory<I, O, E, T> => {
   const factory: EmbeddableFactory<I, O, E, T> = {
+    latestVersion: def.latestVersion,
     isContainerType: def.isContainerType ?? false,
     canCreateNew: def.canCreateNew ? def.canCreateNew.bind(def) : () => true,
     getDefaultInput: def.getDefaultInput ? def.getDefaultInput.bind(def) : () => ({}),
@@ -33,7 +36,29 @@ export const defaultEmbeddableFactoryProvider = <
       : (savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
           throw new Error(`Creation from saved object not supported by type ${def.type}`);
         },
-    create: def.create.bind(def),
+    create: (...args) => {
+      const [initialInput, ...otherArgs] = args;
+      const factoryMigrations =
+        typeof def?.migrations === 'function' ? def?.migrations() : def?.migrations || {};
+      const migratedInput = migrateToLatest(
+        factoryMigrations ?? {},
+        {
+          state: {
+            ...initialInput,
+            type: def.type,
+          },
+          // any embeddable with no version set is considered to require all clientside migrations
+          version: initialInput.version ?? '0',
+        },
+        true
+      );
+      const { type, ...input } = migratedInput;
+      const createdEmbeddable = def.create.bind(def)(
+        { ...input, version: def.latestVersion } as unknown as I,
+        ...otherArgs
+      );
+      return createdEmbeddable;
+    },
     type: def.type,
     isEditable: def.isEditable.bind(def),
     getDisplayName: def.getDisplayName.bind(def),
