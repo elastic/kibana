@@ -20,6 +20,16 @@ interface SelectedNodeItemProps {
   onSelectedFieldClick: (node: WorkspaceNode) => void;
 }
 
+function fixIconOffset(node: WorkspaceNode) {
+  const offset = getIconOffset(node.icon) || { x: 0, y: 0 };
+  const finalOffset = { x: offset.x / 2, y: offset.y / 2 };
+  // Maki icons need to be offset a little bit more on the right (~0.5px)
+  if (node.icon?.package === 'maki') {
+    finalOffset.x += 0.5;
+  }
+  return finalOffset;
+}
+
 export const SelectedNodeItem = ({
   node,
   isHighlighted,
@@ -32,7 +42,7 @@ export const SelectedNodeItem = ({
   const fieldIconClasses = classNames('fa', 'gphNode__text', 'gphSelectionList__icon', {
     ['gphNode__text--inverse']: isHexColorDark(node.color),
   });
-  const offset = getIconOffset(node.icon);
+  const offset = fixIconOffset(node);
 
   return (
     <div aria-hidden="true" className={fieldClasses} onClick={() => onSelectedFieldClick(node)}>
@@ -49,8 +59,8 @@ export const SelectedNodeItem = ({
           onClick={() => onDeselectNode(node)}
           icon={node.icon}
           className={fieldIconClasses}
-          x={(offset?.x || 0) / 2}
-          y={(offset?.y || 0) / 2}
+          x={offset.x}
+          y={offset.y}
         />
       </svg>
       <span>{node.label}</span>

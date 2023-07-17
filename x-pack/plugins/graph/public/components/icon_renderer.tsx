@@ -31,12 +31,10 @@ export const getIconOffset = (icon: GenericIcon | null) => {
   if (icon == null) {
     return;
   }
-  return icon.package === 'eui'
-    ? {
-        x: 7.5,
-        y: 8.5,
-      }
-    : { x: 8.5, y: 8.5 };
+  return {
+    x: 7.5,
+    y: 8.5,
+  };
 };
 
 export const IconRenderer = ({

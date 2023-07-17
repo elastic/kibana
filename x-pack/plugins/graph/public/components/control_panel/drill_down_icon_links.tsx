@@ -35,14 +35,6 @@ export const DrillDownIconLinks = ({
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip content={cur.description}>
-          {/* <button
-            className="kuiButton kuiButton--basic kuiButton--small"
-            type="button"
-            disabled={hasNodes}
-            onClick={onUrlTemplateClick}
-          >
-            <span className={`kuiIcon ${cur.icon?.class || ''}`} />
-          </button> */}
           <EuiButtonIcon
             iconType={cur.icon ? () => <IconRenderer icon={cur.icon} /> : ''}
             size="xs"
