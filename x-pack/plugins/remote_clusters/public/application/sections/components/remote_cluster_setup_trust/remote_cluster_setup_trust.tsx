@@ -128,7 +128,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
 
       <EuiFlexGroup wrap justifyContent="center">
         <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
-          <EuiFlexGroup justifyContent='flexStart'>
+          <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="setupTrustDoneButton"
@@ -144,7 +144,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
-          <EuiFlexGroup justifyContent='flexEnd'>
+          <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="setupTrustDoneButton"
