@@ -252,7 +252,7 @@ function WarningContent({
   const hasDescription = 'text' in originalWarning;
 
   return (
-    <EuiFlexGroup gutterSize="xs" {...groupStyles}>
+    <EuiFlexGroup gutterSize="xs" {...groupStyles} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size={textSize} data-test-subj={`${dataTestSubj}_warningTitle`}>
           {hasDescription ? <strong>{originalWarning.message}</strong> : originalWarning.message}
