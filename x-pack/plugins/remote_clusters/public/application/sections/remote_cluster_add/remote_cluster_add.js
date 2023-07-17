@@ -37,7 +37,7 @@ export class RemoteClusterAdd extends PureComponent {
     this.props.addCluster(clusterConfig);
   };
 
-  cancel = () => {
+  redirectToList = () => {
     const {
       history,
       route: {
@@ -58,7 +58,7 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <EuiPageBody restrictWidth={true} data-test-subj="remote-clusters-add">
+      <EuiPageBody data-test-subj="remote-clusters-add">
         <EuiPageSection paddingSize="none">
           <RemoteClusterPageTitle
             title={
@@ -75,7 +75,12 @@ export class RemoteClusterAdd extends PureComponent {
             }
           />
 
-          <RemoteClusterWizard saveRemoteClusterConfig={this.save} />
+          <RemoteClusterWizard
+            saveRemoteClusterConfig={this.save}
+            onCancel={this.redirectToList}
+            isSaving={isAddingCluster}
+            addClusterError={addClusterError}
+          />
         </EuiPageSection>
       </EuiPageBody>
     );

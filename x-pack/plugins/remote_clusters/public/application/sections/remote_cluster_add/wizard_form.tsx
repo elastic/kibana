@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer, EuiPageSection } from '@elastic/eui';
 
 import { RemoteClusterSetupTrust, RemoteClusterForm } from '../components';
 
@@ -15,10 +15,15 @@ const CONFIGURE_CONNECTION = 1;
 const SETUP_TRUST = 2;
 
 interface Props {
+  // TODO: fix types
   saveRemoteClusterConfig: (object: any) => void;
+  onCancel: () => void;
+  addClusterError: boolean;
+  isSaving: boolean;
 }
 
-export const RemoteClusterWizard = ({ saveRemoteClusterConfig }: Props) => {
+export const RemoteClusterWizard = ({ saveRemoteClusterConfig, onCancel }: Props) => {
+  // TODO: fix types
   const [formState, setFormState] = useState({} as any);
   const [currentStep, setCurrentStep] = useState(CONFIGURE_CONNECTION);
 
@@ -44,32 +49,31 @@ export const RemoteClusterWizard = ({ saveRemoteClusterConfig }: Props) => {
     [currentStep]
   );
 
+  // Upon finalizing configuring the connection, we need to temporarily store the
+  // cluster configuration so that we can persist it when the user completes the
+  // trust step.
+  // TODO: fix types
   const completeConfigStep = (clusterConfig: any) => {
     setFormState(clusterConfig);
     setCurrentStep(SETUP_TRUST);
   };
 
   const completeTrustStep = () => {
-    console.log('complete trust step');
-    console.log(formState);
     saveRemoteClusterConfig(formState);
   };
 
   return (
-    <>
+    <EuiPageSection restrictWidth>
       <EuiStepsHorizontal steps={stepDefinitions} />
       <EuiSpacer size="xl" />
 
-      {currentStep === CONFIGURE_CONNECTION && (
-        <RemoteClusterForm
-          isSaving={false}
-          saveError={null}
-          save={completeConfigStep}
-          cancel={() => {
-            console.log('cancel');
-          }}
-        />
-      )}
+      {/*
+        Instead of unmounting the Form, we toggle its visibility not to lose the form
+        state when moving to the next step.
+      */}
+      <div style={{ display: currentStep === CONFIGURE_CONNECTION ? 'block' : 'none' }}>
+        <RemoteClusterForm save={completeConfigStep} cancel={onCancel} />
+      </div>
 
       {currentStep === SETUP_TRUST && (
         <RemoteClusterSetupTrust
@@ -77,6 +81,6 @@ export const RemoteClusterWizard = ({ saveRemoteClusterConfig }: Props) => {
           onSubmit={completeTrustStep}
         />
       )}
-    </>
+    </EuiPageSection>
   );
 };

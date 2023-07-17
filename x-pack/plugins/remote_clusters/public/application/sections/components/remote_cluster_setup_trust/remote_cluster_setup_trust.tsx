@@ -50,6 +50,16 @@ const i18nTexts = {
   ),
 };
 
+const docLinks = {
+  apiKey:
+    'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
+  apiKeyCloud:
+    'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
+  cert: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
+  certCloud:
+    'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html',
+};
+
 interface Props {
   onBack: () => void;
   onSubmit: () => void;
@@ -59,13 +69,8 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit }: Props) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const { canUseAPIKeyTrustModel, isCloudEnabled } = useContext(AppContext);
 
-  console.log({
-    canUseAPIKeyTrustModel,
-    isCloudEnabled,
-  });
-
   return (
-    <>
+    <div>
       <EuiText size="m" textAlign="center">
         <p>
           <FormattedMessage
@@ -80,7 +85,7 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit }: Props) => {
 
       <EuiSpacer size="xxl" />
 
-      <EuiFlexGroup wrap>
+      <EuiFlexGroup wrap justifyContent="center">
         {canUseAPIKeyTrustModel && (
           <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
             <EuiCard
@@ -88,11 +93,11 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit }: Props) => {
               paddingSize="l"
               betaBadgeProps={{ label: i18nTexts.apiKeyBadge, color: 'accent' }}
             >
-              <EuiText grow={false} size="s">
+              <EuiText size="s">
                 <p>{i18nTexts.apiKeyDescription}</p>
               </EuiText>
               <EuiSpacer size="xl" />
-              <EuiButton>
+              <EuiButton href={isCloudEnabled ? docLinks.apiKeyCloud : docLinks.apiKey}>
                 <FormattedMessage
                   id="xpack.remoteClusters.clusterWizard.trustStep.docs"
                   defaultMessage="Documentation"
@@ -102,13 +107,13 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit }: Props) => {
           </EuiFlexItem>
         )}
 
-        <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
+        <EuiFlexItem style={{ maxWidth: canUseAPIKeyTrustModel ? CARD_MAX_WIDTH : '100%' }}>
           <EuiCard title={i18nTexts.certTitle} paddingSize="l">
-            <EuiText grow={false} size="s">
+            <EuiText size="s">
               <p>{i18nTexts.certDescription}</p>
             </EuiText>
             <EuiSpacer size="xl" />
-            <EuiButton>
+            <EuiButton href={isCloudEnabled ? docLinks.certCloud : docLinks.cert}>
               <FormattedMessage
                 id="xpack.remoteClusters.clusterWizard.trustStep.docs"
                 defaultMessage="Documentation"
@@ -151,6 +156,6 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit }: Props) => {
           <ConfirmTrustSetupModal closeModal={() => setIsModalVisible(false)} onSubmit={onSubmit} />
         )}
       </EuiFlexGroup>
-    </>
+    </div>
   );
 };

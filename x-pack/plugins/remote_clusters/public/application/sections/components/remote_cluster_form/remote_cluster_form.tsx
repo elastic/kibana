@@ -300,7 +300,7 @@ export class RemoteClusterForm extends Component<Props, State> {
   }
 
   renderActions() {
-    const { isSaving, cancel } = this.props;
+    const { isSaving, cancel, cluster: isEditMode } = this.props;
     const { areErrorsVisible, isRequestVisible } = this.state;
     const isSaveDisabled = (areErrorsVisible && this.hasErrors()) || isSaving;
 
@@ -352,7 +352,10 @@ export class RemoteClusterForm extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
-                  defaultMessage="Next"
+                  defaultMessage="{isEditMode, select, true{Save} other{Next}}"
+                  values={{
+                    isEditMode: Boolean(isEditMode),
+                  }}
                 />
               </EuiButton>
             </EuiFlexItem>
