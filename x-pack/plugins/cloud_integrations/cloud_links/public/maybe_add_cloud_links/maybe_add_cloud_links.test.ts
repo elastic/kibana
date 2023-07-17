@@ -19,6 +19,7 @@ describe('maybeAddCloudLinks', () => {
       chrome: coreMock.createStart().chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
       docLinks: coreMock.createStart().docLinks,
+      uiSettingsClient: coreMock.createStart().uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -30,12 +31,13 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
     );
-    const { chrome, docLinks } = coreMock.createStart();
+    const { chrome, docLinks, uiSettings } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
       docLinks,
+      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -72,6 +74,79 @@ describe('maybeAddCloudLinks', () => {
             "iconType": "gear",
             "label": "Organization",
             "order": 300,
+          },
+          Object {
+            "content": <ThemDarkModeToggle
+              security={
+                Object {
+                  "authc": Object {
+                    "areAPIKeysEnabled": [MockFunction],
+                    "getCurrentUser": [MockFunction] {
+                      "calls": Array [
+                        Array [],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": Promise {},
+                        },
+                      ],
+                    },
+                  },
+                  "hooks": Object {
+                    "useUpdateUserProfile": [MockFunction],
+                  },
+                  "navControlService": Object {
+                    "addUserMenuLinks": [MockFunction] {
+                      "calls": Array [
+                        [Circular],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": undefined,
+                        },
+                      ],
+                    },
+                    "getUserMenuLinks$": [MockFunction],
+                  },
+                  "uiApi": Object {
+                    "components": Object {
+                      "getChangePassword": [MockFunction],
+                      "getPersonalInfo": [MockFunction],
+                    },
+                  },
+                  "userProfiles": Object {
+                    "bulkGet": [MockFunction],
+                    "getCurrent": [MockFunction],
+                    "suggest": [MockFunction],
+                    "update": [MockFunction],
+                    "userProfile$": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                }
+              }
+              uiSettingsClient={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
+            />,
+            "href": "",
+            "iconType": "",
+            "label": "",
+            "order": 400,
           },
         ],
       ]
@@ -101,12 +176,13 @@ describe('maybeAddCloudLinks', () => {
   it('when cloud enabled and it fails to fetch the user, it sets the links', async () => {
     const security = securityMock.createStart();
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
-    const { chrome, docLinks } = coreMock.createStart();
+    const { chrome, docLinks, uiSettings } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
       docLinks,
+      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -143,6 +219,79 @@ describe('maybeAddCloudLinks', () => {
             "iconType": "gear",
             "label": "Organization",
             "order": 300,
+          },
+          Object {
+            "content": <ThemDarkModeToggle
+              security={
+                Object {
+                  "authc": Object {
+                    "areAPIKeysEnabled": [MockFunction],
+                    "getCurrentUser": [MockFunction] {
+                      "calls": Array [
+                        Array [],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": Promise {},
+                        },
+                      ],
+                    },
+                  },
+                  "hooks": Object {
+                    "useUpdateUserProfile": [MockFunction],
+                  },
+                  "navControlService": Object {
+                    "addUserMenuLinks": [MockFunction] {
+                      "calls": Array [
+                        [Circular],
+                      ],
+                      "results": Array [
+                        Object {
+                          "type": "return",
+                          "value": undefined,
+                        },
+                      ],
+                    },
+                    "getUserMenuLinks$": [MockFunction],
+                  },
+                  "uiApi": Object {
+                    "components": Object {
+                      "getChangePassword": [MockFunction],
+                      "getPersonalInfo": [MockFunction],
+                    },
+                  },
+                  "userProfiles": Object {
+                    "bulkGet": [MockFunction],
+                    "getCurrent": [MockFunction],
+                    "suggest": [MockFunction],
+                    "update": [MockFunction],
+                    "userProfile$": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                }
+              }
+              uiSettingsClient={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
+            />,
+            "href": "",
+            "iconType": "",
+            "label": "",
+            "order": 400,
           },
         ],
       ]
@@ -173,12 +322,13 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: false })
     );
-    const { chrome, docLinks } = coreMock.createStart();
+    const { chrome, docLinks, uiSettings } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
       docLinks,
+      uiSettingsClient: uiSettings,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
