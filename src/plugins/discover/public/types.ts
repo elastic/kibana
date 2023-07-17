@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import type { ReactNode } from 'react';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SearchResponseWarning } from '@kbn/data-plugin/public';
@@ -19,7 +19,7 @@ export type ValueToStringConverter = (
 
 export interface SearchResponseInterceptedWarning {
   originalWarning: SearchResponseWarning;
-  action?: React.ReactNode;
+  action?: ReactNode;
 }
 
 export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
