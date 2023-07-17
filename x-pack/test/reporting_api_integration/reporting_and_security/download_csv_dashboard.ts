@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
   const fromTime = '2019-06-20T00:00:00.000Z';
   const toTime = '2019-06-25T00:00:00.000Z';
 
-  describe.skip('CSV Generation from SearchSource', () => {
+  describe('CSV Generation from SearchSource', () => {
     before(async () => {
       await reportingAPI.initEcommerce();
       await reportingAPI.initLogs();
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe.skip('unquoted values', () => {
+    describe('unquoted values', () => {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'csv:quoteValues': false });
       });
@@ -204,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('date formatting', () => {
+    describe('date formatting', () => {
       it('With filters and timebased data, default to UTC', async () => {
         const res = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
@@ -283,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('nanosecond formatting', () => {
+    describe('nanosecond formatting', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
       });
@@ -336,7 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('non-timebased', () => {
+    describe('non-timebased', () => {
       it('Handle _id and _index columns', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
 
@@ -394,7 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('_id field is a big integer', () => {
+    describe('_id field is a big integer', () => {
       before(async () => {
         await Promise.all([
           esArchiver.load('x-pack/test/functional/es_archives/reporting/big_int_id_field'),
@@ -473,7 +473,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('validation', () => {
+    describe('validation', () => {
       it('Return a 404', async () => {
         const { body } = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({

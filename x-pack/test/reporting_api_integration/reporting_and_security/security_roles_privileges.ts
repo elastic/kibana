@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe.skip('Dashboard: CSV download file', () => {
+    describe('Dashboard: CSV download file', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.downloadCsv(
           reportingAPI.DATA_ANALYST_USERNAME,
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // csv searchsource immediate api
-      xit('does allow user with the role privilege', async () => {
+      it('does allow user with the role privilege', async () => {
         const res = await reportingAPI.downloadCsv(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Dashboard: Generate PDF report', () => {
+    describe('Dashboard: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generatePdf(
           reportingAPI.DATA_ANALYST_USERNAME,
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.status).to.eql(403);
       });
 
-      xit('does allow user with the role-based privilege', async () => {
+      it('does allow user with the role-based privilege', async () => {
         const res = await reportingAPI.generatePdf(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,
@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Visualize: Generate PDF report', () => {
+    describe('Visualize: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generatePdf(
           reportingAPI.DATA_ANALYST_USERNAME,
@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Discover: Generate CSV report', () => {
+    describe('Discover: Generate CSV report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generateCsv(
           {
@@ -206,7 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // This tests the same API as x-pack/test/api_integration/apis/security/privileges.ts, but it uses the non-deprecated config
-    xit('should register reporting privileges with the security privileges API', async () => {
+    it('should register reporting privileges with the security privileges API', async () => {
       await supertest
         .get('/api/security/privileges')
         .set('kbn-xsrf', 'xxx')
