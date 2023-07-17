@@ -149,7 +149,6 @@ describe('useAddOrUpdateException', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('initializes hook', async () => {

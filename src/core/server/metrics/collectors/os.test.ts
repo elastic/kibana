@@ -23,7 +23,7 @@ describe('OsMetricsCollector', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('collects platform info from the os package', async () => {
