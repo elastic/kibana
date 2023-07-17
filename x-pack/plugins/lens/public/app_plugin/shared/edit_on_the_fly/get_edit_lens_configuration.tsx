@@ -12,15 +12,17 @@ import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
   LensRootStore,
   LensAppState,
   LensState,
+  loadInitial,
 } from '../../../state_management';
 import { getPreloadedState } from '../../../state_management/lens_slice';
-
+import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
   LensEditConfigurationFlyout,
@@ -55,6 +57,7 @@ export function getEditLensConfiguration(
     wrapInFlyout,
     datasourceId,
     adaptersTables,
+    panelId,
   }: EditLensConfigurationProps) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
@@ -89,6 +92,14 @@ export function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
       lens: getPreloadedState(storeDeps) as LensAppState,
     } as unknown as PreloadedState<LensState>);
+    lensStore.dispatch(
+      loadInitial({
+        initialInput: {
+          attributes,
+          id: panelId ?? generateId(),
+        },
+      })
+    );
 
     const getWrapper = (children: JSX.Element) => {
       if (wrapInFlyout) {
@@ -131,7 +142,9 @@ export function getEditLensConfiguration(
 
     return getWrapper(
       <Provider store={lensStore}>
-        <LensEditConfigurationFlyout {...configPanelProps} />
+        <KibanaContextProvider services={lensServices}>
+          <LensEditConfigurationFlyout {...configPanelProps} />
+        </KibanaContextProvider>
       </Provider>
     );
   };
