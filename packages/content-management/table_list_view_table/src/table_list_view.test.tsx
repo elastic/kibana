@@ -824,6 +824,181 @@ describe('TableListView', () => {
     });
   });
 
+  describe('search', () => {
+    const updatedAt = new Date('2023-07-15').toISOString();
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: 'item-1',
+        type: 'dashboard',
+        updatedAt,
+        attributes: {
+          title: 'Item 1',
+        },
+        references: [],
+      },
+      {
+        id: 'item-2',
+        type: 'dashboard',
+        updatedAt,
+        attributes: {
+          title: 'Item 2',
+        },
+        references: [],
+      },
+    ];
+
+    const findItems = jest.fn();
+
+    const setupSearch = (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
+      const testBed = registerTestBed<string, TableListViewTableProps>(
+        WithServices<TableListViewTableProps>(TableListViewTable),
+        {
+          defaultProps: {
+            ...requiredProps,
+            findItems,
+            urlStateEnabled: false,
+            entityName: 'Foo',
+            entityNamePlural: 'Foos',
+          },
+          memoryRouter: { wrapComponent: true },
+        }
+      )(...args);
+
+      const updateSearchText = async (value: string) => {
+        await act(async () => {
+          testBed.find('tableListSearchBox').simulate('keyup', {
+            key: 'Enter',
+            target: { value },
+          });
+        });
+        testBed.component.update();
+      };
+
+      return {
+        testBed,
+        updateSearchText,
+        getSearchBoxValue: () => testBed.find('tableListSearchBox').props().defaultValue,
+        getLastCallArgsFromFindItems: () => findItems.mock.calls[findItems.mock.calls.length - 1],
+      };
+    };
+
+    beforeEach(() => {
+      findItems.mockReset().mockResolvedValue({ total: hits.length, hits });
+    });
+
+    test('should search the table items', async () => {
+      let testBed: TestBed;
+      let updateSearchText: (value: string) => Promise<void>;
+      let getLastCallArgsFromFindItems: () => Parameters<typeof findItems>;
+      let getSearchBoxValue: () => string;
+
+      await act(async () => {
+        ({ testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+          await setupSearch());
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      let searchTerm = '';
+      let expected = '';
+      [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(getSearchBoxValue!()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Item 1",
+            "Sat Jul 15 2023",
+          ],
+          Array [
+            "Item 2",
+            "Sat Jul 15 2023",
+          ],
+        ]
+      `);
+
+      findItems.mockResolvedValueOnce({
+        total: 1,
+        hits: [
+          {
+            id: 'item-from-search',
+            type: 'dashboard',
+            updatedAt: new Date('2023-07-01').toISOString(),
+            attributes: {
+              title: 'Item from search',
+            },
+            references: [],
+          },
+        ],
+      });
+
+      expected = 'foo';
+      await updateSearchText!(expected);
+      [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(getSearchBoxValue!()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+
+      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Item from search",
+            "July 1, 2023",
+          ],
+        ]
+      `);
+    });
+
+    test('should search and render empty list if no result', async () => {
+      let testBed: TestBed;
+      let updateSearchText: (value: string) => Promise<void>;
+
+      await act(async () => {
+        ({ testBed, updateSearchText } = await setupSearch());
+      });
+
+      const { component, table, find } = testBed!;
+      component.update();
+
+      findItems.mockResolvedValueOnce({
+        total: 0,
+        hits: [],
+      });
+
+      await updateSearchText!('unknown items');
+
+      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "No Foos matched your search.",
+          ],
+        ]
+      `);
+
+      await act(async () => {
+        find('clearSearchButton').simulate('click');
+      });
+      component.update();
+
+      // We should get back the initial 2 items (Item 1 and Item 2)
+      expect(table.getMetaData('itemsInMemTable').tableCellsValues).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Item 1",
+            "Sat Jul 15 2023",
+          ],
+          Array [
+            "Item 2",
+            "Sat Jul 15 2023",
+          ],
+        ]
+      `);
+    });
+  });
+
   describe('url state', () => {
     let router: Router | undefined;
 
