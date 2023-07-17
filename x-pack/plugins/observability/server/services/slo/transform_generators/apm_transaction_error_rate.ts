@@ -98,10 +98,8 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       query: {
         bool: {
           filter: [
-            { terms: { 'processor.event': ['metric'] } },
             { term: { 'metricset.name': 'transaction' } },
-            { exists: { field: 'transaction.duration.histogram' } },
-            { exists: { field: 'transaction.result' } },
+            { terms: { 'event.outcome': ['success', 'failure'] } },
             ...queryFilter,
           ],
         },
@@ -130,8 +128,8 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
         },
       },
       'slo.denominator': {
-        value_count: {
-          field: 'transaction.duration.histogram',
+        filter: {
+          match_all: {},
         },
       },
       ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
@@ -139,7 +137,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           bucket_script: {
             buckets_path: {
               goodEvents: 'slo.numerator>_count',
-              totalEvents: 'slo.denominator.value',
+              totalEvents: 'slo.denominator>_count',
             },
             script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
           },
