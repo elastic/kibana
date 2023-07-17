@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkCreateRulesRequestBody } from '../../../../../../../common/detection_engine/rule_management';
+import type { BulkCreateRulesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
 import { getDuplicates } from './get_duplicates';
 
 describe('getDuplicates', () => {
