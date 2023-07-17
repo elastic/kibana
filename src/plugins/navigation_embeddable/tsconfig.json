@@ -11,6 +11,7 @@
     "@kbn/embeddable-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/presentation-util-plugin",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": ["target/**/*"]
 }

@@ -33,7 +33,6 @@ export class NavigationEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<NavigationEmbeddableInput>
 {
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
-
   public isContainerType = false;
 
   public async isEditable() {
@@ -75,11 +74,9 @@ export class NavigationEmbeddableFactoryDefinition
   ) {
     if (!parent) return {};
 
-    const { openEditorFlyout: createNavigationEmbeddable } = await import(
-      '../editor/open_editor_flyout'
-    );
+    const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
-    const input = await createNavigationEmbeddable(
+    const input = await openEditorFlyout(
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
       parent
     ).catch(() => {

@@ -1,23 +1,68 @@
 @import '../mixins';
 
-.navEmbeddableLinkEditor {
-  @include euiFlyout;
-  animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+.navEmbeddablePanelEditor {
+  max-inline-size: $euiSizeXXL * 18; // 40px * 18 = 720px
 
-  .linkEditorBackButton {
-    height: auto;
+  .navEmbeddableLinkEditor {
+    @include euiFlyout;
+    max-inline-size: $euiSizeXXL * 18;
+
+    &.in {
+      animation: euiFlyoutOpenAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+    }
+
+    &.out {
+      animation: euiFlyoutCloseAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+    }
+
+    .linkEditorBackButton {
+      height: auto;
+    }
   }
 }
 
-.navEmbeddablePanelEditor {
-  .linkText {
-    flex: 1;
-    min-width: 0;
+.navEmbeddableDashboardItem {
+  .euiBadge {
+    cursor: pointer !important;
+  }
 
-    .wrapText {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+  // in order to ensure that the "Current" badge doesn't recieve an underline on hover, we have to set the
+  // text-decoration to `none` for the entire list item and manually set the underline **only** on the text
+  &:hover {
+    text-decoration: none;
+  }
+
+  .navEmbeddableLinkText {
+    &:hover {
+      text-decoration: underline !important;
+    }
+  }
+}
+
+.navEmbeddableLinkText {
+  flex: 1;
+  min-width: 0;
+
+  .wrapText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.navEmbeddableLinkPanel {
+  padding: $euiSizeXS $euiSizeS;
+
+  .navEmbeddable_hoverActions {
+    opacity: 0;
+    visibility: hidden;
+    transition: visibility $euiAnimSpeedNormal, opacity $euiAnimSpeedNormal;
+  }
+
+  &:hover, &:focus-within {
+    .navEmbeddable_hoverActions {
+      opacity: 1;
+      visibility: visible;
     }
   }
 }
