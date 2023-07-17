@@ -57,14 +57,11 @@ describe('RuleStatusDropdown', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   beforeAll(() => {
     jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
-  });
-  afterAll(() => {
-    jest.restoreAllMocks();
   });
 
   test('renders status control', () => {
