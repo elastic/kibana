@@ -33,11 +33,11 @@ import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../mocks';
-import { ActionTypes } from '../../../../common/api';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
+import { UserActionTypes } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -566,7 +566,8 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    describe('User actions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/151981
+    describe.skip('User actions', () => {
       it('renders the description correctly', async () => {
         appMockRender = createAppMockRenderer();
         appMockRender.render(<CaseViewActivity {...caseProps} />);
@@ -601,7 +602,7 @@ describe('Case View Page activity tab', () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
           data: {
-            userActions: [getUserAction(ActionTypes.assignees, 'delete')],
+            userActions: [getUserAction(UserActionTypes.assignees, 'delete')],
           },
         });
 
@@ -619,7 +620,7 @@ describe('Case View Page activity tab', () => {
           ...defaultUseFindCaseUserActions,
           data: {
             userActions: [
-              getUserAction(ActionTypes.assignees, 'add', {
+              getUserAction(UserActionTypes.assignees, 'add', {
                 payload: {
                   assignees: [
                     { uid: 'not-valid' },

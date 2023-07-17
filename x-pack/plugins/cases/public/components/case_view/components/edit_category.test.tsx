@@ -194,7 +194,9 @@ describe('EditCategory ', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('The length of the category is too long. The maximum length is 50.')
+        screen.getByText(
+          'The length of the category is too long. The maximum length is 50 characters.'
+        )
       ).toBeInTheDocument();
     });
 

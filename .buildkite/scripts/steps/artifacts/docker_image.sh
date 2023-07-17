@@ -83,17 +83,15 @@ echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
-  - trigger: serverless-gitops-update-stack-image-tag
+  - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
     async: true
-    label: ":argo: Update image tag for Kibana"
     branches: main
+    trigger: gpctl-promote
     build:
       env:
-        IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
-        SERVICE: kibana-controller
-        NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana-serverless
-        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
+        SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
+        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/config.yaml
+
 EOF
 
 else

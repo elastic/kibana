@@ -1,6 +1,11 @@
 [[manage-cases]]
 == Open and manage cases
 
+:frontmatter-description: Create a case then add files, visualizations, and user notifications.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [analyze]
+
 preview::[]
 
 [[open-case]]
@@ -16,8 +21,8 @@ TIP: In the `Description` area, you can use
 https://www.markdownguide.org/cheat-sheet[Markdown] syntax to create formatted
 text.
 
-. Optionally, add assignees and tags. You can add users only if they meet
-the necessary <<setup-cases,prerequisites>>.
+. Optionally, add a category, assignees, and tags.
+You can add users only if they meet the necessary <<setup-cases,prerequisites>>.
 
 . For *External incident management system*, select a connector. For more
 information, refer to <<add-case-connectors>>.
@@ -72,8 +77,9 @@ go back to your case.
 
 . Click *Add Comment* to add the visualization to your case.
 
-After a visualization has been added to a case, you can modify or interact with
-it by clicking the *Open Visualization* option in the comment menu.
+Alternatively, while viewing a <<dashboard,dashboard>> you can open a panel's menu then click *More > Add to existing case* or *More > Add to new case*.
+
+After a visualization has been added to a case, you can modify or interact with it by clicking the *Open Visualization* option in the case's comment menu.
 
 [[add-case-notifications]]
 === Add email notifications
@@ -115,7 +121,7 @@ When you subsequently add assignees to cases, they receive an email.
 === Manage cases
 
 In *Management > {stack-manage-app} > Cases*, you can search cases and filter
-them by attributes such as assignees, severity, status, and tags. You can also
+them by attributes such as assignees, categories, severity, status, and tags. You can also
 select multiple cases and use bulk actions to delete cases or change their
 attributes.
 
@@ -126,7 +132,7 @@ To view a case, click on its name. You can then:
 * Add or remove assignees.
 * Add a connector.
 * Send updates to external systems (if external connections are configured).
-* Edit tags.
+* Edit the category and tags.
 * Refresh the case to retrieve the latest updates.
 * Change the status.
 * Change the severity.
