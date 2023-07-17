@@ -40,6 +40,11 @@ const coreMock = {
   application: {
     getUrlForApp: () => {},
   },
+  data: {
+    query: {
+      filterManager: {},
+    },
+  },
   uiSettings,
   notifications: {
     toasts: {
@@ -48,6 +53,16 @@ const coreMock = {
       addWarning: () => {},
       remove: () => {},
     },
+  },
+  timelines: {
+    getHoverActions: () => ({
+      getAddToTimelineButton: () => {},
+      getColumnToggleButton: () => {},
+      getCopyButton: () => {},
+      getFilterForValueButton: () => {},
+      getFilterOutValueButton: () => {},
+      getOverflowButton: () => {},
+    }),
   },
 } as unknown as CoreStart;
 const KibanaReactContext = createKibanaReactContext(coreMock);
