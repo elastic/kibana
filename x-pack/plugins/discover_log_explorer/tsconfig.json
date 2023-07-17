@@ -15,6 +15,7 @@
     "@kbn/data-views-plugin",
     "@kbn/rison",
     "@kbn/core-application-browser",
+    "@kbn/config-schema",
   ],
   "exclude": ["target/**/*"]
 }
