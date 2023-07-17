@@ -18,6 +18,7 @@ export {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
+  getLanguageDisplayName,
 } from './es_query_sql';
 export { getIndexPatternFromESQLQuery } from './es_query_esql';
 export { fromCombinedFilter } from './from_combined_filter';

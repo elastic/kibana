@@ -55,6 +55,7 @@ export {
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
+  getLanguageDisplayName,
 } from './src/es_query';
 
 export {
