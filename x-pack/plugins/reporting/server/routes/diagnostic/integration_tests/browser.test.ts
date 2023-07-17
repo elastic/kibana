@@ -75,7 +75,6 @@ describe('POST /diagnose/browser', () => {
   });
 
   afterEach(async () => {
-    jest.restoreAllMocks();
     await server.stop();
   });
 
