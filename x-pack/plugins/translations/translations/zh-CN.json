@@ -34909,7 +34909,6 @@
     "xpack.sessionView.alerts": "告警",
     "xpack.sessionView.alertsLoadMoreButton": "加载更多告警",
     "xpack.sessionView.backToInvestigatedAlert": "返回到已调查告警",
-    "xpack.sessionView.beta": "公测版",
     "xpack.sessionView.blockedBadge": "已阻止",
     "xpack.sessionView.childProcesses": "子进程",
     "xpack.sessionView.collapseAll": "折叠全部",
