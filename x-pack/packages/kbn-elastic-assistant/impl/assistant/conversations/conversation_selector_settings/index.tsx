@@ -167,11 +167,17 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       return (
         <EuiFlexGroup
           alignItems="center"
-          justifyContent="spaceBetween"
-          component={'span'}
           className={'parentFlexGroup'}
+          component={'span'}
+          justifyContent="spaceBetween"
         >
-          <EuiFlexItem grow={false} component={'span'} css={css``}>
+          <EuiFlexItem
+            component={'span'}
+            grow={false}
+            css={css`
+              width: calc(100% - 60px);
+            `}
+          >
             <EuiHighlight
               search={searchValue}
               css={css`
