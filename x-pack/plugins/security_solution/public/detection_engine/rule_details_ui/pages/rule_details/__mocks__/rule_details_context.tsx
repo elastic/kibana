@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { RuleDetailsContextType } from '../rule_details_context';
-import { RuleDetailTabs } from '..';
+import { RuleDetailTabs } from 'RuleDetailTabs';
 
 export const useRuleDetailsContextMock = {
   create: (): jest.Mocked<RuleDetailsContextType> => ({

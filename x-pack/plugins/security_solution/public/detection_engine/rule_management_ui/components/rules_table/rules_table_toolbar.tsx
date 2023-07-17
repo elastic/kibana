@@ -11,12 +11,7 @@ import { TabNavigation } from '../../../../common/components/navigation/tab_navi
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import * as i18n from './translations';
-
-export enum AllRulesTabs {
-  management = 'management',
-  monitoring = 'monitoring',
-  updates = 'updates',
-}
+import { AllRulesTabs } from './all_rules_tabs';
 
 export const RulesTableToolbar = React.memo(() => {
   const { data: ruleManagementFilters } = useRuleManagementFilters();

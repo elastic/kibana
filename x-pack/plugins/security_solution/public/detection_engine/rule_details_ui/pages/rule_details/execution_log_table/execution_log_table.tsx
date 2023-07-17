@@ -29,7 +29,7 @@ import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
-import { RuleDetailTabs } from '..';
+import { RuleDetailTabs } from 'RuleDetailTabs';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
 import type {
   RuleExecutionResult,

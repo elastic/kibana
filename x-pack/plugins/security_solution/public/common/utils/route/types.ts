@@ -8,7 +8,7 @@
 import type * as H from 'history';
 import type React from 'react';
 
-import type { AllRulesTabs } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
+import { AllRulesTabs } from "../../../detection_engine/rule_management_ui/components/rules_table/all_rules_tabs";
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import type { AlertDetailRouteType } from '../../../detections/pages/alert_details/types';

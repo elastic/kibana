@@ -11,7 +11,8 @@ import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { RulesManagementTour } from './rules_table/guided_onboarding/rules_management_tour';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
-import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
+import { RulesTableToolbar } from './rules_table_toolbar';
+import { AllRulesTabs } from './all_rules_tabs';
 import { UpgradePrebuiltRulesTable } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table';
 import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 

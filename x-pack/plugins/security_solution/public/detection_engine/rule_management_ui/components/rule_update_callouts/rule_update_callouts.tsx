@@ -16,7 +16,7 @@ import {
   getUpdateRulesCalloutTitle,
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
 } from '../mini_callout/translations';
-import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../rules_table/all_rules_tabs';
 
 export const RuleUpdateCallouts = () => {
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();

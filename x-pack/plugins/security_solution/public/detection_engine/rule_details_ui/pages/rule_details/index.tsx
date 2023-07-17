@@ -138,6 +138,7 @@ import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_managem
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { RuleDetailTabs } from './rule_detail_tabs';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -154,14 +155,6 @@ const StyledFullHeightContainer = styled.div`
 const StyledMinHeightTabContainer = styled.div`
   min-height: 800px;
 `;
-
-export enum RuleDetailTabs {
-  alerts = 'alerts',
-  exceptions = 'rule_exceptions',
-  endpointExceptions = 'endpoint_exceptions',
-  executionResults = 'execution_results',
-  executionEvents = 'execution_events',
-}
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.alerts]: detectionI18n.ALERT,

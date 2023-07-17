@@ -12,45 +12,46 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { RULES_LANDING_PATH, RULES_PATH, SecurityPageName } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
-import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
-import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
-import {
-  RuleDetailsPage,
-  RuleDetailTabs,
-} from '../detection_engine/rule_details_ui/pages/rule_details';
-import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
-import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
-import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
+import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/rule_detail_tabs';
+import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/all_rules_tabs';
+
+const EditRulePageLazy = React.lazy(() => import('./routes/edit_rule_page'));
+
+const CreateRulePageLazy = React.lazy(() => import('./routes/create_rule_page'));
+
+const RulesPageLazy = React.lazy(() => import('./routes/rules_page'));
+
+const AddRulesPageLazy = React.lazy(() => import('./routes/add_rules_page'));
 
 const RulesSubRoutes = [
   {
     path: '/rules/id/:detailName/edit',
-    main: EditRulePage,
+    component: EditRulePageLazy,
     exact: true,
   },
   {
     path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
-    main: RuleDetailsPage,
+    component: EditRulePageLazy,
     exact: true,
   },
   {
     path: '/rules/create',
-    main: CreateRulePage,
+    component: CreateRulePageLazy,
     exact: true,
   },
   {
     path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
-    main: RulesPage,
+    component: RulesPageLazy,
     exact: true,
   },
   {
     path: '/rules/add_rules',
-    main: AddRulesPage,
+    component: AddRulesPageLazy,
     exact: true,
   },
 ];
@@ -88,9 +89,8 @@ const RulesContainerComponent: React.FC = () => {
               key={`rules-route-${route.path}`}
               path={route.path}
               exact={route?.exact ?? false}
-            >
-              <route.main />
-            </Route>
+              component={route.component}
+            />
           ))}
           <Route component={NotFoundPage} />
           <SpyRoute pageName={SecurityPageName.rules} />

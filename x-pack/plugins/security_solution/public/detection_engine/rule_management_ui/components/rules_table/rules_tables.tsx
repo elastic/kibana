@@ -23,7 +23,7 @@ import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout'
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { AllRulesTabs } from './rules_table_toolbar';
+import { AllRulesTabs } from './all_rules_tabs';
 import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';

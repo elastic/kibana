@@ -6,41 +6,19 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { MANAGEMENT_PATH, MANAGE_PATH } from '../../common/constants';
-import { SecurityPageName } from '../app/types';
-import { ManagementContainer } from './pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
-import { CurrentLicense } from '../common/components/current_license';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { ManageLandingPage } from './pages/landing';
 
-const ManagementLanding = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.administration}>
-      <ManageLandingPage />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
-);
-
-/**
- * Returns the React Router Routes for the management area
- */
-const ManagementRoutes = () => (
-  <PluginTemplateWrapper>
-    <CurrentLicense>
-      <ManagementContainer />
-    </CurrentLicense>
-  </PluginTemplateWrapper>
-);
+const ManagementLandingLazy = React.lazy(() => import('./route_landing_lazy'));
+const ManagementRoutesLazy = React.lazy(() => import('./routes_lazy'));
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: MANAGE_PATH,
-    component: React.memo(ManagementLanding),
+    component: ManagementLandingLazy,
   },
   {
     path: MANAGEMENT_PATH,
-    component: React.memo(ManagementRoutes),
+    component: ManagementRoutesLazy,
   },
 ];

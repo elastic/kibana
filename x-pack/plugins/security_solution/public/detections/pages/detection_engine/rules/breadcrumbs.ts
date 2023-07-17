@@ -15,9 +15,9 @@ import { SecurityPageName } from '../../../../app/types';
 import { RULES_PATH } from '../../../../../common/constants';
 import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
 import {
-  RuleDetailTabs,
   RULE_DETAILS_TAB_NAME,
 } from '../../../../detection_engine/rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from "../../../../detection_engine/rule_details_ui/pages/RuleDetailTabs";
 import { DELETED_RULE } from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 
 const getRuleDetailsTabName = (tabName: string): string => {
