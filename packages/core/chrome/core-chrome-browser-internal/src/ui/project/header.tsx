@@ -268,25 +268,17 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
+
+          {/* fixme: should have position=fixed */}
           {headerActionMenuMounter.mount && (
-            <div
-              css={css`
-                position: relative;
-                top: 0;
-              `}
-            >
-              <EuiHeader
-                className="header__secondBar"
-                data-test-subj="kibanaProjectHeaderActionMenu"
-              >
-                <EuiHeaderSection />
-                <EuiHeaderSection side="right">
-                  <EuiHeaderSectionItem>
-                    <HeaderActionMenu mounter={headerActionMenuMounter} />
-                  </EuiHeaderSectionItem>
-                </EuiHeaderSection>
-              </EuiHeader>
-            </div>
+            <EuiHeader className="header__secondBar" data-test-subj="kibanaProjectHeaderActionMenu">
+              <EuiHeaderSection />
+              <EuiHeaderSection side="right">
+                <EuiHeaderSectionItem>
+                  <HeaderActionMenu mounter={headerActionMenuMounter} />
+                </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+            </EuiHeader>
           )}
         </div>
       </header>
