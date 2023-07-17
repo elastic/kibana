@@ -8,6 +8,7 @@
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { useCallback } from 'react';
 import { useLazyRef } from '../../../../hooks/use_lazy_ref';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
@@ -57,5 +58,16 @@ export const useLogViewReference = ({ id, extraFields = [] }: Props) => {
         };
   });
 
-  return { logViewReference: logViewReference.current, loading };
+  const getLogsDataView = useCallback(
+    async (reference?: LogViewReference | null) => {
+      if (reference) {
+        const resolvedLogview = await logsShared.logViews.client.getResolvedLogView(reference);
+
+        return resolvedLogview.dataViewReference;
+      }
+    },
+    [logsShared.logViews.client]
+  );
+
+  return { logViewReference: logViewReference.current, loading, getLogsDataView };
 };
