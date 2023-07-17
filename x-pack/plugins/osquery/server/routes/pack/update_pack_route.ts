@@ -8,7 +8,6 @@
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
 import { unset, has, difference, filter, find, map, mapKeys, uniq, some, isEmpty } from 'lodash';
-import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -17,6 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
@@ -33,6 +33,14 @@ import {
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
+import type {
+  UpdatePacksRequestParamsSchema,
+  UpdatePacksRequestBodySchema,
+} from '../../../common/api/packs/update_packs_route';
+import {
+  updatePacksRequestBodySchema,
+  updatePacksRequestParamsSchema,
+} from '../../../common/api/packs/update_packs_route';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -46,46 +54,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: schema.object(
-              {
-                id: schema.string(),
-              },
-              { unknowns: 'allow' }
-            ),
-            body: schema.object(
-              {
-                name: schema.maybe(schema.string()),
-                description: schema.maybe(schema.string()),
-                enabled: schema.maybe(schema.boolean()),
-                policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-                shards: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-                queries: schema.maybe(
-                  schema.recordOf(
-                    schema.string(),
-                    schema.object({
-                      query: schema.string(),
-                      interval: schema.maybe(schema.number()),
-                      snapshot: schema.maybe(schema.boolean()),
-                      removed: schema.maybe(schema.boolean()),
-                      platform: schema.maybe(schema.string()),
-                      version: schema.maybe(schema.string()),
-                      ecs_mapping: schema.maybe(
-                        schema.recordOf(
-                          schema.string(),
-                          schema.object({
-                            field: schema.maybe(schema.string()),
-                            value: schema.maybe(
-                              schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-                            ),
-                          })
-                        )
-                      ),
-                    })
-                  )
-                ),
-              },
-              { unknowns: 'allow' }
-            ),
+            params: buildRouteValidation<
+              typeof updatePacksRequestParamsSchema,
+              UpdatePacksRequestParamsSchema
+            >(updatePacksRequestParamsSchema),
+            body: buildRouteValidation<
+              typeof updatePacksRequestBodySchema,
+              UpdatePacksRequestBodySchema
+            >(updatePacksRequestBodySchema),
           },
         },
       },

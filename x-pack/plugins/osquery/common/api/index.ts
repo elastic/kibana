@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './common/utils';
 export * from './live_query/create_live_query_route';
 export * from './live_query/find_live_query_route';
 export * from './live_query/get_live_query_results_route';
@@ -14,6 +15,10 @@ export * from './saved_query/delete_saved_query_route';
 export * from './saved_query/find_saved_query_route';
 export * from './saved_query/update_saved_query_route';
 export * from './saved_query/read_saved_query_route';
-export * from './common/utils';
+export * from './packs/create_pack_route';
+export * from './packs/delete_packs_route';
+export * from './packs/find_packs_route';
+export * from './packs/read_packs_route';
+export * from './packs/update_packs_route';
 export * from './model/default_uuid';
 export * from './model/non_empty_string';
