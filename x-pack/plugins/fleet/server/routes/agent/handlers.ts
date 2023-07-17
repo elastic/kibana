@@ -48,12 +48,9 @@ import type {
   GetAgentUploadFileRequestSchema,
   PostRetrieveAgentsByActionsRequestSchema,
 } from '../../types';
-import { defaultFleetErrorHandler, KQLSyntaxError } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
-import { AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
-
-import { validateKuery } from '../utils/filter_utils';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
@@ -186,16 +183,6 @@ export const getAgentsHandler: RequestHandler<
   const { kuery } = request.query;
 
   try {
-    // validate kuery
-    const validationObj = validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
-    if (validationObj?.error) {
-      return response.badRequest({
-        body: {
-          message: validationObj.error,
-        },
-      });
-    }
-
     const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
       page: request.query.page,
       perPage: request.query.perPage,
@@ -225,13 +212,6 @@ export const getAgentsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
@@ -246,8 +226,6 @@ export const getAgentTagsHandler: RequestHandler<
   const { kuery } = request.query;
 
   try {
-    validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
-
     const tags = await AgentService.getAgentTags(soClient, esClient, {
       showInactive: request.query.showInactive,
       kuery,
@@ -258,13 +236,6 @@ export const getAgentTagsHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

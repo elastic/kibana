@@ -24,11 +24,6 @@ import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
 
-import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
-import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
-
-import { validateKuery } from '../utils/filter_utils';
-
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
@@ -38,20 +33,6 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
   const { kuery } = request.query;
 
   try {
-    const validationObj = validateKuery(
-      kuery,
-      [FLEET_ENROLLMENT_API_PREFIX],
-      ENROLLMENT_API_KEY_MAPPINGS,
-      true
-    );
-    if (validationObj?.error) {
-      return response.badRequest({
-        body: {
-          message: validationObj.error,
-        },
-      });
-    }
-
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,

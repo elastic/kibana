@@ -43,22 +43,15 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { defaultFleetErrorHandler, PackagePolicyNotFoundError, KQLSyntaxError } from '../../errors';
+import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
-import {
-  PACKAGES_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICIES_MAPPINGS,
-} from '../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
-
-import { validateKuery } from '../utils/filter_utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -73,20 +66,6 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
 
   const { kuery, ...restOfQuery } = request.query;
   try {
-    const validationObj = validateKuery(
-      kuery,
-      [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-      PACKAGE_POLICIES_MAPPINGS,
-      true
-    );
-    if (validationObj?.error) {
-      return response.badRequest({
-        body: {
-          message: validationObj.error,
-        },
-      });
-    }
-
     const { items, total, page, perPage } = await packagePolicyService.list(soClient, {
       kuery,
       ...restOfQuery,
@@ -111,13 +90,6 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

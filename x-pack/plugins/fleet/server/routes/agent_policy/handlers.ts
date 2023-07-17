@@ -20,11 +20,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
-import {
-  AGENTS_PREFIX,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_MAPPINGS,
-} from '../../constants';
+import { AGENTS_PREFIX } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -52,9 +48,8 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
-import { validateKuery } from '../utils/filter_utils';
 
 export async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
@@ -90,20 +85,6 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   } = request.query;
 
   try {
-    const validationObj = validateKuery(
-      kuery,
-      [AGENT_POLICY_SAVED_OBJECT_TYPE],
-      AGENT_POLICY_MAPPINGS,
-      true
-    );
-    if (validationObj?.error) {
-      return response.badRequest({
-        body: {
-          message: validationObj.error,
-        },
-      });
-    }
-
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       esClient,
@@ -120,13 +101,6 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    if (error instanceof KQLSyntaxError) {
-      return response.badRequest({
-        body: {
-          message: error.message,
-        },
-      });
-    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
