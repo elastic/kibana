@@ -7,6 +7,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '../../common/constants';
 
 export function registerScriptsRoute(router: IRouter) {
@@ -18,7 +19,13 @@ export function registerScriptsRoute(router: IRouter) {
     .addVersion(
       {
         version: SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
-        validate: false,
+        validate: {
+          response: {
+            '200': {
+              body: schema.arrayOf(schema.string()),
+            },
+          },
+        },
       },
       async (context, request, response) => {
         return response.ok({
