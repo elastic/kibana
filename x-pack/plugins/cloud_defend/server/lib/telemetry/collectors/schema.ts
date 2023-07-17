@@ -66,6 +66,7 @@ export const cloudDefendUsageSchema: MakeSchemaFrom<CloudDefendUsage> = {
       container_image_name: { type: 'keyword' },
       container_image_tag: { type: 'keyword' },
       pod_name: { type: 'keyword' },
+      doc_count: { type: 'long' },
       process_doc_count: { type: 'long' },
       file_doc_count: { type: 'long' },
       alert_doc_count: { type: 'long' },

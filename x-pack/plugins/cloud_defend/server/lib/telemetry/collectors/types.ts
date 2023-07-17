@@ -60,6 +60,7 @@ export interface CloudDefendPodsStats {
   pod_name: string;
   container_image_name: string;
   container_image_tag: string;
+  doc_count: number;
   file_doc_count: number;
   process_doc_count: number;
   alert_doc_count: number;
