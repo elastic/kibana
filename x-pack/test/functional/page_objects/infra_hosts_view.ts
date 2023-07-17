@@ -40,12 +40,12 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
-    async clickMetadataFlyoutTab() {
-      return testSubjects.click('hostsView-flyout-tabs-metadata');
-    },
-
     async clickOverviewFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-overview');
+    },
+
+    async clickMetadataFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-metadata');
     },
 
     async clickOverviewLinkToAlerts() {
@@ -225,6 +225,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const container = await testSubjects.find('totalAlertCount');
       const containerText = await container.getVisibleText();
       return containerText;
+    },
+
+    async getAssetDetailsMetricsCharts() {
+      const container = await testSubjects.find('assetDetailsMetricsChartGrid');
+      return container.findAllByCssSelector('[data-test-subj*="assetDetailsMetricsChart"]');
     },
 
     getMetadataTab() {

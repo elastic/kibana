@@ -154,7 +154,6 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
-    "@kbn/core-lifecycle-browser",
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
