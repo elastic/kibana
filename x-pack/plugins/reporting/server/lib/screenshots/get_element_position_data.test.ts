@@ -69,7 +69,6 @@ describe('getElementPositionAndAttributes', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
     document.body.innerHTML = '';
   });
 

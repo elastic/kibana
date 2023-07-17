@@ -28,7 +28,7 @@ jest.mock('./api', () => ({
 
 describe('usePrePackagedRules', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   test('init', async () => {

@@ -36,7 +36,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
 });

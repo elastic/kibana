@@ -80,10 +80,11 @@ describe('pick_events', () => {
   beforeAll(() => {
     (EuiToolTip as unknown as jest.Mock).mockImplementation(mockTooltip);
   });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
+
   it('renders', () => {
     const wrapper = render(
       <TestProviders>

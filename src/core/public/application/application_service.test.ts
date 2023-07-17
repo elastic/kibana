@@ -1140,7 +1140,7 @@ describe('#stop()', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('removes the beforeunload listener', async () => {
