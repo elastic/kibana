@@ -79,7 +79,7 @@ describe('register()', () => {
       expect(() =>
         registry.register({ ...alertType, id: `${alertType.id}${char}` })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"expected RuleType Id not to include invalid character: ${char}"`
+        `"expected AlertType Id not to include invalid character: ${char}"`
       );
     }
 
@@ -87,7 +87,7 @@ describe('register()', () => {
     expect(() =>
       registry.register({ ...alertType, id: `${first}${alertType.id}${second}` })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"expected RuleType Id not to include invalid characters: ${first}, ${second}"`
+      `"expected AlertType Id not to include invalid characters: ${first}, ${second}"`
     );
   });
 
