@@ -511,13 +511,17 @@ export function App({
             datasourceStates[activeDatasourceId].state,
             {
               frame: frameDatasourceAPI,
-              setState: (newStateOrUpdater) =>
+              setState: (newStateOrUpdater) => {
                 dispatch(
                   updateDatasourceState({
-                    updater: newStateOrUpdater,
+                    newDatasourceState:
+                      typeof newStateOrUpdater === 'function'
+                        ? newStateOrUpdater(datasourceStates[activeDatasourceId].state)
+                        : newStateOrUpdater,
                     datasourceId: activeDatasourceId,
                   })
-                ),
+                );
+              },
             }
           )
         : []),

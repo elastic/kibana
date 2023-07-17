@@ -8,8 +8,8 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
