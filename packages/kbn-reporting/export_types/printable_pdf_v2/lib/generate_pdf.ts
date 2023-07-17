@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { PdfMetrics } from '@kbn/reporting-common/export_types/metrics';
@@ -16,8 +15,9 @@ import {
   LocatorParams,
   ReportingConfigType,
   ReportingServerInfo,
-  UrlOrUrlLocatorTuple,
 } from '@kbn/reporting-common';
+import { Observable } from 'rxjs';
+import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 import { TaskPayloadPDFV2 } from '../types';
 
 interface PdfResult {
@@ -26,7 +26,7 @@ interface PdfResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+type GetScreenshotsFn = (options: PdfScreenshotOptions) => Observable<PdfScreenshotResult>;
 
 export function generatePdfObservable(
   config: ReportingConfigType,
@@ -35,7 +35,7 @@ export function generatePdfObservable(
   job: TaskPayloadPDFV2,
   locatorParams: LocatorParams[],
   options: Omit<PdfScreenshotOptions, 'urls'>
-): Rx.Observable<PdfResult> {
+): Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
@@ -45,7 +45,7 @@ export function generatePdfObservable(
   const urls = locatorParams.map((locator) => [
     getFullRedirectAppUrl(config, serverInfo, job.spaceId, job.forceNow),
     locator,
-  ]) as UrlOrUrlLocatorTuple[];
+  ]) as unknown as UrlOrUrlWithContext[];
   const screenshots$ = getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
       if (metrics.cpu) {
