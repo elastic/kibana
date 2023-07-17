@@ -14,12 +14,14 @@ import type {
   UserActionType,
   Case,
   Cases,
+  CaseConnector,
 } from '../../common/types/domain';
 import {
   CaseSeverity,
   CaseStatuses,
   UserActionActions,
   UserActionTypes,
+  ConnectorTypes,
 } from '../../common/types/domain';
 import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
 
@@ -37,8 +39,8 @@ import type {
   CasesFindResponseUI,
   CasesUI,
 } from '../../common/ui/types';
-import type { CaseConnector, Comment } from '../../common/api';
-import { CommentType, ConnectorTypes, ExternalReferenceStorageType } from '../../common/api';
+import type { Comment } from '../../common/api';
+import { CommentType, ExternalReferenceStorageType } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';

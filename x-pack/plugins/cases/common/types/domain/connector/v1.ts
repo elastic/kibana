@@ -9,11 +9,8 @@ import * as rt from 'io-ts';
 
 import type { ActionType } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
-import { JiraFieldsRT } from './jira';
-import { ResilientFieldsRT } from './resilient';
-import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
-import { ServiceNowSIRFieldsRT } from './servicenow_sir';
-import { SwimlaneFieldsRT } from './swimlane';
+
+export * from './mappings.v1';
 
 export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ActionType;
@@ -33,37 +30,104 @@ const ConnectorCasesWebhookTypeFieldsRt = rt.strict({
   fields: rt.null,
 });
 
+/**
+ * Jira
+ */
+
+export const JiraFieldsRt = rt.strict({
+  issueType: rt.union([rt.string, rt.null]),
+  priority: rt.union([rt.string, rt.null]),
+  parent: rt.union([rt.string, rt.null]),
+});
+
+export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRt>;
+
 const ConnectorJiraTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.jira),
-  fields: rt.union([JiraFieldsRT, rt.null]),
+  fields: rt.union([JiraFieldsRt, rt.null]),
 });
+
+/**
+ * Resilient
+ */
+
+export const ResilientFieldsRt = rt.strict({
+  incidentTypes: rt.union([rt.array(rt.string), rt.null]),
+  severityCode: rt.union([rt.string, rt.null]),
+});
+
+export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRt>;
 
 const ConnectorResilientTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.resilient),
-  fields: rt.union([ResilientFieldsRT, rt.null]),
+  fields: rt.union([ResilientFieldsRt, rt.null]),
 });
+
+/**
+ * ServiceNow
+ */
+
+export const ServiceNowITSMFieldsRt = rt.strict({
+  impact: rt.union([rt.string, rt.null]),
+  severity: rt.union([rt.string, rt.null]),
+  urgency: rt.union([rt.string, rt.null]),
+  category: rt.union([rt.string, rt.null]),
+  subcategory: rt.union([rt.string, rt.null]),
+});
+
+export type ServiceNowITSMFieldsType = rt.TypeOf<typeof ServiceNowITSMFieldsRt>;
 
 const ConnectorServiceNowITSMTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.serviceNowITSM),
-  fields: rt.union([ServiceNowITSMFieldsRT, rt.null]),
+  fields: rt.union([ServiceNowITSMFieldsRt, rt.null]),
 });
 
-const ConnectorSwimlaneTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.swimlane),
-  fields: rt.union([SwimlaneFieldsRT, rt.null]),
+export const ServiceNowSIRFieldsRt = rt.strict({
+  category: rt.union([rt.string, rt.null]),
+  destIp: rt.union([rt.boolean, rt.null]),
+  malwareHash: rt.union([rt.boolean, rt.null]),
+  malwareUrl: rt.union([rt.boolean, rt.null]),
+  priority: rt.union([rt.string, rt.null]),
+  sourceIp: rt.union([rt.boolean, rt.null]),
+  subcategory: rt.union([rt.string, rt.null]),
 });
+
+export type ServiceNowSIRFieldsType = rt.TypeOf<typeof ServiceNowSIRFieldsRt>;
 
 const ConnectorServiceNowSIRTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.serviceNowSIR),
-  fields: rt.union([ServiceNowSIRFieldsRT, rt.null]),
+  fields: rt.union([ServiceNowSIRFieldsRt, rt.null]),
 });
+
+/**
+ * Swimlane
+ */
+
+export const SwimlaneFieldsRt = rt.strict({
+  caseId: rt.union([rt.string, rt.null]),
+});
+
+export enum SwimlaneConnectorType {
+  All = 'all',
+  Alerts = 'alerts',
+  Cases = 'cases',
+}
+
+export type SwimlaneFieldsType = rt.TypeOf<typeof SwimlaneFieldsRt>;
+
+const ConnectorSwimlaneTypeFieldsRt = rt.strict({
+  type: rt.literal(ConnectorTypes.swimlane),
+  fields: rt.union([SwimlaneFieldsRt, rt.null]),
+});
+
+/**
+ * None connector
+ */
 
 const ConnectorNoneTypeFieldsRt = rt.strict({
   type: rt.literal(ConnectorTypes.none),
   fields: rt.null,
 });
-
-export const NONE_CONNECTOR_ID: string = 'none';
 
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorCasesWebhookTypeFieldsRt,
@@ -94,21 +158,6 @@ export const CaseConnectorRt = rt.intersection([
   }),
   CaseUserActionConnectorRt,
 ]);
-
-const ActionConnectorResultRt = rt.intersection([
-  rt.strict({
-    id: rt.string,
-    actionTypeId: rt.string,
-    name: rt.string,
-    isDeprecated: rt.boolean,
-    isPreconfigured: rt.boolean,
-    isSystemAction: rt.boolean,
-    referencedByCount: rt.number,
-  }),
-  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
-]);
-
-export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
 
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;

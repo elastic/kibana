@@ -53,12 +53,13 @@ export {
   CASE_COMMENT_SAVED_OBJECT,
 } from './constants';
 
+export { ConnectorTypes } from './types/domain';
+
 export {
-  CommentType,
-  ConnectorTypes,
   getCasesFromAlertsUrl,
   getCaseFindUserActionsUrl,
   throwErrors,
+  CommentType,
   ExternalReferenceStorageType,
 } from './api';
 export { StatusAll } from './ui/types';

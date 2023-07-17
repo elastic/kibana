@@ -13,14 +13,12 @@ import type {
   UPDATE_CASES_CAPABILITY,
 } from '..';
 import type {
-  ActionConnector,
   SingleCaseMetricsResponse,
   Comment,
   CommentResponseAlertsType,
   CasesMetricsResponse,
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
-  GetCaseConnectorsResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -30,12 +28,14 @@ import type {
   UserAction,
   Case as CaseSnakeCase,
   User,
+  ActionConnector,
 } from '../types/domain';
 import type {
   CasePatchRequest,
   CasesFindResponse,
   CasesStatusResponse,
   CaseUserActionStatsResponse,
+  GetCaseConnectorsResponse,
   GetCaseUsersResponse,
   UserActionFindRequestTypes,
   UserActionFindResponse,

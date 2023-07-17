@@ -8,11 +8,10 @@
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import type { CasePostRequest } from '../../../common/types/api';
-import { ConnectorTypes } from '../../../common/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 import { alertComment, comment } from '../../mocks';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 export const casePayload: CasePostRequest = {
   title: 'Case SIR',

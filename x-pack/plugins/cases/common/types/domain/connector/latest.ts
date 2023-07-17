@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export * from './cases';
-export * from './helpers';
-export * from './runtime_types';
-export * from './saved_object';
-export * from './metrics';
+export * from './v1';
+export * from './mappings.v1';

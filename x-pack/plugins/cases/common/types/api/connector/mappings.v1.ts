@@ -6,11 +6,12 @@
  */
 
 import * as rt from 'io-ts';
+import { ConnectorMappingsRt } from '../../domain/connector/v1';
 
-export const JiraFieldsRT = rt.strict({
-  issueType: rt.union([rt.string, rt.null]),
-  priority: rt.union([rt.string, rt.null]),
-  parent: rt.union([rt.string, rt.null]),
+export const ConnectorMappingResponseRt = rt.strict({
+  id: rt.string,
+  version: rt.string,
+  mappings: ConnectorMappingsRt,
 });
 
-export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRT>;
+export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;

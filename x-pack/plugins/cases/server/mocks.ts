@@ -11,9 +11,8 @@ import type {
   CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestUserType,
-  ConnectorMappings,
 } from '../common/api';
-import { CommentType, ConnectorTypes } from '../common/api';
+import { CommentType } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
@@ -24,6 +23,7 @@ import {
   UserActionTypes,
   CaseSeverity,
   CaseStatuses,
+  ConnectorTypes,
 } from '../common/types/domain';
 import type { CasePostRequest } from '../common/types/api';
 

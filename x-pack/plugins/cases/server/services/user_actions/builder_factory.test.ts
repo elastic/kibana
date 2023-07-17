@@ -8,11 +8,12 @@
 import {
   CaseSeverity,
   CaseStatuses,
+  ConnectorTypes,
   UserActionActions,
   UserActionTypes,
 } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CommentType, ConnectorTypes } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,

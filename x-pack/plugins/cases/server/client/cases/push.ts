@@ -12,13 +12,9 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import type { Case, ConfigurationAttributes } from '../../../common/types/domain';
+import type { ActionConnector, Case, ConfigurationAttributes } from '../../../common/types/domain';
 import { CaseRt, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
-import type {
-  ActionConnector,
-  CommentRequestAlertType,
-  CommentAttributes,
-} from '../../../common/api';
+import type { CommentRequestAlertType, CommentAttributes } from '../../../common/api';
 import { OWNER_FIELD, CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 

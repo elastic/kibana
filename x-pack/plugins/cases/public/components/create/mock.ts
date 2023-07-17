@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
-import { ConnectorTypes } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
 

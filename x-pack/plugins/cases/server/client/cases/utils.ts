@@ -11,23 +11,21 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
+  ActionConnector,
   Case,
   CaseAssignees,
   CaseAttributes,
+  CaseField,
+  ConnectorMappings,
   ExternalService,
+  ThirdPartyField,
   User,
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
-import type {
-  ActionConnector,
-  Comment,
-  CaseField,
-  ThirdPartyField,
-  ConnectorMappings,
-} from '../../../common/api';
+import type { Comment } from '../../../common/api';
 import { CommentType } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';

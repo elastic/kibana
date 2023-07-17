@@ -15,6 +15,7 @@ import type {
   CaseResolveResponse,
   CasesFindResponse,
   CaseUserActionStatsResponse,
+  GetCaseConnectorsResponse,
   UserActionFindResponse,
 } from '../../common/types/api';
 import type {
@@ -34,7 +35,6 @@ import type {
   BulkCreateCommentRequest,
   CommentRequest,
   SingleCaseMetricsResponse,
-  GetCaseConnectorsResponse,
 } from '../../common/api';
 import {
   CommentType,

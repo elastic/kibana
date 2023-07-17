@@ -13,12 +13,14 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ExternalService, CaseAttributes } from '../../common/types/domain';
-import { CaseStatuses, CaseSeverity } from '../../common/types/domain';
+import type { ExternalService, CaseAttributes, CaseConnector } from '../../common/types/domain';
+import { CaseStatuses, CaseSeverity, ConnectorTypes } from '../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
-import type { CaseConnector } from '../../common/api';
-import { ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
-import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  NONE_CONNECTOR_ID,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 import { getNoneCaseConnector } from '../common/utils';
 import type { ConnectorPersistedFields } from '../common/types/connectors';
 import type { CasePersistedAttributes } from '../common/types/case';

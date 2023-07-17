@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorMappingsAttributesPartialRt } from '../../../server/common/types/connector_mappings';
-import { decodeOrThrow } from '../runtime_types';
-import { ConnectorMappingsAttributesRt, ConnectorMappingsRt } from './mappings';
+import { ConnectorMappingsAttributesRt, ConnectorMappingsRt } from './v1';
 
 describe('mappings', () => {
   const mappings = [
@@ -96,22 +94,6 @@ describe('mappings', () => {
         _tag: 'Right',
         right: { ...attributes, mappings: [{ ...attributes.mappings[0] }] },
       });
-    });
-  });
-
-  describe('ConnectorMappingsAttributesPartialRt', () => {
-    it('strips excess fields from the object', () => {
-      const res = decodeOrThrow(ConnectorMappingsAttributesPartialRt)({
-        bananas: 'yes',
-        owner: 'hi',
-      });
-      expect(res).toMatchObject({
-        owner: 'hi',
-      });
-    });
-
-    it('does not throw when the object is empty', () => {
-      expect(() => decodeOrThrow(ConnectorMappingsAttributesPartialRt)({})).not.toThrow();
     });
   });
 });

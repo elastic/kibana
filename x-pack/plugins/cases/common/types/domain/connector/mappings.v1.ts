@@ -41,11 +41,3 @@ export const ConnectorMappingsAttributesRt = rt.strict({
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
 export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
-
-export const ConnectorMappingResponseRt = rt.strict({
-  id: rt.string,
-  version: rt.string,
-  mappings: ConnectorMappingsRt,
-});
-
-export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;

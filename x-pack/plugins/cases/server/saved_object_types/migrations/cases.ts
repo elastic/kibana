@@ -9,10 +9,9 @@
 
 import { cloneDeep, unset, flow } from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
-import { ConnectorTypes } from '../../../common/api';
 
 import {
   CONNECTOR_ID_REFERENCE_NAME,

@@ -16,7 +16,7 @@ import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { Case, User } from '../../common/types/domain';
-import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
+import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -37,12 +37,7 @@ import type {
   Comment,
   CommentsFindResponse,
 } from '../../common/api';
-import {
-  CommentType,
-  ConnectorTypes,
-  ExternalReferenceSORt,
-  FileAttachmentMetadataRt,
-} from '../../common/api';
+import { CommentType, ExternalReferenceSORt, FileAttachmentMetadataRt } from '../../common/api';
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
   parseCommentString,
