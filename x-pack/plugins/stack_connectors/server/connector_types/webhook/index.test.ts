@@ -60,7 +60,7 @@ describe('connectorType', () => {
 
 describe('secrets validation', () => {
   test('succeeds when secrets is valid', () => {
-    const secrets: Record<string, string | null> = {
+    const secrets: Record<string, string> = {
       user: 'bob',
       password: 'supersecret',
       crt: null,
