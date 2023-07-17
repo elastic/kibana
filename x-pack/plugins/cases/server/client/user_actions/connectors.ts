@@ -13,7 +13,6 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type {
   GetCaseConnectorsResponse,
   CaseConnector,
-  UserActionAttributes,
   CaseExternalServiceBasic,
   GetCaseConnectorsPushDetails,
 } from '../../../common/api';
@@ -30,6 +29,7 @@ import { Operations } from '../../authorization';
 import type { GetConnectorsRequest } from './types';
 import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
+import type { UserActionAttributes } from '../../../common/types/domain';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,
