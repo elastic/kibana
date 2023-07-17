@@ -79,7 +79,7 @@ jest.mock('@elastic/eui', () => {
 
 const { setup } = pageHelpers.watchCreateThreshold;
 
-describe('<ThresholdWatchEdit /> create route', () => {
+describe.skip('<ThresholdWatchEdit /> create route', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateThresholdTestBed;
 

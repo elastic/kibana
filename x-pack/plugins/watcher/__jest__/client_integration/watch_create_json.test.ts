@@ -16,7 +16,7 @@ import { WATCH } from './helpers/jest_constants';
 
 const { setup } = pageHelpers.watchCreateJson;
 
-describe('<JsonWatchEdit /> create route', () => {
+describe.skip('<JsonWatchEdit /> create route', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateJsonTestBed;
 

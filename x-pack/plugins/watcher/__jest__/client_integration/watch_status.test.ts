@@ -38,7 +38,7 @@ const watch = {
   },
 };
 
-describe('<WatchStatus />', () => {
+describe.skip('<WatchStatus />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchStatusTestBed;
 

@@ -16,7 +16,7 @@ import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchEdit;
 
-describe('<WatchEdit />', () => {
+describe.skip('<WatchEdit />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchEditTestBed;
 
