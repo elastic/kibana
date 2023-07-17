@@ -63,9 +63,10 @@ const docLinks = {
 interface Props {
   onBack: () => void;
   onSubmit: () => void;
+  isSaving: boolean;
 }
 
-export const RemoteClusterSetupTrust = ({ onBack, onSubmit }: Props) => {
+export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const { canUseAPIKeyTrustModel, isCloudEnabled } = useContext(AppContext);
 
@@ -125,31 +126,40 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit }: Props) => {
 
       <EuiSpacer size="xxl" />
 
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="setupTrustDoneButton"
-            iconType="arrowLeft"
-            onClick={onBack}
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.clusterWizard.trustStep.backButtonLabel"
-              defaultMessage="Back"
-            />
-          </EuiButtonEmpty>
+      <EuiFlexGroup wrap justifyContent="center">
+        <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
+          <EuiFlexGroup justifyContent='flexStart'>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="setupTrustDoneButton"
+                iconType="arrowLeft"
+                onClick={onBack}
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.clusterWizard.trustStep.backButtonLabel"
+                  defaultMessage="Back"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="setupTrustDoneButton"
-            color="primary"
-            fill
-            onClick={() => setIsModalVisible(true)}
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.clusterWizard.trustStep.doneButtonLabel"
-              defaultMessage="Add remote cluster"
-            />
-          </EuiButton>
+        <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
+          <EuiFlexGroup justifyContent='flexEnd'>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="setupTrustDoneButton"
+                color="primary"
+                fill
+                isLoading={isSaving}
+                onClick={() => setIsModalVisible(true)}
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.clusterWizard.trustStep.doneButtonLabel"
+                  defaultMessage="Add remote cluster"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         {isModalVisible && (

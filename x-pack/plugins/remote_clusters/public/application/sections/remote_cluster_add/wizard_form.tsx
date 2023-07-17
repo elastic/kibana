@@ -22,7 +22,7 @@ interface Props {
   isSaving: boolean;
 }
 
-export const RemoteClusterWizard = ({ saveRemoteClusterConfig, onCancel }: Props) => {
+export const RemoteClusterWizard = ({ saveRemoteClusterConfig, onCancel, isSaving }: Props) => {
   // TODO: fix types
   const [formState, setFormState] = useState({} as any);
   const [currentStep, setCurrentStep] = useState(CONFIGURE_CONNECTION);
@@ -79,6 +79,7 @@ export const RemoteClusterWizard = ({ saveRemoteClusterConfig, onCancel }: Props
         <RemoteClusterSetupTrust
           onBack={() => setCurrentStep(CONFIGURE_CONNECTION)}
           onSubmit={completeTrustStep}
+          isSaving={isSaving}
         />
       )}
     </EuiPageSection>
