@@ -13,7 +13,7 @@ import { onActiveDataChange } from '.';
 export const optimizingMiddleware = () => (store: MiddlewareAPI) => {
   return (next: Dispatch) => (action: Action) => {
     if (onActiveDataChange.match(action)) {
-      if (isEqual(store.getState().lens.activeData, action.payload)) {
+      if (isEqual(store.getState().lens.activeData, action.payload.activeData)) {
         return;
       }
     }

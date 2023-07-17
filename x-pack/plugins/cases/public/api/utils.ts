@@ -7,6 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
+import type { UserActions } from '../../common/types/domain';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -14,7 +15,6 @@ import {
 import type {
   CasesFindResponse,
   Case,
-  UserActions,
   CommentRequest,
   Comment,
   CaseResolveResponse,
