@@ -589,12 +589,10 @@ export class SavedSearchEmbeddable
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
               <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
-                <>
-                  <SavedSearchEmbeddableComponent {...props} />
-                  <SavedSearchEmbeddableBadge
-                    interceptedWarnings={props.searchProps.interceptedWarnings}
-                  />
-                </>
+                <SavedSearchEmbeddableComponent {...props} />
+                <SavedSearchEmbeddableBadge
+                  interceptedWarnings={props.searchProps.interceptedWarnings}
+                />
               </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>

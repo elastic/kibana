@@ -25,8 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { SearchResponseInterceptedWarning } from '../../../types';
-import './warnings_callout.scss';
+import type { SearchResponseInterceptedWarning } from '../../../types';
 
 export interface WarningsCalloutProps {
   interceptedWarnings?: SearchResponseInterceptedWarning[];
@@ -189,18 +188,35 @@ export const WarningsCallout = ({
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
       >
-        <ul className="dscWarningsCalloutWarningList">
+        <ul
+          className="eui-yScrollWithShadows"
+          css={css`
+            max-height: calc(${euiTheme.size.base} * 20);
+            width: calc(${euiTheme.size.base} * 16);
+          `}
+        >
           {interceptedWarnings.map((warning, index) => (
             <li
               key={`warning-${index}`}
               data-test-subj={`${dataTestSubj}_item`}
-              className="dscWarningsCalloutWarningList__item"
+              css={css`
+                padding: ${euiTheme.size.base};
+
+                & + & {
+                  border-top: ${euiTheme.border.thin};
+                }
+              `}
             >
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="warning" color="warning" />
                 </EuiFlexItem>
-                <EuiFlexItem className="dscWarningsCalloutWarningList__itemDescription">
+                <EuiFlexItem
+                  css={css`
+                    overflow-wrap: break-word;
+                    min-width: 0;
+                  `}
+                >
                   <WarningContent
                     warning={warning}
                     groupStyles={{ direction: 'column' }}
