@@ -503,6 +503,7 @@ const AssistantComponent: React.FC<Props> = ({
         {showTitle && (
           <AssistantHeader
             currentConversation={currentConversation}
+            currentTitle={currentTitle}
             defaultConnectorId={defaultConnectorId}
             defaultProvider={defaultProvider}
             docLinks={docLinks}
@@ -515,7 +516,6 @@ const AssistantComponent: React.FC<Props> = ({
             setSelectedConversationId={setSelectedConversationId}
             shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
             showAnonymizedValues={showAnonymizedValues}
-            currentTitle={currentTitle}
           />
         )}
 
@@ -579,12 +579,21 @@ const AssistantComponent: React.FC<Props> = ({
               isDisabled={isSendingDisabled}
             />
           </EuiFlexItem>
-          <ChatActions
-            onChatCleared={handleOnChatCleared}
-            isDisabled={isSendingDisabled}
-            isLoading={isLoading}
-            onSendMessage={handleButtonSendMessage}
-          />
+          <EuiFlexItem
+            css={css`
+              left: -34px;
+              position: relative;
+              top: 11px;
+            `}
+            grow={false}
+          >
+            <ChatActions
+              onChatCleared={handleOnChatCleared}
+              isDisabled={isSendingDisabled}
+              isLoading={isLoading}
+              onSendMessage={handleButtonSendMessage}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
         {!isDisabled && (
           <QuickPrompts

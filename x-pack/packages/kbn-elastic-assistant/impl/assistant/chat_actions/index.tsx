@@ -26,47 +26,38 @@ export const ChatActions: FunctionComponent<Props> = ({
   onSendMessage,
 }) => {
   return (
-    <EuiFlexItem
+    <EuiFlexGroup
       css={css`
-        left: -34px;
-        position: relative;
-        top: 11px;
+        position: absolute;
       `}
-      grow={false}
+      direction="column"
+      gutterSize="xs"
     >
-      <EuiFlexGroup
-        css={css`
-          position: absolute;
-        `}
-        direction="column"
-        gutterSize="xs"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="right" content={i18n.CLEAR_CHAT}>
-            <EuiButtonIcon
-              aria-label={i18n.CLEAR_CHAT}
-              color="danger"
-              display="base"
-              iconType="cross"
-              isDisabled={isDisabled}
-              onClick={onChatCleared}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="right" content={i18n.SUBMIT_MESSAGE}>
-            <EuiButtonIcon
-              aria-label={i18n.SUBMIT_MESSAGE}
-              color="primary"
-              display="base"
-              iconType="returnKey"
-              isDisabled={isDisabled}
-              isLoading={isLoading}
-              onClick={onSendMessage}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="right" content={i18n.CLEAR_CHAT}>
+          <EuiButtonIcon
+            aria-label={i18n.CLEAR_CHAT}
+            color="danger"
+            display="base"
+            iconType="cross"
+            isDisabled={isDisabled}
+            onClick={onChatCleared}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="right" content={i18n.SUBMIT_MESSAGE}>
+          <EuiButtonIcon
+            aria-label={i18n.SUBMIT_MESSAGE}
+            color="primary"
+            display="base"
+            iconType="returnKey"
+            isDisabled={isDisabled}
+            isLoading={isLoading}
+            onClick={onSendMessage}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
