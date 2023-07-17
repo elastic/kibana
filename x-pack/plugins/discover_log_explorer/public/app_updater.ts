@@ -25,7 +25,7 @@ export const createAppUpdater = () => {
   return new BehaviorSubject<AppUpdater>((app) => {
     if (app.id === 'discover') {
       return {
-        deepLinks: appendDeepLinks(app, [logExplorerDeepLink, logExplorerDeepLink]),
+        deepLinks: appendDeepLinks(app, [logExplorerDeepLink]),
       };
     }
   });
