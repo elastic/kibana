@@ -91,33 +91,25 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      try {
-        const body = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(body.createdMonitors.length).eql(2);
-        const editedBody = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(editedBody.createdMonitors.length).eql(0);
-        expect(editedBody.updatedMonitors.length).eql(2);
+      const body = await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(body.createdMonitors.length).eql(2);
+      const editedBody = await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(editedBody.createdMonitors.length).eql(0);
+      expect(editedBody.updatedMonitors.length).eql(2);
 
-        testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
-        testMonitors[1].privateLocations = ['Test private location 8'];
+      testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
+      testMonitors[1].privateLocations = ['Test private location 8'];
 
-        const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(editedBodyError.createdMonitors.length).eql(0);
-        expect(editedBodyError.updatedMonitors.length).eql(1);
-        expect(editedBodyError.failedMonitors.length).eql(1);
-        expect(editedBodyError.failedMonitors[0].details).eql(
-          'Invalid private location: "Test private location 8". Remove it or replace it with a valid private location.'
-        );
-        expect(editedBodyError.failedMonitors[0].reason).eql(
-          "Couldn't save or update monitor because of an invalid configuration."
-        );
-      } finally {
-        await Promise.all([
-          testMonitors.map((monitor) => {
-            return monitorTestService.deleteMonitorByJourney(projectMonitors, monitor.id, project);
-          }),
-        ]);
-      }
+      const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(editedBodyError.createdMonitors.length).eql(0);
+      expect(editedBodyError.updatedMonitors.length).eql(1);
+      expect(editedBodyError.failedMonitors.length).eql(1);
+      expect(editedBodyError.failedMonitors[0].details).eql(
+        'Invalid private location: "Test private location 8". Remove it or replace it with a valid private location.'
+      );
+      expect(editedBodyError.failedMonitors[0].reason).eql(
+        "Couldn't save or update monitor because of an invalid configuration."
+      );
     });
   });
 }
