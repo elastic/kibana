@@ -22,23 +22,19 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ChatActions } from './chat_actions';
+import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
 import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { getDefaultConnector, getMessageFromRawResponse, getBlockBotConversation } from './helpers';
+import { getDefaultConnector, getBlockBotConversation } from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
-import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
-import { useSendMessages } from './use_send_messages';
-import type { Message } from '../assistant_context/types';
 import { PromptEditor } from './prompt_editor';
-import { getCombinedMessage } from './prompt/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
@@ -87,9 +83,7 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { appendMessage, appendReplacements, clearConversation, createConversation } =
-    useConversation();
-  const { isLoading, sendMessages } = useSendMessages();
+  const { createConversation } = useConversation();
 
   // Connector details
   const {
@@ -216,15 +210,6 @@ const AssistantComponent: React.FC<Props> = ({
   }, []);
   // End drill in `Add To Timeline` action
 
-  // For auto-focusing prompt within timeline
-  const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (shouldRefocusPrompt && promptTextAreaRef.current) {
-      promptTextAreaRef?.current.focus();
-    }
-  }, [shouldRefocusPrompt]);
-
   // Scroll to bottom on conversation change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'auto' });
@@ -232,7 +217,6 @@ const AssistantComponent: React.FC<Props> = ({
   useEffect(() => {
     setTimeout(() => {
       bottomRef.current?.scrollIntoView({ behavior: 'auto' });
-      promptTextAreaRef?.current?.focus();
     }, 0);
   }, [currentConversation.messages.length, selectedPromptContextsCount]);
   ////
@@ -257,89 +241,14 @@ const AssistantComponent: React.FC<Props> = ({
     [allSystemPrompts, conversations]
   );
 
-  const handlePromptChange = useCallback((prompt: string) => {
-    setPromptTextPreview(prompt);
-    setUserPrompt(prompt);
-  }, []);
-
-  // Handles sending latest user prompt to API
-  const handleSendMessage = useCallback(
-    async (promptText) => {
-      const onNewReplacements = (newReplacements: Record<string, string>) =>
-        appendReplacements({
-          conversationId: selectedConversationId,
-          replacements: newReplacements,
-        });
-
-      const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
-
-      const message = await getCombinedMessage({
-        isNewChat: currentConversation.messages.length === 0,
-        currentReplacements: currentConversation.replacements,
-        onNewReplacements,
-        promptText,
-        selectedPromptContexts,
-        selectedSystemPrompt: systemPrompt,
-      });
-
-      const updatedMessages = appendMessage({
-        conversationId: selectedConversationId,
-        message,
-      });
-
-      // Reset prompt context selection and preview before sending:
-      setSelectedPromptContexts({});
-      setPromptTextPreview('');
-
-      const rawResponse = await sendMessages({
-        http,
-        apiConfig: currentConversation.apiConfig,
-        messages: updatedMessages,
-      });
-      const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-      appendMessage({ conversationId: selectedConversationId, message: responseMessage });
-    },
-    [
-      allSystemPrompts,
-      currentConversation.messages.length,
-      currentConversation.replacements,
-      currentConversation.apiConfig,
-      selectedPromptContexts,
-      appendMessage,
-      selectedConversationId,
-      sendMessages,
-      http,
-      appendReplacements,
-      editingSystemPromptId,
-    ]
-  );
-
-  const handleButtonSendMessage = useCallback(() => {
-    handleSendMessage(promptTextAreaRef.current?.value?.trim() ?? '');
-    setUserPrompt('');
-  }, [handleSendMessage, promptTextAreaRef]);
-
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
     setEditingSystemPromptId(systemPromptId);
   }, []);
 
-  const handleOnChatCleared = useCallback(() => {
-    const defaultSystemPromptId = getDefaultSystemPrompt({
-      allSystemPrompts,
-      conversation: conversations[selectedConversationId],
-    })?.id;
-
-    setPromptTextPreview('');
-    setUserPrompt('');
-    setSelectedPromptContexts({});
-    clearConversation(selectedConversationId);
-    setEditingSystemPromptId(defaultSystemPromptId);
-  }, [allSystemPrompts, clearConversation, conversations, selectedConversationId]);
-
-  const shouldDisableConversationSelectorHotkeys = useCallback(() => {
-    const promptTextAreaHasFocus = document.activeElement === promptTextAreaRef.current;
-    return promptTextAreaHasFocus;
-  }, [promptTextAreaRef]);
+  // const shouldDisableConversationSelectorHotkeys = useCallback(() => {
+  //   const promptTextAreaHasFocus = document.activeElement === promptTextAreaRef.current;
+  //   return promptTextAreaHasFocus;
+  // }, [promptTextAreaRef]);
 
   // Add min-height to all codeblocks so timeline icon doesn't overflow
   const codeBlockContainers = [...document.getElementsByClassName('euiCodeBlock')];
@@ -395,7 +304,6 @@ const AssistantComponent: React.FC<Props> = ({
     currentConversation.messages,
     promptContexts,
     promptContextId,
-    handleSendMessage,
     conversationId,
     selectedConversationId,
     selectedPromptContexts,
@@ -439,11 +347,11 @@ const AssistantComponent: React.FC<Props> = ({
           `}
         />
 
-        {currentConversation.messages.length !== 0 &&
-          Object.keys(selectedPromptContexts).length > 0 && <EuiSpacer size={'m'} />}
+        {currentConversation.messages.length !== 0 && selectedPromptContextsCount > 0 && (
+          <EuiSpacer size={'m'} />
+        )}
 
-        {(currentConversation.messages.length === 0 ||
-          Object.keys(selectedPromptContexts).length > 0) && (
+        {(currentConversation.messages.length === 0 || selectedPromptContextsCount > 0) && (
           <PromptEditor
             conversation={currentConversation}
             editingSystemPromptId={editingSystemPromptId}
@@ -470,6 +378,7 @@ const AssistantComponent: React.FC<Props> = ({
       promptContexts,
       promptTextPreview,
       selectedPromptContexts,
+      selectedPromptContextsCount,
       showAnonymizedValues,
     ]
   );
@@ -514,7 +423,6 @@ const AssistantComponent: React.FC<Props> = ({
             selectedConversationId={selectedConversationId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             setSelectedConversationId={setSelectedConversationId}
-            shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
             showAnonymizedValues={showAnonymizedValues}
           />
         )}
@@ -564,37 +472,20 @@ const AssistantComponent: React.FC<Props> = ({
           isAssistantEnabled={isAssistantEnabled}
           isWelcomeSetup={isWelcomeSetup}
         />
-        <EuiFlexGroup
-          gutterSize="none"
-          css={css`
-            width: 100%;
-          `}
-        >
-          <EuiFlexItem>
-            <PromptTextArea
-              onPromptSubmit={handleSendMessage}
-              ref={promptTextAreaRef}
-              handlePromptChange={handlePromptChange}
-              value={isSendingDisabled ? '' : userPrompt ?? ''}
-              isDisabled={isSendingDisabled}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            css={css`
-              left: -34px;
-              position: relative;
-              top: 11px;
-            `}
-            grow={false}
-          >
-            <ChatActions
-              onChatCleared={handleOnChatCleared}
-              isDisabled={isSendingDisabled}
-              isLoading={isLoading}
-              onSendMessage={handleButtonSendMessage}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ChatSend
+          allSystemPrompts={allSystemPrompts}
+          currentConversation={currentConversation}
+          isDisabled={isSendingDisabled}
+          shouldRefocusPrompt={shouldRefocusPrompt}
+          setPromptTextPreview={setPromptTextPreview}
+          userPrompt={userPrompt}
+          setUserPrompt={setUserPrompt}
+          editingSystemPromptId={editingSystemPromptId}
+          http={http}
+          setEditingSystemPromptId={setEditingSystemPromptId}
+          selectedPromptContexts={selectedPromptContexts}
+          setSelectedPromptContexts={setSelectedPromptContexts}
+        />
         {!isDisabled && (
           <QuickPrompts
             setInput={setUserPrompt}
