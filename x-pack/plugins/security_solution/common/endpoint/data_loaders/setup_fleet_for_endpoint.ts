@@ -14,6 +14,7 @@ import type {
   PostFleetSetupResponse,
 } from '@kbn/fleet-plugin/common';
 import { AGENTS_SETUP_API_ROUTES, EPM_API_ROUTES, SETUP_API_ROUTE } from '@kbn/fleet-plugin/common';
+import { ToolingLog } from '@kbn/tooling-log';
 import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 export interface SetupFleetForEndpointResponse {
@@ -23,11 +24,13 @@ export interface SetupFleetForEndpointResponse {
 /**
  * Calls the fleet setup APIs and then installs the latest Endpoint package
  * @param kbnClient
+ * @param logger
  */
-export const setupFleetForEndpoint = async (kbnClient: KbnClient): Promise<void> => {
-  // We try to use the kbnClient **private** logger, bug if unable to access it, then just use console
-  // @ts-expect-error TS2341
-  const log = kbnClient.log ? kbnClient.log : console;
+export const setupFleetForEndpoint = async (
+  kbnClient: KbnClient,
+  logger?: ToolingLog
+): Promise<void> => {
+  const log = logger ?? new ToolingLog();
 
   // Setup Fleet
   try {
@@ -57,8 +60,8 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient): Promise<void>
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
 
     if (!setupResponse.data.isInitialized) {
-      log.error(setupResponse.data);
-      throw new Error('Initializing Fleet failed, existing');
+      log.error(setupResponse);
+      throw new Error('Initializing Fleet failed');
     }
   } catch (error) {
     log.error(error);
@@ -67,7 +70,7 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient): Promise<void>
 
   // Install/upgrade the endpoint package
   try {
-    await installOrUpgradeEndpointFleetPackage(kbnClient);
+    await installOrUpgradeEndpointFleetPackage(kbnClient, log);
   } catch (error) {
     log.error(error);
     throw error;
@@ -78,9 +81,11 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient): Promise<void>
  * Installs the Endpoint package (or upgrades it) in Fleet to the latest available in the registry
  *
  * @param kbnClient
+ * @param logger
  */
 export const installOrUpgradeEndpointFleetPackage = async (
-  kbnClient: KbnClient
+  kbnClient: KbnClient,
+  logger: ToolingLog
 ): Promise<BulkInstallPackageInfo> => {
   const installEndpointPackageResp = (await kbnClient
     .request({
@@ -106,6 +111,8 @@ export const installOrUpgradeEndpointFleetPackage = async (
 
   const installResponse = bulkResp[0];
 
+  logger.info(installResponse);
+
   if (isFleetBulkInstallError(installResponse)) {
     if (installResponse.error instanceof Error) {
       throw new EndpointDataLoadingError(
@@ -116,14 +123,15 @@ export const installOrUpgradeEndpointFleetPackage = async (
 
     // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
     if (installResponse.statusCode !== 409) {
-      // when `no_shard_available_action_exception` errors
-      // re-run install or upgrade after a delay
+      // when `no_shard_available_action_exception` errors re-run install or upgrade after a delay
       if (isNoShardAvailableActionExceptionError(installResponse)) {
-        await retryInstallOrUpgradeEndpointFleetPackage(
-          installOrUpgradeEndpointFleetPackage,
-          kbnClient
-        );
+        logger.warning(`Known transient failure detected. Retrying...`);
+
+        await retryInstallOrUpgradeEndpointFleetPackage(() => {
+          return installOrUpgradeEndpointFleetPackage(kbnClient, logger);
+        }, logger);
       }
+
       throw new EndpointDataLoadingError(installResponse.error, bulkResp);
     }
   }
@@ -139,10 +147,7 @@ function isFleetBulkInstallError(
 
 function isNoShardAvailableActionExceptionError(error: IBulkInstallPackageHTTPError): boolean {
   return (
-    typeof error.error === 'string' &&
-    error.error.includes(
-      'no_shard_available_action_exception: index [metrics-endpoint.metadata_current_default] has no active shard copy'
-    )
+    typeof error.error === 'string' && error.error.includes('no_shard_available_action_exception')
   );
 }
 
@@ -151,23 +156,34 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS = 3;
 
 const retryInstallOrUpgradeEndpointFleetPackage = async <T>(
-  func: (kbnClient: KbnClient) => Promise<T>,
-  kbnClient: KbnClient,
-  attempt = 0
+  callback: () => Promise<T>,
+  logger: ToolingLog
 ): Promise<T | undefined> => {
-  if (attempt < MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS) {
-    const retryCount = attempt + 1;
-    const retryDelaySec: number = Math.min(Math.pow(2, retryCount), 30); // 2s, 4s, 8s, 16s, 30s, 30s, 30s...
+  let attempt = 1;
+  let lastError: Error;
 
-    // @ts-expect-error
-    // TS2341: Property 'log' is private and only accessible within class 'KbnClient'.
-    const log = kbnClient ? kbnClient.log : console;
-    log.info(
-      `Retrying install/upgrade package operation after [${retryDelaySec}s] due to error: 'no_shard_available_action_exception'}`
-    );
+  while (attempt <= MAX_RETRY_INSTALL_UPGRADE_ATTEMPTS) {
+    logger.info(`retryInstallOrUpgradeEndpointFleetPackage(): attempt ${attempt}`);
+    attempt++;
 
-    // delay with some randomness
-    await delay(retryDelaySec * 1000 * Math.random());
-    return retryInstallOrUpgradeEndpointFleetPackage(func, kbnClient, retryCount);
+    try {
+      const responsePromise = callback();
+      await callback();
+      return responsePromise; // Success since it did not throw
+    } catch (err) {
+      // If not a no_shard_available_action_exception error, then end loop here and throw
+      if (!isNoShardAvailableActionExceptionError(err)) {
+        logger.error(err);
+        return Promise.reject(err);
+      }
+
+      lastError = err;
+    }
+
+    await delay(10000);
   }
+
+  // Exhausted all attempts
+  // @ts-expect-error
+  throw lastError;
 };

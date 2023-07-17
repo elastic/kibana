@@ -272,7 +272,7 @@ export class EndpointTestResources extends FtrService {
   async installOrUpgradeEndpointFleetPackage(): ReturnType<
     typeof installOrUpgradeEndpointFleetPackage
   > {
-    return installOrUpgradeEndpointFleetPackage(this.kbnClient);
+    return installOrUpgradeEndpointFleetPackage(this.kbnClient, this.log);
   }
 
   /**
