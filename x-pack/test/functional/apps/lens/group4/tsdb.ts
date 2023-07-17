@@ -594,7 +594,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         {
           name: 'Dataview with an additional TSDB stream',
-          indexes: [{ index: initialIndex }, { index: 'tsdb_index', create: true, tsdb: true }],
+          indexes: [{ index: initialIndex }, { index: 'tsdb_index_2', create: true, tsdb: true }],
         },
       ];
 
