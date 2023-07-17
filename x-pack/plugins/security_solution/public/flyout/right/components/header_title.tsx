@@ -68,8 +68,8 @@ export const HeaderTitle: FC = memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem grow={false}>
           <DocumentStatus />
         </EuiFlexItem>
@@ -77,8 +77,8 @@ export const HeaderTitle: FC = memo(() => {
           {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem grow={false}>
           <DocumentSeverity />
         </EuiFlexItem>
