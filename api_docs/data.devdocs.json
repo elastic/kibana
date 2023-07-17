@@ -8816,6 +8816,10 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
               },
@@ -13270,7 +13274,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -13367,6 +13371,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -20921,7 +20937,7 @@
               },
               {
                 "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/threshold/components/expression.tsx"
+                "path": "x-pack/plugins/observability/public/components/threshold/threshold_rule_expression.tsx"
               },
               {
                 "plugin": "observability",
@@ -21018,6 +21034,18 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/common/expressions/kibana_context.test.ts"
               },
               {
                 "plugin": "@kbn/es-query",
@@ -27620,6 +27648,10 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/server/services/sample_data/data_sets/logs_tsdb/saved_objects.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "fleet",

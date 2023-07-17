@@ -139,13 +139,14 @@ export const MetricItem = ({
                       justifyContent="flexEnd"
                       // empty title to prevent default title from showing
                       title=""
+                      component="span"
                     >
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} component="span">
                         {i18n.translate('xpack.synthetics.overview.duration.label', {
                           defaultMessage: 'Duration',
                         })}
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} component="span">
                         <EuiIconTip
                           title={i18n.translate('xpack.synthetics.overview.duration.description', {
                             defaultMessage: 'Median duration of last 24 checks',
