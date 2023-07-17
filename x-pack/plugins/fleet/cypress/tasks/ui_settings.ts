@@ -9,7 +9,7 @@
 export function setUISettings(settingsKey: string, settingsValue: any) {
   cy.request({
     method: 'POST',
-    url: '/api/kibana/settings',
+    url: '/internal/kibana/settings',
     headers: { 'kbn-xsrf': 'xx' },
     body: {
       changes: {
