@@ -6,11 +6,11 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { Asset } from '../../../../common/types_api';
+import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { withSpan } from './helpers';
 
-export async function collectPods({
+export async function collectContainers({
   client,
   from,
   to,
@@ -20,12 +20,12 @@ export async function collectPods({
 }: CollectorOptions) {
   const { metrics, logs, traces } = sourceIndices;
   const dsl: estypes.SearchRequest = {
-    index: [metrics, logs, traces],
+    index: [traces, logs, metrics],
     size: QUERY_MAX_SIZE,
     collapse: {
-      field: 'kubernetes.pod.uid',
+      field: 'container.id',
     },
-    sort: [{ 'kubernetes.pod.uid': 'asc' }],
+    sort: [{ 'container.id': 'asc' }],
     _source: false,
     fields: [
       'kubernetes.*',
@@ -46,9 +46,11 @@ export async function collectPods({
             },
           },
         ],
-        must: [
+        should: [
+          { exists: { field: 'kubernetes.container.id' } },
           { exists: { field: 'kubernetes.pod.uid' } },
           { exists: { field: 'kubernetes.node.name' } },
+          { exists: { field: 'host.hostname' } },
         ],
       },
     },
@@ -63,27 +65,25 @@ export async function collectPods({
   const result = withSpan({ transaction, name: 'processing_response' }, async () => {
     const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
       const { fields = {} } = hit;
+      const containerId = fields['container.id'];
       const podUid = fields['kubernetes.pod.uid'];
       const nodeName = fields['kubernetes.node.name'];
-      const clusterName = fields['orchestrator.cluster.name'];
 
-      const pod: Asset = {
+      const parentEan = podUid ? `pod:${podUid}` : `host:${fields['host.hostname']}`;
+
+      const container: Asset = {
         '@timestamp': new Date().toISOString(),
-        'asset.kind': 'pod',
-        'asset.id': podUid,
-        'asset.ean': `pod:${podUid}`,
-        'asset.parents': [`host:${nodeName}`],
+        'asset.kind': 'container',
+        'asset.id': containerId,
+        'asset.ean': `container:${containerId}`,
+        'asset.parents': [parentEan],
       };
 
-      if (fields['cloud.provider']) {
-        pod['cloud.provider'] = fields['cloud.provider'];
+      if (nodeName) {
+        container['asset.references'] = [`host:${nodeName}`];
       }
 
-      if (clusterName) {
-        pod['orchestrator.cluster.name'] = clusterName;
-      }
-
-      acc.push(pod);
+      acc.push(container);
 
       return acc;
     }, []);
