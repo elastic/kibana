@@ -54,7 +54,7 @@ const configSchemaProps = {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
-  hasAuth: schema.maybe(schema.boolean()), // DEPRECATED
+  hasAuth: schema.maybe(schema.boolean()),
   authType: schema.string({ defaultValue: WebhookAuthType.None }),
   certType: schema.maybe(schema.string()),
   ca: schema.maybe(schema.string()),

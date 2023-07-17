@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -33,6 +33,7 @@ import {
   PasswordField,
   FilePickerField,
   CardRadioGroupField,
+  HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -46,7 +47,7 @@ const VERIFICATION_MODE_DEFAULT = 'certificate';
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-  const { getFieldDefaultValue } = useFormContext();
+  const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
       'config.hasAuth',
@@ -58,7 +59,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   });
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const authTypeDefaultValue = getFieldDefaultValue('config.authType') ?? WebhookAuthType.None;
+  const authTypeDefaultValue = getFieldDefaultValue('config.authType') ?? WebhookAuthType.Basic;
   const certTypeDefaultValue = getFieldDefaultValue('config.certType') ?? SSLCertType.CRT;
   const hasCADefaultValue =
     !!getFieldDefaultValue<boolean | undefined>('config.ca') ||
@@ -70,6 +71,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   const certType = config == null ? SSLCertType.CRT : config.certType;
 
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
+
+  useEffect(
+    () => setFieldValue('config.hasAuth', authType !== WebhookAuthType.None),
+    [authType, setFieldValue]
+  );
 
   const basicAuthFields = (
     <EuiFlexGroup justifyContent="spaceBetween">
@@ -225,6 +231,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
   return (
     <>
+      <UseField path="config.hasAuth" component={HiddenField} />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <UseField
