@@ -17,6 +17,7 @@
       "grokdebugger",
       "management",
       "ml",
+      "observabilityShared",
       "painlessLab",
       "searchprofiler",
       "security",
