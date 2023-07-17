@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  MappingRuntimeFields,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
@@ -14,82 +16,86 @@ import { SLO } from '../../../domain/models';
 export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
-  public buildCommonRuntimeMappings(slo: SLO) {
+  public buildCommonRuntimeMappings(
+    slo: SLO,
+    extraRuntimeMappings: MappingRuntimeFields = {}
+  ): MappingRuntimeFields {
     return {
       'slo.id': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.id}')`,
         },
       },
       'slo.revision': {
-        type: 'long' as MappingRuntimeFieldType,
+        type: 'long',
         script: {
           source: `emit(${slo.revision})`,
         },
       },
       'slo.instanceId': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${ALL_VALUE}')`,
         },
       },
       'slo.name': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.name}')`,
         },
       },
       'slo.description': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.description}')`,
         },
       },
       'slo.tags': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.tags}')`,
         },
       },
       'slo.indicator.type': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.indicator.type}')`,
         },
       },
       'slo.objective.target': {
-        type: 'double' as MappingRuntimeFieldType,
+        type: 'double',
         script: {
           source: `emit(${slo.objective.target})`,
         },
       },
       ...(slo.objective.timesliceWindow && {
         'slo.objective.sliceDurationInSeconds': {
-          type: 'long' as MappingRuntimeFieldType,
+          type: 'long',
           script: {
             source: `emit(${slo.objective.timesliceWindow!.asSeconds()})`,
           },
         },
       }),
       'slo.budgetingMethod': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.budgetingMethod}')`,
         },
       },
       'slo.timeWindow.duration': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.timeWindow.duration.format()}')`,
         },
       },
       'slo.timeWindow.type': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.timeWindow.type}')`,
         },
       },
+      ...extraRuntimeMappings,
     };
   }
 
@@ -97,7 +103,11 @@ export abstract class TransformGenerator {
     return `Rolled-up SLI data for SLO: ${slo.name}`;
   }
 
-  public buildGroupBy(slo: SLO, sourceIndexTimestampField: string | undefined = '@timestamp') {
+  public buildGroupBy(
+    slo: SLO,
+    sourceIndexTimestampField: string | undefined = '@timestamp',
+    extraGroupByFields = {}
+  ) {
     let fixedInterval = '1m';
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       fixedInterval = slo.objective.timesliceWindow!.format();
@@ -120,7 +130,8 @@ export abstract class TransformGenerator {
       'slo.budgetingMethod': { terms: { field: 'slo.budgetingMethod' } },
       'slo.timeWindow.duration': { terms: { field: 'slo.timeWindow.duration' } },
       'slo.timeWindow.type': { terms: { field: 'slo.timeWindow.type' } },
-      // timestamp field defined in the destination index
+      ...extraGroupByFields,
+      // @timestamp field defined in the destination index
       '@timestamp': {
         date_histogram: {
           field: sourceIndexTimestampField, // timestamp field defined in the source index

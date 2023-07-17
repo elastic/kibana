@@ -16,6 +16,31 @@ export const getSLOMappingsTemplate = (name: string) => ({
           type: 'date',
           format: 'date_optional_time||epoch_millis',
         },
+        // APM service and transaction specific fields
+        service: {
+          properties: {
+            name: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            environment: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
+        transaction: {
+          properties: {
+            name: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            type: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
         slo: {
           properties: {
             id: {

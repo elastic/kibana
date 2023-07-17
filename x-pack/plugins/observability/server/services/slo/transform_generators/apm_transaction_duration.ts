@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MappingRuntimeFields,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { InvalidTransformError } from '../../../errors';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
-import { Query } from './types';
+import { APMTransactionDurationIndicator, SLO } from '../../../domain/models';
+import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
+import { Query } from './types';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -29,12 +32,19 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
+    const extraGroupByFields = {
+      'service.name': { terms: { field: 'service.name' } },
+      'service.environment': { terms: { field: 'service.environment' } },
+      'transaction.name': { terms: { field: 'transaction.name' } },
+      'transaction.type': { terms: { field: 'transaction.type' } },
+    };
+
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(slo),
+      this.buildGroupBy(slo, '@timestamp', extraGroupByFields),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
@@ -45,6 +55,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
+    const extraRuntimeMappings: MappingRuntimeFields = {};
     const queryFilter: Query[] = [
       {
         range: {
@@ -54,12 +65,19 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
         },
       },
     ];
+
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
           'service.name': indicator.params.service,
         },
       });
+      extraRuntimeMappings['service.name'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.service}')`,
+        },
+      };
     }
 
     if (indicator.params.environment !== ALL_VALUE) {
@@ -68,6 +86,12 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           'service.environment': indicator.params.environment,
         },
       });
+      extraRuntimeMappings['service.environment'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.environment}')`,
+        },
+      };
     }
 
     if (indicator.params.transactionName !== ALL_VALUE) {
@@ -76,6 +100,12 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           'transaction.name': indicator.params.transactionName,
         },
       });
+      extraRuntimeMappings['transaction.name'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.transactionName}')`,
+        },
+      };
     }
 
     if (indicator.params.transactionType !== ALL_VALUE) {
@@ -84,6 +114,12 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           'transaction.type': indicator.params.transactionType,
         },
       });
+      extraRuntimeMappings['transaction.type'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.transactionType}')`,
+        },
+      };
     }
 
     if (!!indicator.params.filter) {
@@ -92,7 +128,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, extraRuntimeMappings),
       query: {
         bool: {
           filter: [

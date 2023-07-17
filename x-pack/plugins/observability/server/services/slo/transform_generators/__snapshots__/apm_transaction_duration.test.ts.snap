@@ -194,6 +194,16 @@ Object {
           "fixed_interval": "2m",
         },
       },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
       "slo.budgetingMethod": Object {
         "terms": Object {
           "field": "slo.budgetingMethod",
@@ -254,6 +264,16 @@ Object {
           "field": "slo.timeWindow.type",
         },
       },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
     },
   },
   "settings": Object {
@@ -312,6 +332,18 @@ Object {
       },
     },
     "runtime_mappings": Object {
+      "service.environment": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "service.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
       "slo.budgetingMethod": Object {
         "script": Object {
           "source": "emit('timeslices')",
@@ -384,6 +416,18 @@ Object {
         },
         "type": "keyword",
       },
+      "transaction.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "transaction.type": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
     },
   },
   "sync": Object {
@@ -442,6 +486,16 @@ Object {
           "fixed_interval": "1m",
         },
       },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
       "slo.budgetingMethod": Object {
         "terms": Object {
           "field": "slo.budgetingMethod",
@@ -495,6 +549,16 @@ Object {
       "slo.timeWindow.type": Object {
         "terms": Object {
           "field": "slo.timeWindow.type",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
         },
       },
     },
@@ -555,6 +619,18 @@ Object {
       },
     },
     "runtime_mappings": Object {
+      "service.environment": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "service.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
       "slo.budgetingMethod": Object {
         "script": Object {
           "source": "emit('occurrences')",
@@ -618,6 +694,18 @@ Object {
       "slo.timeWindow.type": Object {
         "script": Object {
           "source": "emit('rolling')",
+        },
+        "type": "keyword",
+      },
+      "transaction.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "transaction.type": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },

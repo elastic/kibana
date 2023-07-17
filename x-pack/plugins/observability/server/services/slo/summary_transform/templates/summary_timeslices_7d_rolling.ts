@@ -12,6 +12,7 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
   SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../../../assets/constants';
+import { groupBy } from './common';
 
 export const SUMMARY_TIMESLICES_7D_ROLLING: TransformPutTransformRequest = {
   transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}timeslices-7d-rolling`,
@@ -51,58 +52,7 @@ export const SUMMARY_TIMESLICES_7D_ROLLING: TransformPutTransformRequest = {
     },
   },
   pivot: {
-    group_by: {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      'slo.instanceId': {
-        terms: {
-          field: 'slo.instanceId',
-        },
-      },
-      'slo.name': {
-        terms: {
-          field: 'slo.name',
-        },
-      },
-      'slo.description': {
-        terms: {
-          field: 'slo.description',
-        },
-      },
-      'slo.tags': {
-        terms: {
-          field: 'slo.tags',
-        },
-      },
-      'slo.indicator.type': {
-        terms: {
-          field: 'slo.indicator.type',
-        },
-      },
-      'slo.budgetingMethod': {
-        terms: {
-          field: 'slo.budgetingMethod',
-        },
-      },
-      'slo.timeWindow.duration': {
-        terms: {
-          field: 'slo.timeWindow.duration',
-        },
-      },
-      'slo.timeWindow.type': {
-        terms: {
-          field: 'slo.timeWindow.type',
-        },
-      },
-    },
+    group_by: groupBy,
     aggregations: {
       goodEvents: {
         sum: {

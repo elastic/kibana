@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MappingRuntimeFields,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   ALL_VALUE,
   apmTransactionErrorRateIndicatorSchema,
@@ -30,12 +33,19 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
+    const extraGroupByFields = {
+      'service.name': { terms: { field: 'service.name' } },
+      'service.environment': { terms: { field: 'service.environment' } },
+      'transaction.name': { terms: { field: 'transaction.name' } },
+      'transaction.type': { terms: { field: 'transaction.type' } },
+    };
+
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(slo),
+      this.buildGroupBy(slo, '@timestamp', extraGroupByFields),
       this.buildAggregations(slo),
       this.buildSettings(slo)
     );
@@ -46,6 +56,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
+    const extraRuntimeMappings: MappingRuntimeFields = {};
     const queryFilter: Query[] = [
       {
         range: {
@@ -62,6 +73,12 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'service.name': indicator.params.service,
         },
       });
+      extraRuntimeMappings['service.name'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.service}')`,
+        },
+      };
     }
 
     if (indicator.params.environment !== ALL_VALUE) {
@@ -70,6 +87,12 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'service.environment': indicator.params.environment,
         },
       });
+      extraRuntimeMappings['service.environment'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.environment}')`,
+        },
+      };
     }
 
     if (indicator.params.transactionName !== ALL_VALUE) {
@@ -78,6 +101,12 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'transaction.name': indicator.params.transactionName,
         },
       });
+      extraRuntimeMappings['transaction.name'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.transactionName}')`,
+        },
+      };
     }
 
     if (indicator.params.transactionType !== ALL_VALUE) {
@@ -86,6 +115,12 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           'transaction.type': indicator.params.transactionType,
         },
       });
+      extraRuntimeMappings['transaction.type'] = {
+        type: 'keyword',
+        script: {
+          source: `emit('${indicator.params.transactionType}')`,
+        },
+      };
     }
 
     if (indicator.params.filter) {
@@ -94,7 +129,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, extraRuntimeMappings),
       query: {
         bool: {
           filter: [
