@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
+import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 import { createAppUpdater } from './app_updater';
 import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
 import {
@@ -18,7 +26,14 @@ import {
 export class DiscoverLogExplorerPlugin
   implements Plugin<DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart>
 {
-  private appUpdater = createAppUpdater();
+  private appUpdater: BehaviorSubject<AppUpdater>;
+  private config: DiscoverLogExplorerConfig;
+
+  constructor(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
+    this.config = context.config.get();
+
+    this.appUpdater = createAppUpdater(this.config);
+  }
 
   public setup(core: CoreSetup) {
     core.application.registerAppUpdater(this.appUpdater);

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { App, AppDeepLink, AppUpdater } from '@kbn/core-application-browser';
+import { App, AppDeepLink, AppNavLinkStatus, AppUpdater } from '@kbn/core-application-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
+import { DiscoverLogExplorerConfig } from '../common/plugin_config';
 
-const logExplorerDeepLink = {
+const getLogExplorerDeepLink = ({ isVisible }: { isVisible: boolean }) => ({
   id: LOG_EXPLORER_PROFILE_ID,
   title: i18n.translate('xpack.discoverLogExplorer.deepLink', {
     defaultMessage: 'Logs Explorer',
@@ -19,13 +20,16 @@ const logExplorerDeepLink = {
   path: `#/p/log-explorer`,
   category: DEFAULT_APP_CATEGORIES.observability,
   euiIconType: 'logoObservability',
-};
+  navLinkStatus: isVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.default,
+});
 
-export const createAppUpdater = () => {
+export const createAppUpdater = (config: DiscoverLogExplorerConfig) => {
   return new BehaviorSubject<AppUpdater>((app) => {
     if (app.id === 'discover') {
       return {
-        deepLinks: appendDeepLinks(app, [logExplorerDeepLink]),
+        deepLinks: appendDeepLinks(app, [
+          getLogExplorerDeepLink({ isVisible: config.featureFlags.deepLinkVisible }),
+        ]),
       };
     }
   });
