@@ -12,7 +12,7 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
+  EuiInputPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiOutsideClickDetector,
@@ -22,8 +22,6 @@ import {
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import './field_type_filter.scss';
 
 export interface Props {
   onFieldTypesChange: (value: string[]) => void;
@@ -65,15 +63,15 @@ export function FieldTypeFilter({
   return (
     <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
       <EuiFilterGroup fullWidth>
-        <EuiPopover
-          panelClassName="presFilterByType__panel"
+        <EuiInputPopover
           panelPaddingSize="none"
           display="block"
           isOpen={isPopoverOpen}
           closePopover={() => {
             setPopoverOpen(false);
           }}
-          button={buttonContent}
+          fullWidth
+          input={buttonContent}
         >
           <EuiPopoverTitle paddingSize="s">
             {i18n.translate('presentationUtil.fieldSearch.filterByTypeLabel', {
@@ -103,7 +101,7 @@ export function FieldTypeFilter({
               </EuiContextMenuItem>
             ))}
           />
-        </EuiPopover>
+        </EuiInputPopover>
       </EuiFilterGroup>
     </EuiOutsideClickDetector>
   );

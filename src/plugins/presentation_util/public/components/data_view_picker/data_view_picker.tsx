@@ -8,12 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { EuiSelectable, EuiPopoverTitle, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-
-import './data_view_picker.scss';
 
 export type DataViewTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -62,15 +60,15 @@ export function DataViewPicker({
   };
 
   return (
-    <EuiPopover
+    <EuiInputPopover
       {...other}
-      button={createTrigger()}
+      input={createTrigger()}
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverIsOpen(false)}
       display="block"
       panelPaddingSize="s"
       ownFocus
-      panelClassName="presDataViewPicker__panel"
+      fullWidth
     >
       <EuiPopoverTitle data-test-subj="data-view-picker-title">
         {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
@@ -112,7 +110,7 @@ export function DataViewPicker({
           </>
         )}
       </EuiSelectable>
-    </EuiPopover>
+    </EuiInputPopover>
   );
 }
 
