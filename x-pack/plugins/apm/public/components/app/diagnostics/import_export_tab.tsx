@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
-import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
-import { getIndicesTabStatus } from './summary_tab/indicies_status';
+import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
+import { getIsIndicesTabOk } from './summary_tab/indicies_status';
 import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
@@ -156,8 +156,8 @@ function ImportCard() {
 
 function isBundleValid(diagnosticsBundle: DiagnosticsBundle) {
   try {
-    getIndexTemplateStatus(diagnosticsBundle);
-    getIndicesTabStatus(diagnosticsBundle);
+    getIsIndexTemplateOk(diagnosticsBundle);
+    getIsIndicesTabOk(diagnosticsBundle);
     getDataStreamTabStatus(diagnosticsBundle);
     return true;
   } catch (e) {

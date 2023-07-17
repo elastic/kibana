@@ -19,21 +19,25 @@ import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import { DiagnosticsSummary, getIsCrossCluster } from './summary_tab';
+import {
+  DiagnosticsSummary,
+  getHasAllClusterPrivileges,
+  getIsCrossCluster,
+} from './summary_tab';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { DiagnosticsIndexTemplates } from './index_templates_tab';
 import { DiagnosticsIndices } from './indices_tab';
 import { DiagnosticsDataStreams } from './data_stream_tab';
 import {
   DiagnosticsIndexPatternSettings,
-  getIndexPatternTabStatus,
+  getIsIndexPatternTabOk,
 } from './index_pattern_settings_tab';
 import { DiagnosticsImportExport } from './import_export_tab';
 import { DiagnosticsContextProvider } from './context/diagnostics_context';
 import { useDiagnosticsContext } from './context/use_diagnostics';
-import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
-import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
-import { getIndicesTabStatus } from './summary_tab/indicies_status';
+import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
+import { getIsDataStreamTabOk } from './summary_tab/data_streams_status';
+import { getIsIndicesTabOk } from './summary_tab/indicies_status';
 import { DiagnosticsApmDocuments } from './apm_documents_tab';
 import { isPending } from '../../../hooks/use_fetcher';
 
@@ -128,7 +132,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     },
     {
       'data-test-subj': 'index-pattern-tab',
-      prepend: !getIndexPatternTabStatus(diagnosticsBundle) && (
+      prepend: !getIsIndexPatternTabOk(diagnosticsBundle) && (
         <EuiIcon type="warning" color="red" />
       ),
       href: router.link('/diagnostics/index-pattern-settings', { query }),
@@ -139,11 +143,12 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         }
       ),
       isSelected: routePath === '/diagnostics/index-pattern-settings',
-      isHidden: isCrossCluster,
+      isHidden:
+        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
     },
     {
       'data-test-subj': 'index-templates-tab',
-      prepend: !getIndexTemplateStatus(diagnosticsBundle) && (
+      prepend: !getIsIndexTemplateOk(diagnosticsBundle) && (
         <EuiIcon type="warning" color="red" />
       ),
       href: router.link('/diagnostics/index-templates', { query }),
@@ -151,11 +156,12 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         defaultMessage: 'Index templates',
       }),
       isSelected: routePath === '/diagnostics/index-templates',
-      isHidden: isCrossCluster,
+      isHidden:
+        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
     },
     {
       'data-test-subj': 'data-streams-tab',
-      prepend: !getDataStreamTabStatus(diagnosticsBundle) && (
+      prepend: !getIsDataStreamTabOk(diagnosticsBundle) && (
         <EuiIcon type="warning" color="red" />
       ),
       href: router.link('/diagnostics/data-streams', { query }),
@@ -163,11 +169,12 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         defaultMessage: 'Data streams',
       }),
       isSelected: routePath === '/diagnostics/data-streams',
-      isHidden: isCrossCluster,
+      isHidden:
+        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
     },
     {
       'data-test-subj': 'indices-tab',
-      prepend: !getIndicesTabStatus(diagnosticsBundle) && (
+      prepend: !getIsIndicesTabOk(diagnosticsBundle) && (
         <EuiIcon type="warning" color="red" />
       ),
       href: router.link('/diagnostics/indices', { query }),
@@ -175,7 +182,8 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         defaultMessage: 'Indices',
       }),
       isSelected: routePath === '/diagnostics/indices',
-      isHidden: isCrossCluster,
+      isHidden:
+        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
     },
     {
       'data-test-subj': 'documents-tab',
