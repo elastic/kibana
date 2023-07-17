@@ -303,26 +303,48 @@ urlTemplateIconChoices.forEach((icon) => {
 
 export const colorChoices = euiPaletteColorBlind();
 
-export function isNewIcon(icon: FontawesomeIcon | GenericIcon | string): icon is GenericIcon {
+type AnyIconType = FontawesomeIcon | GenericIcon | string;
+
+function hasIcon(icon: AnyIconType | undefined): icon is AnyIconType {
+  return icon != null;
+}
+
+export function isNewIcon(icon: AnyIconType | undefined): icon is GenericIcon {
+  if (!hasIcon(icon)) {
+    return false;
+  }
   return typeof icon !== 'string' ? 'package' in icon : iconChoices.some(({ id }) => id === icon);
 }
 
-export function getIcon(icon: FontawesomeIcon | GenericIcon | string): GenericIcon {
+export function getIcon(icon: AnyIconType): GenericIcon {
   if (isNewIcon(icon)) {
     return typeof icon === 'string' ? iconChoicesByClass[icon]! : icon;
   }
   return getIconFromList(icon, iconChoices);
 }
 
-export function getTemplateIcon(icon: FontawesomeIcon | GenericIcon | string): GenericIcon {
+export function getTemplateIcon(icon: AnyIconType): GenericIcon {
   if (isNewIcon(icon)) {
     return typeof icon === 'string' ? urlTemplateIconChoicesByClass[icon]! : icon;
   }
   return getIconFromList(icon, urlTemplateIconChoices);
 }
 
-function getIconFromList(icon: FontawesomeIcon | string, list: GenericIcon[]): GenericIcon {
+const EMPTY_ICON: GenericIcon = {
+  id: 'empty',
+  prevName: '',
+  package: 'eui',
+  label: i18n.translate('xpack.graph.icon.empty', { defaultMessage: 'Empty icon' }),
+};
+
+function getIconFromList(
+  icon: Exclude<AnyIconType, GenericIcon>,
+  list: GenericIcon[]
+): GenericIcon {
+  if (!hasIcon(icon)) {
+    return EMPTY_ICON;
+  }
   const iconName = typeof icon === 'string' ? icon : icon.class;
-  const newIcon = list.find(({ prevName }) => prevName === iconName)!;
-  return newIcon;
+  const newIcon = list.find(({ prevName }) => prevName === iconName);
+  return newIcon ?? EMPTY_ICON;
 }

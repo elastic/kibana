@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
 import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
-import { IconRenderer } from '../icon_renderer';
+import { getIconOffset, IconRenderer } from '../icon_renderer';
 
 export interface GraphVisualizationProps {
   workspace: Workspace;
@@ -145,6 +145,7 @@ export function GraphVisualization({
           workspace.nodes
             .filter((node) => !node.parent)
             .map((node) => {
+              const iconOffset = getIconOffset(node.icon);
               return (
                 <g
                   key={makeNodeId(node.data.field, node.data.term)}
@@ -171,8 +172,8 @@ export function GraphVisualization({
                   <IconRenderer
                     icon={node.icon}
                     color={node.color}
-                    x={node.kx - 7.5}
-                    y={node.ky - 8.5}
+                    x={node.kx - (iconOffset?.x || 0)}
+                    y={node.ky - (iconOffset?.y || 0)}
                   />
 
                   {node.label.length < 30 && (

@@ -9,6 +9,7 @@ import { hexToRgb, isColorDark } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { WorkspaceNode } from '../../types';
+import { getIconOffset, IconRenderer } from '../icon_renderer';
 
 const isHexColorDark = (color: string) => isColorDark(...hexToRgb(color));
 
@@ -31,6 +32,7 @@ export const SelectedNodeItem = ({
   const fieldIconClasses = classNames('fa', 'gphNode__text', 'gphSelectionList__icon', {
     ['gphNode__text--inverse']: isHexColorDark(node.color),
   });
+  const offset = getIconOffset(node.icon);
 
   return (
     <div aria-hidden="true" className={fieldClasses} onClick={() => onSelectedFieldClick(node)}>
@@ -43,18 +45,13 @@ export const SelectedNodeItem = ({
           style={{ fill: node.color }}
           onClick={() => onDeselectNode(node)}
         />
-
-        {node.icon && (
-          <text
-            className={fieldIconClasses}
-            textAnchor="middle"
-            x="12"
-            y="16"
-            onClick={() => onDeselectNode(node)}
-          >
-            {node.icon.code}
-          </text>
-        )}
+        <IconRenderer
+          onClick={() => onDeselectNode(node)}
+          icon={node.icon}
+          className={fieldIconClasses}
+          x={(offset?.x || 0) / 2}
+          y={(offset?.y || 0) / 2}
+        />
       </svg>
       <span>{node.label}</span>
       {node.numChildren > 0 && <span> (+{node.numChildren})</span>}

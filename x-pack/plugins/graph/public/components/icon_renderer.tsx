@@ -27,7 +27,25 @@ interface IconRendererProps {
   onClick?: () => void;
 }
 
-export const IconRenderer = ({ icon, color, className, onClick, ...coords }: IconRendererProps) => {
+export const getIconOffset = (icon: GenericIcon | null) => {
+  if (icon == null) {
+    return;
+  }
+  return icon.package === 'eui'
+    ? {
+        x: 7.5,
+        y: 8.5,
+      }
+    : { x: 8.5, y: 8.5 };
+};
+
+export const IconRenderer = ({
+  icon,
+  color,
+  className,
+  onClick,
+  ...offsets
+}: IconRendererProps) => {
   if (icon == null) {
     return null;
   }
@@ -40,7 +58,7 @@ export const IconRenderer = ({ icon, color, className, onClick, ...coords }: Ico
         color={backgroundColor}
         className={className}
         onClick={onClick}
-        {...coords}
+        {...offsets}
       />
     );
   }
@@ -48,7 +66,7 @@ export const IconRenderer = ({ icon, color, className, onClick, ...coords }: Ico
     <EuiIcon
       type={icon.id}
       color={backgroundColor}
-      {...coords}
+      {...offsets}
       className={className}
       onClick={onClick}
     />
