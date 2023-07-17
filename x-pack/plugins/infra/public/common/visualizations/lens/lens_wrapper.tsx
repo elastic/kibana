@@ -4,31 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, useRef, useCallback, CSSProperties } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useIntersectedOnce } from '../../../hooks/use_intersection_once';
+import type { TimeRange } from '@kbn/es-query';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useIntersectedOnce } from '../../../hooks/use_intersection_once';
 import { ChartLoader } from './chart_loader';
 import type { LensAttributes } from '../types';
 
-export interface LensWrapperProps {
-  id: string;
+export type LensWrapperProps = Pick<
+  TypedLensByValueInput,
+  | 'id'
+  | 'filters'
+  | 'query'
+  | 'style'
+  | 'onBrushEnd'
+  | 'hidePanelTitles'
+  | 'overrides'
+  | 'hidePanelTitles'
+  | 'disabledActions'
+  | 'disableTriggers'
+> & {
   attributes: LensAttributes | null;
   dateRange: TimeRange;
-  query?: Query;
-  filters: Filter[];
   extraActions: Action[];
   lastReloadRequestTime?: number;
-  style?: CSSProperties;
   loading?: boolean;
   hasTitle?: boolean;
-  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
-  onLoad?: () => void;
-}
+};
 
 export const LensWrapper = React.memo(
   ({
@@ -41,8 +48,10 @@ export const LensWrapper = React.memo(
     style,
     onBrushEnd,
     lastReloadRequestTime,
+    overrides,
     loading = false,
     hasTitle = false,
+    disableTriggers = false,
   }: LensWrapperProps) => {
     const intersectionRef = useRef(null);
     const [loadedOnce, setLoadedOnce] = useState(false);
@@ -92,7 +101,14 @@ export const LensWrapper = React.memo(
     }, [loadedOnce]);
 
     return (
-      <div ref={intersectionRef}>
+      <div
+        ref={intersectionRef}
+        css={css`
+          .echLegend .echLegendList {
+            display: flex;
+          }
+        `}
+      >
         <ChartLoader
           loading={loading || !isReady}
           loadedOnce={loadedOnce}
@@ -103,12 +119,14 @@ export const LensWrapper = React.memo(
             <EmbeddableComponent
               id={id}
               style={style}
+              hidePanelTitles={!hasTitle}
               attributes={state.attributes}
               viewMode={ViewMode.VIEW}
               timeRange={state.dateRange}
               query={state.query}
               filters={state.filters}
               extraActions={extraActions}
+              overrides={overrides}
               lastReloadRequestTime={state.lastReloadRequestTime}
               executionContext={{
                 type: 'infrastructure_observability_hosts_view',
@@ -116,6 +134,7 @@ export const LensWrapper = React.memo(
               }}
               onBrushEnd={onBrushEnd}
               onLoad={onLoad}
+              disableTriggers={disableTriggers}
             />
           )}
         </ChartLoader>

@@ -209,7 +209,7 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 160.'
+      'The length of the title is too long. The maximum length is 160 characters.'
     );
 
     expect(submitTitle).not.toHaveBeenCalled();
@@ -263,7 +263,7 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 160.'
+      'The length of the title is too long. The maximum length is 160 characters.'
     );
 
     // write a shorter one

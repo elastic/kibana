@@ -32,9 +32,9 @@ import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import type { CoverageOverviewFilter } from '../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
-import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
-import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
-import type { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
+import type { WarningSchema } from '../../../../common/api/detection_engine';
+import { RuleExecutionSummary } from '../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
 import {
   AlertSuppression,
   AlertsIndex,
@@ -74,15 +74,15 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../common/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/rule_schema';
 
-import type { PatchRuleRequestBody } from '../../../../common/detection_engine/rule_management';
-import { FindRulesSortField } from '../../../../common/detection_engine/rule_management';
+import type { PatchRuleRequestBody } from '../../../../common/api/detection_engine/rule_management';
+import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-} from '../../../../common/detection_engine/rule_schema';
-import { SortOrder } from '../../../../common/detection_engine/schemas/common';
+} from '../../../../common/api/detection_engine/model/rule_schema';
+import { SortOrder } from '../../../../common/api/detection_engine';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
