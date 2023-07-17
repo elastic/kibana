@@ -14,8 +14,13 @@ import type {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression } from '@kbn/es-query';
 import { CommentAttributesRt, CommentType, decodeOrThrow } from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  FILE_ATTACHMENT_TYPE,
+} from '../../../common/constants';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField, isSOError } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
@@ -120,6 +125,50 @@ export class AttachmentService {
       return response.aggregations;
     } catch (error) {
       this.context.log.error(`Error while executing aggregation for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Counts the persistableState and externalReference attachments that are not .files
+   */
+  public async countPersistableStateAndExternalReferenceAttachments({
+    caseId,
+  }: {
+    caseId: string;
+  }): Promise<number> {
+    try {
+      this.context.log.debug(
+        `Attempting to count persistableState and externalReference attachments for case id ${caseId}`
+      );
+
+      const typeFilter = buildFilter({
+        filters: [CommentType.persistableState, CommentType.externalReference],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const excludeFilesFilter = fromKueryExpression(
+        `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId: ${FILE_ATTACHMENT_TYPE}`
+      );
+
+      const combinedFilter = combineFilters([typeFilter, excludeFilesFilter]);
+
+      const response = await this.context.unsecuredSavedObjectsClient.find<{ total: number }>({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        filter: combinedFilter,
+      });
+
+      return response.total;
+    } catch (error) {
+      this.context.log.error(
+        `Error while attempting to count persistableState and externalReference attachments for case id ${caseId}: ${error}`
+      );
       throw error;
     }
   }
