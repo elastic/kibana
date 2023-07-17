@@ -53,7 +53,6 @@ describe('import timelines', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();
@@ -514,7 +513,6 @@ describe('import timeline templates', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();

@@ -33,7 +33,7 @@ interface Props {
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   selectedConversationId: string | undefined;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  onConversationSelected: (conversationId: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
 }
@@ -59,7 +59,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     selectedConversationId = DEFAULT_CONVERSATION_TITLE,
     defaultConnectorId,
     defaultProvider,
-    setSelectedConversationId,
+    onConversationSelected,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
   }) => {
@@ -109,14 +109,14 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           };
           setConversation({ conversation: newConversation });
         }
-        setSelectedConversationId(searchValue);
+        onConversationSelected(searchValue);
       },
       [
         allSystemPrompts,
         defaultConnectorId,
         defaultProvider,
         setConversation,
-        setSelectedConversationId,
+        onConversationSelected,
       ]
     );
 
@@ -124,13 +124,13 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     const onDelete = useCallback(
       (cId: string) => {
         if (selectedConversationId === cId) {
-          setSelectedConversationId(getPreviousConversationId(conversationIds, cId));
+          onConversationSelected(getPreviousConversationId(conversationIds, cId));
         }
         setTimeout(() => {
           deleteConversation(cId);
         }, 0);
       },
-      [conversationIds, deleteConversation, selectedConversationId, setSelectedConversationId]
+      [conversationIds, deleteConversation, selectedConversationId, onConversationSelected]
     );
 
     const onChange = useCallback(
@@ -138,20 +138,20 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         if (newOptions.length === 0) {
           setSelectedOptions([]);
         } else if (conversationOptions.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
-          setSelectedConversationId(newOptions?.[0].label);
+          onConversationSelected(newOptions?.[0].label);
         }
       },
-      [conversationOptions, setSelectedConversationId]
+      [conversationOptions, onConversationSelected]
     );
 
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
-      setSelectedConversationId(prevId);
-    }, [conversationIds, selectedConversationId, setSelectedConversationId]);
+      onConversationSelected(prevId);
+    }, [conversationIds, selectedConversationId, onConversationSelected]);
     const onRightArrowClick = useCallback(() => {
       const nextId = getNextConversationId(conversationIds, selectedConversationId);
-      setSelectedConversationId(nextId);
-    }, [conversationIds, selectedConversationId, setSelectedConversationId]);
+      onConversationSelected(nextId);
+    }, [conversationIds, selectedConversationId, onConversationSelected]);
 
     // Register keyboard listener for quick conversation switching
     const onKeyDown = useCallback(
@@ -200,11 +200,17 @@ export const ConversationSelector: React.FC<Props> = React.memo(
       return (
         <EuiFlexGroup
           alignItems="center"
-          justifyContent="spaceBetween"
-          component={'span'}
           className={'parentFlexGroup'}
+          component={'span'}
+          justifyContent="spaceBetween"
         >
-          <EuiFlexItem grow={false} component={'span'} css={css``}>
+          <EuiFlexItem
+            component={'span'}
+            grow={false}
+            css={css`
+              width: calc(100% - 60px);
+            `}
+          >
             <EuiHighlight
               search={searchValue}
               css={css`
