@@ -30,12 +30,8 @@ import {
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { useStyles as useSelectorStyles } from '../control_general_view_selector/styles';
-import {
-  ControlGeneralViewResponseDeps,
-  ResponseAction,
-  Response,
-  ControlFormErrorMap,
-} from '../../types';
+import { ControlGeneralViewResponseDeps, ControlFormErrorMap } from '../../types';
+import { Response, ResponseAction } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 import {
   getSelectorTypeIcon,
