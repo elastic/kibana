@@ -60,6 +60,7 @@ const navigationTree: NavigationTreeDefinition = {
                 );
               },
             },
+            { link: 'observability-overview:alerts' },
           ],
         },
         {

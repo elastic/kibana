@@ -6,10 +6,16 @@ Object {
     "download": Object {
       "sourceURI": "https://artifacts.elastic.co/downloads/",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": false,
       "logs": false,
       "metrics": false,
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "id": "policy-elastic-agent-on-cloud",
@@ -27,18 +33,23 @@ Object {
       "name": "Fleet Server",
       "package_policy_id": "elastic-cloud-fleet-server",
       "revision": 1,
-      "server": Object {
-        "host": "0.0.0.0",
-        "port": 8220,
-      },
       "server.runtime": Object {
         "gc_percent": 20,
       },
       "type": "fleet-server",
+      "unused_key": "not_used",
       "use_output": "es-containerhost",
     },
     Object {
       "apm-server": Object {
+        "agent": Object {
+          "config": Object {
+            "elasticsearch": Object {
+              "api_key": "",
+            },
+          },
+        },
+        "agent_config": Array [],
         "auth": Object {
           "anonymous": Object {
             "allow_agent": Array [
@@ -84,6 +95,12 @@ Object {
           "exclude_from_grouping": "^/webpack",
           "library_pattern": "node_modules|bower_components|~",
           "response_headers": null,
+          "source_mapping": Object {
+            "elasticsearch": Object {
+              "api_key": "",
+            },
+            "metadata": Array [],
+          },
         },
         "sampling": Object {
           "tail": Object {
@@ -124,7 +141,7 @@ Object {
       },
       "name": "Elastic APM",
       "package_policy_id": "elastic-cloud-apm",
-      "revision": 1,
+      "revision": 2,
       "type": "apm",
       "use_output": "es-containerhost",
     },
@@ -231,6 +248,11 @@ Object {
       "type": "elasticsearch",
     },
   },
-  "revision": 4,
+  "revision": 5,
+  "secret_references": Array [],
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
