@@ -328,6 +328,7 @@ describe('execute()', () => {
         aheader: 'a value',
       },
       authType: WebhookAuthType.Basic,
+      hasAuth: true,
     };
     await connectorType.executor({
       actionId: 'some-id',
@@ -391,6 +392,7 @@ describe('execute()', () => {
       },
       authType: WebhookAuthType.SSL,
       certType: SSLCertType.CRT,
+      hasAuth: true,
     };
     await connectorType.executor({
       actionId: 'some-id',
@@ -572,6 +574,7 @@ describe('execute()', () => {
         aheader: 'a value',
       },
       authType: WebhookAuthType.Basic,
+      hasAuth: true,
     };
     requestMock.mockReset();
     requestMock.mockRejectedValueOnce({
@@ -601,6 +604,7 @@ describe('execute()', () => {
         aheader: 'a value',
       },
       authType: WebhookAuthType.None,
+      hasAuth: false,
     };
     const secrets: ConnectorTypeSecretsType = {
       user: null,
