@@ -284,6 +284,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (boolean)',
         'xpack.observability_onboarding.ui.enabled (boolean)',
+        /**
+         * xpack.discoverLogExplo.featureFlags is conditional and will resolve to an object of properties
+         * - xpack.discoverLogExplo.featureFlags.deepLinkVisible (boolean)
+         */
+        'xpack.discoverLogExplorer.featureFlags (any)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
