@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppUpdater } from '@kbn/core-application-browser';
+import { App, AppDeepLink, AppUpdater } from '@kbn/core-application-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
@@ -25,8 +25,21 @@ export const createAppUpdater = () => {
   return new BehaviorSubject<AppUpdater>((app) => {
     if (app.id === 'discover') {
       return {
-        deepLinks: [logExplorerDeepLink],
+        deepLinks: appendDeepLinks(app, [logExplorerDeepLink, logExplorerDeepLink]),
       };
     }
   });
 };
+
+const appendDeepLinks = (app: App, deepLinks: AppDeepLink[]) => {
+  return deepLinks.reduce<AppDeepLink[]>((links, deepLink) => {
+    const shouldAddLink = !hasDeepLink(links, deepLink);
+    if (shouldAddLink) {
+      return [...links, deepLink];
+    }
+    return links;
+  }, app.deepLinks ?? []);
+};
+
+const hasDeepLink = (deepLinks: AppDeepLink[], deepLink: AppDeepLink) =>
+  Boolean(deepLinks?.find((link) => link.id === deepLink.id));
