@@ -19,7 +19,7 @@ export const useFetchAgentByAgentPolicySummary = (
    * The Fleet Agent Policy ID (NOT the endpoint policy id)
    */
   agentPolicyId: string,
-  options: Exclude<UseQueryOptions<EndpointPolicyAgentSummary, IHttpFetchError>, 'queryFn'> = {}
+  options: Omit<UseQueryOptions<EndpointPolicyAgentSummary, IHttpFetchError>, 'queryFn'> = {}
 ): UseQueryResult<EndpointPolicyAgentSummary, IHttpFetchError> => {
   const http = useHttp();
 

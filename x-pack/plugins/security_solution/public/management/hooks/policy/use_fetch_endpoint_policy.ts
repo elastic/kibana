@@ -36,7 +36,7 @@ export type UseFetchEndpointPolicyResponse = UseQueryResult<ApiDataResponse, IHt
  */
 export const useFetchEndpointPolicy = (
   policyId: string,
-  options: Exclude<UseQueryOptions<ApiDataResponse, IHttpFetchError>, 'queryFn'> = {}
+  options: Omit<UseQueryOptions<ApiDataResponse, IHttpFetchError>, 'queryFn'> = {}
 ): UseFetchEndpointPolicyResponse => {
   const http = useHttp();
 
