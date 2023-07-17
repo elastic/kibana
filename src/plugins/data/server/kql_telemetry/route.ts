@@ -29,6 +29,13 @@ export function registerKqlTelemetryRoute(
               opt_in: schema.boolean(),
             }),
           },
+          response: {
+            '200': {
+              body: schema.object({
+                success: schema.boolean(),
+              }),
+            },
+          },
         },
       },
       async (context, request, response) => {
