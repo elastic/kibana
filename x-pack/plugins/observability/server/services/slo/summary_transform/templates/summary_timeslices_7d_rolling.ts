@@ -67,6 +67,26 @@ export const SUMMARY_TIMESLICES_7D_ROLLING: TransformPutTransformRequest = {
           field: 'slo.instanceId',
         },
       },
+      'slo.name': {
+        terms: {
+          field: 'slo.name',
+        },
+      },
+      'slo.description': {
+        terms: {
+          field: 'slo.description',
+        },
+      },
+      'slo.tags': {
+        terms: {
+          field: 'slo.tags',
+        },
+      },
+      'slo.indicator.type': {
+        terms: {
+          field: 'slo.indicator.type',
+        },
+      },
       'slo.budgetingMethod': {
         terms: {
           field: 'slo.budgetingMethod',
