@@ -6,12 +6,13 @@
  */
 
 import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 export const updateSavedQueryRequestBodySchema = t.type({
   id: t.string,
   query: t.string,
   description: t.union([t.string, t.undefined]),
-  interval: t.union([t.number, t.undefined]),
+  interval: t.union([toNumberRt, t.undefined]),
   snapshot: t.union([t.boolean, t.undefined]),
   removed: t.union([t.boolean, t.undefined]),
   platform: t.union([t.string, t.undefined]),

@@ -43,8 +43,8 @@ export const findPackRoute = (router: IRouter) => {
 
         const soClientResponse = await savedObjectsClient.find<PackSavedObject>({
           type: packSavedObjectType,
-          page: request.query.page ?? 1,
-          perPage: request.query.pageSize ?? 20,
+          page: (request.query.page as number) ?? 1,
+          perPage: (request.query.pageSize as number) ?? 20,
           sortField: request.query.sort ?? 'updated_at',
           sortOrder: request.query.sortOrder ?? 'desc',
         });

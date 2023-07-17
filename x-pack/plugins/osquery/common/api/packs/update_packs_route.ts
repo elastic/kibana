@@ -6,19 +6,20 @@
  */
 
 import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 export const updatePacksRequestBodySchema = t.type({
   name: t.union([t.string, t.undefined]),
   description: t.union([t.string, t.undefined]),
   enabled: t.union([t.boolean, t.undefined]),
   policy_ids: t.union([t.array(t.string), t.undefined]),
-  shards: t.union([t.record(t.string, t.number), t.undefined]),
+  shards: t.union([t.record(t.string, toNumberRt), t.undefined]),
   queries: t.union([
     t.record(
       t.string,
       t.type({
         query: t.string,
-        interval: t.union([t.number, t.undefined]),
+        interval: t.union([toNumberRt, t.undefined]),
         snapshot: t.union([t.boolean, t.undefined]),
         removed: t.union([t.boolean, t.undefined]),
         platform: t.union([t.string, t.undefined]),
