@@ -11,7 +11,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import expect from '@kbn/expect';
 
-import type { ApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
+import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
 
-  const requestBody: ApiLogRateAnalysis['body'] = {
+  const requestBody: AiopsApiLogRateAnalysis['body'] = {
     baselineMax: 1561719083292,
     baselineMin: 1560954147006,
     deviationMax: 1562254538692,

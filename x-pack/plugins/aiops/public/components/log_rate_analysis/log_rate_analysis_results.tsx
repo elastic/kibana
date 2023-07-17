@@ -31,7 +31,7 @@ import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
-import type { ApiLogRateAnalysis } from '../../../common/api';
+import type { AiopsApiLogRateAnalysis } from '../../../common/api';
 import {
   getGroupTableItems,
   LogRateAnalysisResultsTable,
@@ -127,9 +127,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const [groupResults, setGroupResults] = useState<boolean>(false);
   const [groupSkipFields, setGroupSkipFields] = useState<string[]>([]);
   const [uniqueFieldNames, setUniqueFieldNames] = useState<string[]>([]);
-  const [overrides, setOverrides] = useState<ApiLogRateAnalysis['body']['overrides'] | undefined>(
-    undefined
-  );
+  const [overrides, setOverrides] = useState<
+    AiopsApiLogRateAnalysis['body']['overrides'] | undefined
+  >(undefined);
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
 
@@ -158,7 +158,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     data,
     isRunning,
     errors: streamErrors,
-  } = useFetchStream<ApiLogRateAnalysis, typeof basePath>(
+  } = useFetchStream<AiopsApiLogRateAnalysis, typeof basePath>(
     `${basePath}/internal/aiops/log_rate_analysis`,
     '1',
     {

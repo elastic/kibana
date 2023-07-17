@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
-import type { ApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
+import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         }
 
-        async function requestWithoutStreaming(body: ApiLogRateAnalysis['body']) {
+        async function requestWithoutStreaming(body: AiopsApiLogRateAnalysis['body']) {
           const resp = await supertest
             .post(`/internal/aiops/log_rate_analysis`)
             .set('kbn-xsrf', 'kibana')
@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        async function requestWithStreaming(body: ApiLogRateAnalysis['body']) {
+        async function requestWithStreaming(body: AiopsApiLogRateAnalysis['body']) {
           const resp = await fetch(`${kibanaServerUrl}/internal/aiops/log_rate_analysis`, {
             method: 'POST',
             headers: {

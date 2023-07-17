@@ -12,6 +12,7 @@ import type {
 import { streamReducer } from './stream_reducer';
 
 export const AIOPS_API_ENDPOINT = {
+  // Deprecated since 8.10
   EXPLAIN_LOG_RATE_SPIKES: '/internal/aiops/explain_log_rate_spikes',
   LOG_RATE_ANALYSIS: '/internal/aiops/log_rate_analysis',
 } as const;
