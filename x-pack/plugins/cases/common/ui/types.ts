@@ -13,7 +13,6 @@ import type {
   UPDATE_CASES_CAPABILITY,
 } from '..';
 import type {
-  User,
   ActionConnector,
   SingleCaseMetricsResponse,
   Comment,
@@ -22,7 +21,6 @@ import type {
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
   GetCaseConnectorsResponse,
-  GetCaseUsersResponse,
 } from '../api';
 import type { PUSH_CASES_CAPABILITY } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -31,12 +29,14 @@ import type {
   CaseStatuses,
   UserAction,
   Case as CaseSnakeCase,
+  User,
 } from '../types/domain';
 import type {
   CasePatchRequest,
   CasesFindResponse,
   CasesStatusResponse,
   CaseUserActionStatsResponse,
+  GetCaseUsersResponse,
   UserActionFindRequestTypes,
   UserActionFindResponse,
 } from '../types/api';

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseAssigneesRt, CaseConnectorRt, UserRt } from '../../../api';
+import { CaseConnectorRt } from '../../../api';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
@@ -35,6 +35,7 @@ import {
   CaseStatusRt,
   RelatedCaseRt,
 } from '../../domain/case/v1';
+import { CaseAssigneesRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
 /**

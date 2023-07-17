@@ -7,6 +7,7 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import type { User } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
   CasePatchRequest,
@@ -32,7 +33,6 @@ import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
   BulkCreateCommentRequest,
   CommentRequest,
-  User,
   SingleCaseMetricsResponse,
   GetCaseConnectorsResponse,
 } from '../../common/api';

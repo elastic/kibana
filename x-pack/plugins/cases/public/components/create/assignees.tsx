@@ -24,8 +24,8 @@ import {
   UseField,
   getFieldValidityAndErrorMessage,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { CaseAssignees } from '../../../common/types/domain';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
-import type { CaseAssignees } from '../../../common/api';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';

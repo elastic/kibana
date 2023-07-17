@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { UserRt } from '../../../types/domain';
 import {
   MAX_BULK_GET_ATTACHMENTS,
   MAX_COMMENTS_PER_PAGE,
@@ -14,8 +15,6 @@ import {
 } from '../../../constants';
 import { limitedArraySchema, paginationSchema, limitedStringSchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
-
-import { UserRt } from '../../user';
 
 export * from './files';
 

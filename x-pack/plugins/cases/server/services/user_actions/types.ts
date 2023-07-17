@@ -26,8 +26,10 @@ import type {
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
+  User,
+  CaseAssignees,
 } from '../../../common/types/domain';
-import type { CommentRequest, User, CaseAssignees } from '../../../common/api';
+import type { CommentRequest } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,

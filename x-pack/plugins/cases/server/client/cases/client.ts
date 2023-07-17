@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, Cases } from '../../../common/types/domain';
+import type { Case, Cases, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindRequest,
@@ -19,7 +19,6 @@ import type {
   GetRelatedCasesByAlertResponse,
   CasesBulkGetResponse,
 } from '../../../common/types/api';
-import type { User } from '../../../common/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';

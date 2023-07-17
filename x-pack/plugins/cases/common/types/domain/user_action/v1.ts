@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { UserRt } from '../../../api';
+import { UserRt } from '../user/v1';
 import { UserActionActionsRt } from './action/v1';
 import { AssigneesUserActionRt } from './assignees/v1';
 import { CategoryUserActionRt } from './category/v1';

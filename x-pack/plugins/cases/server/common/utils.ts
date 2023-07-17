@@ -15,7 +15,7 @@ import type {
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import type { Case } from '../../common/types/domain';
+import type { Case, User } from '../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
 import {
@@ -36,7 +36,6 @@ import type {
   CommentRequestUserType,
   Comment,
   CommentsFindResponse,
-  User,
 } from '../../common/api';
 import {
   CommentType,

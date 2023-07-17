@@ -10,7 +10,13 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { Case, CaseAttributes, ExternalService } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseAssignees,
+  CaseAttributes,
+  ExternalService,
+  User,
+} from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
@@ -18,8 +24,6 @@ import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
   ActionConnector,
   Comment,
-  User,
-  CaseAssignees,
   CaseField,
   ThirdPartyField,
   ConnectorMappings,

@@ -6,8 +6,8 @@
  */
 
 import { isString } from 'lodash';
-import type { CaseAssignees } from '../../../common/api';
-import { CaseAssigneesRt } from '../../../common/api';
+import type { CaseAssignees } from '../../../common/types/domain';
+import { CaseAssigneesRt } from '../../../common/types/domain';
 
 export const isStringArray = (value: unknown): value is string[] => {
   return Array.isArray(value) && value.every((val) => isString(val));
