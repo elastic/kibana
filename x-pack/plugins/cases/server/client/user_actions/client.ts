@@ -6,12 +6,11 @@
  */
 
 import type {
-  GetCaseConnectorsResponse,
+  CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
   UserActionFindResponse,
-  CaseUserActionsDeprecatedResponse,
-  GetCaseUsersResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
+import type { GetCaseConnectorsResponse, GetCaseUsersResponse } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
 import { getConnectors } from './connectors';

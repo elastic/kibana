@@ -29,7 +29,7 @@
       "post": {
         "summary": "Creates a rule with a randomly generated rule identifier.",
         "operationId": "createRule",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.\n",
+        "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
           "alerting"
         ],
@@ -167,7 +167,7 @@
       "delete": {
         "summary": "Deletes a rule.",
         "operationId": "deleteRule",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it.\n",
+        "description": "To delete a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it. If the API key that is used by the rule was created automatically, it is deleted.\n",
         "tags": [
           "alerting"
         ],
@@ -216,7 +216,7 @@
       "post": {
         "summary": "Creates a rule with a specific rule identifier.",
         "operationId": "createRuleId",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.  If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.\n",
+        "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
           "alerting"
         ],
@@ -299,7 +299,7 @@
       "put": {
         "summary": "Updates the attributes for a rule.",
         "operationId": "updateRule",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.  If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you update a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If you have different privileges than the user that created or most recently updated the rule, you might change its behavior. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.\n",
+        "description": "To update a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs. NOTE: If the API key has different privileges than the key that created or most recently updated the rule, the rule behavior might change. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.\n",
         "tags": [
           "alerting"
         ],
@@ -438,7 +438,7 @@
       "post": {
         "summary": "Enables a rule.",
         "operationId": "enableRule",
-        "description": "This API supports token-based authentication only. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.\n",
+        "description": "To enable a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
         "tags": [
           "alerting"
         ],

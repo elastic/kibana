@@ -1,6 +1,6 @@
 post:
   summary: Creates an SLO.
-  operationId: createSlo
+  operationId: createSloOp
   description: >
     You must have `all` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
@@ -51,7 +51,7 @@ post:
 
 get:
   summary: Retrieves a paginated list of SLOs
-  operationId: findSlos
+  operationId: findSlosOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
