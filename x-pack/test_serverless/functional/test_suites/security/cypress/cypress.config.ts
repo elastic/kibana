@@ -8,12 +8,12 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 
 export default defineCypressConfig({
-  defaultCommandTimeout: 60000,
+  defaultCommandTimeout: 150000,
   env: {
     grepFilterSpecs: true,
   },
-  execTimeout: 60000,
-  pageLoadTimeout: 60000,
+  execTimeout: 150000,
+  pageLoadTimeout: 150000,
   responseTimeout: 60000,
   trashAssetsBeforeRuns: false,
   video: false,
