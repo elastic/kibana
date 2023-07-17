@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import {
-  AppUpdater,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
+import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
 import { DiscoverLogExplorerConfig } from '../common/plugin_config';
-import { createAppUpdater } from './app_updater';
 import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
+import { getLogExplorerDeepLink } from './deep_links';
 import {
   DiscoverLogExplorerPluginSetup,
   DiscoverLogExplorerPluginStart,
@@ -26,22 +19,20 @@ import {
 export class DiscoverLogExplorerPlugin
   implements Plugin<DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart>
 {
-  private appUpdater: BehaviorSubject<AppUpdater>;
   private config: DiscoverLogExplorerConfig;
 
   constructor(context: PluginInitializerContext<DiscoverLogExplorerConfig>) {
     this.config = context.config.get();
-
-    this.appUpdater = createAppUpdater(this.config);
   }
 
-  public setup(core: CoreSetup) {
-    core.application.registerAppUpdater(this.appUpdater);
-  }
+  public setup() {}
 
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover } = plugins;
 
-    discover.customize(LOG_EXPLORER_PROFILE_ID, createLogExplorerProfileCustomizations({ core }));
+    discover.customize(LOG_EXPLORER_PROFILE_ID, {
+      customize: createLogExplorerProfileCustomizations({ core }),
+      deepLinks: [getLogExplorerDeepLink({ isVisible: this.config.featureFlags.deepLinkVisible })],
+    });
   }
 }

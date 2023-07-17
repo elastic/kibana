@@ -6,13 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { AppDeepLink } from '@kbn/core/public';
 import type { DiscoverStateContainer } from '../application/main/services/discover_state';
 import type { DiscoverCustomizationService } from './customization_service';
+
+export type DiscoverProfileId = string;
+
+export interface DiscoverProfile {
+  id: DiscoverProfileId;
+  customizationCallbacks: CustomizationCallback[];
+  deepLinks?: AppDeepLink[];
+}
 
 export interface CustomizationCallbackContext {
   customizations: DiscoverCustomizationService;
   stateContainer: DiscoverStateContainer;
 }
+
+export interface DiscoverProfileOptions {
+  customize: CustomizationCallback;
+  deepLinks?: AppDeepLink[];
+}
+
+export type DiscoverCustomize = (id: DiscoverProfileId, options: DiscoverProfileOptions) => void;
 
 export type CustomizationCallback = (
   options: CustomizationCallbackContext

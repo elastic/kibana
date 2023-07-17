@@ -12,19 +12,19 @@ describe('createProfileRegistry', () => {
   it('should allow registering profiles', () => {
     const registry = createProfileRegistry();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     registry.set({
-      name: 'test2',
+      id: 'test2',
       customizationCallbacks: [],
     });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     expect(registry.get('test2')).toEqual({
-      name: 'test2',
+      id: 'test2',
       customizationCallbacks: [],
     });
   });
@@ -32,20 +32,20 @@ describe('createProfileRegistry', () => {
   it('should allow overriding profiles', () => {
     const registry = createProfileRegistry();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     const callback = jest.fn();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback],
     });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback],
     });
   });
@@ -53,11 +53,11 @@ describe('createProfileRegistry', () => {
   it('should be case insensitive', () => {
     const registry = createProfileRegistry();
     registry.set({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
     expect(registry.get('tEsT')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [],
     });
   });
@@ -68,16 +68,18 @@ describe('createCustomizeFunction', () => {
     const registry = createProfileRegistry();
     const customize = createCustomizeFunction(registry);
     const callback = jest.fn();
-    customize('test', callback);
+    customize('test', { customize: callback });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback],
+      deepLinks: [],
     });
     const callback2 = jest.fn();
-    customize('test', callback2);
+    customize('test', { customize: callback2 });
     expect(registry.get('test')).toEqual({
-      name: 'test',
+      id: 'test',
       customizationCallbacks: [callback, callback2],
+      deepLinks: [],
     });
   });
 });

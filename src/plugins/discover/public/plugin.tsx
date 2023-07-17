@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
+  AppDeepLink,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -72,7 +73,7 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import type { CustomizationCallback } from './customizations';
+import type { DiscoverCustomize } from './customizations';
 import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 
@@ -159,7 +160,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly customize: (profileName: string, callback: CustomizationCallback) => void;
+  readonly customize: DiscoverCustomize;
 }
 
 /**
@@ -305,6 +306,13 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
+    /**
+     * At the current stage Discover doesn't have any deep link,
+     * this act as the static deep link list that we'll be used as initial values for
+     * updates coming from the profileRegistry.
+     */
+    const deepLinks: AppDeepLink[] = [];
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
@@ -319,6 +327,11 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
+
+        const unsubscribeProfileRegistry = this.profileRegistry.subscribe({
+          deepLinks,
+          appStateUpdater: this.appStateUpdater,
+        });
 
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
@@ -355,6 +368,7 @@ export class DiscoverPlugin
           isDev,
         });
         return () => {
+          unsubscribeProfileRegistry();
           unlistenParentHistory();
           unmount();
           appUnMounted();
