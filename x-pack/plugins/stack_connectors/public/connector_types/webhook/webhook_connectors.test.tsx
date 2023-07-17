@@ -11,6 +11,7 @@ import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { WebhookAuthType } from '../../../common/webhook/constants';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -22,6 +23,7 @@ describe('WebhookActionConnectorFields renders', () => {
         url: 'https://test.com',
         headers: [{ key: 'content-type', value: 'text' }],
         hasAuth: true,
+        authType: WebhookAuthType.Basic,
       },
       secrets: {
         user: 'user',
@@ -102,6 +104,7 @@ describe('WebhookActionConnectorFields renders', () => {
             url: 'https://test.com',
             headers: [{ key: 'content-type', value: 'text' }],
             hasAuth: true,
+            authType: WebhookAuthType.Basic,
           },
           secrets: {
             user: 'user',
@@ -109,6 +112,7 @@ describe('WebhookActionConnectorFields renders', () => {
           },
           __internal__: {
             hasHeaders: true,
+            hasCA: false,
           },
           isDeprecated: false,
         },
@@ -122,6 +126,7 @@ describe('WebhookActionConnectorFields renders', () => {
         config: {
           ...actionConnector.config,
           hasAuth: false,
+          authType: WebhookAuthType.None,
         },
       };
 
@@ -148,9 +153,11 @@ describe('WebhookActionConnectorFields renders', () => {
             url: 'https://test.com',
             headers: [{ key: 'content-type', value: 'text' }],
             hasAuth: false,
+            authType: WebhookAuthType.None,
           },
           __internal__: {
             hasHeaders: true,
+            hasCA: false,
           },
           isDeprecated: false,
         },
@@ -165,6 +172,7 @@ describe('WebhookActionConnectorFields renders', () => {
           method: 'PUT',
           url: 'https://test.com',
           hasAuth: true,
+          authType: WebhookAuthType.Basic,
         },
       };
 
@@ -190,6 +198,7 @@ describe('WebhookActionConnectorFields renders', () => {
             method: 'PUT',
             url: 'https://test.com',
             hasAuth: true,
+            authType: WebhookAuthType.Basic,
           },
           secrets: {
             user: 'user',
@@ -197,6 +206,7 @@ describe('WebhookActionConnectorFields renders', () => {
           },
           __internal__: {
             hasHeaders: false,
+            hasCA: false,
           },
           isDeprecated: false,
         },

@@ -12,7 +12,6 @@ import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import * as i18n from './translations';
-import { WebhookAuthType } from '../../../common/webhook/constants';
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
@@ -391,7 +390,6 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         config: {
           ...actionConnector.config,
           hasAuth: false,
-          authType: WebhookAuthType.None,
         },
       };
 
