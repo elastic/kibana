@@ -46,6 +46,8 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
 
+  const shouldUseSearchCriteria = currentPage.length === 0;
+
   // prevents requestTs and serchCriteria states from reloading the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
@@ -64,24 +66,31 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   });
 
   const filters = useMemo(() => {
-    return [
-      ...searchCriteria.filters,
-      buildCombinedHostsFilter({
-        field: 'host.name',
-        values: currentPage.map((p) => p.name),
-        dataView,
-      }),
-    ];
-  }, [currentPage, dataView, searchCriteria.filters]);
+    return shouldUseSearchCriteria
+      ? afterLoadedState.filters
+      : [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: currentPage.map((p) => p.name),
+            dataView,
+          }),
+        ];
+  }, [afterLoadedState.filters, currentPage, dataView, shouldUseSearchCriteria]);
 
   const extraActions: Action[] = useMemo(
     () =>
       getExtraActions({
         timeRange: afterLoadedState.dateRange,
-        query: afterLoadedState.query,
+        query: shouldUseSearchCriteria ? afterLoadedState.query : undefined,
         filters,
       }),
-    [afterLoadedState.dateRange, afterLoadedState.query, filters, getExtraActions]
+    [
+      afterLoadedState.dateRange,
+      afterLoadedState.query,
+      filters,
+      getExtraActions,
+      shouldUseSearchCriteria,
+    ]
   );
 
   const handleBrushEnd = useCallback(
@@ -139,7 +148,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
           dateRange={afterLoadedState.dateRange}
           filters={filters}
-          query={afterLoadedState.query}
+          query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
           onBrushEnd={handleBrushEnd}
           loading={loading}
           hasTitle

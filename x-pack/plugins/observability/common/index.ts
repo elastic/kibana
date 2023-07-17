@@ -68,6 +68,7 @@ export const alertsLocatorID = 'ALERTS_LOCATOR';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
 export const sloDetailsLocatorID = 'SLO_DETAILS_LOCATOR';
+export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 
 export type { AlertsLocatorParams } from './locators/alerts';
 
@@ -84,4 +85,4 @@ export {
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
-export { CoPilotPromptId, coPilotPrompts } from './co_pilot';
+export { CoPilotPromptId, loadCoPilotPrompts } from './co_pilot';

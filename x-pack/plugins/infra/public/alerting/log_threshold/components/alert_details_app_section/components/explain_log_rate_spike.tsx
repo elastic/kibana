@@ -231,6 +231,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
               title={explainLogSpikeTitle}
               params={logSpikeParams}
               promptId={CoPilotPromptId.ExplainLogSpike}
+              feedbackEnabled={false}
             />
           </EuiFlexItem>
         ) : null}

@@ -28,10 +28,14 @@ These features are all available for cases in *{stack-manage-app}*, *{observabil
 
 There's a new category field to enable better case classification and a better understanding of the overall distribution and trends within different areas of a case management system.
 
+It is also simpler to add visualizations to cases:
+[role="screenshot"]
+image::images/case-visualizations.png[A Dashboard panel's menu options for adding visualizations to cases]
+
 The email notification that occurs when a user is assigned to a case has also been enhanced:
 
 [role="screenshot"]
-image::images/case-notification.png[Example email with case name, description, tags, and link,width="75%"]
+image::images/case-notification.png[Example email with case name, description, tags, and link,width=60%]
 
 To learn more, check out cases in the {observability-guide}/create-cases.html[{observability}], <<cases,{stack-manage-app}>>, or {security-guide}/cases-overview.html[{security-app}].
 
