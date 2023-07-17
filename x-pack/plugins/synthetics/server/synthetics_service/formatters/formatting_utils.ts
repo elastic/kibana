@@ -48,9 +48,8 @@ export const replaceStringWithParams = (
 };
 
 export const hasNoParams = (strVal: string) => {
-  const startIndex = strVal.indexOf('${');
-  const endIndex = strVal.indexOf('}');
-  return startIndex === -1 || endIndex === -1 || startIndex > endIndex;
+  const shellParamsRegex = /\$\{[a-zA-Z_][a-zA-Z0-9_]*\}/g;
+  return strVal.match(shellParamsRegex) === null;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
