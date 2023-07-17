@@ -37,7 +37,7 @@ export const bulkCreate = async (
 
   try {
     decodeWithExcessOrThrow(BulkCreateCommentRequestRt)(attachments);
-    validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
+    validateMaxUserActions({ caseId, userActionService, userActionsToAdd: attachments.length });
 
     attachments.forEach((attachment) => {
       decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
