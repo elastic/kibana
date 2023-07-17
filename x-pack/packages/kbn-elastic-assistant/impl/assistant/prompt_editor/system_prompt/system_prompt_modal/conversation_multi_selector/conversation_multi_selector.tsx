@@ -13,6 +13,7 @@ import { Conversation } from '../../../../../..';
 import * as i18n from '../translations';
 
 interface Props {
+  isDisabled?: boolean;
   onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
   conversations: Conversation[];
   selectedConversations?: Conversation[];
@@ -22,7 +23,12 @@ interface Props {
  * Selector for choosing multiple Conversations
  */
 export const ConversationMultiSelector: React.FC<Props> = React.memo(
-  ({ onConversationSelectionChange, conversations, selectedConversations = [] }) => {
+  ({
+    conversations,
+    isDisabled = false,
+    onConversationSelectionChange,
+    selectedConversations = [],
+  }) => {
     // ComboBox options
     const options = useMemo<EuiComboBoxOptionOption[]>(
       () =>
@@ -64,8 +70,11 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
-        data-test-subj={TEST_IDS.CONVERSATIONS_MULTISELECTOR}
         aria-label={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS}
+        compressed
+        data-test-subj={TEST_IDS.CONVERSATIONS_MULTISELECTOR}
+        isDisabled={isDisabled}
+        fullWidth
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChange}

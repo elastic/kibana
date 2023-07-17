@@ -353,9 +353,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     addUserMessages,
   ]);
 
+  const isSaveable = Boolean(unappliedExpression);
+
   useEffect(() => {
-    dispatchLens(setSaveable(Boolean(unappliedExpression)));
-  }, [unappliedExpression, dispatchLens]);
+    dispatchLens(setSaveable(isSaveable));
+  }, [isSaveable, dispatchLens]);
 
   useEffect(() => {
     if (!autoApplyEnabled) {

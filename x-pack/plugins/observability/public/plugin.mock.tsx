@@ -72,7 +72,9 @@ const data = {
         },
       },
       search: {
-        searchSource: jest.fn(),
+        searchSource: {
+          create: jest.fn(),
+        },
       },
     };
   },
