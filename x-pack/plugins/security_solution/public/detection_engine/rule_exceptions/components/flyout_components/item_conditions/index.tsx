@@ -256,7 +256,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         osTypes,
         listId: listIdToUse,
         listNamespaceType,
-        listTypeSpecificIndexPatternFilter: onFilterIndexPatterns,
         exceptionItemName,
         indexPatterns,
         isOrDisabled: isExceptionBuilderFormDisabled,
