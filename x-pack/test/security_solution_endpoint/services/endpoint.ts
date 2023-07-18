@@ -139,7 +139,11 @@ export class EndpointTestResources extends FtrService {
           alertsPerHost,
           enableFleetIntegration,
           undefined,
-          CurrentKibanaVersionDocGenerator
+          CurrentKibanaVersionDocGenerator,
+          undefined,
+          undefined,
+          undefined,
+          this.log
         );
 
     if (waitUntilTransformed && customIndexFn) {

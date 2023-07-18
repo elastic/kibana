@@ -50,6 +50,9 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param options
  * @param DocGenerator
  * @param withResponseActions
+ * @param numResponseActions
+ * @param alertIds
+ * @param logger_
  */
 export async function indexHostsAndAlerts(
   client: Client,
@@ -67,10 +70,11 @@ export async function indexHostsAndAlerts(
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
   withResponseActions = true,
   numResponseActions?: number,
-  alertIds?: string[]
+  alertIds?: string[],
+  logger_?: ToolingLog
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
-  const logger = new ToolingLog();
+  const logger = logger_ ?? new ToolingLog({ level: 'info', writeTo: process.stdout });
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
   const response: IndexedHostsAndAlertsResponse = {
     hosts: [],
