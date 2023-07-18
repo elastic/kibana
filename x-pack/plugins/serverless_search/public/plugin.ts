@@ -73,7 +73,6 @@ export class ServerlessSearchPlugin
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless }));
-    observabilityShared.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],

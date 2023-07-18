@@ -56,7 +56,12 @@ const navigationTree: NavigationTreeDefinition = {
             {
               link: 'visualize',
             },
-            { link: 'observability-overview:alerts' },
+            {
+              link: 'management:triggersActions',
+              title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
+                defaultMessage: 'Alerts',
+              }),
+            },
           ],
         },
         {
