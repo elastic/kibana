@@ -7,6 +7,19 @@
 
 import { GeoJsonImporter } from './geojson_importer';
 
+(function () {
+  Blob.prototype.arrayBuffer = Blob.prototype.arrayBuffer || arrayBufferPolyFill;
+  function arrayBufferPolyFill() {
+    return new Promise((resolve) => {
+      let fr = new FileReader();
+      fr.onload = (event) => {
+        resolve(event?.target?.result);
+      };
+      fr.readAsArrayBuffer(this);
+    })
+  }
+})();
+
 const FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: [
