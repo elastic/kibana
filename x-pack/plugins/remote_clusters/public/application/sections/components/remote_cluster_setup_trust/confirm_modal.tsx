@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiText,
-  EuiLink,
   EuiSpacer,
   EuiButtonEmpty,
   EuiForm,
@@ -57,10 +56,7 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
           <p>
             <FormattedMessage
               id="xpack.remoteClusters.clusterWizard.trustStep.body"
-              defaultMessage="Have you setup an authentication mechanism to securely connect your remote cluster? {helpLink}."
-              values={{
-                helpLink: <EuiLink href="#">Learn how</EuiLink>,
-              }}
+              defaultMessage="Have you setup an authentication mechanism to securely connect your remote cluster?"
             />
           </p>
         </EuiText>

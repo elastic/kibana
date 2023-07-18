@@ -19,6 +19,7 @@ import {
   EuiPageHeader,
   EuiPageSection,
   EuiPageBody,
+  EuiPageTemplate,
 } from '@elastic/eui';
 
 import { remoteClustersUrl } from '../../services/documentation';
@@ -144,8 +145,8 @@ export class RemoteClusterList extends Component {
 
   renderEmpty() {
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiEmptyPrompt
+      <EuiPageTemplate minHeight={0} panelled={false}>
+        <EuiPageTemplate.EmptyPrompt
           data-test-subj="remoteClusterListEmptyPrompt"
           iconType="managementApp"
           title={
@@ -179,7 +180,7 @@ export class RemoteClusterList extends Component {
             </EuiButton>
           }
         />
-      </EuiPageSection>
+      </EuiPageTemplate>
     );
   }
 
