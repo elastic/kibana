@@ -66,7 +66,13 @@ describe('config schema', () => {
 
   it('should not throw error if allowFeatureVisibility is disabled in serverless offering', () => {
     expect(() =>
-      ConfigSchema.validate({ allowFeatureVisibility: false }, { serverless: true })
+      ConfigSchema.validate(
+        {
+          allowFeatureVisibility: false,
+          enablePublicApi: false, // this is also a required to be false
+        },
+        { serverless: true }
+      )
     ).not.toThrow();
   });
 
@@ -76,7 +82,13 @@ describe('config schema', () => {
 
   it('should throw error if allowFeatureVisibility is enabled in serverless offering', () => {
     expect(() =>
-      ConfigSchema.validate({ allowFeatureVisibility: true }, { serverless: true })
+      ConfigSchema.validate(
+        {
+          allowFeatureVisibility: true,
+          enablePublicApi: false, // this is also a required to be false
+        },
+        { serverless: true }
+      )
     ).toThrow();
   });
 });

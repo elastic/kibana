@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         error: 'Not Found',
         message: 'Not Found',
       });
-      expect(status).toBe(400);
+      expect(status).toBe(404);
     });
 
     it('rejects request to update a space with disabledFeatures', async () => {
