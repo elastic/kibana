@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('BWC report generation into existing indexes', () => {
     let cleanupIndexAlias: () => Promise<void>;
 
-    describe.skip('existing 6_2 index', () => {
+    describe('existing 6_2 index', () => {
       before('load data and add index alias', async () => {
         await reportingAPI.deleteAllReports();
         // data to report on

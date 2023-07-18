@@ -24,10 +24,6 @@ import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '..
 import { decryptJobHeaders } from '../common/decrypt_job_headers';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 
-/*
- * @TODO move to be within @kbn/reporitng-export-types
- */
-
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
@@ -53,14 +49,14 @@ export class CsvSearchSourceExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
+
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    const logger = args[2];
-    this.logger = logger.get('csv-searchsource-export');
+    this.logger = this.logger.get('csv-searchsource-export');
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams, isDeprecated: false };
+    return { ...jobParams };
   };
 
   public runTask = async (

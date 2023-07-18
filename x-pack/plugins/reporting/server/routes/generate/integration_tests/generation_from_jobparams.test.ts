@@ -24,6 +24,7 @@ import {
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
 import { PdfExportType } from '../../../export_types/printable_pdf_v2';
+import { reportingMock } from '../../../mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -54,12 +55,7 @@ describe('POST /api/reporting/generate', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({
-        usesUiCapabilities: jest.fn(),
-        getSpaceId: jest.fn(),
-        getScreenshots: jest.fn(),
-        registerExportTypes: jest.fn(),
-      })
+      () => reportingMock.createStart()
     );
 
     const mockSetupDeps = createMockPluginSetup({
@@ -159,7 +155,7 @@ describe('POST /api/reporting/generate', () => {
       );
   });
 
-  xit('returns 400 on invalid browser timezone', async () => {
+  it('returns 400 on invalid browser timezone', async () => {
     registerJobGenerationRoutes(mockReportingCore, mockLogger);
 
     await server.start();
@@ -173,7 +169,7 @@ describe('POST /api/reporting/generate', () => {
       );
   });
 
-  xit('returns 500 if job handler throws an error', async () => {
+  it('returns 500 if job handler throws an error', async () => {
     store.addReport = jest.fn().mockRejectedValue('silly');
 
     registerJobGenerationRoutes(mockReportingCore, mockLogger);
@@ -193,7 +189,14 @@ describe('POST /api/reporting/generate', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/reporting/generate/printablePdf')
-      .send({ jobParams: rison.encode({ title: `abc` }) })
+      .send({
+        jobParams: rison.encode({
+          title: `abc`,
+          relativeUrls: ['test'],
+          layout: { id: 'test' },
+          objectType: 'canvas workpad',
+        }),
+      })
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchObject({
@@ -204,9 +207,19 @@ describe('POST /api/reporting/generate', () => {
             index: 'foo-index',
             jobtype: 'printable_pdf',
             payload: {
-              createJobTest: {
-                test1: 'yes',
+              forceNow: expect.any(String),
+              isDeprecated: true,
+              layout: {
+                id: 'test',
               },
+              objectType: 'canvas workpad',
+              objects: [
+                {
+                  relativeUrl: 'test',
+                },
+              ],
+              title: 'abc',
+              version: '7.14.0',
             },
             status: 'pending',
           },

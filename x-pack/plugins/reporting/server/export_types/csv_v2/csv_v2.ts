@@ -12,7 +12,6 @@ import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { CsvGenerator } from '@kbn/generate-csv';
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
-import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import {
   CSV_REPORT_TYPE_V2,
@@ -45,8 +44,8 @@ export class CsvV2ExportType extends ExportType<
   CsvV2ExportTypeStartDeps
 > {
   id = CSV_REPORT_TYPE_V2;
-  name = 'csv_v2';
-  jobType = CONTENT_TYPE_CSV;
+  name = CSV_REPORT_TYPE_V2;
+  jobType = CSV_REPORT_TYPE_V2;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [

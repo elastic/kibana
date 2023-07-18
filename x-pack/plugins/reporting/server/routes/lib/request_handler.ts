@@ -71,7 +71,7 @@ export class RequestHandler {
     const payload = {
       ...job,
       headers,
-      title: jobParams.title,
+      title: job.title,
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,
@@ -84,6 +84,7 @@ export class RequestHandler {
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
         payload,
+        migration_version: jobParams.version,
         meta: {
           // telemetry fields
           objectType: jobParams.objectType,

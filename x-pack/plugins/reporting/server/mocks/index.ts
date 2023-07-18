@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export const metadata = {
-  id: 'png',
-  name: 'PNG',
+import { ReportingStart } from '../types';
+
+export const reportingMock = {
+  createStart: (): ReportingStart => ({
+    usesUiCapabilities: () => false,
+    registerExportTypes: () => {},
+    getSpaceId: jest.fn(),
+    getScreenshots: jest.fn(),
+  }),
 };

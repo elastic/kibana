@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     return result;
   };
 
-  describe.skip('Job Listing APIs', () => {
+  describe('Job Listing APIs', () => {
     before(async () => {
       await reportingAPI.initLogs();
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
@@ -70,11 +70,9 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
-            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
-            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -100,11 +98,9 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
-            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
-            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -126,11 +122,9 @@ export default function ({ getService }: FtrProviderContext) {
             "created_by": false,
             "jobtype": "csv_searchsource",
             "meta": Object {
-              "isDeprecated": false,
               "objectType": "search",
             },
             "payload": Object {
-              "isDeprecated": false,
               "title": "A Saved Search With a DATE FILTER",
             },
             "status": "pending",
@@ -151,11 +145,9 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
-            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
-            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -178,11 +170,9 @@ export default function ({ getService }: FtrProviderContext) {
             "created_by": false,
             "jobtype": "csv_searchsource",
             "meta": Object {
-              "isDeprecated": false,
               "objectType": "search",
             },
             "payload": Object {
-              "isDeprecated": false,
               "title": "A Saved Search With a DATE FILTER",
             },
             "status": "pending",
@@ -203,11 +193,9 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
-            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
-            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -226,11 +214,9 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
-            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
-            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
