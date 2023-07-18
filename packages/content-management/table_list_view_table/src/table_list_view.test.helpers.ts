@@ -34,7 +34,6 @@ export const getActions = ({ find, form, component }: TestBed) => {
   // --- Row Actions ---
   const selectRow = (rowId: string) => {
     act(() => {
-      // Select the second item
       form.selectCheckBox(`checkboxSelectRow-${rowId}`);
     });
     component.update();

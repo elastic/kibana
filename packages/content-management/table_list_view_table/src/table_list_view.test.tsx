@@ -1393,6 +1393,7 @@ describe('TableListView', () => {
         ['', 'Item 1Item 1 description', twoDaysAgoToString],
       ]);
 
+      // Select the second item
       const selectedHit = hits[1];
 
       expect(exists('deleteSelectedItems')).toBe(false);
