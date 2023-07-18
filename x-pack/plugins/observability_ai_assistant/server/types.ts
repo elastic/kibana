@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
+
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ObservabilityAIAssistantPluginStart {}
 export interface ObservabilityAIAssistantPluginSetup {}
-export interface ObservabilityAIAssistantPluginSetupDependencies {}
-export interface ObservabilityAIAssistantPluginStartDependencies {}
+export interface ObservabilityAIAssistantPluginSetupDependencies {
+  actions: PluginSetupContract;
+}
+export interface ObservabilityAIAssistantPluginStartDependencies {
+  actions: PluginStartContract;
+}

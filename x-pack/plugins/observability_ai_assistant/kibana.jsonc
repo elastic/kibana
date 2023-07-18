@@ -3,14 +3,17 @@
   "id": "@kbn/observability-ai-assistant-plugin",
   "owner": "@elastic/apm-ui",
   "plugin": {
-    "id": "observabilityAiAssistant",
+    "id": "observabilityAIAssistant",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
-      "observabilityAiAssistant"
+      "observabilityAIAssistant"
     ],
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "triggersActionsUi",
+      "actions"
+    ],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

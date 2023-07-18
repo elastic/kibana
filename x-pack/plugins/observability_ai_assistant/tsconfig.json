@@ -12,7 +12,14 @@
     "server/**/*"
   ],
   "kbn_references": [
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/utility-types",
+    "@kbn/server-route-repository",
+    "@kbn/logging",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/config-schema",
+    "@kbn/security-plugin"
   ],
   "exclude": [
     "target/**/*",
