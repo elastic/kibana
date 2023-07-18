@@ -13360,10 +13360,10 @@ cypress-axe@^1.4.0:
   resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-1.4.0.tgz#e67482bfe9e740796bf77c7823f19781a8a2faff"
   integrity sha512-Ut7NKfzjyKm0BEbt2WxuKtLkIXmx6FD2j0RwdvO/Ykl7GmB/qRQkwbKLk3VP35+83hiIr8GKD04PDdrTK5BnyA==
 
-cypress-cloud@^1.7.4:
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/cypress-cloud/-/cypress-cloud-1.7.4.tgz#59e086608c7e9c28b55e8261785aa5e0a5421162"
-  integrity sha512-YnJEJLwTSEnIDnctKQg5v7g1caPxvzb0EBowwYI550KNNQyOOaVpHZ5zxjoJyT3BPZDXtnhti9h7Drv549FtTg==
+cypress-cloud@^1.9.1:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/cypress-cloud/-/cypress-cloud-1.9.1.tgz#8da616e4302a930fe3c9b5981bae6b963aa730a8"
+  integrity sha512-JdElp53c4pgNLfRf+7/KdHjg0xgzLtSp4ErzwHsIPQdymJTIqlXI1oypC/HfDKKumj5sNl85uE90GP/sry/9eA==
   dependencies:
     "@cypress/commit-info" "^2.2.0"
     axios "^1.2.0"
@@ -13377,13 +13377,16 @@ cypress-cloud@^1.7.4:
     execa "^5.1.1"
     getos "^3.2.1"
     globby "^11.1.0"
+    is-absolute "^1.0.0"
+    lil-http-terminator "^1.2.3"
     lodash "^4.17.21"
     nanoid "^3.3.4"
     pretty-ms "^7.0.1"
     source-map-support "^0.5.21"
     table "^6.8.1"
     tmp-promise "^3.0.3"
-    ws "^8.12.1"
+    ts-pattern "^4.3.0"
+    ws "^8.13.0"
 
 cypress-file-upload@^5.0.8:
   version "5.0.8"
@@ -18174,6 +18177,14 @@ is-absolute-url@^3.0.0:
   resolved "https://registry.yarnpkg.com/is-absolute-url/-/is-absolute-url-3.0.3.tgz#96c6a22b6a23929b11ea0afb1836c36ad4a5d698"
   integrity sha512-opmNIX7uFnS96NtPmhWQgQx6/NYFgsUXYMllcfzwWKUMwfo8kku1TvE6hkNcH+Q1ts5cMVrsY7j0bxXQDciu9Q==
 
+is-absolute@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/is-absolute/-/is-absolute-1.0.0.tgz#395e1ae84b11f26ad1795e73c17378e48a301576"
+  integrity sha512-dOWoqflvcydARa360Gvv18DZ/gRuHKi2NU/wU5X1ZFzdYfH29nkiNZsF3mp4OJ3H4yo9Mx8A/uAGNzpzPN3yBA==
+  dependencies:
+    is-relative "^1.0.0"
+    is-windows "^1.0.1"
+
 is-accessor-descriptor@^0.1.6:
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/is-accessor-descriptor/-/is-accessor-descriptor-0.1.6.tgz#a9e12cb3ae8d876727eeef3843f8a0897b5c98d6"
@@ -18716,7 +18727,7 @@ is-window@^1.0.2:
   resolved "https://registry.yarnpkg.com/is-window/-/is-window-1.0.2.tgz#2c896ca53db97de45d3c33133a65d8c9f563480d"
   integrity sha1-LIlspT25feRdPDMTOmXYyfVjSA0=
 
-is-windows@^1.0.2:
+is-windows@^1.0.1, is-windows@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/is-windows/-/is-windows-1.0.2.tgz#d1850eb9791ecd18e6182ce12a30f396634bb19d"
   integrity sha512-eXK1UInq2bPmjyX6e3VHIzMLobc4J94i4AWn+Hpq3OU5KkrRC96OAcR3PRJ/pGu6m8TRnBHP9dkXQVsT/COVIA==
@@ -20109,6 +20120,11 @@ lie@~3.3.0:
   integrity sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==
   dependencies:
     immediate "~3.0.5"
+
+lil-http-terminator@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/lil-http-terminator/-/lil-http-terminator-1.2.3.tgz#594ef0f3c2b2f7d43a8f2989b2b3de611bf507eb"
+  integrity sha512-vQcHSwAFq/kTR2cG6peOVS7SjgksGgSPeH0G2lkw+buue33thE/FCHdn10wJXXshc5RswFy0Iaz48qA2Busw5Q==
 
 lilconfig@^2.0.3, lilconfig@^2.0.5:
   version "2.1.0"
@@ -27897,6 +27913,11 @@ ts-node@^10.9.1:
     v8-compile-cache-lib "^3.0.1"
     yn "3.1.1"
 
+ts-pattern@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/ts-pattern/-/ts-pattern-4.3.0.tgz#7a995b39342f1b00d1507c2d2f3b90ea16e178a6"
+  integrity sha512-pefrkcd4lmIVR0LA49Imjf9DYLK8vtWhqBPA3Ya1ir8xCW0O2yjL9dsCVvI7pCodLC5q7smNpEtDR2yVulQxOg==
+
 ts-pnp@^1.1.6:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/ts-pnp/-/ts-pnp-1.2.0.tgz#a500ad084b0798f1c3071af391e65912c86bca92"
@@ -29750,7 +29771,7 @@ write-file-atomic@^4.0.1, write-file-atomic@^4.0.2:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.7"
 
-ws@8.13.0, ws@>=8.13.0, ws@^8.12.1, ws@^8.2.3, ws@^8.4.2, ws@^8.9.0:
+ws@8.13.0, ws@>=8.13.0, ws@^8.13.0, ws@^8.2.3, ws@^8.4.2, ws@^8.9.0:
   version "8.13.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.13.0.tgz#9a9fb92f93cf41512a0735c8f4dd09b8a1211cd0"
   integrity sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==
