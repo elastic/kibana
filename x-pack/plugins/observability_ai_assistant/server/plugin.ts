@@ -12,7 +12,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { mapValues } from 'lodash';
 import type { ObservabilityAIAssistantConfig } from './config';
+import { registerServerRoutes } from './routes/register_routes';
+import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
+import { ObservabilityAIAssistantService } from './service';
 import {
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
@@ -35,17 +39,44 @@ export class ObservabilityAIAssistantPlugin
   }
   public start(
     core: CoreStart,
-    plugins: ObservabilityAIAssistantPluginSetupDependencies
+    plugins: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPluginStart {
     return {};
   }
   public setup(
     core: CoreSetup<
-      ObservabilityAIAssistantPluginSetupDependencies,
+      ObservabilityAIAssistantPluginStartDependencies,
       ObservabilityAIAssistantPluginStart
     >,
     plugins: ObservabilityAIAssistantPluginSetupDependencies
   ): ObservabilityAIAssistantPluginSetup {
+    const routeHandlerPlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[
+              key as keyof ObservabilityAIAssistantPluginStartDependencies
+            ];
+          }),
+      };
+    }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
+
+    const service = new ObservabilityAIAssistantService({
+      logger: this.logger.get('service'),
+      core,
+    });
+
+    registerServerRoutes({
+      core,
+      logger: this.logger,
+      dependencies: {
+        plugins: routeHandlerPlugins,
+        service,
+      },
+    });
+
     return {};
   }
 }

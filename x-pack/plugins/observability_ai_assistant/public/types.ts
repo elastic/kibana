@@ -4,12 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ObservabilityAIAssistantPluginStart {}
 export interface ObservabilityAIAssistantPluginSetup {}
-export interface ObservabilityAIAssistantPluginSetupDependencies {}
-export interface ObservabilityAIAssistantPluginStartDependencies {}
+export interface ObservabilityAIAssistantPluginSetupDependencies {
+  triggersActions: TriggersAndActionsUIPublicPluginSetup;
+}
+export interface ObservabilityAIAssistantPluginStartDependencies {
+  triggersActions: TriggersAndActionsUIPublicPluginStart;
+}
 
 export interface ConfigSchema {}
