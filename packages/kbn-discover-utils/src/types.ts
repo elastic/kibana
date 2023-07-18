@@ -8,6 +8,8 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+export type { IgnoredReason } from './utils';
+
 export interface EsHitRecord extends Omit<SearchHit, '_source'> {
   _source?: Record<string, unknown>;
 }
