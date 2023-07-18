@@ -15,7 +15,7 @@ export type GetLiveQueryDetailsRequestQuerySchema = t.OutputOf<
   typeof getLiveQueryDetailsRequestQuerySchema
 >;
 
-export const getLiveQueryDetailsRequestParamsSchema = t.type({});
+export const getLiveQueryDetailsRequestParamsSchema = t.unknown;
 
 export type GetLiveQueryDetailsRequestParamsSchema = t.OutputOf<
   typeof getLiveQueryDetailsRequestParamsSchema
