@@ -15,6 +15,9 @@ import {
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_INGEST_PIPELINE_NAME,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
 } from '../../assets/constants';
 import { StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
@@ -30,11 +33,13 @@ export async function getGlobalDiagnosis(
     const licenseInfo = licensing.license.toJSON();
     const userPrivileges = await esClient.security.getUserPrivileges();
     const sloResources = await getSloResourcesDiagnosis(esClient);
+    const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
 
     return {
       licenseAndFeatures: licenseInfo,
       userPrivileges,
       sloResources,
+      sloSummaryResources,
     };
   } catch (error) {
     throw error;
@@ -48,6 +53,7 @@ export async function getSloDiagnosis(
   const { esClient, soClient } = services;
 
   const sloResources = await getSloResourcesDiagnosis(esClient);
+  const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
 
   let sloSavedObject;
   try {
@@ -60,25 +66,11 @@ export async function getSloDiagnosis(
     transform_id: getSLOTransformId(sloId, sloSavedObject?.attributes.revision ?? 1),
   });
 
-  let dataSample;
-  if (sloSavedObject?.attributes.indicator.params.index) {
-    const slo = sloSavedObject.attributes;
-    const sortField =
-      'timestampField' in slo.indicator.params
-        ? slo.indicator.params.timestampField ?? '@timestamp'
-        : '@timestamp';
-    dataSample = await esClient.search({
-      index: slo.indicator.params.index,
-      sort: { [sortField]: 'desc' },
-      size: 5,
-    });
-  }
-
   return {
     sloResources,
+    sloSummaryResources,
     sloSavedObject: sloSavedObject ?? NOT_OK,
     sloTransformStats,
-    dataSample: dataSample ?? NOT_OK,
   };
 }
 
@@ -109,6 +101,32 @@ async function getSloResourcesDiagnosis(esClient: ElasticsearchClient) {
       [SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME]: mappingsTemplateExists ? OK : NOT_OK,
       [SLO_COMPONENT_TEMPLATE_SETTINGS_NAME]: settingsTemplateExists ? OK : NOT_OK,
       [SLO_INGEST_PIPELINE_NAME]: ingestPipelineExists ? OK : NOT_OK,
+    };
+  } catch (err) {
+    if (err.meta.statusCode === 403) {
+      throw new Error('Insufficient permissions to access Elasticsearch Cluster', { cause: err });
+    }
+  }
+}
+
+async function getSloSummaryResourcesDiagnosis(esClient: ElasticsearchClient) {
+  try {
+    const indexTemplateExists = await esClient.indices.existsIndexTemplate({
+      name: SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+    });
+
+    const mappingsTemplateExists = await esClient.cluster.existsComponentTemplate({
+      name: SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+    });
+
+    const settingsTemplateExists = await esClient.cluster.existsComponentTemplate({
+      name: SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+    });
+
+    return {
+      [SLO_SUMMARY_INDEX_TEMPLATE_NAME]: indexTemplateExists ? OK : NOT_OK,
+      [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME]: mappingsTemplateExists ? OK : NOT_OK,
+      [SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME]: settingsTemplateExists ? OK : NOT_OK,
     };
   } catch (err) {
     if (err.meta.statusCode === 403) {
