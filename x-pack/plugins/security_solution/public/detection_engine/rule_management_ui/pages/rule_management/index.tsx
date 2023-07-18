@@ -31,7 +31,6 @@ import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/
 import { importRules } from '../../../rule_management/logic';
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
 import { AllRules } from '../../components/rules_table';
-import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { SuperHeader } from './super_header';
 
@@ -131,17 +130,15 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RulesPageTourComponent>
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
-                </RulesPageTourComponent>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </SuperHeader>
