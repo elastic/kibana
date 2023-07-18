@@ -45,7 +45,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   form: FormHook<AboutStepRule>;
 
   // TODO: https://github.com/elastic/kibana/issues/161456
-  // The About step page contains EuiRnage component which does not work properly within memoized parents.
+  // The About step page contains EuiRange component which does not work properly within memoized parents.
   // EUI team suggested not to memoize EuiRange/EuiDualRange: https://github.com/elastic/eui/issues/6846
   // Workaround: We introduced this additional property to be able to do extra re-render on switching to/from the About step page.
   // NOTE: We should remove this workaround once EUI team fixed EuiRange.
