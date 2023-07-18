@@ -774,7 +774,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(countBars[0].y).to.eql(indexes.length * TEST_DOC_COUNT);
             log.info('Check count after the upgrade');
             // later there are only documents for the upgraded stream
-            expect(counterBars[counterBars.length - 1].y).to.eql(TEST_DOC_COUNT);
+            expect(countBars[countBars.length - 1].y).to.eql(TEST_DOC_COUNT);
           });
         });
       });
