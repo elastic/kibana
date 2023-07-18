@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ReportingServerInfo } from '../../core';
-import { TaskPayloadPNG } from '../png/types';
-import { TaskPayloadPDF } from '../printable_pdf/types';
+import { ReportingServerInfo } from '@kbn/reporting-plugin/server/core';
 import { getFullUrls } from './get_full_urls';
-import { ReportingConfigType } from '../../config';
+import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import { TaskPayloadPNG } from '@kbn/reporting-plugin/common/types/export_types/png';
+import { TaskPayloadPDF } from '@kbn/reporting-plugin/common/types/export_types/printable_pdf';
 
 const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;
 const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;

@@ -23,8 +23,6 @@ import {
   CancellationToken,
   TaskRunResult,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-} from '@kbn/reporting-common';
-import {
   decryptJobHeaders,
   getCustomLogo,
   getFullRedirectAppUrl,
@@ -32,7 +30,7 @@ import {
 } from '@kbn/reporting-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { generatePdfObservable } from './lib/generate_pdf';
+import { generatePdfObservable } from './lib/generate_pdf_v2';
 import { JobParamsPDFV2, TaskPayloadPDFV2 } from './types';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {

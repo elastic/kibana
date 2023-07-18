@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -11,12 +12,9 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { TaskPayloadPNG } from '../../../common/types/export_types/png';
-import { TaskPayloadPDF } from '../../../common/types/export_types/printable_pdf';
-import { ReportingConfigType } from '../../config';
-import { ReportingServerInfo } from '../../core';
+import { ReportingConfigType, ReportingServerInfo, validateUrls } from '@kbn/reporting-common';
+import type { TaskPayloadPNG, TaskPayloadPDF } from '@kbn/reporting-export-types-deprecated';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
-import { validateUrls } from './validate_urls';
 
 function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
   return (job as TaskPayloadPNG).relativeUrl !== undefined;

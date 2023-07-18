@@ -18,7 +18,7 @@ import {
 } from '@kbn/reporting-common';
 import { Observable } from 'rxjs';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { TaskPayloadPDFV2 } from '../types';
+import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf';
 
 interface PdfResult {
   buffer: Uint8Array | null;

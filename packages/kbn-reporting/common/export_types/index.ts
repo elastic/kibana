@@ -13,6 +13,7 @@ export { decryptJobHeaders } from './decrypt_job_headers';
 export { getFieldFormats, setFieldFormats } from './services';
 export { getFullRedirectAppUrl } from './get_full_redirect_app_url';
 export { getCustomLogo } from './get_custom_logo';
+export { validateUrls } from './validate_urls';
 export { ExportType } from './export_type';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
 export * from './base';

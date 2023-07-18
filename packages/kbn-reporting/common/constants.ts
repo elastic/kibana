@@ -16,6 +16,7 @@ export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 
 const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
+export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
 export const PLUGIN_ID = 'reporting';
 

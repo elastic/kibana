@@ -10,7 +10,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx", "../printable_pdf_v2/generate_pdf.ts",
   ],
   "exclude": [
     "target/**/*"

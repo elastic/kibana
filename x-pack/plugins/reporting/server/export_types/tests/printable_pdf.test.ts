@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-jest.mock('@kbn/reporting-export-types-pdf/lib/generate_pdf_v2');
-
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CancellationToken } from '@kbn/reporting-common';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import * as Rx from 'rxjs';
-import type { Writable } from 'stream';
-import {
-  generatePdfObservable,
-  PdfExportType,
-  TaskPayloadPDFV2,
-} from '@kbn/reporting-export-types-pdf';
-import type { LocatorParams } from '../../../common/types';
-import { cryptoFactory } from '@kbn/reporting-common';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { Writable } from 'stream';
+import { CancellationToken, cryptoFactory } from '@kbn/reporting-common';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { createMockConfigSchema } from '../../test_helpers';
+import type { TaskPayloadPDF } from '../../../common/types/export_types/printable_pdf';
+import { PdfV1ExportType } from '@kbn/reporting-export-types-deprecated';
+import { generatePdfObservable } from '@kbn/reporting-export-types-deprecated/pdf_v1/lib/generate_pdf_v1';
+
+jest.mock('@kbn/reporting-export-types-deprecated/pdf_v1/lib/generate_pdf_v1');
 
 let content: string;
-let mockPdfExportType: PdfExportType;
+let mockPdfExportType: PdfV1ExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = {
@@ -37,23 +33,18 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getBasePayload = (baseObj: any) =>
-  ({
-    params: { forceNow: 'test' },
-    ...baseObj,
-  } as TaskPayloadPDFV2);
+const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPDF;
 
 beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
-
   const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
   const context = coreMock.createPluginInitializerContext(configType);
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
 
-  mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
+  mockPdfExportType = new PdfV1ExportType(mockCoreSetup, configType, mockLogger, context);
 
   mockPdfExportType.setup({
     basePath: { set: jest.fn() },
@@ -70,15 +61,14 @@ afterEach(() => (generatePdfObservable as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
+  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask(
     'pdfJobId',
     getBasePayload({
-      forceNow: 'test',
       title: 'PDF Params Timezone Test',
-      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
+      relativeUrl: '/app/kibana#/something',
       browserTimezone,
       headers: encryptedHeaders,
     }),
@@ -87,10 +77,6 @@ test(`passes browserTimezone to generatePdf`, async () => {
   );
 
   expect(generatePdfObservable).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.anything(),
     expect.anything(),
     expect.objectContaining({ browserTimezone: 'UTC' })
   );
@@ -103,7 +89,7 @@ test(`returns content_type of application/pdf`, async () => {
 
   const { content_type: contentType } = await mockPdfExportType.runTask(
     'pdfJobId',
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
@@ -117,7 +103,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask(
     'pdfJobId',
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );

@@ -40,10 +40,15 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, take } from 'rxjs/operators';
-import { CsvV2ExportType, CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
+import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-export-types-csv';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
+import {
+  CsvSearchSourceImmediateExportType,
+  PdfV1ExportType,
+  PngV1ExportType,
+} from '@kbn/reporting-export-types-deprecated';
 import type { ReportingSetup } from '.';
 import { createConfig, ReportingConfigType } from './config';
 import { checkLicense, ExportTypesRegistry } from './lib';
@@ -107,10 +112,11 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private csvSearchSourceExport: CsvSearchSourceExportType;
-  private csvV2Export: CsvV2ExportType;
+  private csvV2ExportType: CsvV2ExportType;
   private pdfExport: PdfExportType;
+  private pdfV1Export: PdfV1ExportType;
   private pngExport: PngExportType;
-
+  private pngV1Export: PngV1ExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -134,14 +140,20 @@ export class ReportingCore {
     );
     this.exportTypesRegistry.register(this.csvSearchSourceExport);
 
-    this.csvV2Export = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.csvV2Export);
+    this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.csvV2ExportType);
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
 
     this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pngExport);
+
+    // deprecated export types for tests
+    this.pdfV1Export = new PdfV1ExportType(this.core, this.config, this.logger, this.context);
+    this.pngV1Export = new PngV1ExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.pdfV1Export);
+    this.exportTypesRegistry.register(this.pngV1Export);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -150,6 +162,8 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
+      getScreenshots: this.getScreenshots.bind(this),
+      getSpaceId: this.getSpaceId.bind(this),
     });
 
     this.executing = new Set();
@@ -167,9 +181,11 @@ export class ReportingCore {
     this.pluginSetupDeps = setupDeps; // cache
 
     this.csvSearchSourceExport.setup(setupDeps);
-    this.csvV2Export.setup(setupDeps);
+    this.csvV2ExportType.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
+    this.pdfV1Export.setup(setupDeps);
     this.pngExport.setup(setupDeps);
+    this.pngV1Export.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -185,10 +201,15 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    this.csvSearchSourceExport.start({ ...startDeps });
-    this.csvV2Export.start({ ...startDeps });
-    this.pdfExport.start({ ...startDeps });
-    this.pngExport.start({ ...startDeps });
+    const reportingStart = this.getContract();
+    const exportTypeStartDeps = { ...startDeps, reporting: reportingStart };
+
+    this.csvSearchSourceExport.start(exportTypeStartDeps);
+    this.csvV2ExportType.start(exportTypeStartDeps);
+    this.pdfExport.start(exportTypeStartDeps);
+    this.pdfV1Export.start(exportTypeStartDeps);
+    this.pngExport.start(exportTypeStartDeps);
+    this.pngV1Export.start(exportTypeStartDeps);
 
     await this.assertKibanaIsAvailable();
 
@@ -317,6 +338,7 @@ export class ReportingCore {
   }
 
   /*
+   *
    * Track usage of code paths for telemetry
    */
   public getUsageCounter(): UsageCounter | undefined {
@@ -433,5 +455,19 @@ export class ReportingCore {
   public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
+  }
+
+  public async getCsvSearchSourceImmediate() {
+    const startDeps = await this.getPluginStartDeps();
+
+    const csvImmediateExport = new CsvSearchSourceImmediateExportType(
+      this.core,
+      this.config,
+      this.logger,
+      this.context
+    );
+    csvImmediateExport.setup(this.getPluginSetupDeps());
+    csvImmediateExport.start({ ...startDeps });
+    return csvImmediateExport;
   }
 }

@@ -8,3 +8,4 @@
 
 export { PdfExportType } from './printable_pdf_v2';
 export type { TaskPayloadPDFV2, JobParamsPDFV2 } from './types';
+export { generatePdfObservable } from './lib/generate_pdf_v2';

@@ -22,6 +22,7 @@ export {
   ExportType,
   setFieldFormats,
   buildKibanaPath,
+  validateUrls,
 } from './export_types';
 export type {
   BaseParams,
