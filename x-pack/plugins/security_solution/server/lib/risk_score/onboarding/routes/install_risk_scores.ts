@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
-import { INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
+import { APP_ID, INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import type { SetupPlugins } from '../../../../plugin';
@@ -28,7 +28,7 @@ export const installRiskScoresRoute = (
       path: INTERNAL_RISK_SCORE_URL,
       validate: onboardingRiskScoreSchema,
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     },
     async (context, request, response) => {

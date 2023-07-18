@@ -9,14 +9,113 @@ import type { SavedObject } from '@kbn/core/server';
 import type {
   CasePostRequest,
   CommentAttributes,
+  CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestUserType,
+  ConnectorMappings,
 } from '../common/api';
 import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
+import type { UserActionAttributes } from '../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../common/types/domain';
+
+const lensPersistableState = {
+  attributes: {
+    title: '',
+    description: '',
+    visualizationType: 'lnsXY',
+    type: 'lens',
+    references: [
+      {
+        type: 'index-pattern',
+        id: 'security-solution-default',
+        name: 'indexpattern-datasource-layer-3298543e-9615-4df1-bc10-248cb0ec857f',
+      },
+    ],
+    state: {
+      visualization: {
+        legend: {
+          isVisible: true,
+          position: 'right',
+        },
+        valueLabels: 'hide',
+        fittingFunction: 'None',
+        axisTitlesVisibilitySettings: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        tickLabelsVisibilitySettings: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        labelsOrientation: {
+          x: 0,
+          yLeft: 0,
+          yRight: 0,
+        },
+        gridlinesVisibilitySettings: {
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        preferredSeriesType: 'bar_stacked',
+        layers: [
+          {
+            layerId: '3298543e-9615-4df1-bc10-248cb0ec857f',
+            accessors: ['fde6cfef-44d7-452c-9c0a-5c797cbb0d40'],
+            position: 'top',
+            seriesType: 'bar_stacked',
+            showGridlines: false,
+            layerType: 'data',
+          },
+        ],
+      },
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+      datasourceStates: {
+        formBased: {
+          layers: {
+            '3298543e-9615-4df1-bc10-248cb0ec857f': {
+              columns: {
+                'fde6cfef-44d7-452c-9c0a-5c797cbb0d40': {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  operationType: 'count',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  sourceField: '___records___',
+                  params: {
+                    emptyAsNull: true,
+                  },
+                },
+              },
+              columnOrder: ['fde6cfef-44d7-452c-9c0a-5c797cbb0d40'],
+              incompleteColumns: {},
+              sampling: 1,
+            },
+          },
+        },
+        textBased: {
+          layers: {},
+        },
+      },
+      internalReferences: [],
+      adHocDataViews: {},
+    },
+  },
+  timeRange: {
+    from: 'now-15m',
+    to: 'now',
+  },
+};
 
 export const mockCases: CaseSavedObjectTransformed[] = [
   {
@@ -55,6 +154,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T21:54:48.952Z',
@@ -96,6 +196,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T22:32:00.900Z',
@@ -137,6 +238,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -182,6 +284,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      category: null,
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -407,6 +510,131 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     updated_at: '2019-11-25T22:32:30.608Z',
     version: 'WzYsMV0=',
   },
+  {
+    type: 'cases-comment',
+    id: 'mock-comment-7',
+    attributes: {
+      type: CommentType.persistableState,
+      persistableStateAttachmentTypeId: '.lens',
+      persistableStateAttachmentState: lensPersistableState,
+      owner: 'cases',
+      created_at: '2023-06-05T08:56:53.794Z',
+      created_by: {
+        email: null,
+        full_name: null,
+        username: 'elastic',
+        profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: null,
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-4',
+      },
+    ],
+    updated_at: '2019-11-25T22:32:30.608Z',
+    version: 'WzE1NjM2ODQsMTFd',
+  },
+];
+
+export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
+  {
+    type: 'cases-user-actions',
+    id: 'mock-user-action-1',
+    attributes: {
+      type: UserActionTypes.description,
+      action: UserActionActions.update,
+      payload: { description: 'test' },
+      created_at: '2019-11-25T21:55:00.177Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      comment_id: null,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-1',
+      },
+    ],
+    updated_at: '2019-11-25T21:55:00.177Z',
+    version: 'WzEsMV0=',
+  },
+  {
+    type: 'cases-user-actions',
+    id: 'mock-user-action-2',
+    attributes: {
+      type: UserActionTypes.comment,
+      action: UserActionActions.update,
+      payload: {
+        comment: {
+          type: CommentType.persistableState,
+          persistableStateAttachmentTypeId: '.test',
+          persistableStateAttachmentState: {},
+          owner: 'cases',
+        },
+      },
+      created_at: '2019-11-25T21:55:00.177Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      comment_id: null,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-1',
+      },
+    ],
+    updated_at: '2019-11-25T21:55:00.177Z',
+    version: 'WzEsMV0=',
+  },
+  {
+    type: 'cases-user-actions',
+    id: 'mock-user-action-3',
+    attributes: {
+      type: UserActionTypes.comment,
+      action: UserActionActions.update,
+      payload: {
+        comment: {
+          type: CommentType.persistableState,
+          persistableStateAttachmentTypeId: '.lens',
+          persistableStateAttachmentState: lensPersistableState,
+          owner: 'cases',
+        },
+      },
+      created_at: '2019-11-25T21:55:00.177Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      comment_id: null,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-1',
+      },
+    ],
+    updated_at: '2019-11-25T21:55:00.177Z',
+    version: 'WzEsMV0=',
+  },
 ];
 
 export const newCase: CasePostRequest = {
@@ -431,6 +659,21 @@ export const comment: CommentRequestUserType = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
+export const actionComment: CommentRequestActionsType = {
+  type: CommentType.actions,
+  comment: 'I just isolated the host!',
+  actions: {
+    targets: [
+      {
+        hostname: 'host1',
+        endpointId: '001',
+      },
+    ],
+    type: 'isolate',
+  },
+  owner: 'cases',
+};
+
 export const alertComment: CommentRequestAlertType = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
@@ -447,6 +690,24 @@ export const multipleAlert: CommentRequestAlertType = {
   alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
   index: ['test-index-3', 'test-index-4', 'test-index-5'],
 };
+
+export const mappings: ConnectorMappings = [
+  {
+    source: 'title',
+    target: 'short_description',
+    action_type: 'overwrite',
+  },
+  {
+    source: 'description',
+    target: 'description',
+    action_type: 'append',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    action_type: 'append',
+  },
+];
 
 const casesClientMock = createCasesClientMock();
 

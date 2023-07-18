@@ -5,38 +5,56 @@
  * 2.0.
  */
 
-import { InventoryItemType } from '../../../common/inventory_models/types';
-import { InfraAssetMetricType } from '../../../common/http_api';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { TimeRange } from '@kbn/es-query';
+import type { InventoryItemType } from '../../../common/inventory_models/types';
 
-export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
-
-interface HostMetadata {
-  os?: string | null;
+interface Metadata {
   ip?: string | null;
-  servicesOnHost?: number | null;
-  title: { name: string; cloudProvider?: CloudProvider | null };
-  id: string;
 }
-export type HostNodeRow = HostMetadata &
-  HostMetrics & {
-    name: string;
-  };
+export type Node = Metadata & {
+  id: string;
+  name: string;
+};
 
 export enum FlyoutTabIds {
+  OVERVIEW = 'overview',
   METADATA = 'metadata',
   PROCESSES = 'processes',
+  ANOMALIES = 'anomalies',
+  OSQUERY = 'osquery',
+  LOGS = 'logs',
+  LINK_TO_APM = 'linkToApm',
+  LINK_TO_UPTIME = 'linkToUptime',
 }
 
 export type TabIds = `${FlyoutTabIds}`;
 
 export interface TabState {
+  overview?: {
+    metricsDataView?: DataView;
+    logsDataView?: DataView;
+  };
   metadata?: {
     query?: string;
     showActionsColumn?: boolean;
   };
   processes?: {
     query?: string;
+  };
+  anomalies?: {
+    onClose?: () => void;
+  };
+  alertRule?: {
+    onCreateRuleClick?: () => void;
+  };
+  logs?: {
+    query?: string;
+    logView?: {
+      reference?: LogViewReference | null;
+      loading?: boolean;
+    };
   };
 }
 
@@ -57,20 +75,18 @@ export interface Tab {
   'data-test-subj': string;
 }
 
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices';
+
 export interface AssetDetailsProps {
-  node: HostNodeRow;
+  node: Node;
   nodeType: InventoryItemType;
-  currentTimeRange: {
-    interval: string;
-    from: number;
-    to: number;
-  };
+  dateRange: TimeRange;
   tabs: Tab[];
   activeTabId?: TabIds;
   overrides?: TabState;
   renderMode?: RenderMode;
   onTabsStateChange?: TabsStateChangeFn;
-  links?: Array<'uptime' | 'apmServices'>;
+  links?: LinkOptions[];
 }
 
 export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;

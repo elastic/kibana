@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import LRU from 'lru-cache';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
@@ -62,7 +65,6 @@ export enum ManifestManagerMockType {
 }
 
 export interface ManifestManagerMockOptions {
-  cache: LRU<string, Buffer>;
   exceptionListClient: ExceptionListClient;
   packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -73,7 +75,6 @@ export const buildManifestManagerMockOptions = (
 ): ManifestManagerMockOptions => {
   const savedObjectMock = savedObjectsClientMock.create();
   return {
-    cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
     exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
     packagePolicyService: createPackagePolicyServiceMock(),
     savedObjectsClient: savedObjectMock,
@@ -90,7 +91,9 @@ export const buildManifestManagerContextMock = (
     ...fullOpts,
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
-    experimentalFeatures: parseExperimentalConfigValue([]),
+    experimentalFeatures: parseExperimentalConfigValue([]).features,
+    packagerTaskPackagePolicyUpdateBatchSize: 10,
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };
 };
 
@@ -130,7 +133,7 @@ export const getManifestManagerMock = (
           context.exceptionListClient.findExceptionListItem = jest
             .fn()
             .mockRejectedValue(new Error('unexpected thing happened'));
-          return super.buildExceptionListArtifacts();
+          return super.buildExceptionListArtifacts([]);
         case ManifestManagerMockType.NormalFlow:
           return getMockArtifactsWithDiff();
       }

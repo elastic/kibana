@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { useHistory } from 'react-router-dom';
-import { CoreStart } from '@kbn/core/public';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
@@ -19,7 +18,7 @@ import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias
 import { useSavedSearchInitial } from './services/discover_state_provider';
 import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
 import { useTextBasedQueryLanguage } from './hooks/use_text_based_query_language';
-import { DiscoverServices } from '../../build_services';
+import { addLog } from '../../utils/add_log';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -39,14 +38,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { providedServices, stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const { chrome, docLinks, data, spaces, history } = services ?? providedServices;
-  const usedHistory = useHistory();
-  const navigateTo = useCallback(
-    (path: string) => {
-      usedHistory.push(path);
-    },
-    [usedHistory]
-  );
+  const { chrome, docLinks, data, spaces, history } = services;
 
   useUrlTracking(stateContainer.savedSearchState);
 
@@ -67,6 +59,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     const unsubscribe = stateContainer.actions.initializeAndSync();
+    addLog('[DiscoverMainApp] state container initialization triggers data fetching');
     stateContainer.actions.fetchData(true);
     return () => unsubscribe();
   }, [stateContainer]);
@@ -77,8 +70,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-    setBreadcrumbsTitle(savedSearch.title, chrome);
-  }, [savedSearch.id, savedSearch.title, chrome, data]);
+    setBreadcrumbsTitle({ title: savedSearch.title, services });
+  }, [chrome.docTitle, savedSearch.id, savedSearch.title, services]);
 
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
@@ -95,7 +88,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <RootDragDropProvider>
-      <DiscoverLayoutMemoized navigateTo={navigateTo} stateContainer={stateContainer} />
+      <DiscoverLayoutMemoized stateContainer={stateContainer} />
     </RootDragDropProvider>
   );
 }

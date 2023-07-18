@@ -8,9 +8,9 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { css } from '@emotion/react';
 import React, { createContext, useContext, useMemo } from 'react';
-import type { SearchHit } from '@kbn/es-types';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { SearchHit } from '../../../common/search_strategy';
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
 import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
 import { useSpaceId } from '../../common/hooks/use_space_id';
@@ -50,9 +50,9 @@ export interface RightPanelContext {
   /**
    * The actual raw document object
    */
-  searchHit: SearchHit<object> | undefined;
+  searchHit: SearchHit | undefined;
   /**
-   *
+   * Promise to trigger a data refresh
    */
   refetchFlyoutData: () => Promise<void>;
   /**
@@ -77,6 +77,8 @@ export const RightPanelProvider = ({
   children,
 }: RightPanelProviderProps) => {
   const currentSpaceId = useSpaceId();
+  // TODO Replace getAlertIndexAlias way to retrieving the eventIndex with the GET /_alias
+  //  https://github.com/elastic/kibana/issues/113063
   const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
@@ -101,9 +103,9 @@ export const RightPanelProvider = ({
             indexName,
             scopeId,
             browserFields: sourcererDataView.browserFields,
-            dataAsNestedObject: dataAsNestedObject as unknown as Ecs,
+            dataAsNestedObject,
             dataFormattedForFieldBrowser,
-            searchHit: searchHit as SearchHit<object>,
+            searchHit,
             refetchFlyoutData,
             getFieldsData,
           }

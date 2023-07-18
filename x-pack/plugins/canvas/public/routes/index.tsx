@@ -6,8 +6,8 @@
  */
 
 import React, { FC } from 'react';
-import { Router, Switch, RouteComponentProps, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { HomeRoute } from './home';
@@ -50,11 +50,11 @@ export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
         }
 
         return (
-          <Switch>
+          <Routes>
             {ExportWorkpadRoute()}
             {WorkpadRoute()}
             {HomeRoute()}
-          </Switch>
+          </Routes>
         );
       }}
     />

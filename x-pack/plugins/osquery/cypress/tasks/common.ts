@@ -17,6 +17,6 @@ export const request = <T = unknown>(
 ): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: API_HEADERS,
     ...options,
+    headers: { ...API_HEADERS, ...options.headers },
   });

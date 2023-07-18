@@ -24,6 +24,8 @@ import type {
   RegistryStream,
   RegistryVarsEntry,
   PackageSpecManifest,
+  RegistryDataStreamRoutingRules,
+  RegistryDataStreamLifecycle,
 } from '../../../../common/types';
 import {
   RegistryInputKeys,
@@ -39,6 +41,9 @@ import { unpackBufferEntries } from '.';
 
 const readFileAsync = promisify(readFile);
 export const MANIFEST_NAME = 'manifest.yml';
+export const DATASTREAM_MANIFEST_NAME = 'manifest.yml';
+export const DATASTREAM_ROUTING_RULES_NAME = 'routing_rules.yml';
+export const DATASTREAM_LIFECYCLE_NAME = 'lifecycle.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
 
@@ -79,7 +84,7 @@ export const expandDottedEntries = (obj: object) => {
   }, {} as Record<string, any>);
 };
 
-type ManifestMap = Record<string, Buffer>;
+type AssetsBufferMap = Record<string, Buffer>;
 
 // not sure these are 100% correct but they do the job here
 // keeping them local until others need them
@@ -126,6 +131,18 @@ const registryPolicyTemplateProps = Object.values(RegistryPolicyTemplateKeys);
 const registryStreamProps = Object.values(RegistryStreamKeys);
 const registryDataStreamProps = Object.values(RegistryDataStreamKeys);
 
+const PARSE_AND_VERIFY_ASSETS_NAME = [
+  MANIFEST_NAME,
+  DATASTREAM_ROUTING_RULES_NAME,
+  DATASTREAM_LIFECYCLE_NAME,
+];
+/**
+ * Filter assets needed for the parse and verify archive function
+ */
+export function filterAssetPathForParseAndVerifyArchive(assetPath: string): boolean {
+  return PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) => assetPath.endsWith(endWithPath));
+}
+
 /*
   This function generates a package info object (see type `ArchivePackage`) by parsing and verifying the `manifest.yml` file as well
   as the directory structure for the given package archive and other files adhering to the package spec: https://github.com/elastic/package-spec.
@@ -142,16 +159,18 @@ export async function generatePackageInfoFromArchiveBuffer(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
-  const manifests: ManifestMap = {};
+  const assetsMap: AssetsBufferMap = {};
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach(({ path: bufferPath, buffer }) => {
     paths.push(bufferPath);
-    if (bufferPath.endsWith(MANIFEST_NAME) && buffer) manifests[bufferPath] = buffer;
+    if (buffer && filterAssetPathForParseAndVerifyArchive(bufferPath)) {
+      assetsMap[bufferPath] = buffer;
+    }
   });
 
   return {
-    packageInfo: parseAndVerifyArchive(paths, manifests),
+    packageInfo: parseAndVerifyArchive(paths, assetsMap),
     paths,
   };
 }
@@ -164,33 +183,40 @@ export async function _generatePackageInfoFromPaths(
   paths: string[],
   topLevelDir: string
 ): Promise<ArchivePackage> {
-  const manifests: ManifestMap = {};
+  const assetsMap: AssetsBufferMap = {};
   await Promise.all(
     paths.map(async (filePath) => {
-      if (filePath.endsWith(MANIFEST_NAME)) manifests[filePath] = await readFileAsync(filePath);
+      if (filterAssetPathForParseAndVerifyArchive(filePath)) {
+        assetsMap[filePath] = await readFileAsync(filePath);
+      }
     })
   );
-  return parseAndVerifyArchive(paths, manifests, topLevelDir);
+
+  return parseAndVerifyArchive(paths, assetsMap, topLevelDir);
 }
 
 export function parseAndVerifyArchive(
   paths: string[],
-  manifests: ManifestMap,
+  assetsMap: AssetsBufferMap,
   topLevelDirOverride?: string
 ): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
   const toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
   paths.forEach((filePath) => {
     if (!filePath.startsWith(toplevelDir)) {
-      throw new PackageInvalidArchiveError('Package contains more than one top-level directory.');
+      throw new PackageInvalidArchiveError(
+        `Package contains more than one top-level directory; top-level directory found: ${toplevelDir}; filePath: ${filePath}`
+      );
     }
   });
 
   // The package must contain a manifest file ...
   const manifestFile = path.posix.join(toplevelDir, MANIFEST_NAME);
-  const manifestBuffer = manifests[manifestFile];
+  const manifestBuffer = assetsMap[manifestFile];
   if (!paths.includes(manifestFile) || !manifestBuffer) {
-    throw new PackageInvalidArchiveError(`Package must contain a top-level ${MANIFEST_NAME} file.`);
+    throw new PackageInvalidArchiveError(
+      `Package at top-level directory ${toplevelDir} must contain a top-level ${MANIFEST_NAME} file.`
+    );
   }
 
   // ... which must be valid YAML
@@ -198,7 +224,9 @@ export function parseAndVerifyArchive(
   try {
     manifest = yaml.safeLoad(manifestBuffer.toString());
   } catch (error) {
-    throw new PackageInvalidArchiveError(`Could not parse top-level package manifest: ${error}.`);
+    throw new PackageInvalidArchiveError(
+      `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${error}.`
+    );
   }
 
   // must have mandatory fields
@@ -208,7 +236,7 @@ export function parseAndVerifyArchive(
   if (!requiredKeysMatch) {
     const list = requiredArchivePackageProps.join(', ');
     throw new PackageInvalidArchiveError(
-      `Invalid top-level package manifest: one or more fields missing of ${list}`
+      `Invalid top-level package manifest at top-level directory ${toplevelDir} (package name: ${manifest.name}): one or more fields missing of ${list}.`
     );
   }
 
@@ -233,7 +261,7 @@ export function parseAndVerifyArchive(
     pkgName: parsed.name,
     pkgVersion: parsed.version,
     pkgBasePathOverride: topLevelDirOverride,
-    manifests,
+    assetsMap,
   });
 
   if (parsedDataStreams.length) {
@@ -278,10 +306,10 @@ export function parseAndVerifyDataStreams(opts: {
   paths: string[];
   pkgName: string;
   pkgVersion: string;
-  manifests: ManifestMap;
+  assetsMap: AssetsBufferMap;
   pkgBasePathOverride?: string;
 }): RegistryDataStream[] {
-  const { paths, pkgName, pkgVersion, manifests, pkgBasePathOverride } = opts;
+  const { paths, pkgName, pkgVersion, assetsMap: assetsMap, pkgBasePathOverride } = opts;
   // A data stream is made up of a subdirectory of name-version/data_stream/, containing a manifest.yml
   const dataStreamPaths = new Set<string>();
   const dataStreams: RegistryDataStream[] = [];
@@ -299,8 +327,8 @@ export function parseAndVerifyDataStreams(opts: {
 
   dataStreamPaths.forEach((dataStreamPath) => {
     const fullDataStreamPath = path.posix.join(dataStreamsBasePath, dataStreamPath);
-    const manifestFile = path.posix.join(fullDataStreamPath, MANIFEST_NAME);
-    const manifestBuffer = manifests[manifestFile];
+    const manifestFile = path.posix.join(fullDataStreamPath, DATASTREAM_MANIFEST_NAME);
+    const manifestBuffer = assetsMap[manifestFile];
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
         `No manifest.yml file found for data stream '${dataStreamPath}'`
@@ -314,6 +342,33 @@ export function parseAndVerifyDataStreams(opts: {
       throw new PackageInvalidArchiveError(
         `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
       );
+    }
+
+    // Routing rules
+    const routingRulesPath = path.posix.join(fullDataStreamPath, DATASTREAM_ROUTING_RULES_NAME);
+    const routingRulesBuffer = assetsMap[routingRulesPath];
+    let dataStreamRoutingRules: RegistryDataStreamRoutingRules[] | undefined;
+    if (routingRulesBuffer) {
+      try {
+        dataStreamRoutingRules = yaml.safeLoad(routingRulesBuffer.toString());
+      } catch (error) {
+        throw new PackageInvalidArchiveError(
+          `Could not parse routing rules for data stream '${dataStreamPath}': ${error}.`
+        );
+      }
+    }
+    // Lifecycle
+    const lifecyclePath = path.posix.join(fullDataStreamPath, DATASTREAM_LIFECYCLE_NAME);
+    const lifecyleBuffer = assetsMap[lifecyclePath];
+    let dataStreamLifecyle: RegistryDataStreamLifecycle | undefined;
+    if (lifecyleBuffer) {
+      try {
+        dataStreamLifecyle = yaml.safeLoad(lifecyleBuffer.toString());
+      } catch (error) {
+        throw new PackageInvalidArchiveError(
+          `Could not parse lifecycle for data stream '${dataStreamPath}': ${error}.`
+        );
+      }
     }
 
     const {
@@ -350,6 +405,14 @@ export function parseAndVerifyDataStreams(opts: {
       path: dataStreamPath,
       elasticsearch: parsedElasticsearchEntry,
     };
+
+    if (dataStreamRoutingRules) {
+      dataStreamObject.routing_rules = dataStreamRoutingRules;
+    }
+
+    if (dataStreamLifecyle) {
+      dataStreamObject.lifecycle = dataStreamLifecyle;
+    }
 
     if (ingestPipeline) {
       dataStreamObject.ingest_pipeline = ingestPipeline;

@@ -93,7 +93,7 @@
         "label": "ProgressControls",
         "description": [],
         "signature": [
-          "({ children, progress, progressMessage, onRefresh, onCancel, isRunning, shouldRerunAnalysis, }: React.PropsWithChildren<ProgressControlProps>) => JSX.Element"
+          "({ children, isBrushCleared, progress, progressMessage, onRefresh, onCancel, onReset, isRunning, shouldRerunAnalysis, }: React.PropsWithChildren<ProgressControlProps>) => JSX.Element"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
         "deprecated": false,
@@ -104,7 +104,7 @@
             "id": "def-common.ProgressControls.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  progress,\n  progressMessage,\n  onRefresh,\n  onCancel,\n  isRunning,\n  shouldRerunAnalysis,\n}",
+            "label": "{\n  children,\n  isBrushCleared,\n  progress,\n  progressMessage,\n  onRefresh,\n  onCancel,\n  onReset,\n  isRunning,\n  shouldRerunAnalysis,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<ProgressControlProps>"

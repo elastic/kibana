@@ -53,7 +53,7 @@ export {
   DEFAULT_LEGEND_SIZE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
-export { prepareLogTable } from '../common';
+export { prepareLogTable, XYCurveTypes } from '../common';
 export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
 export type {
   ExpressionValueXYDimension,

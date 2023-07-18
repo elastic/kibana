@@ -17,12 +17,13 @@ import {
   Settings,
   RectAnnotation,
   LineAnnotation,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { getChartTheme } from '../../../../utils/get_chart_theme';
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../types';
 import {
   ChartContainer,
@@ -46,7 +47,7 @@ import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../common/http_api/log_alerts';
+} from '../../../../../common/http_api';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
@@ -330,7 +331,8 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Settings theme={getChartTheme(isDarkMode)} />
+          <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>
       {!executionTimeRange && (

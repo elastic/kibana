@@ -18,11 +18,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { withSecuritySolutionLink } from '../links';
 import { NavItemBetaBadge } from '../navigation/nav_item_beta_badge';
-import type { NavLinkItem } from '../navigation/types';
+import type { NavigationLink } from '../../links/types';
 import { TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 interface LandingImagesProps {
-  items: NavLinkItem[];
+  items: NavigationLink[];
 }
 
 const PrimaryEuiTitle = styled(EuiTitle)`
@@ -59,7 +59,7 @@ const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
 export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
   <EuiFlexGroup direction="column">
-    {items.map(({ title, description, image, id, isBeta, betaOptions }) => (
+    {items.map(({ title, description, landingImage, id, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <SecuritySolutionLink
           deepLinkId={id}
@@ -72,13 +72,13 @@ export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
           <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={() => {}}>
             <EuiFlexGroup>
               <StyledFlexItem grow={false}>
-                {image && (
+                {landingImage && (
                   <EuiImage
                     data-test-subj="LandingLinksImage"
                     size="l"
                     role="presentation"
                     alt=""
-                    src={image}
+                    src={landingImage}
                   />
                 )}
               </StyledFlexItem>
@@ -122,7 +122,7 @@ const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
 export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
   <EuiFlexGroup direction="row" wrap>
-    {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
+    {items.map(({ id, landingImage, title, description, isBeta, betaOptions }) => (
       <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>
         <SecuritySolutionCard
           deepLinkId={id}
@@ -130,13 +130,13 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
           textAlign="left"
           paddingSize="m"
           image={
-            image && (
+            landingImage && (
               <EuiImage
                 data-test-subj="LandingImageCard-image"
                 role="presentation"
                 size={CARD_WIDTH}
                 alt={title}
-                src={image}
+                src={landingImage}
               />
             )
           }

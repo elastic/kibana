@@ -16,6 +16,7 @@ import { FieldValueCell } from './field_value_cell';
 import type { AlertSummaryRow } from '../helpers';
 import { hasHoverOrRowActions } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
+import { getSourcererScopeId } from '../../../../helpers';
 
 const style = { flexGrow: 0 };
 
@@ -45,15 +46,14 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
       />
       {scopeId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
         <SecurityCellActions
-          field={{
-            name: data.field,
+          data={{
+            field: data.field,
             value: values,
-            type: data.type,
-            aggregatable: fieldFromBrowserField?.aggregatable,
           }}
           triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
           mode={CellActionsMode.INLINE}
           visibleCellActions={3}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
           metadata={{ scopeId }}
         />
       )}

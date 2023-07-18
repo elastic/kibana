@@ -29,9 +29,10 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
-import { useTheme } from '../../common/components/charts/common';
+import { useThemes } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { useLocalStorage } from '../../common/components/local_storage';
@@ -128,8 +129,9 @@ const renderOption = (
 );
 
 const DataQualityComponent: React.FC = () => {
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const httpFetch = KibanaServices.get().http.fetch;
-  const theme = useTheme();
+  const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
   const addSuccessToast = useCallback(
     (toast: { title: string }) => {
@@ -235,10 +237,12 @@ const DataQualityComponent: React.FC = () => {
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
+            isAssistantEnabled={hasAssistantPrivilege}
             lastChecked={lastChecked}
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}
             setLastChecked={setLastChecked}
+            baseTheme={baseTheme}
             theme={theme}
           />
         </SecuritySolutionPageWrapper>

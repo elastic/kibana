@@ -29,7 +29,7 @@ const store = {
 const value = 'the-value';
 
 const context = {
-  field: { name: 'user.name', value, type: 'text' },
+  data: [{ field: { name: 'user.name', type: 'string' }, value }],
 } as CellActionExecutionContext;
 
 const defaultDataProvider = {
@@ -91,7 +91,12 @@ describe('createAddToTimelineDiscoverCellActionFactory', () => {
       expect(
         await addToTimelineAction.isCompatible({
           ...context,
-          field: { ...context.field, name: 'signal.reason' },
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
         })
       ).toEqual(false);
     });
@@ -107,10 +112,16 @@ describe('createAddToTimelineDiscoverCellActionFactory', () => {
     it('should show warning if no provider added', async () => {
       await addToTimelineAction.execute({
         ...context,
-        field: {
-          ...context.field,
-          type: GEO_FIELD_TYPE,
-        },
+        data: [
+          {
+            ...context.data[0],
+            field: {
+              ...context.data[0].field,
+              type: GEO_FIELD_TYPE,
+            },
+            value,
+          },
+        ],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();

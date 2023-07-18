@@ -115,17 +115,22 @@ function DiscoverDocumentsComponent({
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState = useDataState(documents$);
-  const isDataLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  const isDataLoading =
+    documentState.fetchStatus === FetchStatus.LOADING ||
+    documentState.fetchStatus === FetchStatus.PARTIAL;
+  const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
+  // It's just necessary for non-text-based query lang requests since they don't have a partial result state, that's
+  // considered as loading state in the Component.
   // 1. When switching the data view, the sorting in the URL is reset to the default sorting of the selected data view.
   // 2. The new sort param is already available in this component and propagated to the EuiDataGrid.
   // 3. currentColumns are still referring to the old state
   // 4. since the new sort by field isn't available in currentColumns EuiDataGrid is emitting a 'onSort', which is unsorting the grid
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
-  const isDataViewLoading = index && dataView.id && index !== dataView.id;
-  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isDataViewLoading = !isTextBasedQuery && dataView.id && index !== dataView.id;
+  const isEmptyDataResult =
+    isTextBasedQuery || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const {
@@ -173,10 +178,10 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
-      !isPlainRecord &&
+      !isTextBasedQuery &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!dataView.timeFieldName,
-    [isPlainRecord, uiSettings, dataView.timeFieldName]
+    [isTextBasedQuery, uiSettings, dataView.timeFieldName]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -209,11 +214,12 @@ function DiscoverDocumentsComponent({
             isLoading={isDataLoading}
             searchDescription={savedSearch.description}
             sharedItemTitle={savedSearch.title}
+            isPlainRecord={isTextBasedQuery}
             onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onSort={!isPlainRecord ? onSort : undefined}
+            onSort={!isTextBasedQuery ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
             DocViewer={DocViewer}
@@ -222,8 +228,8 @@ function DiscoverDocumentsComponent({
       )}
       {!isLegacy && (
         <>
-          {!hideAnnouncements && !isPlainRecord && (
-            <DiscoverTourProvider isPlainRecord={isPlainRecord}>
+          {!hideAnnouncements && !isTextBasedQuery && (
+            <DiscoverTourProvider isPlainRecord={isTextBasedQuery}>
               <DocumentExplorerUpdateCallout />
             </DiscoverTourProvider>
           )}
@@ -242,20 +248,21 @@ function DiscoverDocumentsComponent({
                 sampleSize={sampleSize}
                 searchDescription={savedSearch.description}
                 searchTitle={savedSearch.title}
-                setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
+                setExpandedDoc={setExpandedDoc}
                 showTimeCol={showTimeCol}
                 settings={grid}
                 onAddColumn={onAddColumn}
                 onFilter={onAddFilter as DocViewFilterFn}
                 onRemoveColumn={onRemoveColumn}
                 onSetColumns={onSetColumns}
-                onSort={!isPlainRecord ? onSort : undefined}
+                onSort={!isTextBasedQuery ? onSort : undefined}
                 onResize={onResizeDataGrid}
                 useNewFieldsApi={useNewFieldsApi}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={onUpdateRowHeight}
-                isSortEnabled={!isPlainRecord}
-                isPlainRecord={isPlainRecord}
+                isSortEnabled={true}
+                isPlainRecord={isTextBasedQuery}
+                query={query}
                 rowsPerPageState={rowsPerPage}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 onFieldEdited={onFieldEdited}

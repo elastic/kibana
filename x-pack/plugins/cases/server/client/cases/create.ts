@@ -9,16 +9,16 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
+import { UserActionTypes } from '../../../common/types/domain';
 import type { Case, CasePostRequest } from '../../../common/api';
 import {
   CaseRt,
-  ActionTypes,
   CasePostRequestRt,
   CaseSeverity,
   decodeWithExcessOrThrow,
 } from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
+import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -42,16 +42,6 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
 
   try {
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
-
-    if (query.title.length > MAX_TITLE_LENGTH) {
-      throw Boom.badRequest(
-        `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
-      );
-    }
-
-    if (query.tags.some(isInvalidTag)) {
-      throw Boom.badRequest('A tag must contain at least one non-space character');
-    }
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -92,13 +82,14 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     });
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.create_case,
+      type: UserActionTypes.create_case,
       caseId: newCase.id,
       user,
       payload: {
         ...query,
         severity: query.severity ?? CaseSeverity.LOW,
         assignees: query.assignees ?? [],
+        category: query.category ?? null,
       },
       owner: newCase.attributes.owner,
     });

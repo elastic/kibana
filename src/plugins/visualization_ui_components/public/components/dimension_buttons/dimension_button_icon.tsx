@@ -11,15 +11,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AccessorConfig, Message } from './types';
 
-const baseIconProps = {
-  className: 'lnsLayerPanel__colorIndicator',
-} as const;
-
 const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
   <>
     {accessorConfig.triggerIconType === 'color' && accessorConfig.color && (
       <EuiIcon
-        {...baseIconProps}
         color={accessorConfig.color}
         type="stopFilled"
         aria-label={i18n.translate(
@@ -35,7 +30,6 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
     )}
     {accessorConfig.triggerIconType === 'disabled' && (
       <EuiIcon
-        {...baseIconProps}
         type="stopSlash"
         color="subdued"
         aria-label={i18n.translate(
@@ -48,7 +42,6 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
     )}
     {accessorConfig.triggerIconType === 'invisible' && (
       <EuiIcon
-        {...baseIconProps}
         type="eyeClosed"
         color="subdued"
         aria-label={i18n.translate(
@@ -61,7 +54,6 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
     )}
     {accessorConfig.triggerIconType === 'aggregate' && (
       <EuiIcon
-        {...baseIconProps}
         type="fold"
         color="subdued"
         aria-label={i18n.translate(
@@ -75,7 +67,6 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
     )}
     {accessorConfig.triggerIconType === 'colorBy' && (
       <EuiIcon
-        {...baseIconProps}
         type="color"
         color="subdued"
         aria-label={i18n.translate(
@@ -88,7 +79,6 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
     )}
     {accessorConfig.triggerIconType === 'custom' && accessorConfig.customIcon && (
       <EuiIcon
-        {...baseIconProps}
         type={accessorConfig.customIcon}
         color={accessorConfig.color}
         aria-label={i18n.translate(
@@ -112,7 +102,10 @@ export function DimensionButtonIcon({
   children: React.ReactChild;
 }) {
   let indicatorIcon = null;
-  if (severity || accessorConfig.triggerIconType !== 'none') {
+  if (
+    severity ||
+    (accessorConfig.triggerIconType !== 'none' && accessorConfig.triggerIconType !== undefined)
+  ) {
     indicatorIcon = (
       <>
         {accessorConfig.triggerIconType !== 'none' && (
@@ -120,7 +113,7 @@ export function DimensionButtonIcon({
         )}
         {severity && (
           <EuiFlexItem grow={false}>
-            <EuiIcon {...baseIconProps} type={severity === 'error' ? 'error' : 'alert'} />
+            <EuiIcon type={severity === 'error' ? 'error' : 'alert'} />
           </EuiFlexItem>
         )}
       </>
@@ -128,7 +121,7 @@ export function DimensionButtonIcon({
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {indicatorIcon}
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>

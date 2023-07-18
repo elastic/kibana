@@ -39,6 +39,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -71,6 +72,8 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
+import type { CustomizationCallback } from './customizations';
+import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import { useDiscoverGrid } from './exports/discover_grid';
 import { useDiscoverMainRoute } from './exports/discover_app';
@@ -160,6 +163,7 @@ export interface DiscoverStart {
   readonly locator: undefined | DiscoverAppLocator;
   useDiscoverGrid: () => ReturnType<typeof useDiscoverGrid>;
   useDiscoverMainRoute: () => ReturnType<typeof useDiscoverMainRoute>;
+  readonly customize: (profileName: string, callback: CustomizationCallback) => void;
 }
 
 /**
@@ -198,6 +202,7 @@ export interface DiscoverStartPlugins {
   expressions: ExpressionsStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
 }
@@ -214,6 +219,7 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
+  private profileRegistry = createProfileRegistry();
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
@@ -221,12 +227,14 @@ export class DiscoverPlugin
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
     const isDev = this.initializerContext.env.mode.dev;
+
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
+
+      // Create locators for external use without profile-awareness
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
       );
-
       this.contextLocator = plugins.share.url.locators.create(
         new DiscoverContextAppLocatorDefinition({ useHash })
       );
@@ -267,22 +275,25 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView }) => (
-        <React.Suspense
-          fallback={
-            <DeferredSpinner>
-              <EuiSkeletonText />
-            </DeferredSpinner>
-          }
-        >
-          <SourceViewer
-            index={hit.raw._index}
-            id={hit.raw._id}
-            dataView={dataView}
-            hasLineNumbers
-          />
-        </React.Suspense>
-      ),
+      component: ({ hit, dataView, query, textBasedHits }) => {
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiSkeletonText />
+              </DeferredSpinner>
+            }
+          >
+            <SourceViewer
+              index={hit.raw._index}
+              id={hit.raw._id ?? hit.id}
+              dataView={dataView}
+              textBasedHits={textBasedHits}
+              hasLineNumbers
+            />
+          </React.Suspense>
+        );
+      },
     });
 
     const {
@@ -319,13 +330,19 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+          locator: this.locator!,
+          contextLocator: this.contextLocator!,
+          singleDocLocator: this.singleDocLocator!,
+        });
+
         const services = buildServices(
           coreStart,
           discoverStartPlugins,
           this.initializerContext,
-          this.locator!,
-          this.contextLocator!,
-          this.singleDocLocator!
+          locator,
+          contextLocator,
+          singleDocLocator
         );
 
         // make sure the data view list is up to date
@@ -335,7 +352,12 @@ export class DiscoverPlugin
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services, isDev);
+        const unmount = renderApp({
+          element: params.element,
+          services,
+          profileRegistry: this.profileRegistry,
+          isDev,
+        });
         return () => {
           unlistenParentHistory();
           unmount();
@@ -413,6 +435,7 @@ export class DiscoverPlugin
       useDiscoverMainRoute: () => {
         return useDiscoverMainRoute(services);
       },
+      customize: createCustomizeFunction(this.profileRegistry),
     };
   }
 
@@ -433,13 +456,19 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
+      const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+        locator: this.locator!,
+        contextLocator: this.contextLocator!,
+        singleDocLocator: this.singleDocLocator!,
+      });
+
       return buildServices(
         coreStart,
         discoverStartPlugins,
         this.initializerContext,
-        this.locator!,
-        this.contextLocator!,
-        this.singleDocLocator!
+        locator,
+        contextLocator,
+        singleDocLocator
       );
     };
 
@@ -447,3 +476,24 @@ export class DiscoverPlugin
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
+
+/**
+ * Create profile-aware locators for internal use
+ */
+const getProfileAwareLocators = async ({
+  locator,
+  contextLocator,
+  singleDocLocator,
+}: {
+  locator: DiscoverAppLocator;
+  contextLocator: DiscoverContextAppLocator;
+  singleDocLocator: DiscoverSingleDocLocator;
+}) => {
+  const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
+
+  return {
+    locator: new ProfileAwareLocator(locator),
+    contextLocator: new ProfileAwareLocator(contextLocator),
+    singleDocLocator: new ProfileAwareLocator(singleDocLocator),
+  };
+};

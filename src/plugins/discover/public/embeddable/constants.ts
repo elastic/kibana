@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '../../common';
 

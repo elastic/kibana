@@ -75,14 +75,14 @@ const props = {
 
 jest.mock('../../../lib/kibana');
 
+jest.mock('../../../hooks/use_get_field_spec');
+
 const mockAction = createAction({
   id: 'test_action',
   execute: async () => {},
   getIconType: () => 'test-icon',
   getDisplayName: () => 'test-actions',
 });
-
-// jest.useFakeTimers();
 
 describe('OverviewCardWithActions', () => {
   test('it renders correctly', async () => {

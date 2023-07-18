@@ -92,12 +92,19 @@ npm-debug.log*
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
+/apm-diagnostics*.json
 
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
 x-pack/plugins/fleet/cypress.config.js
 x-pack/plugins/osquery/cypress.config.d.ts
 x-pack/plugins/osquery/cypress.config.js
+x-pack/plugins/enterprise_search/cypress.config.d.ts
+x-pack/plugins/enterprise_search/cypress.config.js
+x-pack/plugins/security_solution/public/management/cypress.config.d.ts
+x-pack/plugins/security_solution/public/management/cypress.config.js
+x-pack/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
+x-pack/plugins/security_solution/public/management/cypress_endpoint.config.js
 
 # release notes script output
 report.csv
@@ -130,3 +137,5 @@ fleet-server.yml
 **/.synthetics/
 **/.journeys/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
+
+

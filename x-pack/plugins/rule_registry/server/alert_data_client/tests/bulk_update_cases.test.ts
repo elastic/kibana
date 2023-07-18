@@ -36,6 +36,7 @@ describe('bulkUpdateCases', () => {
     esClient: esClientMock,
     auditLogger,
     ruleDataService: ruleDataServiceMock.create(),
+    getRuleType: jest.fn(),
   };
 
   beforeEach(() => {

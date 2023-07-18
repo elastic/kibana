@@ -11,9 +11,8 @@ import './_dashboard_app.scss';
 import React from 'react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
+import { HashRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
@@ -29,13 +28,14 @@ import {
 } from '../dashboard_constants';
 import { DashboardApp } from './dashboard_app';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardNoMatch } from './listing_page/dashboard_no_match';
+import { RedirectToProps } from '../dashboard_container/types';
 import { createDashboardEditUrl } from '../dashboard_constants';
+import { DashboardNoMatch } from './listing_page/dashboard_no_match';
 import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
+import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
-import { DashboardEmbedSettings, DashboardMountContextProps, RedirectToProps } from './types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -90,16 +90,16 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
     return {
-      forceShowTopNavMenu: Boolean(routeParams[dashboardUrlParams.showTopMenu]),
-      forceShowQueryInput: Boolean(routeParams[dashboardUrlParams.showQueryInput]),
-      forceShowDatePicker: Boolean(routeParams[dashboardUrlParams.showTimeFilter]),
-      forceHideFilterBar: Boolean(routeParams[dashboardUrlParams.hideFilterBar]),
+      forceShowTopNavMenu: routeParams[dashboardUrlParams.showTopMenu] === 'true',
+      forceShowQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
+      forceShowDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',
+      forceHideFilterBar: routeParams[dashboardUrlParams.hideFilterBar] === 'true',
     };
   };
 
   const renderDashboard = (routeProps: RouteComponentProps<{ id?: string }>) => {
     const routeParams = parse(routeProps.history.location.search);
-    if (routeParams.embed && !globalEmbedSettings) {
+    if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
     return (
@@ -149,7 +149,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       <DashboardMountContext.Provider value={mountContext}>
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <HashRouter>
-            <Switch>
+            <Routes>
               <Route
                 path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
                 render={renderDashboard}
@@ -159,7 +159,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
                 <Redirect to={LANDING_PAGE_PATH} />
               </Route>
               <Route render={renderNoMatch} />
-            </Switch>
+            </Routes>
           </HashRouter>
         </KibanaThemeProvider>
       </DashboardMountContext.Provider>

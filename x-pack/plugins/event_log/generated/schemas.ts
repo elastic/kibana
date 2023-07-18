@@ -97,6 +97,7 @@ export const EventSchema = schema.maybe(
     user: schema.maybe(
       schema.object({
         name: ecsString(),
+        id: ecsString(),
       })
     ),
     kibana: schema.maybe(
@@ -171,6 +172,7 @@ export const EventSchema = schema.maybe(
                         trigger_actions_duration_ms: ecsStringOrNumber(),
                         process_rule_duration_ms: ecsStringOrNumber(),
                         claim_to_start_duration_ms: ecsStringOrNumber(),
+                        persist_alerts_duration_ms: ecsStringOrNumber(),
                         prepare_rule_duration_ms: ecsStringOrNumber(),
                         total_run_duration_ms: ecsStringOrNumber(),
                         total_enrichment_duration_ms: ecsStringOrNumber(),
@@ -206,6 +208,17 @@ export const EventSchema = schema.maybe(
               schema.object({
                 source: ecsString(),
                 uuid: ecsString(),
+                gen_ai: schema.maybe(
+                  schema.object({
+                    usage: schema.maybe(
+                      schema.object({
+                        prompt_tokens: ecsStringOrNumber(),
+                        completion_tokens: ecsStringOrNumber(),
+                        total_tokens: ecsStringOrNumber(),
+                      })
+                    ),
+                  })
+                ),
               })
             ),
           })

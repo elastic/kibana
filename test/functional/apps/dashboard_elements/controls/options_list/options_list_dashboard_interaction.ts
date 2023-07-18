@@ -16,7 +16,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_DASHBOARD_NAME } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
@@ -45,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag();
       await dashboard.loadSavedDashboard(OPTIONS_LIST_DASHBOARD_NAME);
       await dashboard.ensureDashboardIsInEditMode();
+      await header.waitUntilLoadingHasFinished();
     };
 
     before(async () => {
@@ -67,12 +67,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Applies query settings to controls', async () => {
-      it('Applies dashboard query to options list control', async () => {
-        await queryBar.setQuery('animal.keyword : "dog" ');
+      it('Malformed query throws an error', async () => {
+        await queryBar.setQuery('animal.keyword : "dog" error');
         await queryBar.submitQuery(); // quicker than clicking the submit button, but hides the time picker
-        await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('control-frame-error');
+      });
 
+      it('Can recover from malformed query error', async () => {
+        await queryBar.setQuery('animal.keyword : "dog"');
+        await queryBar.submitQuery();
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('control-frame-error');
+      });
+
+      it('Applies dashboard query to options list control', async () => {
         const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
           'ruff',
           'bark',
@@ -85,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           invalidSelections: [],
         });
         await queryBar.setQuery('');
-        await queryBar.clickQuerySubmitButton(); // ensures that the time picker is visible for the next test
+        await queryBar.clickQuerySubmitButton(); // slower than submitQuery but ensures that the time picker is visible for the next test
       });
 
       it('Applies dashboard time range to options list control', async () => {
@@ -94,7 +103,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Jan 1, 2017 @ 00:00:00.000',
           'Jan 1, 2017 @ 00:00:00.000'
         );
-        await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
 
         await dashboardControls.optionsListOpenPopover(controlId);
@@ -110,7 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             operation: 'is one of',
             value: ['bark', 'bow ow ow', 'ruff'],
           });
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
         });
 
@@ -128,20 +135,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('Does not apply disabled dashboard filters to options list control', async () => {
           await filterBar.toggleFilterEnabled('sound.keyword');
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
           await dashboardControls.ensureAvailableOptionsEqual(controlId, {
             suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
             invalidSelections: [],
           });
           await filterBar.toggleFilterEnabled('sound.keyword');
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
         });
 
         it('Negated filters apply to options control', async () => {
           await filterBar.toggleFilterNegated('sound.keyword');
-          await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
 
           const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
@@ -167,7 +171,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('Shows available options in options list', async () => {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
-        await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
           suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
@@ -218,16 +221,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Applies options list control options to dashboard', async () => {
-        await retry.try(async () => {
-          expect(await pieChart.getPieSliceCount()).to.be(2);
-        });
+        await dashboard.waitForRenderComplete();
+        expect(await pieChart.getPieSliceCount()).to.be(2);
       });
 
       it('Applies options list control options to dashboard by default on open', async () => {
         await dashboard.gotoDashboardLandingPage();
         await header.waitUntilLoadingHasFinished();
         await dashboard.clickUnsavedChangesContinueEditing(OPTIONS_LIST_DASHBOARD_NAME);
-        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieSliceCount()).to.be(2);
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
@@ -236,13 +238,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('excluding selections has expected results', async () => {
         await dashboard.clickQuickSave();
-        await dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
 
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSetIncludeSelections(false);
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await dashboard.waitForRenderComplete();
 
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieSliceCount()).to.be(5);
         await dashboard.clearUnsavedChanges();
       });
@@ -251,8 +253,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSetIncludeSelections(true);
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await dashboard.waitForRenderComplete();
 
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieSliceCount()).to.be(2);
         await dashboard.clearUnsavedChanges();
       });
@@ -339,8 +341,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSelectOption('B');
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        await dashboard.waitForRenderComplete();
 
+        await dashboard.waitForRenderComplete();
         expect(await pieChart.getPieChartLabels()).to.eql(['bark', 'bow ow ow']);
       });
 
@@ -387,10 +389,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         controlId = (await dashboardControls.getAllControlIds())[0];
         await header.waitUntilLoadingHasFinished();
-        await dashboard.waitForRenderComplete();
       });
 
       it('creating exists query has expected results', async () => {
+        await dashboard.waitForRenderComplete();
         expect((await pieChart.getPieChartValues())[0]).to.be(6);
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSelectExists();

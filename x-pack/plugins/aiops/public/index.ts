@@ -17,6 +17,7 @@ export type { AiopsAppDependencies } from './hooks/use_aiops_app_context';
 export type { ExplainLogRateSpikesAppStateProps } from './components/explain_log_rate_spikes';
 export type { LogCategorizationAppStateProps } from './components/log_categorization';
 export type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
+export type { ExplainLogRateSpikesAnalysisResults } from './components/explain_log_rate_spikes/explain_log_rate_spikes_analysis';
 
 export {
   ExplainLogRateSpikes,

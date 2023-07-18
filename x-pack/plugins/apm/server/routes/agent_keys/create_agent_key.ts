@@ -68,7 +68,7 @@ export async function createAgentKey({
       }],
       ...
     }`;
-    throw Boom.internal(error);
+    throw Boom.internal(error, { missingPrivileges }, 403);
   }
 
   const body = {

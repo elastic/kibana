@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '@kbn/core/server';
 import pMap from 'p-map';
 import {
   SavedObjectsUpdateResponse,
@@ -13,8 +12,9 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SyntheticsServerSetup } from '../../types';
+import { RouteContext } from '../../routes/types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { RouteContext } from '../../legacy_uptime/routes';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
@@ -30,7 +30,6 @@ import {
   MonitorFields,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
   validateProjectMonitor,
@@ -40,14 +39,6 @@ import {
 import { normalizeProjectMonitor } from './normalizers';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
-
-export const INSUFFICIENT_FLEET_PERMISSIONS = i18n.translate(
-  'xpack.synthetics.service.projectMonitors.insufficientFleetPermissions',
-  {
-    defaultMessage:
-      'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.',
-  }
-);
 
 export const CANNOT_UPDATE_MONITOR_TO_DIFFERENT_TYPE = i18n.translate(
   'xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentType',
@@ -74,13 +65,10 @@ export class ProjectMonitorFormatter {
   public createdMonitors: string[] = [];
   public updatedMonitors: string[] = [];
   public failedMonitors: FailedError = [];
-  private server: UptimeServerSetup;
+  private server: SyntheticsServerSetup;
   private projectFilter: string;
   private syntheticsMonitorClient: SyntheticsMonitorClient;
-  private request: KibanaRequest;
   private routeContext: RouteContext;
-
-  private writeIntegrationPoliciesPermissions?: boolean;
 
   constructor({
     encryptedSavedObjectsClient,
@@ -104,7 +92,6 @@ export class ProjectMonitorFormatter {
     this.monitors = monitors;
     this.server = routeContext.server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
-    this.request = routeContext.request;
     this.publicLocations = [];
     this.privateLocations = [];
   }
@@ -186,21 +173,6 @@ export class ProjectMonitorFormatter {
     ]);
   };
 
-  validatePermissions = async ({ monitor }: { monitor: ProjectMonitor }) => {
-    if (this.writeIntegrationPoliciesPermissions || (monitor.privateLocations ?? []).length === 0) {
-      return;
-    }
-    const {
-      integrations: { writeIntegrationPolicies },
-    } = await this.server.fleet.authz.fromRequest(this.request);
-
-    this.writeIntegrationPoliciesPermissions = writeIntegrationPolicies;
-
-    if (!writeIntegrationPolicies) {
-      throw new Error(INSUFFICIENT_FLEET_PERMISSIONS);
-    }
-  };
-
   validateProjectMonitor = async ({
     monitor,
     publicLocations,
@@ -211,8 +183,6 @@ export class ProjectMonitorFormatter {
     privateLocations: PrivateLocation[];
   }) => {
     try {
-      await this.validatePermissions({ monitor });
-
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
         monitor,
         locations: this.publicLocations,

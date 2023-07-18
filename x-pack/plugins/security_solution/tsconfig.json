@@ -83,13 +83,14 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/core-chrome-browser",
     "@kbn/ecs-data-quality-dashboard",
+    "@kbn/elastic-assistant",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
     "@kbn/securitysolution-list-api",
     "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-exception-list-components",
     "@kbn/rison",
@@ -153,11 +154,13 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
-    "@kbn/core-lifecycle-browser",
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
+    "@kbn/discover-plugin",
+    "@kbn/field-formats-plugin",
     "@kbn/dev-proc-runner",
-    "@kbn/discover-plugin"
+    "@kbn/cloud-chat-plugin",
+    "@kbn/alerts-ui-shared"
   ]
 }

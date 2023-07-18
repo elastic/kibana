@@ -17,6 +17,8 @@ export type {
   SavedObjectsModelMappingsAdditionChange,
   SavedObjectsModelMappingsDeprecationChange,
   SavedObjectsModelDataBackfillChange,
+  SavedObjectsModelDataRemovalChange,
+  SavedObjectsModelUnsafeTransformChange,
 } from './model_change';
 
 export type {
@@ -26,10 +28,13 @@ export type {
   SavedObjectModelBidirectionalTransformation,
   SavedObjectModelTransformationResult,
   SavedObjectModelDataBackfillFn,
+  SavedObjectModelDataBackfillResult,
+  SavedObjectModelUnsafeTransformFn,
 } from './transformations';
 
 export type {
   SavedObjectsModelVersionSchemaDefinitions,
   SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilityFn,
 } from './schemas';

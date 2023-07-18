@@ -12,11 +12,38 @@ import type {
   Event,
   IShipper,
 } from '@kbn/analytics-client';
+import { get, has } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { FullStoryApi } from './types';
 import type { FullStorySnippetConfig } from './load_snippet';
 import { formatPayload } from './format_payload';
 import { loadSnippet } from './load_snippet';
 import { getParsedVersion } from './get_parsed_version';
+
+const PAGE_VARS_KEYS = [
+  // Page-specific keys
+  'pageName',
+  'page',
+  'entityId',
+  'applicationId',
+
+  // Deployment-specific keys
+  'version', // x4, split to version_major, version_minor, version_patch for easier filtering
+  'buildNum', // May be useful for Serverless
+  'cloudId',
+  'deploymentId',
+  'cluster_name',
+  'cluster_uuid',
+  'cluster_version',
+  'labels.serverless',
+  'license_id',
+  'license_status',
+  'license_type',
+
+  // Session-specific
+  'session_id',
+  'preferred_languages',
+] as const;
 
 /**
  * FullStory shipper configuration.
@@ -62,7 +89,13 @@ export class FullStoryShipper implements IShipper {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
     // FullStory requires different APIs for different type of contexts.
-    const { userId, isElasticCloudUser, ...nonUserContext } = newContext;
+    const {
+      userId,
+      isElasticCloudUser,
+      cloudIsElasticStaffOwned,
+      cloudTrialEndDate,
+      ...nonUserContext
+    } = newContext;
 
     // Call it only when the userId changes
     if (userId && userId !== this.lastUserId) {
@@ -73,30 +106,37 @@ export class FullStoryShipper implements IShipper {
     }
 
     // User-level context
-    if (typeof isElasticCloudUser === 'boolean') {
-      this.initContext.logger.debug(
-        `Calling FS.setUserVars with isElasticCloudUser ${isElasticCloudUser}`
-      );
-      this.fullStoryApi.setUserVars(
-        formatPayload({
-          isElasticCloudUser,
-        })
-      );
+    if (
+      typeof isElasticCloudUser === 'boolean' ||
+      typeof cloudIsElasticStaffOwned === 'boolean' ||
+      cloudTrialEndDate
+    ) {
+      const userVars = {
+        isElasticCloudUser,
+        cloudIsElasticStaffOwned,
+        cloudTrialEndDate,
+      };
+      this.initContext.logger.debug(`Calling FS.setUserVars with ${JSON.stringify(userVars)}`);
+      this.fullStoryApi.setUserVars(formatPayload(userVars));
     }
 
-    // Event-level context. At the moment, only the scope `page` is supported by FullStory for webapps.
-    if (Object.keys(nonUserContext).length) {
-      // Keeping these fields for backwards compatibility.
-      if (nonUserContext.applicationId) nonUserContext.app_id = nonUserContext.applicationId;
-      if (nonUserContext.entityId) nonUserContext.ent_id = nonUserContext.entityId;
-      if (nonUserContext.cloudId) nonUserContext.org_id = nonUserContext.cloudId;
+    // Cherry-picking fields because FS limits the number of fields that can be sent.
+    // > Note: You can capture up to 20 unique page properties (exclusive of pageName) for any given page
+    // > and up to 500 unique page properties across all pages.
+    // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
+    const pageVars = PAGE_VARS_KEYS.reduce((acc, key) => {
+      if (has(nonUserContext, key)) {
+        set(acc, key, get(nonUserContext, key));
+      }
+      return acc;
+    }, {} as Partial<Pick<EventContext, typeof PAGE_VARS_KEYS[number]>> & Record<string, unknown>);
 
-      this.initContext.logger.debug(
-        `Calling FS.setVars with context ${JSON.stringify(nonUserContext)}`
-      );
+    // Event-level context. At the moment, only the scope `page` is supported by FullStory for webapps.
+    if (Object.keys(pageVars).length) {
+      this.initContext.logger.debug(`Calling FS.setVars with context ${JSON.stringify(pageVars)}`);
       this.fullStoryApi.setVars('page', {
-        ...formatPayload(nonUserContext),
-        ...(nonUserContext.version ? getParsedVersion(nonUserContext.version) : {}),
+        ...formatPayload(pageVars),
+        ...(pageVars.version ? getParsedVersion(pageVars.version) : {}),
       });
     }
   }

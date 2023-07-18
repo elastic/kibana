@@ -69,624 +69,633 @@ export const defineExplainLogRateSpikesRoute = (
   logger: Logger,
   coreStart: CoreStart
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES,
-      validate: {
-        body: aiopsExplainLogRateSpikesSchema,
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: aiopsExplainLogRateSpikesSchema,
+          },
+        },
       },
-    },
-    async (context, request, response) => {
-      if (!license.isActivePlatinumLicense) {
-        return response.forbidden();
-      }
-
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
-
-      return await coreStart.executionContext.withContext(executionContext, () => {
-        let logMessageCounter = 1;
-
-        function logDebugMessage(msg: string) {
-          logger.debug(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
-          logMessageCounter++;
+      async (context, request, response) => {
+        if (!license.isActivePlatinumLicense) {
+          return response.forbidden();
         }
 
-        logDebugMessage('Starting analysis.');
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
-        const groupingEnabled = !!request.body.grouping;
-        const sampleProbability = request.body.sampleProbability ?? 1;
+        return await coreStart.executionContext.withContext(executionContext, () => {
+          let logMessageCounter = 1;
 
-        const controller = new AbortController();
-        const abortSignal = controller.signal;
-
-        let isRunning = false;
-        let loaded = 0;
-        let shouldStop = false;
-        request.events.aborted$.subscribe(() => {
-          logDebugMessage('aborted$ subscription trigger.');
-          shouldStop = true;
-          controller.abort();
-        });
-        request.events.completed$.subscribe(() => {
-          logDebugMessage('completed$ subscription trigger.');
-          shouldStop = true;
-          controller.abort();
-        });
-
-        const {
-          end: streamEnd,
-          push,
-          responseWithHeaders,
-        } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
-          request.headers,
-          logger,
-          request.body.compressResponse,
-          request.body.flushFix
-        );
-
-        function pushPingWithTimeout() {
-          setTimeout(() => {
-            if (isRunning) {
-              logDebugMessage('Ping message.');
-              push(pingAction());
-              pushPingWithTimeout();
-            }
-          }, PING_FREQUENCY);
-        }
-
-        function end() {
-          if (isRunning) {
-            isRunning = false;
-            logDebugMessage('Ending analysis.');
-            streamEnd();
-          } else {
-            logDebugMessage('end() was called again with isRunning already being false.');
+          function logDebugMessage(msg: string) {
+            logger.debug(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
+            logMessageCounter++;
           }
-        }
 
-        function endWithUpdatedLoadingState() {
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded: 1,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.doneMessage',
-                {
-                  defaultMessage: 'Done.',
-                }
-              ),
-            })
+          logDebugMessage('Starting analysis.');
+
+          const groupingEnabled = !!request.body.grouping;
+          const sampleProbability = request.body.sampleProbability ?? 1;
+
+          const controller = new AbortController();
+          const abortSignal = controller.signal;
+
+          let isRunning = false;
+          let loaded = 0;
+          let shouldStop = false;
+          request.events.aborted$.subscribe(() => {
+            logDebugMessage('aborted$ subscription trigger.');
+            shouldStop = true;
+            controller.abort();
+          });
+          request.events.completed$.subscribe(() => {
+            logDebugMessage('completed$ subscription trigger.');
+            shouldStop = true;
+            controller.abort();
+          });
+
+          const {
+            end: streamEnd,
+            push,
+            responseWithHeaders,
+          } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
+            request.headers,
+            logger,
+            request.body.compressResponse,
+            request.body.flushFix
           );
 
-          end();
-        }
+          function pushPingWithTimeout() {
+            setTimeout(() => {
+              if (isRunning) {
+                logDebugMessage('Ping message.');
+                push(pingAction());
+                pushPingWithTimeout();
+              }
+            }, PING_FREQUENCY);
+          }
 
-        function pushError(m: string) {
-          logDebugMessage('Push error.');
-          push(addErrorAction(m));
-        }
-
-        async function runAnalysis() {
-          try {
-            isRunning = true;
-
-            if (!request.body.overrides) {
-              logDebugMessage('Full Reset.');
-              push(resetAllAction());
+          function end() {
+            if (isRunning) {
+              isRunning = false;
+              logDebugMessage('Ending analysis.');
+              streamEnd();
             } else {
-              logDebugMessage('Reset Errors.');
-              push(resetErrorsAction());
+              logDebugMessage('end() was called again with isRunning already being false.');
             }
+          }
 
-            if (request.body.overrides?.regroupOnly) {
-              logDebugMessage('Reset Groups.');
-              push(resetGroupsAction());
-            }
+          function endWithUpdatedLoadingState() {
+            push(
+              updateLoadingStateAction({
+                ccsWarning: false,
+                loaded: 1,
+                loadingState: i18n.translate(
+                  'xpack.aiops.explainLogRateSpikes.loadingState.doneMessage',
+                  {
+                    defaultMessage: 'Done.',
+                  }
+                ),
+              })
+            );
 
-            if (request.body.overrides?.loaded) {
-              logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
-              loaded = request.body.overrides?.loaded;
-            }
+            end();
+          }
 
-            pushPingWithTimeout();
+          function pushError(m: string) {
+            logDebugMessage('Push error.');
+            push(addErrorAction(m));
+          }
 
-            // Step 1: Index Info: Field candidates, total doc count, sample probability
+          async function runAnalysis() {
+            try {
+              isRunning = true;
 
-            const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] =
-              [];
-            let fieldCandidatesCount = fieldCandidates.length;
-
-            let totalDocCount = 0;
-
-            if (!request.body.overrides?.remainingFieldCandidates) {
-              logDebugMessage('Fetch index information.');
-              push(
-                updateLoadingStateAction({
-                  ccsWarning: false,
-                  loaded,
-                  loadingState: i18n.translate(
-                    'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
-                    {
-                      defaultMessage: 'Loading index information.',
-                    }
-                  ),
-                })
-              );
-
-              try {
-                const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
-                fieldCandidates.push(...indexInfo.fieldCandidates);
-                fieldCandidatesCount = fieldCandidates.length;
-                totalDocCount = indexInfo.totalDocCount;
-              } catch (e) {
-                if (!isRequestAbortedError(e)) {
-                  logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
-                  pushError(`Failed to fetch index information.`);
-                }
-                end();
-                return;
+              if (!request.body.overrides) {
+                logDebugMessage('Full Reset.');
+                push(resetAllAction());
+              } else {
+                logDebugMessage('Reset Errors.');
+                push(resetErrorsAction());
               }
 
-              logDebugMessage(`Total document count: ${totalDocCount}`);
-              logDebugMessage(`Sample probability: ${sampleProbability}`);
+              if (request.body.overrides?.regroupOnly) {
+                logDebugMessage('Reset Groups.');
+                push(resetGroupsAction());
+              }
 
-              loaded += LOADED_FIELD_CANDIDATES;
+              if (request.body.overrides?.loaded) {
+                logDebugMessage(`Set 'loaded' override to '${request.body.overrides?.loaded}'.`);
+                loaded = request.body.overrides?.loaded;
+              }
 
               pushPingWithTimeout();
 
-              push(
-                updateLoadingStateAction({
-                  ccsWarning: false,
-                  loaded,
-                  loadingState: i18n.translate(
-                    'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
-                    {
-                      defaultMessage:
-                        'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
-                      values: {
-                        fieldCandidatesCount,
-                      },
-                    }
-                  ),
-                })
-              );
+              // Step 1: Index Info: Field candidates, total doc count, sample probability
 
-              if (fieldCandidatesCount === 0) {
-                endWithUpdatedLoadingState();
-              } else if (shouldStop) {
-                logDebugMessage('shouldStop after fetching field candidates.');
-                end();
-                return;
-              }
-            }
+              const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] =
+                [];
+              let fieldCandidatesCount = fieldCandidates.length;
 
-            // Step 2: Significant Terms
+              let totalDocCount = 0;
 
-            const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
-              ? request.body.overrides?.significantTerms
-              : [];
-            const fieldsToSample = new Set<string>();
-
-            // Don't use more than 10 here otherwise Kibana will emit an error
-            // regarding a limit of abort signal listeners of more than 10.
-            const MAX_CONCURRENT_QUERIES = 10;
-
-            let remainingFieldCandidates: string[];
-            let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
-
-            if (request.body.overrides?.remainingFieldCandidates) {
-              fieldCandidates.push(...request.body.overrides?.remainingFieldCandidates);
-              remainingFieldCandidates = request.body.overrides?.remainingFieldCandidates;
-              fieldCandidatesCount = fieldCandidates.length;
-              loadingStepSizePValues =
-                LOADED_FIELD_CANDIDATES +
-                PROGRESS_STEP_P_VALUES -
-                (request.body.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
-            } else {
-              remainingFieldCandidates = fieldCandidates;
-            }
-
-            logDebugMessage('Fetch p-values.');
-
-            const pValuesQueue = queue(async function (fieldCandidate: string) {
-              loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
-
-              let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
-
-              try {
-                pValues = await fetchSignificantTermPValues(
-                  client,
-                  request.body,
-                  [fieldCandidate],
-                  logger,
-                  sampleProbability,
-                  pushError,
-                  abortSignal
-                );
-              } catch (e) {
-                if (!isRequestAbortedError(e)) {
-                  logger.error(
-                    `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
-                  );
-                  pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
-                }
-                return;
-              }
-
-              remainingFieldCandidates = remainingFieldCandidates.filter(
-                (d) => d !== fieldCandidate
-              );
-
-              if (pValues.length > 0) {
-                pValues.forEach((d) => {
-                  fieldsToSample.add(d.fieldName);
-                });
-                significantTerms.push(...pValues);
-
-                push(addSignificantTermsAction(pValues));
-              }
-
-              push(
-                updateLoadingStateAction({
-                  ccsWarning: false,
-                  loaded,
-                  loadingState: i18n.translate(
-                    'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldValuePairs',
-                    {
-                      defaultMessage:
-                        'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
-                      values: {
-                        fieldValuePairsCount: significantTerms.length,
-                      },
-                    }
-                  ),
-                  remainingFieldCandidates,
-                })
-              );
-            }, MAX_CONCURRENT_QUERIES);
-
-            pValuesQueue.push(fieldCandidates, (err) => {
-              if (err) {
-                logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
-                pushError(`Failed to fetch p-values.`);
-                pValuesQueue.kill();
-                end();
-              } else if (shouldStop) {
-                logDebugMessage('shouldStop fetching p-values.');
-                pValuesQueue.kill();
-                end();
-              }
-            });
-            await pValuesQueue.drain();
-
-            if (significantTerms.length === 0) {
-              logDebugMessage('Stopping analysis, did not find significant terms.');
-              endWithUpdatedLoadingState();
-              return;
-            }
-
-            const histogramFields: [NumericHistogramField] = [
-              { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
-            ];
-
-            logDebugMessage('Fetch overall histogram.');
-
-            let overallTimeSeries: NumericChartData | undefined;
-
-            const overallHistogramQuery = getHistogramQuery(request.body);
-
-            try {
-              overallTimeSeries = (
-                (await fetchHistogramsForFields(
-                  client,
-                  request.body.index,
-                  overallHistogramQuery,
-                  // fields
-                  histogramFields,
-                  // samplerShardSize
-                  -1,
-                  undefined,
-                  abortSignal,
-                  sampleProbability,
-                  RANDOM_SAMPLER_SEED
-                )) as [NumericChartData]
-              )[0];
-            } catch (e) {
-              if (!isRequestAbortedError(e)) {
-                logger.error(`Failed to fetch the overall histogram data, got: \n${e.toString()}`);
-                pushError(`Failed to fetch overall histogram data.`);
-              }
-              // Still continue the analysis even if loading the overall histogram fails.
-            }
-
-            function pushHistogramDataLoadingState() {
-              push(
-                updateLoadingStateAction({
-                  ccsWarning: false,
-                  loaded,
-                  loadingState: i18n.translate(
-                    'xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData',
-                    {
-                      defaultMessage: 'Loading histogram data.',
-                    }
-                  ),
-                })
-              );
-            }
-
-            if (shouldStop) {
-              logDebugMessage('shouldStop after fetching overall histogram.');
-              end();
-              return;
-            }
-
-            if (groupingEnabled) {
-              logDebugMessage('Group results.');
-
-              push(
-                updateLoadingStateAction({
-                  ccsWarning: false,
-                  loaded,
-                  loadingState: i18n.translate(
-                    'xpack.aiops.explainLogRateSpikes.loadingState.groupingResults',
-                    {
-                      defaultMessage: 'Transforming significant field/value pairs into groups.',
-                    }
-                  ),
-                  groupsMissing: true,
-                })
-              );
-
-              try {
-                const { fields, df } = await fetchFrequentItemSets(
-                  client,
-                  request.body.index,
-                  JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
-                  significantTerms,
-                  request.body.timeFieldName,
-                  request.body.deviationMin,
-                  request.body.deviationMax,
-                  logger,
-                  sampleProbability,
-                  pushError,
-                  abortSignal
+              if (!request.body.overrides?.remainingFieldCandidates) {
+                logDebugMessage('Fetch index information.');
+                push(
+                  updateLoadingStateAction({
+                    ccsWarning: false,
+                    loaded,
+                    loadingState: i18n.translate(
+                      'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
+                      {
+                        defaultMessage: 'Loading index information.',
+                      }
+                    ),
+                  })
                 );
 
-                if (shouldStop) {
-                  logDebugMessage('shouldStop after fetching frequent_item_sets.');
+                try {
+                  const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
+                  fieldCandidates.push(...indexInfo.fieldCandidates);
+                  fieldCandidatesCount = fieldCandidates.length;
+                  totalDocCount = indexInfo.totalDocCount;
+                } catch (e) {
+                  if (!isRequestAbortedError(e)) {
+                    logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
+                    pushError(`Failed to fetch index information.`);
+                  }
                   end();
                   return;
                 }
 
-                if (fields.length > 0 && df.length > 0) {
-                  const significantTermGroups = getSignificantTermGroups(
-                    df,
+                logDebugMessage(`Total document count: ${totalDocCount}`);
+                logDebugMessage(`Sample probability: ${sampleProbability}`);
+
+                loaded += LOADED_FIELD_CANDIDATES;
+
+                pushPingWithTimeout();
+
+                push(
+                  updateLoadingStateAction({
+                    ccsWarning: false,
+                    loaded,
+                    loadingState: i18n.translate(
+                      'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldCandidates',
+                      {
+                        defaultMessage:
+                          'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
+                        values: {
+                          fieldCandidatesCount,
+                        },
+                      }
+                    ),
+                  })
+                );
+
+                if (fieldCandidatesCount === 0) {
+                  endWithUpdatedLoadingState();
+                } else if (shouldStop) {
+                  logDebugMessage('shouldStop after fetching field candidates.');
+                  end();
+                  return;
+                }
+              }
+
+              // Step 2: Significant Terms
+
+              const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
+                ? request.body.overrides?.significantTerms
+                : [];
+              const fieldsToSample = new Set<string>();
+
+              // Don't use more than 10 here otherwise Kibana will emit an error
+              // regarding a limit of abort signal listeners of more than 10.
+              const MAX_CONCURRENT_QUERIES = 10;
+
+              let remainingFieldCandidates: string[];
+              let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
+
+              if (request.body.overrides?.remainingFieldCandidates) {
+                fieldCandidates.push(...request.body.overrides?.remainingFieldCandidates);
+                remainingFieldCandidates = request.body.overrides?.remainingFieldCandidates;
+                fieldCandidatesCount = fieldCandidates.length;
+                loadingStepSizePValues =
+                  LOADED_FIELD_CANDIDATES +
+                  PROGRESS_STEP_P_VALUES -
+                  (request.body.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+              } else {
+                remainingFieldCandidates = fieldCandidates;
+              }
+
+              logDebugMessage('Fetch p-values.');
+
+              const pValuesQueue = queue(async function (fieldCandidate: string) {
+                loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
+
+                let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
+
+                try {
+                  pValues = await fetchSignificantTermPValues(
+                    client,
+                    request.body,
+                    [fieldCandidate],
+                    logger,
+                    sampleProbability,
+                    pushError,
+                    abortSignal
+                  );
+                } catch (e) {
+                  if (!isRequestAbortedError(e)) {
+                    logger.error(
+                      `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
+                    );
+                    pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+                  }
+                  return;
+                }
+
+                remainingFieldCandidates = remainingFieldCandidates.filter(
+                  (d) => d !== fieldCandidate
+                );
+
+                if (pValues.length > 0) {
+                  pValues.forEach((d) => {
+                    fieldsToSample.add(d.fieldName);
+                  });
+                  significantTerms.push(...pValues);
+
+                  push(addSignificantTermsAction(pValues));
+                }
+
+                push(
+                  updateLoadingStateAction({
+                    ccsWarning: false,
+                    loaded,
+                    loadingState: i18n.translate(
+                      'xpack.aiops.explainLogRateSpikes.loadingState.identifiedFieldValuePairs',
+                      {
+                        defaultMessage:
+                          'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
+                        values: {
+                          fieldValuePairsCount: significantTerms.length,
+                        },
+                      }
+                    ),
+                    remainingFieldCandidates,
+                  })
+                );
+              }, MAX_CONCURRENT_QUERIES);
+
+              pValuesQueue.push(fieldCandidates, (err) => {
+                if (err) {
+                  logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
+                  pushError(`Failed to fetch p-values.`);
+                  pValuesQueue.kill();
+                  end();
+                } else if (shouldStop) {
+                  logDebugMessage('shouldStop fetching p-values.');
+                  pValuesQueue.kill();
+                  end();
+                }
+              });
+              await pValuesQueue.drain();
+
+              if (significantTerms.length === 0) {
+                logDebugMessage('Stopping analysis, did not find significant terms.');
+                endWithUpdatedLoadingState();
+                return;
+              }
+
+              const histogramFields: [NumericHistogramField] = [
+                { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
+              ];
+
+              logDebugMessage('Fetch overall histogram.');
+
+              let overallTimeSeries: NumericChartData | undefined;
+
+              const overallHistogramQuery = getHistogramQuery(request.body);
+
+              try {
+                overallTimeSeries = (
+                  (await fetchHistogramsForFields(
+                    client,
+                    request.body.index,
+                    overallHistogramQuery,
+                    // fields
+                    histogramFields,
+                    // samplerShardSize
+                    -1,
+                    undefined,
+                    abortSignal,
+                    sampleProbability,
+                    RANDOM_SAMPLER_SEED
+                  )) as [NumericChartData]
+                )[0];
+              } catch (e) {
+                if (!isRequestAbortedError(e)) {
+                  logger.error(
+                    `Failed to fetch the overall histogram data, got: \n${e.toString()}`
+                  );
+                  pushError(`Failed to fetch overall histogram data.`);
+                }
+                // Still continue the analysis even if loading the overall histogram fails.
+              }
+
+              function pushHistogramDataLoadingState() {
+                push(
+                  updateLoadingStateAction({
+                    ccsWarning: false,
+                    loaded,
+                    loadingState: i18n.translate(
+                      'xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData',
+                      {
+                        defaultMessage: 'Loading histogram data.',
+                      }
+                    ),
+                  })
+                );
+              }
+
+              if (shouldStop) {
+                logDebugMessage('shouldStop after fetching overall histogram.');
+                end();
+                return;
+              }
+
+              if (groupingEnabled) {
+                logDebugMessage('Group results.');
+
+                push(
+                  updateLoadingStateAction({
+                    ccsWarning: false,
+                    loaded,
+                    loadingState: i18n.translate(
+                      'xpack.aiops.explainLogRateSpikes.loadingState.groupingResults',
+                      {
+                        defaultMessage: 'Transforming significant field/value pairs into groups.',
+                      }
+                    ),
+                    groupsMissing: true,
+                  })
+                );
+
+                try {
+                  const { fields, df } = await fetchFrequentItemSets(
+                    client,
+                    request.body.index,
+                    JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
                     significantTerms,
-                    fields
+                    request.body.timeFieldName,
+                    request.body.deviationMin,
+                    request.body.deviationMax,
+                    logger,
+                    sampleProbability,
+                    pushError,
+                    abortSignal
                   );
 
-                  // We'll find out if there's at least one group with at least two items,
-                  // only then will we return the groups to the clients and make the grouping option available.
-                  const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
-
-                  if (maxItems > 1) {
-                    push(addSignificantTermsGroupAction(significantTermGroups));
-                  }
-
-                  loaded += PROGRESS_STEP_GROUPING;
-
-                  pushHistogramDataLoadingState();
-
                   if (shouldStop) {
-                    logDebugMessage('shouldStop after grouping.');
+                    logDebugMessage('shouldStop after fetching frequent_item_sets.');
                     end();
                     return;
                   }
 
-                  logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
+                  if (fields.length > 0 && df.length > 0) {
+                    const significantTermGroups = getSignificantTermGroups(
+                      df,
+                      significantTerms,
+                      fields
+                    );
 
-                  const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
+                    // We'll find out if there's at least one group with at least two items,
+                    // only then will we return the groups to the clients and make the grouping option available.
+                    const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
+
+                    if (maxItems > 1) {
+                      push(addSignificantTermsGroupAction(significantTermGroups));
+                    }
+
+                    loaded += PROGRESS_STEP_GROUPING;
+
+                    pushHistogramDataLoadingState();
+
                     if (shouldStop) {
-                      logDebugMessage('shouldStop abort fetching group histograms.');
-                      groupHistogramQueue.kill();
+                      logDebugMessage('shouldStop after grouping.');
                       end();
                       return;
                     }
 
-                    if (overallTimeSeries !== undefined) {
-                      const histogramQuery = getHistogramQuery(request.body, getGroupFilter(cpg));
+                    logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
 
-                      let cpgTimeSeries: NumericChartData;
-                      try {
-                        cpgTimeSeries = (
-                          (await fetchHistogramsForFields(
-                            client,
-                            request.body.index,
-                            histogramQuery,
-                            // fields
-                            [
-                              {
-                                fieldName: request.body.timeFieldName,
-                                type: KBN_FIELD_TYPES.DATE,
-                                interval: overallTimeSeries.interval,
-                                min: overallTimeSeries.stats[0],
-                                max: overallTimeSeries.stats[1],
-                              },
-                            ],
-                            // samplerShardSize
-                            -1,
-                            undefined,
-                            abortSignal,
-                            sampleProbability,
-                            RANDOM_SAMPLER_SEED
-                          )) as [NumericChartData]
-                        )[0];
-                      } catch (e) {
-                        if (!isRequestAbortedError(e)) {
-                          logger.error(
-                            `Failed to fetch the histogram data for group #${
-                              cpg.id
-                            }, got: \n${e.toString()}`
-                          );
-                          pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
-                        }
+                    const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
+                      if (shouldStop) {
+                        logDebugMessage('shouldStop abort fetching group histograms.');
+                        groupHistogramQueue.kill();
+                        end();
                         return;
                       }
-                      const histogram =
-                        overallTimeSeries.data.map((o, i) => {
-                          const current = cpgTimeSeries.data.find(
-                            (d1) => d1.key_as_string === o.key_as_string
-                          ) ?? {
-                            doc_count: 0,
-                          };
-                          return {
-                            key: o.key,
-                            key_as_string: o.key_as_string ?? '',
-                            doc_count_significant_term: current.doc_count,
-                            doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                          };
-                        }) ?? [];
 
-                      push(
-                        addSignificantTermsGroupHistogramAction([
-                          {
-                            id: cpg.id,
-                            histogram,
-                          },
-                        ])
-                      );
-                    }
-                  }, MAX_CONCURRENT_QUERIES);
+                      if (overallTimeSeries !== undefined) {
+                        const histogramQuery = getHistogramQuery(request.body, getGroupFilter(cpg));
 
-                  groupHistogramQueue.push(significantTermGroups);
-                  await groupHistogramQueue.drain();
-                }
-              } catch (e) {
-                if (!isRequestAbortedError(e)) {
-                  logger.error(
-                    `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
-                  );
-                  pushError(`Failed to transform field/value pairs into groups.`);
+                        let cpgTimeSeries: NumericChartData;
+                        try {
+                          cpgTimeSeries = (
+                            (await fetchHistogramsForFields(
+                              client,
+                              request.body.index,
+                              histogramQuery,
+                              // fields
+                              [
+                                {
+                                  fieldName: request.body.timeFieldName,
+                                  type: KBN_FIELD_TYPES.DATE,
+                                  interval: overallTimeSeries.interval,
+                                  min: overallTimeSeries.stats[0],
+                                  max: overallTimeSeries.stats[1],
+                                },
+                              ],
+                              // samplerShardSize
+                              -1,
+                              undefined,
+                              abortSignal,
+                              sampleProbability,
+                              RANDOM_SAMPLER_SEED
+                            )) as [NumericChartData]
+                          )[0];
+                        } catch (e) {
+                          if (!isRequestAbortedError(e)) {
+                            logger.error(
+                              `Failed to fetch the histogram data for group #${
+                                cpg.id
+                              }, got: \n${e.toString()}`
+                            );
+                            pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
+                          }
+                          return;
+                        }
+                        const histogram =
+                          overallTimeSeries.data.map((o, i) => {
+                            const current = cpgTimeSeries.data.find(
+                              (d1) => d1.key_as_string === o.key_as_string
+                            ) ?? {
+                              doc_count: 0,
+                            };
+                            return {
+                              key: o.key,
+                              key_as_string: o.key_as_string ?? '',
+                              doc_count_significant_term: current.doc_count,
+                              doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                            };
+                          }) ?? [];
+
+                        push(
+                          addSignificantTermsGroupHistogramAction([
+                            {
+                              id: cpg.id,
+                              histogram,
+                            },
+                          ])
+                        );
+                      }
+                    }, MAX_CONCURRENT_QUERIES);
+
+                    groupHistogramQueue.push(significantTermGroups);
+                    await groupHistogramQueue.drain();
+                  }
+                } catch (e) {
+                  if (!isRequestAbortedError(e)) {
+                    logger.error(
+                      `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
+                    );
+                    pushError(`Failed to transform field/value pairs into groups.`);
+                  }
                 }
               }
-            }
 
-            loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
+              loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
-            logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
+              logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
 
-            // time series filtered by fields
-            if (
-              significantTerms.length > 0 &&
-              overallTimeSeries !== undefined &&
-              !request.body.overrides?.regroupOnly
-            ) {
-              const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
-                if (shouldStop) {
-                  logDebugMessage('shouldStop abort fetching field/value histograms.');
-                  fieldValueHistogramQueue.kill();
-                  end();
-                  return;
-                }
-
-                if (overallTimeSeries !== undefined) {
-                  const histogramQuery = getHistogramQuery(request.body, [
-                    {
-                      term: { [cp.fieldName]: cp.fieldValue },
-                    },
-                  ]);
-
-                  let cpTimeSeries: NumericChartData;
-
-                  try {
-                    cpTimeSeries = (
-                      (await fetchHistogramsForFields(
-                        client,
-                        request.body.index,
-                        histogramQuery,
-                        // fields
-                        [
-                          {
-                            fieldName: request.body.timeFieldName,
-                            type: KBN_FIELD_TYPES.DATE,
-                            interval: overallTimeSeries.interval,
-                            min: overallTimeSeries.stats[0],
-                            max: overallTimeSeries.stats[1],
-                          },
-                        ],
-                        // samplerShardSize
-                        -1,
-                        undefined,
-                        abortSignal,
-                        sampleProbability,
-                        RANDOM_SAMPLER_SEED
-                      )) as [NumericChartData]
-                    )[0];
-                  } catch (e) {
-                    logger.error(
-                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
-                        cp.fieldValue
-                      }", got: \n${e.toString()}`
-                    );
-                    pushError(
-                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-                    );
+              // time series filtered by fields
+              if (
+                significantTerms.length > 0 &&
+                overallTimeSeries !== undefined &&
+                !request.body.overrides?.regroupOnly
+              ) {
+                const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
+                  if (shouldStop) {
+                    logDebugMessage('shouldStop abort fetching field/value histograms.');
+                    fieldValueHistogramQueue.kill();
+                    end();
                     return;
                   }
 
-                  const histogram =
-                    overallTimeSeries.data.map((o, i) => {
-                      const current = cpTimeSeries.data.find(
-                        (d1) => d1.key_as_string === o.key_as_string
-                      ) ?? {
-                        doc_count: 0,
-                      };
-                      return {
-                        key: o.key,
-                        key_as_string: o.key_as_string ?? '',
-                        doc_count_significant_term: current.doc_count,
-                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                      };
-                    }) ?? [];
-
-                  const { fieldName, fieldValue } = cp;
-
-                  loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
-                  pushHistogramDataLoadingState();
-                  push(
-                    addSignificantTermsHistogramAction([
+                  if (overallTimeSeries !== undefined) {
+                    const histogramQuery = getHistogramQuery(request.body, [
                       {
-                        fieldName,
-                        fieldValue,
-                        histogram,
+                        term: { [cp.fieldName]: cp.fieldValue },
                       },
-                    ])
-                  );
-                }
-              }, MAX_CONCURRENT_QUERIES);
+                    ]);
 
-              fieldValueHistogramQueue.push(significantTerms);
-              await fieldValueHistogramQueue.drain();
-            }
+                    let cpTimeSeries: NumericChartData;
 
-            endWithUpdatedLoadingState();
-          } catch (e) {
-            if (!isRequestAbortedError(e)) {
-              logger.error(
-                `Explain log rate spikes analysis failed to finish, got: \n${e.toString()}`
-              );
-              pushError(`Explain log rate spikes analysis failed to finish.`);
+                    try {
+                      cpTimeSeries = (
+                        (await fetchHistogramsForFields(
+                          client,
+                          request.body.index,
+                          histogramQuery,
+                          // fields
+                          [
+                            {
+                              fieldName: request.body.timeFieldName,
+                              type: KBN_FIELD_TYPES.DATE,
+                              interval: overallTimeSeries.interval,
+                              min: overallTimeSeries.stats[0],
+                              max: overallTimeSeries.stats[1],
+                            },
+                          ],
+                          // samplerShardSize
+                          -1,
+                          undefined,
+                          abortSignal,
+                          sampleProbability,
+                          RANDOM_SAMPLER_SEED
+                        )) as [NumericChartData]
+                      )[0];
+                    } catch (e) {
+                      logger.error(
+                        `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
+                          cp.fieldValue
+                        }", got: \n${e.toString()}`
+                      );
+                      pushError(
+                        `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
+                      );
+                      return;
+                    }
+
+                    const histogram =
+                      overallTimeSeries.data.map((o, i) => {
+                        const current = cpTimeSeries.data.find(
+                          (d1) => d1.key_as_string === o.key_as_string
+                        ) ?? {
+                          doc_count: 0,
+                        };
+                        return {
+                          key: o.key,
+                          key_as_string: o.key_as_string ?? '',
+                          doc_count_significant_term: current.doc_count,
+                          doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                        };
+                      }) ?? [];
+
+                    const { fieldName, fieldValue } = cp;
+
+                    loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
+                    pushHistogramDataLoadingState();
+                    push(
+                      addSignificantTermsHistogramAction([
+                        {
+                          fieldName,
+                          fieldValue,
+                          histogram,
+                        },
+                      ])
+                    );
+                  }
+                }, MAX_CONCURRENT_QUERIES);
+
+                fieldValueHistogramQueue.push(significantTerms);
+                await fieldValueHistogramQueue.drain();
+              }
+
+              endWithUpdatedLoadingState();
+            } catch (e) {
+              if (!isRequestAbortedError(e)) {
+                logger.error(
+                  `Explain log rate spikes analysis failed to finish, got: \n${e.toString()}`
+                );
+                pushError(`Explain log rate spikes analysis failed to finish.`);
+              }
+              end();
             }
-            end();
           }
-        }
 
-        // Do not call this using `await` so it will run asynchronously while we return the stream already.
-        runAnalysis();
+          // Do not call this using `await` so it will run asynchronously while we return the stream already.
+          runAnalysis();
 
-        return response.ok(responseWithHeaders);
-      });
-    }
-  );
+          return response.ok(responseWithHeaders);
+        });
+      }
+    );
 };

@@ -6,7 +6,7 @@
  */
 
 import type { CellActionFactory, CellAction } from '@kbn/cell-actions';
-import { fieldHasCellActions, isInSecurityApp } from '../../utils';
+import { isInSecurityApp } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
 import { createFilterOutCellActionFactory } from '../cell_action/filter_out';
@@ -28,7 +28,6 @@ export const createFilterOutDiscoverCellActionFactory = ({
   const genericFilterOutActionFactory = createFilterOutCellActionFactory({ store, services });
 
   return genericFilterOutActionFactory.combine<CellAction>({
-    isCompatible: async ({ field }) =>
-      isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
+    isCompatible: async () => isInSecurityApp(currentAppId),
   });
 };

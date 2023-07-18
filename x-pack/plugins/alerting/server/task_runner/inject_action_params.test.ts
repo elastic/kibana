@@ -14,8 +14,6 @@ describe('injectActionParams', () => {
     };
     const result = injectActionParams({
       actionParams,
-      ruleId: '1',
-      spaceId: 'the-space',
       actionTypeId: '.server-log',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -33,9 +31,8 @@ describe('injectActionParams', () => {
     };
     const result = injectActionParams({
       actionParams,
-      ruleId: '1',
-      spaceId: 'default',
       actionTypeId: '.email',
+      ruleUrl: 'http://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/1',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -50,7 +47,7 @@ describe('injectActionParams', () => {
     `);
   });
 
-  test('injects viewInKibanaPath and viewInKibanaText when actionTypeId is .email and spaceId is undefined', () => {
+  test('injects viewInKibanaPath as empty string when the ruleUrl is undefined', () => {
     const actionParams = {
       body: {
         message: 'State: "{{state.value}}", Context: "{{context.value}}"',
@@ -58,8 +55,6 @@ describe('injectActionParams', () => {
     };
     const result = injectActionParams({
       actionParams,
-      ruleId: '1',
-      spaceId: undefined,
       actionTypeId: '.email',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -68,32 +63,7 @@ describe('injectActionParams', () => {
           "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
         },
         "kibanaFooterLink": Object {
-          "path": "/app/management/insightsAndAlerting/triggersActions/rule/1",
-          "text": "View rule in Kibana",
-        },
-      }
-    `);
-  });
-
-  test('injects viewInKibanaPath with space ID and viewInKibanaText when actionTypeId is .email', () => {
-    const actionParams = {
-      body: {
-        message: 'State: "{{state.value}}", Context: "{{context.value}}"',
-      },
-    };
-    const result = injectActionParams({
-      actionParams,
-      ruleId: '1',
-      spaceId: 'not-the-default',
-      actionTypeId: '.email',
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "message": "State: \\"{{state.value}}\\", Context: \\"{{context.value}}\\"",
-        },
-        "kibanaFooterLink": Object {
-          "path": "/s/not-the-default/app/management/insightsAndAlerting/triggersActions/rule/1",
+          "path": "",
           "text": "View rule in Kibana",
         },
       }

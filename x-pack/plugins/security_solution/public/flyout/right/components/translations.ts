@@ -31,6 +31,13 @@ export const SEVERITY_TITLE = i18n.translate(
   }
 );
 
+export const STATUS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.statusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const RISK_SCORE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.riskScoreTitle',
   {
@@ -38,12 +45,19 @@ export const RISK_SCORE_TITLE = i18n.translate(
   }
 );
 
-/* Description section */
-
-export const DESCRIPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.descriptionTitle',
+export const VIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.viewRuleText',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'View rule',
+  }
+);
+
+/* About section */
+
+export const ABOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.aboutTitle',
+  {
+    defaultMessage: 'About',
   }
 );
 
@@ -287,5 +301,40 @@ export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const SESSION_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
+  {
+    defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_PROCESS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.processText',
+  {
+    defaultMessage: 'started',
+  }
+);
+
+export const SESSION_PREVIEW_TIME_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.timeText',
+  {
+    defaultMessage: 'at',
+  }
+);
+
+export const SESSION_PREVIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.ruleText',
+  {
+    defaultMessage: 'with rule',
+  }
+);
+
+export const SESSION_PREVIEW_COMMAND_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText',
+  {
+    defaultMessage: 'by',
   }
 );

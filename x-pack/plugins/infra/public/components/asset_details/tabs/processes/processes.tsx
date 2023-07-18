@@ -27,14 +27,13 @@ import {
   ProcessListContextProvider,
 } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import { getFieldByType } from '../../../../../common/inventory_models';
-import type { HostNodeRow } from '../../types';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 
 export interface ProcessesProps {
-  node: HostNodeRow;
+  nodeName: string;
   nodeType: InventoryItemType;
-  currentTime: number;
-  searchFilter?: string;
+  currentTimestamp: number;
+  search?: string;
   onSearchFilterChange?: (searchFilter: string) => void;
 }
 
@@ -44,13 +43,13 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
 }));
 
 export const Processes = ({
-  currentTime,
-  node,
+  currentTimestamp,
+  nodeName,
   nodeType,
-  searchFilter,
+  search,
   onSearchFilterChange,
 }: ProcessesProps) => {
-  const [searchText, setSearchText] = useState(searchFilter ?? '');
+  const [searchText, setSearchText] = useState(search ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
@@ -62,15 +61,15 @@ export const Processes = ({
 
   const hostTerm = useMemo(() => {
     const field = getFieldByType(nodeType) ?? nodeType;
-    return { [field]: node.name };
-  }, [node, nodeType]);
+    return { [field]: nodeName };
+  }, [nodeName, nodeType]);
 
   const {
     loading,
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchText));
+  } = useProcessList(hostTerm, currentTimestamp, sortBy, parseSearchString(searchText));
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
@@ -98,7 +97,7 @@ export const Processes = ({
   }, [onSearchFilterChange]);
 
   return (
-    <ProcessListContextProvider hostTerm={hostTerm} to={currentTime}>
+    <ProcessListContextProvider hostTerm={hostTerm} to={currentTimestamp}>
       <SummaryTable
         isLoading={loading}
         processSummary={(!error ? response?.summary : null) ?? { total: 0 }}
@@ -149,7 +148,7 @@ export const Processes = ({
       <EuiSpacer size="m" />
       {!error ? (
         <ProcessesTable
-          currentTime={currentTime}
+          currentTime={currentTimestamp}
           isLoading={loading || !response}
           processList={response?.processList ?? []}
           sortBy={sortBy}

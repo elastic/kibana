@@ -8,10 +8,11 @@ import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import type { History } from 'history';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
@@ -20,6 +21,7 @@ import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
+import { isLensSupportedType } from '../../../common/utils/lens';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {
@@ -28,7 +30,6 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 const ICON = 'visBarVertical';
-const UNSUPPORTED_FIELD_TYPES = ['date', 'text'];
 
 export const createShowTopNCellActionFactory = createCellActionFactory(
   ({
@@ -42,12 +43,19 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
   }): CellActionTemplate<SecurityCellAction> => ({
     type: SecurityCellActionType.SHOW_TOP_N,
     getIconType: () => ICON,
-    getDisplayName: ({ field }) => SHOW_TOP(field.name),
-    getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
-    isCompatible: async ({ field }) =>
-      fieldHasCellActions(field.name) &&
-      !UNSUPPORTED_FIELD_TYPES.includes(field.type) &&
-      !!field.aggregatable,
+    getDisplayName: ({ data }) => SHOW_TOP(data[0]?.field.name),
+    getDisplayNameTooltip: ({ data }) => SHOW_TOP(data[0]?.field.name),
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 &&
+        fieldHasCellActions(field.name) &&
+        isLensSupportedType(field.type) &&
+        !isDataViewFieldSubtypeNested(field) &&
+        !!field.aggregatable
+      );
+    },
     execute: async (context) => {
       if (!context.nodeRef.current) return;
 

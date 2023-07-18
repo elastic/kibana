@@ -40,4 +40,5 @@ export {
   IconChartHeatmap,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
+  IconChartTagcloud,
 } from './src/assets';

@@ -8,6 +8,7 @@
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
+import { loadPage } from '../../tasks/common';
 
 describe('Response actions history page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
@@ -32,7 +33,7 @@ describe('Response actions history page', () => {
   });
 
   it('retains expanded action details on page reload', () => {
-    cy.visit(`/app/security/administration/response_actions_history`);
+    loadPage(`/app/security/administration/response_actions_history`);
     cy.getByTestSubj('response-actions-list-expand-button').eq(3).click(); // 4th row on 1st page
     cy.getByTestSubj('response-actions-list-details-tray').should('exist');
     cy.url().should('include', 'withOutputs');

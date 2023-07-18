@@ -33,9 +33,9 @@
       "expressionMetricVis",
       "expressionHeatmap",
       "expressionXY",
+      "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "unifiedFieldList",
       "contentManagement"
     ],
     "optionalPlugins": [

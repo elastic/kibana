@@ -239,9 +239,9 @@ describe('Response actions history', () => {
         agentIds: undefined,
         commands: [],
         statuses: [],
+        types: [],
         userIds: [],
         withOutputs: [],
-        withAutomatedActions: false,
         startDate: 'now-24h/h',
         endDate: 'now',
       },
@@ -312,9 +312,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1160,9 +1160,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: ['failed', 'pending'],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1362,9 +1362,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );

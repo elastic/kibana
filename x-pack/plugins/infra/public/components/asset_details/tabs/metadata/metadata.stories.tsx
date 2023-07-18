@@ -16,28 +16,12 @@ const stories: Meta<MetadataProps> = {
   decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: Metadata,
   args: {
-    currentTimeRange: {
-      from: 1679316685686,
-      to: 1679585836087,
-      interval: '1m',
+    dateRange: {
+      from: '2023-04-09T11:07:49Z',
+      to: '2023-04-09T11:23:49Z',
     },
     nodeType: 'host',
-    node: {
-      id: 'host-1',
-      name: 'host-1',
-      ip: '192.168.0.1',
-      os: 'iOS',
-      title: {
-        name: 'host-1',
-        cloudProvider: 'gcp',
-      },
-      rx: 0,
-      tx: 0,
-      memory: 0.5445920331099282,
-      cpu: 0.2000718443867342,
-      diskLatency: 0,
-      memoryTotal: 16777216,
-    },
+    nodeName: 'host-1',
     showActionsColumn: false,
   },
 };

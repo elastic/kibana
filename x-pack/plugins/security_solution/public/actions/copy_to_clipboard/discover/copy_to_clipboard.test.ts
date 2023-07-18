@@ -24,7 +24,12 @@ describe('createCopyToClipboardDiscoverCellActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardDiscoverCellActionFactory({ services });
   const copyToClipboardAction = copyToClipboardActionFactory({ id: 'testAction' });
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    data: [
+      {
+        field: { name: 'user.name', type: 'string' },
+        value: 'the value',
+      },
+    ],
   } as CellActionExecutionContext;
 
   beforeEach(() => {
@@ -54,7 +59,12 @@ describe('createCopyToClipboardDiscoverCellActionFactory', () => {
       expect(
         await copyToClipboardAction.isCompatible({
           ...context,
-          field: { ...context.field, name: 'signal.reason' },
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
         })
       ).toEqual(false);
     });

@@ -113,15 +113,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-const DatePicker = styled(EuiFlexItem)`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-    width: auto;
-  }
-`;
-
-DatePicker.displayName = 'DatePicker';
-
 const VerticalRule = styled.div`
   width: 2px;
   height: 100%;
@@ -277,9 +268,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={10}>
-                <SuperDatePicker id={InputsModelId.timeline} timelineId={timelineId} />
-              </DatePicker>
+              <EuiFlexItem grow={10}>
+                <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>

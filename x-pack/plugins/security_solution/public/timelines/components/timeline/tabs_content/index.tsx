@@ -6,14 +6,19 @@
  */
 
 import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useConversationStore } from '../../../../assistant/use_conversation_store';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -34,6 +39,7 @@ import {
 } from './selectors';
 import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -44,6 +50,11 @@ const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScr
   })
 )<{ $isVisible: boolean; isOverflowYScroll?: boolean }>`
   flex: 1;
+`;
+
+const AssistantTabContainer = styled.div`
+  overflow-y: auto;
+  width: 100%;
 `;
 
 const QueryTabContent = lazy(() => import('../query_tab_content'));
@@ -139,9 +150,43 @@ const DiscoverTab: React.FC = memo(() => (
 DiscoverTab.displayName = 'DiscoverTab';
 
 type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
+const AssistantTab: React.FC<{
+  isAssistantEnabled: boolean;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
+  timelineId: TimelineId;
+  shouldRefocusPrompt: boolean;
+}> = memo(
+  ({ isAssistantEnabled, renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
+    <Suspense fallback={<EuiSkeletonText lines={10} />}>
+      <AssistantTabContainer>
+        <Assistant
+          isAssistantEnabled={isAssistantEnabled}
+          conversationId={TIMELINE_CONVERSATION_TITLE}
+          shouldRefocusPrompt={shouldRefocusPrompt}
+        />
+      </AssistantTabContainer>
+    </Suspense>
+  )
+);
+
+AssistantTab.displayName = 'AssistantTab';
+
+type ActiveTimelineTabProps = BasicTimelineTab & {
+  activeTimelineTab: TimelineTabs;
+  showTimeline: boolean;
+};
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
-  ({ activeTimelineTab, renderCellValue, rowRenderers, timelineId, timelineType }) => {
+  ({
+    activeTimelineTab,
+    renderCellValue,
+    rowRenderers,
+    timelineId,
+    timelineType,
+    showTimeline,
+  }) => {
+    const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -164,6 +209,13 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       () =>
         [TimelineTabs.graph, TimelineTabs.notes, TimelineTabs.session].includes(activeTimelineTab),
       [activeTimelineTab]
+    );
+
+    const { conversations } = useConversationStore();
+
+    const hasTimelineConversationStarted = useMemo(
+      () => conversations[TIMELINE_CONVERSATION_TITLE].messages.length > 0,
+      [conversations]
     );
 
     /* Future developer -> why are we doing that
@@ -218,6 +270,29 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
+        {hasAssistantPrivilege && (
+          <HideShowContainer
+            $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
+            isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
+            data-test-subj={`timeline-tab-content-security-assistant`}
+            css={css`
+              overflow: hidden !important;
+            `}
+          >
+            {(activeTimelineTab === TimelineTabs.securityAssistant ||
+              hasTimelineConversationStarted) && (
+              <AssistantTab
+                isAssistantEnabled={isAssistantEnabled}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
+                timelineId={timelineId}
+                shouldRefocusPrompt={
+                  showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
+                }
+              />
+            )}
+          </HideShowContainer>
+        )}
       </>
     );
   }
@@ -255,6 +330,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
@@ -327,6 +403,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const setDiscoverAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.discover);
+  }, [setActiveTab]);
+
+  const setSecurityAssistantAsActiveTab = useCallback(() => {
+    setActiveTab(TimelineTabs.securityAssistant);
   }, [setActiveTab]);
 
   useEffect(() => {
@@ -418,6 +498,17 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           >
             <span>{i18n.DISCOVER_TAB}</span>
           </StyledEuiTab>
+          {hasAssistantPrivilege && (
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
+              onClick={setSecurityAssistantAsActiveTab}
+              disabled={timelineType === TimelineType.template}
+              isSelected={activeTab === TimelineTabs.securityAssistant}
+              key={TimelineTabs.securityAssistant}
+            >
+              <span>{i18n.SECURITY_ASSISTANT}</span>
+            </StyledEuiTab>
+          )}
         </EuiTabs>
       )}
 
@@ -428,6 +519,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         timelineId={timelineId}
         timelineType={timelineType}
         timelineDescription={timelineDescription}
+        showTimeline={showTimeline}
       />
     </>
   );

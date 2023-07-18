@@ -25,7 +25,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
 import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
@@ -100,6 +100,7 @@ export interface SuggestionPanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   getUserMessages: UserMessagesGetter;
+  nowProvider: DataPublicPluginStart['nowProvider'];
 }
 
 const PreviewRenderer = ({
@@ -184,7 +185,7 @@ const SuggestionPreview = ({
           onClick={onSelect}
           aria-current={!!selected}
           aria-label={preview.title}
-          element="div"
+          element="button"
           role="listitem"
         >
           {preview.expression || preview.error ? (
@@ -219,6 +220,7 @@ export function SuggestionPanel({
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
+  nowProvider,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -289,7 +291,8 @@ export function SuggestionPanel({
               visualizationMap[suggestion.visualizationId],
               datasourceMap,
               currentDatasourceStates,
-              frame
+              frame,
+              nowProvider
             ),
           }));
 
@@ -303,7 +306,8 @@ export function SuggestionPanel({
             visualizationMap[currentVisualization.activeId],
             datasourceMap,
             currentDatasourceStates,
-            frame
+            frame,
+            nowProvider
           )
         : undefined;
 
@@ -447,6 +451,7 @@ export function SuggestionPanel({
     <div className="lnsSuggestionPanel">
       <EuiAccordion
         id="lensSuggestionsPanel"
+        buttonProps={{ 'data-test-subj': 'lensSuggestionsPanelToggleButton' }}
         buttonContent={
           <EuiTitle size="xxs">
             <h3>
@@ -508,7 +513,8 @@ function getPreviewExpression(
   visualization: Visualization,
   datasources: Record<string, Datasource>,
   datasourceStates: DatasourceStates,
-  frame: FramePublicAPI
+  frame: FramePublicAPI,
+  nowProvider: DataPublicPluginStart['nowProvider']
 ) {
   if (!visualization.toPreviewExpression) {
     return null;
@@ -546,7 +552,8 @@ function getPreviewExpression(
       datasources,
       datasourceStates,
       frame.dataViews.indexPatterns,
-      frame.dateRange
+      frame.dateRange,
+      nowProvider.get()
     );
 
     return visualization.toPreviewExpression(
@@ -565,7 +572,8 @@ function preparePreviewExpression(
   visualization: Visualization,
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
-  framePublicAPI: FramePublicAPI
+  framePublicAPI: FramePublicAPI,
+  nowProvider: DataPublicPluginStart['nowProvider']
 ) {
   const suggestionDatasourceId = visualizableState.datasourceId;
   const suggestionDatasourceState = visualizableState.datasourceState;
@@ -585,7 +593,8 @@ function preparePreviewExpression(
     visualization,
     datasourceMap,
     datasourceStatesWithSuggestions,
-    framePublicAPI
+    framePublicAPI,
+    nowProvider
   );
 
   if (!expression) {

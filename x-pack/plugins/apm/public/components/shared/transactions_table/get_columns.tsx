@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,8 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { ValuesType } from 'utility-types';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   asMillisecondDuration,
   asPercent,
@@ -32,6 +34,14 @@ import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getLatencyColumnLabel } from './get_latency_column_label';
+import { ApmRoutes } from '../../routing/apm_route_config';
+import { unit } from '../../../utils/style';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../common/es_fields/apm';
+import { fieldValuePairToKql } from '../../../../common/utils/field_value_pair_to_kql';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -49,8 +59,11 @@ export function getColumns({
   transactionGroupDetailedStatistics,
   comparisonEnabled,
   shouldShowSparkPlots = true,
+  showAlertsColumn,
   offset,
   transactionOverflowCount,
+  link,
+  query,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
@@ -58,10 +71,66 @@ export function getColumns({
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
+  showAlertsColumn: boolean;
   offset?: string;
   transactionOverflowCount: number;
+  link: any;
+  query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
+    ...(showAlertsColumn
+      ? [
+          {
+            field: 'alertsCount',
+            sortable: true,
+            name: i18n.translate(
+              'xpack.apm.transactionsTableColumnName.alertsColumnLabel',
+              { defaultMessage: 'Active alerts' }
+            ),
+            width: `${unit * 6}px`,
+            render: (_, { alertsCount, name, transactionType }) => {
+              if (!alertsCount) {
+                return null;
+              }
+              return (
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.home.transactionsTableColumnName.tooltip.activeAlertsExplanation',
+                    {
+                      defaultMessage: 'Active alerts',
+                    }
+                  )}
+                >
+                  <EuiBadge
+                    iconType="warning"
+                    color="danger"
+                    href={link('/services/{serviceName}/alerts', {
+                      path: { serviceName },
+                      query: {
+                        ...query,
+                        kuery: [
+                          query.kuery,
+                          ...fieldValuePairToKql(TRANSACTION_NAME, name),
+                          ...fieldValuePairToKql(
+                            TRANSACTION_TYPE,
+                            transactionType
+                          ),
+                        ]
+                          .filter(Boolean)
+                          .join(' and '),
+                        alertStatus: ALERT_STATUS_ACTIVE,
+                      },
+                    })}
+                  >
+                    {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
+              );
+            },
+          } as EuiBasicTableColumn<ServiceTransactionGroupItem>,
+        ]
+      : []),
     {
       field: 'name',
       sortable: true,

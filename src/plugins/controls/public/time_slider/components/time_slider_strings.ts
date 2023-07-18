@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 
 export const TimeSliderStrings = {
   control: {
-    getClearSelection: () =>
-      i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
-        defaultMessage: 'Clear time selection',
-      }),
     getPinStart: () =>
       i18n.translate('controls.timeSlider.settings.pinStart', {
         defaultMessage: 'Pin start',

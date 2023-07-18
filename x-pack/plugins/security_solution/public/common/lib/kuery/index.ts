@@ -16,7 +16,8 @@ import { flow, get, isEmpty, isString } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderType, EXISTS_OPERATOR } from '../../../../common/types';
+import { DataProviderType } from '../../../../common/api/timeline';
+import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =
   | string

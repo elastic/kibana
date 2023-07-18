@@ -1,4 +1,4 @@
-title: Create Composite SLO request
+title: Create composite SLO request
 description: >
   The create Composite SLO API request body. The provided source SLOs must exists and their budgeting method and time window must match the one from the composite SLO.
 type: object
@@ -18,14 +18,12 @@ properties:
     description: A name for the composite SLO.
     type: string
   timeWindow:
-    $ref: 'time_window_rolling.yaml'
+    $ref: "time_window.yaml"
   budgetingMethod:
-    $ref: 'budgeting_method.yaml'
+    $ref: "budgeting_method.yaml"
   compositeMethod:
-    $ref: 'composite_method.yaml'
+    $ref: "composite_method.yaml"
   objective:
-    $ref: 'composite_objective.yaml'
+    $ref: "objective.yaml"
   sources:
-    oneOf:
-      - $ref: 'weighted_composite_sources.yaml'
-  
+    - $ref: "weighted_composite_sources.yaml"

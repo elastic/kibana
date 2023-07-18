@@ -7,8 +7,15 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import { NewChatById } from '@kbn/elastic-assistant';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { DocumentStatus } from './status';
+import { useAssistant } from '../hooks/use_assistant';
+import {
+  ALERT_SUMMARY_CONVERSATION_ID,
+  EVENT_SUMMARY_CONVERSATION_ID,
+} from '../../../common/components/event_details/translations';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
 import { DOCUMENT_DETAILS } from './translations';
@@ -26,23 +33,52 @@ export const HeaderTitle: FC = memo(() => {
   const { isAlert, ruleName, timestamp, alertUrl } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
+  const { showAssistant, promptContextId } = useAssistant({
+    dataFormattedForFieldBrowser,
+    isAlert,
+  });
 
   return (
     <>
-      <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+      <EuiTitle size="s">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <h4>{isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}</h4>
+            <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+              {isAlert && !isEmpty(ruleName) ? ruleName : DOCUMENT_DETAILS}
+            </h4>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isAlert && alertUrl && <ShareButton alertUrl={alertUrl} />}
+            <EuiFlexGroup alignItems="center">
+              {isAlert && alertUrl && (
+                <EuiFlexItem>
+                  <ShareButton alertUrl={alertUrl} />
+                </EuiFlexItem>
+              )}
+              {showAssistant && (
+                <EuiFlexItem grow={false}>
+                  <NewChatById
+                    conversationId={
+                      isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
+                    }
+                    promptContextId={promptContextId}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTitle>
-      <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <DocumentStatus />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem grow={false}>
           <DocumentSeverity />
         </EuiFlexItem>

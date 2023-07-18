@@ -11,6 +11,10 @@ import moment from 'moment';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
 
+Cypress.Commands.add('loginAsSuperUser', () => {
+  return cy.loginAs({ username: 'elastic', password: 'changeme' });
+});
+
 Cypress.Commands.add('loginAsViewerUser', () => {
   return cy.loginAs({ username: ApmUsername.viewerUser, password: 'changeme' });
 });
@@ -22,6 +26,13 @@ Cypress.Commands.add('loginAsEditorUser', () => {
 Cypress.Commands.add('loginAsMonitorUser', () => {
   return cy.loginAs({
     username: ApmUsername.apmMonitorClusterAndIndices,
+    password: 'changeme',
+  });
+});
+
+Cypress.Commands.add('loginAsApmManageOwnAndCreateAgentKeys', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmManageOwnAndCreateAgentKeys,
     password: 'changeme',
   });
 });
@@ -115,7 +126,7 @@ Cypress.Commands.add(
     cy.request({
       log: false,
       method: 'POST',
-      url: `${kibanaUrl}/api/kibana/settings`,
+      url: `${kibanaUrl}/internal/kibana/settings`,
       body: { changes: settings },
       headers: {
         'kbn-xsrf': 'e2e_test',

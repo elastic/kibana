@@ -177,6 +177,20 @@
           },
           {
             "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.detectTimestamp",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "detectTimestamp",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
             "id": "def-public.TextBasedLanguagesEditorProps.errors",
             "type": "Array",
             "tags": [],

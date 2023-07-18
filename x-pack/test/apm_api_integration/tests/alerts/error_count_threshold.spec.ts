@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { errorCountMessage } from '@kbn/apm-plugin/common/rules/default_action_message';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
@@ -35,6 +36,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
     let ruleId: string;
+    let alertId: string;
+    let startedAt: string;
     let actionId: string | undefined;
 
     const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
@@ -106,6 +109,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               'service.environment',
               'transaction.name',
               'error.grouping_key',
+              'error.grouping_name',
             ],
           },
           actions: [
@@ -117,7 +121,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   {
                     message: `${errorCountMessage}
 - Transaction name: {{context.transactionName}}
-- Error grouping key: {{context.errorGroupingKey}}`,
+- Error grouping key: {{context.errorGroupingKey}}
+- Error grouping name: {{context.errorGroupingName}}`,
                   },
                 ],
               },
@@ -142,35 +147,45 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(executionStatus.status).to.be('active');
       });
 
-      it('returns correct message', async () => {
-        const resp = await waitForDocumentInIndex<{ message: string }>({
-          es,
-          indexName: ALERT_ACTION_INDEX_NAME,
-        });
-
-        expect(resp.hits.hits[0]._source?.message).eql(
-          `Apm error count alert is firing because of the following conditions:
-
-- Service name: opbeans-java
-- Environment: production
-- Threshold: 1
-- Triggered value: 15 errors over the last 1 hr
-- Transaction name: tx-java
-- Error grouping key: ${errorGroupingKey}`
-        );
-      });
-
       it('indexes alert document with all group-by fields', async () => {
         const resp = await waitForAlertInIndex({
           es,
           indexName: APM_ALERTS_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
+        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
         expect(resp.hits.hits[0]._source).property('service.environment', 'production');
         expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
         expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
+        expect(resp.hits.hits[0]._source).property('error.grouping_name', errorMessage);
+      });
+
+      it('returns correct message', async () => {
+        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
+        const resp = await waitForDocumentInIndex<{ message: string }>({
+          es,
+          indexName: ALERT_ACTION_INDEX_NAME,
+        });
+
+        expect(resp.hits.hits[0]._source?.message).eql(
+          `Error count is 15 in the last 1 hr for service: opbeans-java, env: production, name: tx-java, error key: ${errorGroupingKey}, error name: ${errorMessage}. Alert when > 1.
+
+Apm error count is active with the following conditions:
+
+- Service name: opbeans-java
+- Environment: production
+- Error count: 15 errors over the last 1 hr
+- Threshold: 1
+
+[View alert details](http://mockedpublicbaseurl/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all))
+
+- Transaction name: tx-java
+- Error grouping key: ${errorGroupingKey}
+- Error grouping name: ${errorMessage}`
+        );
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {

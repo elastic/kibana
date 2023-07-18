@@ -54,8 +54,8 @@ function getNormalizedValueByRange(
   if (range === 'percent') {
     result = (100 * (value - minMax.min)) / (minMax.max - minMax.min);
 
-    // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-    if (Number.isNaN(result)) {
+    // a division by zero safeguard is required if the range above has equal boundaries
+    if (!Number.isFinite(result)) {
       return rangeMin;
     }
   }

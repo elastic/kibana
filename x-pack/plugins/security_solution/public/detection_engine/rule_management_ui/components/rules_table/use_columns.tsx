@@ -19,7 +19,7 @@ import {
 import type {
   DurationMetric,
   RuleExecutionSummary,
-} from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
@@ -45,7 +45,7 @@ import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
-import { MlRuleWarningPopover } from './ml_rule_warning_popover';
+import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -191,7 +191,7 @@ const TAGS_COLUMN: TableColumn = {
   name: null,
   align: 'center',
   render: (tags: Rule['tags']) => {
-    if (tags.length === 0) {
+    if (tags == null || tags.length === 0) {
       return null;
     }
 

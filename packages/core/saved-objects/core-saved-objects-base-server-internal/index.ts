@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { DEFAULT_INDEX_TYPES_MAP } from './src/constants';
 export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
 export {
   getProperty,

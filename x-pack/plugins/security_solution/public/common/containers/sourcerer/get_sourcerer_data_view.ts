@@ -7,7 +7,7 @@
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
-import type { SourcererDataView } from '../../store/sourcerer/model';
+import type { SourcererDataView, RunTimeMappings } from '../../store/sourcerer/model';
 import { getDataViewStateFromIndexFields } from '../source/use_data_view';
 
 export const getSourcererDataView = async (
@@ -15,8 +15,9 @@ export const getSourcererDataView = async (
   dataViewsService: DataViewsContract,
   refreshFields = false
 ): Promise<SourcererDataView> => {
-  const dataViewData = await dataViewsService.get(dataViewId, true, refreshFields);
-  const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
+  const dataView = await dataViewsService.get(dataViewId, true, refreshFields);
+  const dataViewData = dataView.toSpec();
+  const defaultPatternsList = ensurePatternFormat(dataView.getIndexPattern().split(','));
 
   // typeguard used to assert that pattern is a string, otherwise
   // typescript expects patternList to be (string | null)[]
@@ -45,15 +46,13 @@ export const getSourcererDataView = async (
   return {
     loading: false,
     id: dataViewData.id ?? '',
-    title: dataViewData.getIndexPattern(),
-    indexFields: dataViewData.fields,
+    title: dataView.getIndexPattern(),
+    indexFields: dataView.fields,
     fields: dataViewData.fields,
     patternList,
     dataView: dataViewData,
-    browserFields: getDataViewStateFromIndexFields(
-      dataViewData.id ?? '',
-      dataViewData.fields != null ? dataViewData.fields : []
-    ).browserFields,
-    runtimeMappings: dataViewData.getRuntimeMappings(),
+    browserFields: getDataViewStateFromIndexFields(dataViewData.id ?? '', dataViewData.fields)
+      .browserFields,
+    runtimeMappings: dataViewData.runtimeFieldMap as RunTimeMappings,
   };
 };

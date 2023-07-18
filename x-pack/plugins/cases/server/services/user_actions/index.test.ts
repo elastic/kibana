@@ -15,11 +15,8 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import type {
-  CaseAttributes,
-  CaseUserActionAttributesWithoutConnectorId,
-} from '../../../common/api';
-import { Actions, ActionTypes, CaseSeverity, CaseStatuses } from '../../../common/api';
+import type { CaseAttributes } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 import { createCaseSavedObjectResponse, createSOFindResponse } from '../test_utils';
@@ -43,6 +40,8 @@ import {
   pushConnectorUserAction,
 } from './test_utils';
 import { comment } from '../../mocks';
+import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -102,13 +101,13 @@ describe('CaseUserActionService', () => {
           await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
-            type: ActionTypes.create_case,
+            type: UserActionTypes.create_case,
           });
 
           expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
             'cases-user-actions',
             {
-              action: Actions.create,
+              action: UserActionActions.create,
               created_at: '2022-01-09T22:00:00.000Z',
               created_by: {
                 email: 'elastic@elastic.co',
@@ -154,7 +153,7 @@ describe('CaseUserActionService', () => {
           await service.creator.createUserAction({
             ...commonArgs,
             payload: casePayload,
-            type: ActionTypes.create_case,
+            type: UserActionTypes.create_case,
           });
 
           expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -188,13 +187,13 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
-              type: ActionTypes.status,
+              type: UserActionTypes.status,
             });
 
             expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
               'cases-user-actions',
               {
-                action: Actions.update,
+                action: UserActionActions.update,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -213,7 +212,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { status: CaseStatuses.closed },
-              type: ActionTypes.status,
+              type: UserActionTypes.status,
             });
 
             expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -248,13 +247,13 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
-              type: ActionTypes.severity,
+              type: UserActionTypes.severity,
             });
 
             expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
               'cases-user-actions',
               {
-                action: Actions.update,
+                action: UserActionActions.update,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -273,7 +272,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { severity: CaseSeverity.MEDIUM },
-              type: ActionTypes.severity,
+              type: UserActionTypes.severity,
             });
 
             expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -308,13 +307,13 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
-              type: ActionTypes.pushed,
+              type: UserActionTypes.pushed,
             });
 
             expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
               'cases-user-actions',
               {
-                action: Actions.push_to_service,
+                action: UserActionActions.push_to_service,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -352,7 +351,7 @@ describe('CaseUserActionService', () => {
             await service.creator.createUserAction({
               ...commonArgs,
               payload: { externalService },
-              type: ActionTypes.pushed,
+              type: UserActionTypes.pushed,
             });
 
             expect(mockAuditLogger.log).toBeCalledTimes(1);
@@ -383,62 +382,64 @@ describe('CaseUserActionService', () => {
         });
 
         describe('comment', () => {
-          it.each([[Actions.create], [Actions.delete], [Actions.update]])(
-            'creates a comment user action of action: %s',
-            async (action) => {
-              await service.creator.createUserAction({
-                ...commonArgs,
-                type: ActionTypes.comment,
-                action,
-                attachmentId: 'test-id',
-                payload: { attachment: comment },
-              });
+          it.each([
+            [UserActionActions.create],
+            [UserActionActions.delete],
+            [UserActionActions.update],
+          ])('creates a comment user action of action: %s', async (action) => {
+            await service.creator.createUserAction({
+              ...commonArgs,
+              type: UserActionTypes.comment,
+              action,
+              attachmentId: 'test-id',
+              payload: { attachment: comment },
+            });
 
-              expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-                'cases-user-actions',
-                {
-                  action,
-                  created_at: '2022-01-09T22:00:00.000Z',
-                  created_by: {
-                    email: 'elastic@elastic.co',
-                    full_name: 'Elastic User',
-                    username: 'elastic',
-                  },
-                  type: 'comment',
-                  owner: 'securitySolution',
-                  payload: {
-                    comment: {
-                      comment: 'a comment',
-                      type: 'user',
-                      owner: 'securitySolution',
-                    },
+            expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+              'cases-user-actions',
+              {
+                action,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'comment',
+                owner: 'securitySolution',
+                payload: {
+                  comment: {
+                    comment: 'a comment',
+                    type: 'user',
+                    owner: 'securitySolution',
                   },
                 },
-                {
-                  references: [
-                    { id: '123', name: 'associated-cases', type: 'cases' },
-                    { id: 'test-id', name: 'associated-cases-comments', type: 'cases-comments' },
-                  ],
-                }
-              );
-            }
-          );
+              },
+              {
+                references: [
+                  { id: '123', name: 'associated-cases', type: 'cases' },
+                  { id: 'test-id', name: 'associated-cases-comments', type: 'cases-comments' },
+                ],
+              }
+            );
+          });
 
-          it.each([[Actions.create], [Actions.delete], [Actions.update]])(
-            'logs a comment user action of action: %s',
-            async (action) => {
-              await service.creator.createUserAction({
-                ...commonArgs,
-                type: ActionTypes.comment,
-                action,
-                attachmentId: 'test-id',
-                payload: { attachment: comment },
-              });
+          it.each([
+            [UserActionActions.create],
+            [UserActionActions.delete],
+            [UserActionActions.update],
+          ])('logs a comment user action of action: %s', async (action) => {
+            await service.creator.createUserAction({
+              ...commonArgs,
+              type: UserActionTypes.comment,
+              action,
+              attachmentId: 'test-id',
+              payload: { attachment: comment },
+            });
 
-              expect(mockAuditLogger.log).toBeCalledTimes(1);
-              expect(mockAuditLogger.log.mock.calls[0]).toMatchSnapshot();
-            }
-          );
+            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log.mock.calls[0]).toMatchSnapshot();
+          });
         });
       });
     });
@@ -512,7 +513,7 @@ describe('CaseUserActionService', () => {
           [
             {
               attributes: {
-                action: Actions.update,
+                action: UserActionActions.update,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -528,7 +529,7 @@ describe('CaseUserActionService', () => {
             },
             {
               attributes: {
-                action: Actions.update,
+                action: UserActionActions.update,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -544,7 +545,7 @@ describe('CaseUserActionService', () => {
             },
             {
               attributes: {
-                action: Actions.update,
+                action: UserActionActions.update,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -577,7 +578,7 @@ describe('CaseUserActionService', () => {
             },
             {
               attributes: {
-                action: Actions.update,
+                action: UserActionActions.update,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -625,7 +626,7 @@ describe('CaseUserActionService', () => {
             },
             {
               attributes: {
-                action: Actions.update,
+                action: UserActionActions.update,
                 created_at: '2022-01-09T22:00:00.000Z',
                 created_by: {
                   email: 'elastic@elastic.co',
@@ -1654,9 +1655,7 @@ describe('CaseUserActionService', () => {
         });
 
         describe('getConnectorFieldsBeforeLatestPush', () => {
-          const getAggregations = (
-            userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
-          ) => {
+          const getAggregations = (userAction: SavedObject<CaseUserActionWithoutReferenceIds>) => {
             const connectors = set({}, 'servicenow.mostRecent.hits.hits', [userAction]);
 
             const aggregations = set({}, 'references.connectors.reverse.ids.buckets', connectors);
@@ -1861,8 +1860,8 @@ describe('CaseUserActionService', () => {
 
         describe('getCaseConnectorInformation', () => {
           const getAggregations = (
-            userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
-            pushUserAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
+            userAction: SavedObject<CaseUserActionWithoutReferenceIds>,
+            pushUserAction: SavedObject<CaseUserActionWithoutReferenceIds>
           ) => {
             const changeConnector = set({}, 'mostRecent.hits.hits', [userAction]);
             const createCase = set({}, 'mostRecent.hits.hits', []);

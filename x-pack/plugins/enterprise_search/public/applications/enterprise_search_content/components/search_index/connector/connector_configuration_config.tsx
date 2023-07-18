@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -23,17 +24,21 @@ import { i18n } from '@kbn/i18n';
 import { IndexViewLogic } from '../index_view_logic';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
-import { ConnectorConfigurationLogic } from './connector_configuration_logic';
+import { ConfigEntryView, ConnectorConfigurationLogic } from './connector_configuration_logic';
+
+function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; title: string } {
+  return {
+    description: entry.sensitive && !!entry.value ? '********' : String(entry.value) || '--',
+    title: entry.label,
+  };
+}
 
 export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
   const { connectorError } = useValues(IndexViewLogic);
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 
-  const displayList = configView.map(({ label, sensitive, value }) => ({
-    description: sensitive && !!value ? '********' : value || '--',
-    title: label,
-  }));
+  const uncategorizedDisplayList = configView.unCategorizedItems.map(entryToDisplaylistItem);
 
   return (
     <EuiFlexGroup direction="column">
@@ -42,11 +47,30 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
         {isEditing ? (
           <ConnectorConfigurationForm />
         ) : (
-          displayList.length > 0 && (
+          uncategorizedDisplayList.length > 0 && (
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <EuiDescriptionList listItems={displayList} className="eui-textBreakWord" />
+                <EuiDescriptionList
+                  listItems={uncategorizedDisplayList}
+                  className="eui-textBreakWord"
+                />
               </EuiFlexItem>
+              {configView.categories.length > 0 &&
+                configView.categories.map((category) => (
+                  <EuiFlexGroup direction="column" key={category.key}>
+                    <EuiFlexItem>
+                      <EuiTitle size="s">
+                        <h3>{category.label}</h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiDescriptionList
+                        listItems={category.configEntries.map(entryToDisplaylistItem)}
+                        className="eui-textBreakWord"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ))}
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
