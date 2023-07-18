@@ -10,7 +10,12 @@ import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import {
+  cleanKibana,
+  deleteAlertsAndRules,
+  waitForPageToBeLoaded,
+  waitForTableToLoad,
+} from '../../../tasks/common';
 import {
   ANOMALIES_TABLE,
   ANOMALIES_TABLE_ROWS,
@@ -313,11 +318,15 @@ describe('Entity Analytics Dashboard', () => {
     beforeEach(() => {
       login();
       visit(ENTITY_ANALYTICS_URL);
+      waitForPageToBeLoaded();
     });
 
     it('renders table with pagination', () => {
       cy.get(ANOMALIES_TABLE).should('be.visible');
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+      waitForTableToLoad();
+
+      // Increase default timeout because anomalies table takes a while to load
+      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 20000 }).should('have.length', 10);
 
       // navigates to next page
       cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
