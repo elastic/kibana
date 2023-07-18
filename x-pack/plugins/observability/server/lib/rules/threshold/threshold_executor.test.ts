@@ -1394,7 +1394,7 @@ describe.skip('The metric threshold alert type', () => {
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertDetailsUrl: '',
         alertState: 'NO DATA',
         group: '*',
         groupByKeys: undefined,
