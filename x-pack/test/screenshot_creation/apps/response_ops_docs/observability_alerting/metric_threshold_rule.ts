@@ -35,6 +35,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+      await testSubjects.click('messageAddVariableButton');
+      await commonScreenshots.takeScreenshot(
+        'metrics-threshold-alert-message',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
   });
 }

@@ -62,7 +62,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
             id: emailConnectorId,
             params: {
               level: 'info',
-              message: '{{rule.name}} - {{context.group}} is in a state of {{context.alertState}}',
+              subject: '{{rule.name}} - {{context.group}} is in a state of {{context.alertState}}',
+              message: 'Reason: {{context.reason}}',
             },
           },
         ],
