@@ -85,7 +85,8 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
       const placeholder = i18n.translate(
         'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
         {
-          defaultMessage: `Enter a phrase to test. Use ${this.maskToken} as a placeholder for the missing words.`,
+          defaultMessage: `Enter a phrase to test. Use {maskToken} as a placeholder for the missing words.`,
+          values: { maskToken: this.maskToken },
         }
       );
 
