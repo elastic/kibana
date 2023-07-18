@@ -30,7 +30,7 @@ import {
   TaskRunStat,
   SummarizedTaskRunStat,
 } from './task_run_statistics';
-import { AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { FillPoolResult } from '../lib/fill_pool';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { configSchema } from '../config';
