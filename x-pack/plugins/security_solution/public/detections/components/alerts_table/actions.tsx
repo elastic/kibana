@@ -41,9 +41,9 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import type { TimelineResult } from '../../../../common/types/timeline/api';
+import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,

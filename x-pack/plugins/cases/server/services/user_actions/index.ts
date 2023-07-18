@@ -13,12 +13,9 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import type { CaseUserActionDeprecatedResponse } from '../../../common/api';
-import {
-  decodeOrThrow,
-  ActionTypes,
-  CaseUserActionDeprecatedResponseRt,
-} from '../../../common/api';
+import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
+import { UserActionTypes } from '../../../common/types/domain';
+import { decodeOrThrow } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -49,6 +46,7 @@ import type {
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
 import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
+import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
@@ -81,7 +79,7 @@ export class CaseUserActionService {
       }
 
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case],
+        filters: [UserActionTypes.connector, UserActionTypes.create_case],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -249,10 +247,10 @@ export class CaseUserActionService {
 
       const connectorsFilter = buildFilter({
         filters: [
-          ActionTypes.comment,
-          ActionTypes.description,
-          ActionTypes.tags,
-          ActionTypes.title,
+          UserActionTypes.comment,
+          UserActionTypes.description,
+          UserActionTypes.tags,
+          UserActionTypes.title,
         ],
         field: 'type',
         operator: 'or',
@@ -298,7 +296,7 @@ export class CaseUserActionService {
       this.context.log.debug(`Attempting to find connector information for case id: ${caseId}`);
 
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case, ActionTypes.pushed],
+        filters: [UserActionTypes.connector, UserActionTypes.create_case, UserActionTypes.pushed],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
@@ -449,7 +447,7 @@ export class CaseUserActionService {
                             changeConnector: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.connector,
+                                  UserActionTypes.connector,
                               },
                             },
                             // If the case was initialized with a connector, the fields could exist in the create_case
@@ -457,14 +455,14 @@ export class CaseUserActionService {
                             createCase: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.create_case,
+                                  UserActionTypes.create_case,
                               },
                             },
                             // Also grab the most recent push occurrence for the connector
                             pushInfo: {
                               term: {
                                 [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.type`]:
-                                  ActionTypes.pushed,
+                                  UserActionTypes.pushed,
                               },
                             },
                           },
@@ -590,7 +588,7 @@ export class CaseUserActionService {
     try {
       this.context.log.debug(`Attempting to count connectors for case id ${caseId}`);
       const connectorsFilter = buildFilter({
-        filters: [ActionTypes.connector, ActionTypes.create_case],
+        filters: [UserActionTypes.connector, UserActionTypes.create_case],
         field: 'type',
         operator: 'or',
         type: CASE_USER_ACTION_SAVED_OBJECT,
