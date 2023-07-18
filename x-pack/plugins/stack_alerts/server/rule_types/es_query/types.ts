@@ -27,6 +27,7 @@ export type OnlyEsqlQueryRuleParams = Omit<
   'esQuery' | 'index' | 'searchConfiguration'
 > & {
   searchType: 'esqlQuery';
+  timeField: string;
 };
 
 export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<

@@ -85,6 +85,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     expect(result.getByTestId('queryEsqlEditor')).toBeInTheDocument();
+    expect(result.getByTestId('timeFieldSelect')).toBeInTheDocument();
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });

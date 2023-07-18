@@ -77,6 +77,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsqlQueryRuleParams,
         spacePrefix,
+        publicBaseUrl,
         services: {
           share,
           scopedClusterClient,

@@ -285,9 +285,23 @@ describe('expression params validation', () => {
       timeWindowSize: 1,
       timeWindowUnit: 's',
       threshold: [0],
+      timeField: '@timestamp',
       searchType: SearchType.esqlQuery,
     } as EsQueryRuleParams<SearchType.esqlQuery>;
     expect(validateExpression(initialParams).errors.esqlQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esqlQuery[0]).toBe(`ESQL query is required.`);
+  });
+
+  test('if esqlQuery timeField property is not defined should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
   });
 });

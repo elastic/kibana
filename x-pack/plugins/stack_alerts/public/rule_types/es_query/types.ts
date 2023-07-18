@@ -60,6 +60,7 @@ export interface OnlySearchSourceRuleParams {
 export interface OnlyEsqlQueryRuleParams {
   searchType?: 'esqlQuery';
   esqlQuery: AggregateQuery;
+  timeField: string;
 }
 
 export type DataViewOption = EuiComboBoxOptionOption<string>;
