@@ -131,6 +131,426 @@ Object {
 }
 `;
 
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.environment' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "production",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.environment' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.environment": Object {
+    "terms": Object {
+      "field": "service.environment",
+    },
+  },
+  "slo.budgetingMethod": Object {
+    "terms": Object {
+      "field": "slo.budgetingMethod",
+    },
+  },
+  "slo.description": Object {
+    "terms": Object {
+      "field": "slo.description",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.indicator.type": Object {
+    "terms": Object {
+      "field": "slo.indicator.type",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.name": Object {
+    "terms": Object {
+      "field": "slo.name",
+    },
+  },
+  "slo.objective.target": Object {
+    "terms": Object {
+      "field": "slo.objective.target",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "slo.tags": Object {
+    "terms": Object {
+      "field": "slo.tags",
+    },
+  },
+  "slo.timeWindow.duration": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.duration",
+    },
+  },
+  "slo.timeWindow.type": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.type",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.name": "my-service",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.name": Object {
+    "terms": Object {
+      "field": "service.name",
+    },
+  },
+  "slo.budgetingMethod": Object {
+    "terms": Object {
+      "field": "slo.budgetingMethod",
+    },
+  },
+  "slo.description": Object {
+    "terms": Object {
+      "field": "slo.description",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.indicator.type": Object {
+    "terms": Object {
+      "field": "slo.indicator.type",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.name": Object {
+    "terms": Object {
+      "field": "slo.name",
+    },
+  },
+  "slo.objective.target": Object {
+    "terms": Object {
+      "field": "slo.objective.target",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "slo.tags": Object {
+    "terms": Object {
+      "field": "slo.tags",
+    },
+  },
+  "slo.timeWindow.duration": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.duration",
+    },
+  },
+  "slo.timeWindow.type": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.type",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "GET /foo",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "slo.budgetingMethod": Object {
+    "terms": Object {
+      "field": "slo.budgetingMethod",
+    },
+  },
+  "slo.description": Object {
+    "terms": Object {
+      "field": "slo.description",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.indicator.type": Object {
+    "terms": Object {
+      "field": "slo.indicator.type",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.name": Object {
+    "terms": Object {
+      "field": "slo.name",
+    },
+  },
+  "slo.objective.target": Object {
+    "terms": Object {
+      "field": "slo.objective.target",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "slo.tags": Object {
+    "terms": Object {
+      "field": "slo.tags",
+    },
+  },
+  "slo.timeWindow.duration": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.duration",
+    },
+  },
+  "slo.timeWindow.type": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.type",
+    },
+  },
+  "transaction.name": Object {
+    "terms": Object {
+      "field": "transaction.name",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.type' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "request",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.type' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "slo.budgetingMethod": Object {
+    "terms": Object {
+      "field": "slo.budgetingMethod",
+    },
+  },
+  "slo.description": Object {
+    "terms": Object {
+      "field": "slo.description",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.indicator.type": Object {
+    "terms": Object {
+      "field": "slo.indicator.type",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.name": Object {
+    "terms": Object {
+      "field": "slo.name",
+    },
+  },
+  "slo.objective.target": Object {
+    "terms": Object {
+      "field": "slo.objective.target",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "slo.tags": Object {
+    "terms": Object {
+      "field": "slo.tags",
+    },
+  },
+  "slo.timeWindow.duration": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.duration",
+    },
+  },
+  "slo.timeWindow.type": Object {
+    "terms": Object {
+      "field": "slo.timeWindow.type",
+    },
+  },
+  "transaction.type": Object {
+    "terms": Object {
+      "field": "transaction.type",
+    },
+  },
+}
+`;
+
 exports[`APM Transaction Error Rate Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
@@ -179,9 +599,24 @@ Object {
           "fixed_interval": "2m",
         },
       },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
       "slo.budgetingMethod": Object {
         "terms": Object {
           "field": "slo.budgetingMethod",
+        },
+      },
+      "slo.description": Object {
+        "terms": Object {
+          "field": "slo.description",
         },
       },
       "slo.id": Object {
@@ -189,9 +624,19 @@ Object {
           "field": "slo.id",
         },
       },
+      "slo.indicator.type": Object {
+        "terms": Object {
+          "field": "slo.indicator.type",
+        },
+      },
       "slo.instanceId": Object {
         "terms": Object {
           "field": "slo.instanceId",
+        },
+      },
+      "slo.name": Object {
+        "terms": Object {
+          "field": "slo.name",
         },
       },
       "slo.objective.sliceDurationInSeconds": Object {
@@ -209,6 +654,11 @@ Object {
           "field": "slo.revision",
         },
       },
+      "slo.tags": Object {
+        "terms": Object {
+          "field": "slo.tags",
+        },
+      },
       "slo.timeWindow.duration": Object {
         "terms": Object {
           "field": "slo.timeWindow.duration",
@@ -217,6 +667,16 @@ Object {
       "slo.timeWindow.type": Object {
         "terms": Object {
           "field": "slo.timeWindow.type",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
         },
       },
     },
@@ -279,15 +739,33 @@ Object {
         },
         "type": "keyword",
       },
+      "slo.description": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
       "slo.id": Object {
         "script": Object {
           "source": Any<String>,
         },
         "type": "keyword",
       },
+      "slo.indicator.type": Object {
+        "script": Object {
+          "source": "emit('sli.apm.transactionErrorRate')",
+        },
+        "type": "keyword",
+      },
       "slo.instanceId": Object {
         "script": Object {
           "source": "emit('*')",
+        },
+        "type": "keyword",
+      },
+      "slo.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -308,6 +786,12 @@ Object {
           "source": "emit(1)",
         },
         "type": "long",
+      },
+      "slo.tags": Object {
+        "script": Object {
+          "source": "emit('critical,k8s')",
+        },
+        "type": "keyword",
       },
       "slo.timeWindow.duration": Object {
         "script": Object {
@@ -372,9 +856,24 @@ Object {
           "fixed_interval": "1m",
         },
       },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
       "slo.budgetingMethod": Object {
         "terms": Object {
           "field": "slo.budgetingMethod",
+        },
+      },
+      "slo.description": Object {
+        "terms": Object {
+          "field": "slo.description",
         },
       },
       "slo.id": Object {
@@ -382,9 +881,19 @@ Object {
           "field": "slo.id",
         },
       },
+      "slo.indicator.type": Object {
+        "terms": Object {
+          "field": "slo.indicator.type",
+        },
+      },
       "slo.instanceId": Object {
         "terms": Object {
           "field": "slo.instanceId",
+        },
+      },
+      "slo.name": Object {
+        "terms": Object {
+          "field": "slo.name",
         },
       },
       "slo.objective.target": Object {
@@ -397,6 +906,11 @@ Object {
           "field": "slo.revision",
         },
       },
+      "slo.tags": Object {
+        "terms": Object {
+          "field": "slo.tags",
+        },
+      },
       "slo.timeWindow.duration": Object {
         "terms": Object {
           "field": "slo.timeWindow.duration",
@@ -405,6 +919,16 @@ Object {
       "slo.timeWindow.type": Object {
         "terms": Object {
           "field": "slo.timeWindow.type",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
         },
       },
     },
@@ -467,15 +991,33 @@ Object {
         },
         "type": "keyword",
       },
+      "slo.description": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
       "slo.id": Object {
         "script": Object {
           "source": Any<String>,
         },
         "type": "keyword",
       },
+      "slo.indicator.type": Object {
+        "script": Object {
+          "source": "emit('sli.apm.transactionErrorRate')",
+        },
+        "type": "keyword",
+      },
       "slo.instanceId": Object {
         "script": Object {
           "source": "emit('*')",
+        },
+        "type": "keyword",
+      },
+      "slo.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
@@ -490,6 +1032,12 @@ Object {
           "source": "emit(1)",
         },
         "type": "long",
+      },
+      "slo.tags": Object {
+        "script": Object {
+          "source": "emit('critical,k8s')",
+        },
+        "type": "keyword",
       },
       "slo.timeWindow.duration": Object {
         "script": Object {
