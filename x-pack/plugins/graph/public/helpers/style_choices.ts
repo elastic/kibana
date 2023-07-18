@@ -246,10 +246,10 @@ export const urlTemplateIconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.fileText', { defaultMessage: 'File' }),
   },
   {
-    id: 'google',
+    id: 'search',
     prevName: 'fa-google',
     package: 'eui',
-    label: i18n.translate('xpack.graph.icon.google', { defaultMessage: 'Google' }),
+    label: i18n.translate('xpack.graph.icon.search', { defaultMessage: 'Search' }),
   },
   {
     id: 'eye',
