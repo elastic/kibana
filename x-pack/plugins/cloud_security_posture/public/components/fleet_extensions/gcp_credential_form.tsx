@@ -198,7 +198,7 @@ const GcpInputVarFields = ({
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
 }) => {
-  const [credentialOption, setCredentialOption] = useState('Credentials JSON');
+  const [credentialOption, setCredentialOption] = useState('Credentials File');
   const targetFieldName = (id: string) => {
     return fields.find((element) => element.id === id);
   };
@@ -226,9 +226,9 @@ const GcpInputVarFields = ({
         {credentialOption === 'Credentials File' && (
           <EuiFormRow fullWidth label={CredentialFileText}>
             <EuiFieldText
-              id={fields[1].id}
+              id={targetFieldName('credentials_file')!.id}
               fullWidth
-              value={fields[1].value || ''}
+              value={targetFieldName('credentials_file')!.value || ''}
               onChange={(event) =>
                 onChange(targetFieldName('credentials_file')!.id, event.target.value)
               }
@@ -238,9 +238,9 @@ const GcpInputVarFields = ({
         {credentialOption === 'Credentials JSON' && (
           <EuiFormRow fullWidth label={CredentialJSONText}>
             <EuiFieldText
-              id={fields[2].id}
+              id={targetFieldName('credentials_json')!.id}
               fullWidth
-              value={fields[2].value || ''}
+              value={targetFieldName('credentials_json')!.value || ''}
               onChange={(event) =>
                 onChange(targetFieldName('credentials_json')!.id, event.target.value)
               }
