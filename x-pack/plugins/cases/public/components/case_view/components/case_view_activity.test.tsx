@@ -451,7 +451,8 @@ describe('Case View Page activity tab', () => {
   });
 
   describe('Case users', () => {
-    describe('Participants', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152204
+    describe.skip('Participants', () => {
       it('should render the participants correctly', async () => {
         appMockRender = createAppMockRenderer();
         appMockRender.render(<CaseViewActivity {...caseProps} />);
