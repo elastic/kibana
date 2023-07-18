@@ -90,16 +90,16 @@ describe('<DefaultNavigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId('nav-item-group1.item1')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.item2')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A.item1')).toBeVisible();
-      expect(await findByTestId('nav-item-group1.group1A.group1A_1')).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.item1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.item2/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.item1/)).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.group1A_1/)).toBeVisible();
 
       // Click the last group to expand and show the last depth
-      (await findByTestId('nav-item-group1.group1A.group1A_1')).click();
+      (await findByTestId(/nav-item-group1.group1A.group1A_1/)).click();
 
-      expect(await findByTestId('nav-item-group1.group1A.group1A_1.item1')).toBeVisible();
+      expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -556,10 +556,10 @@ describe('<DefaultNavigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
-      expect(await findByTestId('nav-item-group1.item2')).not.toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item2/)).not.toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
     });
@@ -619,7 +619,7 @@ describe('<DefaultNavigation />', () => {
         jest.advanceTimersByTime(SET_NAVIGATION_DELAY);
       });
 
-      expect(await findByTestId('nav-item-group1.item1')).toHaveClass(
+      expect(await findByTestId(/nav-item-group1.item1/)).toHaveClass(
         'euiSideNavItemButton-isSelected'
       );
     });
@@ -705,7 +705,7 @@ describe('<DefaultNavigation />', () => {
         expect(
           await (
             await findByTestId(
-              'nav-item-project_settings_project_nav.settings.cloudLinkUserAndRoles'
+              /nav-item-project_settings_project_nav.settings.cloudLinkUserAndRoles/
             )
           ).textContent
         ).toBe('Mock Users & RolesExternal link');
@@ -713,14 +713,14 @@ describe('<DefaultNavigation />', () => {
         expect(
           await (
             await findByTestId(
-              'nav-item-project_settings_project_nav.settings.cloudLinkPerformance'
+              /nav-item-project_settings_project_nav.settings.cloudLinkPerformance/
             )
           ).textContent
         ).toBe('Mock PerformanceExternal link');
 
         expect(
           await (
-            await findByTestId('nav-item-project_settings_project_nav.settings.cloudLinkBilling')
+            await findByTestId(/nav-item-project_settings_project_nav.settings.cloudLinkBilling/)
           ).textContent
         ).toBe('Mock Billing & SubscriptionsExternal link');
       });
