@@ -40,7 +40,7 @@ export const createPureDatasetsStateMachine = (
             src: 'loadDatasets',
             onDone: {
               target: 'loaded',
-              actions: ['storeInCache', 'storeDatasets', 'storeSearch'],
+              actions: ['storeInCache', 'aggregateAndStoreDatasets', 'storeSearch'],
             },
             onError: 'loadingFailed',
           },
@@ -78,7 +78,7 @@ export const createPureDatasetsStateMachine = (
           // Store search from search event
           ...('search' in event && { search: event.search }),
         })),
-        storeDatasets: assign((_context, event) =>
+        aggregateAndStoreDatasets: assign((_context, event) =>
           'data' in event && !isError(event.data)
             ? { datasets: Dataset.createWildcardDatasetsFrom(event.data.items) }
             : {}
