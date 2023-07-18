@@ -89,7 +89,7 @@ export interface Range {
 export interface NumericDriftData {
   type: 'numeric';
   pValue: number;
-  range: Range;
+  range?: Range;
   referenceHistogram: Histogram[];
   productionHistogram: Histogram[];
 }

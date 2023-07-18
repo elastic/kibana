@@ -12,13 +12,15 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
-import { cloneDeep } from 'lodash';
+import { chunk, cloneDeep, flatten } from 'lodash';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
-import { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { ErrorType, extractErrorMessage } from '@kbn/ml-error-utils';
+import { RandomSampler, RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useDataVisualizerKibana } from '../kibana_context';
 import {
   REFERENCE_LABEL,
@@ -40,7 +42,6 @@ import {
   TimeRange,
 } from './types';
 import { computeChi2PValue } from './data_comparison_utils';
-import { getErrorMessagesFromEsShardFailures } from '../common/util/get_error_messages_from_es_shard_failures';
 
 export const getDataComparisonType = (kibanaType: string): DataComparisonField['type'] => {
   switch (kibanaType) {
@@ -53,6 +54,8 @@ export const getDataComparisonType = (kibanaType: string): DataComparisonField['
       return DATA_COMPARISON_TYPE.UNSUPPORTED;
   }
 };
+
+type UseDataSearch = ReturnType<typeof useDataSearch>;
 
 export const useDataSearch = <T>() => {
   const { data } = useDataVisualizerKibana().services;
@@ -220,10 +223,10 @@ const getDataComparisonQuery = ({
   timeRange,
 }: {
   runtimeFields: MappingRuntimeFields;
-  searchQuery?: Query['query'];
+  searchQuery?: estypes.QueryDslQueryContainer;
   datetimeField?: string;
   timeRange?: TimeRange;
-}) => {
+}): NonNullable<estypes.SearchRequest['body']> => {
   let rangeFilter;
   if (timeRange && datetimeField !== undefined && isPopulatedObject(timeRange, ['start', 'end'])) {
     rangeFilter = {
@@ -237,21 +240,23 @@ const getDataComparisonQuery = ({
     };
   }
 
-  const query: Query['query'] = cloneDeep(
+  const query = cloneDeep(
     !searchQuery || isPopulatedObject(searchQuery, ['match_all'])
       ? getDefaultDSLQuery()
       : searchQuery
   );
 
-  if (rangeFilter && isPopulatedObject<string, unknown>(query, ['bool'])) {
+  if (rangeFilter && isPopulatedObject<string, QueryDslBoolQuery>(query, ['bool'])) {
     if (Array.isArray(query.bool.filter)) {
+      // @ts-expect-error gte and lte can be numeric
       query.bool.filter.push(rangeFilter);
     } else {
+      // @ts-expect-error gte and lte can be numeric
       query.bool.filter = [rangeFilter];
     }
   }
 
-  const refDataQuery: { query: Query['query']; runtime_mappings?: MappingRuntimeFields } = {
+  const refDataQuery: NonNullable<estypes.SearchRequest['body']> = {
     query,
   };
   if (runtimeFields) {
@@ -260,6 +265,267 @@ const getDataComparisonQuery = ({
   return refDataQuery;
 };
 
+const fetchReferenceBaselineData = async ({
+  baseRequest,
+  fields,
+  randomSamplerWrapper,
+  dataSearch,
+  signal,
+}: {
+  baseRequest: EsRequestParams;
+  dataSearch: UseDataSearch;
+  fields: DataComparisonField[];
+  randomSamplerWrapper: RandomSamplerWrapper;
+  signal: AbortSignal;
+}) => {
+  const baselineRequest = { ...baseRequest };
+  const baselineRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+
+  // for each field with type "numeric", add a percentiles agg to the request
+  for (const { field, type } of fields) {
+    // if the field is numeric, add a percentiles and stats aggregations to the request
+    if (type === DATA_COMPARISON_TYPE.NUMERIC) {
+      baselineRequestAggs[`${field}_percentiles`] = {
+        percentiles: {
+          field,
+          percents,
+        },
+      };
+      baselineRequestAggs[`${field}_stats`] = {
+        stats: {
+          field,
+        },
+      };
+    }
+    // if the field is categorical, add a terms aggregation to the request
+    if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
+      baselineRequestAggs[`${field}_terms`] = {
+        terms: {
+          field,
+          size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+        },
+      };
+    }
+  }
+
+  const baselineResponse = await dataSearch(
+    {
+      ...baselineRequest,
+      body: { ...baselineRequest.body, aggs: randomSamplerWrapper.wrap(baselineRequestAggs) },
+    },
+    signal
+  );
+
+  return baselineResponse;
+};
+
+const fetchComparisonDriftedData = async ({
+  dataSearch,
+  fields,
+  baselineResponseAggs,
+  baseRequest,
+  randomSamplerWrapper,
+  signal,
+}: {
+  baseRequest: EsRequestParams;
+  dataSearch: UseDataSearch;
+  fields: DataComparisonField[];
+  randomSamplerWrapper: RandomSamplerWrapper;
+  signal: AbortSignal;
+  // @TODO: Fix any
+  baselineResponseAggs: any;
+}) => {
+  const driftedRequest = { ...baseRequest };
+  const driftedRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+
+  for (const { field, type } of fields) {
+    if (
+      isPopulatedObject(baselineResponseAggs, [`${field}_percentiles`]) &&
+      type === DATA_COMPARISON_TYPE.NUMERIC
+    ) {
+      // create ranges based on percentiles
+      const percentiles = Object.values<number>(
+        (baselineResponseAggs[`${field}_percentiles`] as Record<string, { values: number }>).values
+      );
+      const ranges: Array<{ from?: number; to?: number }> = [];
+      percentiles.forEach((val: number, idx) => {
+        if (idx === 0) {
+          ranges.push({ to: val });
+        } else if (idx === percentiles.length - 1) {
+          ranges.push({ from: val });
+        } else {
+          ranges.push({ from: percentiles[idx - 1], to: val });
+        }
+      });
+      // add range and bucket_count_ks_test to the request
+      driftedRequestAggs[`${field}_ranges`] = {
+        range: {
+          field,
+          ranges,
+        },
+      };
+      driftedRequestAggs[`${field}_ks_test`] = {
+        bucket_count_ks_test: {
+          buckets_path: `${field}_ranges>_count`,
+          alternative: ['two_sided'],
+        },
+      };
+      // add stats aggregation to the request
+      driftedRequestAggs[`${field}_stats`] = {
+        stats: {
+          field,
+        },
+      };
+    }
+    // if feature is categoric perform terms aggregation
+    if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
+      driftedRequestAggs[`${field}_terms`] = {
+        terms: {
+          field,
+          size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
+        },
+      };
+    }
+  }
+
+  const driftedResp = await dataSearch(
+    {
+      ...driftedRequest,
+      body: { ...driftedRequest.body, aggs: randomSamplerWrapper.wrap(driftedRequestAggs) },
+    },
+    signal
+  );
+  return driftedResp;
+};
+
+const fetchHistogramData = async ({
+  dataSearch,
+  fields,
+  driftedRespAggs,
+  baselineResponseAggs,
+  baseRequest,
+  randomSamplerWrapper,
+  signal,
+}: {
+  baseRequest: EsRequestParams;
+  dataSearch: UseDataSearch;
+  fields: DataComparisonField[];
+  randomSamplerWrapper: RandomSamplerWrapper;
+  signal: AbortSignal;
+  // @TODO: Fix any
+  baselineResponseAggs: any;
+  driftedRespAggs: any;
+}) => {
+  const histogramRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
+  const fieldRange: { [field: string]: Range } = {};
+
+  for (const { field, type } of fields) {
+    // add histogram aggregation with min and max from baseline
+    if (
+      type === DATA_COMPARISON_TYPE.NUMERIC &&
+      baselineResponseAggs[`${field}_stats`] &&
+      driftedRespAggs[`${field}_stats`]
+    ) {
+      const numBins = 10;
+      const min = Math.min(
+        baselineResponseAggs[`${field}_stats`].min,
+        driftedRespAggs[`${field}_stats`].min
+      );
+      const max = Math.max(
+        baselineResponseAggs[`${field}_stats`].max,
+        driftedRespAggs[`${field}_stats`].max
+      );
+      const interval = (max - min) / numBins;
+
+      if (interval === 0) {
+        continue;
+      }
+      const offset = min;
+      fieldRange[field] = { min, max, interval };
+      histogramRequestAggs[`${field}_histogram`] = {
+        histogram: {
+          field,
+          interval,
+          offset,
+          extended_bounds: {
+            min,
+            max,
+          },
+        },
+      };
+    }
+  }
+
+  const histogramRequest = {
+    ...baseRequest,
+    body: {
+      ...baseRequest.body,
+      aggs: randomSamplerWrapper.wrap(histogramRequestAggs),
+    },
+  };
+
+  return dataSearch(histogramRequest, signal);
+};
+
+const isFulfilled = <T>(
+  input: PromiseSettledResult<Awaited<T>>
+): input is PromiseFulfilledResult<Awaited<T>> => input.status === 'fulfilled';
+const isRejected = <T>(input: PromiseSettledResult<Awaited<T>>): input is PromiseRejectedResult =>
+  input.status === 'rejected';
+
+type EsRequestParams = NonNullable<
+  IKibanaSearchRequest<NonNullable<estypes.SearchRequest>>['params']
+>;
+/**
+ * Help split one big request into multiple requests (with max of 30 fields/request)
+ * to avoid too big of a data payload
+ * Returns a merged
+ * @param fields - list of fields to split
+ * @param randomSamplerWrapper - helper from randomSampler to pack and unpack 'sample' path from esResponse.aggregations
+ * @param asyncFetchFn - callback function with the divided fields
+ */
+export const fetchInParallelChunks = async <
+  ReturnedRespFromFetchFn extends { aggregations: Record<string, AggregationsAggregate> }
+>({
+  fields,
+  randomSamplerWrapper,
+  asyncFetchFn,
+  errorMsg,
+}: {
+  fields: DataComparisonField[];
+  randomSamplerWrapper: RandomSamplerWrapper;
+  asyncFetchFn: (chunkedFields: DataComparisonField[]) => Promise<ReturnedRespFromFetchFn>;
+  errorMsg?: string;
+}) => {
+  const { unwrap } = randomSamplerWrapper;
+  const results = await Promise.allSettled(
+    chunk(fields, 30).map((chunkedFields: DataComparisonField[]) => asyncFetchFn(chunkedFields))
+  );
+
+  const mergedResults = results.filter(isFulfilled).map((r) => {
+    return unwrap(r?.value.aggregations);
+  });
+
+  if (mergedResults.length === 0) {
+    const error = results.find(isRejected);
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      return {
+        data: undefined,
+        status: FETCH_STATUS.FAILURE,
+        error: errorMsg,
+        errorBody: error.reason.message,
+      };
+    }
+  }
+
+  const baselineResponseAggs = flatten(mergedResults).reduce(
+    (prev, acc) => ({ ...acc, ...prev }),
+    {}
+  );
+  return baselineResponseAggs;
+};
 export const useFetchDataComparisonResult = (
   {
     fields,
@@ -275,7 +541,7 @@ export const useFetchDataComparisonResult = (
     fields?: DataComparisonField[];
     currentDataView?: DataView;
     timeRanges?: { reference: TimeRange; production: TimeRange };
-    searchQuery?: Query['query'];
+    searchQuery?: estypes.QueryDslQueryContainer;
     searchString?: Query['query'];
     searchQueryLanguage?: SearchQueryLanguage;
   } = { lastRefresh: 0 }
@@ -299,7 +565,7 @@ export const useFetchDataComparisonResult = (
 
         if (!randomSampler) return;
 
-        const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
+        const randomSamplerWrapper = randomSampler.createRandomSamplerWrapper();
 
         setLoaded(0);
         setResult({
@@ -342,43 +608,7 @@ export const useFetchDataComparisonResult = (
         });
 
         try {
-          const baselineRequest = {
-            index: referenceIndex,
-            body: {
-              size: 0,
-              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
-              ...refDataQuery,
-            },
-          };
-
-          const baselineRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
           const fieldsCount = fields.length;
-          // for each field with type "numeric", add a percentiles agg to the request
-          for (const { field, type } of fields) {
-            // if the field is numeric, add a percentiles and stats aggregations to the request
-            if (type === DATA_COMPARISON_TYPE.NUMERIC) {
-              baselineRequestAggs[`${field}_percentiles`] = {
-                percentiles: {
-                  field,
-                  percents,
-                },
-              };
-              baselineRequestAggs[`${field}_stats`] = {
-                stats: {
-                  field,
-                },
-              };
-            }
-            // if the field is categorical, add a terms aggregation to the request
-            if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
-              baselineRequestAggs[`${field}_terms`] = {
-                terms: {
-                  field,
-                  size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
-                },
-              };
-            }
-          }
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingReference', {
@@ -387,28 +617,34 @@ export const useFetchDataComparisonResult = (
             })
           );
 
-          baselineRequest.body.aggs = wrap(baselineRequestAggs);
-          const baselineResponse = await dataSearch(baselineRequest, signal);
+          const baselineRequest: EsRequestParams = {
+            index: referenceIndex,
+            body: {
+              size: 0,
+              aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+              ...refDataQuery,
+            },
+          };
+
+          const baselineResponseAggs = await fetchInParallelChunks({
+            fields,
+            randomSamplerWrapper,
+            asyncFetchFn: (chunkedFields) =>
+              fetchReferenceBaselineData({
+                dataSearch,
+                baseRequest: baselineRequest,
+                fields: chunkedFields,
+                randomSamplerWrapper,
+                signal,
+              }),
+          });
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedReference', {
               defaultMessage: `Loaded reference data.`,
             })
           );
-
           setLoaded(0.25);
-
-          if (!baselineResponse?.aggregations) {
-            setResult({
-              data: undefined,
-              status: FETCH_STATUS.FAILURE,
-              error: `Unable to fetch percentiles data from ${referenceIndex}`,
-              errorBody:
-                getErrorMessagesFromEsShardFailures(baselineResponse).join('\n') ??
-                extractErrorMessage(baselineResponse as ErrorType),
-            });
-            return;
-          }
 
           const prodDataQuery = getDataComparisonQuery({
             searchQuery,
@@ -418,13 +654,13 @@ export const useFetchDataComparisonResult = (
           });
 
           setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingProduction', {
-              defaultMessage: `Loading production data for {fieldsCount} fields.`,
+            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingComparison', {
+              defaultMessage: `Loading comparison data for {fieldsCount} fields.`,
               values: { fieldsCount },
             })
           );
 
-          const driftedRequest = {
+          const driftedRequest: EsRequestParams = {
             index: productionIndex,
             body: {
               size: 0,
@@ -432,86 +668,28 @@ export const useFetchDataComparisonResult = (
               ...prodDataQuery,
             },
           };
-          const driftedRequestAggs: Record<string, estypes.AggregationsAggregationContainer> = {};
-          const baselineResponseAggs = unwrap(baselineResponse?.aggregations);
-
-          // retrieve p-values for each numeric field
-          for (const { field, type } of fields) {
-            if (
-              isPopulatedObject(baselineResponseAggs, [`${field}_percentiles`]) &&
-              type === DATA_COMPARISON_TYPE.NUMERIC
-            ) {
-              // create ranges based on percentiles
-              const percentiles = Object.values<number>(
-                (baselineResponseAggs[`${field}_percentiles`] as Record<string, { values: number }>)
-                  .values
-              );
-              const ranges: Array<{ from?: number; to?: number }> = [];
-              percentiles.forEach((val: number, idx) => {
-                if (idx === 0) {
-                  ranges.push({ to: val });
-                } else if (idx === percentiles.length - 1) {
-                  ranges.push({ from: val });
-                } else {
-                  ranges.push({ from: percentiles[idx - 1], to: val });
-                }
-              });
-              // add range and bucket_count_ks_test to the request
-              driftedRequestAggs[`${field}_ranges`] = {
-                range: {
-                  field,
-                  ranges,
-                },
-              };
-              driftedRequestAggs[`${field}_ks_test`] = {
-                bucket_count_ks_test: {
-                  buckets_path: `${field}_ranges>_count`,
-                  alternative: ['two_sided'],
-                },
-              };
-              // add stats aggregation to the request
-              driftedRequestAggs[`${field}_stats`] = {
-                stats: {
-                  field,
-                },
-              };
-            }
-            // if feature is categoric perform terms aggregation
-            if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
-              driftedRequestAggs[`${field}_terms`] = {
-                terms: {
-                  field,
-                  size: 100, // also DFA can potentially handle problems with 100 categories, for visualization purposes we will use top 10
-                },
-              };
-            }
-          }
-
-          driftedRequest.body.aggs = wrap(driftedRequestAggs);
-          const driftedResp = await dataSearch(driftedRequest, signal);
+          const driftedRespAggs = await fetchInParallelChunks({
+            fields,
+            randomSamplerWrapper,
+            asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
+              fetchComparisonDriftedData({
+                dataSearch,
+                baseRequest: driftedRequest,
+                baselineResponseAggs,
+                fields: chunkedFields,
+                randomSamplerWrapper,
+                signal,
+              }),
+          });
 
           setLoaded(0.5);
           setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedBaseline', {
-              defaultMessage: `Loaded comparison data.`,
+            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedComparison', {
+              defaultMessage: `Loaded comparison data. Now loading histogram data.`,
             })
           );
 
-          if (!driftedResp || !driftedResp.aggregations) {
-            setResult({
-              data: undefined,
-              status: FETCH_STATUS.FAILURE,
-              error: `Unable to fetch drift data from ${productionIndex}`,
-              errorBody:
-                getErrorMessagesFromEsShardFailures(driftedResp).join('\n') ??
-                extractErrorMessage(driftedResp as ErrorType),
-            });
-            return;
-          }
-
-          const driftedRespAggs = unwrap(driftedResp.aggregations);
-
-          const referenceHistogramRequest = {
+          const referenceHistogramRequest: EsRequestParams = {
             index: referenceIndex,
             body: {
               size: 0,
@@ -520,7 +698,32 @@ export const useFetchDataComparisonResult = (
             },
           };
 
-          const productionHistogramRequest = {
+          const referenceHistogramRespAggs = await fetchInParallelChunks({
+            fields,
+            randomSamplerWrapper,
+            asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
+              fetchHistogramData({
+                dataSearch,
+                baseRequest: referenceHistogramRequest,
+                baselineResponseAggs,
+                driftedRespAggs,
+                fields: chunkedFields,
+                randomSamplerWrapper,
+                signal,
+              }),
+          });
+
+          setLoaded(0.75);
+          setProgressMessage(
+            i18n.translate(
+              'xpack.dataVisualizer.dataComparison.progress.loadedReferenceHistogram',
+              {
+                defaultMessage: `Loaded histogram data for reference data set.`,
+              }
+            )
+          );
+
+          const productionHistogramRequest: EsRequestParams = {
             index: productionIndex,
             body: {
               size: 0,
@@ -529,104 +732,46 @@ export const useFetchDataComparisonResult = (
             },
           };
 
-          const referenceHistogramRequestAggs: Record<
-            string,
-            estypes.AggregationsAggregationContainer
-          > = {};
-          const productionHistogramRequestAggs: Record<
-            string,
-            estypes.AggregationsAggregationContainer
-          > = {};
-
-          const fieldRange: { [field: string]: Range } = {};
-
-          for (const { field, type } of fields) {
-            // add histogram aggregation with min and max from baseline
-            if (type === DATA_COMPARISON_TYPE.NUMERIC) {
-              const numBins = 10;
-              const min = Math.min(
-                baselineResponseAggs[`${field}_stats`].min,
-                driftedRespAggs[`${field}_stats`].min
-              );
-              const max = Math.max(
-                baselineResponseAggs[`${field}_stats`].max,
-                driftedRespAggs[`${field}_stats`].max
-              );
-              const interval = (max - min) / numBins;
-
-              if (interval === 0) {
-                continue;
-              }
-              const offset = min;
-              fieldRange[field] = { min, max, interval };
-              referenceHistogramRequestAggs[`${field}_histogram`] = {
-                histogram: {
-                  field,
-                  interval,
-                  offset,
-                  extended_bounds: {
-                    min,
-                    max,
-                  },
-                },
-              };
-              productionHistogramRequestAggs[`${field}_histogram`] = {
-                histogram: {
-                  field,
-                  interval,
-                  offset,
-                  extended_bounds: {
-                    min,
-                    max,
-                  },
-                },
-              };
-            }
-          }
-
-          setProgressMessage(
-            i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadingHistogramData', {
-              defaultMessage: `Loading histogram data.`,
-            })
-          );
-
-          referenceHistogramRequest.body.aggs = referenceHistogramRequestAggs;
-          productionHistogramRequest.body.aggs = productionHistogramRequestAggs;
-
-          const [productionHistogramResponse, referenceHistogramResponse] = (
-            await Promise.all([
-              dataSearch(productionHistogramRequest, signal),
-              dataSearch(referenceHistogramRequest, signal),
-            ])
-          ).map((r) => ({ ...r, aggregations: unwrap(r.aggregations) }));
+          const productionHistogramRespAggs = await fetchInParallelChunks({
+            fields,
+            randomSamplerWrapper,
+            asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
+              fetchHistogramData({
+                dataSearch,
+                baseRequest: productionHistogramRequest,
+                baselineResponseAggs,
+                driftedRespAggs,
+                fields: chunkedFields,
+                randomSamplerWrapper,
+                signal,
+              }),
+          });
 
           const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
           for (const { field, type } of fields) {
             if (
               type === DATA_COMPARISON_TYPE.NUMERIC &&
-              referenceHistogramResponse.aggregations &&
-              productionHistogramResponse.aggregations
+              driftedRespAggs[`${field}_ks_test`] &&
+              referenceHistogramRespAggs[`${field}_histogram`] &&
+              productionHistogramRespAggs[`${field}_histogram`]
             ) {
               data[field] = {
                 type: DATA_COMPARISON_TYPE.NUMERIC,
                 pValue: driftedRespAggs[`${field}_ks_test`].two_sided,
-                range: fieldRange[field],
-                referenceHistogram:
-                  referenceHistogramResponse.aggregations[`${field}_histogram`]?.buckets ?? [],
-                productionHistogram:
-                  productionHistogramResponse.aggregations[`${field}_histogram`]?.buckets ?? [],
+                referenceHistogram: referenceHistogramRespAggs[`${field}_histogram`].buckets,
+                productionHistogram: productionHistogramRespAggs[`${field}_histogram`].buckets,
               };
             }
             if (
               type === DATA_COMPARISON_TYPE.CATEGORICAL &&
-              driftedRespAggs &&
-              baselineResponseAggs
+              driftedRespAggs[`${field}_terms`] &&
+              baselineResponseAggs[`${field}_terms`]
             ) {
               data[field] = {
                 type: DATA_COMPARISON_TYPE.CATEGORICAL,
-                driftedTerms: driftedRespAggs[`${field}_terms`].buckets,
+                driftedTerms: driftedRespAggs[`${field}_terms`].buckets ?? [],
                 driftedSumOtherDocCount: driftedRespAggs[`${field}_terms`].sum_other_doc_count,
-                baselineTerms: baselineResponseAggs[`${field}_terms`].buckets,
+                baselineTerms: baselineResponseAggs[`${field}_terms`].buckets ?? [],
                 baselineSumOtherDocCount:
                   baselineResponseAggs[`${field}_terms`].sum_other_doc_count,
               };
@@ -635,7 +780,7 @@ export const useFetchDataComparisonResult = (
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedHistogramData', {
-              defaultMessage: `Loaded histogram data.`,
+              defaultMessage: `Loaded histogram data for comparison data set.`,
             })
           );
 
@@ -645,6 +790,8 @@ export const useFetchDataComparisonResult = (
           });
           setLoaded(1);
         } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(e);
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,

@@ -17,6 +17,7 @@ import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
 import type { DataComparisonField, Feature, TimeRange } from './types';
 import { DataComparisonOverviewTable } from './data_comparison_overview_table';
@@ -30,7 +31,7 @@ interface DataComparisonViewProps {
   windowParameters?: WindowParameters;
   dataView: DataView;
   searchString: Query['query'];
-  searchQuery: Query['query'];
+  searchQuery: QueryDslQueryContainer;
   searchQueryLanguage: SearchQueryLanguage;
   isBrushCleared: boolean;
   runAnalysisDisabled?: boolean;
@@ -202,7 +203,7 @@ export const DataComparisonView = ({
           color="danger"
           title={<h2>{result.error}</h2>}
           titleSize="xs"
-          body={<p>{result.errorBody}</p>}
+          body={<span>{result.errorBody}</span>}
         />
       ) : (
         <DataComparisonOverviewTable
