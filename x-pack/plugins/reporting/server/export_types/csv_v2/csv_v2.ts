@@ -44,8 +44,8 @@ export class CsvV2ExportType extends ExportType<
   CsvV2ExportTypeStartDeps
 > {
   id = CSV_REPORT_TYPE_V2;
-  name = CSV_REPORT_TYPE_V2; // CSV_JOB_TYPE in main
-  jobType = CSV_REPORT_TYPE_V2; // CSV_JOB_TYPE in main;
+  name = CSV_REPORT_TYPE_V2;
+  jobType = CSV_REPORT_TYPE_V2;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [
