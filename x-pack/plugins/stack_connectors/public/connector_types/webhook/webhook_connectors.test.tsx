@@ -271,5 +271,56 @@ describe('WebhookActionConnectorFields renders', () => {
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
+
+    it('validates correctly with a CA and verificationMode', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          ca: Buffer.from('some binary string').toString('base64'),
+          verificationMode: 'full',
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <WebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          actionTypeId: '.webhook',
+          name: 'webhook',
+          config: {
+            method: 'PUT',
+            url: 'https://test.com',
+            hasAuth: true,
+            authType: WebhookAuthType.Basic,
+            ca: Buffer.from('some binary string').toString('base64'),
+            verificationMode: 'full',
+            headers: [{ key: 'content-type', value: 'text' }],
+          },
+          secrets: {
+            user: 'user',
+            password: 'pass',
+          },
+          __internal__: {
+            hasHeaders: true,
+            hasCA: true,
+          },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
   });
 });
