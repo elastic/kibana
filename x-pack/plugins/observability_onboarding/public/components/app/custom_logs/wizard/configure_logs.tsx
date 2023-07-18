@@ -255,7 +255,7 @@ export function ConfigureLogs() {
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
                     content={i18n.translate(
-                      'xpack.observability_onboarding.configureLogs.dataset.name.tooltip',
+                      'xpack.observability_onboarding.configureLogs.serviceName.tooltip',
                       {
                         defaultMessage:
                           'Provide a service name to allow for distributed services running on multiple hosts to correlate the related instances.',
@@ -330,7 +330,7 @@ export function ConfigureLogs() {
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
                           content={i18n.translate(
-                            'xpack.observability_onboarding.configureLogs.dataset.name.tooltip',
+                            'xpack.observability_onboarding.configureLogs.namespace.tooltip',
                             {
                               defaultMessage:
                                 'Provide a namespace to customize the grouping of your logs. Defaults to the default namespace.',

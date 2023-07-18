@@ -565,7 +565,7 @@ export function InstallElasticAgent() {
                             'xpack.observability_onboarding.installElasticAgent.configStep.manual.description',
                             {
                               defaultMessage:
-                                'Add the following configuration to the elastic-agent.yml on the host where you installed the Elastic agent.',
+                                'Add the following configuration to {configPath} on the host where you installed the Elastic agent.',
                               values: {
                                 configPath:
                                   '/opt/Elastic/Agent/elastic-agent.yml',
