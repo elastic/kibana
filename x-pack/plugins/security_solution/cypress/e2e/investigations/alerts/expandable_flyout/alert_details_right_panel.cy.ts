@@ -43,6 +43,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS,
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
@@ -66,7 +67,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel',
-  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled', 'assistantEnabled'] } } },
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     const rule = getNewRule();
 
@@ -84,6 +85,8 @@ describe(
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON).should('be.visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('be.visible');
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('be.visible');
       cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)

@@ -78,7 +78,7 @@ import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';

@@ -10,8 +10,10 @@ import { ConfigKey } from '../../../common/constants/monitor_management';
 export const PARAMS_KEYS_TO_SKIP = [
   'secrets',
   'fields',
+  ConfigKey.MONITOR_QUERY_ID,
   ConfigKey.LOCATIONS,
   ConfigKey.TLS_VERSION,
   ConfigKey.SOURCE_PROJECT_CONTENT,
   ConfigKey.SOURCE_INLINE,
+  ConfigKey.RESPONSE_JSON_CHECK,
 ];

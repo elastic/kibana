@@ -456,23 +456,15 @@ export const DiscoverGrid = ({
   const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
       cellActionsTriggerId && !isPlainRecord
-        ? visibleColumns.map((columnName) => {
-            const field = dataView.getFieldByName(columnName);
-            if (!field) {
-              return {
+        ? visibleColumns.map(
+            (columnName) =>
+              dataView.getFieldByName(columnName)?.toSpec() ?? {
                 name: '',
                 type: '',
                 aggregatable: false,
                 searchable: false,
-              };
-            }
-            return {
-              name: columnName,
-              type: field.type,
-              aggregatable: field.aggregatable,
-              searchable: field.searchable,
-            };
-          })
+              }
+          )
         : undefined,
     [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );
