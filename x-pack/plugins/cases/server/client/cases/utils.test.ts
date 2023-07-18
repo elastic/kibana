@@ -85,6 +85,7 @@ describe('utils', () => {
       },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
     it('creates an external incident correctly for Jira', async () => {

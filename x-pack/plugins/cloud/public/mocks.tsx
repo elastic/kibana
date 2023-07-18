@@ -39,6 +39,7 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   cloudId: 'mock-cloud-id',
   isCloudEnabled: true,
   deploymentUrl: 'deployment-url',
+  billingUrl: 'billing-url',
   profileUrl: 'profile-url',
   organizationUrl: 'organization-url',
 });

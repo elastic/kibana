@@ -22,6 +22,13 @@ export const DATA_QUALITY = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.navigation.entityRiskScore',
+  {
+    defaultMessage: 'Entity Risk Score',
+  }
+);
+
 export const DETECTION_RESPONSE = i18n.translate(
   'xpack.securitySolution.navigation.detectionResponse',
   {
@@ -47,6 +54,13 @@ export const GETTING_STARTED = i18n.translate('xpack.securitySolution.navigation
 export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dashboards', {
   defaultMessage: 'Dashboards',
 });
+
+export const COVERAGE_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.navigation.coverageOverviewDashboard',
+  {
+    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+  }
+);
 
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
   defaultMessage: 'Network',

@@ -13,6 +13,7 @@ import {
   PartialTheme,
   Settings,
   Tooltip,
+  FlameSpec,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
@@ -27,13 +28,15 @@ import { ComparisonMode } from '../normalization_menu';
 
 interface Props {
   id: string;
-  comparisonMode: ComparisonMode;
+  comparisonMode?: ComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
   baseline?: number;
   comparison?: number;
   showInformationWindow: boolean;
   toggleShowInformationWindow: () => void;
+  searchText?: string;
+  onChangeSearchText?: FlameSpec['onSearchTextChange'];
 }
 
 export function FlameGraph({
@@ -45,6 +48,8 @@ export function FlameGraph({
   comparison,
   showInformationWindow,
   toggleShowInformationWindow,
+  searchText,
+  onChangeSearchText,
 }: Props) {
   const theme = useEuiTheme();
 
@@ -165,6 +170,8 @@ export function FlameGraph({
                     valueFormatter={(value) => `${value}`}
                     animation={{ duration: 100 }}
                     controlProviderCallback={{}}
+                    search={searchText ? { text: searchText } : undefined}
+                    onSearchTextChange={onChangeSearchText}
                   />
                 </Chart>
               </EuiFlexItem>

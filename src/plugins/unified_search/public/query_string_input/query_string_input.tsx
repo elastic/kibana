@@ -42,7 +42,10 @@ import { toUser } from './to_user';
 import { fromUser } from './from_user';
 import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type {
+  SuggestionsAbstraction,
+  SuggestionsListSize,
+} from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
@@ -112,6 +115,7 @@ export interface QueryStringInputProps {
   submitOnBlur?: boolean;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
+  suggestionsAbstraction?: SuggestionsAbstraction;
   className?: string;
   isInvalid?: boolean;
   isClearable?: boolean;
@@ -287,6 +291,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           useTimeRange: this.props.timeRangeForSuggestionsOverride,
           boolFilter: buildQueryFromFilters(this.props.filtersForSuggestions, undefined).filter,
           method: this.props.filtersForSuggestions?.length ? 'terms_agg' : undefined,
+          suggestionsAbstraction: this.props.suggestionsAbstraction,
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {

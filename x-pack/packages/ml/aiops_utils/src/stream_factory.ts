@@ -73,6 +73,9 @@ export function streamFactory<T = unknown>(
 ): StreamFactoryReturnType<T> {
   let streamType: StreamType;
   const isCompressed = compressOverride && acceptCompression(headers);
+  const flushPayload = flushFix
+    ? crypto.randomBytes(FLUSH_PAYLOAD_SIZE).toString('hex')
+    : undefined;
 
   const stream = isCompressed ? zlib.createGzip() : new UncompressedResponseStream();
 
@@ -149,9 +152,7 @@ export function streamFactory<T = unknown>(
           ? `${JSON.stringify({
               ...d,
               // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-              ...(flushFix
-                ? { flushPayload: crypto.randomBytes(FLUSH_PAYLOAD_SIZE).toString('hex') }
-                : {}),
+              ...(flushFix ? { flushPayload } : {}),
             })}${DELIMITER}`
           : d;
 

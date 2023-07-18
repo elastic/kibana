@@ -7,7 +7,7 @@
  */
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import React, { PropsWithChildren, useCallback, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 
 import {
   type TableListViewKibanaDependencies,
@@ -87,6 +87,7 @@ export const DashboardListing = ({
     notifications,
     overlays,
     http,
+    chrome: { theme },
     savedObjectsTagging,
     dashboardSessionStorage,
     settings: { uiSettings },
@@ -206,6 +207,14 @@ export const DashboardListing = ({
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
 
+  const savedObjectsTaggingFakePlugin = useMemo(() => {
+    return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+      ? ({
+          ui: savedObjectsTagging,
+        } as TableListViewKibanaDependencies['savedObjectsTagging'])
+      : undefined;
+  }, [savedObjectsTagging]);
+
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
@@ -215,13 +224,10 @@ export const DashboardListing = ({
             notifications,
             overlays,
             http,
+            theme,
           },
           toMountPoint,
-          savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-            ? ({
-                ui: savedObjectsTagging,
-              } as TableListViewKibanaDependencies['savedObjectsTagging'])
-            : undefined,
+          savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
         }}
       >

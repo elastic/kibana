@@ -91,11 +91,11 @@ describe('FleetFromHostFilesClient', () => {
 
     esClientMock.search.mockImplementation(async (searchRequest = {}) => {
       // File metadata
-      if ((searchRequest.index as string).startsWith('.fleet-files-')) {
+      if ((searchRequest.index as string).startsWith('.fleet-fileds-fromhost-meta-')) {
         return fleetFilesIndexSearchResponse;
       }
 
-      if ((searchRequest.index as string).startsWith('.fleet-file-data-')) {
+      if ((searchRequest.index as string).startsWith('.fleet-fileds-fromhost-data-')) {
         return fleetFileDataIndexSearchResponse;
       }
 
@@ -111,8 +111,8 @@ describe('FleetFromHostFilesClient', () => {
     expect(createEsFileClientMock).toHaveBeenCalledWith({
       elasticsearchClient: esClientMock,
       logger: loggerMock,
-      metadataIndex: '.fleet-files-foo',
-      blobStorageIndex: '.fleet-file-data-foo',
+      metadataIndex: '.fleet-fileds-fromhost-meta-foo',
+      blobStorageIndex: '.fleet-fileds-fromhost-data-foo',
       indexIsAlias: true,
     });
   });
@@ -159,7 +159,7 @@ describe('FleetFromHostFilesClient', () => {
             },
           },
         },
-        index: '.fleet-file-data-foo',
+        index: '.fleet-fileds-fromhost-data-foo',
         size: 0,
       });
     });

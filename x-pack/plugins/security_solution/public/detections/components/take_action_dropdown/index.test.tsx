@@ -99,7 +99,6 @@ describe('take action dropdown', () => {
       detailsData: generateAlertDetailsDataMock() as TimelineEventsDetailsItem[],
       ecsData: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
-      indexName: 'index',
       isHostIsolationPanelOpen: false,
       loadingEventDetails: false,
       onAddEventFilterClick: jest.fn(),

@@ -1622,7 +1622,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         type: FieldType.BOOLEAN,
-        ui_restrictions: [],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },
@@ -1645,6 +1645,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           {
             defaultMessage:
               'Document level security ensures identities and permissions set in Sharepoint Online are maintained in Elasticsearch. This metadata is added to your Elasticsearch documents, so you can control user and group read-access. Access control syncs ensure this metadata is kept up to date.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      fetch_users_by_site: {
+        default_value: false,
+        depends_on: [{ field: 'use_document_level_security', value: true }],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteLabel',
+          {
+            defaultMessage: 'Discover users by site membership',
+          }
+        ),
+        options: [],
+        order: 8,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.fetchUsersBySiteTooltip',
+          {
+            defaultMessage:
+              'When syncing only a small subset of sites, it can be more efficient to only fetch users who have access to those sites. This becomes increasingly inefficient the more sites (and the more users) concerned.',
           }
         ),
         type: FieldType.BOOLEAN,

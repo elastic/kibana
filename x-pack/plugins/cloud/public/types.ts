@@ -29,6 +29,10 @@ export interface CloudStart {
    */
   profileUrl?: string;
   /**
+   * The full URL to the billing page on Elastic Cloud. Undefined if not running on Cloud.
+   */
+  billingUrl?: string;
+  /**
    * The full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud.
    */
   organizationUrl?: string;

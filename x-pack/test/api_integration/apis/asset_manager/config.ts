@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import { format, UrlObject } from 'url';
+import { APM_TEST_PASSWORD } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  AssetsSynthtraceEsClient,
+  createLogger,
+  InfraSynthtraceEsClient,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-
-import { bootstrapApmSynthtrace, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
+import url from 'url';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 import { InheritedServices } from './types';
 
 interface AssetManagerConfig {
   services: InheritedServices & {
-    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+    assetsSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<AssetsSynthtraceEsClient>;
+    infraSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<InfraSynthtraceEsClient>;
+    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
   };
 }
 
@@ -30,12 +42,45 @@ export default async function createTestConfig({
     testFiles: [require.resolve('.')],
     services: {
       ...services,
-      synthtraceEsClient: (context: InheritedFtrProviderContext) => {
+      assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+        return new AssetsSynthtraceEsClient({
+          client: context.getService('es'),
+          logger: createLogger(LogLevel.info),
+          refreshAfterIndex: true,
+        });
+      },
+      infraSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+        return new InfraSynthtraceEsClient({
+          client: context.getService('es'),
+          logger: createLogger(LogLevel.info),
+          refreshAfterIndex: true,
+        });
+      },
+      apmSynthtraceEsClient: async (context: InheritedFtrProviderContext) => {
         const servers = baseIntegrationTestsConfig.get('servers');
-        const kibanaServer = servers.kibana as UrlObject;
-        const kibanaServerUrl = format(kibanaServer);
-        const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
-        return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
+
+        const kibanaServer = servers.kibana as url.UrlObject;
+        const kibanaServerUrl = url.format(kibanaServer);
+        const kibanaServerUrlWithAuth = url
+          .format({
+            ...url.parse(kibanaServerUrl),
+            auth: `elastic:${APM_TEST_PASSWORD}`,
+          })
+          .slice(0, -1);
+
+        const kibanaClient = new ApmSynthtraceKibanaClient({
+          target: kibanaServerUrlWithAuth,
+          logger: createLogger(LogLevel.debug),
+        });
+        const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
+        await kibanaClient.installApmPackage(kibanaVersion);
+
+        return new ApmSynthtraceEsClient({
+          client: context.getService('es'),
+          logger: createLogger(LogLevel.info),
+          version: kibanaVersion,
+          refreshAfterIndex: true,
+        });
       },
     },
     kbnTestServer: {

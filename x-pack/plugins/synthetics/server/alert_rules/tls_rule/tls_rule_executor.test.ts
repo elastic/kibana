@@ -75,7 +75,8 @@ describe('tlsRuleExecutor', () => {
     expect(certs).toEqual([]);
 
     expect(spy).toHaveBeenCalledWith({
-      filter: 'synthetics-monitor.attributes.alert.tls.enabled: true',
+      filter:
+        'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)',
       soClient,
     });
   });

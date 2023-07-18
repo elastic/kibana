@@ -47,6 +47,9 @@ export const alertInstanceFactoryStub = <
   getContext() {
     return {} as unknown as TInstanceContext;
   },
+  getStart() {
+    return null;
+  },
   hasContext() {
     return false;
   },

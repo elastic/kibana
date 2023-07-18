@@ -222,6 +222,7 @@ export class AlertsService implements IAlertsService {
       ruleType: opts.ruleType,
       namespace: opts.namespace,
       rule: opts.rule,
+      kibanaVersion: this.options.kibanaVersion,
     });
   }
 

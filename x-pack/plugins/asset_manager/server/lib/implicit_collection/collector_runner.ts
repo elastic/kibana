@@ -7,9 +7,9 @@
 
 import apm from 'elastic-apm-node';
 import { ImplicitCollectionOptions } from '.';
-import { Collector, CollectorOptions, QUERY_MAX_SIZE } from './collectors';
+import { Collector, CollectorOptions, QUERY_MAX_SIZE } from '../collectors';
 import { Asset } from '../../../common/types_api';
-import { withSpan } from './collectors/helpers';
+import { withSpan } from '../collectors/helpers';
 
 const TRANSACTION_TYPE = 'asset_manager-implicit_collection';
 const transactionName = (collectorName: string) => `asset_manager-collector_${collectorName}`;
