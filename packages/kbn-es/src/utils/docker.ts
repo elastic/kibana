@@ -31,7 +31,7 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   clean?: boolean;
 }
 
-interface RunServerlessEsNodeArgs {
+interface ServerlessEsNodeArgs {
   params: string[];
   name: string;
   image: string;
@@ -112,6 +112,86 @@ const SHARED_SERVERLESS_PARAMS = [
   'path.repo=/objectstore',
 ];
 
+const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
+  {
+    name: 'es01',
+    params: [
+      '-p',
+      '127.0.0.1:9200:9200',
+
+      '-p',
+      '127.0.0.1:9300:9300',
+
+      '--env',
+      'discovery.seed_hosts=es02,es03',
+
+      '--env',
+      'node.roles=["master","index"]',
+
+      '--env',
+      'xpack.searchable.snapshot.shared_cache.size=1gb',
+    ],
+  },
+  {
+    name: 'es02',
+    params: [
+      '-p',
+      '127.0.0.1:9202:9202',
+
+      '-p',
+      '127.0.0.1:9302:9302',
+
+      '--env',
+      'discovery.seed_hosts=es01,es03',
+
+      '--env',
+      'node.roles=["master","search"]',
+
+      '--env',
+      'xpack.searchable.snapshot.shared_cache.size=1gb',
+    ],
+  },
+  {
+    name: 'es03',
+    params: [
+      '-p',
+      '127.0.0.1:9203:9203',
+
+      '-p',
+      '127.0.0.1:9303:9303',
+
+      '--env',
+      'discovery.seed_hosts=es01,es02',
+
+      '--env',
+      'node.roles=["master"]',
+    ],
+  },
+];
+
+export const resolveDockerImage = ({
+  tag,
+  image,
+  repo,
+  defaultImg,
+}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) => {
+  if (image) {
+    return image;
+  } else if (tag) {
+    return `${repo}:${tag}`;
+  }
+
+  return defaultImg;
+};
+
+export const resolveDockerCmd = (options: DockerOptions) => {
+  return options.dockerCmd
+    ? options.dockerCmd.split(' ')
+    : DOCKER_BASE_CMD.concat(
+        resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG })
+      );
+};
+
 /**
  * Verify that Docker is installed locally
  */
@@ -181,10 +261,19 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   return getDataPath();
 }
 
-export async function runServerlessEsNode(
-  log: ToolingLog,
-  { params, name, image }: RunServerlessEsNodeArgs
-) {
+function getServerlessImage(options: ServerlessOptions) {
+  return resolveDockerImage({
+    ...options,
+    repo: SERVERLESS_REPO,
+    defaultImg: SERVERLESS_IMG,
+  });
+}
+
+export function getDockerImage(options: DockerOptions) {
+  return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+}
+
+async function runServerlessEsNode(log: ToolingLog, { params, name, image }: ServerlessEsNodeArgs) {
   const dockerCmd = SHARED_SERVERLESS_PARAMS.concat(
     params,
     ['--name', name, '--env', `node.name=${name}`],
@@ -208,25 +297,18 @@ export async function runServerlessEsNode(
   log.indent(-4);
 }
 
-export const resolveDockerImage = ({
-  tag,
-  image,
-  repo,
-  defaultImg,
-}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) => {
-  if (image) {
-    return image;
-  } else if (tag) {
-    return `${repo}:${tag}`;
+export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
+  const volumeParentPath = await setupServerlessVolumes(log, options);
+  const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
+  const image = getServerlessImage(options);
+  const nodeNames: string[] = [];
+
+  for (const node of SERVERLESS_NODES) {
+    await runServerlessEsNode(log, { ...node, image, params: node.params.concat(volumeCmd) });
+    nodeNames.push(node.name);
   }
 
-  return defaultImg;
-};
-
-export const resolveDockerCmd = (options: DockerOptions) => {
-  return options.dockerCmd
-    ? options.dockerCmd.split(' ')
-    : DOCKER_BASE_CMD.concat(
-        resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG })
-      );
-};
+  log.success(`Serverless ES cluster running.
+      Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
+    `);
+}

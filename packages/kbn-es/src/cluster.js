@@ -23,15 +23,10 @@ const {
   NativeRealm,
   parseTimeoutToMs,
   verifyDockerInstalled,
-  resolveDockerImage,
   maybeCreateDockerNetwork,
-  setupServerlessVolumes,
-  runServerlessEsNode,
-  SERVERLESS_REPO,
-  SERVERLESS_IMG,
-  DOCKER_REPO,
-  DOCKER_IMG,
   DOCKER_BASE_CMD,
+  runServerlessCluster,
+  getDockerImage,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -398,7 +393,7 @@ exports.Cluster = class Cluster {
     if (installPath === 'docker') {
       await this.setupDocker();
       // const dockerCmd = resolveDockerCmd(options);
-      const image = resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+      const image = getDockerImage(options);
       const dockerCmd = DOCKER_BASE_CMD.concat(args, image);
 
       this._log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
@@ -608,77 +603,6 @@ exports.Cluster = class Cluster {
    */
   async runServerless(options = {}) {
     await this.setupDocker();
-
-    const volumeParentPath = await setupServerlessVolumes(this._log, options);
-    const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
-    const image = resolveDockerImage({
-      ...options,
-      repo: SERVERLESS_REPO,
-      defaultImg: SERVERLESS_IMG,
-    });
-
-    await runServerlessEsNode(this._log, {
-      params: [
-        '-p',
-        '127.0.0.1:9200:9200',
-
-        '-p',
-        '127.0.0.1:9300:9300',
-
-        '--env',
-        'discovery.seed_hosts=es02,es03',
-
-        '--env',
-        'node.roles=["master","index"]',
-
-        '--env',
-        'xpack.searchable.snapshot.shared_cache.size=1gb',
-      ].concat(volumeCmd),
-      image,
-      name: 'es01',
-    });
-
-    await runServerlessEsNode(this._log, {
-      params: [
-        '-p',
-        '127.0.0.1:9202:9202',
-
-        '-p',
-        '127.0.0.1:9302:9302',
-
-        '--env',
-        'discovery.seed_hosts=es01,es03',
-
-        '--env',
-        'node.roles=["master","search"]',
-
-        '--env',
-        'xpack.searchable.snapshot.shared_cache.size=1gb',
-      ].concat(volumeCmd),
-      image,
-      name: 'es02',
-    });
-
-    await runServerlessEsNode(this._log, {
-      params: [
-        '-p',
-        '127.0.0.1:9203:9203',
-
-        '-p',
-        '127.0.0.1:9303:9303',
-
-        '--env',
-        'discovery.seed_hosts=es01,es02',
-
-        '--env',
-        'node.roles=["master"]',
-      ].concat(volumeCmd),
-      image,
-      name: 'es03',
-    });
-
-    this._log.success(`Serverless ES cluster running.
-      Stop the cluster:     ${chalk.bold('docker container stop es01 es02 es03')}
-    `);
+    await runServerlessCluster(this._log, options);
   }
 };
