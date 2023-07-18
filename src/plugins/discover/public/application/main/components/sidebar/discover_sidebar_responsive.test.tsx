@@ -33,8 +33,8 @@ import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { type DataTableRecord } from '../../../../types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
 

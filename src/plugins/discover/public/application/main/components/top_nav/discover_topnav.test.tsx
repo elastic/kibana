@@ -8,7 +8,7 @@
 
 import React, { ReactElement } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { Query } from '@kbn/es-query';

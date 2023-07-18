@@ -8,7 +8,7 @@
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { DataTableRecord } from '../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 
 export interface FieldMapping {

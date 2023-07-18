@@ -372,6 +372,7 @@
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
     "@kbn/discover-log-explorer-plugin": "link:x-pack/plugins/discover_log_explorer",
     "@kbn/discover-plugin": "link:src/plugins/discover",
+    "@kbn/discover-utils": "link:packages/kbn-discover-utils",
     "@kbn/doc-links": "link:packages/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:packages/kbn-dom-drag-drop",
     "@kbn/ebt-tools": "link:packages/kbn-ebt-tools",
