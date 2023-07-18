@@ -303,10 +303,7 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-        );
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [getEndpointField('file.Ext.code_signature.status')],
           id: '1234',
@@ -317,10 +314,7 @@ describe('Exception builder helpers', () => {
 
       test('it returns all fields that matched those in "exceptionable_fields.json" with no further filtering if "item.nested" is not "child" or "parent"', () => {
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-        );
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const fieldsExpected: FieldSpec[] = [
           {
             aggregatable: false,
