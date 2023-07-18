@@ -37,7 +37,6 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
-import type { DataViewBase } from '@kbn/es-query';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
@@ -59,10 +58,6 @@ import {
   KIBANA_ALERT_RULE_UUID,
   ENDPOINT_ALERT,
 } from './highlighted_fields_config';
-
-export const filterIndexPatterns = (patterns: DataViewBase): DataViewBase => {
-  return patterns;
-};
 
 /**
  * Formats os value array to a displayable string
