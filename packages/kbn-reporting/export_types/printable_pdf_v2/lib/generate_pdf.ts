@@ -6,10 +6,18 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
-import { mergeMap, tap } from 'rxjs/operators';
+import {
+  PdfMetrics,
+  ReportingConfigType,
+  ReportingServerInfo,
+  LocatorParams,
+  getTracker,
+  getFullRedirectAppUrl,
+} from '@kbn/reporting-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { getTracker, PdfMetrics } from '@kbn/reporting-common';
+import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import { Observable, mergeMap, tap } from 'rxjs';
+import { TaskPayloadPDFV2 } from '../types';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -17,16 +25,27 @@ interface PdfResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+type GetScreenshotsFn = (options: PdfScreenshotOptions) => Observable<PdfScreenshotResult>;
 
 export function generatePdfObservable(
+  config: ReportingConfigType,
+  serverInfo: ReportingServerInfo,
   getScreenshots: GetScreenshotsFn,
-  options: PdfScreenshotOptions
-): Rx.Observable<PdfResult> {
+  job: TaskPayloadPDFV2,
+  locatorParams: LocatorParams[],
+  options: Omit<PdfScreenshotOptions, 'urls'>
+): Observable<PdfResult> {
   const tracker = getTracker();
   tracker.startScreenshots();
 
-  return getScreenshots(options).pipe(
+  /**
+   * For each locator we get the relative URL to the redirect app
+   */
+  const urls = locatorParams.map((locator) => [
+    getFullRedirectAppUrl(config, serverInfo, job.spaceId, job.forceNow),
+    locator,
+  ]) as unknown as UrlOrUrlWithContext[];
+  const screenshots$ = getScreenshots({ ...options, urls }).pipe(
     tap(({ metrics }) => {
       if (metrics.cpu) {
         tracker.setCpuUsage(metrics.cpu);
@@ -45,8 +64,6 @@ export function generatePdfObservable(
         warnings.push(...renderErrors);
       }
 
-      tracker.end();
-
       return {
         buffer,
         metrics,
@@ -54,4 +71,6 @@ export function generatePdfObservable(
       };
     })
   );
+
+  return screenshots$;
 }

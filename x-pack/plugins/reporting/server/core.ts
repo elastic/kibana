@@ -41,14 +41,14 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, take } from 'rxjs/operators';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
-import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-export-types-csv';
-import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import { PngExportType } from '@kbn/reporting-export-types-png';
 import {
   CsvSearchSourceImmediateExportType,
   PdfV1ExportType,
   PngV1ExportType,
 } from '@kbn/reporting-export-types-deprecated';
+import { CsvV2ExportType, CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingSetup } from '.';
 import { createConfig, ReportingConfigType } from './config';
 import { checkLicense, ExportTypesRegistry } from './lib';
@@ -338,7 +338,6 @@ export class ReportingCore {
   }
 
   /*
-   *
    * Track usage of code paths for telemetry
    */
   public getUsageCounter(): UsageCounter | undefined {

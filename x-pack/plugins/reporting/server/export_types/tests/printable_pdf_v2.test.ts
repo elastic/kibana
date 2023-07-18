@@ -52,7 +52,6 @@ beforeEach(async () => {
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
-
   mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
 
   mockPdfExportType.setup({

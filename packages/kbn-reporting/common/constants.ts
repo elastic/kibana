@@ -31,6 +31,7 @@ export const USES_HEADLESS_JOB_TYPES = [
   PDF_JOB_TYPE_V2,
   PNG_JOB_TYPE_V2,
 ];
+
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
 // Re-export type definitions here for convenience.

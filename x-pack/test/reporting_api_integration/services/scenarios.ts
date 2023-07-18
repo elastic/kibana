@@ -10,7 +10,6 @@ import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
 } from '@kbn/reporting-plugin/common/constants';
-import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/common/types/export_types/csv_searchsource_immediate';
 import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf';
 import { JobParamsPNGDeprecated } from '@kbn/reporting-plugin/common/types';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv';

@@ -69,31 +69,31 @@ beforeAll(async () => {
     data: dataPluginMock.createStartContract(),
     screenshotting: createMockScreenshottingStart(),
   });
-});
 
-beforeEach(() => {
-  stream = {} as typeof stream;
-});
+  beforeEach(() => {
+    stream = {} as typeof stream;
+  });
 
-test('gets the csv content from job parameters', async () => {
-  const payload = await mockCsvSearchSourceExportType.runTask(
-    'cool-job-id',
-    {
-      headers: encryptedHeaders,
-      browserTimezone: 'US/Alaska',
-      searchSource: {},
-      objectType: 'search',
-      title: 'Test Search',
-      version: '7.13.0',
-    },
-    new CancellationToken(),
-    stream
-  );
+  test('gets the csv content from job parameters', async () => {
+    const payload = await mockCsvSearchSourceExportType.runTask(
+      'cool-job-id',
+      {
+        headers: encryptedHeaders,
+        browserTimezone: 'US/Alaska',
+        searchSource: {},
+        objectType: 'search',
+        title: 'Test Search',
+        version: '7.13.0',
+      },
+      new CancellationToken(),
+      stream
+    );
 
-  expect(payload).toMatchInlineSnapshot(`
+    expect(payload).toMatchInlineSnapshot(`
         Object {
           "content_type": "text/csv",
           "size": 123,
         }
       `);
+  });
 });

@@ -33,7 +33,6 @@ export const UNVERSIONED_VERSION = '7.14.0';
 export const API_USAGE_COUNTER_TYPE = 'reportingApi';
 export const API_USAGE_ERROR_TYPE = 'reportingApiError';
 
-export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
@@ -51,6 +50,23 @@ export enum JOB_STATUSES {
   FAILED = 'failed',
   WARNINGS = 'completed_with_warnings',
 }
+
+export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
+
+// This is deprecated because it lacks support for runtime fields
+// but the extension points are still needed for pre-existing scripted automation, until 8.0
+export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
+export const CSV_JOB_TYPE_DEPRECATED = 'csv';
+
+export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
+
+// Licenses
+export const LICENSE_TYPE_TRIAL = 'trial' as const;
+export const LICENSE_TYPE_BASIC = 'basic' as const;
+export const LICENSE_TYPE_CLOUD_STANDARD = 'standard' as const;
+export const LICENSE_TYPE_GOLD = 'gold' as const;
+export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
+export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 
 /**
  * A way to get the client side route for the reporting redirect app.
