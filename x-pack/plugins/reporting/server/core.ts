@@ -457,11 +457,16 @@ export class ReportingCore {
   }
 
   public async getCsvSearchSourceImmediate() {
-    return new CsvSearchSourceImmediateExportType(
+    const startDeps = await this.getPluginStartDeps();
+
+    const csvImmediateExport = new CsvSearchSourceImmediateExportType(
       this.core,
       this.config,
       this.logger,
       this.context
     );
+    csvImmediateExport.setup(this.getPluginSetupDeps());
+    csvImmediateExport.start({ ...startDeps, reporting: this.getContract() });
+    return csvImmediateExport;
   }
 }
