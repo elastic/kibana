@@ -7,7 +7,8 @@
 
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import { JSONLoader, loadInBatches } from '../loaders';
+import { JSONLoader } from '@loaders.gl/json';
+import { loadInBatches } from '@loaders.gl/core';
 import type { ImportFailure } from '../../../../common/types';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
