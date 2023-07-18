@@ -12,11 +12,13 @@ import { createPromiseFromStreams } from '@kbn/utils';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { ImportQuerySchemaDecoded } from '@kbn/securitysolution-io-ts-types';
-import { importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { ImportRulesResponse } from '../../../../../../../common/detection_engine/rule_management';
+import type { ImportRulesRequestQueryDecoded } from '../../../../../../../common/api/detection_engine/rule_management';
+import {
+  ImportRulesRequestQuery,
+  ImportRulesResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
@@ -48,8 +50,8 @@ export const importRulesRoute = (
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
       validate: {
-        query: buildRouteValidation<typeof importQuerySchema, ImportQuerySchemaDecoded>(
-          importQuerySchema
+        query: buildRouteValidation<typeof ImportRulesRequestQuery, ImportRulesRequestQueryDecoded>(
+          ImportRulesRequestQuery
         ),
         body: schema.any(), // validation on file object is accomplished later in the handler.
       },
