@@ -1,0 +1,36 @@
+ debg KIBANA_CI_STATS_CONFIG environment variable not found, disabling CiStatsReporter
+ debg Loading config file from x-pack/test/detection_engine_api_integration/security_and_spaces/update_prebuilt_rules_package/config.ts
+ debg Loading config file from x-pack/test/detection_engine_api_integration/security_and_spaces/config.base.ts
+ debg Loading config file from x-pack/test/api_integration/config.ts
+ debg Loading config file from x-pack/test/functional/config.base.js
+ debg Loading config file from test/common/config.js
+ debg Loading config file from test/functional/config.base.js
+ debg Only running suites which are compatible with ES version 8.10.0
+ debg randomness seed: 1689677926000
+ debg ===============creating system indices role and user===============
+ debg ===============creating roles and users===============
+ debg deleting user test_user
+ debg deleted user test_user
+ debg default roles = superuser
+ debg creating user test_user
+ debg created user test_user
+ debg Only running suites which are compatible with ES version 8.10.0
+ info Starting tests
+
+ └-: update_prebuilt_rules_package
+   └-> "before all" hook: beforeTestSuite.trigger for "should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package"
+   └-> "before all" hook for "should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package"
+   └-> should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package
+     └-> "before each" hook: global before each for "should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package"
+     └-> "before each" hook for "should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package"
+Length statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install: 776
+Length prebuiltRulesToInstallReview.stats.num_rules_to_install: 776
+Length installPrebuiltRulesResponse.summary.succeeded: 776
+Length: rulesResponse 776
+Length rulesResponseAfterPackageUpdate: 20 { rule_id: '208dbe77-01ed-4954-8d44-1e5751cb20de' } { rule_id: '15c0b7a7-9c34-4869-b25b-fa6518414899' } { rule_id: '2dd480be-1263-4d9c-8672-172928f6789a' } { rule_id: '1f0a69c0-3392-4adf-b7d5-6012fd292da8' } { rule_id: '31b4c719-f2b4-41f6-a9bd-fce93c2eaf62' } { rule_id: '1fe3b299-fbb5-4657-a937-1d746f2c711a' } { rule_id: '58c6d58b-a0d3-412d-b3b8-0981a9400607' } { rule_id: '2de87d72-ee0c-43e2-b975-5f0b029ac600' } { rule_id: 'a7ccae7b-9d2c-44b2-a061-98e5946971fa' } { rule_id: '52376a86-ee86-4967-97ae-1a05f55816f0' } { rule_id: '22599847-5d13-48cb-8872-5796fee8692b' } { rule_id: '9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae5' } { rule_id: '33f306e8-417c-411b-965c-c2812d6d3f4d' } { rule_id: '440e2db4-bc7f-4c96-a068-65b78da59bde' } { rule_id: '6ea41894-66c3-4df7-ad6b-2c5074eb3df8' } { rule_id: '61ac3638-40a3-44b2-855a-985636ca985e' } { rule_id: 'ab75c24b-2502-43a0-bf7c-e60e662c811e' } { rule_id: 'ad84d445-b1ce-4377-82d9-7c633f28bf9a' } { rule_id: '2e29e96a-b67c-455a-afe4-de6183431d0d' } { rule_id: '71bccb61-e19b-452f-b104-79a60e546a95' }
+Length installPrebuiltRulesResponseAfterLatestPackageInstallation: 55 { rule_id: 'c8935a8b-634a-4449-98f7-bb24d3b2c0af' } { rule_id: '17b0a495-4d9f-414c-8ad0-92f018b8e001' } { rule_id: 'fa210b61-b627-4e5e-86f4-17e8270656ab' } { rule_id: '420e5bb4-93bf-40a3-8f4a-4cc1af90eca1' } { rule_id: '9661ed8b-001c-40dc-a777-0983b7b0c91a' } { rule_id: '6e1a2cc4-d260-11ed-8829-f661ea17fbcc' } { rule_id: '1a289854-5b78-49fe-9440-8a8096b1ab50' } { rule_id: 'f5488ac1-099e-4008-a6cb-fb638a0f0828' } { rule_id: '66712812-e7f2-4a1d-bbda-dd0b5cf20c5d' } { rule_id: '28738f9f-7427-4d23-bc69-756708b5f624' } { rule_id: '43d6ec12-2b1c-47b5-8f35-e9de65551d3b' } { rule_id: '03a514d9-500e-443e-b6a9-72718c548f6c' } { rule_id: '0859355c-0f08-4b43-8ff5-7d2a4789fc08' } { rule_id: '4ec47004-b34a-42e6-8003-376a123ea447' } { rule_id: '0787daa6-f8c5-453b-a4ec-048037f6c1cd' } { rule_id: '48b3d2e3-f4e8-41e6-95e6-9b2091228db3' } { rule_id: '494ebba4-ecb7-4be4-8c6f-654c686549ad' } { rule_id: '521fbe5c-a78d-4b6b-a323-f978b0e4c4c0' } { rule_id: '4b1a807a-4e7b-414e-8cea-24bf580f6fc5' } { rule_id: '53617418-17b4-4e9c-8a2c-8deb8086ca4b' } { rule_id: '7592c127-89fb-4209-a8f6-f9944dfd7e02' } { rule_id: '0c41e478-5263-4c69-8f9e-7dfd2c22da64' } { rule_id: '7fb500fa-8e24-4bd1-9480-2a819352602c' } { rule_id: 'aab184d3-72b3-4639-b242-6597c99d8bca' } { rule_id: '6c6bb7ea-0636-44ca-b541-201478ef6b50' } { rule_id: '96d11d31-9a79-480f-8401-da28b194608f' } { rule_id: '475b42f0-61fb-4ef0-8a85-597458bfb0a1' } { rule_id: 'aebaa51f-2a91-4f6a-850b-b601db2293f4' } { rule_id: '40ddbcc8-6561-44d9-afc8-eefdbfe0cccd' } { rule_id: '781f8746-2180-4691-890c-4c96d11ca91d' } { rule_id: '5a3d5447-31c9-409a-aed1-72f9921594fd' } { rule_id: 'a52a9439-d52c-401c-be37-2785235c6547' } { rule_id: 'ff10d4d8-fea7-422d-afb1-e5a2702369a9' } { rule_id: '0171f283-ade7-4f87-9521-ac346c68cc9b' } { rule_id: 'f7769104-e8f9-4931-94a2-68fc04eadec3' } { rule_id: '76e4d92b-61c1-4a95-ab61-5fd94179a1ee' } { rule_id: 'a1c2589e-0c8c-4ca8-9eb6-f83c4bbdbe8f' } { rule_id: '4973e46b-a663-41b8-a875-ced16dda2bb0' } { rule_id: '80084fa9-8677-4453-8680-b891d3c0c778' } { rule_id: '4d4c35f4-414e-4d0c-bb7e-6db7c80a6957' } { rule_id: '8d3d0794-c776-476b-8674-ee2e685f6470' } { rule_id: 'bbaa96b9-f36c-4898-ace2-581acb00a409' } { rule_id: 'dc0b7782-0df0-47ff-8337-db0d678bdb66' } { rule_id: 'ec604672-bed9-43e1-8871-cf591c052550' } { rule_id: '2a692072-d78d-42f3-a48a-775677d79c4e' } { rule_id: '474fd20e-14cc-49c5-8160-d9ab4ba16c8b' } { rule_id: 'f16fca20-4d6c-43f9-aec1-20b6de3b0aeb' } { rule_id: 'a8afdce2-0ec1-11ee-b843-f661ea17fbcd' } { rule_id: 'a61809f3-fb5b-465c-8bff-23a8a068ac60' } { rule_id: 'ef100a2e-ecd4-4f72-9d1e-2f779ff3c311' } { rule_id: 'e9001ee6-2d00-4d2f-849e-b8b1fb05234c' } { rule_id: 'f530ca17-153b-4a7a-8cd3-98dd4b4ddf73' } { rule_id: 'edfd5ca9-9d6c-44d9-b615-1e56b920219c' } { rule_id: 'fa3a59dc-33c3-43bf-80a9-e8437a922c7f' } { rule_id: 'f3e22c8b-ea47-45d1-b502-b57b6de950b3' }
+     └- ✓ pass  (26.2s)
+   └-> "after all" hook: afterTestSuite.trigger for "should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package"
+
+1 passing (45.7s)
+
