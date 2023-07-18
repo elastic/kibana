@@ -77,7 +77,16 @@ export const cli = () => {
     async () => {
       const { argv } = yargs(process.argv.slice(2));
 
-      const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
+      // console.log(argv);
+      const cypressConfigPath =
+        argv.env === 'serverless'
+          ? '../../../../test_serverless/functional/test_suites/security/'
+          : '../../';
+      // console.log(cypressConfigPath);
+      const cypressConfigFile = await import(
+        require.resolve(`${cypressConfigPath}${argv.configFile}`)
+      );
+      // console.log(cypressConfigFile);
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 

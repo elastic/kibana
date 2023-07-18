@@ -5,9 +5,7 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress:open": "../../../../../../node_modules/.bin/cypress open --config-file ./cypress.config.ts",
-    "cypress:run": "../../../../../../node_modules/.bin/cypress run --browser chrome --config-file ./cypress.config.ts",
-    "cypress:serverless:open": "node ../../../../../../scripts/functional_tests --config ./config_visual.ts",
-    "cypress:serverless:run":  "node ../../../../../../scripts/functional_tests --config ./config_headless.ts"
+    "cypress:open": "node ../../../../../plugins/security_solution/scripts/start_cypress_parallel open --env serverless --config-file ./cypress/cypress.config.ts --ftr-config-file ./security_config.ts",
+    "cypress:run": "../../../../../../node_modules/.bin/cypress run --browser chrome --config-file ./cypress.config.ts"
   }
 }
