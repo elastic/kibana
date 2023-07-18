@@ -60,6 +60,7 @@ import { mapSourceToLogView } from './utils/map_source_to_log_view';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
     logs: schema.conditional(
       schema.contextRef('serverless'),
@@ -83,7 +84,6 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         group_by_page_size: schema.number({ defaultValue: 10_000 }),
       }),
     }),
-    enabled: schema.boolean({ defaultValue: true }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),
@@ -155,9 +155,6 @@ export class InfraServerPlugin
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
-    if (!this.config.enabled) {
-      return {} as InfraPluginSetup;
-    }
     const framework = new KibanaFramework(core, this.config, plugins);
     const sources = new InfraSources({
       config: this.config,
@@ -263,10 +260,6 @@ export class InfraServerPlugin
   }
 
   start(core: CoreStart) {
-    if (!this.config.enabled) {
-      return {} as InfraPluginStart;
-    }
-
     const inventoryViews = this.inventoryViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,

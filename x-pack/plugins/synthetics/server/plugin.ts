@@ -40,21 +40,17 @@ export class Plugin implements PluginType {
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
-  private readonly config: UptimeConfig;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = initializerContext;
-    this.config = this.initContext.config.get();
     this.logger = initializerContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
-    if (!this.config.enabled) {
-      return {};
-    }
+    const config = this.initContext.config.get<UptimeConfig>();
 
-    savedObjectsAdapter.config = this.config;
+    savedObjectsAdapter.config = config;
 
     this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
@@ -73,7 +69,7 @@ export class Plugin implements PluginType {
     });
 
     this.server = {
-      config: this.config,
+      config,
       router: core.http.createRouter(),
       cloud: plugins.cloud,
       stackVersion: this.initContext.env.packageInfo.version,
@@ -102,9 +98,6 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, pluginsStart: SyntheticsPluginsStartDependencies) {
-    if (!this.config.enabled) {
-      return {};
-    }
     this.savedObjectsClient = new SavedObjectsClient(
       coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
     );
