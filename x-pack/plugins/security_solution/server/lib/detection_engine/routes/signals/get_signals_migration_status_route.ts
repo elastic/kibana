@@ -8,7 +8,7 @@
 import { transformError, getIndexAliases } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../../common/constants';
-import { getSignalsMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema';
+import { getSignalsMigrationStatusSchema } from '../../../../../common/api/detection_engine/signals_migration';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getMigrationSavedObjectsByIndex } from '../../migrations/get_migration_saved_objects_by_index';
