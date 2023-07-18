@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Check that all prebuilt rules were actually installed
       expect(rulesResponse.total).toBe(installPrebuiltRulesResponse.summary.succeeded);
       expect(
-        installPrebuiltRulesResponse.results.created.map((rule) => ({ rule_id: rule.rule_id }))
+        installPrebuiltRulesResponse.results.created.map((rule: { rule_id: string }) => ({ rule_id: rule.rule_id }))
       ).toEqual(
         expect.arrayContaining(
           rulesResponse.data.map((rule: { rule_id: string }) => ({ rule_id: rule.rule_id }))
