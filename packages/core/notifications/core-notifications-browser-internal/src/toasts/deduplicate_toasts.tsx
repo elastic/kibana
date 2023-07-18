@@ -10,8 +10,6 @@ import { Toast } from '@kbn/core-notifications-browser';
 import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
-const TOAST_TIMEOUT_LONG = 6e6;
-
 /**
  * Collects toast messages to groups based on the `getKeyOf` function,
  * then represents every group of message with a single toast
@@ -79,7 +77,7 @@ function mergeToasts(toasts: Toast[], closeAll: () => void) {
     ...firstElement,
     id: key,
     text: firstElement.text,
-    toastLifeTimeMs: TOAST_TIMEOUT_LONG,
+    toastLifeTimeMs: firstElement.toastLifeTimeMs,
     onClose: closeAll,
     title: (
       <>
