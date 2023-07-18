@@ -31,36 +31,7 @@ import {
 import { BenchmarkId } from '../../../common/types';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
-export interface ResourcesStats {
-  benchmarks: {
-    buckets: BenchmarkBucket[];
-  };
-}
 
-interface BenchmarkBucket {
-  key: string;
-  doc_count: number;
-  by_resource_id: {
-    buckets: ResourceIdBucket[];
-  };
-  overall_min_timestamp: {
-    value: number;
-  };
-}
-
-interface ResourceIdBucket {
-  key: string;
-  doc_count: number;
-
-  earliest_timestamp: {
-    value: number;
-  };
-}
-
-interface ResourceNameBucket {
-  key: string;
-  doc_count: number;
-}
 export const getRulesCountForPolicy = async (
   soClient: SavedObjectsClientContract,
   benchmarkId: BenchmarkId
@@ -112,56 +83,6 @@ const createBenchmarks = (
     })
   );
 };
-
-export const getFindingsByResourceAggQuery = () => ({
-  index: 'logs-cloud_security_posture.findings_latest-*',
-  query: {
-    bool: {
-      must: [
-        {
-          term: {
-            'rule.benchmark.posture_type': 'cspm',
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: 'now-480h',
-            },
-          },
-        },
-      ],
-    },
-  },
-  size: 0,
-  aggs: {
-    benchmarks: {
-      terms: {
-        field: 'rule.benchmark.name',
-      },
-      aggs: {
-        by_resource_id: {
-          terms: {
-            field: 'resource.id',
-            size: 10000,
-          },
-          aggs: {
-            min_timestamp: {
-              min: {
-                field: '@timestamp',
-              },
-            },
-          },
-        },
-        overall_min_timestamp: {
-          min_bucket: {
-            buckets_path: 'by_resource_id>min_timestamp',
-          },
-        },
-      },
-    },
-  },
-});
 
 export const defineGetBenchmarksRoute = (router: CspRouter) =>
   router.versioned
@@ -220,34 +141,6 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
             ...cspPackagePolicies,
             items: benchmarks,
           };
-
-          const response2 = await cspContext.esClient.asCurrentUser.search<unknown, ResourcesStats>(
-            getFindingsByResourceAggQuery()
-          );
-
-          const cspmBenchmarks = response2.aggregations?.benchmarks.buckets;
-
-          const sumResources = cspmBenchmarks
-            ?.map((benchmarkBucket: BenchmarkBucket) => {
-              return benchmarkBucket.by_resource_id.buckets.length;
-            })
-            .reduce((total: number, docCount: number) => total + docCount, 0);
-
-          console.log({ sumResources });
-          const earliestTimestampArray = cspmBenchmarks?.map((benchmarkBucket: BenchmarkBucket) => {
-            return benchmarkBucket.overall_min_timestamp.value;
-          });
-
-          const minTimestamp: number = Math.min(...earliestTimestampArray!);
-
-          console.log({ minTimestamp });
-
-          const minTimestampDate: Date = new Date(minTimestamp!);
-
-          console.log({ minTimestampDate });
-          // const humanReadableTimestamp2: string = minTimestampDate.toISOString();
-          // const humanReadableTimestamp3: string = minTimestampDate.toLocaleDateString();
-          // console.log({ humanReadableTimestamp3 });
 
           return response.ok({
             body: getBenchmarkResponse,
