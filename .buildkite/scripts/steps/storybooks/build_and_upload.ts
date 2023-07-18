@@ -85,7 +85,9 @@ const build = async () => {
   const cpuCount = Math.max(os.cpus()?.length, 1);
   const buildStorybooks = STORYBOOKS.map(
     (storybook) => () =>
-      exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`)
+      Promise.resolve(
+        exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`)
+      )
   );
   return async.parallelLimit(buildStorybooks, cpuCount);
 };
