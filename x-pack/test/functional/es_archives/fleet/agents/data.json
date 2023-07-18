@@ -136,23 +136,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-agent-actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-actions",
-      "fleet-agent-actions": {
-        "agent_id": "agent1",
-        "type": "PAUSE",
-        "created_at": "2019-09-04T15:01:07+0000",
-        "sent_at": "2019-09-04T15:03:07+0000"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "ingest-agent-policies:policy1",
     "index": ".kibana_ingest",
     "source": {
@@ -162,7 +145,6 @@
         "namespace": "default",
         "description": "Policy 1",
         "status": "active",
-        "package_policies": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",
@@ -190,7 +172,6 @@
         "namespace": "default",
         "description": "Policy 2",
         "status": "active",
-        "package_policies": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",
@@ -205,4 +186,3 @@
     }
   }
 }
-

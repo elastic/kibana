@@ -187,9 +187,7 @@
         "encryptedAttribute": "JuDwwSjflpKmPKUIfjgo04E0DW9iyhp8C94hwvflgkS0SUUPt+862FQ1eja4VEfEG7HVUt7xxj+BWeZv9vrf4olxgbr4/f5RrT8BVic0EOVS9nhspiDVEv12mV0uDWGtdneB/UWyaZg+0Qr0tPrwceSl8BS///U=",
         "nonEncryptedAttribute": "elastic"
       },
-      "migrationVersion": {
-        "saved-object-with-migration": "7.7.0"
-      },
+      "typeMigrationVersion":  "7.7.0",
       "references": [],
       "type": "saved-object-with-migration",
       "updated_at": "2020-06-17T15:35:39.839Z"
@@ -210,9 +208,7 @@
       "type": "saved-object-with-migration",
       "references": [],
       "namespace": "custom-space",
-      "migrationVersion": {
-        "saved-object-with-migration": "7.7.0"
-      },
+      "typeMigrationVersion":  "7.7.0",
       "updated_at": "2021-07-27T12:46:23.881Z"
     }
   }
@@ -231,9 +227,7 @@
       },
       "type": "saved-object-with-migration",
       "references": [],
-      "migrationVersion": {
-        "saved-object-with-migration": "7.9.0"
-      },
+      "typeMigrationVersion":  "7.9.0",
       "updated_at": "2021-07-27T15:49:22.324Z"
     }
   }
@@ -253,9 +247,7 @@
       "type": "saved-object-with-migration",
       "references": [],
       "namespace": "custom-space",
-      "migrationVersion": {
-        "saved-object-with-migration": "7.9.0"
-      },
+      "typeMigrationVersion":  "7.9.0",
       "updated_at": "2021-07-27T15:49:22.509Z"
     }
   }
