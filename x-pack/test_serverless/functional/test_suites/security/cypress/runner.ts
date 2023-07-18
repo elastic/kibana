@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Url from 'url';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export type { FtrProviderContext } from '../../../ftr_provider_context';

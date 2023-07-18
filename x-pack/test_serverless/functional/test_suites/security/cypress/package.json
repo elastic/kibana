@@ -5,7 +5,7 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress:open": "node ../../../../../plugins/security_solution/scripts/start_cypress_parallel open --env serverless --config-file ./cypress/cypress.config.ts --ftr-config-file ./security_config.ts",
+    "cypress:open": "node ../../../../../plugins/security_solution/scripts/start_cypress_parallel open --config-file ../../../x-pack/test_serverless/functional/test_suites/security/cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test_serverless/functional/test_suites/security/cypress/security_config",
     "cypress:run": "../../../../../../node_modules/.bin/cypress run --browser chrome --config-file ./cypress.config.ts"
   }
 }
