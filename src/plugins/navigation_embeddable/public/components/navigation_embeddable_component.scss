@@ -40,8 +40,6 @@
     flex-direction: row;
 
     .navigationLink {
-      max-width: 60ch;
-
       &.navigationLinkCurrent {
         box-shadow: $euiColorPrimary 0px -2px 0px inset;
 

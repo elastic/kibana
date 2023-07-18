@@ -21,7 +21,7 @@ import { NavigationEmbeddableInput } from '../embeddable/types';
 import { memoizedFetchDashboards } from '../components/dashboard_link/dashboard_link_tools';
 
 const LazyNavigationEmbeddablePanelEditor = React.lazy(
-  () => import('../components/navigation_embeddable_panel_editor')
+  () => import('../components/editor/navigation_embeddable_panel_editor')
 );
 
 const NavigationEmbeddablePanelEditor = withSuspense(

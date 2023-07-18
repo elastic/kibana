@@ -14,7 +14,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { coreServices } from '../services/kibana_services';
 import { NavigationEmbeddableLink } from '../embeddable/types';
-import { NavigationEmbeddableLinkEditor } from '../components/navigation_embeddable_link_editor';
+import { NavigationEmbeddableLinkEditor } from '../components/editor/navigation_embeddable_link_editor';
 
 export interface LinkEditorProps {
   link?: NavigationEmbeddableLink;

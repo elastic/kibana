@@ -25,9 +25,9 @@ import {
   NavigationLinkInfo,
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
-} from '../embeddable/types';
-import { fetchDashboard } from './dashboard_link/dashboard_link_tools';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+} from '../../embeddable/types';
+import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
+import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
 
 export const NavigationEmbeddablePanelEditorLink = ({
   link,

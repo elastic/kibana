@@ -34,21 +34,21 @@ import {
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { coreServices } from '../services/kibana_services';
+import { coreServices } from '../../services/kibana_services';
 import {
   NavigationLayoutType,
   NavigationEmbeddableLink,
   NavigationEmbeddableInput,
   NavigationEmbeddableLinkList,
-} from '../embeddable/types';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+} from '../../embeddable/types';
+import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
 
-import { openLinkEditorFlyout } from '../editor/open_link_editor_flyout';
-import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
+import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
+import { memoizedGetOrderedLinkList } from '../../editor/navigation_embeddable_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
 
-import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
-import noLinksIllustrationLight from '../assets/empty_links_light.svg';
+import noLinksIllustrationDark from '../../assets/empty_links_dark.svg';
+import noLinksIllustrationLight from '../../assets/empty_links_light.svg';
 
 import './navigation_embeddable_editor.scss';
 

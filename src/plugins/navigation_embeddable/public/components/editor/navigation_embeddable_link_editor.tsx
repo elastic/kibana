@@ -35,11 +35,11 @@ import {
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
   DashboardItem,
-} from '../embeddable/types';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { NavigationEmbeddableUnorderedLink } from '../editor/open_link_editor_flyout';
-import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
-import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';
+} from '../../embeddable/types';
+import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
+import { NavigationEmbeddableUnorderedLink } from '../../editor/open_link_editor_flyout';
+import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
+import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 
 export const NavigationEmbeddableLinkEditor = ({
   link,
