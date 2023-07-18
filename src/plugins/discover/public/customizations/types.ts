@@ -28,7 +28,10 @@ export interface DiscoverProfileOptions {
   deepLinks?: AppDeepLink[];
 }
 
-export type DiscoverCustomize = (id: DiscoverProfileId, options: DiscoverProfileOptions) => void;
+export type RegisterCustomizationProfile = (
+  id: DiscoverProfileId,
+  options: DiscoverProfileOptions
+) => void;
 
 export type CustomizationCallback = (
   options: CustomizationCallbackContext

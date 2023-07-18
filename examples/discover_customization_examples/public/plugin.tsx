@@ -74,7 +74,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
       isOptionsOpen = false;
     };
 
-    discover.customize('customization-examples', {
+    discover.registerCustomizationProfile('customization-examples', {
       customize: async ({ customizations, stateContainer }) => {
         customizations.set({
           id: 'top_nav',

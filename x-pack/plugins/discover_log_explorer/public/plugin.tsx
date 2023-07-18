@@ -30,7 +30,7 @@ export class DiscoverLogExplorerPlugin
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover } = plugins;
 
-    discover.customize(LOG_EXPLORER_PROFILE_ID, {
+    discover.registerCustomizationProfile(LOG_EXPLORER_PROFILE_ID, {
       customize: createLogExplorerProfileCustomizations({ core }),
       deepLinks: [getLogExplorerDeepLink({ isVisible: this.config.featureFlags.deepLinkVisible })],
     });

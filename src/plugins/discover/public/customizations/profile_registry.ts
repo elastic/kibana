@@ -64,7 +64,7 @@ export const createCustomizeFunction =
     profile.customizationCallbacks.push(customize);
 
     if (Array.isArray(deepLinks) && profile.deepLinks) {
-      profile.deepLinks.push(...getUniqueDeepLinks(deepLinks));
+      profile.deepLinks = getUniqueDeepLinks([...profile.deepLinks, ...deepLinks]);
     } else if (Array.isArray(deepLinks)) {
       profile.deepLinks = getUniqueDeepLinks(deepLinks);
     }
@@ -81,15 +81,10 @@ const createProfile = (id: DiscoverProfileId): DiscoverProfile => ({
   deepLinks: [],
 });
 
-const getUniqueDeepLinks = (deepLinks: AppDeepLink[]) => {
-  return deepLinks.reduce<AppDeepLink[]>((list, deepLink) => {
-    const shouldAddLink = !containsDeepLink(list, deepLink);
-    if (shouldAddLink) {
-      list.push(deepLink);
-    }
-    return list;
-  }, []);
-};
+const getUniqueDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
+  const mapValues = deepLinks
+    .reduce((deepLinksMap, deepLink) => deepLinksMap.set(deepLink.id, deepLink), new Map())
+    .values();
 
-const containsDeepLink = (deepLinks: AppDeepLink[], deepLink: AppDeepLink) =>
-  Boolean(deepLinks?.find((link) => link.id === deepLink.id));
+  return Array.from(mapValues);
+};

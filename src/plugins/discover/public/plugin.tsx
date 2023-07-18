@@ -73,7 +73,7 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import type { DiscoverCustomize } from './customizations';
+import type { RegisterCustomizationProfile } from './customizations';
 import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 
@@ -160,7 +160,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly customize: DiscoverCustomize;
+  readonly registerCustomizationProfile: RegisterCustomizationProfile;
 }
 
 /**
@@ -430,7 +430,7 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      customize: createCustomizeFunction(this.profileRegistry),
+      registerCustomizationProfile: createCustomizeFunction(this.profileRegistry),
     };
   }
 
