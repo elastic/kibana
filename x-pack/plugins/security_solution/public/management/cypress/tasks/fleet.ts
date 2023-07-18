@@ -15,6 +15,8 @@ import {
   agentRouteService,
   epmRouteService,
   packagePolicyRouteService,
+  AGENTS_PREFIX,
+  PACKAGES_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { PutAgentReassignResponse } from '@kbn/fleet-plugin/common/types';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -31,7 +33,7 @@ export const getAgentByHostName = (hostname: string): Cypress.Chainable<Agent> =
     url: agentRouteService.getListPath(),
     method: 'GET',
     qs: {
-      kuery: `fleet-agents.local_metadata.host.hostname: "${hostname}"`,
+      kuery: `${AGENTS_PREFIX}.local_metadata.host.hostname: "${hostname}"`,
     },
   }).then((response) => response.body.items[0]);
 
@@ -52,7 +54,7 @@ export const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
     method: 'GET',
     url: packagePolicyRouteService.getListPath(),
     qs: {
-      kuery: 'ingest-package-policies.package.name: endpoint',
+      kuery: `${PACKAGES_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   }).then(({ body }) => {
     return body.items?.[0]?.revision ?? -1;
