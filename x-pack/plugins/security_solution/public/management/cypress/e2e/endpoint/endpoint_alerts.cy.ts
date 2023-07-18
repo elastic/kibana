@@ -88,7 +88,7 @@ describe('Endpoint generated alerts', () => {
       })
       .then(() => {
         return navigateToAlertsList(
-          `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
+          `query=(language:kuery,query:'fleet-agents.agent.id: "${createdHost.agentId}" ')`
         );
       });
 

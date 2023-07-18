@@ -31,7 +31,7 @@ export const getAgentByHostName = (hostname: string): Cypress.Chainable<Agent> =
     url: agentRouteService.getListPath(),
     method: 'GET',
     qs: {
-      kuery: `local_metadata.host.hostname: "${hostname}"`,
+      kuery: `fleet-agents.local_metadata.host.hostname: "${hostname}"`,
     },
   }).then((response) => response.body.items[0]);
 
