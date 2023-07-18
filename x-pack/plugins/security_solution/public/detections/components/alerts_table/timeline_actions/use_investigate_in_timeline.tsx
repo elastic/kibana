@@ -9,7 +9,10 @@ import { useDispatch } from 'react-redux';
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import type { ExceptionListId } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListId,
+  ExceptionListIdentifiers,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
@@ -35,6 +38,49 @@ interface UseInvestigateInTimelineActionProps {
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
+const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
+  let exceptionsList = getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? [];
+  let detectionExceptionsList: ExceptionListId[] = [];
+  try {
+    if (Array.isArray(exceptionsList) && exceptionsList.length === 0) {
+      const ruleParameters = getField(ecsData, ALERT_RULE_PARAMETERS) ?? {};
+      if (ruleParameters.length > 0) {
+        const parametersObject = JSON.parse(ruleParameters[0]);
+        exceptionsList = parametersObject?.exceptions_list ?? [];
+      }
+    } else if (exceptionsList && exceptionsList.list_id) {
+      return exceptionsList.list_id
+        .map((listId: string, index: number) => {
+          const type = exceptionsList.type[index];
+          return {
+            exception_list_id: listId,
+            namespace_type: exceptionsList.namespace_type[index],
+            type,
+          };
+        })
+        .filter((exception: ExceptionListIdentifiers) => exception.type === 'detection');
+    }
+  } catch (error) {
+    // do nothing, just fail silently as parametersObject is initialized
+  }
+  detectionExceptionsList = exceptionsList.reduce(
+    (acc: ExceptionListId[], next: string | object) => {
+      // parsed rule.parameters returns an object else use the default string representation
+      const parsedList = typeof next === 'string' ? JSON.parse(next) : next;
+      if (parsedList.type === 'detection') {
+        const formattedList = {
+          exception_list_id: parsedList.list_id,
+          namespace_type: parsedList.namespace_type,
+        };
+        acc.push(formattedList);
+      }
+      return acc;
+    },
+    []
+  );
+  return detectionExceptionsList;
+};
+
 export const useInvestigateInTimeline = ({
   ecsRowData,
   onInvestigateInTimelineAlertClick,
@@ -51,39 +97,7 @@ export const useInvestigateInTimeline = ({
 
   const getExceptionFilter = useCallback(
     async (ecsData: Ecs): Promise<Filter | undefined> => {
-      // This pulls exceptions list information from `_source`
-      // This primarily matters for the old `signal` alerts a user may be viewing
-      // as new exception lists are pulled from kibana.alert.rule.parameters[0].exception_lists;
-      // Source was removed in favour of the fields api which passes the exceptions_list via `kibana.alert.rule.parameters`
-      let exceptionsList = getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? [];
-
-      if (exceptionsList.length === 0) {
-        try {
-          const ruleParameters = getField(ecsData, ALERT_RULE_PARAMETERS) ?? {};
-          if (ruleParameters.length > 0) {
-            const parametersObject = JSON.parse(ruleParameters[0]);
-            exceptionsList = parametersObject?.exceptions_list ?? [];
-          }
-        } catch (error) {
-          // do nothing, just fail silently as parametersObject is initialized
-        }
-      }
-      const detectionExceptionsLists = exceptionsList.reduce(
-        (acc: ExceptionListId[], next: string | object) => {
-          // parsed rule.parameters returns an object else use the default string representation
-          const parsedList = typeof next === 'string' ? JSON.parse(next) : next;
-          if (parsedList.type === 'detection') {
-            const formattedList = {
-              exception_list_id: parsedList.list_id,
-              namespace_type: parsedList.namespace_type,
-            };
-            acc.push(formattedList);
-          }
-          return acc;
-        },
-        []
-      );
-
+      const detectionExceptionsLists = detectionExceptionList(ecsData);
       let exceptionFilter;
       if (detectionExceptionsLists.length > 0) {
         await getExceptionFilterFromIds({
