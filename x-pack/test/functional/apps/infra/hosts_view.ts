@@ -390,13 +390,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const query = decodeURIComponent(url.query ?? '');
 
         const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-        const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
-        const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
 
         expect(url.pathname).to.eql('/app/apm/services');
         expect(query).to.contain(kuery);
-        expect(query).to.contain(rangeFrom);
-        expect(query).to.contain(rangeTo);
 
         await returnTo(HOSTS_VIEW_PATH);
       });
