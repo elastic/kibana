@@ -7,6 +7,7 @@
 
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import type { Batch } from '@loaders.gl/schema';
 import { JSONLoader } from '@loaders.gl/json';
 import { loadInBatches } from '@loaders.gl/core';
 import type { ImportFailure } from '../../../../common/types';
@@ -16,15 +17,8 @@ export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 const SUPPORTED_CRS_LIST = ['EPSG:4326', 'urn:ogc:def:crs:OGC:1.3:CRS84'];
 
-interface LoaderBatch {
-  bytesUsed?: number;
-  batchType?: string;
-  container?: Feature;
-  data?: Feature[];
-}
-
 export class GeoJsonImporter extends AbstractGeoFileImporter {
-  private _iterator?: AsyncIterator<LoaderBatch>;
+  private _iterator?: AsyncIterator<Omit<Batch, 'data'> & { data: Feature[] }>;
   private _prevBatchLastFeature?: Feature;
 
   protected async _readNext(prevTotalFeaturesRead: number, prevTotalBytesRead: number) {
