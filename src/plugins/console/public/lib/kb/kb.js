@@ -40,10 +40,6 @@ const parametrizedComponentFactories = {
   },
   index: function (name, parent) {
     if (isNotAnIndexName(name)) return;
-    return new IndexAutocompleteComponent(name, parent, false);
-  },
-  indices: function (name, parent) {
-    if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, true);
   },
   type: function (name, parent) {
@@ -79,7 +75,7 @@ const parametrizedComponentFactories = {
   field: function (name, parent) {
     return new FieldAutocompleteComponent(name, parent, false);
   },
-  nodes: function (name, parent) {
+  node_id: function (name, parent) {
     return new ListComponent(
       name,
       ['_local', '_master', 'data:true', 'data:false', 'master:true', 'master:false'],
