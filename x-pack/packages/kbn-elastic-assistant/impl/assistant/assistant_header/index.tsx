@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,8 +42,12 @@ interface OwnProps {
 }
 
 type Props = OwnProps;
-
-export const AssistantHeader: FunctionComponent<Props> = ({
+/**
+ * Renders the header of the Elastic AI Assistant.
+ * Provide a user interface for selecting and managing conversations,
+ * toggling the display of anonymized values, and accessing the assistant settings.
+ */
+export const AssistantHeader: React.FC<Props> = ({
   currentConversation,
   currentTitle,
   defaultConnectorId,
@@ -76,7 +80,7 @@ export const AssistantHeader: FunctionComponent<Props> = ({
         justifyContent={'spaceBetween'}
       >
         <EuiFlexItem grow={false}>
-          <AssistantTitle currentTitle={currentTitle} docLinks={docLinks} />
+          <AssistantTitle {...currentTitle} docLinks={docLinks} />
         </EuiFlexItem>
 
         <EuiFlexItem

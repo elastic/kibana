@@ -11,7 +11,8 @@ import { AssistantTitle } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
 const testProps = {
-  currentTitle: { title: 'Test Title', titleIcon: 'globe' },
+  title: 'Test Title',
+  titleIcon: 'globe',
   docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: '7.15' },
 };
 describe('AssistantTitle', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -20,7 +20,11 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const BlockBotCallToAction: FunctionComponent<Props> = ({
+/**
+ * Provides a call-to-action for users to upgrade their subscription or set up a connector
+ * depending on the isAssistantEnabled and isWelcomeSetup props.
+ */
+export const BlockBotCallToAction: React.FC<Props> = ({
   connectorPrompt,
   http,
   isAssistantEnabled,

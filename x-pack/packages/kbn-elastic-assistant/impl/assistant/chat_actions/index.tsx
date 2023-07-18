@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import * as i18n from '../translations';
+import { CLEAR_CHAT, SUBMIT_MESSAGE } from '../translations';
 
 interface OwnProps {
   isDisabled: boolean;
@@ -18,8 +18,11 @@ interface OwnProps {
 }
 
 type Props = OwnProps;
-
-export const ChatActions: FunctionComponent<Props> = ({
+/**
+ * Renders two EuiButtonIcon components with tooltips for clearing the chat and submitting a message,
+ * while handling the disabled and loading states of the buttons.
+ */
+export const ChatActions: React.FC<Props> = ({
   isDisabled,
   isLoading,
   onChatCleared,
@@ -34,9 +37,9 @@ export const ChatActions: FunctionComponent<Props> = ({
       gutterSize="xs"
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="right" content={i18n.CLEAR_CHAT}>
+        <EuiToolTip position="right" content={CLEAR_CHAT}>
           <EuiButtonIcon
-            aria-label={i18n.CLEAR_CHAT}
+            aria-label={CLEAR_CHAT}
             color="danger"
             data-test-subj="clear-chat"
             display="base"
@@ -47,9 +50,9 @@ export const ChatActions: FunctionComponent<Props> = ({
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="right" content={i18n.SUBMIT_MESSAGE}>
+        <EuiToolTip position="right" content={SUBMIT_MESSAGE}>
           <EuiButtonIcon
-            aria-label={i18n.SUBMIT_MESSAGE}
+            aria-label={SUBMIT_MESSAGE}
             data-test-subj="submit-chat"
             color="primary"
             display="base"

@@ -8,30 +8,17 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { ChatSend, Props } from '.';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { useSendMessages } from '../use_send_messages';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { useConversation } from '../use_conversation';
-import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
+import { useChatSend } from './use_chat_send';
 import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
+import { emptyWelcomeConvo } from '../../mock/conversation';
+import { HttpSetup } from '@kbn/core-http-browser';
 
-jest.mock('../use_send_messages');
-jest.mock('../use_conversation');
+jest.mock('./use_chat_send');
 
-const setEditingSystemPromptId = jest.fn();
-const setPromptTextPreview = jest.fn();
-const setSelectedPromptContexts = jest.fn();
-const setUserPrompt = jest.fn();
-const sendMessages = jest.fn();
-const appendMessage = jest.fn();
-const appendReplacements = jest.fn();
-const clearConversation = jest.fn();
 const testProps: Props = {
   selectedPromptContexts: {},
   allSystemPrompts: [defaultSystemPrompt, mockSystemPrompt],
-  isDisabled: false,
-  shouldRefocusPrompt: false,
-  userPrompt: '',
   currentConversation: emptyWelcomeConvo,
   http: {
     basePath: {
@@ -42,77 +29,58 @@ const testProps: Props = {
     externalUrl: {},
   } as unknown as HttpSetup,
   editingSystemPromptId: defaultSystemPrompt.id,
-  setEditingSystemPromptId,
-  setPromptTextPreview,
-  setSelectedPromptContexts,
-  setUserPrompt,
+  setEditingSystemPromptId: () => {},
+  setPromptTextPreview: () => {},
+  setSelectedPromptContexts: () => {},
+  setUserPrompt: () => {},
+  isDisabled: false,
+  shouldRefocusPrompt: false,
+  userPrompt: '',
 };
-const robotMessage = 'Response message from the robot';
+const handleButtonSendMessage = jest.fn();
+const handleOnChatCleared = jest.fn();
+const handlePromptChange = jest.fn();
+const handleSendMessage = jest.fn();
+const chatSend = {
+  handleButtonSendMessage,
+  handleOnChatCleared,
+  handlePromptChange,
+  handleSendMessage,
+  isLoading: false,
+};
+
 describe('ChatSend', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useSendMessages as jest.Mock).mockReturnValue({
-      isLoading: false,
-      sendMessages: sendMessages.mockReturnValue(robotMessage),
-    });
-    (useConversation as jest.Mock).mockReturnValue({
-      appendMessage,
-      appendReplacements,
-      clearConversation,
-    });
+    (useChatSend as jest.Mock).mockReturnValue(chatSend);
   });
-  it('a message is sent with context when a valid prompt text is provided', async () => {
+  it('the prompt updates when the text area changes', async () => {
     const { getByTestId, rerender } = render(<ChatSend {...testProps} />, {
       wrapper: TestProviders,
     });
     const promptTextArea = getByTestId('prompt-textarea');
     const promptText = 'valid prompt text';
     fireEvent.change(promptTextArea, { target: { value: promptText } });
-    expect(setUserPrompt).toHaveBeenCalledWith(promptText);
-    rerender(<ChatSend {...testProps} userPrompt={promptText} />);
-    fireEvent.click(getByTestId('submit-chat'));
-    await waitFor(() => {
-      expect(sendMessages).toHaveBeenCalled();
-      const appendMessageSend = appendMessage.mock.calls[0][0];
-      const appendMessageResponse = appendMessage.mock.calls[1][0];
-      expect(appendMessageSend.message.content).toEqual(
-        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
-      );
-      expect(appendMessageSend.message.role).toEqual('user');
-      expect(appendMessageResponse.message.content).toEqual(robotMessage);
-      expect(appendMessageResponse.message.role).toEqual('assistant');
-    });
+    expect(handlePromptChange).toHaveBeenCalledWith(promptText);
   });
-  it('a message is sent with only provided prompt text and context already exists in convo history', async () => {
-    const props: Props = {
-      ...testProps,
 
-      currentConversation: welcomeConvo,
-    };
-
-    const { getByTestId, rerender } = render(<ChatSend {...props} />, {
-      wrapper: TestProviders,
-    });
-    const promptTextArea = getByTestId('prompt-textarea');
+  it('a message is sent when send button is clicked', async () => {
     const promptText = 'valid prompt text';
-    fireEvent.change(promptTextArea, { target: { value: promptText } });
-    expect(setUserPrompt).toHaveBeenCalledWith(promptText);
-    rerender(<ChatSend {...props} userPrompt={promptText} />);
+    const { getByTestId } = render(<ChatSend {...testProps} userPrompt={promptText} />, {
+      wrapper: TestProviders,
+    });
+    expect(getByTestId('prompt-textarea')).toHaveTextContent(promptText);
     fireEvent.click(getByTestId('submit-chat'));
     await waitFor(() => {
-      expect(appendMessage.mock.calls[0][0].message.content).toEqual(`\n\n${promptText}`);
+      expect(handleButtonSendMessage).toHaveBeenCalledWith(promptText);
     });
   });
 
-  it('the chat is cleared when the clear chat button is clicked', async () => {
-    const { getByTestId } = render(<ChatSend {...testProps} />, {
+  it('promptValue is set to empty string if isDisabled=true', async () => {
+    const promptText = 'valid prompt text';
+    const { getByTestId } = render(<ChatSend {...testProps} userPrompt={promptText} isDisabled />, {
       wrapper: TestProviders,
     });
-    fireEvent.click(getByTestId('clear-chat'));
-    expect(setPromptTextPreview).toHaveBeenCalledWith('');
-    expect(setUserPrompt).toHaveBeenCalledWith('');
-    expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
-    expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation.id);
-    expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
+    expect(getByTestId('prompt-textarea')).toHaveTextContent('');
   });
 });
