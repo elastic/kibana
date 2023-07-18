@@ -60,7 +60,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-   - command: .buildkite/scripts/steps/functional/security_serverless.sh
+  - command: .buildkite/scripts/steps/functional/security_serverless.sh
     label: 'Serverless Security Cypress Tests'
     agents:
       queue: n2-4-spot
