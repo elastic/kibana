@@ -11,12 +11,12 @@ import { GeoJsonImporter } from './geojson_importer';
   Blob.prototype.arrayBuffer = Blob.prototype.arrayBuffer || arrayBufferPolyFill;
   function arrayBufferPolyFill() {
     return new Promise((resolve) => {
-      let fr = new FileReader();
+      const fr = new FileReader();
       fr.onload = (event) => {
         resolve(event?.target?.result);
       };
       fr.readAsArrayBuffer(this);
-    })
+    });
   }
 })();
 

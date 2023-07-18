@@ -38,17 +38,19 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     };
 
     if (this._iterator === undefined) {
-      this._iterator = (await loadInBatches(this._getFile(), JSONLoader, {
-        // enabling metadata adds 3 additional batches to iterator output
-        // 1) batchType: 'metadata' - ignored
-        // 2) batchType: 'partial-result' - used to test for compatible crs, and fail early for incompatible crs
-        // n) batchType: 'data' - unchanged by enabling metadata option
-        // 3) batchType: 'final-result' - used to read top level feature when file is a single feature instead of feature collection
-        metadata: true,
-        json: {
-          jsonpaths: ['$.features'],
-        },
-      }))[Symbol.asyncIterator]();
+      this._iterator = (
+        await loadInBatches(this._getFile(), JSONLoader, {
+          // enabling metadata adds 3 additional batches to iterator output
+          // 1) batchType: 'metadata' - ignored
+          // 2) batchType: 'partial-result' - used to test for compatible crs, and fail early for incompatible crs
+          // n) batchType: 'data' - unchanged by enabling metadata option
+          // 3) batchType: 'final-result' - used to read top level feature when file is a single feature instead of feature collection
+          metadata: true,
+          json: {
+            jsonpaths: ['$.features'],
+          },
+        })
+      )[Symbol.asyncIterator]();
     }
 
     if (!this._getIsActive() || !this._iterator) {
