@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@e
 import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IgnoredReason } from '@kbn/discover-utils/types';
+import { IgnoredReason } from '@kbn/discover-utils';
 import { FieldRecord } from './table';
 import { DocViewTableRowBtnCollapse } from './legacy/table_row_btn_collapse';
 

@@ -14,4 +14,5 @@ export {
   getDocId,
   getIgnoredReason,
   getShouldShowFieldHandler,
+  IgnoredReason,
 } from './src';
