@@ -84,6 +84,7 @@ export class TaskManagerPlugin
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
   private metrics$ = new Subject<Metrics>();
+  private resetMetrics$ = new Subject<boolean>();
   private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private adHocTaskCounter: AdHocTaskCounter;
@@ -160,6 +161,7 @@ export class TaskManagerPlugin
     metricsRoute({
       router,
       metrics$: this.metrics$,
+      resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
 
@@ -288,6 +290,7 @@ export class TaskManagerPlugin
       this.elasticsearchAndSOAvailability$!,
       this.config!,
       this.logger,
+      this.resetMetrics$,
       this.taskPollingLifecycle
     ).subscribe((metric) => this.metrics$.next(metric));
 

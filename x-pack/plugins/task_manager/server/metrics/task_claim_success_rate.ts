@@ -6,22 +6,46 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
+import { combineLatest, filter, interval, map, merge, Observable, startWith } from 'rxjs';
 import { isOk } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent, TaskRun } from '../task_events';
 import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { SuccessRate } from './metrics_stream';
+import { TaskManagerConfig } from '../config';
 
 export type TaskClaimSuccessRate = JsonObject & SuccessRate;
 
 export function createTaskClaimAggregator(
-  taskPollingLifecycle: TaskPollingLifecycle
+  taskPollingLifecycle: TaskPollingLifecycle,
+  config: TaskManagerConfig,
+  resetMetrics$: Observable<boolean>
 ): AggregatedStatProvider<TaskClaimSuccessRate> {
-  const taskPollingCycleEventToSuccessMetric = createTaskPollingCycleEventToSuccessMetric();
+  let allClaimEvents = 0;
+  let successfulClaimEvents = 0;
+
+  // Resets the claim counters either when the reset interval has passed or
+  // a resetMetrics$ event is received
+  merge(
+    interval(config.metrics_reset_interval).pipe(map(() => true)),
+    resetMetrics$.pipe(map(() => true))
+  ).subscribe(() => {
+    allClaimEvents = 0;
+    successfulClaimEvents = 0;
+  });
+
   const taskClaimEvents$: Observable<TaskClaimSuccessRate> = taskPollingLifecycle.events.pipe(
     filter((taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent)),
-    map((taskEvent: TaskLifecycleEvent) => taskPollingCycleEventToSuccessMetric(taskEvent))
+    map((taskEvent: TaskLifecycleEvent) => {
+      const metric = taskPollingCycleEventToSuccessMetric(
+        taskEvent,
+        allClaimEvents,
+        successfulClaimEvents
+      );
+      allClaimEvents = metric.total;
+      successfulClaimEvents = metric.success;
+      return metric;
+    })
   );
 
   return combineLatest([
@@ -41,14 +65,14 @@ export function createTaskClaimAggregator(
   );
 }
 
-function createTaskPollingCycleEventToSuccessMetric() {
-  let allClaimEvents = 0;
-  let successfulClaimEvents = 0;
-  return (taskEvent: TaskLifecycleEvent): TaskClaimSuccessRate => {
-    const success = isOk((taskEvent as TaskRun).event);
-    return {
-      success: (successfulClaimEvents += success ? 1 : 0),
-      total: (allClaimEvents += 1),
-    };
+function taskPollingCycleEventToSuccessMetric(
+  taskEvent: TaskLifecycleEvent,
+  allClaimEvents: number,
+  successfulClaimEvents: number
+) {
+  const success = isOk((taskEvent as TaskRun).event);
+  return {
+    success: (successfulClaimEvents += success ? 1 : 0),
+    total: (allClaimEvents += 1),
   };
 }

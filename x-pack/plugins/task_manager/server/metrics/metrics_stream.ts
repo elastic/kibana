@@ -38,6 +38,7 @@ interface CreateMetricsAggregatorsOpts {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   config: TaskManagerConfig;
   logger: Logger;
+  resetMetrics$: Observable<boolean>;
   taskPollingLifecycle?: TaskPollingLifecycle;
 }
 export function createMetricsAggregators({
@@ -45,11 +46,12 @@ export function createMetricsAggregators({
   elasticsearchAndSOAvailability$,
   config,
   logger,
+  resetMetrics$,
   taskPollingLifecycle,
 }: CreateMetricsAggregatorsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [];
   if (taskPollingLifecycle) {
-    aggregators.push(createTaskClaimAggregator(taskPollingLifecycle));
+    aggregators.push(createTaskClaimAggregator(taskPollingLifecycle, config, resetMetrics$));
   }
   return merge(...aggregators);
 }

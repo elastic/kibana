@@ -12,7 +12,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { Observable } from 'rxjs';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Observable, Subject } from 'rxjs';
 import { Metrics } from '../metrics';
 
 export interface NodeMetrics {
@@ -25,11 +26,16 @@ export interface NodeMetrics {
 export interface MetricsRouteParams {
   router: IRouter;
   metrics$: Observable<Metrics>;
+  resetMetrics$: Subject<boolean>;
   taskManagerId: string;
 }
 
+const QuerySchema = schema.object({
+  reset: schema.boolean({ defaultValue: true }),
+});
+
 export function metricsRoute(params: MetricsRouteParams) {
-  const { router, metrics$, taskManagerId } = params;
+  const { router, metrics$, resetMetrics$, taskManagerId } = params;
 
   let lastMetrics: NodeMetrics | null = null;
 
@@ -42,13 +48,19 @@ export function metricsRoute(params: MetricsRouteParams) {
       path: `/api/task_manager/metrics`,
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
       // options: { tags: ['access:taskManager'] },
-      validate: false,
+      validate: {
+        query: QuerySchema,
+      },
     },
     async function (
       _: RequestHandlerContext,
-      __: KibanaRequest<unknown, unknown, unknown>,
+      req: KibanaRequest<unknown, TypeOf<typeof QuerySchema>, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
+      if (req.query.reset) {
+        resetMetrics$.next(true);
+      }
+
       return res.ok({
         body: lastMetrics
           ? lastMetrics

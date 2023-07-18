@@ -18,6 +18,7 @@ export function metricsStream(
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
   logger: Logger,
+  resetMetrics$: Observable<boolean>,
   taskPollingLifecycle?: TaskPollingLifecycle
 ): Observable<Metrics> {
   return createMetricsStream(
@@ -26,6 +27,7 @@ export function metricsStream(
       elasticsearchAndSOAvailability$,
       config,
       logger,
+      resetMetrics$,
       taskPollingLifecycle,
     })
   );
