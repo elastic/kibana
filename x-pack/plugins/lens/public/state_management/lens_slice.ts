@@ -147,11 +147,8 @@ export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
 export const applyChanges = createAction<void>('lens/applyChanges');
 export const setChangesApplied = createAction<boolean>('lens/setChangesApplied');
-export const updateState = createAction<{
-  updater: (prevState: LensAppState) => LensAppState;
-}>('lens/updateState');
 export const updateDatasourceState = createAction<{
-  updater: unknown | ((prevState: unknown) => unknown);
+  newDatasourceState: unknown;
   datasourceId: string;
   clearStagedPreview?: boolean;
   dontSyncLinkedDimensions?: boolean;
@@ -270,7 +267,6 @@ export const lensActions = {
   disableAutoApply,
   applyChanges,
   setChangesApplied,
-  updateState,
   updateDatasourceState,
   updateVisualizationState,
   insertLayer,
@@ -337,46 +333,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [setChangesApplied.type]: (state, { payload: applied }) => {
       state.changesApplied = applied;
-    },
-    [updateState.type]: (
-      state,
-      {
-        payload: { updater },
-      }: {
-        payload: {
-          updater: (prevState: LensAppState) => LensAppState;
-        };
-      }
-    ) => {
-      let newState: LensAppState = updater(current(state) as LensAppState);
-
-      if (newState.activeDatasourceId) {
-        const { datasourceState, visualizationState } = syncLinkedDimensions(
-          newState,
-          visualizationMap,
-          datasourceMap
-        );
-
-        newState = {
-          ...newState,
-          visualization: {
-            ...newState.visualization,
-            state: visualizationState,
-          },
-          datasourceStates: {
-            ...newState.datasourceStates,
-            [newState.activeDatasourceId]: {
-              ...newState.datasourceStates[newState.activeDatasourceId],
-              state: datasourceState,
-            },
-          },
-        };
-      }
-
-      return {
-        ...newState,
-        stagedPreview: undefined,
-      };
     },
     [cloneLayer.type]: (
       state,
@@ -647,7 +603,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload,
       }: {
         payload: {
-          updater: unknown | ((prevState: unknown) => unknown);
+          newDatasourceState: unknown;
           datasourceId: string;
           clearStagedPreview?: boolean;
           dontSyncLinkedDimensions: boolean;
@@ -661,10 +617,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         datasourceStates: {
           ...currentState.datasourceStates,
           [payload.datasourceId]: {
-            state:
-              typeof payload.updater === 'function'
-                ? payload.updater(currentState.datasourceStates[payload.datasourceId].state)
-                : payload.updater,
+            state: payload.newDatasourceState,
             isLoading: false,
           },
         },

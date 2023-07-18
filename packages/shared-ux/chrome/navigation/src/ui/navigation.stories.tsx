@@ -363,8 +363,20 @@ export const WithUIComponents = (args: NavigationServices) => {
           <Navigation.Group preset="ml" />
 
           <Navigation.Footer>
-            <Navigation.Group preset="devtools" />
-            <Navigation.Group preset="management" />
+            <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+            <Navigation.Group
+              id="project_settings_project_nav"
+              title="Project settings"
+              breadcrumbStatus="hidden"
+              icon="gear"
+            >
+              <Navigation.Group id="settings">
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
+                <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation.Group>
           </Navigation.Footer>
         </Navigation>
       </NavigationProvider>

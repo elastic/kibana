@@ -541,10 +541,6 @@ export function getFormBasedDatasource({
       );
     },
 
-    canCloseDimensionEditor: (state) => {
-      return !state.isDimensionClosePrevented;
-    },
-
     getDropProps,
     onDrop,
 

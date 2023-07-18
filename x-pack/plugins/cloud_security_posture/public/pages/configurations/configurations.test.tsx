@@ -43,7 +43,7 @@ jest.mock('../../common/navigation/use_csp_integration_link');
 const chance = new Chance();
 
 beforeEach(() => {
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
 
   (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
     createReactQueryResponse({

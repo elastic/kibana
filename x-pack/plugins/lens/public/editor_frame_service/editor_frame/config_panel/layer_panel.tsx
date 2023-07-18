@@ -787,12 +787,6 @@ export function LayerPanel(
         groupLabel={activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')}
         handleClose={() => {
           if (layerDatasource) {
-            if (
-              layerDatasource.canCloseDimensionEditor &&
-              !layerDatasource.canCloseDimensionEditor(layerDatasourceState)
-            ) {
-              return false;
-            }
             if (layerDatasource.updateStateOnCloseDimension) {
               const newState = layerDatasource.updateStateOnCloseDimension({
                 state: layerDatasourceState,
