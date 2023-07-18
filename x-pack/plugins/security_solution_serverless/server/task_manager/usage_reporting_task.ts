@@ -109,15 +109,13 @@ export class SecurityUsageReportingTask {
       logger: this.logger,
       lastSuccessfulReport,
     });
-    this.logger.info(
-      `${taskInstance.id} - received usage records: ${JSON.stringify(usageRecords)}`
-    );
+    this.logger.info(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
     try {
       usageReportResponse = await usageReportingService.reportUsage(usageRecords);
-      this.logger.info(`${taskInstance.id} - usage records report was sent successfully`);
+      this.logger.info(`usage records report was sent successfully`);
     } catch (err) {
       this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
     }

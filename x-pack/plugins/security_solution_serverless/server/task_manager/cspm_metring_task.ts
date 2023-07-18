@@ -55,48 +55,32 @@ export const cspmMetringCallback = async ({
 
     const cspmBenchmarks = response.aggregations?.benchmarks.buckets;
 
-    // TODO: handle cspmBenchmarks is undefined
-    const { sumResources, minTimestamp } = cspmBenchmarks!.reduce(
-      (accumulator, benchmarkBucket) => {
-        // Calculate the sum of resources
-        accumulator.sumResources += benchmarkBucket.by_resource_id.buckets.length;
+    const { sumResources, earliestTimestampArray } = cspmBenchmarks
+      ? cspmBenchmarks.reduce(
+          (accumulator, benchmarkBucket: BenchmarkBucket) => {
+            accumulator.sumResources += benchmarkBucket.by_resource_id.buckets.length;
+            accumulator.earliestTimestampArray.push(benchmarkBucket.overall_min_timestamp.value);
+            return accumulator;
+          },
+          { sumResources: 0, earliestTimestampArray: [] as number[] }
+        )
+      : { sumResources: 0, earliestTimestampArray: undefined };
 
-        // Find the minimum timestamp
-        accumulator.minTimestamp = isNaN(accumulator.minTimestamp)
-          ? benchmarkBucket.overall_min_timestamp.value
-          : Math.min(accumulator.minTimestamp, benchmarkBucket.overall_min_timestamp.value);
-
-        return accumulator;
-      },
-      { sumResources: 0, minTimestamp: NaN }
-    );
-
-    // const sumResources = cspmBenchmarks
-    //   ?.map((benchmarkBucket: BenchmarkBucket) => {
-    //     return benchmarkBucket.by_resource_id.buckets.length;
-    //   })
-    //   .reduce((total: number, docCount: number) => total + docCount, 0);
-
-    // const earliestTimestampArray = cspmBenchmarks?.map((benchmarkBucket: BenchmarkBucket) => {
-    //   return benchmarkBucket.overall_min_timestamp.value;
-    // });
-
-    // const minTimestamp: number = Math.min(...earliestTimestampArray!);
-
-    // TODO: check timezone
-    const minTimestampDate: Date = new Date(minTimestamp);
+    const minTimestamp = earliestTimestampArray
+      ? new Date(Math.min(...earliestTimestampArray)).toLocaleString()
+      : new Date().toLocaleString();
 
     const usageRecords = {
       id: TASK_TYPE_PREFIX + ':cspm-usage-report',
-      usage_timestamp: minTimestampDate.toDateString(),
+      usage_timestamp: minTimestamp,
       creation_timestamp: new Date().toLocaleString(),
       usage: {
         type: 'cspm-resource',
         quantity: sumResources,
         period_seconds: 60 * 60, // equal to task interval
-        cause: 'aws benchmark',
+        // cause: '', // implement if product require that. (suggestion: installed benchmarks)
       },
-      // TODO:
+      // TODO: how to fetch instance details
       source: {
         id: 'FOO',
         instance_group_id: '',
@@ -115,7 +99,8 @@ export const cspmMetringTaskProperties: MetringTaskProperties = {
   taskType: TASK_TYPE_PREFIX + ':cspm-usage-reporting-task',
   taskTitle: 'Security Solution - CSPM Metring Periodic Tasks',
   meteringCallback: cspmMetringCallback,
-  interval: '3600s',
+  // interval: '3600s',
+  interval: '30s', // for debugging
   version: '1',
 };
 
@@ -132,7 +117,8 @@ export const getFindingsByResourceAggQuery = () => ({
         {
           range: {
             '@timestamp': {
-              gte: 'now-' + CSPM_CYCLE_SCAN_FREQUENT, // the "look back" period should be the same as the scan interval
+              // gte: 'now-' + CSPM_CYCLE_SCAN_FREQUENT, // the "look back" period should be the same as the scan interval
+              gte: 'now-' + '3d', // the "look back" period should be the same as the scan interval
             },
           },
         },
