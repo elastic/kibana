@@ -10,12 +10,11 @@ import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
-import { formatFieldValue, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { formatFieldValue, getIgnoredReason, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
-import { getIgnoredReason } from '../../../../../utils/get_ignored_reason';
 import { isNestedFieldParent } from '../../../../../application/main/utils/nested_fields';
 
 export const DocViewerLegacyTable = ({

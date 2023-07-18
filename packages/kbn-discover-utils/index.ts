@@ -12,5 +12,6 @@ export {
   formatFieldValue,
   formatHit,
   getDocId,
+  getIgnoredReason,
   getShouldShowFieldHandler,
 } from './src';
