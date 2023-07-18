@@ -18,17 +18,48 @@ import type {
 } from '../common/types/categories';
 import { ValidationResults } from './validation_results';
 
+/**
+ * The size of each chunk for processing examples.
+ *
+ * @type {100}
+ */
 const CHUNK_SIZE = 100;
 
+/**
+ * Provides methods for checking whether categories can be
+ * produced from a field.
+ *
+ * @export
+ * @param {IScopedClusterClient} {
+  asCurrentUser,
+  asInternalUser,
+}
+ */
 export function categorizationExamplesProvider({
   asCurrentUser,
   asInternalUser,
 }: IScopedClusterClient) {
   const validationResults = new ValidationResults();
 
+  /**
+   * Retrieves the tokens for the provided examples and analyzer.
+   *
+   * @async
+   * @param {string} indexPatternTitle
+   * @param {estypes.QueryDslQueryContainer} query
+   * @param {number} size
+   * @param {string} categorizationFieldName
+   * @param {(string | undefined)} timeField
+   * @param {number} start
+   * @param {number} end
+   * @param {CategorizationAnalyzer} analyzer
+   * @param {(RuntimeMappings | undefined)} runtimeMappings
+   * @param {(estypes.IndicesOptions | undefined)} indicesOptions
+   * @returns {Promise<{ examples: CategoryFieldExample[]; error?: Error }>}
+   */
   async function categorizationExamples(
     indexPatternTitle: string,
-    query: any,
+    query: estypes.QueryDslQueryContainer,
     size: number,
     categorizationFieldName: string,
     timeField: string | undefined,
@@ -37,7 +68,7 @@ export function categorizationExamplesProvider({
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
     indicesOptions: estypes.IndicesOptions | undefined
-  ): Promise<{ examples: CategoryFieldExample[]; error?: any }> {
+  ): Promise<{ examples: CategoryFieldExample[]; error?: Error }> {
     if (timeField !== undefined) {
       const range = {
         range: {
@@ -177,7 +208,7 @@ export function categorizationExamplesProvider({
 
   async function validateCategoryExamples(
     indexPatternTitle: string,
-    query: any,
+    query: estypes.QueryDslQueryContainer,
     size: number,
     categorizationFieldName: string,
     timeField: string | undefined,
