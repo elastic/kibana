@@ -93,7 +93,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
-    "@kbn/slo-schema",
     "@kbn/discover-plugin"
   ],
   "exclude": ["target/**/*"]

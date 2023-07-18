@@ -100,6 +100,13 @@ const mockPlugin = {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
   },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
+    },
+  },
 };
 
 export const infraLocatorsMock: InfraLocators = {
