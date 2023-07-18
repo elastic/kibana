@@ -8,6 +8,7 @@
 import { AreaSeries, Chart, CurveType, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { NoChartsData } from './no_charts_data';
 import type { ComparisionHistogram, DataComparisonField } from '../types';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
@@ -23,6 +24,8 @@ export const OverlapDistributionComparison = ({
   fieldType?: DataComparisonField['type'];
   fieldName?: DataComparisonField['field'];
 }) => {
+  if (data.length === 0) return <NoChartsData textAlign="left" />;
+
   return (
     <Chart>
       <Tooltip body={DataComparisonChartTooltipBody} />

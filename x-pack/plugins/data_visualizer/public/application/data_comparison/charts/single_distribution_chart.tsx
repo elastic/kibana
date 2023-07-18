@@ -8,6 +8,7 @@
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import React from 'react';
+import { NoChartsData } from './no_charts_data';
 import { DATA_COMPARISON_TYPE } from '../constants';
 import { DataComparisonField, Histogram } from '../types';
 
@@ -22,6 +23,8 @@ export const SingleDistributionChart = ({
   color?: SeriesColorAccessor;
   fieldType?: DataComparisonField['type'];
 }) => {
+  if (data.length === 0) return <NoChartsData textAlign="left" />;
+
   return (
     <Chart>
       <Settings />

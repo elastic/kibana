@@ -7,6 +7,7 @@
 
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import React from 'react';
+import { NoChartsData } from './no_charts_data';
 import { ComparisionHistogram } from '../types';
 import { DataComparisonChartTooltipBody } from '../data_comparison_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE } from '../constants';
@@ -22,17 +23,13 @@ export const DataComparisonDistributionChart = ({
   data: ComparisionHistogram[];
   colors: { referenceColor: string; productionColor: string };
 }) => {
+  if (data.length === 0) return <NoChartsData />;
   return (
     <Chart>
       <Tooltip body={DataComparisonChartTooltipBody} />
       <Settings />
-      <Axis id="bottom" position={Position.Bottom} title="Feature values" />
-      <Axis
-        id="left2"
-        title="Frequency"
-        position={Position.Left}
-        tickFormat={(d: any) => Number(d).toFixed(2)}
-      />
+      <Axis id="bottom" position={Position.Bottom} />
+      <Axis id="left2" position={Position.Left} tickFormat={(d: any) => Number(d).toFixed(2)} />
       <BarSeries
         id="data-drift-viz"
         name={featureName}
