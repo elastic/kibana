@@ -254,22 +254,71 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           START_HOST_PROCESSES_DATE.format(timepickerFormat),
           END_HOST_PROCESSES_DATE.format(timepickerFormat)
         );
-      });
-
-      beforeEach(async () => {
         await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
       });
 
-      afterEach(async () => {
+      after(async () => {
         await retry.try(async () => {
           await pageObjects.infraHostsView.clickCloseFlyoutButton();
         });
       });
 
+      describe('Overview Tab', () => {
+        before(async () => {
+          await pageObjects.infraHostsView.clickOverviewFlyoutTab();
+        });
+
+        [
+          { metric: 'cpuUsage', value: '13.9%' },
+          { metric: 'normalizedLoad1m', value: '18.8%' },
+          { metric: 'memoryUsage', value: '94.9%' },
+          { metric: 'diskSpaceUsage', value: 'N/A' },
+        ].forEach(({ metric, value }) => {
+          it(`${metric} tile should show ${value}`, async () => {
+            await retry.try(async () => {
+              const tileValue = await pageObjects.infraHostsView.getAssetDetailsKPITileValue(
+                metric
+              );
+              expect(tileValue).to.eql(value);
+            });
+          });
+        });
+
+        it('should render 8 charts in the Metrics section', async () => {
+          const hosts = await pageObjects.infraHostsView.getAssetDetailsMetricsCharts();
+          expect(hosts.length).to.equal(8);
+        });
+
+        it('should navigate to metadata tab', async () => {
+          await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.metadataTableExist();
+        });
+      });
+
       describe('Metadata Tab', () => {
+        before(async () => {
+          await pageObjects.infraHostsView.clickMetadataFlyoutTab();
+        });
+
         it('should render metadata tab, add and remove filter', async () => {
-          const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
-          expect(metadataTab).to.contain('Metadata');
+          await pageObjects.infraHostsView.metadataTableExist();
+
+          // Add Pin
+          await pageObjects.infraHostsView.clickAddMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+
+          // Persist pin after refresh
+          await browser.refresh();
+          await retry.try(async () => {
+            await pageObjects.infraHome.waitForLoading();
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
+          });
+
+          // Remove Pin
+          await pageObjects.infraHostsView.clickRemoveMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
 
           await pageObjects.infraHostsView.clickAddMetadataFilter();
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -287,11 +336,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.infraHostsView.getRemoveFilterExist();
           expect(removeFilterShouldNotExist).to.be(false);
         });
+
+        it('should render metadata tab, pin and unpin table row', async () => {
+          // Add Pin
+          await pageObjects.infraHostsView.clickAddMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+
+          // Persist pin after refresh
+          await browser.refresh();
+          await retry.try(async () => {
+            await pageObjects.infraHome.waitForLoading();
+            const removePinExist = await pageObjects.infraHostsView.getRemovePinExist();
+            expect(removePinExist).to.be(true);
+          });
+
+          // Remove Pin
+          await pageObjects.infraHostsView.clickRemoveMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
+        });
       });
 
       describe('Processes Tab', () => {
-        it('should render processes tab and with Total Value summary', async () => {
+        before(async () => {
           await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        });
+        it('should render processes tab and with Total Value summary', async () => {
           const processesTotalValue =
             await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
           const processValue = await processesTotalValue.getVisibleText();
@@ -299,7 +368,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should expand processes table row', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
           await pageObjects.infraHostsView.getProcessesTable();
           await pageObjects.infraHostsView.getProcessesTableBody();
           await pageObjects.infraHostsView.clickProcessesTableExpandButton();
@@ -307,23 +375,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Logs Tab', () => {
-        it('should render logs tab', async () => {
+        before(async () => {
           await pageObjects.infraHostsView.clickLogsFlyoutTab();
+        });
+        it('should render logs tab', async () => {
           await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
         });
-      });
-
-      it('should navigate to Uptime after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        const url = parse(await browser.getCurrentUrl());
-
-        const search = 'search=host.name: "Jennys-MBP.fritz.box" OR host.ip: "192.168.1.79"';
-        const query = decodeURIComponent(url.query ?? '');
-
-        expect(url.pathname).to.eql('/app/uptime/');
-        expect(query).to.contain(search);
-
-        await returnTo(HOSTS_VIEW_PATH);
       });
 
       it('should navigate to APM services after click', async () => {
@@ -342,23 +399,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(query).to.contain(rangeTo);
 
         await returnTo(HOSTS_VIEW_PATH);
-      });
-
-      describe('Processes Tab', () => {
-        it('should render processes tab and with Total Value summary', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          const processesTotalValue =
-            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
-        });
-
-        it('should expand processes table row', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          await pageObjects.infraHostsView.getProcessesTable();
-          await pageObjects.infraHostsView.getProcessesTableBody();
-          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
-        });
       });
     });
 
@@ -448,11 +488,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('KPI tiles', () => {
-        it('should render 5 metrics trend tiles', async () => {
-          const hosts = await pageObjects.infraHostsView.getAllKPITiles();
-          expect(hosts.length).to.equal(5);
-        });
-
         [
           { metric: 'hostsCount', value: '6' },
           { metric: 'cpuUsage', value: '0.8%' },

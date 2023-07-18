@@ -19,9 +19,6 @@ export default function spacesOnlyTestSuite({ loadTestFile }: FtrProviderContext
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./update_objects_spaces'));
-    // FLAKY: https://github.com/elastic/kibana/issues/158711, https://github.com/elastic/kibana/issues/158366
-    // Also, https://github.com/elastic/kibana/issues/158918
-    // esArchiver fails with no_shard_available_action_exception after deleting indexes
-    // loadTestFile(require.resolve('./disable_legacy_url_aliases'));
+    loadTestFile(require.resolve('./disable_legacy_url_aliases'));
   });
 }

@@ -151,7 +151,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             onClick={toggle}
-            data-test-subj="expandRow"
+            data-test-subj="thresholdRuleExpandRow"
             aria-label={i18n.translate(
               'xpack.observability.threshold.rule.alertFlyout.expandRowLabel',
               {
@@ -164,7 +164,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
             <StyledExpression>
               <EuiExpression
-                data-test-subj="customEquationWhen"
+                data-test-subj="thresholdRuleCustomEquationWhen"
                 description={i18n.translate(
                   'xpack.observability.thresholdRule.expressionItems.descriptionLabel',
                   {
@@ -204,7 +204,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       }}
                     />
                   }
-                  data-test-subj="ofExpression"
+                  data-test-subj="thresholdRuleOfExpression"
                 />
               </StyledExpression>
             )}

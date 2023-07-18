@@ -21,8 +21,8 @@ import type {
   QueryRule,
   RuleCreateProps,
   RuleUpdateProps,
-} from '../../../../../common/detection_engine/rule_schema';
-import { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleParams, RuleAlertType, UnifiedQueryRuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
@@ -32,7 +32,7 @@ import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 import type {
   ResponseAction,
   RuleResponseAction,
-} from '../../../../../common/detection_engine/rule_response_actions/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 export const transformValidate = (
   rule: PartialRule<RuleParams>

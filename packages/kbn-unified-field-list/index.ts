@@ -52,6 +52,7 @@ export type {
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
+  SearchMode,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 
@@ -80,6 +81,7 @@ export {
 export {
   useQuerySubscriber,
   hasQuerySubscriberData,
+  getSearchMode,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
 } from './src/hooks/use_query_subscriber';
@@ -91,3 +93,9 @@ export {
   getFieldType,
   getFieldIconType,
 } from './src/utils/field_types';
+
+export {
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListSidebarContainerProps,
+} from './src/containers/unified_field_list_sidebar';

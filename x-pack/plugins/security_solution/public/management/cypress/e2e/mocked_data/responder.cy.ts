@@ -16,6 +16,7 @@ import {
   setResponderActionLogDateRange,
 } from '../../screens/responder';
 import { login } from '../../tasks/login';
+import { loadPage } from '../../tasks/common';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
@@ -38,8 +39,7 @@ describe('When accessing Endpoint Response Console', () => {
     login();
   });
 
-  // Flaky: https://github.com/elastic/security-team/issues/7048
-  describe.skip('from Cases', () => {
+  describe('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
@@ -103,14 +103,14 @@ describe('When accessing Endpoint Response Console', () => {
     });
 
     it('should display responder option in take action menu', () => {
-      cy.visit(caseUrlPath);
+      loadPage(caseUrlPath);
       closeAllToasts();
       openCaseAlertDetails();
       cy.getByTestSubj('endpointResponseActions-action-item').should('be.enabled');
     });
 
     it('should display Responder response action interface', () => {
-      cy.visit(caseUrlPath);
+      loadPage(caseUrlPath);
       closeAllToasts();
       openCaseAlertDetails();
       cy.getByTestSubj('endpointResponseActions-action-item').click();

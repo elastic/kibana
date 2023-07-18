@@ -12,15 +12,17 @@ import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
   LensRootStore,
   LensAppState,
   LensState,
+  loadInitial,
 } from '../../../state_management';
 import { getPreloadedState } from '../../../state_management/lens_slice';
-
+import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
   LensEditConfigurationFlyout,
@@ -51,9 +53,11 @@ export function getEditLensConfiguration(
     attributes,
     dataView,
     updateAll,
-    setIsFlyoutVisible,
+    closeFlyout,
+    wrapInFlyout,
     datasourceId,
     adaptersTables,
+    panelId,
   }: EditLensConfigurationProps) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
@@ -88,15 +92,46 @@ export function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
       lens: getPreloadedState(storeDeps) as LensAppState,
     } as unknown as PreloadedState<LensState>);
-    const closeFlyout = () => {
-      setIsFlyoutVisible?.(false);
+    lensStore.dispatch(
+      loadInitial({
+        initialInput: {
+          attributes,
+          id: panelId ?? generateId(),
+        },
+      })
+    );
+
+    const getWrapper = (children: JSX.Element) => {
+      if (wrapInFlyout) {
+        return (
+          <EuiFlyout
+            type="push"
+            ownFocus
+            onClose={() => {
+              closeFlyout?.();
+            }}
+            aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+              defaultMessage: 'Edit configuration',
+            })}
+            size="s"
+            hideCloseButton
+            css={css`
+              background: none;
+            `}
+          >
+            {children}
+          </EuiFlyout>
+        );
+      } else {
+        return children;
+      }
     };
 
     const configPanelProps = {
       attributes,
       dataView,
       updateAll,
-      setIsFlyoutVisible,
+      closeFlyout,
       datasourceId,
       adaptersTables,
       coreStart,
@@ -105,25 +140,12 @@ export function getEditLensConfiguration(
       datasourceMap,
     };
 
-    return (
-      <EuiFlyout
-        type="push"
-        ownFocus
-        onClose={closeFlyout}
-        aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
-          defaultMessage: 'Edit configuration',
-        })}
-        size="s"
-        className="lnsEditConfigurationFlyout"
-        css={css`
-          background: none;
-        `}
-        hideCloseButton
-      >
-        <Provider store={lensStore}>
+    return getWrapper(
+      <Provider store={lensStore}>
+        <KibanaContextProvider services={lensServices}>
           <LensEditConfigurationFlyout {...configPanelProps} />
-        </Provider>
-      </EuiFlyout>
+        </KibanaContextProvider>
+      </Provider>
     );
   };
 }
