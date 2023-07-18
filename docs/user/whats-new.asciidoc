@@ -9,6 +9,16 @@ Previous versions:  {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 [discrete]
+=== Alerting
+
+[discrete]
+==== Rules as code
+ 
+The https://registry.terraform.io/providers/elastic/elasticstack/latest[Terraform Elasticstack provider] enables you to automate manual processes, manage multiple clusters from a single place, and unlock use cases like version control.
+Check out the new https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_action_connector[elasticstack_kibana_action_connector] and 
+https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule[elasticstack_kibana_alerting_rule] resources for {kib} rules and connectors.
+
+[discrete]
 === Cases
 
 These features are all available for cases in *{stack-manage-app}*, *{observability}*, and the *{security-app}*.

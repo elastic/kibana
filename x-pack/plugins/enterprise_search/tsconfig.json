@@ -61,6 +61,5 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/global-search-plugin",
     "@kbn/share-plugin",
-    "@kbn/core-saved-objects-migration-server-internal",
   ]
 }

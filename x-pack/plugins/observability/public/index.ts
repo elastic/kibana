@@ -46,11 +46,14 @@ export {
   ruleDetailsLocatorID,
   rulesLocatorID,
   sloDetailsLocatorID,
+  sloEditLocatorID,
   uptimeOverviewLocatorID,
 } from '../common';
 
 export type { UXMetrics } from './components/core_web_vitals/core_vitals';
 export { getCoreVitalsComponent } from './components/core_web_vitals/get_core_web_vitals_lazy';
+
+export type { SloEditLocatorParams } from './locators/slo_edit';
 
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
