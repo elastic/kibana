@@ -14,8 +14,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
   const listingTable = getService('listingTable');
+  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-  describe('dashboard listing page', function describeIndexTests() {
+  describe.only('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
@@ -46,6 +48,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
+        await listingTable.clearSearchFilter();
+      });
+    });
+
+    describe('edit meta data', () => {
+      it('saves changes to title, description, and tags', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await testSubjects.click('edit-action');
+        await testSubjects.setValue('nameInput', 'new title');
+        await testSubjects.setValue('descriptionInput', 'new description');
+        await find.clickByCssSelector('euiFilterSelectItem');
+        await testSubjects.click('saveButton');
+        await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
+        await listingTable.clickItemLink('dashboard', 'new title');
       });
     });
 
@@ -198,12 +214,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
-      });
-    });
-
-    describe('edit meta data', () => {
-      it('saves changes to title, description, and tags', async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
       });
     });
   });
