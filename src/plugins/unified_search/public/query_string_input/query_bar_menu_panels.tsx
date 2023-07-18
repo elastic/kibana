@@ -301,7 +301,7 @@ export function QueryBarMenuPanels({
   };
 
   const onSelectLanguage = (lang: string) => {
-    http.post('/internal/kibana/kql_opt_in_stats', {
+    http.post('/internal/kql_opt_in_stats', {
       version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
       body: JSON.stringify({ opt_in: lang === 'kuery' }),
     });
