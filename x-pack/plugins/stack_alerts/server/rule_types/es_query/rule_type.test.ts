@@ -675,7 +675,7 @@ describe('ruleType', () => {
         },
       ],
       toSpec: () => {
-        return { id: 'test-id', title: 'test-title', timeFieldName: 'time-field', fields: [] };
+        return { id: 'test-id', title: 'test-title', timeFieldName: 'timestamp', fields: [] };
       },
     };
     const defaultParams: OnlyEsqlQueryRuleParams = {
@@ -685,6 +685,7 @@ describe('ruleType', () => {
       thresholdComparator: Comparator.GT,
       threshold: [0],
       esqlQuery: { esql: 'test' },
+      timeField: 'timestamp',
       searchType: 'esqlQuery',
       excludeHitsFromPreviousRun: true,
       aggType: 'count',
@@ -723,12 +724,6 @@ describe('ruleType', () => {
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        toSpec: () => dataViewMock.toSpec(),
-      });
-      (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
-        dataViewMock.toSpec(),
-      ]);
-      (ruleServices.dataViews.get as jest.Mock).mockResolvedValueOnce({
         ...dataViewMock.toSpec(),
         toSpec: () => dataViewMock.toSpec(),
       });
@@ -748,35 +743,11 @@ describe('ruleType', () => {
       expect(ruleServices.alertFactory.create).not.toHaveBeenCalled();
     });
 
-    it('rule executor throws an error when index does not have time field', async () => {
-      const params = defaultParams;
-      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
-
-      (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
-        dataViewMock.toSpec(),
-      ]);
-      (ruleServices.dataViews.get as jest.Mock).mockResolvedValueOnce({
-        ...dataViewMock.toSpec(),
-        timeFieldName: null,
-        toSpec: () => dataViewMock.toSpec(),
-      });
-
-      await expect(invokeExecutor({ params, ruleServices })).rejects.toThrow(
-        'Invalid data view without timeFieldName.'
-      );
-    });
-
     it('rule executor schedule actions when condition met', async () => {
       const params = defaultParams;
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        toSpec: () => dataViewMock.toSpec(),
-      });
-      (ruleServices.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValueOnce([
-        dataViewMock.toSpec(),
-      ]);
-      (ruleServices.dataViews.get as jest.Mock).mockResolvedValueOnce({
         ...dataViewMock.toSpec(),
         toSpec: () => dataViewMock.toSpec(),
       });

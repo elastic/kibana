@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView, DataViewsContract, getTime } from '@kbn/data-plugin/common';
 import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlyEsqlQueryRuleParams } from '../types';
-import { getSmallerDataViewSpec } from './fetch_search_source_query';
 import { EsqlTable, toEsQueryHits } from '../../../../common';
 
 export interface FetchEsqlQueryOpts {
@@ -21,6 +17,7 @@ export interface FetchEsqlQueryOpts {
   alertLimit: number | undefined;
   params: OnlyEsqlQueryRuleParams;
   spacePrefix: string;
+  publicBaseUrl: string;
   services: {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
@@ -35,14 +32,13 @@ export async function fetchEsqlQuery({
   params,
   services,
   spacePrefix,
+  publicBaseUrl,
 }: FetchEsqlQueryOpts) {
   const { logger, scopedClusterClient, dataViews } = services;
   const esClient = scopedClusterClient.asCurrentUser;
-
-  const indexPatternRefs = await dataViews.getIdsWithTitle();
-  const indexPattern = getIndexPatternFromESQLQuery(params.esqlQuery.esql);
-  const dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
-  const dataView = await dataViews.get(dataViewId);
+  const dataView = await dataViews.create({
+    timeFieldName: params.timeField,
+  });
 
   const { query, dateStart, dateEnd } = getEsqlQuery(dataView, params, alertLimit);
 
@@ -54,16 +50,7 @@ export async function fetchEsqlQuery({
     body: query,
   });
 
-  const link = await generateLink(
-    params.esqlQuery,
-    response.columns.map((c) => c.name),
-    services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
-    services.dataViews,
-    dataView,
-    dateStart,
-    dateEnd,
-    spacePrefix
-  );
+  const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
 
   return {
     link,
@@ -85,27 +72,21 @@ export async function fetchEsqlQuery({
 }
 
 export const getEsqlQuery = (
-  index: DataView,
+  dataView: DataView,
   params: OnlyEsqlQueryRuleParams,
   alertLimit?: number
 ) => {
-  const timeFieldName = index.timeFieldName;
-
-  if (!timeFieldName) {
-    throw new Error('Invalid data view without timeFieldName.');
-  }
-
   const timeRange = {
     from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
     to: 'now',
   };
-  const timerangeFilter = getTime(index, timeRange);
-  const dateStart = timerangeFilter?.query.range[timeFieldName].gte;
-  const dateEnd = timerangeFilter?.query.range[timeFieldName].lte;
+  const timerangeFilter = getTime(dataView, timeRange);
+  const dateStart = timerangeFilter?.query.range[params.timeField].gte;
+  const dateEnd = timerangeFilter?.query.range[params.timeField].lte;
   const rangeFilter: unknown[] = [
     {
       range: {
-        [timeFieldName]: {
+        [params.timeField]: {
           lte: dateEnd,
           gte: dateStart,
           format: 'strict_date_optional_time',
@@ -127,37 +108,4 @@ export const getEsqlQuery = (
     dateStart,
     dateEnd,
   };
-};
-
-export const generateLink = async (
-  query: AggregateQuery,
-  columns: string[],
-  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
-  dataViewToUpdate: DataView,
-  dateStart: string,
-  dateEnd: string,
-  spacePrefix: string
-) => {
-  // make new adhoc data view
-  const newDataView = await dataViews.create({
-    ...dataViewToUpdate.toSpec(false),
-    version: undefined,
-    id: undefined,
-  });
-
-  const redirectUrlParams: DiscoverAppLocatorParams = {
-    dataViewSpec: getSmallerDataViewSpec(newDataView),
-    query,
-    timeRange: { from: dateStart, to: dateEnd },
-    isAlertResults: true,
-    columns,
-  };
-
-  // use `lzCompress` flag for making the link readable during debugging/testing
-  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
-
-  return start + spacePrefix + '/app' + end;
 };

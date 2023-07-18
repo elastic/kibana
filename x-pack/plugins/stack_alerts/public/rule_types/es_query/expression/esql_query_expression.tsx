@@ -7,13 +7,17 @@
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import { AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/public/common';
+import {
+  firstFieldOption,
+  getTimeFieldOptions,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
@@ -23,9 +27,9 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty }) => {
-  const { expressions } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit } = ruleParams;
+> = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
+  const { expressions, http } = useTriggerUiActionServices();
+  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -47,6 +51,8 @@ export const EsqlQueryExpression: React.FC<
   });
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [testQuery, setTestQuery] = useState<boolean>();
+  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+  const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -111,6 +117,21 @@ export const EsqlQueryExpression: React.FC<
     return emptyResult;
   }, [timeWindowSize, timeWindowUnit, currentRuleParams, esqlQuery, expressions]);
 
+  const refreshTimeFields = async (q: AggregateQuery) => {
+    let hasTimestamp = false;
+    const indexPattern: string = getIndexPatternFromESQLQuery(q.esql);
+    const currentEsFields = await getFields(http, [indexPattern]);
+    const timeFields = getTimeFieldOptions(currentEsFields);
+    setTimeFieldOptions([firstFieldOption, ...timeFields]);
+
+    const timestampField = timeFields.find((field) => field.value === '@timestamp');
+    if (timestampField) {
+      setParam('timeField', timestampField.value);
+      hasTimestamp = true;
+    }
+    setDetectTimestamp(hasTimestamp);
+  };
+
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -128,11 +149,45 @@ export const EsqlQueryExpression: React.FC<
           onTextLangQueryChange={(q: AggregateQuery) => {
             setQuery(q);
             setParam('esqlQuery', q);
+            refreshTimeFields(q);
           }}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
-          errors={[]}
           onTextLangQuerySubmit={() => setTestQuery(!testQuery)}
+          detectTimestamp={detectTimestamp}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryTimeFieldPrompt"
+            defaultMessage="Select a time field"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        id="thresholdTimeField"
+        fullWidth
+        isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+        error={errors.timeField}
+      >
+        <EuiSelect
+          options={timeFieldOptions}
+          isInvalid={errors.timeField.length > 0 && timeField !== undefined}
+          fullWidth
+          name="thresholdTimeField"
+          data-test-subj="timeFieldSelect"
+          value={timeField || ''}
+          onChange={(e) => {
+            setParam('timeField', e.target.value);
+          }}
+          onBlur={() => {
+            if (timeField === undefined) {
+              setParam('timeField', '');
+            }
+          }}
         />
       </EuiFormRow>
       <EuiSpacer />

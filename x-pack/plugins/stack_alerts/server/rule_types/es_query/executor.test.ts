@@ -226,6 +226,7 @@ describe('es_query executor', () => {
           dataViews: undefined,
         },
         spacePrefix: '',
+        publicBaseUrl: 'https://localhost:5601',
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
       expect(mockFetchSearchSourceQuery).not.toHaveBeenCalled();

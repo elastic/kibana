@@ -234,6 +234,14 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
       })
     );
   }
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+
   return errors;
 };
 
