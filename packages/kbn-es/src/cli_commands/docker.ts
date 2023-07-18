@@ -84,7 +84,7 @@ export const docker: Command = {
     });
 
     const cluster = new Cluster({ ssl: options.ssl });
-    await cluster.run('docker', {
+    await cluster.runDocker({
       reportTime,
       startTime: runStartTime,
       ...options,

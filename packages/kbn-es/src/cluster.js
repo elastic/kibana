@@ -318,7 +318,7 @@ exports.Cluster = class Cluster {
    * @param {String} installPath
    * @param {ExecOptions} opts
    */
-  async _exec(installPath, opts = {}) {
+  _exec(installPath, opts = {}) {
     const {
       skipNativeRealmSetup = false,
       reportTime = () => {},
@@ -383,42 +383,24 @@ exports.Cluster = class Cluster {
         filter: SettingsFilter.NonSecureOnly,
       }
     ).reduce(
-      (acc, [settingName, settingValue]) => acc.concat(['--env', `${settingName}=${settingValue}`]),
+      (acc, [settingName, settingValue]) => acc.concat(['--E', `${settingName}=${settingValue}`]),
       []
     );
 
+    this._log.info('%s %s', ES_BIN, args.join(' '));
     const esJavaOpts = this.javaOptions(options);
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
-    if (installPath === 'docker') {
-      await this.setupDocker();
-      // const dockerCmd = resolveDockerCmd(options);
-      const image = getDockerImage(options);
-      const dockerCmd = DOCKER_BASE_CMD.concat(args, image);
-
-      this._log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
-
-      this._process = execa('docker', dockerCmd, {
-        // inherit is required to show Java console output for pw, enrollment token, etc
-        stdio: ['ignore', 'inherit', 'inherit'],
-      });
-
-      this._process.stdout = process.stdout;
-      this._process.stderr = process.stderr;
-    } else {
-      this._log.info('%s %s', ES_BIN, args.join(' '));
-
-      this._process = execa(ES_BIN, args, {
-        cwd: installPath,
-        env: {
-          ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
-          ...process.env,
-          JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-          ES_JAVA_OPTS: esJavaOpts,
-        },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-    }
+    this._process = execa(ES_BIN, args, {
+      cwd: installPath,
+      env: {
+        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+        ...process.env,
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+        ES_JAVA_OPTS: esJavaOpts,
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
 
     this._setupPromise = Promise.all([
       // parse log output to find http port
@@ -604,5 +586,25 @@ exports.Cluster = class Cluster {
   async runServerless(options = {}) {
     await this.setupDocker();
     await runServerlessCluster(this._log, options);
+  }
+
+  /**
+   * Run an Elasticsearch Docker container
+   *
+   * @param {DockerOptions} options
+   */
+  async runDocker(options = {}) {
+    await this.setupDocker();
+    // const dockerCmd = resolveDockerCmd(options);
+    const image = getDockerImage(options);
+    // TODO: add args
+    const dockerCmd = DOCKER_BASE_CMD.concat([], image);
+
+    this._log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
+
+    this._process = execa('docker', dockerCmd, {
+      // inherit is required to show Java console output for pw, enrollment token, etc
+      stdio: ['ignore', 'inherit', 'inherit'],
+    });
   }
 };
