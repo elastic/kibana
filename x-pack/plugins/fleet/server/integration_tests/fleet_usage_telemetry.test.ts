@@ -401,9 +401,9 @@ describe('fleet usage telemetry', () => {
           },
         ],
         agent_logs_top_errors: [
-          'this should not be included in metrics',
-          'stderr panic close of closed channel',
           'stderr panic some other panic',
+          'stderr panic close of closed channel',
+          'this should not be included in metrics',
         ],
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })

@@ -6,7 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+
 import { sortBy } from 'lodash';
+
+import { DATA_TIERS } from '../../common/constants';
 
 import { appContextService } from '../services';
 
@@ -35,6 +38,11 @@ export async function getAgentLogsTopErrors(
         query: {
           bool: {
             filter: [
+              {
+                terms: {
+                  _tier: DATA_TIERS,
+                },
+              },
               {
                 term: {
                   'log.level': 'error',
