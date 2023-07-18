@@ -11,3 +11,4 @@ export { PngV1ExportType } from './png_v1';
 export { PdfV1ExportType } from './pdf_v1';
 export type { TaskPayloadPNG } from './png_v1';
 export type { TaskPayloadPDF } from './pdf_v1';
+export type { JobParamsDownloadCSV } from './csv_searchsource_immediate';

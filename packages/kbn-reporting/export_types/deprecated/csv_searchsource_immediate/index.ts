@@ -7,3 +7,4 @@
  */
 
 export { CsvSearchSourceImmediateExportType } from './csv_searchsource_immediate';
+export type { JobParamsDownloadCSV } from './types';
