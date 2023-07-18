@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { Chart, Metric, MetricDatum } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { TopNFunctions } from '../../../common/functions';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { calculateBaseComparisonDiff } from '../topn_functions/utils';
-import { ExtraValue } from './extra_value';
+import { SummaryItem } from './summary_item';
 
 interface Props {
   baselineTopNFunctions?: TopNFunctions;
@@ -23,6 +22,10 @@ interface Props {
   isLoading: boolean;
 }
 
+const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.estimatedValue', {
+  defaultMessage: 'Estimated value',
+}) as string;
+
 export function TopNFunctionsSummary({
   baselineTopNFunctions,
   comparisonTopNFunctions,
@@ -30,8 +33,6 @@ export function TopNFunctionsSummary({
   comparisonScaleFactor,
   isLoading,
 }: Props) {
-  const theme = useEuiTheme();
-
   const totalSamplesDiff = calculateBaseComparisonDiff({
     baselineValue: baselineTopNFunctions?.TotalCount || 0,
     baselineScaleFactor,
@@ -55,81 +56,65 @@ export function TopNFunctionsSummary({
     formatValue: asCost,
   });
 
-  const data: MetricDatum[] = useMemo(() => {
-    return [
-      {
-        color: theme.euiTheme.colors.emptyShade,
-        title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.performance', {
-          defaultMessage: 'Gained/Lost overall performance by',
-        }),
-        icon: () => <EuiIcon type="visGauge" />,
-        value: isLoading || !totalSamplesDiff.label ? '--' : totalSamplesDiff.label,
-      },
-      {
-        color: theme.euiTheme.colors.emptyShade,
-        title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.co2', {
-          defaultMessage: 'Annualized CO2 emission impact (estd.)',
-        }),
-        icon: () => <EuiIcon type="globe" />,
-        extra: isLoading ? undefined : (
-          <ExtraValue
-            value={co2EmissionDiff.comparisonValue}
-            diff={co2EmissionDiff.label}
-            color={co2EmissionDiff.color}
-            icon={co2EmissionDiff.icon}
-          />
-        ),
-        value: isLoading ? '--' : co2EmissionDiff.baseValue,
-      },
-      {
-        color: theme.euiTheme.colors.emptyShade,
-        title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.cost', {
-          defaultMessage: 'Annualized cost impact (estd.)',
-        }),
-        icon: () => <EuiIcon type="currency" />,
-        extra: isLoading ? undefined : (
-          <ExtraValue
-            value={costImpactDiff.comparisonValue}
-            diff={costImpactDiff.label}
-            color={costImpactDiff.color}
-            icon={costImpactDiff.icon}
-          />
-        ),
-        value: isLoading ? '--' : costImpactDiff.baseValue,
-      },
-      {
-        color: theme.euiTheme.colors.emptyShade,
-        title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.samples', {
-          defaultMessage: 'Total number of samples (estd.)',
-        }),
-        icon: () => <EuiIcon type="documents" />,
-        extra: isLoading ? undefined : (
-          <ExtraValue
-            value={totalSamplesDiff.comparisonValue}
-            diff={totalSamplesDiff.label}
-            color={totalSamplesDiff.color}
-            icon={totalSamplesDiff.icon}
-          />
-        ),
-        value: isLoading ? '--' : totalSamplesDiff.baseValue,
-      },
-    ];
-  }, [
-    co2EmissionDiff,
-    isLoading,
-    theme.euiTheme.colors.emptyShade,
-    totalSamplesDiff,
-    costImpactDiff,
-  ]);
+  const data = [
+    {
+      title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.performance', {
+        defaultMessage: '{label} overall performance by',
+        values: {
+          label:
+            isLoading || totalSamplesDiff.percentDiffDelta === undefined
+              ? 'Gained/Lost'
+              : totalSamplesDiff?.percentDiffDelta > 0
+              ? 'Lost'
+              : 'Gained',
+        },
+      }) as string,
+      baseValue: totalSamplesDiff.label || '',
+      baseIcon: totalSamplesDiff.icon,
+      baseColor: totalSamplesDiff.color,
+      titleHint: ESTIMATED_VALUE_LABEL,
+    },
+    {
+      title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.co2', {
+        defaultMessage: 'Annualized CO2 emission impact',
+      }) as string,
+      baseValue: co2EmissionDiff.baseValue,
+      comparisonValue: co2EmissionDiff.comparisonValue,
+      comparisonIcon: co2EmissionDiff.icon,
+      comparisonColor: co2EmissionDiff.color,
+      comparisonPerc: co2EmissionDiff.label,
+      titleHint: ESTIMATED_VALUE_LABEL,
+    },
+    {
+      title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.cost', {
+        defaultMessage: 'Annualized cost impact',
+      }) as string,
+      baseValue: costImpactDiff.baseValue,
+      comparisonValue: costImpactDiff.comparisonValue,
+      comparisonIcon: costImpactDiff.icon,
+      comparisonColor: costImpactDiff.color,
+      comparisonPerc: costImpactDiff.label,
+      titleHint: ESTIMATED_VALUE_LABEL,
+    },
+    {
+      title: i18n.translate('xpack.profiling.diffTopNFunctions.summary.samples', {
+        defaultMessage: 'Total number of samples',
+      }) as string,
+      baseValue: totalSamplesDiff.baseValue,
+      comparisonValue: totalSamplesDiff.comparisonValue,
+      comparisonIcon: totalSamplesDiff.icon,
+      comparisonColor: totalSamplesDiff.color,
+      comparisonPerc: totalSamplesDiff.label,
+      titleHint: ESTIMATED_VALUE_LABEL,
+    },
+  ];
 
   return (
-    <EuiFlexGroup direction="row" style={{ height: 120 }}>
+    <EuiFlexGroup direction="row">
       {data.map((item, idx) => {
         return (
-          <EuiFlexItem key={item.title}>
-            <Chart>
-              <Metric id={idx.toString()} data={[[item]]} />
-            </Chart>
+          <EuiFlexItem key={idx}>
+            <SummaryItem {...item} isLoading={isLoading} />
           </EuiFlexItem>
         );
       })}

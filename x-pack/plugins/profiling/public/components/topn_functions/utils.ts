@@ -11,7 +11,7 @@ import { calculateImpactEstimates } from '../../../common/calculate_impact_estim
 
 export function getColorLabel(percent: number) {
   const color = percent < 0 ? 'success' : 'danger';
-  const icon = percent < 0 ? 'sortDown' : 'sortUp';
+  const icon = percent < 0 ? 'sortUp' : 'sortDown';
   const isSmallPercent = Math.abs(percent) <= 0.01;
   const label = isSmallPercent ? '<0.01' : Math.abs(percent).toFixed(2) + '%';
 
