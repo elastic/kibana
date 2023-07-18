@@ -8,7 +8,7 @@
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
 import { API_VERSIONS } from '../../common/constants';
