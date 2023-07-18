@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiDescriptionList,
   EuiDescriptionListDescription,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -103,7 +102,6 @@ export const MetadataSummary = ({ metadata, metadataLoading }: MetadataSummaryPr
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="m" />
     </>
   );
 };

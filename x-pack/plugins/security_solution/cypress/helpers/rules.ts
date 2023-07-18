@@ -9,7 +9,7 @@ import moment from 'moment';
 import type { PrebuiltRuleAsset } from '../../server/lib/detection_engine/prebuilt_rules';
 import { getPrebuiltRuleMock } from '../../server/lib/detection_engine/prebuilt_rules/mocks';
 
-import type { ThreatArray } from '../../common/detection_engine/rule_schema';
+import type { ThreatArray } from '../../common/api/detection_engine';
 
 export const formatMitreAttackDescription = (mitre: ThreatArray) => {
   return mitre
