@@ -53,8 +53,8 @@ export class DeleteSLO {
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {
-        bool: {
-          filter: [{ term: { 'slo.id': sloId } }],
+        match: {
+          'slo.id': sloId,
         },
       },
     });
