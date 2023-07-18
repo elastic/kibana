@@ -45,6 +45,8 @@ import {
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
 
+import { appContextService } from '../../../app_context';
+
 import {
   generateMappings,
   generateTemplateName,
@@ -286,6 +288,7 @@ export function buildComponentTemplates(params: {
   pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
+  lifecycle?: IndexTemplate['template']['lifecycle'];
 }) {
   const {
     templateName,
@@ -295,6 +298,7 @@ export function buildComponentTemplates(params: {
     mappings,
     pipelineName,
     experimentalDataStreamFeature,
+    lifecycle,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -332,6 +336,8 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
+
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
   const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
 
@@ -359,8 +365,11 @@ export function buildComponentTemplates(params: {
       },
       mappings: {
         properties: mappingsProperties,
+        ...(Object.keys(mappingsRuntimeFields).length > 0
+          ? { runtime: mappingsRuntimeFields }
+          : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
-        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source'),
+        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source', 'runtime'),
         ...(indexTemplateMappings?._source || sourceModeSynthetic
           ? {
               _source: {
@@ -370,6 +379,7 @@ export function buildComponentTemplates(params: {
             }
           : {}),
       },
+      ...(lifecycle ? { lifecycle } : {}),
     },
     _meta,
   };
@@ -517,6 +527,9 @@ export function prepareTemplate({
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
 
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  const lifecyle = isILMPolicyDisabled && dataStream.lifecycle ? dataStream.lifecycle : undefined;
+
   const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
@@ -535,6 +548,7 @@ export function prepareTemplate({
     pipelineName,
     registryElasticsearch: dataStream.elasticsearch,
     experimentalDataStreamFeature,
+    lifecycle: lifecyle,
   });
 
   const template = getTemplate({

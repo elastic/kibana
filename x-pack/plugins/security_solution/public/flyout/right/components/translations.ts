@@ -31,6 +31,13 @@ export const SEVERITY_TITLE = i18n.translate(
   }
 );
 
+export const STATUS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.statusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const RISK_SCORE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.riskScoreTitle',
   {
@@ -45,12 +52,12 @@ export const VIEW_RULE_TEXT = i18n.translate(
   }
 );
 
-/* Description section */
+/* About section */
 
-export const DESCRIPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.descriptionTitle',
+export const ABOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.aboutTitle',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'About',
   }
 );
 

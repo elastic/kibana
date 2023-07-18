@@ -10,6 +10,7 @@ import React, { memo } from 'react';
 import { NewChatById } from '@kbn/elastic-assistant';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { DocumentStatus } from './status';
 import { useAssistant } from '../hooks/use_assistant';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
@@ -67,10 +68,17 @@ export const HeaderTitle: FC = memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTitle>
-      <EuiSpacer size="m" />
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="l">
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <DocumentStatus />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup direction="row" gutterSize="m">
         <EuiFlexItem grow={false}>
           <DocumentSeverity />
         </EuiFlexItem>
