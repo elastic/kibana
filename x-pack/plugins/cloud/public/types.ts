@@ -37,6 +37,14 @@ export interface CloudStart {
    */
   organizationUrl?: string;
   /**
+   * The full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud.
+   */
+  performanceUrl?: string;
+  /**
+   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud.
+   */
+  usersAndRolesUrl?: string;
+  /**
    * The full URL to the elasticsearch cluster.
    */
   elasticsearchUrl?: string;
