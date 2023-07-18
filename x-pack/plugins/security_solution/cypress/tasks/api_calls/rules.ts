@@ -11,7 +11,7 @@ import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../common/constants';
-import type { RuleCreateProps, RuleResponse } from '../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps, RuleResponse } from '../../../common/api/detection_engine';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 import type { FetchRulesResponse } from '../../../public/detection_engine/rule_management/logic/types';
 
