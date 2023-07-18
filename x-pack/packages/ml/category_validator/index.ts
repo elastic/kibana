@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { categorizationExamplesProvider } from './src';
+export { categorizationExamplesProvider } from './src/examples';
 export type {
   CategorizationAnalyzer,
   CategoryFieldExample,
