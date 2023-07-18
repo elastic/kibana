@@ -420,7 +420,4 @@ export interface ActionStatusOptions {
   errorSize: number;
   page?: number;
   perPage?: number;
-  sortField?: string;
-  sortOrder?: 'asc' | 'desc';
-  showUpgradeable?: boolean;
 }

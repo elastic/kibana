@@ -307,5 +307,30 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
     });
+
+    it('should get a list of agent policies by kuery', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=fleet-agents.status:healthy`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'TEST',
+          namespace: 'default',
+        })
+        .expect(200);
+    });
+
+    it('should return 400 if passed kuery is not correct', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=fleet-agents.non_existent_parameter:healthy`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
+    });
+
+    it('should return 400 if the passed kuery does not have prefix fleet-agents', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=name:test`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
+    });
   });
 }
