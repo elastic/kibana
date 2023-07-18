@@ -77,7 +77,12 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import { createRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
+import {
+  cleanKibana,
+  resetRulesTableState,
+  deleteAlertsAndRules,
+  waitForPageToBeLoaded,
+} from '../../tasks/common';
 
 import {
   getEqlRule,
@@ -136,7 +141,7 @@ describe('Detection rules, bulk edit', () => {
     createRule(getNewTermsRule({ ...defaultRuleData, rule_id: '6' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
+    waitForPageToBeLoaded();
     waitForRulesTableToBeLoaded();
   });
 

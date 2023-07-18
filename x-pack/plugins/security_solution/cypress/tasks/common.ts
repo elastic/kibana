@@ -269,6 +269,11 @@ export const deleteDataView = (dataSource: string) => {
 
 export const scrollToBottom = () => cy.scrollTo('bottom');
 
+export const waitForPageToBeLoaded = () => {
+  cy.get(LOADING_INDICATOR_HIDDEN).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
+};
+
 export const waitForWelcomePanelToBeLoaded = () => {
   cy.get(KIBANA_LOADING_ICON).should('exist');
   cy.get(KIBANA_LOADING_ICON).should('not.exist');

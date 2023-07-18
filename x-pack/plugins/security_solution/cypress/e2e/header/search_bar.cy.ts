@@ -20,12 +20,14 @@ import {
 import { getHostIpFilter } from '../../objects/filter';
 
 import { HOSTS_URL } from '../../urls/navigation';
+import { waitForPageToBeLoaded } from '../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 describe('SearchBar', () => {
   beforeEach(() => {
     login();
     visit(HOSTS_URL);
+    waitForPageToBeLoaded();
     waitForAllHostsToBeLoaded();
   });
 
