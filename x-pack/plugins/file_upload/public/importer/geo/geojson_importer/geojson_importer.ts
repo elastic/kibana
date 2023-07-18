@@ -46,9 +46,9 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     };
 
     if (this._iterator === undefined) {
-      this._iterator = (
-        await loadInBatches(this._getFile(), JSONLoader, jsonLoaderOptions)
-      )[Symbol.asyncIterator]();
+      this._iterator = (await loadInBatches(this._getFile(), JSONLoader, jsonLoaderOptions))[
+        Symbol.asyncIterator
+      ]();
     }
 
     if (!this._getIsActive() || !this._iterator) {
