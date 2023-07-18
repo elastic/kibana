@@ -29,29 +29,12 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
-    // These groupBy fields must be the one specified in the source query, otherwise
-    // the transform will create many permutation for each field values
-    const extraGroupByFields = {
-      ...(slo.indicator.params.service !== ALL_VALUE && {
-        'service.name': { terms: { field: 'service.name' } },
-      }),
-      ...(slo.indicator.params.environment !== ALL_VALUE && {
-        'service.environment': { terms: { field: 'service.environment' } },
-      }),
-      ...(slo.indicator.params.transactionName !== ALL_VALUE && {
-        'transaction.name': { terms: { field: 'transaction.name' } },
-      }),
-      ...(slo.indicator.params.transactionType !== ALL_VALUE && {
-        'transaction.type': { terms: { field: 'transaction.type' } },
-      }),
-    };
-
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(slo, '@timestamp', extraGroupByFields),
+      this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
@@ -59,6 +42,29 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
 
   private buildTransformId(slo: SLO): string {
     return getSLOTransformId(slo.id, slo.revision);
+  }
+
+  private buildGroupBy(slo: SLO, indicator: APMTransactionDurationIndicator) {
+    // These groupBy fields must match the fields from the source query, otherwise
+    // the transform will create permutations for each value present in the source.
+    // E.g. if environment is not specified in the source query, but we include it in the groupBy,
+    // we'll output documents for each environment value
+    const extraGroupByFields = {
+      ...(indicator.params.service !== ALL_VALUE && {
+        'service.name': { terms: { field: 'service.name' } },
+      }),
+      ...(indicator.params.environment !== ALL_VALUE && {
+        'service.environment': { terms: { field: 'service.environment' } },
+      }),
+      ...(indicator.params.transactionName !== ALL_VALUE && {
+        'transaction.name': { terms: { field: 'transaction.name' } },
+      }),
+      ...(indicator.params.transactionType !== ALL_VALUE && {
+        'transaction.type': { terms: { field: 'transaction.type' } },
+      }),
+    };
+
+    return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {

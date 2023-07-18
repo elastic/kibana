@@ -99,7 +99,7 @@ export abstract class TransformGenerator {
     return `Rolled-up SLI data for SLO: ${slo.name}`;
   }
 
-  public buildGroupBy(
+  public buildCommonGroupBy(
     slo: SLO,
     sourceIndexTimestampField: string | undefined = '@timestamp',
     extraGroupByFields = {}
