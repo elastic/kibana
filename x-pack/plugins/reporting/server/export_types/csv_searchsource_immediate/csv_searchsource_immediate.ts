@@ -17,7 +17,6 @@ import {
   BaseExportTypeStartDeps,
 } from '../common/export_type';
 import {
-  CSV_JOB_TYPE,
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -61,7 +60,7 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
 > {
   id = CSV_SEARCHSOURCE_IMMEDIATE_TYPE;
   name = CSV_SEARCHSOURCE_IMMEDIATE_TYPE;
-  jobType = CSV_JOB_TYPE;
+  jobType = CSV_SEARCHSOURCE_IMMEDIATE_TYPE;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [
@@ -83,6 +82,7 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
   public createJob = async (immediateJobParams: any): Promise<JobParamsDownloadCSV> => {
     return {
       ...immediateJobParams,
+      title: immediateJobParams.title,
       objectType: 'immediate-search',
     };
   };
@@ -97,7 +97,7 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
   ) => {
     const job = await this.createJob(immediateJobParams);
 
-    const dataPluginStart = this.startDeps.data;
+    const dataPluginStart = await this.startDeps.data;
     const savedObjectsClient = (await context.core).savedObjects.client;
     const uiSettings = this.getUiSettingsServiceFactory(savedObjectsClient);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
