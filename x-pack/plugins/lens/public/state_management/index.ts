@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { configureStore, getDefaultMiddleware, PreloadedState } from '@reduxjs/toolkit';
+import {
+  configureStore,
+  getDefaultMiddleware,
+  PreloadedState,
+  Action,
+  Dispatch,
+  MiddlewareAPI,
+} from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import { makeLensReducer, lensActions } from './lens_slice';
+import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
 import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
@@ -50,9 +57,12 @@ export const {
   changeIndexPattern,
 } = lensActions;
 
+type CustomMiddleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => void;
+
 export const makeConfigureStore = (
   storeDeps: LensStoreDeps,
-  preloadedState: PreloadedState<LensState>
+  preloadedState: PreloadedState<LensState> | undefined,
+  customMiddleware?: CustomMiddleware
 ) => {
   const middleware = [
     ...getDefaultMiddleware({
@@ -74,6 +84,9 @@ export const makeConfigureStore = (
     contextMiddleware(storeDeps),
     fullscreenMiddleware(storeDeps),
   ];
+  if (customMiddleware) {
+    middleware.push(customMiddleware);
+  }
   if (process.env.NODE_ENV === 'development') {
     middleware.push(
       createLogger({
@@ -88,7 +101,9 @@ export const makeConfigureStore = (
       lens: makeLensReducer(storeDeps),
     },
     middleware,
-    preloadedState,
+    preloadedState: preloadedState ?? {
+      lens: getPreloadedState(storeDeps),
+    },
   });
 };
 

@@ -113,7 +113,7 @@ export const getPreloadedState = ({
     ? data.query.queryString.getDefaultQuery()
     : getQueryFromContext(initialContext, data);
 
-  const state = {
+  const state: LensAppState = {
     ...initialState,
     isLoading: true,
     // Do not use app-specific filters from previous app,
@@ -124,7 +124,7 @@ export const getPreloadedState = ({
       : 'searchFilters' in initialContext && initialContext.searchFilters
       ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId(),
+    searchSessionId: data.search.session.getSessionId() || '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
       embeddableEditorIncomingState?.originatingApp ||

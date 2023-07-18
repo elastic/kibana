@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { PreloadedState } from '@reduxjs/toolkit';
+import { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,11 +17,13 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 import {
   makeConfigureStore,
   LensRootStore,
-  LensAppState,
-  LensState,
   loadInitial,
+  updateVisualizationState,
+  removeDimension,
+  removeOrClearLayer,
+  addLayer,
+  updateDatasourceState,
 } from '../../../state_management';
-import { getPreloadedState } from '../../../state_management/lens_slice';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
@@ -42,6 +44,26 @@ function LoadingSpinnerWithOverlay() {
     </EuiOverlayMask>
   );
 }
+
+type UpdaterType = (datasourceState: unknown, visualizationState: unknown) => void;
+
+const updatingMiddleware =
+  (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
+    next(action);
+    if (
+      updateVisualizationState.match(action) ||
+      removeDimension.match(action) ||
+      removeOrClearLayer.match(action) ||
+      addLayer.match(action) ||
+      updateDatasourceState.match(action)
+    ) {
+      // we want to get the state after the store update, that's why we use setTimeout
+      setTimeout(() => {
+        const { datasourceStates, visualization, activeDatasourceId } = store.getState().lens;
+        updater(datasourceStates[activeDatasourceId].state, visualization.state);
+      });
+    }
+  };
 
 export function getEditLensConfiguration(
   coreStart: CoreStart,
@@ -89,9 +111,11 @@ export function getEditLensConfiguration(
           ? datasourceState.initialContext
           : undefined,
     };
-    const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-      lens: getPreloadedState(storeDeps) as LensAppState,
-    } as unknown as PreloadedState<LensState>);
+    const lensStore: LensRootStore = makeConfigureStore(
+      storeDeps,
+      undefined,
+      updatingMiddleware(updateAll)
+    );
     lensStore.dispatch(
       loadInitial({
         initialInput: {

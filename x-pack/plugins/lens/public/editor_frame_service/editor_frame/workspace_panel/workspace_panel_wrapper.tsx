@@ -52,13 +52,10 @@ export interface WorkspacePanelWrapperProps {
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  onUpdateStateCb?: (datasourceState: unknown, visualizationState: unknown) => void;
 }) {
   const dispatchLens = useLensDispatch();
-  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
-    (state) => state.lens
-  );
-  const { activeVisualization, onUpdateStateCb } = props;
+  const { visualization, datasourceStates } = useLensSelector((state) => state.lens);
+  const { activeVisualization } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -70,12 +67,8 @@ export function VisualizationToolbar(props: {
           newState,
         })
       );
-      if (activeDatasourceId && onUpdateStateCb) {
-        const dsState = datasourceStates[activeDatasourceId].state;
-        onUpdateStateCb?.(dsState, newState);
-      }
     },
-    [activeDatasourceId, datasourceStates, dispatchLens, activeVisualization, onUpdateStateCb]
+    [datasourceStates, dispatchLens, activeVisualization]
   );
 
   const ToolbarComponent = props.activeVisualization?.ToolbarComponent;
