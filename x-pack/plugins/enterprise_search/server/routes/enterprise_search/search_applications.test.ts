@@ -548,9 +548,9 @@ describe('engines routes', () => {
       expect(mockRouter.response.customError).toHaveBeenCalledWith({
         body: {
           attributes: {
-            error_code: 'engine_not_found',
+            error_code: 'search_application_not_found',
           },
-          message: 'Could not find engine',
+          message: 'Could not find search application',
         },
         statusCode: 404,
       });
