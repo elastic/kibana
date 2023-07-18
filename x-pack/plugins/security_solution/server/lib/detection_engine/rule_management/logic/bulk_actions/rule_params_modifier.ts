@@ -12,8 +12,8 @@ import type { RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { invariant } from '../../../../../../common/utils/invariant';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { ServerlessSecurityConfig } from './config';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
@@ -42,11 +42,10 @@ export class SecuritySolutionServerlessPlugin
     }
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
-
     return {};
   }
 
-  public start() {
+  public start(_coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
     return {};
   }
 
