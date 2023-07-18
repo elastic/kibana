@@ -165,7 +165,7 @@ export async function installYarnDeps(log, opts = undefined) {
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
 export async function buildWebpackBundles(log, opts = undefined) {
-  await runBazel(log, ['build', ...BAZEL_TARGETS, '--show_result=1', '--sandbox_debug=true'], {
+  await runBazel(log, ['build', ...BAZEL_TARGETS, '--show_result=1'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
   });
