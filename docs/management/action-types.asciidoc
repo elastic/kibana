@@ -159,6 +159,9 @@ action in the current space.
 For out-of-the-box and standardized connectors, refer to
 <<pre-configured-connectors,preconfigured connectors>>.
 
+TIP: You can also manage connectors as resources with the https://registry.terraform.io/providers/elastic/elasticstack/latest[Elasticstack provider] for Terraform.
+For more details, refer to the https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_action_connector[elasticstack_kibana_action_connector] resource.
+
 [float]
 [[importing-and-exporting-connectors]]
 === Importing and exporting connectors
