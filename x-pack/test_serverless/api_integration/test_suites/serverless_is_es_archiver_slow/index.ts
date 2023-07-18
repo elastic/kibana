@@ -9,6 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Es Archiver Load Action Performance', function () {
-    loadTestFile(require.resolve('./serverless_big_loop'));
+    loadTestFile(require.resolve('./serverless_es_archiver_benchmark'));
   });
 }

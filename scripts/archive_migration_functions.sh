@@ -356,7 +356,7 @@ load_logstash() {
 
 load_es() {
   set -x
-  node scripts/es_archiver.js load "$orig_archive" --config "$test_config"
+  node scripts/es_archiver.js load "$orig_archive" --config "$test_config" --quiet
   set +x
 }
 
