@@ -45,7 +45,6 @@ import {
 } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleActionParam,
-  ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,

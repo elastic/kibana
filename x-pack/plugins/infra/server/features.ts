@@ -40,10 +40,18 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+          ],
         },
         alert: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
+          all: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+          ],
         },
       },
       management: {
@@ -61,10 +69,18 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+          ],
         },
         alert: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
+          read: [
+            METRIC_THRESHOLD_ALERT_TYPE_ID,
+            METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+            '.es-query',
+          ],
         },
       },
       management: {
