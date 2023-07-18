@@ -13,8 +13,8 @@ import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/consta
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
-import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
-import { querySignalsSchema } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import type { QuerySignalsSchemaDecoded } from '../../../../../common/api/detection_engine/signals';
+import { querySignalsSchema } from '../../../../../common/api/detection_engine/signals';
 
 export const querySignalsRoute = (
   router: SecuritySolutionPluginRouter,
