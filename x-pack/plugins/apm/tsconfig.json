@@ -93,9 +93,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
-    "@kbn/profiling-plugin",
-    "@kbn/logs-shared-plugin",
-    "@kbn/unified-field-list",
     "@kbn/discover-plugin"
   ],
   "exclude": ["target/**/*"]
