@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -51,7 +51,7 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
     <EuiSideNav
       items={[
         {
-          name: 'Embeddable explorer',
+          name: 'Embeddable examples',
           id: 'home',
           items: [...navItems],
         },
@@ -81,7 +81,7 @@ const EmbeddableExplorerApp = ({
 }: Props) => {
   const pages: PageDef[] = [
     {
-      title: 'Hello world embeddable',
+      title: 'Render embeddable',
       id: 'helloWorldEmbeddableSection',
       component: (
         <HelloWorldEmbeddableExample
@@ -90,7 +90,7 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'Todo embeddable',
+      title: 'Update embeddable state',
       id: 'todoEmbeddableSection',
       component: (
         <TodoEmbeddableExample
@@ -99,21 +99,19 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'List container embeddable',
+      title: 'Groups of embeddables',
       id: 'listContainerSection',
       component: (
         <ListContainerExample
           listContainerEmbeddableFactory={embeddableExamples.factories.getListContainerEmbeddableFactory()}
-          searchableListContainerEmbeddableFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),
     },
     {
-      title: 'Dynamically adding children to a container',
+      title: 'Context menu',
       id: 'embeddablePanelExample',
       component: (
         <EmbeddablePanelExample
-          embeddableServices={embeddableApi}
           searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),
@@ -126,12 +124,12 @@ const EmbeddableExplorerApp = ({
 
   return (
     <Router basename={basename}>
-      <EuiPage>
-        <EuiPageSideBar>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Sidebar>
           <Nav navigateToApp={navigateToApp} pages={pages} />
-        </EuiPageSideBar>
+        </EuiPageTemplate.Sidebar>
         {routes}
-      </EuiPage>
+      </EuiPageTemplate>
     </Router>
   );
 };

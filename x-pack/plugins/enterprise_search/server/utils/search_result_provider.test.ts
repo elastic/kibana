@@ -28,7 +28,7 @@ describe('Enterprise Search search provider', () => {
     id: 'elastic-crawler',
     score: 75,
     title: 'Elastic Web Crawler',
-    type: 'Enterprise Search',
+    type: 'Search',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/crawler`,
       prependBasePath: true,
@@ -40,7 +40,7 @@ describe('Enterprise Search search provider', () => {
     id: 'mongodb',
     score: 75,
     title: 'MongoDB',
-    type: 'Enterprise Search',
+    type: 'Search',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?service_type=mongodb`,
       prependBasePath: true,

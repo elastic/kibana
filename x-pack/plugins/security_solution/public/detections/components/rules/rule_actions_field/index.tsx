@@ -23,6 +23,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { getTimeTypeValue } from '../../../../../common/utils/time_type_value';
 import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
 import type { FieldHook } from '../../../../shared_imports';
@@ -100,7 +101,7 @@ const ContainerActions = styled.div.attrs(
   ${({ $caseIndexes }) =>
     $caseIndexes.map(
       (index) => `
-        div[id="${index}"].euiAccordion__childWrapper .euiAccordion__padding--l {
+        div[id="${index}"].euiAccordion__childWrapper .euiAccordion__children {
           padding: 0px;
           .euiFlexGroup {
             display: none;
@@ -121,7 +122,7 @@ export const RuleActionsField: React.FC<Props> = ({
 }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
-  const { isSubmitted, isSubmitting, isValid } = form;
+  const { isValid } = form;
   const {
     triggersActionsUi: { getActionForm },
   } = useKibana().services;
@@ -241,6 +242,7 @@ export const RuleActionsField: React.FC<Props> = ({
     [field]
   );
 
+  const isFormValidated = isValid !== undefined;
   const actionForm = useMemo(
     () =>
       getActionForm({
@@ -254,14 +256,15 @@ export const RuleActionsField: React.FC<Props> = ({
         setActionFrequencyProperty: setActionFrequency,
         setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
+        producerId: AlertConsumers.SIEM,
         defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
         defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
-        showActionAlertsFilter: true,
         minimumThrottleInterval,
+        disableErrorMessages: !isFormValidated,
       }),
     [
       getActionForm,
@@ -274,18 +277,17 @@ export const RuleActionsField: React.FC<Props> = ({
       setActionFrequency,
       setActionAlertsFilterProperty,
       minimumThrottleInterval,
+      isFormValidated,
     ]
   );
 
   useEffect(() => {
-    if (isSubmitting || !field.errors.length) {
-      return setFieldErrors(null);
-    }
-    if (isSubmitted && !isSubmitting && isValid === false && field.errors.length) {
+    if (isValid === false) {
       const errorsString = field.errors.map(({ message }) => message).join('\n');
       return setFieldErrors(errorsString);
     }
-  }, [isSubmitted, isSubmitting, field.isChangingValue, isValid, field.errors, setFieldErrors]);
+    return setFieldErrors(null);
+  }, [field.errors, isValid]);
 
   return (
     <ContainerActions $caseIndexes={caseActionIndexes}>

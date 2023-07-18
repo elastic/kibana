@@ -11,7 +11,6 @@ import * as React from 'react';
 import { EmbeddableOutput, isErrorEmbeddable, ViewMode } from '../lib';
 import { coreMock } from '@kbn/core/public/mocks';
 import { testPlugin } from './test_plugin';
-import { CustomizePanelEditor } from '../lib/panel/panel_header/panel_actions/customize_panel/customize_panel_editor';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import {
   EmbeddableTimeRangeInput,
@@ -20,6 +19,7 @@ import {
   TimeRangeEmbeddableFactory,
   TIME_RANGE_EMBEDDABLE,
 } from '../lib/test_samples';
+import { CustomizePanelEditor } from '../embeddable_panel/panel_actions/customize_panel_action/customize_panel_editor';
 
 let container: TimeRangeContainer;
 let embeddable: TimeRangeEmbeddable;

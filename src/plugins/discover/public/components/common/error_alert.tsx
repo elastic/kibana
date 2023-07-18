@@ -15,8 +15,8 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 export const DiscoverError = ({ error }: { error: Error }) => {
   const { locator } = useDiscoverServices();
 
-  const goToMain = () => {
-    locator.navigate({});
+  const goToMain = async () => {
+    await locator.navigate({});
   };
 
   return (

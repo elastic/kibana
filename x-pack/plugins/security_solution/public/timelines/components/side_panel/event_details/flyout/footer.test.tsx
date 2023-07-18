@@ -115,7 +115,6 @@ const defaultProps = {
   isHostIsolationPanelOpen: false,
   handleOnEventClosed: jest.fn(),
   onAddIsolationStatusClick: jest.fn(),
-  expandedEvent: { eventId: ecsData._id, indexName: '' },
   detailsData: mockAlertDetailsDataWithIsObject,
   refetchFlyoutData: jest.fn(),
 };

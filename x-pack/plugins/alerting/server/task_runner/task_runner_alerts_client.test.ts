@@ -42,13 +42,13 @@ import {
   mockedRuleTypeSavedObject,
   ruleType,
   RULE_NAME,
-  SAVED_OBJECT,
   generateRunnerResult,
   RULE_ACTIONS,
   generateSavedObjectParams,
   mockTaskInstance,
   DATE_1970,
   DATE_1970_5_MIN,
+  mockedRawRuleSO,
 } from './fixtures';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -240,22 +240,22 @@ describe('Task Runner', () => {
       hasReachedAlertLimit: false,
       triggeredActionsStatus: 'complete',
     });
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
 
@@ -332,24 +332,24 @@ describe('Task Runner', () => {
       .spyOn(alertsService, 'getContextInitializationPromise')
       .mockResolvedValue({ result: true });
 
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      {
+      context: {
         ...taskRunnerFactoryInitializerParams,
         alertsService,
       },
-      inMemoryMetrics
-    );
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const runnerResult = await taskRunner.run();
     expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
 
@@ -448,18 +448,18 @@ describe('Task Runner', () => {
       }
     );
 
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      mockedTaskInstance,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: mockedTaskInstance,
+      context: {
         ...taskRunnerFactoryInitializerParams,
         alertsService,
       },
-      inMemoryMetrics
-    );
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     await taskRunner.run();
 
     expect(ruleType.executor).toHaveBeenCalledTimes(1);
@@ -473,6 +473,10 @@ describe('Task Runner', () => {
         // new alert doc
         {
           '@timestamp': DATE_1970,
+          event: {
+            action: 'open',
+            kind: 'signal',
+          },
           kibana: {
             alert: {
               action_group: 'default',
@@ -503,12 +507,18 @@ describe('Task Runner', () => {
               },
               start: DATE_1970,
               status: 'active',
+              time_range: {
+                gte: DATE_1970,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              workflow_status: 'open',
             },
             space_ids: ['default'],
+            version: '8.8.0',
           },
           numericField: 27,
           textField: 'foo',
+          tags: ['rule-', '-tags'],
         },
       ],
     });
@@ -541,22 +551,22 @@ describe('Task Runner', () => {
       hasReachedAlertLimit: false,
       triggeredActionsStatus: 'complete',
     });
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
 
@@ -624,22 +634,22 @@ describe('Task Runner', () => {
       hasReachedAlertLimit: false,
       triggeredActionsStatus: 'complete',
     });
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
+    const taskRunner = new TaskRunner({
+      ruleType: ruleTypeWithAlerts,
+      taskInstance: {
         ...mockedTaskInstance,
         state: {
           ...mockedTaskInstance.state,
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      { ...taskRunnerFactoryInitializerParams, alertsService: null },
-      inMemoryMetrics
-    );
+      context: { ...taskRunnerFactoryInitializerParams, alertsService: null },
+      inMemoryMetrics,
+    });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
 

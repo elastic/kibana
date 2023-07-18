@@ -8,10 +8,12 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import type { Logger } from '@kbn/core/server';
-import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
-import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import { setSignalsStatusSchema } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  setSignalStatusValidateTypeDependents,
+  setSignalsStatusSchema,
+} from '../../../../../common/api/detection_engine/signals';
+import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -87,40 +89,20 @@ export const setSignalsStatusRoute = (
         }
       }
 
-      let queryObject;
-      if (signalIds) {
-        queryObject = { ids: { values: signalIds } };
-      }
-      if (query) {
-        queryObject = {
-          bool: {
-            filter: query,
-          },
-        };
-      }
       try {
-        const body = await esClient.updateByQuery({
-          index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-          conflicts: conflicts ?? 'abort',
-          // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
-          // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"
-          // but the tests do not pass with "refresh: false". If at some point a "refresh: wait_for" is implemented, we should use that instead.
-          refresh: true,
-          body: {
-            script: {
-              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
-              }
-              if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                ctx._source.signal.status = '${status}'
-              }`,
-              lang: 'painless',
-            },
-            query: queryObject,
-          },
-          ignore_unavailable: true,
-        });
-        return response.ok({ body });
+        if (signalIds) {
+          const body = await updateSignalsStatusByIds(status, signalIds, spaceId, esClient);
+          return response.ok({ body });
+        } else {
+          const body = await updateSignalsStatusByQuery(
+            status,
+            query,
+            { conflicts: conflicts ?? 'abort' },
+            spaceId,
+            esClient
+          );
+          return response.ok({ body });
+        }
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);
@@ -132,3 +114,62 @@ export const setSignalsStatusRoute = (
     }
   );
 };
+
+const updateSignalsStatusByIds = async (
+  status: SetSignalsStatusSchemaDecoded['status'],
+  signalsId: string[],
+  spaceId: string,
+  esClient: ElasticsearchClient
+) =>
+  esClient.bulk({
+    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+    refresh: 'wait_for',
+    body: signalsId.flatMap((signalId) => [
+      {
+        update: { _id: signalId, _index: `${DEFAULT_ALERTS_INDEX}-${spaceId}` },
+      },
+      {
+        script: getUpdateSignalStatusScript(status),
+      },
+    ]),
+  });
+
+/**
+ * Please avoid using `updateSignalsStatusByQuery` when possible, use `updateSignalsStatusByIds` instead.
+ *
+ * This method calls `updateByQuery` with `refresh: true` which is expensive on serverless.
+ */
+const updateSignalsStatusByQuery = async (
+  status: SetSignalsStatusSchemaDecoded['status'],
+  query: object | undefined,
+  options: { conflicts: 'abort' | 'proceed' },
+  spaceId: string,
+  esClient: ElasticsearchClient
+) =>
+  esClient.updateByQuery({
+    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+    conflicts: options.conflicts,
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html#_refreshing_shards_2
+    // Note: Before we tried to use "refresh: wait_for" but I do not think that was available and instead it defaulted to "refresh: true"
+    // but the tests do not pass with "refresh: false". If at some point a "refresh: wait_for" is implemented, we should use that instead.
+    refresh: true,
+    body: {
+      script: getUpdateSignalStatusScript(status),
+      query: {
+        bool: {
+          filter: query,
+        },
+      },
+    },
+    ignore_unavailable: true,
+  });
+
+const getUpdateSignalStatusScript = (status: SetSignalsStatusSchemaDecoded['status']) => ({
+  source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+      ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
+    }
+    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+      ctx._source.signal.status = '${status}'
+    }`,
+  lang: 'painless',
+});

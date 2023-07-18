@@ -12,8 +12,9 @@ import {
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
-export const DEFAULT_LAYER_ID = 'layer1';
+export const DEFAULT_LAYER_ID = 'layer';
 export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';
+
 const DEFAULT_BREAKDOWN_SIZE = 10;
 
 export const getHistogramColumn = ({
@@ -37,7 +38,7 @@ export const getHistogramColumn = ({
   };
 };
 
-export const getBreakdownColumn = ({
+export const getTopValuesColumn = ({
   columnName,
   overrides,
 }: {
@@ -89,10 +90,10 @@ export const getDefaultReferences = (
   ];
 };
 
-export const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
+export const getAdhocDataView = (dataViewSpec: DataViewSpec): Record<string, DataViewSpec> => {
   return {
-    [dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID]: {
-      ...dataView.toSpec(),
+    [dataViewSpec.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID]: {
+      ...dataViewSpec,
     },
   };
 };

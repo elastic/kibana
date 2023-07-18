@@ -29,19 +29,31 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickSelectedHostsButton() {
-      return testSubjects.click('infraUseHostsTableButton');
+      return testSubjects.click('hostsViewTableSelectHostsFilterButton');
     },
 
     async clickSelectedHostsAddFilterButton() {
-      return testSubjects.click('infraHostsTableAddFilterButton');
+      return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async clickOverviewFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-overview');
+    },
+
+    async clickMetadataFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-metadata');
+    },
+
     async clickProcessesFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-processes');
+    },
+
+    async clickShowAllMetadataOverviewTab() {
+      return testSubjects.click('infraMetadataSummaryShowAllMetadataButton');
     },
 
     async clickLogsFlyoutTab() {
@@ -52,12 +64,16 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraProcessRowButton');
     },
 
-    async clickFlyoutUptimeLink() {
-      return testSubjects.click('hostsView-flyout-uptime-link');
-    },
-
     async clickFlyoutApmServicesLink() {
       return testSubjects.click('hostsView-flyout-apm-services-link');
+    },
+
+    async clickAddMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableAddPin');
+    },
+
+    async clickRemoveMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableRemovePin');
     },
 
     async clickAddMetadataFilter() {
@@ -124,7 +140,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async selectedHostsButtonExist() {
-      return testSubjects.exists('infraUseHostsTableButton');
+      return testSubjects.exists('hostsViewTableSelectHostsFilterButton');
     },
 
     async getMetricsTrendContainer() {
@@ -180,14 +196,34 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Flyout Tabs
+    async getAssetDetailsKPITileValue(type: string) {
+      const container = await testSubjects.find('assetDetailsKPIGrid');
+      const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
+      const div = await element.findByClassName('echMetricText__value');
+      return div.getAttribute('title');
+    },
+
+    async getAssetDetailsMetricsCharts() {
+      const container = await testSubjects.find('assetDetailsMetricsChartGrid');
+      return container.findAllByCssSelector('[data-test-subj*="assetDetailsMetricsChart"]');
+    },
+
     getMetadataTab() {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
+    },
+
+    metadataTableExist() {
+      return testSubjects.exists('infraMetadataTable');
     },
 
     async getMetadataTabName() {
       const tabElement = await this.getMetadataTab();
       const tabTitle = await tabElement.findByClassName('euiTab__content');
       return tabTitle.getVisibleText();
+    },
+
+    async getRemovePinExist() {
+      return testSubjects.exists('infraMetadataEmbeddableRemovePin');
     },
 
     async getAppliedFilter() {

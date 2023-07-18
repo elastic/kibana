@@ -8,10 +8,13 @@ import { UNINSTALL_TOKEN_ROUTES } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 
 import type { FleetAuthzRouter } from '../../services/security';
-import { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
+import {
+  GetUninstallTokenRequestSchema,
+  GetUninstallTokensMetadataRequestSchema,
+} from '../../types/rest_spec/uninstall_token';
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
-import { getUninstallTokensHandler } from './handlers';
+import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
@@ -20,12 +23,23 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     router.get(
       {
         path: UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
-        validate: GetUninstallTokensRequestSchema,
+        validate: GetUninstallTokensMetadataRequestSchema,
         fleetAuthz: {
           fleet: { all: true },
         },
       },
-      getUninstallTokensHandler
+      getUninstallTokensMetadataHandler
+    );
+
+    router.get(
+      {
+        path: UNINSTALL_TOKEN_ROUTES.INFO_PATTERN,
+        validate: GetUninstallTokenRequestSchema,
+        fleetAuthz: {
+          fleet: { all: true },
+        },
+      },
+      getUninstallTokenHandler
     );
   }
 };

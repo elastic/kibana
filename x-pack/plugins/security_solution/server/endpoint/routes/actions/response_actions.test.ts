@@ -209,7 +209,10 @@ describe('Response actions', () => {
     });
 
     it('correctly redirects legacy isolate to new route', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(ISOLATE_HOST_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.custom).toBeCalled();
       const response = mockResponse.custom.mock.calls[0][0];
       expect(response.statusCode).toEqual(308);
@@ -217,7 +220,10 @@ describe('Response actions', () => {
     });
 
     it('correctly redirects legacy release to new route', async () => {
-      await callRoute(UNISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(UNISOLATE_HOST_ROUTE, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.custom).toBeCalled();
       const response = mockResponse.custom.mock.calls[0][0];
       expect(response.statusCode).toEqual(308);
@@ -225,12 +231,18 @@ describe('Response actions', () => {
     });
 
     it('succeeds when an endpoint ID is provided', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE_V2, { body: { endpoint_ids: ['XYZ'] } });
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
+        body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
+      });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('accepts a comment field', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE_V2, { body: { endpoint_ids: ['XYZ'], comment: 'XYZ' } });
+      await callRoute(ISOLATE_HOST_ROUTE_V2, {
+        body: { endpoint_ids: ['XYZ'], comment: 'XYZ' },
+        version: '2023-10-31',
+      });
       expect(mockResponse.ok).toBeCalled();
     });
 
@@ -240,6 +252,7 @@ describe('Response actions', () => {
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['ABC-XYZ-000'] },
         searchResponse: metadataResponse,
+        version: '2023-10-31',
       });
 
       await expect(
@@ -258,6 +271,7 @@ describe('Response actions', () => {
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
         mockUser: testUser,
+        version: '2023-10-31',
       });
 
       await expect(
@@ -275,6 +289,7 @@ describe('Response actions', () => {
       const comment = "I am isolating this because it's Friday";
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'], comment },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -295,6 +310,7 @@ describe('Response actions', () => {
 
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: endpointIds, comment: 'XYZ' },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -322,6 +338,7 @@ describe('Response actions', () => {
     it('records the timeout in the action payload', async () => {
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
       await expect(
         (
@@ -341,6 +358,7 @@ describe('Response actions', () => {
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
         searchResponse: doc,
+        version: '2023-10-31',
       });
 
       await expect(
@@ -357,6 +375,7 @@ describe('Response actions', () => {
     it('sends the isolate command payload from the isolate route', async () => {
       await callRoute(ISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -375,6 +394,7 @@ describe('Response actions', () => {
     it('sends the unisolate command payload from the unisolate route', async () => {
       await callRoute(UNISOLATE_HOST_ROUTE_V2, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -393,6 +413,7 @@ describe('Response actions', () => {
     it('sends the kill-process command payload from the kill process route', async () => {
       await callRoute(KILL_PROCESS_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -411,6 +432,7 @@ describe('Response actions', () => {
     it('sends the suspend-process command payload from the suspend process route', async () => {
       await callRoute(SUSPEND_PROCESS_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -429,6 +451,7 @@ describe('Response actions', () => {
     it('sends the running-processes command payload from the running processes route', async () => {
       await callRoute(GET_PROCESSES_ROUTE, {
         body: { endpoint_ids: ['XYZ'] },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -447,6 +470,7 @@ describe('Response actions', () => {
     it('sends the get-file command payload from the get file route', async () => {
       await callRoute(GET_FILE_ROUTE, {
         body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -487,6 +511,7 @@ describe('Response actions', () => {
           UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -521,6 +546,7 @@ describe('Response actions', () => {
           ISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -556,6 +582,7 @@ describe('Response actions', () => {
           KILL_PROCESS_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -593,6 +620,7 @@ describe('Response actions', () => {
           SUSPEND_PROCESS_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -629,6 +657,7 @@ describe('Response actions', () => {
           GET_PROCESSES_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -663,6 +692,7 @@ describe('Response actions', () => {
           GET_FILE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { path: '/one/two/three' } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -777,6 +807,7 @@ describe('Response actions', () => {
           ISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -801,6 +832,7 @@ describe('Response actions', () => {
           UNISOLATE_HOST_ROUTE_V2,
           {
             body: { endpoint_ids: ['XYZ'] },
+            version: '2023-10-31',
             indexErrorResponse: {
               statusCode: 500,
               body: {
@@ -824,6 +856,7 @@ describe('Response actions', () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           license: Platinum,
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -833,6 +866,7 @@ describe('Response actions', () => {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canIsolateHost: false },
           license: Gold,
+          version: '2023-10-31',
         });
 
         expect(mockResponse.forbidden).toBeCalled();
@@ -842,6 +876,7 @@ describe('Response actions', () => {
         licenseEmitter.next(Gold);
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
           license: Gold,
         });
         expect(mockResponse.ok).toBeCalled();
@@ -852,6 +887,7 @@ describe('Response actions', () => {
       it('allows user to perform isolation when canIsolateHost is true', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -859,6 +895,7 @@ describe('Response actions', () => {
       it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
+          version: '2023-10-31',
         });
         expect(mockResponse.ok).toBeCalled();
       });
@@ -867,6 +904,7 @@ describe('Response actions', () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canIsolateHost: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
@@ -875,6 +913,7 @@ describe('Response actions', () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canUnIsolateHost: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
@@ -924,6 +963,7 @@ describe('Response actions', () => {
       it('logs a comment to the provided cases', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'], case_ids: ['one', 'two'] },
+          version: '2023-10-31',
         });
 
         expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
@@ -935,6 +975,7 @@ describe('Response actions', () => {
       it('logs a comment to any cases associated with the given alerts', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'], alert_ids: ['one', 'two'] },
+          version: '2023-10-31',
         });
 
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
@@ -950,6 +991,7 @@ describe('Response actions', () => {
             case_ids: ['ONE', 'TWO', 'case-1'],
             alert_ids: ['one', 'two'],
           },
+          version: '2023-10-31',
         });
 
         expect(casesClient.attachments.bulkCreate).toHaveBeenCalledTimes(4);

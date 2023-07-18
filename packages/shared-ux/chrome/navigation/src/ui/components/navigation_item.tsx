@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, ReactElement, ReactNode, useEffect } from 'react';
+import React, { Fragment, ReactElement, ReactNode, useEffect, useMemo } from 'react';
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { ChromeProjectNavigationNodeEnhanced, NodeProps } from '../types';
@@ -34,7 +34,14 @@ function NavigationItemComp<
   const navigationContext = useNavigation();
   const navNodeRef = React.useRef<ChromeProjectNavigationNodeEnhanced | null>(null);
 
-  const { element, children, ...node } = props;
+  const { element, children, node } = useMemo(() => {
+    const { element: _element, children: _children, ...rest } = props;
+    return {
+      element: _element,
+      children: _children,
+      node: rest,
+    };
+  }, [props]);
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
   let renderItem: (() => ReactElement) | undefined;
