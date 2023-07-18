@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSetAlertTagsRequestMock } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema.mock';
+import { getSetAlertTagsRequestMock } from '../../../../../common/api/detection_engine/alert_tags/mocks';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../common/constants';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
