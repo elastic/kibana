@@ -140,7 +140,8 @@ export class ProjectNavigationService {
     const activeNodes = findActiveNodes(
       currentPathname,
       this.projectNavigationNavTreeFlattened,
-      location
+      location,
+      this.http?.basePath.prepend
     );
 
     // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used

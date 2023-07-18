@@ -28,6 +28,7 @@ const allNavLinks: AppDeepLinkId[] = [
   'discover',
   'fleet',
   'integrations',
+  'management',
   'management:api_keys',
   'management:cases',
   'management:cross_cluster_replication',
