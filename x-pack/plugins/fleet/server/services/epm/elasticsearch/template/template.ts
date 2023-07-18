@@ -765,6 +765,7 @@ const updateExistingDataStream = async ({
 
     settings = simulateResult.template.settings;
     mappings = simulateResult.template.mappings;
+    // @ts-expect-error template is not yet typed with DLM
     lifecycle = simulateResult.template.lifecycle;
 
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
