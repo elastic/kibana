@@ -9,6 +9,8 @@ import * as rt from 'io-ts';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { ExternalServiceRt } from '../../domain/external_service/v1';
 
+export * from './mappings.v1';
+
 const PushDetailsRt = rt.strict({
   latestUserActionPushDate: rt.string,
   oldestUserActionPushDate: rt.string,
@@ -36,6 +38,21 @@ export const GetCaseConnectorsResponseRt = rt.record(
     CaseConnectorRt,
   ])
 );
+
+const ActionConnectorResultRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+    actionTypeId: rt.string,
+    name: rt.string,
+    isDeprecated: rt.boolean,
+    isPreconfigured: rt.boolean,
+    isSystemAction: rt.boolean,
+    referencedByCount: rt.number,
+  }),
+  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
+]);
+
+export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
 
 export type GetCaseConnectorsResponse = rt.TypeOf<typeof GetCaseConnectorsResponseRt>;
 export type GetCaseConnectorsPushDetails = rt.TypeOf<typeof PushDetailsRt>;

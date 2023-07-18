@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CommentType, ConnectorTypes } from '../../../api';
+import { CommentType } from '../../../api';
+import { ConnectorTypes } from '../connector/v1';
 import {
   CaseAttributesRt,
   CaseSettingsRt,

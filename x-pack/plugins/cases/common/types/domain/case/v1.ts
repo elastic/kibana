@@ -7,9 +7,10 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
-import { AttachmentTotalsRt, CaseConnectorRt, CommentRt } from '../../../api';
+import { AttachmentTotalsRt, CommentRt } from '../../../api';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
+import { CaseConnectorRt } from '../connector/v1';
 
 export { CaseStatuses };
 

@@ -17,7 +17,7 @@ import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
-import type { UserActionAttributes } from '../common/types/domain';
+import type { ConnectorMappings, UserActionAttributes } from '../common/types/domain';
 import {
   UserActionActions,
   UserActionTypes,
