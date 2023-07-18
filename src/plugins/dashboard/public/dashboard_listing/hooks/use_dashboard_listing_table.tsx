@@ -9,10 +9,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  TableListViewTableProps,
-  type UserContentCommonSchema,
-} from '@kbn/content-management-table-list-view-table';
+import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
@@ -28,14 +25,7 @@ import {
   dashboardListingTableStrings,
 } from '../_dashboard_listing_strings';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
-
-interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
-  attributes: {
-    title: string;
-    description?: string;
-    timeRestore: boolean;
-  };
-}
+import { DashboardSavedObjectUserContent } from '../types';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];

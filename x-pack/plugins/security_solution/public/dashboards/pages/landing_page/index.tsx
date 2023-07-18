@@ -102,6 +102,7 @@ export const DashboardsLandingPage = () => {
   );
 
   const securityTags = useSecurityTags();
+  const securityTagsExist = securityTags && securityTags?.length > 0;
 
   const initialFilter = useMemo(() => getInitialFilterString(securityTags), [securityTags]);
   return (
@@ -116,7 +117,7 @@ export const DashboardsLandingPage = () => {
       <LandingImageCards items={dashboardLinks} />
       <EuiSpacer size="m" />
 
-      {canReadDashboard && initialFilter && securityTags && (
+      {canReadDashboard && securityTagsExist && initialFilter && (
         <>
           <DashboardListingTable
             disableCreateDashboardButton={loadingCreateDashboardUrl}

@@ -10,10 +10,20 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useDashboardListingTable } from './use_dashboard_listing_table';
 import { pluginServices } from '../../services/plugin_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
+import { DashboardSavedObjectUserContent } from '../types';
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();
 const goToDashboard = jest.fn();
 const deleteDashboards = jest.fn().mockResolvedValue(true);
+const getUiSettingsMock = jest.fn().mockImplementation((key) => {
+  if (key === 'savedObjects:listingLimit') {
+    return 20;
+  }
+  if (key === 'savedObjects:perPage') {
+    return 5;
+  }
+  return null;
+});
 
 jest.mock('@kbn/ebt-tools', () => ({
   reportPerformanceMetricEvent: jest.fn(),
@@ -31,51 +41,23 @@ jest.mock('../_dashboard_listing_strings', () => ({
   },
 }));
 
-jest.mock('../../services/plugin_services', () => ({
-  pluginServices: {
-    getServices: jest.fn(),
-  },
-}));
-
-const mockGetServices = {
-  analytics: 'analytics',
-  dashboardSessionStorage: {
-    dashboardHasUnsavedEdits: jest.fn().mockReturnValue(true),
-    getDashboardIdsWithUnsavedChanges: jest.fn().mockReturnValue([]),
-    clearState: clearStateMock,
-  },
-  dashboardCapabilities: {
-    showWriteControls: true,
-  },
-  dashboardContentManagement: {
-    findDashboards: jest.fn(),
-    deleteDashboards,
-  },
-  settings: {
-    uiSettings: {
-      get: jest.fn().mockImplementation((key) => {
-        if (key === 'savedObjects:listingLimit') {
-          return 20;
-        }
-        if (key === 'savedObjects:perPage') {
-          return 5;
-        }
-        return null;
-      }),
-    },
-  },
-  notifications: {
-    toasts: {
-      addError: jest.fn(),
-    },
-  },
-};
-
 describe('useDashboardListingTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (pluginServices.getServices as jest.Mock).mockReturnValue(mockGetServices);
+    pluginServices.getServices().dashboardSessionStorage.dashboardHasUnsavedEdits = jest
+      .fn()
+      .mockReturnValue(true);
+
+    pluginServices.getServices().dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = jest
+      .fn()
+      .mockReturnValue([]);
+
+    pluginServices.getServices().dashboardSessionStorage.clearState = clearStateMock;
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+    pluginServices.getServices().dashboardContentManagement.deleteDashboards = deleteDashboards;
+    pluginServices.getServices().settings.uiSettings.get = getUiSettingsMock;
+    pluginServices.getServices().notifications.toasts.addError = jest.fn();
   });
 
   test('should return the correct initial hasInitialFetchReturned state', () => {
@@ -167,7 +149,9 @@ describe('useDashboardListingTable', () => {
     );
 
     act(() => {
-      result.current.tableListViewTableProps.deleteItems?.([{ id: 'test-id' }]);
+      result.current.tableListViewTableProps.deleteItems?.([
+        { id: 'test-id' } as DashboardSavedObjectUserContent,
+      ]);
     });
 
     expect(deleteDashboards).toHaveBeenCalled();
@@ -182,7 +166,9 @@ describe('useDashboardListingTable', () => {
     );
 
     act(() => {
-      result.current.tableListViewTableProps.editItem?.({ id: 'test-id' });
+      result.current.tableListViewTableProps.editItem?.({
+        id: 'test-id',
+      } as DashboardSavedObjectUserContent);
     });
 
     expect(goToDashboard).toHaveBeenCalled();
@@ -222,12 +208,8 @@ describe('useDashboardListingTable', () => {
   });
 
   test('createItem should be undefined when showWriteControls equals false', () => {
-    (pluginServices.getServices as jest.Mock).mockReturnValue({
-      ...mockGetServices,
-      dashboardCapabilities: {
-        showWriteControls: false,
-      },
-    });
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -239,12 +221,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('deleteItems should be undefined when showWriteControls equals false', () => {
-    (pluginServices.getServices as jest.Mock).mockReturnValue({
-      ...mockGetServices,
-      dashboardCapabilities: {
-        showWriteControls: false,
-      },
-    });
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -256,12 +233,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('editItem should be undefined when showWriteControls equals false', () => {
-    (pluginServices.getServices as jest.Mock).mockReturnValue({
-      ...mockGetServices,
-      dashboardCapabilities: {
-        showWriteControls: false,
-      },
-    });
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
