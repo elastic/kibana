@@ -9,6 +9,8 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
+import async from 'async';
 
 // TODO - how to generate this dynamically?
 const STORYBOOKS = [
@@ -78,12 +80,14 @@ const ghStatus = (state: string, description: string) =>
     `--silent`
   );
 
-const build = () => {
+const build = async () => {
   console.log('--- Building Storybooks');
-
-  for (const storybook of STORYBOOKS) {
-    exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
-  }
+  const cpuCount = Math.max(os.cpus()?.length, 1);
+  const buildStorybooks = STORYBOOKS.map(
+    (storybook) => () =>
+      exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`)
+  );
+  return async.parallelLimit(buildStorybooks, cpuCount);
 };
 
 const upload = () => {
@@ -136,12 +140,16 @@ const upload = () => {
   }
 };
 
-try {
-  ghStatus('pending', 'Building Storybooks');
-  build();
-  upload();
-  ghStatus('success', 'Storybooks built');
-} catch (error) {
-  ghStatus('error', 'Building Storybooks failed');
-  throw error;
+async function run() {
+  try {
+    ghStatus('pending', 'Building Storybooks');
+    await build();
+    upload();
+    ghStatus('success', 'Storybooks built');
+  } catch (error) {
+    ghStatus('error', 'Building Storybooks failed');
+    throw error;
+  }
 }
+
+run();
