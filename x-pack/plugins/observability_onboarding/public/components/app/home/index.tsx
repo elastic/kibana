@@ -22,9 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import styled from '@emotion/styled';
-import { ObservabilityOnboardingAppServices } from '../../..';
 import { breadcrumbsApp } from '../../../application/app';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import apacheIcon from '../../../icons/apache.svg';
@@ -57,20 +55,13 @@ export function Home() {
   const { euiTheme } = useEuiTheme();
 
   const { navigateToKibanaUrl } = useKibanaNavigation();
-  const {
-    config: {
-      serverless: { enabled: isServerlessEnabled },
-    },
-  } = useKibana<ObservabilityOnboardingAppServices>().services;
 
   const handleClickSystemLogs = () => {};
   const handleClickCustomLogs = () => {
     navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
   };
   const handleClickApmSetupGuide = () => {
-    navigateToKibanaUrl(
-      isServerlessEnabled ? '/app/apm/onboarding' : '/app/home#/tutorial/apm'
-    );
+    navigateToKibanaUrl('/app/apm/tutorial');
   };
   const handleClickKubernetesSetupGuide = () => {
     navigateToKibanaUrl('/app/integrations/detail/kubernetes');
