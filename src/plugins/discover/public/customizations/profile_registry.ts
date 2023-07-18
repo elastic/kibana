@@ -13,15 +13,12 @@ import type { RegisterCustomizationProfile, DiscoverProfile, DiscoverProfileId }
 export interface DiscoverProfileRegistry {
   get(id: DiscoverProfileId): DiscoverProfile | undefined;
   set(profile: DiscoverProfile): void;
-  getDeepLinks$: () => Observable<AppDeepLink[]>;
-  subscribe: (appUpdater: BehaviorSubject<AppUpdater>) => () => void;
-  unsubscribe: () => void;
+  getContributedAppState$: () => Observable<AppUpdater>;
 }
 
 export const createProfileRegistry = (): DiscoverProfileRegistry => {
   const profiles = new Map<string, DiscoverProfile>([['default', createProfile('default')]]);
   const profiles$ = new BehaviorSubject<DiscoverProfile[]>([...profiles.values()]);
-  let unsubscribe = () => {};
 
   return {
     get: (id) => profiles.get(id.toLowerCase()),
@@ -29,32 +26,21 @@ export const createProfileRegistry = (): DiscoverProfileRegistry => {
       profiles.set(profile.id.toLowerCase(), profile);
       profiles$.next([...profiles.values()]);
     },
-    getDeepLinks$() {
+    getContributedAppState$() {
       return profiles$.pipe(
         map((profilesList) => {
           const mergedDeepLinks = profilesList.flatMap((profile) => profile.deepLinks ?? []);
           return getUniqueDeepLinks(mergedDeepLinks);
-        })
+        }),
+        map((profilesDeepLinks) => (app) => ({
+          deepLinks: getUniqueDeepLinks([...(app.deepLinks ?? []), ...profilesDeepLinks]),
+        }))
       );
     },
-    subscribe(appUpdater) {
-      const unsubscribeDeepLinks = this.getDeepLinks$().subscribe((customizationsDeepLinks) => {
-        appUpdater.next(({ deepLinks }) => ({
-          deepLinks: getUniqueDeepLinks([...(deepLinks ?? []), ...customizationsDeepLinks]),
-        }));
-      });
-
-      unsubscribe = () => {
-        unsubscribeDeepLinks.unsubscribe();
-      };
-
-      return unsubscribe;
-    },
-    unsubscribe,
   };
 };
 
-export const createCustomizeFunction =
+export const createRegisterCustomizationProfile =
   (profileRegistry: DiscoverProfileRegistry): RegisterCustomizationProfile =>
   (id, options) => {
     const profile = profileRegistry.get(id) ?? createProfile(id);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createCustomizeFunction, createProfileRegistry } from './profile_registry';
+import { createRegisterCustomizationProfile, createProfileRegistry } from './profile_registry';
 
 describe('createProfileRegistry', () => {
   it('should allow registering profiles', () => {
@@ -63,19 +63,19 @@ describe('createProfileRegistry', () => {
   });
 });
 
-describe('createCustomizeFunction', () => {
+describe('createRegisterCustomizationProfile', () => {
   test('should add a customization callback to the registry', () => {
     const registry = createProfileRegistry();
-    const customize = createCustomizeFunction(registry);
+    const registerCustomizationProfile = createRegisterCustomizationProfile(registry);
     const callback = jest.fn();
-    customize('test', { customize: callback });
+    registerCustomizationProfile('test', { customize: callback });
     expect(registry.get('test')).toEqual({
       id: 'test',
       customizationCallbacks: [callback],
       deepLinks: [],
     });
     const callback2 = jest.fn();
-    customize('test', { customize: callback2 });
+    registerCustomizationProfile('test', { customize: callback2 });
     expect(registry.get('test')).toEqual({
       id: 'test',
       customizationCallbacks: [callback, callback2],

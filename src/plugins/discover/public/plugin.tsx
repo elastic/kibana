@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -73,7 +73,10 @@ import {
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 import type { RegisterCustomizationProfile } from './customizations';
-import { createCustomizeFunction, createProfileRegistry } from './customizations/profile_registry';
+import {
+  createRegisterCustomizationProfile,
+  createProfileRegistry,
+} from './customizations/profile_registry';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 
 const DocViewerLegacyTable = React.lazy(
@@ -219,6 +222,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
+  private profileRegistrySubscription: Subscription | undefined = undefined;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
@@ -305,7 +309,9 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
-    this.profileRegistry.subscribe(this.appStateUpdater);
+    this.profileRegistrySubscription = this.profileRegistry
+      .getContributedAppState$()
+      .subscribe(this.appStateUpdater);
 
     core.application.register({
       id: PLUGIN_ID,
@@ -418,12 +424,14 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      registerCustomizationProfile: createCustomizeFunction(this.profileRegistry),
+      registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
     };
   }
 
   stop() {
-    this.profileRegistry.unsubscribe();
+    if (this.profileRegistrySubscription) {
+      this.profileRegistrySubscription.unsubscribe();
+    }
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
