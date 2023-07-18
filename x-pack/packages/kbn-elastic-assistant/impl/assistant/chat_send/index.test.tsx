@@ -9,10 +9,11 @@ import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { ChatSend, Props } from '.';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { useSendMessages } from '../use_send_messages';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useConversation } from '../use_conversation';
+import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
+import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 
 jest.mock('../use_send_messages');
 jest.mock('../use_conversation');
@@ -27,49 +28,11 @@ const appendReplacements = jest.fn();
 const clearConversation = jest.fn();
 const testProps: Props = {
   selectedPromptContexts: {},
-  allSystemPrompts: [
-    {
-      id: 'default-system-prompt',
-      content:
-        'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:',
-      name: 'Default system prompt',
-      promptType: 'system',
-      isDefault: true,
-      isNewConversationDefault: true,
-    },
-    {
-      id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
-      content:
-        'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nProvide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:',
-      name: 'Enhanced system prompt',
-      promptType: 'system',
-      isDefault: true,
-    },
-  ],
+  allSystemPrompts: [defaultSystemPrompt, mockSystemPrompt],
   isDisabled: false,
   shouldRefocusPrompt: false,
   userPrompt: '',
-  currentConversation: {
-    id: 'Welcome',
-    isDefault: true,
-    theme: {
-      title: 'Elastic AI Assistant',
-      titleIcon: 'logoSecurity',
-      assistant: {
-        name: 'Elastic AI Assistant',
-        icon: 'logoSecurity',
-      },
-      system: {
-        icon: 'logoElastic',
-      },
-      user: {},
-    },
-    messages: [],
-    apiConfig: {
-      connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-      provider: OpenAiProviderType.OpenAi,
-    },
-  },
+  currentConversation: emptyWelcomeConvo,
   http: {
     basePath: {
       basePath: '/mfg',
@@ -78,7 +41,7 @@ const testProps: Props = {
     anonymousPaths: {},
     externalUrl: {},
   } as unknown as HttpSetup,
-  editingSystemPromptId: 'default-system-prompt',
+  editingSystemPromptId: defaultSystemPrompt.id,
   setEditingSystemPromptId,
   setPromptTextPreview,
   setSelectedPromptContexts,
@@ -124,23 +87,7 @@ describe('ChatSend', () => {
     const props: Props = {
       ...testProps,
 
-      currentConversation: {
-        ...testProps.currentConversation,
-        messages: [
-          {
-            content:
-              'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\nhow do i write host.name: * in EQL?',
-            role: 'user',
-            timestamp: '7/17/2023, 1:00:36 PM',
-          },
-          {
-            role: 'assistant',
-            content:
-              "In EQL (Event Query Language), you can write the equivalent of `host.name: *` using the `exists` operator. Here's how you can write it:\n\n```\nexists(host.name)\n```\n\nThis query will match all events where the `host.name` field exists, effectively giving you the same result as `host.name: *`.",
-            timestamp: '7/17/2023, 1:00:40 PM',
-          },
-        ],
-      },
+      currentConversation: welcomeConvo,
     };
 
     const { getByTestId, rerender } = render(<ChatSend {...props} />, {
@@ -166,6 +113,6 @@ describe('ChatSend', () => {
     expect(setUserPrompt).toHaveBeenCalledWith('');
     expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
     expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation.id);
-    expect(setEditingSystemPromptId).toHaveBeenCalledWith('default-system-prompt');
+    expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
 });

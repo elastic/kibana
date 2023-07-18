@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -59,6 +59,13 @@ export const AssistantHeader: FunctionComponent<Props> = ({
   shouldDisableKeyboardShortcut,
   showAnonymizedValues,
 }) => {
+  const showAnonymizedValuesChecked = useMemo(
+    () =>
+      currentConversation.replacements != null &&
+      Object.keys(currentConversation.replacements).length > 0 &&
+      showAnonymizedValues,
+    [currentConversation.replacements, showAnonymizedValues]
+  );
   return (
     <>
       <EuiFlexGroup
@@ -97,11 +104,8 @@ export const AssistantHeader: FunctionComponent<Props> = ({
                   repositionOnScroll={true}
                 >
                   <EuiSwitch
-                    checked={
-                      currentConversation.replacements != null &&
-                      Object.keys(currentConversation.replacements).length > 0 &&
-                      showAnonymizedValues
-                    }
+                    data-test-subj="showAnonymizedValues"
+                    checked={showAnonymizedValuesChecked}
                     compressed={true}
                     disabled={currentConversation.replacements == null}
                     label={i18n.SHOW_ANONYMIZED}
