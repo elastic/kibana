@@ -8,7 +8,7 @@
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type { RuleCreateProps } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
 import type { RuleParams } from '../../../rule_schema';
 
