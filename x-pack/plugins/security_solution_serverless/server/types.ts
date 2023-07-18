@@ -60,7 +60,7 @@ export interface UsageMetrics {
 export interface UsageSource {
   id: string;
   instance_group_id: string;
-  instance_group_type: string;
+  instance_group_type?: string; // not seems part of step 1 fields https://github.com/elastic/mx-team/blob/main/teams/billing/services/usage_record_schema_v2.md
 }
 
 export interface SecurityUsageReportingTaskSetupContract {
@@ -79,7 +79,9 @@ export interface SecurityMetadataTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
 
-export type MeteringCallback = (metringCallbackInput: MeteringCallbackInput) => UsageRecord[];
+export type MeteringCallback = (
+  metringCallbackInput: MeteringCallbackInput
+) => Promise<UsageRecord[]>;
 
 export interface MeteringCallbackInput {
   esClient: ElasticsearchClient;

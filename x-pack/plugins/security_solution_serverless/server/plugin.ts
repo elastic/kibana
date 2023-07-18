@@ -16,7 +16,7 @@ import type {
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
-import { cspmMetringTaskProperties } from './task_manager/cspmMetringTask';
+import { cspmMetringTaskProperties } from './task_manager/cspm_metring_task';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -38,6 +38,7 @@ export class SecuritySolutionServerlessPlugin
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
     // `plugins.forceEnableAllPlugins` flag is enabled).
+
     const shouldRegister = pluginsSetup.securitySolutionEss == null;
 
     if (shouldRegister) {

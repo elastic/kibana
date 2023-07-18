@@ -48,7 +48,7 @@ export class SecurityUsageReportingTask {
           },
         },
       });
-      this.logger.info(`Setup task ${taskType} was completed successfully `);
+      this.logger.info(`Scheduled task successfully ${taskTitle}`);
     } catch (err) {
       this.logger.error(`Failed to setup task ${taskType}, ${err} `);
     }
@@ -104,15 +104,22 @@ export class SecurityUsageReportingTask {
 
     const lastSuccessfulReport = taskInstance.state.lastSuccessfulReport;
 
-    const usageRecords = meteringCallback({ esClient, logger: this.logger, lastSuccessfulReport });
+    const usageRecords = await meteringCallback({
+      esClient,
+      logger: this.logger,
+      lastSuccessfulReport,
+    });
+    this.logger.info(
+      `${taskInstance.id} - received usage records: ${JSON.stringify(usageRecords)}`
+    );
 
     let usageReportResponse: Response | undefined;
 
     try {
       usageReportResponse = await usageReportingService.reportUsage(usageRecords);
-      this.logger.info(`Usage report was sent successfully`);
+      this.logger.info(`${taskInstance.id} - usage records report was sent successfully`);
     } catch (err) {
-      this.logger.error(`Failed to send usage report ${JSON.stringify(err)} `);
+      this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
     }
     const state = {
       lastSuccessfulReport:
