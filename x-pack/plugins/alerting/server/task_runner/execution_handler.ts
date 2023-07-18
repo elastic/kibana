@@ -536,6 +536,12 @@ export class ExecutionHandler<
       }
 
       for (const [alertId, alert] of alertsArray) {
+        if (!alert.isIncludedAction(action)) {
+          this.logger.debug(
+            `skipping scheduling of actions for '${alertId}' in rule ${this.rule.id}: action  ${action.id} is not included when scheduleActions is called`
+          );
+          continue;
+        }
         if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
         }

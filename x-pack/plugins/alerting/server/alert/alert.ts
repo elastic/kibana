@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { isEmpty } from 'lodash';
-import { AlertHit, CombinedSummarizedAlerts } from '../types';
+import { AlertHit, CombinedSummarizedAlerts, SanitizedRuleAction } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -28,6 +28,7 @@ interface ScheduledExecutionOptions<
   actionGroup: ActionGroupIds;
   context: Context;
   state: State;
+  includedActions?: string[];
 }
 
 export type PublicAlert<
@@ -171,7 +172,11 @@ export class Alert<
     return !isEmpty(this.context);
   }
 
-  scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
+  scheduleActions(
+    actionGroup: ActionGroupIds,
+    context: Context = {} as Context,
+    includedActions?: string[]
+  ) {
     this.ensureHasNoScheduledActions();
     this.setContext(context);
     this.scheduledExecutionOptions = {
@@ -179,6 +184,9 @@ export class Alert<
       context,
       state: this.state,
     };
+    if (includedActions && includedActions.length > 0) {
+      this.scheduledExecutionOptions.includedActions = includedActions;
+    }
     return this;
   }
 
@@ -308,5 +316,13 @@ export class Alert<
 
   getMaintenanceWindowIds() {
     return this.meta.maintenanceWindowIds ?? [];
+  }
+
+  isIncludedAction(action: SanitizedRuleAction) {
+    const { includedActions } = this.getScheduledActionOptions() ?? {};
+    if (!includedActions || includedActions.length === 0) {
+      return true;
+    }
+    return includedActions.includes(action.id);
   }
 }
