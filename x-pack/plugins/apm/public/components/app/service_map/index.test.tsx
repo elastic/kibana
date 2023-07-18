@@ -6,7 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -18,7 +18,7 @@ import * as useFetcherModule from '../../../hooks/use_fetcher';
 import { ServiceMap } from '.';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-const history = createMemoryHistory();
+let history: MemoryHistory<unknown>;
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -47,6 +47,7 @@ const expiredLicense = new License({
 });
 
 function createWrapper(license: License | null) {
+  history = createMemoryHistory();
   history.replace('/service-map?rangeFrom=now-15m&rangeTo=now');
 
   return ({ children }: { children?: ReactNode }) => {

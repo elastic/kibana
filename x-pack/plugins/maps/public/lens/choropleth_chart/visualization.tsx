@@ -7,12 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render } from 'react-dom';
 import type { FileLayer } from '@elastic/ems-client';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
 import { IconRegionMap } from '@kbn/chart-icons';
@@ -195,20 +192,16 @@ export const getVisualization = ({
     return update;
   },
 
-  renderDimensionEditor(domElement, props) {
+  DimensionEditorComponent(props) {
     if (props.groupId === REGION_KEY_GROUP_ID) {
-      render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <I18nProvider>
-            <RegionKeyEditor
-              emsFileLayers={emsFileLayers}
-              state={props.state}
-              setState={props.setState}
-            />
-          </I18nProvider>
-        </KibanaThemeProvider>,
-        domElement
+      return (
+        <RegionKeyEditor
+          emsFileLayers={emsFileLayers}
+          state={props.state}
+          setState={props.setState}
+        />
       );
     }
+    return null;
   },
 });

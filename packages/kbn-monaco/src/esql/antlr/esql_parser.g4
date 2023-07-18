@@ -136,7 +136,11 @@ userVariable
    ;
 
 fromCommand
-    : FROM sourceIdentifier (COMMA sourceIdentifier)*
+    : FROM sourceIdentifier (COMMA sourceIdentifier)* metadata?
+    ;
+
+metadata
+    : OPENING_BRACKET METADATA sourceIdentifier (COMMA sourceIdentifier)* CLOSING_BRACKET
     ;
 
 evalCommand
