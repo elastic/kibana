@@ -315,8 +315,9 @@ const getSloDiagnosisRoute = createObservabilityServerRoute({
   handler: async ({ context, params }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
 
-    return getSloDiagnosis(params.path.id, { esClient, soClient });
+    return getSloDiagnosis(params.path.id, { esClient, repository });
   },
 });
 

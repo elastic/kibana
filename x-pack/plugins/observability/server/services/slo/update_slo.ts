@@ -7,7 +7,11 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
-import { getSLOTransformId, SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import {
+  getSLOTransformId,
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../assets/constants';
 import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
@@ -26,6 +30,7 @@ export class UpdateSLO {
       updatedAt: new Date(),
       revision: originalSlo.revision + 1,
     });
+
     validateSLO(updatedSlo);
 
     await this.deleteObsoleteSLORevisionData(originalSlo);
@@ -41,11 +46,24 @@ export class UpdateSLO {
     await this.transformManager.stop(originalSloTransformId);
     await this.transformManager.uninstall(originalSloTransformId);
     await this.deleteRollupData(originalSlo.id, originalSlo.revision);
+    await this.deleteSummaryData(originalSlo.id, originalSlo.revision);
   }
 
   private async deleteRollupData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLO_DESTINATION_INDEX_PATTERN,
+      wait_for_completion: false,
+      query: {
+        bool: {
+          filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],
+        },
+      },
+    });
+  }
+
+  private async deleteSummaryData(sloId: string, sloRevision: number): Promise<void> {
+    await this.esClient.deleteByQuery({
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {
         bool: {

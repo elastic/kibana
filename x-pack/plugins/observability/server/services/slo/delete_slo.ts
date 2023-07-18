@@ -7,7 +7,11 @@
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { getSLOTransformId, SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import {
+  getSLOTransformId,
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../assets/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
@@ -27,6 +31,7 @@ export class DeleteSLO {
     await this.transformManager.uninstall(sloTransformId);
 
     await this.deleteRollupData(slo.id);
+    await this.deleteSummaryData(slo.id);
     await this.deleteAssociatedRules(slo.id);
     await this.repository.deleteById(slo.id);
   }
@@ -43,6 +48,17 @@ export class DeleteSLO {
     });
   }
 
+  private async deleteSummaryData(sloId: string): Promise<void> {
+    await this.esClient.deleteByQuery({
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      wait_for_completion: false,
+      query: {
+        match: {
+          'slo.id': sloId,
+        },
+      },
+    });
+  }
   private async deleteAssociatedRules(sloId: string): Promise<void> {
     try {
       await this.rulesClient.bulkDeleteRules({
