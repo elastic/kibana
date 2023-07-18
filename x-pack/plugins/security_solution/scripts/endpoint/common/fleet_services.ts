@@ -133,7 +133,7 @@ export const waitForHostToEnroll = async (
   while (!found && !hasTimedOut()) {
     found = await fetchFleetAgents(kbnClient, {
       perPage: 1,
-      kuery: `(${AGENTS_PREFIX}.local_metadata.host.hostname.keyword : "${hostname}") and (${AGENTS_PREFIX}.status:online)`,
+      kuery: `(${AGENTS_PREFIX}.local_metadata.host.hostname : "${hostname}") and (${AGENTS_PREFIX}.status:online)`,
       showInactive: false,
     }).then((response) => response.items[0]);
 
