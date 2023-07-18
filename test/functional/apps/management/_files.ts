@@ -13,8 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'filesManagement']);
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/160178
-  describe.skip('Files management', () => {
+  describe('Files management', () => {
     before(async () => {
       await PageObjects.filesManagement.navigateTo();
     });
