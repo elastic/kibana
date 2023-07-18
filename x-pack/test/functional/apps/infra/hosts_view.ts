@@ -150,6 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const currentUrl = await browser.getCurrentUrl();
       return !!currentUrl.match(path);
     });
@@ -383,18 +384,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should navigate to APM services after click', async () => {
-        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-        const url = parse(await browser.getCurrentUrl());
+      describe('Flyout links', () => {
+        it('should navigate to APM services after click', async () => {
+          await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+          const url = parse(await browser.getCurrentUrl());
+          const query = decodeURIComponent(url.query ?? '');
+          const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
 
-        const query = decodeURIComponent(url.query ?? '');
+          expect(url.pathname).to.eql('/app/apm/services');
+          expect(query).to.contain(kuery);
 
-        const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-
-        expect(url.pathname).to.eql('/app/apm/services');
-        expect(query).to.contain(kuery);
-
-        await returnTo(HOSTS_VIEW_PATH);
+          await returnTo(HOSTS_VIEW_PATH);
+        });
       });
     });
 
