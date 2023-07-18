@@ -183,6 +183,7 @@ export class AlertingAuthorization {
           entity,
           operation
         ),
+        // TODO: Look at consumer instead of this extra check..
         featureAllowsProducer: authorization.actions.alerting.get(
           ruleTypeId,
           consumer,
