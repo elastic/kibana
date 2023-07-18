@@ -8,7 +8,7 @@
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import type { Batch } from '@loaders.gl/schema';
-import { JSONLoader } from '@loaders.gl/json';
+import { JSONLoader, type JSONLoaderOptions } from '@loaders.gl/json';
 import { loadInBatches } from '@loaders.gl/core';
 import type { ImportFailure } from '../../../../common/types';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
@@ -31,19 +31,23 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
       hasNext: true,
     };
 
+    const jsonOptions: JSONLoaderOptions['json'] = {
+      jsonpaths: ['$.features'],
+    };
+
+    const jsonLoaderOptions: JSONLoaderOptions = {
+      // enabling metadata adds 3 additional batches to iterator output
+      // 1) batchType: 'metadata' - ignored
+      // 2) batchType: 'partial-result' - used to test for compatible crs, and fail early for incompatible crs
+      // n) batchType: 'data' - unchanged by enabling metadata option
+      // 3) batchType: 'final-result' - used to read top level feature when file is a single feature instead of feature collection
+      metadata: true,
+      json: jsonOptions,
+    };
+
     if (this._iterator === undefined) {
       this._iterator = (
-        await loadInBatches(this._getFile(), JSONLoader, {
-          // enabling metadata adds 3 additional batches to iterator output
-          // 1) batchType: 'metadata' - ignored
-          // 2) batchType: 'partial-result' - used to test for compatible crs, and fail early for incompatible crs
-          // n) batchType: 'data' - unchanged by enabling metadata option
-          // 3) batchType: 'final-result' - used to read top level feature when file is a single feature instead of feature collection
-          metadata: true,
-          json: {
-            jsonpaths: ['$.features'],
-          },
-        })
+        await loadInBatches(this._getFile(), JSONLoader, jsonLoaderOptions)
       )[Symbol.asyncIterator]();
     }
 
