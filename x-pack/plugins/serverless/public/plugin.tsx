@@ -55,6 +55,7 @@ export class ServerlessPlugin
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
+        order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }

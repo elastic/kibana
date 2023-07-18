@@ -1,6 +1,5 @@
 interactiveSetup.enabled: false
 newsfeed.enabled: false
-xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
 # Fleet settings
 xpack.fleet.internal.fleetServerStandalone: true
