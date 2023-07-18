@@ -7,7 +7,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { AssetManagerConfig } from '../../types';
 
-import { collectContainers, collectHosts, collectPods, collectServices } from './collectors';
+import { collectContainers, collectHosts, collectPods, collectServices } from '../collectors';
 import { CollectorRunner } from './collector_runner';
 
 export interface ImplicitCollectionOptions {

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CollectorRunner } from './collector_runner';
-import { CollectorOptions } from './collectors';
+import { CollectorOptions } from '../collectors';
 import { Asset } from '../../../common/types_api';
 import { INDEX_DEFAULTS } from '../../types';
 

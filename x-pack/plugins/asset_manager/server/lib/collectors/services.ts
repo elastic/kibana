@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { Asset } from '../../../../common/types_api';
+import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { withSpan } from './helpers';
 
