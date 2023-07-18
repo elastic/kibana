@@ -7,7 +7,11 @@
 
 import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { KIBANA_LOADING_ICON } from '../screens/security_header';
+import {
+  KIBANA_LOADING_ICON,
+  LOADING_INDICATOR,
+  LOADING_INDICATOR_HIDDEN,
+} from '../screens/security_header';
 
 const primaryButton = 0;
 
