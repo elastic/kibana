@@ -16,7 +16,7 @@ import type {
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
-} from '../../common/detection_engine/rule_schema';
+} from '../../common/api/detection_engine';
 import type { CreateRulePropsRewrites } from './types';
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
