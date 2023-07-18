@@ -39,6 +39,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
     randomSampler.getProbability$(),
     randomSampler.getProbability()
   );
+
   const setSamplingProbability = useCallback(
     (probability: number | null) => {
       randomSampler.setProbability(probability);

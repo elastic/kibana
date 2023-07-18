@@ -11,7 +11,11 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { Query } from '@kbn/es-query';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SignificantTerm } from '@kbn/ml-agg-utils';
-import { createRandomSamplerWrapper, RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import {
+  createRandomSamplerWrapper,
+  RandomSampler,
+  RandomSamplerWrapper,
+} from '@kbn/ml-random-sampler-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { each, get } from 'lodash';
 import { lastValueFrom } from 'rxjs';
@@ -169,8 +173,8 @@ export interface DocumentStatsSearchStrategyParams {
 
 export function useDocumentCountStats<TParams extends DocumentStatsSearchStrategyParams>(
   searchParams: TParams | undefined,
-  searchParamsCompare: TParams | undefined,
-  lastRefresh: number
+  lastRefresh: number,
+  randomSampler?: RandomSampler
 ): DocumentStats {
   const {
     data,
@@ -189,9 +193,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
 
-    const cacheKey = stringHash(
-      `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
-    );
+    const cacheKey = stringHash(`${JSON.stringify(searchParams)}`);
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
@@ -218,11 +220,15 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
       const totalCount = totalHitsStats?.totalCount ?? 0;
 
-      const randomSamplerWrapper = createRandomSamplerWrapper({
-        totalNumDocs: totalCount,
-        seed: RANDOM_SAMPLER_SEED,
-      });
-
+      if (randomSampler) {
+        randomSampler.setDocCount(totalCount);
+      }
+      const randomSamplerWrapper = randomSampler
+        ? randomSampler.createRandomSamplerWrapper()
+        : createRandomSamplerWrapper({
+            totalNumDocs: totalCount,
+            seed: RANDOM_SAMPLER_SEED,
+          });
       const resp = await lastValueFrom(
         data.search.search(
           {
@@ -257,7 +263,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data?.search, documentStatsCache, searchParams, searchParamsCompare, toasts]);
+  }, [data?.search, documentStatsCache, searchParams, toasts, randomSampler]);
 
   useEffect(
     function getDocumentCountData() {

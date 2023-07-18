@@ -204,7 +204,7 @@ export const DataComparisonPage: FC = () => {
     'data_drift',
     searchQuery,
     setGlobalState,
-    undefined,
+    randomSampler,
     undefined
   );
 
@@ -319,6 +319,7 @@ export const DataComparisonPage: FC = () => {
                   documentCountStatsSplit={documentCountStatsCompare}
                   isBrushCleared={isBrushCleared}
                   totalCount={totalCount}
+                  approximate={sampleProbability < 1}
                   sampleProbability={sampleProbability}
                   initialAnalysisStart={initialAnalysisStart}
                   barStyleAccessor={barStyleAccessor}

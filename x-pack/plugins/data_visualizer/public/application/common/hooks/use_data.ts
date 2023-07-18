@@ -8,12 +8,12 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Dictionary } from '@kbn/ml-url-state';
-import { SignificantTerm } from '@kbn/ml-agg-utils';
 import { Moment } from 'moment';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { merge } from 'rxjs';
+import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import {
   DocumentStatsSearchStrategyParams,
   useDocumentCountStats,
@@ -28,7 +28,7 @@ export const useData = (
   contextId: string,
   searchQuery: estypes.QueryDslQueryContainer,
   onUpdate?: (params: Dictionary<unknown>) => void,
-  selectedSignificantTerm?: SignificantTerm,
+  randomSampler?: RandomSampler,
   barTarget: number = DEFAULT_BAR_TARGET,
   timeRange?: { min: Moment; max: Moment }
 ) => {
@@ -69,7 +69,7 @@ export const useData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastRefresh, JSON.stringify({ searchQuery, timeRange })]);
 
-  const documentStats = useDocumentCountStats(docCountRequestParams, undefined, lastRefresh);
+  const documentStats = useDocumentCountStats(docCountRequestParams, lastRefresh, randomSampler);
 
   useEffect(() => {
     const timefilterUpdateSubscription = merge(

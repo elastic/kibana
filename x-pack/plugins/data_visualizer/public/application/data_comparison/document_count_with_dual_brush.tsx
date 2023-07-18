@@ -42,6 +42,7 @@ export interface DocumentCountContentProps
   incomingInitialAnalysisStart?: number | WindowParameters;
   randomSampler: RandomSampler;
   reload: () => void;
+  approximate: boolean;
 }
 
 export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
@@ -59,6 +60,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
   barHighlightColorOverride,
   windowParameters,
   incomingInitialAnalysisStart,
+  approximate,
   ...docCountChartProps
 }) => {
   const {
@@ -100,7 +102,7 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexGroup gutterSize="m" direction="row">
         <EuiFlexItem>
-          <TotalCountHeader totalCount={totalCount} />
+          <TotalCountHeader totalCount={totalCount} approximate={approximate} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SamplingMenu randomSampler={randomSampler} reload={reload} />
