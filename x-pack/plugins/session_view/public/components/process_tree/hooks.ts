@@ -240,7 +240,7 @@ export class ProcessImpl implements Process {
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
     const filtered = events.filter((processEvent) => {
       const action = processEvent?.event?.action;
-
+      return true;
       return action?.includes('fork') || action?.includes('exec') || action?.includes('end');
     });
 

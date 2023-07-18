@@ -13,7 +13,6 @@ import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   ALERTS_PER_PROCESS_EVENTS_PAGE,
   PROCESS_EVENTS_ROUTE,
@@ -108,15 +107,15 @@ export const fetchEventsAndScopedAlerts = async (
         bool: {
           must: [
             { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-            {
-              bool: {
-                should: [
-                  { term: { [EVENT_ACTION]: 'fork' } },
-                  { term: { [EVENT_ACTION]: 'exec' } },
-                  { term: { [EVENT_ACTION]: 'end' } },
-                ],
-              },
-            },
+            // {
+            //   bool: {
+            //     should: [
+            //       { term: { [EVENT_ACTION]: 'fork' } },
+            //       { term: { [EVENT_ACTION]: 'exec' } },
+            //       { term: { [EVENT_ACTION]: 'end' } },
+            //     ],
+            //   },
+            // },
             {
               range: {
                 // optimization to prevent data before this session from being hit.
