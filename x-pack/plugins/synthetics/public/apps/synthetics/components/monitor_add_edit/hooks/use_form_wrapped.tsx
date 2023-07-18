@@ -5,29 +5,55 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { FieldValues, useForm, UseFormProps } from 'react-hook-form';
+import { useCallback, useState } from 'react';
+import { FieldValues, useForm, UseFormProps, ChangeHandler } from 'react-hook-form';
+import { useDebounce } from 'react-use';
 
 export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, TContext = any>(
   props?: UseFormProps<TFieldValues, TContext>
 ) {
-  const { register, ...restOfForm } = useForm(props);
+  const { register, trigger, ...restOfForm } = useForm(props);
+
+  const [changed, setChanged] = useState<boolean>(false);
+  useDebounce(
+    async () => {
+      if (changed) {
+        await trigger?.(); // Manually invalidate whole form to make dependency validations reactive
+      }
+    },
+    500,
+    [changed]
+  );
+  const euiOnChange = useCallback(
+    (onChange: ChangeHandler) => {
+      return async (event: Parameters<ChangeHandler>[0]) => {
+        setChanged(false);
+        const onChangeResult = await onChange(event);
+        setChanged(true);
+
+        return onChangeResult;
+      };
+    },
+    [setChanged]
+  );
 
   const euiRegister = useCallback(
     (name, ...registerArgs) => {
-      const { ref, ...restOfRegister } = register(name, ...registerArgs);
+      const { ref, onChange, ...restOfRegister } = register(name, ...registerArgs);
 
       return {
         inputRef: ref,
         ref,
+        onChange: euiOnChange(onChange),
         ...restOfRegister,
       };
     },
-    [register]
+    [register, euiOnChange]
   );
 
   return {
     register: euiRegister,
+    trigger,
     ...restOfForm,
   };
 }

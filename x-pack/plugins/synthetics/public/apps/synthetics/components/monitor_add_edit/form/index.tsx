@@ -21,7 +21,7 @@ export const MonitorForm: React.FC<{
 }> = ({ children, defaultValues, space, readOnly = false }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
-    reValidateMode: 'onChange',
+    reValidateMode: 'onSubmit',
     defaultValues:
       formatDefaultFormValues(defaultValues as SyntheticsMonitor) ||
       getDefaultFormFields(space)[FormMonitorType.MULTISTEP],
