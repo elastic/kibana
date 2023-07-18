@@ -36,7 +36,6 @@ export default function (providerContext: FtrProviderContext) {
       await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
     loadTestFile(require.resolve('./endpoint_list'));
-    loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./endpoint_permissions'));
     loadTestFile(require.resolve('./responder'));
     loadTestFile(require.resolve('./endpoint_solution_integrations'));

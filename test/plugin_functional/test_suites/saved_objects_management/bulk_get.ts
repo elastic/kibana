@@ -14,10 +14,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   describe('_bulk_get', () => {
     describe('saved objects with hidden type', () => {
       before(async () => {
+        // we are injecting unknown types in this test, so we need to relax the mappings restrictions
+        await es.indices.putMapping({ index: '.kibana', dynamic: true });
+
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );

@@ -18,8 +18,14 @@ function parseNdJson(input: string): Array<SavedObject<any>> {
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   describe('export transforms', () => {
+    before(async () => {
+      // we are injecting unknown types in this test, so we need to relax the mappings restrictions
+      await es.indices.putMapping({ index: '.kibana', dynamic: true });
+    });
+
     describe('root objects export transforms', () => {
       before(async () => {
         await esArchiver.load(
