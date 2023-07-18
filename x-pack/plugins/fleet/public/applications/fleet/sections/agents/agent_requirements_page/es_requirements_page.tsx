@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiText,
   EuiSpacer,
   EuiIcon,
@@ -56,7 +56,7 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
   return (
     <WithoutHeaderLayout>
       <EuiPageBody restrictWidth={820}>
-        <EuiPageContent hasBorder={true} hasShadow={false}>
+        <EuiPageSection bottomBorder={true}>
           <EuiCallOut
             title={i18n.translate('xpack.fleet.setupPage.missingRequirementsCalloutTitle', {
               defaultMessage: 'Missing security requirements',
@@ -141,7 +141,7 @@ xpack.security.authc.api_key.enabled: true`}
               ),
             }}
           />
-        </EuiPageContent>
+        </EuiPageSection>
       </EuiPageBody>
     </WithoutHeaderLayout>
   );
