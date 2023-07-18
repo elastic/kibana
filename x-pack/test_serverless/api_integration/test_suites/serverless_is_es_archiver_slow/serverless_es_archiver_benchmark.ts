@@ -26,6 +26,8 @@ import type {
   ArchiveWithManyFieldsAndOrManyDocs,
 } from '../../../../../test/api_integration/apis/local_and_ess_is_es_archiver_slow/shared.types';
 
+console.log(`\nλjs process.env.BUILDKITE_BRANCH: \n\t${process.env.BUILDKITE_BRANCH}`);
+console.log(`\nλjs process.env.BUILDKITE_COMMIT: \n\t${process.env.BUILDKITE_COMMIT}`);
 const LOOP_LIMIT_OVERRIDE_SERVERLESS_ONLY: number = 10;
 const LOGS_DIR: string =
   process.env.LOGS_DIR ??

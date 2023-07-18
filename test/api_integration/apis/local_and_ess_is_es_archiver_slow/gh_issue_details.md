@@ -40,7 +40,7 @@ Metrics are needed for local, ess and serverless.
 ### x-pack/test/functional/es_archives/logstash_functional
 
 |                            | Current es-archiver | highwater mark 5000 |
-|----------------------------|---------------------|---------------------|
+| -------------------------- | ------------------- | ------------------- |
 | LOCAL avg / min / max      | 4.7 / 4.5 / 5.0     | Cell                |
 | ESS avg / min / max        | 29.4 / 24.1 / 71.9  | Cell                |
 | SERVERLESS avg / min / max | 29.1 / 27.1 / 32.8  | 10.6 / 9.9 / 12.1   |
@@ -59,7 +59,7 @@ Doc Count: 4634 + 4757 + 4614 (3 indices) = 14_005
 ### test/functional/fixtures/es_archiver/many_fields
 
 |                            | Current es-archiver | highwater mark 5000 |
-|----------------------------|---------------------|---------------------|
+| -------------------------- | ------------------- | ------------------- |
 | LOCAL avg / min / max      | 0.9 / 0.8 / 1.0     | Cell                |
 | ESS avg / min / max        | 4.0 / 3.3 / 12.6    | Cell                |
 | SERVERLESS avg / min / max | 2.8 / 2.5 / 3.2     | 3.0 / 2.8 / 3.4     |
@@ -78,7 +78,7 @@ Doc Count: 5_350
 ### x-pack/test/functional/es_archives/ml/farequote
 
 |                            | Current es-archiver   | highwater mark 5000 |
-|----------------------------|-----------------------|---------------------|
+| -------------------------- | --------------------- | ------------------- |
 | LOCAL avg / min / max      | 9.5 / 8.5 / 13.2      | Cell                |
 | ESS avg / min / max        | 76.1 / 47.6 / 612.8   | Cell                |
 | SERVERLESS avg / min / max | 117.1 / 116.4 / 117.8 | 11.5 / 10.6 / 13.2  |

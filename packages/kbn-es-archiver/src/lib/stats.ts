@@ -29,8 +29,10 @@ export interface IndexStats {
 export type Stats = ReturnType<typeof createStats>;
 
 export function createStats(name: string, log: ToolingLog) {
-  const info = (msg: string, ...args: any[]) => log.info(`[${name}] ${msg}`, ...args);
-  const debug = (msg: string, ...args: any[]) => log.debug(`[${name}] ${msg}`, ...args);
+  // const info = (msg: string, ...args: any[]) => log.info(`[${name}] ${msg}`, ...args);
+  // const debug = (msg: string, ...args: any[]) => log.debug(`[${name}] ${msg}`, ...args);
+  const info = (msg: string, ...args: any[]) => {};
+  const debug = (msg: string, ...args: any[]) => {};
 
   const indices: Record<string, IndexStats> = {};
   const getOrCreate = (index: string) => {

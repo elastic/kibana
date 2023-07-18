@@ -30,6 +30,8 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'x-pack/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload '.es/**/*.hprof'
   buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
+  buildkite-agent artifact upload 'test/api_integration/apis/local_and_ess_is_es_archiver_slow/logs/*.txt'
+  buildkite-agent artifact upload 'x-pack/test_serverless/api_integration/test_suites/serverless_is_es_archiver_slow/logs/*.txt'
 
   echo "--- Run Failed Test Reporter"
   node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'

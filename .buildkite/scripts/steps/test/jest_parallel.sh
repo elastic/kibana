@@ -24,7 +24,8 @@ fi
 export TEST_TYPE
 echo "--- downloading jest test run order"
 download_artifact jest_run_order.json .
-configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
+# configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
+configs=$(jq -r '.[].groups[0].names[0]' jest_run_order.json)
 
 echo "+++ ⚠️ WARNING ⚠️"
 echo "

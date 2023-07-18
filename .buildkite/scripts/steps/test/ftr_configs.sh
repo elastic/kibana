@@ -57,7 +57,8 @@ while read -r config; do
   node ./scripts/functional_tests \
     --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config="$config"
+    --config="$config" \
+    --quiet
   lastCode=$?
   set -e;
 
