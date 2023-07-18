@@ -22,9 +22,6 @@ import {
 } from '../../customizations/customization_service';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
-const mockSetupCustomizationService = () => {
-  mockCustomizationService = createCustomizationService();
-};
 
 jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
@@ -32,7 +29,7 @@ jest.mock('../../customizations', () => {
     ...originalModule,
     useDiscoverCustomizationService: () => ({
       customizationService: mockCustomizationService,
-      isInitialized: Boolean(mockSetupCustomizationService),
+      isInitialized: Boolean(mockCustomizationService),
     }),
   };
 });
