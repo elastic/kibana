@@ -22,7 +22,7 @@ exports[`global_toast_list with duplicate elements renders the list with a singl
             4
           </EuiNotificationBadge>
         </React.Fragment>,
-        "toastLifeTimeMs": 6000000,
+        "toastLifeTimeMs": undefined,
       },
     ]
   }
