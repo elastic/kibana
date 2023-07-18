@@ -7,17 +7,6 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-interface Detector {
-  identifier: string;
-  function: string;
-  field?: string;
-  byField?: string;
-  overField?: string;
-  partitionField?: string;
-  excludeFrequent?: string;
-  description?: string;
-}
-
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
