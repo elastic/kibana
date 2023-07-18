@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
@@ -66,6 +67,7 @@ export const TopNFunctionsGrid = forwardRef(
     ref: Ref<EuiDataGridRefProps> | undefined
   ) => {
     const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
+    const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
     function onSort(newSortingColumns: EuiDataGridSorting['columns']) {
       const lastItem = last(newSortingColumns);
@@ -220,6 +222,7 @@ export const TopNFunctionsGrid = forwardRef(
           },
           rowCellRender: function RowCellRender({ rowIndex }) {
             function handleOnClick() {
+              trackProfilingEvent({ metric: 'topN_function_details_click' });
               setSelectedRow(rows[rowIndex]);
             }
             return (
@@ -234,7 +237,7 @@ export const TopNFunctionsGrid = forwardRef(
         });
       }
       return { columns: gridColumns, leadingControlColumns: gridLeadingControlColumns };
-    }, [isDifferentialView, rows, showDiffColumn]);
+    }, [isDifferentialView, rows, showDiffColumn, trackProfilingEvent]);
 
     const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
