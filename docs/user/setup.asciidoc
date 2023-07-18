@@ -21,16 +21,9 @@ Windows. Since Kibana runs on Node.js, we include the necessary Node.js
 binaries for these platforms. Running Kibana against a separately maintained
 version of Node.js is not supported.
 
-[[custom-node-builds]]
-[float]
-=== Continued support for CentOS7/RHEL7 throughout Node.js 18
-With Node.js 16 coming to an https://nodejs.org/en/blog/announcements/nodejs16-eol[early end-of-life],
-{kib} needs to proceed to using Node.js 18 as it's bundled runtime. However, due to
-official builds of Node.js 18 https://github.com/nodejs/node/blob/v18.x/BUILDING.md#platform-list[dropping support for CentOS7/RHEL7] we
-cannot bundle those binaries with {kib}. To keep support for the CentOS7/RHEL7
-platforms, we're shipping {kib} with https://github.com/elastic/kibana-custom-nodejs-builds[unofficial builds of Node.js]
-with extended backwards compatibility. You can find the list of files we provide
-in {kib-repo}blob/{branch}/docs/assets/NODE_BINARIES.txt[NODE_BINARIES.txt].
+To support certain older Linux platforms (most notably CentOS7/RHEL7), {kib}
+for Linux ships with a custom build of Node.js with glibc 2.17 support. For
+details, see <<custom-nodejs-builds>>.
 
 [float]
 [[elasticsearch-version]]
