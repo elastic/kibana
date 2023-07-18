@@ -89,6 +89,15 @@ export async function getFullAgentPolicy(
     })
   );
 
+  const inputs = await storedPackagePoliciesToAgentInputs(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput)
+  );
+  const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
+    acc[name] = featureConfig;
+    return acc;
+  }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -102,11 +111,7 @@ export async function getFullAgentPolicy(
         return acc;
       }, {}),
     },
-    inputs: await storedPackagePoliciesToAgentInputs(
-      agentPolicy.package_policies as PackagePolicy[],
-      packageInfoCache,
-      getOutputIdForAgentPolicy(dataOutput)
-    ),
+    inputs,
     secret_references: (agentPolicy?.package_policies || []).flatMap(
       (policy) => policy.secret_references || []
     ),
@@ -125,10 +130,7 @@ export async function getFullAgentPolicy(
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
             }
           : { enabled: false, logs: false, metrics: false },
-      features: (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
-        acc[name] = featureConfig;
-        return acc;
-      }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
+      features,
       protection: {
         enabled: agentPolicy.is_protected,
         uninstall_token_hash: '',
@@ -206,8 +208,15 @@ export async function getFullAgentPolicy(
     const dataToSign = {
       id: fullAgentPolicy.id,
       agent: {
+        features,
         protection: fullAgentPolicy.agent.protection,
       },
+      inputs: inputs.map(({ id: inputId, name, revision, type }) => ({
+        id: inputId,
+        name,
+        revision,
+        type,
+      })),
     };
 
     const { data: signedData, signature } = await messageSigningService.sign(dataToSign);

@@ -22,7 +22,7 @@ import {
   updateFleetProxy,
   getFleetProxyRelatedSavedObjects,
 } from '../../services/fleet_proxies';
-import { defaultFleetErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler, FleetProxyUnauthorizedError } from '../../errors';
 import type {
   GetOneFleetProxyRequestSchema,
   PostFleetProxyRequestSchema,
@@ -68,7 +68,7 @@ async function bumpRelatedPolicies(
 
 function checkProxiesAvailable() {
   if (appContextService.getConfig()?.internal?.disableProxies) {
-    throw new Error('Proxies are not available');
+    throw new FleetProxyUnauthorizedError('Proxies write APIs are disabled');
   }
 }
 

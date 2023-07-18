@@ -26,6 +26,7 @@ export const checkIndexStatus = async (
   } catch (e) {
     logger.debug(e);
     if (e?.meta?.body?.error?.type === 'security_exception') {
+      logger.info(e);
       return 'unprivileged';
     }
 

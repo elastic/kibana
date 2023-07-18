@@ -16,7 +16,7 @@ import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_
 import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
 
-const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices', 'uptime'];
+const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices'];
 const tabs: Tab[] = [
   {
     id: FlyoutTabIds.OVERVIEW,
@@ -24,13 +24,6 @@ const tabs: Tab[] = [
       defaultMessage: 'Overview',
     }),
     'data-test-subj': 'hostsView-flyout-tabs-overview',
-  },
-  {
-    id: FlyoutTabIds.METRICS,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.metrics', {
-      defaultMessage: 'Metrics',
-    }),
-    'data-test-subj': 'hostsView-flyout-tabs-metrics',
   },
   {
     id: FlyoutTabIds.LOGS,
@@ -67,13 +60,6 @@ const tabs: Tab[] = [
     }),
     'data-test-subj': 'hostsView-flyout-apm-link',
   },
-  {
-    id: FlyoutTabIds.LINK_TO_UPTIME,
-    name: i18n.translate('xpack.infra.infra.nodeDetails.updtimeTabLabel', {
-      defaultMessage: 'Uptime',
-    }),
-    'data-test-subj': 'hostsView-flyout-uptime-link',
-  },
 ];
 
 const stories: Meta<AssetDetailsProps> = {
@@ -92,40 +78,27 @@ const stories: Meta<AssetDetailsProps> = {
     node: {
       name: 'host1',
       id: 'host1-macOS',
-      title: {
-        name: 'host1',
-        cloudProvider: null,
-      },
-      os: 'macOS',
       ip: '192.168.0.1',
-      rx: 123179.18222222221,
-      tx: 123030.54555555557,
-      memory: 0.9044444444444445,
-      cpu: 0.3979674157303371,
-      diskSpaceUsage: 0.3979674157303371,
-      normalizedLoad1m: 0.15291777273162221,
-      memoryFree: 34359738368,
     },
     overrides: {
       overview: {
-        dataView: {
+        metricsDataView: {
           id: 'default',
           getFieldByName: () => 'hostname' as unknown as DataViewField,
         } as unknown as DataView,
-        dateRange: {
-          from: '168363046800',
-          to: '168363046900',
-        },
+        logsDataView: {
+          id: 'default',
+          getFieldByName: () => 'hostname' as unknown as DataViewField,
+        } as unknown as DataView,
       },
       metadata: {
         showActionsColumn: true,
       },
     },
     nodeType: 'host',
-    currentTimeRange: {
-      interval: '1s',
-      from: 168363046800,
-      to: 168363046900,
+    dateRange: {
+      from: '2023-04-09T11:07:49Z',
+      to: '2023-04-09T11:23:49Z',
     },
     tabs,
     links,
