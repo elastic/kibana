@@ -119,13 +119,6 @@ export const PASSWORD_REQUIRED = i18n.translate(
   }
 );
 
-export const AUTHENTICATION_METHOD = i18n.translate(
-  'xpack.stackConnectors.components.webhook.authenticationMethodLabel',
-  {
-    defaultMessage: 'Authentication method',
-  }
-);
-
 export const AUTHENTICATION_NONE = i18n.translate(
   'xpack.stackConnectors.components.webhook.authenticationMethodNoneLabel',
   {

@@ -308,9 +308,6 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 },
               ],
             }}
-            config={{
-              label: i18n.AUTHENTICATION_METHOD,
-            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
