@@ -269,6 +269,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                 <StepAboutRule
                   isLoading={isLoading}
                   isUpdateView
+                  isActive={activeStep === RuleStep.aboutRule}
                   ruleType={defineStepData.ruleType}
                   machineLearningJobId={defineStepData.machineLearningJobId}
                   index={defineStepData.index}
