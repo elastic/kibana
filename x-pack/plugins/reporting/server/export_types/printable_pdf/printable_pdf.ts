@@ -71,7 +71,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
       mergeMap(() => decryptJobHeaders(this.config.encryptionKey, job.headers, jobLogger)),
-      mergeMap(async (headers: any) => {
+      mergeMap(async (headers) => {
         const fakeRequest = this.getFakeRequest(headers, job.spaceId, jobLogger);
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
         return getCustomLogo(uiSettingsClient, headers);
