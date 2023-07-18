@@ -150,7 +150,6 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           httpService={httpService}
                           indexPattern={indexPattern}
                           listType={listType}
-                          listTypeSpecificIndexPatternFilter={listTypeSpecificIndexPatternFilter}
                           onChange={handleEntryChange}
                           onlyShowListOperators={onlyShowListOperators}
                           setErrorsExist={setErrorsExist}

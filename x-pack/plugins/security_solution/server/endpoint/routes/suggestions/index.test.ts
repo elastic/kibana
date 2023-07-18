@@ -41,7 +41,6 @@ import { EndpointActionGenerator } from '../../../../common/endpoint/data_genera
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   return {
@@ -93,7 +92,7 @@ describe('when calling the Suggestions route handler', () => {
         createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
       );
 
-      const fieldName = EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS[0];
+      const fieldName = 'process.id';
       const mockRequest = httpServerMock.createKibanaRequest<
         TypeOf<typeof EndpointSuggestionsSchema.params>,
         never,
@@ -101,7 +100,7 @@ describe('when calling the Suggestions route handler', () => {
       >({
         params: { suggestion_type: 'eventFilters' },
         body: {
-          field: fieldName,
+          field: 'process.id',
           query: 'test-query',
           filters: 'test-filters',
           fieldMeta: 'test-field-meta',

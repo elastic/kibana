@@ -76,9 +76,6 @@ export interface EntryItemProps {
   showLabel: boolean;
   osTypes?: OsTypeArray;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-  ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: EntryFieldError) => void;
@@ -97,7 +94,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   indexPattern,
   osTypes,
   listType,
-  listTypeSpecificIndexPatternFilter,
   onChange,
   onlyShowListOperators = false,
   setErrorsExist,
@@ -205,9 +201,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       const filteredIndexPatterns = getFilteredIndexPatterns(
         indexPattern,
         entry,
-        listType,
-        listTypeSpecificIndexPatternFilter,
-        osTypes
       );
       const comboBox = (
         <FieldComponent
@@ -311,7 +304,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       indexPattern,
       entry,
       listType,
-      listTypeSpecificIndexPatternFilter,
       osTypes,
       isDisabled,
       handleFieldChange,
