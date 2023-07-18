@@ -8,6 +8,8 @@
 
 import { act } from 'react-dom/test-utils';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -31,8 +33,6 @@ import {
   mockPluginStateInProgress,
 } from '../services/api.mocks';
 import { GuidePanel } from './guide_panel';
-import {BehaviorSubject} from "rxjs";
-import {CoreTheme} from "@kbn/core/public";
 
 const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();

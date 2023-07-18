@@ -8,13 +8,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type {Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import {ApplicationStart, CoreTheme, NotificationsStart} from '@kbn/core/public';
+import { ApplicationStart, CoreTheme, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import type { GuideId, GuideConfig, StepConfig } from '@kbn/guided-onboarding';
