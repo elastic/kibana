@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common';
-
-export const LOG_RATE = DOCUMENT_FIELD_NAME;
+export const SLO_ID_FIELD = 'slo.id';
+export const SLO_REVISION_FIELD = 'slo.revision';
