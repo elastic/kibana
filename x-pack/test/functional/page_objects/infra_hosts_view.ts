@@ -40,6 +40,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
+    async clickOverviewFlyoutTab() {
+      return testSubjects.click('hostsView-flyout-tabs-overview');
+    },
+
     async clickMetadataFlyoutTab() {
       return testSubjects.click('hostsView-flyout-tabs-metadata');
     },
@@ -197,6 +201,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const element = await container.findByTestSubject(`assetDetailsKPI-${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
+    },
+
+    async getAssetDetailsMetricsCharts() {
+      const container = await testSubjects.find('assetDetailsMetricsChartGrid');
+      return container.findAllByCssSelector('[data-test-subj*="assetDetailsMetricsChart"]');
     },
 
     getMetadataTab() {

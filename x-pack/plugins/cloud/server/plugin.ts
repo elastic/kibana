@@ -71,6 +71,21 @@ export interface CloudSetup {
     url?: string;
     secretToken?: string;
   };
+  /**
+   * `true` when running on Serverless Elastic Cloud
+   * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
+   */
+  isServerlessEnabled: boolean;
+  /**
+   * Serverless configuration
+   */
+  serverless: {
+    /**
+     * The serverless projectId.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectId?: string;
+  };
 }
 
 /**
@@ -94,6 +109,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
+    const isServerlessEnabled = !!this.config.serverless?.project_id;
+
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
       isCloudEnabled,
@@ -120,6 +137,10 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
+      },
+      isServerlessEnabled,
+      serverless: {
+        projectId: this.config.serverless?.project_id,
       },
     };
   }

@@ -7,8 +7,7 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { SnakeToCamelCase } from '../../../common/types';
-import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
+import type { UserActionTypes } from '../../../common/types/domain';
 import type {
   CaseUI,
   CaseConnectors,
@@ -44,7 +43,10 @@ export interface UserActionTreeProps {
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
-export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, UnsupportedUserActionTypes>;
+export type SupportedUserActionTypes = keyof Omit<
+  typeof UserActionTypes,
+  UnsupportedUserActionTypes
+>;
 
 export interface UserActionBuilderArgs {
   appId?: string;
@@ -76,7 +78,6 @@ export interface UserActionBuilderArgs {
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
 }
 
-export type UserActionResponse<T> = SnakeToCamelCase<UserActionWithResponse<T>>;
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {
   build: () => EuiCommentProps[];
 };
