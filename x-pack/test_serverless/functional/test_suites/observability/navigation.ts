@@ -68,8 +68,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expectNoPageReload();
     });
 
-    // TODO: bug in the management nav config? @sebelga is looking into it
-    it.skip('active sidenav section is auto opened on load', async () => {
+    it('active sidenav section is auto opened on load', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
       await browser.refresh();
