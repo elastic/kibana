@@ -570,6 +570,36 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(validationObj?.isValid).toEqual(true);
     });
+
+    it('Search by hostname keyword and status', async () => {
+      const validationObj = validateKuery(
+        `(${AGENTS_PREFIX}.local_metadata.host.hostname.keyword:test) and (${AGENTS_PREFIX}.status:online)`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by deeply nested fields', async () => {
+      const validationObj = validateKuery(
+        `${AGENTS_PREFIX}.local_metadata.os.version.keyword: test`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by deeply nested fields in local_metadata', async () => {
+      const validationObj = validateKuery(
+        `${AGENTS_PREFIX}.local_metadata.elastic.agent.build.original.keyword: test`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
   });
 
   describe('Package policies', () => {

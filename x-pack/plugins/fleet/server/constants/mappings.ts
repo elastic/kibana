@@ -113,7 +113,7 @@ export const AGENT_MAPPINGS = {
     },
     last_checkin_message: {
       type: 'text',
-      fields: {
+      properties: {
         keyword: {
           type: 'keyword',
         },
@@ -135,7 +135,7 @@ export const AGENT_MAPPINGS = {
                   properties: {
                     original: {
                       type: 'text',
-                      fields: {
+                      properties: {
                         keyword: {
                           type: 'keyword',
                         },
@@ -157,10 +157,9 @@ export const AGENT_MAPPINGS = {
                 },
                 version: {
                   type: 'text',
-                  fields: {
+                  properties: {
                     keyword: {
                       type: 'keyword',
-                      ignore_above: 16,
                     },
                   },
                 },
@@ -175,10 +174,9 @@ export const AGENT_MAPPINGS = {
             },
             hostname: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
-                  ignore_above: 256,
                 },
               },
             },
@@ -187,7 +185,7 @@ export const AGENT_MAPPINGS = {
             },
             ip: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
                 },
@@ -195,7 +193,7 @@ export const AGENT_MAPPINGS = {
             },
             mac: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
                 },
@@ -203,7 +201,7 @@ export const AGENT_MAPPINGS = {
             },
             name: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
                 },
@@ -218,7 +216,7 @@ export const AGENT_MAPPINGS = {
             },
             full: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
                 },
@@ -226,7 +224,7 @@ export const AGENT_MAPPINGS = {
             },
             kernel: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
                 },
@@ -234,7 +232,7 @@ export const AGENT_MAPPINGS = {
             },
             name: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
                 },
@@ -245,7 +243,7 @@ export const AGENT_MAPPINGS = {
             },
             version: {
               type: 'text',
-              fields: {
+              properties: {
                 keyword: {
                   type: 'keyword',
                 },
