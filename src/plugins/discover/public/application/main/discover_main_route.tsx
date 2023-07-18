@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -95,6 +96,9 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const checkData = useCallback(async () => {
     try {
+      if (savedSearchId) {
+        return true; // bypass NoData screen
+      }
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
@@ -123,10 +127,11 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev]);
+  }, [data.dataViews, isDev, savedSearchId]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
+      const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
       if (!nextDataView && !(await checkData())) {
         setLoading(false);
@@ -134,16 +139,13 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       }
       try {
         await stateContainer.actions.loadDataViewList();
-        // reset appState in case a saved search with id is loaded and the url is empty
-        // so the saved search is loaded in a clean state
-        // else it might be updated by the previous app state
-        const useAppState = !stateContainer.appState.isEmptyURL();
+
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch({
           savedSearchId,
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
-          useAppState,
         });
+
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -159,6 +161,13 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
         );
 
         setLoading(false);
+        if (services.analytics) {
+          const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
+          reportPerformanceMetricEvent(services.analytics, {
+            eventName: 'discoverLoadSavedSearch',
+            duration: loadSavedSearchDuration,
+          });
+        }
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
           redirectWhenMissing({
@@ -212,9 +221,23 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
+    setLoading(true);
+    setHasESData(false);
+    setHasUserDataView(false);
+    setShowNoDataPage(false);
+    setError(undefined);
     // restore the previously selected data view for a new state
     loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
-  }, [loadSavedSearch, savedSearchId, stateContainer]);
+  }, [
+    loadSavedSearch,
+    savedSearchId,
+    stateContainer,
+    setLoading,
+    setHasESData,
+    setHasUserDataView,
+    setShowNoDataPage,
+    setError,
+  ]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
@@ -246,7 +269,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView />
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
       </AnalyticsNoDataPageKibanaProvider>
     );
   }

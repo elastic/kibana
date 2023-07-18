@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-
+import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -78,21 +76,19 @@ const AppRoot = React.memo(
     return (
       <I18nProvider>
         <Router history={parameters.history}>
-          <CompatRouter>
-            <KibanaContextProvider services={coreStart}>
-              <Provider store={store}>
-                <Wrapper>
-                  <ResolverWithoutProviders
-                    databaseDocumentID=""
-                    resolverComponentInstanceID="test"
-                    indices={[]}
-                    shouldUpdate={false}
-                    filters={{}}
-                  />
-                </Wrapper>
-              </Provider>
-            </KibanaContextProvider>
-          </CompatRouter>
+          <KibanaContextProvider services={coreStart}>
+            <Provider store={store}>
+              <Wrapper>
+                <ResolverWithoutProviders
+                  databaseDocumentID=""
+                  resolverComponentInstanceID="test"
+                  indices={[]}
+                  shouldUpdate={false}
+                  filters={{}}
+                />
+              </Wrapper>
+            </Provider>
+          </KibanaContextProvider>
         </Router>
       </I18nProvider>
     );

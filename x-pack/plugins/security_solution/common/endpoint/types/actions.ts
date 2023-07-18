@@ -466,6 +466,7 @@ export interface FileUploadMetadata {
   transithash: {
     sha256: string;
   };
+  '@timestamp': string;
 }
 
 export type UploadedFileInfo = Pick<

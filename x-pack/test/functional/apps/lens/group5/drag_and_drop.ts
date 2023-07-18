@@ -379,7 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([
           '@timestamp',
           'Average of bytes',
-          'Top values of ip',
+          'Top 3 values of ip',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-1')).to.eql([
           '@timestamp [1]',

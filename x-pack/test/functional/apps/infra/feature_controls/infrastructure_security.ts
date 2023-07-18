@@ -17,9 +17,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/156511
-  describe.skip('infrastructure security', () => {
+  describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
       before(async () => {
         await security.role.create('global_infrastructure_all_role', {
@@ -95,8 +95,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('~waffleMap');
+          await retry.try(async () => {
+            await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
+            await testSubjects.existOrFail('~waffleMap');
+          });
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -179,8 +181,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/156437
-      describe.skip('infrastructure landing page with data', () => {
+      describe('infrastructure landing page with data', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
@@ -194,8 +195,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-          await testSubjects.existOrFail('~waffleMap');
+          await retry.try(async () => {
+            await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
+            await testSubjects.existOrFail('~waffleMap');
+          });
         });
 
         it(`shows read-only badge`, async () => {

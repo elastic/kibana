@@ -108,7 +108,7 @@ export default function AlertDetailsAppSection({
           }
         ),
         value: (
-          <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
+          <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
             {rule.name}
           </EuiLink>
         ),
@@ -117,7 +117,7 @@ export default function AlertDetailsAppSection({
   }, [alert, rule, ruleLink, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
-    <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
+    <EuiFlexGroup direction="column" data-test-subj="thresholdRuleAppSection">
       {rule.params.criteria.map((criterion, index) => (
         <EuiFlexItem key={generateUniqueKey(criterion)}>
           <EuiPanel hasBorder hasShadow={false}>

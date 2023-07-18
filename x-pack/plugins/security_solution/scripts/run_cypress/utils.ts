@@ -47,7 +47,6 @@ export const parseTestFileConfig = (
     | undefined;
 
   const callExpression = expressionStatement?.expression;
-
   // @ts-expect-error
   if (expressionStatement?.expression?.arguments?.length === 3) {
     // @ts-expect-error
@@ -82,9 +81,10 @@ export const parseTestFileConfig = (
             }
             return element.value as string;
           });
+        } else if (property.value.type === 'StringLiteral') {
+          value = property.value.value;
         }
         if (key && value) {
-          // @ts-expect-error
           acc[key] = value;
         }
         return acc;

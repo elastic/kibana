@@ -39,6 +39,7 @@
     "@kbn/data-views-plugin",
     "@kbn/es-archiver",
     "@kbn/test",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/fleet-plugin",
   ]
 }

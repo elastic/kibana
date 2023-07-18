@@ -51,7 +51,7 @@ const configSchema = schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  coPilot: schema.maybe(observabilityCoPilotConfig),
+  aiAssistant: schema.maybe(observabilityCoPilotConfig),
   compositeSlo: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
@@ -60,8 +60,11 @@ const configSchema = schema.object({
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
-    coPilot: {
+    aiAssistant: {
       enabled: true,
+      feedback: {
+        enabled: true,
+      },
     },
   },
   schema: configSchema,

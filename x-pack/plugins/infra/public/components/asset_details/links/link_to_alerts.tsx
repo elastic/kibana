@@ -8,11 +8,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-export interface LinkToAlertsRule {
+export interface LinkToAlertsRuleProps {
   onClick?: () => void;
 }
 
-export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRule) => {
+export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
       data-test-subj="infraNodeContextPopoverCreateInventoryRuleButton"
@@ -23,8 +23,8 @@ export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRule) => {
       iconType="bell"
     >
       <FormattedMessage
-        id="xpack.infra.infra.nodeDetails.createAlertLink"
-        defaultMessage="Create inventory rule"
+        id="xpack.infra.infra.assetDetails.alerts.createAlertLink"
+        defaultMessage="Create rule"
       />
     </EuiButtonEmpty>
   );

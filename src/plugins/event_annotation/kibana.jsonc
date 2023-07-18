@@ -27,8 +27,7 @@
       "savedObjectsFinder",
       "dataViews",
       "kibanaReact",
-      "visualizationUiComponents",
-      "unifiedFieldList"
+      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common"

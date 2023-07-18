@@ -222,6 +222,10 @@ export const cli = () => {
                   );
                 }
 
+                if (configFromTestFile?.license) {
+                  vars.esTestCluster.license = configFromTestFile.license;
+                }
+
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`

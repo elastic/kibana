@@ -13,6 +13,7 @@ import {
   diskWriteThroughput,
   diskSpaceAvailable,
   diskSpaceUsage,
+  logRate,
   normalizedLoad1m,
   memoryUsage,
   memoryFree,
@@ -20,7 +21,6 @@ import {
   tx,
   hostCount,
 } from './lens/formulas/host';
-import { LineChart, MetricChart } from './lens/visualization_types';
 
 export const hostLensFormulas = {
   cpuUsage,
@@ -31,6 +31,7 @@ export const hostLensFormulas = {
   diskSpaceAvailable,
   diskSpaceUsage,
   hostCount,
+  logRate,
   normalizedLoad1m,
   memoryUsage,
   memoryFree,
@@ -38,7 +39,4 @@ export const hostLensFormulas = {
   tx,
 };
 
-export const visualizationTypes = {
-  lineChart: LineChart,
-  metricChart: MetricChart,
-};
+export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';

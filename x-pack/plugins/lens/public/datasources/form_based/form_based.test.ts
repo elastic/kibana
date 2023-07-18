@@ -247,32 +247,36 @@ describe('IndexPattern Data Source', () => {
         dataType: 'number',
         isBucketed: false,
         label: 'Foo',
+        customLabel: true,
         operationType: 'count',
         sourceField: '___records___',
       };
-      const map = FormBasedDatasource.uniqueLabels({
-        layers: {
-          a: {
-            columnOrder: ['a', 'b'],
-            columns: {
-              a: col,
-              b: col,
-            },
-            indexPatternId: 'foo',
-          },
-          b: {
-            columnOrder: ['c', 'd'],
-            columns: {
-              c: col,
-              d: {
-                ...col,
-                label: 'Foo [1]',
+      const map = FormBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columnOrder: ['a', 'b'],
+              columns: {
+                a: col,
+                b: col,
               },
+              indexPatternId: 'foo',
             },
-            indexPatternId: 'foo',
+            b: {
+              columnOrder: ['c', 'd'],
+              columns: {
+                c: col,
+                d: {
+                  ...col,
+                  label: 'Foo [1]',
+                },
+              },
+              indexPatternId: 'foo',
+            },
           },
-        },
-      } as unknown as FormBasedPrivateState);
+        } as unknown as FormBasedPrivateState,
+        indexPatterns
+      );
 
       expect(map).toMatchInlineSnapshot(`
         Object {
@@ -583,7 +587,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
+                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"timestampLabel\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
                 ],
               },
               "function": "lens_map_to_columns",
@@ -1127,7 +1131,7 @@ describe('IndexPattern Data Source', () => {
             "col1",
           ],
           "outputColumnName": Array [
-            "Count of records",
+            "Count of records per hour",
           ],
           "reducedTimeRange": Array [],
           "targetUnit": Array [
@@ -1570,7 +1574,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "string",
                 "id": "col1",
                 "isBucketed": true,
-                "label": "My Op",
+                "label": "Top 5 values of Missing field",
                 "operationType": "terms",
                 "params": Object {
                   "orderBy": Object {
@@ -1588,7 +1592,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col2",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1597,7 +1601,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col3",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -1606,7 +1610,7 @@ describe('IndexPattern Data Source', () => {
                 "dataType": "number",
                 "id": "col4",
                 "isBucketed": false,
-                "label": "Count of records",
+                "label": "Count of records per hour",
                 "operationType": "count",
                 "sourceField": "___records___",
                 "timeScale": "h",
@@ -2154,12 +2158,15 @@ describe('IndexPattern Data Source', () => {
     describe('getOperationForColumnId', () => {
       it('should get an operation for col1', () => {
         expect(publicAPI.getOperationForColumnId('col1')).toEqual({
-          label: 'My Op',
+          label: 'Top 5 values of Missing field',
           dataType: 'string',
           isBucketed: true,
           isStaticValue: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
+          scale: undefined,
+          sortingHint: undefined,
+          interval: undefined,
         } as OperationDescriptor);
       });
 

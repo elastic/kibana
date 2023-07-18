@@ -265,6 +265,12 @@ export default ({ getService }: FtrProviderContext): void => {
         await createCase(supertest, getPostCaseRequest({ title: longTitle }), 400);
       });
 
+      it('400s if the description is too long', async () => {
+        const longDescription = 'a'.repeat(30001);
+
+        await createCase(supertest, getPostCaseRequest({ description: longDescription }), 400);
+      });
+
       describe('tags', async () => {
         it('400s if the a tag is a whitespace', async () => {
           const tags = ['test', ' '];
@@ -274,6 +280,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('400s if the a tag is an empty string', async () => {
           const tags = ['test', ''];
+
+          await createCase(supertest, getPostCaseRequest({ tags }), 400);
+        });
+
+        it('400s if the a tag is too long', async () => {
+          const tag = 'a'.repeat(257);
+
+          await createCase(supertest, getPostCaseRequest({ tags: [tag] }), 400);
+        });
+
+        it('400s if the a tags array is too long', async () => {
+          const tags = Array(201).fill('foo');
 
           await createCase(supertest, getPostCaseRequest({ tags }), 400);
         });

@@ -12,9 +12,9 @@ import type {
   RuleExecutionEventType,
   RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import type { RuleObjectId } from '../../../../../../../common/detection_engine/rule_schema';
-import type { SortOrder } from '../../../../../../../common/detection_engine/schemas/common';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { SortOrder } from '../../../../../../../common/api/detection_engine';
 
 /**
  * Used from route handlers to fetch and manage various information about the rule execution:

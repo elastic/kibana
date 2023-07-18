@@ -7,7 +7,7 @@
 
 import { login, visitHostDetailsPage } from '../../../tasks/login';
 
-import { cleanKibana } from '../../../tasks/common';
+import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 
 describe('risk tab', () => {
@@ -48,8 +48,3 @@ describe('risk tab', () => {
     );
   });
 });
-
-export const waitForTableToLoad = () => {
-  cy.get('.euiBasicTable-loading').should('exist');
-  cy.get('.euiBasicTable-loading').should('not.exist');
-};
