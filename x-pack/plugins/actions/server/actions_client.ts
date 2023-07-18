@@ -133,6 +133,15 @@ export interface UpdateOptions {
   action: ActionUpdate;
 }
 
+interface GetAllOptions {
+  includeSystemActions?: boolean;
+}
+
+interface ListTypesOptions {
+  featureId?: string;
+  includeSystemActionTypes?: boolean;
+}
+
 export class ActionsClient {
   private readonly logger: Logger;
   private readonly kibanaIndices: string[];
@@ -459,7 +468,9 @@ export class ActionsClient {
   /**
    * Get all actions with in-memory connectors
    */
-  public async getAll(): Promise<FindActionResult[]> {
+  public async getAll({ includeSystemActions = false }: GetAllOptions = {}): Promise<
+    FindActionResult[]
+  > {
     try {
       await this.authorization.ensureAuthorized('get');
     } catch (error) {
@@ -490,13 +501,13 @@ export class ActionsClient {
       )
     );
 
-    const inMemoryConnectorsWithoutSystemActions = this.inMemoryConnectors.filter(
-      (connector) => !connector.isSystemAction
-    );
+    const inMemoryConnectorsFiltered = includeSystemActions
+      ? this.inMemoryConnectors
+      : this.inMemoryConnectors.filter((connector) => !connector.isSystemAction);
 
     const mergedResult = [
       ...savedObjectsActions,
-      ...inMemoryConnectorsWithoutSystemActions.map((inMemoryConnector) => ({
+      ...inMemoryConnectorsFiltered.map((inMemoryConnector) => ({
         id: inMemoryConnector.id,
         actionTypeId: inMemoryConnector.actionTypeId,
         name: inMemoryConnector.name,
@@ -817,10 +828,17 @@ export class ActionsClient {
    * Return all available action types
    * expect system action types
    */
-  public async listTypes(featureId?: string): Promise<ActionType[]> {
-    return this.actionTypeRegistry
-      .list(featureId)
-      .filter((actionType) => !Boolean(actionType.isSystemActionType));
+  public async listTypes({
+    featureId,
+    includeSystemActionTypes = false,
+  }: ListTypesOptions = {}): Promise<ActionType[]> {
+    const actionTypes = this.actionTypeRegistry.list(featureId);
+
+    const filteredActionTypes = includeSystemActionTypes
+      ? actionTypes
+      : actionTypes.filter((actionType) => !Boolean(actionType.isSystemActionType));
+
+    return filteredActionTypes;
   }
 
   public isActionTypeEnabled(

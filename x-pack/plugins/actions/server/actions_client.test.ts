@@ -1398,8 +1398,9 @@ describe('getAll()', () => {
           },
         },
         /**
-         * System actions should not
+         * System actions will not
          * be returned from getAll
+         * if no options are provided
          */
         {
           id: 'system-connector-.cases',
@@ -1420,6 +1421,114 @@ describe('getAll()', () => {
     const result = await actionsClient.getAll();
 
     expect(result).toEqual([
+      {
+        id: '1',
+        name: 'test',
+        isMissingSecrets: false,
+        config: { foo: 'bar' },
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        referencedByCount: 6,
+      },
+      {
+        id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        name: 'test',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        referencedByCount: 2,
+      },
+    ]);
+  });
+
+  test('get system actions correctly', async () => {
+    const expectedResult = {
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            isMissingSecrets: false,
+            config: {
+              foo: 'bar',
+            },
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+          'system-connector-.cases': { doc_count: 2 },
+        },
+      }
+    );
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    const result = await actionsClient.getAll({ includeSystemActions: true });
+
+    expect(result).toEqual([
+      {
+        actionTypeId: '.cases',
+        id: 'system-connector-.cases',
+        isDeprecated: false,
+        isPreconfigured: false,
+        isSystemAction: true,
+        name: 'System action: .cases',
+        referencedByCount: 2,
+      },
       {
         id: '1',
         name: 'test',
@@ -3117,7 +3226,7 @@ describe('bulkEnqueueExecution()', () => {
 });
 
 describe('listType()', () => {
-  it('filters out system action types', async () => {
+  it('filters action types by feature ID', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
     actionTypeRegistry.register({
@@ -3125,6 +3234,62 @@ describe('listType()', () => {
       name: 'My action type',
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    expect(await actionsClient.listTypes({ featureId: 'alerting' })).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+    ]);
+  });
+
+  it('filters out system action types when not defining options', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
       validate: {
         config: { schema: schema.object({}) },
         secrets: { schema: schema.object({}) },
@@ -3157,6 +3322,70 @@ describe('listType()', () => {
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+      },
+      {
+        id: 'my-action-type-2',
+        name: 'My action type 2',
+        isSystemActionType: false,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['cases'],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+      },
+    ]);
+  });
+
+  it('return system action types when defining options', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
+
+    expect(await actionsClient.listTypes({ includeSystemActionTypes: true })).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
+      },
+      {
+        id: '.cases',
+        name: 'Cases',
+        isSystemActionType: true,
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
       },
     ]);
   });
