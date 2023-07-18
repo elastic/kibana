@@ -11,10 +11,7 @@ import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ServerlessObservabilityPluginStartDependencies } from './types';
 
-type Services = CoreStart &
-  ServerlessObservabilityPluginStartDependencies & {
-    cloud: CloudStart;
-  };
+type Services = CoreStart & ServerlessObservabilityPluginStartDependencies;
 
 export const KibanaServicesProvider: React.FC<{
   core: CoreStart;
