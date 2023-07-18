@@ -15,7 +15,7 @@ import { basicCase, caseUserActions, getUserAction } from '../../containers/mock
 import { UserActionsList } from './user_actions_list';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { getMockBuilderArgs } from './mock';
 
@@ -92,7 +92,7 @@ describe(`UserActionsList`, () => {
     const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
 
-    const ourActions = [getUserAction('comment', Actions.create)];
+    const ourActions = [getUserAction('comment', UserActionActions.create)];
 
     const props = {
       ...defaultProps,
@@ -108,8 +108,8 @@ describe(`UserActionsList`, () => {
 
   it('Outlines comment when update move to link is clicked', async () => {
     const ourActions = [
-      getUserAction('comment', Actions.create),
-      getUserAction('comment', Actions.update),
+      getUserAction('comment', UserActionActions.create),
+      getUserAction('comment', UserActionActions.update),
     ];
 
     const props = {
