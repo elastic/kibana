@@ -23,17 +23,17 @@ export const buildCombinedHostsFilter = ({
   field: string;
   dataView?: DataView;
 }) => {
-  if (!dataView) {
+  const indexField = dataView?.getFieldByName(field);
+  if (!dataView || !indexField) {
     return {
       query: {
         terms: {
-          'host.name': values,
+          [field]: values,
         },
       },
       meta: {},
     };
   }
-  const indexField = dataView.getFieldByName(field)!;
   const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
 
   return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);

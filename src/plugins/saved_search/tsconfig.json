@@ -22,6 +22,9 @@
     "@kbn/object-versioning",
     "@kbn/content-management-utils",
     "@kbn/content-management-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types-jest",
+    "@kbn/expressions-plugin",
   ],
   "exclude": [
     "target/**/*",

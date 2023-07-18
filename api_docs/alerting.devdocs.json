@@ -7766,12 +7766,12 @@
           {
             "parentPluginId": "alerting",
             "id": "def-common.Rule.scheduledTaskId",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "scheduledTaskId",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
