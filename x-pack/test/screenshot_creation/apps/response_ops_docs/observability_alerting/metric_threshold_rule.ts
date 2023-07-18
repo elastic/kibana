@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await editButton.click();
       const runWhen = await testSubjects.find('addNewActionConnectorActionGroup-0');
       await runWhen.click();
+      /* Reposition so that the connector details are visible */
+      await testSubjects.scrollIntoView('alertActionAccordion-0');
       await commonScreenshots.takeScreenshot(
         'metrics-threshold-run-when-selection',
         screenshotDirectories,
@@ -37,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await testSubjects.click('messageAddVariableButton');
       await commonScreenshots.takeScreenshot(
-        'metrics-threshold-alert-message',
+        'metrics-threshold-alert-default-message',
         screenshotDirectories,
         1400,
         1024

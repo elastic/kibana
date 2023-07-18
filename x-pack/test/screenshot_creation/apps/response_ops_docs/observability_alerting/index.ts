@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const metricThresholdRuleName = 'network metric packets';
+export const inventoryRuleName = 'CPU';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -17,6 +18,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
   describe('observability alerting', function () {
     let mtRuleId: string;
+    let invRuleId: string;
     let emailConnectorId: string;
     before(async () => {
       await browser.setWindowSize(1920, 1080);
@@ -62,8 +64,35 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
             id: emailConnectorId,
             params: {
               level: 'info',
-              subject: '{{rule.name}} - {{context.group}} is in a state of {{context.alertState}}',
-              message: 'Reason: {{context.reason}}',
+            },
+          },
+        ],
+      }));
+      ({ id: invRuleId } = await rules.api.createRule({
+        consumer: 'alerts',
+        name: inventoryRuleName,
+        notifyWhen: 'onActionGroupChange',
+        params: {
+          nodeType: 'host',
+          criteria: [
+            {
+              comparator: '>',
+              threshold: [80],
+              timeSize: 3,
+              timeUnit: 'm',
+              metric: 'cpu',
+            },
+          ],
+          sourceId: 'default',
+        },
+        ruleTypeId: 'metrics.alert.inventory.threshold',
+        schedule: { interval: '1m' },
+        actions: [
+          {
+            group: 'metrics.inventory_threshold.fired',
+            id: emailConnectorId,
+            params: {
+              level: 'info',
             },
           },
         ],
@@ -72,12 +101,14 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     after(async () => {
       await rules.api.deleteRule(mtRuleId);
+      await rules.api.deleteRule(invRuleId);
       await rules.api.deleteAllRules();
       await actions.api.deleteConnector(emailConnectorId);
       await actions.api.deleteAllConnectors();
     });
 
     loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./inventory_rule'));
     loadTestFile(require.resolve('./metric_threshold_rule'));
   });
 }
