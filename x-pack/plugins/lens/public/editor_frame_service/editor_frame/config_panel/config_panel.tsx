@@ -15,8 +15,13 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { isEqual } from 'lodash';
-import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
-import { AddLayerFunction, Visualization } from '../../../types';
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import {
+  changeIndexPattern,
+  onDimensionDrop,
+  removeDimension,
+} from '../../../state_management/lens_slice';
+import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
@@ -163,10 +168,13 @@ export function LayerPanels(
     [dispatchLens, onUpdateStateCb, visualization.state, datasourceStates, activeVisualization.id]
   );
 
-  const toggleFullscreen = useMemo(
-    () => () => {
-      dispatchLens(setToggleFullscreen());
-    },
+  const toggleFullscreen = useCallback(() => {
+    dispatchLens(setToggleFullscreen());
+  }, [dispatchLens]);
+
+  const handleDimensionDrop = useCallback(
+    (payload: { source: DragDropIdentifier; target: DragDropOperation; dropType: DropType }) =>
+      dispatchLens(onDimensionDrop(payload)),
     [dispatchLens]
   );
 
@@ -288,6 +296,7 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+              onDimensionDrop={handleDimensionDrop}
               registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
               activeVisualization={activeVisualization}

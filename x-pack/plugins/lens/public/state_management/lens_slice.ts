@@ -12,6 +12,7 @@ import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -20,6 +21,7 @@ import type {
   IndexPattern,
   VisualizationMap,
   DatasourceMap,
+  DragDropOperation,
 } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
@@ -229,6 +231,11 @@ export const addLayer = createAction<{
   extraArg: unknown;
   ignoreInitialValues?: boolean;
 }>('lens/addLayer');
+export const onDimensionDrop = createAction<{
+  source: DragDropIdentifier;
+  target: DragDropOperation;
+  dropType: DropType;
+}>('lens/onDimensionDrop');
 
 export const setLayerDefaultDimension = createAction<{
   layerId: string;
@@ -284,6 +291,7 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  onDimensionDrop,
   cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
@@ -987,6 +995,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         state.visualization.state =
           typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
       }
+
       layerIds.forEach((layerId) => {
         const [layerDatasourceId] =
           Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
@@ -1079,6 +1088,77 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
       state.visualization.state = syncedVisualizationState;
+    },
+    [onDimensionDrop.type]: (
+      state,
+      {
+        payload: { source, target, dropType },
+      }: {
+        payload: {
+          source: DragDropIdentifier;
+          target: DragDropOperation;
+          dropType: DropType;
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        return state;
+      }
+
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+      const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+
+      const { groups } = activeVisualization.getConfiguration({
+        layerId: target.layerId,
+        frame: framePublicAPI,
+        state: state.visualization.state,
+      });
+
+      const [layerDatasourceId, layerDatasource] =
+        Object.entries(datasourceMap).find(
+          ([datasourceId, datasource]) =>
+            state.datasourceStates[datasourceId] &&
+            datasource
+              .getLayers(state.datasourceStates[datasourceId].state)
+              .includes(target.layerId)
+        ) || [];
+
+      if (layerDatasource && layerDatasourceId) {
+        const newState = layerDatasource?.onDrop({
+          state: state.datasourceStates[layerDatasourceId].state,
+          source,
+          target: {
+            ...(target as unknown as DragDropOperation),
+            filterOperations:
+              groups.find(({ groupId: gId }) => gId === target.groupId)?.filterOperations ||
+              Boolean,
+          },
+          targetLayerDimensionGroups: groups,
+          dropType,
+          indexPatterns: framePublicAPI.dataViews.indexPatterns,
+        });
+        if (!newState) {
+          return;
+        }
+        state.datasourceStates[layerDatasourceId].state = newState;
+      }
+
+      activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
+
+      const newVisState = (activeVisualization.onDrop || onDropForVisualization)?.(
+        {
+          prevState: state.visualization.state,
+          frame: framePublicAPI,
+          target,
+          source,
+          dropType,
+          group: groups.find(({ groupId: gId }) => gId === target.groupId),
+        },
+        activeVisualization
+      );
+
+      state.visualization.state = newVisState;
+      state.stagedPreview = undefined;
     },
     [setLayerDefaultDimension.type]: (
       state,
