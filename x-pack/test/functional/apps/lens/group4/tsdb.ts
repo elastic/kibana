@@ -224,6 +224,19 @@ function getDataMapping(
   return dataStreamMapping;
 }
 
+function sumFirstNValues(n: number, bars: Array<{ y: number }>): number {
+  const indexes = Array(n)
+    .fill(1)
+    .map((_, i) => i);
+  let countSum = 0;
+  for (const index of indexes) {
+    if (bars[index]) {
+      countSum += bars[index].y;
+    }
+  }
+  return countSum;
+}
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'lens', 'dashboard']);
   const testSubjects = getService('testSubjects');
@@ -770,11 +783,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(counterBars[counterBars.length - 1].y).to.eql(5000);
 
             log.info('Check count before the upgrade');
+            const columnsToCheck = countBars.length / 2;
             // Before the upgrade the count is N times the indexes
-            expect(countBars[0].y).to.eql(indexes.length * TEST_DOC_COUNT);
+            expect(sumFirstNValues(columnsToCheck, countBars)).to.eql(
+              indexes.length * TEST_DOC_COUNT
+            );
             log.info('Check count after the upgrade');
             // later there are only documents for the upgraded stream
-            expect(countBars[countBars.length - 1].y).to.eql(TEST_DOC_COUNT);
+            expect(sumFirstNValues(columnsToCheck, [...countBars].reverse())).to.eql(
+              TEST_DOC_COUNT
+            );
           });
         });
       });
@@ -848,12 +866,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
             const bars = data.bars![0].bars;
+            const columnsToCheck = bars.length / 2;
             log.info('Check count before the downgrade');
             // Before the upgrade the count is N times the indexes
-            expect(bars[0].y).to.eql(indexes.length * TEST_DOC_COUNT);
+            expect(sumFirstNValues(columnsToCheck, bars)).to.eql(indexes.length * TEST_DOC_COUNT);
             log.info('Check count after the downgrade');
             // later there are only documents for the upgraded stream
-            expect(bars[bars.length - 1].y).to.eql(TEST_DOC_COUNT);
+            expect(sumFirstNValues(columnsToCheck, [...bars].reverse())).to.eql(TEST_DOC_COUNT);
           });
 
           it('should visualize data when moving the time window around the downgrade moment', async () => {
