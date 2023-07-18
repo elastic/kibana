@@ -60,9 +60,7 @@ import {
   ENDPOINT_ALERT,
 } from './highlighted_fields_config';
 
-export const filterIndexPatterns = (
-  patterns: DataViewBase,
-): DataViewBase => {
+export const filterIndexPatterns = (patterns: DataViewBase): DataViewBase => {
   return patterns;
 };
 
