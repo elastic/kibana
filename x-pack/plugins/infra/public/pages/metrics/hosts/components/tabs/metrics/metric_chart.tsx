@@ -7,34 +7,24 @@
 import React, { CSSProperties, useCallback, useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import {
-  EuiIcon,
-  EuiPanel,
-  EuiI18n,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LensWrapper } from '../../../../../../common/visualizations/lens/lens_wrapper';
-import { useLensAttributes, Layer, LayerType } from '../../../../../../hooks/use_lens_attributes';
+import { useLensAttributes, Layer } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { FormulaConfig, XYLayerOptions } from '../../../../../../common/visualizations';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import {
-  buildCombinedHostsFilter,
-  buildExistsHostsFilter,
-} from '../../../../../../utils/filters/build';
+import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_MIN_HEIGHT } from '../../../constants';
 
 export interface MetricChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides'> {
   title: string;
-  layers: Array<Layer<XYLayerOptions, FormulaConfig[], LayerType>>;
+  layers: Array<Layer<XYLayerOptions, FormulaConfig[]>>;
 }
 
 const lensStyle: CSSProperties = {
@@ -47,6 +37,8 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
   const { dataView } = useMetricsDataViewContext();
   const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
+
+  const shouldUseSearchCriteria = currentPage.length === 0;
 
   // prevents requestTs and serchCriteria states from reloading the chart
   // we want it to reload only once the table has finished loading
@@ -63,25 +55,31 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
   });
 
   const filters = useMemo(() => {
-    return [
-      ...searchCriteria.filters,
-      buildCombinedHostsFilter({
-        field: 'host.name',
-        values: currentPage.map((p) => p.name),
-        dataView,
-      }),
-      buildExistsHostsFilter({ field: 'host.name', dataView }),
-    ];
-  }, [currentPage, dataView, searchCriteria.filters]);
+    return shouldUseSearchCriteria
+      ? afterLoadedState.filters
+      : [
+          buildCombinedHostsFilter({
+            field: 'host.name',
+            values: currentPage.map((p) => p.name),
+            dataView,
+          }),
+        ];
+  }, [afterLoadedState.filters, currentPage, dataView, shouldUseSearchCriteria]);
 
   const extraActions: Action[] = useMemo(
     () =>
       getExtraActions({
         timeRange: afterLoadedState.dateRange,
-        query: afterLoadedState.query,
+        query: shouldUseSearchCriteria ? afterLoadedState.query : undefined,
         filters,
       }),
-    [afterLoadedState.dateRange, afterLoadedState.query, filters, getExtraActions]
+    [
+      afterLoadedState.dateRange,
+      afterLoadedState.query,
+      filters,
+      getExtraActions,
+      shouldUseSearchCriteria,
+    ]
   );
 
   const handleBrushEnd = useCallback(
@@ -123,9 +121,9 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
-              <EuiI18n
-                token="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
-                default="There was an error trying to load Lens Plugin."
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.errorOnLoadingLensDependencies"
+                defaultMessage="There was an error trying to load Lens Plugin."
               />
             </EuiText>
           </EuiFlexItem>
@@ -139,7 +137,7 @@ export const MetricChart = ({ id, title, layers, overrides }: MetricChartProps) 
           lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
           dateRange={afterLoadedState.dateRange}
           filters={filters}
-          query={afterLoadedState.query}
+          query={shouldUseSearchCriteria ? afterLoadedState.query : undefined}
           onBrushEnd={handleBrushEnd}
           loading={loading}
           overrides={overrides}

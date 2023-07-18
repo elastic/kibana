@@ -75,7 +75,7 @@
                 "section": "def-common.ElasticsearchClientConfig",
                 "text": "ElasticsearchClientConfig"
               },
-              "> | undefined]> & ((type: string, config?: Partial<",
+              "> | undefined], unknown> & ((type: string, config?: Partial<",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
                 "scope": "common",
@@ -155,7 +155,7 @@
             "section": "def-common.UnauthorizedErrorHandler",
             "text": "UnauthorizedErrorHandler"
           },
-          "]>; } & Omit<",
+          "], unknown>; } & Omit<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
             "scope": "common",

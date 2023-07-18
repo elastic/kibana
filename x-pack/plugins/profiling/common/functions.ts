@@ -161,16 +161,20 @@ export enum TopNFunctionSortField {
   Rank = 'rank',
   Frame = 'frame',
   Samples = 'samples',
-  ExclusiveCPU = 'exclusiveCPU',
-  InclusiveCPU = 'inclusiveCPU',
+  SelfCPU = 'selfCPU',
+  TotalCPU = 'totalCPU',
   Diff = 'diff',
+  AnnualizedCo2 = 'annualizedCo2',
+  AnnualizedDollarCost = 'annualizedDollarCost',
 }
 
 export const topNFunctionSortFieldRt = t.union([
   t.literal(TopNFunctionSortField.Rank),
   t.literal(TopNFunctionSortField.Frame),
   t.literal(TopNFunctionSortField.Samples),
-  t.literal(TopNFunctionSortField.ExclusiveCPU),
-  t.literal(TopNFunctionSortField.InclusiveCPU),
+  t.literal(TopNFunctionSortField.SelfCPU),
+  t.literal(TopNFunctionSortField.TotalCPU),
   t.literal(TopNFunctionSortField.Diff),
+  t.literal(TopNFunctionSortField.AnnualizedCo2),
+  t.literal(TopNFunctionSortField.AnnualizedDollarCost),
 ]);

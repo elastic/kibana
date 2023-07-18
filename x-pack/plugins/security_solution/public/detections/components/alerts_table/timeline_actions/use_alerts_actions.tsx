@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import type { AlertWorkflowStatus } from '../../../../common/types';
 import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import { getScopedActions } from '../../../../helpers';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
