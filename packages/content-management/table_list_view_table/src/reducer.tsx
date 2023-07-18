@@ -40,8 +40,11 @@ export function getReducer<T extends UserContentCommonSchema>() {
         }
 
         let hasNoItems = state.hasNoItems;
+
         const hasQuery = state.searchQuery.text !== '';
-        if (hasNoItems === undefined && !hasQuery) {
+        if (hasQuery) {
+          hasNoItems = undefined;
+        } else {
           hasNoItems = items.length === 0;
         }
 

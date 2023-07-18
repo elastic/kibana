@@ -22,6 +22,7 @@ import {
   type TableListViewTableProps,
   type UserContentCommonSchema,
 } from './table_list_view_table';
+import { getActions } from './table_list_view.test.helpers';
 
 const mockUseEffect = useEffect;
 
@@ -54,12 +55,6 @@ const twoDaysAgoToString = new Date(twoDaysAgo.getTime()).toDateString();
 const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 const yesterdayToString = new Date(yesterday.getTime()).toDateString();
 
-const getActions = (testBed: TestBed) => ({
-  openSortSelect() {
-    testBed.find('tableSortSelectBtn').at(0).simulate('click');
-  },
-});
-
 describe('TableListView', () => {
   const requiredProps: TableListViewTableProps = {
     entityName: 'test',
@@ -91,50 +86,102 @@ describe('TableListView', () => {
     }
   );
 
-  test('render default empty prompt', async () => {
-    let testBed: TestBed;
+  describe('empty prompt', () => {
+    test('render default empty prompt', async () => {
+      let testBed: TestBed;
 
-    await act(async () => {
-      testBed = await setup();
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, exists } = testBed!;
+      component.update();
+
+      expect(component.find(EuiEmptyPrompt).length).toBe(1);
+      expect(exists('newItemButton')).toBe(false);
     });
 
-    const { component, exists } = testBed!;
-    component.update();
+    // avoid trapping users in empty prompt that can not create new items
+    test('render default empty prompt with create action when createItem supplied', async () => {
+      let testBed: TestBed;
 
-    expect(component.find(EuiEmptyPrompt).length).toBe(1);
-    expect(exists('newItemButton')).toBe(false);
-  });
+      await act(async () => {
+        testBed = await setup({ createItem: () => undefined });
+      });
 
-  // avoid trapping users in empty prompt that can not create new items
-  test('render default empty prompt with create action when createItem supplied', async () => {
-    let testBed: TestBed;
+      const { component, exists } = testBed!;
+      component.update();
 
-    await act(async () => {
-      testBed = await setup({ createItem: () => undefined });
+      expect(component.find(EuiEmptyPrompt).length).toBe(1);
+      expect(exists('newItemButton')).toBe(true);
     });
 
-    const { component, exists } = testBed!;
-    component.update();
+    test('render custom empty prompt', async () => {
+      let testBed: TestBed;
 
-    expect(component.find(EuiEmptyPrompt).length).toBe(1);
-    expect(exists('newItemButton')).toBe(true);
-  });
+      const CustomEmptyPrompt = () => {
+        return <EuiEmptyPrompt data-test-subj="custom-empty-prompt" title={<h1>Table empty</h1>} />;
+      };
 
-  test('render custom empty prompt', async () => {
-    let testBed: TestBed;
+      await act(async () => {
+        testBed = await setup({ emptyPrompt: <CustomEmptyPrompt /> });
+      });
 
-    const CustomEmptyPrompt = () => {
-      return <EuiEmptyPrompt data-test-subj="custom-empty-prompt" title={<h1>Table empty</h1>} />;
-    };
+      const { component, exists } = testBed!;
+      component.update();
 
-    await act(async () => {
-      testBed = await setup({ emptyPrompt: <CustomEmptyPrompt /> });
+      expect(exists('custom-empty-prompt')).toBe(true);
     });
 
-    const { component, exists } = testBed!;
-    component.update();
+    test('render empty prompt after deleting all items from table', async () => {
+      // NOTE: this test is using helpers that are being tested in the
+      // "should allow select items to be deleted" test below.
+      // If this test fails, check that one first.
 
-    expect(exists('custom-empty-prompt')).toBe(true);
+      const hits: UserContentCommonSchema[] = [
+        {
+          id: 'item-1',
+          type: 'dashboard',
+          updatedAt: '2020-01-01T00:00:00Z',
+          attributes: {
+            title: 'Item 1',
+          },
+          references: [],
+        },
+      ];
+
+      const findItems = jest.fn().mockResolvedValue({ total: 1, hits });
+      const deleteItems = jest.fn();
+
+      let testBed: TestBed;
+
+      const EmptyPrompt = () => {
+        return <EuiEmptyPrompt data-test-subj="custom-empty-prompt" title={<h1>Table empty</h1>} />;
+      };
+
+      await act(async () => {
+        testBed = await setup({ emptyPrompt: <EmptyPrompt />, findItems, deleteItems });
+      });
+
+      const { component, exists, table } = testBed!;
+      const { selectRow, clickConfirmModalButton, clickDeleteSelectedItemsButton } = getActions(
+        testBed!
+      );
+      component.update();
+
+      expect(exists('custom-empty-prompt')).toBe(false);
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      const [row] = tableCellsValues;
+      expect(row[1]).toBe('Item 1'); // Note: row[0] is the checkbox
+
+      // We delete the item in the table and expect the empty prompt to show
+      findItems.mockResolvedValue({ total: 0, hits: [] });
+      selectRow('item-1');
+      clickDeleteSelectedItemsButton();
+      await clickConfirmModalButton();
+
+      expect(exists('custom-empty-prompt')).toBe(true);
+    });
   });
 
   describe('default columns', () => {
@@ -878,20 +925,12 @@ describe('TableListView', () => {
         }
       )(...args);
 
-      const updateSearchText = async (value: string) => {
-        await act(async () => {
-          testBed.find('tableListSearchBox').simulate('keyup', {
-            key: 'Enter',
-            target: { value },
-          });
-        });
-        testBed.component.update();
-      };
+      const { updateSearchText, getSearchBoxValue } = getActions(testBed);
 
       return {
         testBed,
         updateSearchText,
-        getSearchBoxValue: () => testBed.find('tableListSearchBox').props().defaultValue,
+        getSearchBoxValue,
         getLastCallArgsFromFindItems: () => findItems.mock.calls[findItems.mock.calls.length - 1],
       };
     };
@@ -1341,10 +1380,11 @@ describe('TableListView', () => {
     };
 
     test('should allow select items to be deleted', async () => {
-      const {
-        testBed: { table, find, exists, component, form },
-        deleteItems,
-      } = await setupTest();
+      const { testBed, deleteItems } = await setupTest();
+
+      const { table, exists, component } = testBed;
+      const { selectRow, clickDeleteSelectedItemsButton, clickConfirmModalButton } =
+        getActions(testBed);
 
       const { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
@@ -1356,25 +1396,17 @@ describe('TableListView', () => {
       const selectedHit = hits[1];
 
       expect(exists('deleteSelectedItems')).toBe(false);
-      act(() => {
-        // Select the second item
-        form.selectCheckBox(`checkboxSelectRow-${selectedHit.id}`);
-      });
-      component.update();
+
+      selectRow(selectedHit.id);
       // Delete button is now visible
       expect(exists('deleteSelectedItems')).toBe(true);
 
       // Click delete and validate that confirm modal opens
       expect(component.exists('.euiModal--confirmation')).toBe(false);
-      act(() => {
-        find('deleteSelectedItems').simulate('click');
-      });
-      component.update();
+      clickDeleteSelectedItemsButton();
       expect(component.exists('.euiModal--confirmation')).toBe(true);
 
-      await act(async () => {
-        find('confirmModalConfirmButton').simulate('click');
-      });
+      await clickConfirmModalButton();
       expect(deleteItems).toHaveBeenCalledWith([selectedHit]);
     });
 
