@@ -12,6 +12,31 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
   template: {
     mappings: {
       properties: {
+        // APM service and transaction specific fields
+        service: {
+          properties: {
+            name: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            environment: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
+        transaction: {
+          properties: {
+            name: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            type: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
         slo: {
           properties: {
             id: {
@@ -24,6 +49,26 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
             instanceId: {
               type: 'keyword',
               ignore_above: 256,
+            },
+            name: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            description: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            tags: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            indicator: {
+              properties: {
+                type: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
             },
             budgetingMethod: {
               type: 'keyword',

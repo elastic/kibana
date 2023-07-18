@@ -8,7 +8,11 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import { getSLOTransformId } from '../../assets/constants';
+import {
+  getSLOTransformId,
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../assets/constants';
 import { SLO } from '../../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
@@ -132,8 +136,26 @@ describe('UpdateSLO', () => {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
     expect(mockTransformManager.stop).toBeCalledWith(transformId);
     expect(mockTransformManager.uninstall).toBeCalledWith(transformId);
-    expect(mockEsClient.deleteByQuery).toBeCalledWith(
+    expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
+
+    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
+        index: SLO_DESTINATION_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'slo.id': originalSlo.id } },
+              { term: { 'slo.revision': originalSlo.revision } },
+            ],
+          },
+        },
+      })
+    );
+    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
             filter: [
