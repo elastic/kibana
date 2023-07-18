@@ -11,7 +11,7 @@ import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { createContainerWithEntries } from './create_container_with_entries';
