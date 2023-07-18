@@ -84,7 +84,7 @@ describe('Response actions history page', () => {
       cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength);
       cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule').click();
     });
-    // check if we were moved to Rules app after clicking Triggered by rule
+    // check if we were moved to Rules app after clicking Triggered by rule -change
     cy.getByTestSubj('breadcrumb last').contains('Rules');
   });
 });
