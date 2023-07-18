@@ -395,6 +395,7 @@ export const MonitorOverviewItemCodec = t.intersection([
     isStatusAlertEnabled: t.boolean,
     type: t.string,
     tags: t.array(t.string),
+    schedule: t.string,
   }),
   t.partial({
     projectId: t.string,

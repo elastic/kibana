@@ -56,6 +56,7 @@ const navigationTree: NavigationTreeDefinition = {
             {
               link: 'visualize',
             },
+            { link: 'observability-overview:alerts' },
           ],
         },
         {

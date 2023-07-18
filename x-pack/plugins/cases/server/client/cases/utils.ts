@@ -10,6 +10,8 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserActionTypes } from '../../../common/types/domain';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
@@ -22,10 +24,9 @@ import type {
   CaseAssignees,
   CaseField,
   ThirdPartyField,
-  CaseUserActionsDeprecatedResponse,
   ConnectorMappings,
 } from '../../../common/api';
-import { CommentType, ActionTypes, CaseStatuses } from '../../../common/api';
+import { CommentType, CaseStatuses } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
@@ -248,7 +249,7 @@ export const formatComments = ({
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
-      .filter((action) => action.type === ActionTypes.comment)
+      .filter((action) => action.type === UserActionTypes.comment)
       .map((action) => action.comment_id)
   );
 
