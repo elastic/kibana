@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
   IconType,
+  IconSize,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -37,15 +38,18 @@ interface ProductResourceLink {
 }
 
 export interface ProductCardProps {
-  cta: string;
+  cta?: string;
   description: string;
   emptyCta?: boolean;
   features: string[];
+  hasBorder?: boolean;
+  hasShadow?: boolean;
   icon: IconType;
+  iconSize?: IconSize;
   name: string;
   productId: string;
   resourceLinks: ProductResourceLink[];
-  url: string;
+  url?: string;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -53,7 +57,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   description,
   emptyCta = false,
   features,
+  hasBorder,
+  hasShadow,
   icon,
+  iconSize,
   productId,
   name,
   resourceLinks,
@@ -63,14 +70,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <EuiPanel
-      hasBorder
+      hasBorder={hasBorder ?? true}
+      hasShadow={hasShadow ?? true}
       paddingSize="l"
       data-test-subj={`${productId}ProductCard`}
       className="productCard"
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false} data-test-subj="productCard-icon">
-          <EuiIcon size="xl" type={icon} />
+          <EuiIcon size={iconSize ?? 'xl'} type={icon} />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="productCard-details">
           <EuiTitle size="s">
@@ -81,36 +89,38 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {description}
           </EuiText>
           <EuiSpacer />
-          <div>
-            {emptyCta ? (
-              <EuiButtonTo
-                to={url}
-                shouldNotCreateHref
-                onClick={() =>
-                  sendEnterpriseSearchTelemetry({
-                    action: 'clicked',
-                    metric: snakeCase(productId),
-                  })
-                }
-              >
-                {cta}
-              </EuiButtonTo>
-            ) : (
-              <EuiButtonEmptyTo
-                flush="both"
-                to={url}
-                shouldNotCreateHref
-                onClick={() =>
-                  sendEnterpriseSearchTelemetry({
-                    action: 'clicked',
-                    metric: snakeCase(productId),
-                  })
-                }
-              >
-                {cta}
-              </EuiButtonEmptyTo>
-            )}
-          </div>
+          {cta && url && (
+            <div>
+              {emptyCta ? (
+                <EuiButtonTo
+                  to={url}
+                  shouldNotCreateHref
+                  onClick={() =>
+                    sendEnterpriseSearchTelemetry({
+                      action: 'clicked',
+                      metric: snakeCase(productId),
+                    })
+                  }
+                >
+                  {cta}
+                </EuiButtonTo>
+              ) : (
+                <EuiButtonEmptyTo
+                  flush="both"
+                  to={url}
+                  shouldNotCreateHref
+                  onClick={() =>
+                    sendEnterpriseSearchTelemetry({
+                      action: 'clicked',
+                      metric: snakeCase(productId),
+                    })
+                  }
+                >
+                  {cta}
+                </EuiButtonEmptyTo>
+              )}
+            </div>
+          )}
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="productCard-features">
           <EuiListGroup flush className="productCard-features">
