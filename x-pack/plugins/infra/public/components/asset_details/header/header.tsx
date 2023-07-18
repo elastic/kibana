@@ -26,25 +26,17 @@ import {
   TabToUptime,
 } from '../links';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
+import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
+import { toTimestampRange } from '../utils';
 
-type Props = Pick<
-  AssetDetailsProps,
-  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs'
-> & {
+type Props = Pick<AssetDetailsProps, 'links' | 'tabs'> & {
   compact: boolean;
 };
 
 const APM_FIELD = 'host.hostname';
 
-export const Header = ({
-  nodeType = 'host',
-  node,
-  tabs = [],
-  links = [],
-  compact,
-  currentTimeRange,
-  overrides,
-}: Props) => {
+export const Header = ({ tabs = [], links = [], compact }: Props) => {
+  const { node, nodeType, overrides, dateRange: timeRange } = useAssetDetailsStateContext();
   const { euiTheme } = useEuiTheme();
   const { showTab, activeTabId } = useTabSwitcherContext();
 
@@ -66,7 +58,7 @@ export const Header = ({
       <LinkToNodeDetails
         nodeName={node.name}
         nodeType={nodeType}
-        currentTime={currentTimeRange.to}
+        currentTimestamp={toTimestampRange(timeRange).to}
       />
     ),
     alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
