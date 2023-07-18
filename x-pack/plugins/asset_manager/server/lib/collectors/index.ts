@@ -8,8 +8,8 @@
 import { Transaction } from 'elastic-apm-node';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AssetManagerConfig } from '../../../types';
-import { Asset } from '../../../../common/types_api';
+import { AssetManagerConfig } from '../../types';
+import { Asset } from '../../../common/types_api';
 
 export const QUERY_MAX_SIZE = 10000;
 

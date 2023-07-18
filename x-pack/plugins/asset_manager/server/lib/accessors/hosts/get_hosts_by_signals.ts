@@ -7,7 +7,7 @@
 
 import { Asset } from '../../../../common/types_api';
 import { GetHostsOptionsInjected } from '.';
-import { collectHosts } from '../../implicit_collection/collectors/hosts';
+import { collectHosts } from '../../collectors/hosts';
 
 export async function getHostsBySignals(
   options: GetHostsOptionsInjected
