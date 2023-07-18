@@ -6,6 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -47,7 +48,6 @@ export const EsqlQueryExpression: React.FC<
     groupBy: DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
-    excludeHitsFromPreviousRun: false,
   });
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [testQuery, setTestQuery] = useState<boolean>();
@@ -119,7 +119,7 @@ export const EsqlQueryExpression: React.FC<
 
   const refreshTimeFields = async (q: AggregateQuery) => {
     let hasTimestamp = false;
-    const indexPattern: string = getIndexPatternFromESQLQuery(q.esql);
+    const indexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
     const currentEsFields = await getFields(http, [indexPattern]);
     const timeFields = getTimeFieldOptions(currentEsFields);
     setTimeFieldOptions([firstFieldOption, ...timeFields]);
