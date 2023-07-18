@@ -77,8 +77,8 @@ export const EventAnnotationGroupTableList = ({
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
 
   const refreshList = useCallback(() => {
-    setRefreshListBouncer(!refreshListBouncer);
-  }, [refreshListBouncer]);
+    setRefreshListBouncer((prev) => !prev);
+  }, []);
 
   const fetchItems = useCallback(
     (

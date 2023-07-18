@@ -15,7 +15,14 @@ const configSchema = schema.object({
   /**
    * Disables the plugin.
    */
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    // Upgrade Assistant is disabled in serverless; refer to the serverless.yml file as the source of truth
+    // We take this approach in order to have a central place (serverless.yml) to view disabled plugins across Kibana
+    schema.boolean({ defaultValue: true }),
+    schema.never()
+  ),
 
   featureSet: schema.object({
     /**

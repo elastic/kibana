@@ -18,7 +18,7 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType } from '../../../common/types/timeline/api';
+import { TimelineType } from '../../../common/api/timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../detections/components/alerts_table/translations';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';
 import { useCreateTimeline } from '../../timelines/components/timeline/properties/use_create_timeline';

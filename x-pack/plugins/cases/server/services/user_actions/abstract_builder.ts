@@ -7,6 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { UserActionTypes } from '../../../common/types/domain';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   CASE_REF_NAME,
@@ -15,7 +16,7 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import type { CaseConnector, CaseExternalServiceBasic, User } from '../../../common/api';
-import { ActionTypes, NONE_CONNECTOR_ID } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import type {
   BuilderDeps,
   BuilderParameters,
@@ -110,10 +111,10 @@ export abstract class UserActionBuilder {
       references: [
         ...this.createCaseReferences(caseId),
         ...this.createCommentReferences(attachmentId ?? null),
-        ...(type === ActionTypes.connector
+        ...(type === UserActionTypes.connector
           ? this.createConnectorReference(connectorId ?? null)
           : []),
-        ...(type === ActionTypes.pushed
+        ...(type === UserActionTypes.pushed
           ? this.createConnectorPushReference(connectorId ?? null)
           : []),
       ],
