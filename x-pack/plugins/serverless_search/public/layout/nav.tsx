@@ -36,6 +36,13 @@ const navigationTree: NavigationTreeDefinition = {
           link: 'serverlessElasticsearch',
         },
         {
+          id: 'dev_tools',
+          title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
+            defaultMessage: 'Dev Tools',
+          }),
+          children: getPresets('devtools').children[0].children,
+        },
+        {
           id: 'explore',
           title: i18n.translate('xpack.serverlessSearch.nav.explore', {
             defaultMessage: 'Explore',
@@ -111,15 +118,6 @@ const navigationTree: NavigationTreeDefinition = {
     },
   ],
   footer: [
-    {
-      type: 'navGroup',
-      id: 'devTools',
-      title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-        defaultMessage: 'Developer tools',
-      }),
-      link: 'dev_tools',
-      icon: 'editorCodeBlock',
-    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
