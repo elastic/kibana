@@ -28,10 +28,8 @@ export const docker: Command = {
     const { password } = defaults;
 
     // TODO: additional env/es params?
-    // TODO: parse docker logs?
     // TODO: tests
     // TODO: docs?
-    // TODO: remove unused CLI options
     // TODO: setup pw
     // TODO: Windows support?
     return dedent`
@@ -40,12 +38,8 @@ export const docker: Command = {
       --tag               Image tag of ES to run from ${DOCKER_REPO} [default: ${DOCKER_TAG}]
       --image             Full path to image of ES to run, has precedence over tag. [default: ${DOCKER_IMG}].
       --password          Sets password for elastic user [default: ${password}]
-      --password.[user]   Sets password for native realm user [default: ${password}]
       -E                  Additional key=value settings to pass to Elasticsearch 
       -D                  Single quoted command to pass to Docker [default: ${DEFAULT_DOCKER_CMD}]
-      --ssl               Sets up SSL on Elasticsearch
-      --skip-ready-check  Disable the ready check
-      --ready-timeout     Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
 
     Examples:
 
@@ -67,12 +61,9 @@ export const docker: Command = {
       alias: {
         esArgs: 'E',
         dockerCmd: 'D',
-        skipReadyCheck: 'skip-ready-check',
-        readyTimeout: 'ready-timeout',
       },
 
-      string: ['tag', 'ready-timeout', 'D'],
-      boolean: ['skip-ready-check'],
+      string: ['tag', 'D'],
 
       default: defaults,
     });
