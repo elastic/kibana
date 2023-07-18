@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
-import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
-import { getIndicesTabStatus } from './summary_tab/indicies_status';
-import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
+import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
+import { getIsIndicesTabOk } from './summary_tab/indicies_status';
+import { getIsDataStreamTabOk } from './summary_tab/data_streams_status';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
@@ -82,7 +82,12 @@ function ExportCard() {
 
 function ImportCard() {
   const { setImportedDiagnosticsBundle, isImported } = useDiagnosticsContext();
-  const [importError, setImportError] = useState(false);
+  const [importStatus, setImportStatus] = useState<{
+    isValid: boolean;
+    errorMessage?: string;
+  }>({
+    isValid: true,
+  });
   return (
     <EuiCard
       icon={<EuiIcon size="xxl" type="exportAction" />}
@@ -104,10 +109,11 @@ function ImportCard() {
             </EuiButton>
           ) : (
             <>
-              {importError && (
+              {!importStatus.isValid && (
                 <>
                   <EuiCallOut color="danger" iconType="warning">
-                    The uploaded file could not be parsed
+                    The uploaded file could not be parsed:{' '}
+                    {importStatus.errorMessage}
                   </EuiCallOut>
                   <EuiSpacer />
                 </>
@@ -117,7 +123,7 @@ function ImportCard() {
                 id="file-picker"
                 multiple
                 onChange={(_files) => {
-                  setImportError(false);
+                  setImportStatus({ isValid: true });
 
                   if (_files && _files.length > 0) {
                     const file = Array.from(_files)[0];
@@ -129,13 +135,14 @@ function ImportCard() {
                           evt?.target?.result
                         ) as DiagnosticsBundle;
 
-                        if (isBundleValid(diagnosticsBundle)) {
-                          setImportedDiagnosticsBundle(diagnosticsBundle);
-                        } else {
-                          setImportError(true);
-                        }
+                        validateBundle(diagnosticsBundle);
+                        setImportedDiagnosticsBundle(diagnosticsBundle);
                       } catch (e) {
-                        setImportError(true);
+                        setImportStatus({
+                          isValid: false,
+                          errorMessage: e.message,
+                        });
+
                         console.error(
                           `Could not parse file ${file.name}. ${e.message}`
                         );
@@ -154,13 +161,13 @@ function ImportCard() {
   );
 }
 
-function isBundleValid(diagnosticsBundle: DiagnosticsBundle) {
+function validateBundle(diagnosticsBundle: DiagnosticsBundle) {
   try {
-    getIndexTemplateStatus(diagnosticsBundle);
-    getIndicesTabStatus(diagnosticsBundle);
-    getDataStreamTabStatus(diagnosticsBundle);
-    return true;
+    getIsIndexTemplateOk(diagnosticsBundle);
+    getIsIndicesTabOk(diagnosticsBundle);
+    getIsDataStreamTabOk(diagnosticsBundle);
   } catch (e) {
-    return false;
+    console.error('Error parsing uploaded bundle', e);
+    throw e;
   }
 }
