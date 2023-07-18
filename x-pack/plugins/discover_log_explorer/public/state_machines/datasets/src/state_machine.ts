@@ -7,6 +7,7 @@
 
 import { isEmpty, isError, omitBy } from 'lodash';
 import { assign, createMachine } from 'xstate';
+import { Dataset } from '../../../../common/datasets';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import type {
@@ -78,7 +79,9 @@ export const createPureDatasetsStateMachine = (
           ...('search' in event && { search: event.search }),
         })),
         storeDatasets: assign((_context, event) =>
-          'data' in event && !isError(event.data) ? { datasets: event.data.items } : {}
+          'data' in event && !isError(event.data)
+            ? { datasets: Dataset.createWildcardDatasetsFrom(event.data.items) }
+            : {}
         ),
         storeInCache: (context, event) => {
           if ('data' in event && !isError(event.data)) {
