@@ -263,21 +263,21 @@ export const RuleActionsField: React.FC<Props> = ({
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
-        minimumThrottleInterval,
         disableErrorMessages: !isFormValidated,
+        minimumThrottleInterval,
       }),
     [
-      getActionForm,
       actions,
+      getActionForm,
       messageVariables,
       summaryMessageVariables,
-      setActionIdByIndex,
-      setAlertActionsProperty,
-      setActionParamsProperty,
       setActionFrequency,
+      setActionIdByIndex,
+      setActionParamsProperty,
+      setAlertActionsProperty,
       setActionAlertsFilterProperty,
-      minimumThrottleInterval,
       isFormValidated,
+      minimumThrottleInterval,
     ]
   );
 
