@@ -10,7 +10,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
-import { toSavedSearchAttributes } from './saved_searches_utils';
+import { toSavedSearchAttributes } from '../../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
 
 export interface SaveSavedSearchOptions {

@@ -15,11 +15,8 @@ const booleanValue = true;
 
 describe('createFilter', () => {
   it.each([
-    { caseName: 'string', caseValue: value },
     { caseName: 'string array', caseValue: [value] },
-    { caseName: 'number', caseValue: numberValue, query: numberValue.toString() },
     { caseName: 'number array', caseValue: [numberValue], query: numberValue.toString() },
-    { caseName: 'boolean', caseValue: booleanValue, query: booleanValue.toString() },
     { caseName: 'boolean array', caseValue: [booleanValue], query: booleanValue.toString() },
   ])('should return filter with $caseName value', ({ caseValue, query = value }) => {
     expect(createFilter({ key: field, value: caseValue, negate: false })).toEqual({
@@ -42,11 +39,8 @@ describe('createFilter', () => {
   });
 
   it.each([
-    { caseName: 'string', caseValue: value },
     { caseName: 'string array', caseValue: [value] },
-    { caseName: 'number', caseValue: numberValue, query: numberValue.toString() },
     { caseName: 'number array', caseValue: [numberValue], query: numberValue.toString() },
-    { caseName: 'boolean', caseValue: booleanValue, query: booleanValue.toString() },
     { caseName: 'boolean array', caseValue: [booleanValue], query: booleanValue.toString() },
   ])('should return negate filter with $caseName value', ({ caseValue, query = value }) => {
     expect(createFilter({ key: field, value: caseValue, negate: true })).toEqual({
@@ -93,45 +87,41 @@ describe('createFilter', () => {
     });
   });
 
-  it.each([
-    { caseName: 'null', caseValue: null },
-    { caseName: 'undefined', caseValue: undefined },
-    { caseName: 'empty string', caseValue: '' },
-    { caseName: 'empty array', caseValue: [] },
-  ])('should return exist filter with $caseName value', ({ caseValue }) => {
-    expect(createFilter({ key: field, value: caseValue, negate: false })).toEqual({
-      query: {
-        exists: {
-          field,
+  it.each([{ caseName: 'empty array', caseValue: [] }])(
+    'should return exist filter with $caseName value',
+    ({ caseValue }) => {
+      expect(createFilter({ key: field, value: caseValue, negate: false })).toEqual({
+        query: {
+          exists: {
+            field,
+          },
         },
-      },
-      meta: {
-        key: field,
-        negate: false,
-        type: 'exists',
-        value: 'exists',
-      },
-    });
-  });
+        meta: {
+          key: field,
+          negate: false,
+          type: 'exists',
+          value: 'exists',
+        },
+      });
+    }
+  );
 
-  it.each([
-    { caseName: 'null', caseValue: null },
-    { caseName: 'undefined', caseValue: undefined },
-    { caseName: 'empty string', caseValue: '' },
-    { caseName: 'empty array', caseValue: [] },
-  ])('should return negate exist filter with $caseName value', ({ caseValue }) => {
-    expect(createFilter({ key: field, value: caseValue, negate: true })).toEqual({
-      query: {
-        exists: {
-          field,
+  it.each([{ caseName: 'empty array', caseValue: [] }])(
+    'should return negate exist filter with $caseName value',
+    ({ caseValue }) => {
+      expect(createFilter({ key: field, value: caseValue, negate: true })).toEqual({
+        query: {
+          exists: {
+            field,
+          },
         },
-      },
-      meta: {
-        key: field,
-        negate: true,
-        type: 'exists',
-        value: 'exists',
-      },
-    });
-  });
+        meta: {
+          key: field,
+          negate: true,
+          type: 'exists',
+          value: 'exists',
+        },
+      });
+    }
+  );
 });

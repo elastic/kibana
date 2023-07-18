@@ -89,6 +89,15 @@ export async function getFullAgentPolicy(
     })
   );
 
+  const inputs = await storedPackagePoliciesToAgentInputs(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput)
+  );
+  const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
+    acc[name] = featureConfig;
+    return acc;
+  }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
@@ -102,11 +111,7 @@ export async function getFullAgentPolicy(
         return acc;
       }, {}),
     },
-    inputs: await storedPackagePoliciesToAgentInputs(
-      agentPolicy.package_policies as PackagePolicy[],
-      packageInfoCache,
-      getOutputIdForAgentPolicy(dataOutput)
-    ),
+    inputs,
     secret_references: (agentPolicy?.package_policies || []).flatMap(
       (policy) => policy.secret_references || []
     ),
@@ -125,10 +130,7 @@ export async function getFullAgentPolicy(
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
             }
           : { enabled: false, logs: false, metrics: false },
-      features: (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
-        acc[name] = featureConfig;
-        return acc;
-      }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
+      features,
       protection: {
         enabled: agentPolicy.is_protected,
         uninstall_token_hash: '',
@@ -206,8 +208,15 @@ export async function getFullAgentPolicy(
     const dataToSign = {
       id: fullAgentPolicy.id,
       agent: {
+        features,
         protection: fullAgentPolicy.agent.protection,
       },
+      inputs: inputs.map(({ id: inputId, name, revision, type }) => ({
+        id: inputId,
+        name,
+        revision,
+        type,
+      })),
     };
 
     const { data: signedData, signature } = await messageSigningService.sign(dataToSign);
@@ -272,6 +281,55 @@ export function transformOutputToFullPolicyOutput(
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
   let generalShipperData;
+  let kafkaData = {};
+
+  if (type === outputType.Kafka) {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const {
+      client_id,
+      version,
+      key,
+      compression,
+      compression_level,
+      auth_type,
+      username,
+      password,
+      sasl,
+      partition,
+      random,
+      round_robin,
+      hash,
+      topics,
+      headers,
+      timeout,
+      broker_timeout,
+      broker_buffer_size,
+      broker_ack_reliability,
+    } = output;
+    /* eslint-enable @typescript-eslint/naming-convention */
+
+    kafkaData = {
+      client_id,
+      version,
+      key,
+      compression,
+      compression_level,
+      auth_type,
+      username,
+      password,
+      sasl,
+      partition,
+      random,
+      round_robin,
+      hash,
+      topics,
+      headers,
+      timeout,
+      broker_timeout,
+      broker_buffer_size,
+      broker_ack_reliability,
+    };
+  }
 
   if (shipper) {
     if (!isShipperDisabled) {
@@ -301,6 +359,7 @@ export function transformOutputToFullPolicyOutput(
     ...shipperDiskQueueData,
     type,
     hosts,
+    ...kafkaData,
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),

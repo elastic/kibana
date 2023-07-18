@@ -52,8 +52,7 @@ export const AppGlobalStyle = createGlobalStyle<{
     overflow: hidden;
 
     .expandable-top-value-button {
-      &.euiButtonEmpty--primary:enabled:focus,
-      .euiButtonEmpty--primary:focus {
+      &.euiButtonEmpty:focus {
         background-color: transparent;
       }
     }

@@ -28,7 +28,6 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   Comparator,
   CountRuleParams,
-  hasGroupBy,
   isRatioRuleParams,
   PartialRuleParams,
   ruleParamsRT,
@@ -53,7 +52,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   alert,
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logViews } = services;
+  const { dataViews, logsShared } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logSpikeParams, setLogSpikeParams] = useState<
@@ -62,9 +61,8 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   useEffect(() => {
     const getDataView = async () => {
-      const { timestampField, dataViewReference } = await logViews.client.getResolvedLogView(
-        rule.params.logView
-      );
+      const { timestampField, dataViewReference } =
+        await logsShared.logViews.client.getResolvedLogView(rule.params.logView);
 
       if (dataViewReference.id) {
         const logDataView = await dataViews.get(dataViewReference.id);
@@ -76,7 +74,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     const getQuery = (timestampField: string) => {
       const esSearchRequest = getESQueryForLogSpike(
         validatedParams as CountRuleParams,
-        timestampField
+        timestampField,
+        alert,
+        rule.params.groupBy
       ) as QueryDslQueryContainer;
 
       if (esSearchRequest) {
@@ -88,13 +88,12 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
     if (
       !isRatioRuleParams(validatedParams) &&
-      !hasGroupBy(validatedParams) &&
       (validatedParams.count.comparator === Comparator.GT ||
         validatedParams.count.comparator === Comparator.GT_OR_EQ)
     ) {
       getDataView();
     }
-  }, [rule, alert, dataViews, logViews]);
+  }, [rule, alert, dataViews, logsShared]);
 
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
@@ -231,6 +230,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
               title={explainLogSpikeTitle}
               params={logSpikeParams}
               promptId={CoPilotPromptId.ExplainLogSpike}
+              feedbackEnabled={false}
             />
           </EuiFlexItem>
         ) : null}

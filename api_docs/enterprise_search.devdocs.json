@@ -47,21 +47,6 @@
       },
       {
         "parentPluginId": "enterpriseSearch",
-        "id": "def-server.CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX",
-        "description": [],
-        "signature": [
-          "\".search-acl-filter-\""
-        ],
-        "path": "x-pack/plugins/enterprise_search/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "enterpriseSearch",
         "id": "def-server.CONNECTORS_INDEX",
         "type": "string",
         "tags": [],
@@ -129,6 +114,21 @@
         "description": [],
         "signature": [
           "\".elastic-connectors-v1\""
+        ],
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "enterpriseSearch",
+        "id": "def-server.CURRENT_CONNECTORS_JOB_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "CURRENT_CONNECTORS_JOB_INDEX",
+        "description": [],
+        "signature": [
+          "\".elastic-connectors-sync-jobs-v1\""
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,

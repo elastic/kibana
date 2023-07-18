@@ -25,7 +25,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
 
-const AppContext = createContext<AppDependencies | undefined>(undefined);
+export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
   core: {
@@ -52,6 +52,7 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   theme$: Observable<CoreTheme>;
+  enableIndexActions: boolean;
 }
 
 export const AppContextProvider = ({

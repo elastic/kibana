@@ -11,7 +11,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type {
   PreviewResponse,
   RuleCreateProps,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import { previewRule } from '../../../../detection_engine/rule_management/api/api';
 import { transformOutput } from '../../../containers/detection_engine/rules/transforms';

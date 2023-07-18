@@ -17,7 +17,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule, EuiToolTipProps } from '@elastic/eui';
+import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -145,10 +145,23 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         },
       },
       {
-        text: dashboardTitle,
+        text:
+          viewMode === ViewMode.EDIT ? (
+            <>
+              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+            </>
+          ) : (
+            dashboardTitle
+          ),
+        onClick:
+          viewMode === ViewMode.EDIT
+            ? () => {
+                dashboard.showSettings();
+              }
+            : undefined,
       },
     ]);
-  }, [setBreadcrumbs, redirectTo, dashboardTitle]);
+  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes

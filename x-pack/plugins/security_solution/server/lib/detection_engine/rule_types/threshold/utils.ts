@@ -10,7 +10,7 @@ import { v5 as uuidv5 } from 'uuid';
 import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export const shouldFilterByCardinality = (
   threshold: ThresholdNormalized

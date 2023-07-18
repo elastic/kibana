@@ -40,6 +40,7 @@ export const DashboardListing = ({
     notifications,
     overlays,
     http,
+    chrome: { theme },
     savedObjectsTagging,
 
     coreContext: { executionContext },
@@ -75,6 +76,7 @@ export const DashboardListing = ({
             notifications,
             overlays,
             http,
+            theme,
           },
           toMountPoint,
           savedObjectsTagging: savedObjectsTaggingFakePlugin,

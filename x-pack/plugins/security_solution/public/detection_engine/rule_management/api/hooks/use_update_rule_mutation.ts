@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import type {
   RuleResponse,
   RuleUpdateProps,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRule } from '../api';

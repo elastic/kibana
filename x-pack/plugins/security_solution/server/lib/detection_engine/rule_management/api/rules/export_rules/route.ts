@@ -9,11 +9,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { ExportRulesRequestQueryDecoded } from '../../../../../../../common/detection_engine/rule_management';
+import type { ExportRulesRequestQueryDecoded } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ExportRulesRequestBody,
   ExportRulesRequestQuery,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
