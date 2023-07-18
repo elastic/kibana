@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
 import {
   BaseExportTypeSetupDeps,

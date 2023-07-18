@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
   decryptJobHeaders,
@@ -27,7 +27,7 @@ import { Writable } from 'stream';
 import apm from 'elastic-apm-node';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { fromEventPattern, lastValueFrom, Observable, of, throwError } from 'rxjs';
-import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import { getFullUrls } from '@kbn/reporting-export-types-common';
 import { generatePdfObservable } from './lib/generate_pdf_v1';
 import { JobParamsPDFDeprecated, TaskPayloadPDF } from './types';

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import moment from 'moment';
-import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-deprecated';
+import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-deprecated/csv_searchsource_immediate/types';
 import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { PassThroughStream } from '../../lib';

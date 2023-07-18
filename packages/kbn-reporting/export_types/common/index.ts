@@ -9,6 +9,7 @@
 export { validateUrls } from './validate_urls';
 export { generatePngObservable } from './generate_png';
 export { getFullUrls } from './get_full_urls';
+export { getAbsoluteUrlFactory } from './get_absolute_url';
 export { ExportType, getCustomLogo, decryptJobHeaders } from '@kbn/reporting-common';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '@kbn/reporting-common';
 

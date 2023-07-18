@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
   decryptJobHeaders,
@@ -27,7 +27,7 @@ import {
   of,
   lastValueFrom,
 } from 'rxjs';
-import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import {
   LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -38,6 +38,7 @@ import {
   REPORTING_TRANSACTION_TYPE,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common/constants';
+import { getFullUrls, generatePngObservable } from '@kbn/reporting-export-types-common';
 import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 
 /**

@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ReportingServerInfo } from '@kbn/reporting-plugin/server/core';
+import { ReportingConfigType, ReportingServerInfo } from '@kbn/reporting-common';
+import type { TaskPayloadPNG, TaskPayloadPDF } from '@kbn/reporting-export-types-deprecated';
 import { getFullUrls } from './get_full_urls';
-import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
-import { TaskPayloadPNG } from '@kbn/reporting-plugin/common/types/export_types/png';
-import { TaskPayloadPDF } from '@kbn/reporting-plugin/common/types/export_types/printable_pdf';
 
 const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;
 const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;
