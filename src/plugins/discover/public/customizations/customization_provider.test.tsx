@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 import {
@@ -23,12 +23,15 @@ import {
 } from './customization_service';
 
 describe('useDiscoverCustomizationService', () => {
-  it('should provide a customization service and a setup handler', async () => {
-    const cleanup = jest.fn();
+  it('should provide customization service', async () => {
+    let resolveCallback = (_: () => void) => {};
+    const promise = new Promise<() => void>((resolve) => {
+      resolveCallback = resolve;
+    });
     let service: DiscoverCustomizationService | undefined;
     const callback = jest.fn(({ customizations }) => {
       service = customizations;
-      return cleanup;
+      return promise;
     });
     const wrapper = renderHook(() =>
       useDiscoverCustomizationService({
@@ -36,16 +39,25 @@ describe('useDiscoverCustomizationService', () => {
         customizationCallbacks: [callback],
       })
     );
+    expect(wrapper.result.current.isInitialized).toBe(false);
     expect(wrapper.result.current.customizationService).toBeUndefined();
-    expect(callback).toHaveBeenCalledTimes(0);
-
-    wrapper.result.current.setupCustomizationService();
-    await wrapper.waitForNextUpdate();
-
+    expect(callback).toHaveBeenCalledTimes(1);
+    const cleanup = jest.fn();
+    await act(async () => {
+      resolveCallback(cleanup);
+      await promise;
+    });
+    expect(wrapper.result.current.isInitialized).toBe(true);
     expect(wrapper.result.current.customizationService).toBeDefined();
     expect(wrapper.result.current.customizationService).toBe(service);
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
+    wrapper.unmount();
+    await act(async () => {
+      await promise;
+    });
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 });
 

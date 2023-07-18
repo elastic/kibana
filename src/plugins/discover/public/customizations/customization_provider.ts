@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { DiscoverStateContainer } from '../application/main/services/discover_state';
 import type { CustomizationCallback } from './types';
 import {
@@ -30,30 +31,27 @@ export const useDiscoverCustomizationService = ({
 }) => {
   const [customizationService, setCustomizationService] = useState<DiscoverCustomizationService>();
 
-  const initFunction = () => {
-    if (customizationService) return () => {};
-
+  useEffectOnce(() => {
     const customizations = createCustomizationService();
-
     const callbacks = customizationCallbacks.map((callback) =>
-      callback({ customizations, stateContainer })
+      Promise.resolve(callback({ customizations, stateContainer }))
     );
+    const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
 
-    return Promise.all(callbacks).then((cleanups) => {
+    initialize().then(() => {
       setCustomizationService(customizations);
-
-      return () => cleanups.filter(isFunction).forEach((cleanup) => cleanup());
     });
-  };
 
-  // Apply latest ref pattern to keep referential stability for the init function
-  const ref = useRef<typeof initFunction>(initFunction);
-  useEffect(() => {
-    ref.current = initFunction;
+    return () => {
+      initialize().then((cleanups) => {
+        cleanups.forEach((cleanup) => cleanup());
+      });
+    };
   });
-  const setupCustomizationService = useCallback(() => ref.current(), []);
 
-  return { customizationService, setupCustomizationService };
+  const isInitialized = Boolean(customizationService);
+
+  return { customizationService, isInitialized };
 };
 
 export const useDiscoverCustomization$ = <TCustomizationId extends DiscoverCustomizationId>(

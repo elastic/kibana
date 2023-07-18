@@ -32,7 +32,7 @@ jest.mock('../../customizations', () => {
     ...originalModule,
     useDiscoverCustomizationService: () => ({
       customizationService: mockCustomizationService,
-      setupCustomizationService: mockSetupCustomizationService,
+      isInitialized: Boolean(mockSetupCustomizationService),
     }),
   };
 });
@@ -46,6 +46,10 @@ jest.mock('./discover_main_app', () => {
 setScopedHistory(scopedHistoryMock.create());
 
 describe('DiscoverMainRoute', () => {
+  beforeEach(() => {
+    mockCustomizationService = createCustomizationService();
+  });
+
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
     const component = mountComponent(true, true);
 
