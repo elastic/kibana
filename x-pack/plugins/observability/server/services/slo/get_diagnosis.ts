@@ -6,9 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-
 import {
   getSLOTransformId,
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
@@ -18,9 +16,10 @@ import {
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+  SLO_SUMMARY_TRANSFORM_NAME_PREFIX,
 } from '../../assets/constants';
-import { StoredSLO } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
+import { SLO } from '../../domain/models';
+import { SLORepository } from './slo_repository';
 
 const OK = 'OK';
 const NOT_OK = 'NOT_OK';
@@ -35,11 +34,17 @@ export async function getGlobalDiagnosis(
     const sloResources = await getSloResourcesDiagnosis(esClient);
     const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
 
+    const sloSummaryTransformsStats = await esClient.transform.getTransformStats({
+      transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}*`,
+      allow_no_match: true,
+    });
+
     return {
       licenseAndFeatures: licenseInfo,
       userPrivileges,
       sloResources,
       sloSummaryResources,
+      sloSummaryTransformsStats,
     };
   } catch (error) {
     throw error;
@@ -48,29 +53,36 @@ export async function getGlobalDiagnosis(
 
 export async function getSloDiagnosis(
   sloId: string,
-  services: { esClient: ElasticsearchClient; soClient: SavedObjectsClientContract }
+  services: { esClient: ElasticsearchClient; repository: SLORepository }
 ) {
-  const { esClient, soClient } = services;
+  const { esClient, repository } = services;
 
   const sloResources = await getSloResourcesDiagnosis(esClient);
   const sloSummaryResources = await getSloSummaryResourcesDiagnosis(esClient);
 
-  let sloSavedObject;
+  let slo: SLO | undefined;
   try {
-    sloSavedObject = await soClient.get<StoredSLO>(SO_SLO_TYPE, sloId);
+    slo = await repository.findById(sloId);
   } catch (err) {
     // noop
   }
 
   const sloTransformStats = await esClient.transform.getTransformStats({
-    transform_id: getSLOTransformId(sloId, sloSavedObject?.attributes.revision ?? 1),
+    transform_id: getSLOTransformId(sloId, slo?.revision ?? 1),
+    allow_no_match: true,
+  });
+
+  const sloSummaryTransformsStats = await esClient.transform.getTransformStats({
+    transform_id: `${SLO_SUMMARY_TRANSFORM_NAME_PREFIX}*`,
+    allow_no_match: true,
   });
 
   return {
     sloResources,
     sloSummaryResources,
-    sloSavedObject: sloSavedObject ?? NOT_OK,
+    slo: slo ?? NOT_OK,
     sloTransformStats,
+    sloSummaryTransformsStats,
   };
 }
 
