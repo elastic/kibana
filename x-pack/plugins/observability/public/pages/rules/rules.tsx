@@ -173,8 +173,8 @@ export function RulesPage() {
 
       {addRuleFlyoutVisibility && (
         <AddRuleFlyout
-          consumer={ALERTS_FEATURE_ID}
-          filteredRuleTypes={filteredRuleTypes}
+          consumer={'infrastructure'}
+          filteredRuleTypes={filteredRuleTypes.concat('.es-query')}
           onClose={() => {
             setAddRuleFlyoutVisibility(false);
           }}

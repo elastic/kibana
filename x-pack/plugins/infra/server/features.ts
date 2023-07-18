@@ -28,7 +28,7 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
@@ -40,10 +40,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
         },
         alert: {
-          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
         },
       },
       management: {
@@ -61,10 +61,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
         },
         alert: {
-          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+          read: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, '.es-query'],
         },
       },
       management: {

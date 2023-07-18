@@ -183,6 +183,12 @@ export class AlertingAuthorization {
           entity,
           operation
         ),
+        featureAllowsProducer: authorization.actions.alerting.get(
+          ruleTypeId,
+          consumer,
+          entity,
+          operation
+        ),
       };
 
       // Skip authorizing consumer if consumer is the Rules Management consumer (`alerts`)
@@ -191,6 +197,7 @@ export class AlertingAuthorization {
       const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
 
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+
       const { hasAllRequested, privileges } = await checkPrivileges({
         kibana:
           shouldAuthorizeConsumer && consumer !== ruleType.producer
@@ -199,6 +206,7 @@ export class AlertingAuthorization {
                 requiredPrivilegesByScope.consumer,
                 // check for access at producer level
                 requiredPrivilegesByScope.producer,
+                requiredPrivilegesByScope.featureAllowsProducer,
               ]
             : [
                 // skip consumer privilege checks under `alerts` as all rule types can
@@ -235,15 +243,21 @@ export class AlertingAuthorization {
             ? [ScopeType.Consumer, consumer]
             : [ScopeType.Producer, ruleType.producer];
 
-        throw Boom.forbidden(
-          getUnauthorizedMessage(
-            ruleTypeId,
-            unauthorizedScopeType,
-            unauthorizedScope,
-            operation,
-            entity
-          )
-        );
+        if (
+          unauthorizedScopes.consumer === true ||
+          (unauthorizedScopes.featureAllowsProducer === true &&
+            unauthorizedScopes.producer === true)
+        ) {
+          throw Boom.forbidden(
+            getUnauthorizedMessage(
+              ruleTypeId,
+              unauthorizedScopeType,
+              unauthorizedScope,
+              operation,
+              entity
+            )
+          );
+        }
       }
     } else if (!isAvailableConsumer) {
       throw Boom.forbidden(

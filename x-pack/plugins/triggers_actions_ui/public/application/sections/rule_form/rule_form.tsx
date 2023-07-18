@@ -193,12 +193,9 @@ export const RuleForm = ({
           },
           []
         )
-        .filter((item) => item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType))
-        .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
-            ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer
-        );
+        .filter((item) => {
+          return item.ruleType && hasAllPrivilege(rule.consumer, item.ruleType);
+        });
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
