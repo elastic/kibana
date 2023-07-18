@@ -28,6 +28,13 @@ export interface DashboardItem {
 export const EXTERNAL_LINK_TYPE = 'externalLink';
 
 /**
+ * Layouts for embeddable rendering
+ */
+export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
+export const NAV_VERTICAL_LAYOUT = 'vertical';
+export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;
+
+/**
  * Navigation embeddable explicit input
  */
 export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
@@ -46,6 +53,7 @@ export interface NavigationEmbeddableLinkList {
 
 export interface NavigationEmbeddableInput extends EmbeddableInput {
   links: NavigationEmbeddableLinkList;
+  layout: NavigationLayoutType;
 }
 
 export const NavigationLinkInfo: {

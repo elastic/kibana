@@ -83,7 +83,7 @@ export class NavigationEmbeddableFactoryDefinition
       // swallow the promise rejection that happens when the flyout is closed
       return {};
     });
-
+    console.log('input', input);
     return input;
   }
 

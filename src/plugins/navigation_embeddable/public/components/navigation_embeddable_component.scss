@@ -1,0 +1,54 @@
+.navEmbeddableComponent {
+  font-weight: $euiFontWeightRegular;
+
+  .navigationLink {
+    .euiListGroupItem__button {
+      text-decoration: none !important;
+    }
+
+    &.navigationLinkCurrent {
+      border-radius: 0;
+  
+      .euiListGroupItem__text {
+        cursor: default;
+        font-weight: $euiFontWeightSemiBold;
+        color: $euiColorPrimary;
+      }
+    }
+  }
+
+
+  .verticalLayoutWrapper {
+    .navigationLink {
+      .euiListGroupItem__text {
+        line-height: 1.2rem;
+        min-block-size: 1.2rem;
+        padding-block: $euiSizeXS;
+      }
+
+      &.navigationLinkCurrent {
+        box-shadow: $euiColorPrimary 2px 0px 0px inset;
+      }
+    }
+  }
+
+  .horizontalLayoutWrapper {
+    height: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    flex-direction: row;
+
+    .navigationLink {
+      max-width: 60ch;
+
+      &.navigationLinkCurrent {
+        box-shadow: $euiColorPrimary 0px -2px 0px inset;
+
+        .euiListGroupItem__text {
+          padding-inline: 0px;
+        }
+      }
+    }
+  }
+}

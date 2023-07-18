@@ -8,17 +8,19 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
-import {
-  EXTERNAL_LINK_TYPE,
-  NavigationLinkInfo,
-  NavigationEmbeddableLink,
-} from '../../embeddable/types';
+import { EuiListGroupItem } from '@elastic/eui';
+import { NavigationEmbeddableLink } from '../../embeddable/types';
 
 export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   return (
-    <EuiButtonEmpty iconType={NavigationLinkInfo[EXTERNAL_LINK_TYPE].icon}>
-      {link.label || link.destination}
-    </EuiButtonEmpty>
+    <EuiListGroupItem
+      size="s"
+      className={'navigationLink'}
+      id={`navigationLink--${link.id}`}
+      label={link.label || link.destination}
+      onClick={() => {
+        // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
+      }}
+    />
   );
 };

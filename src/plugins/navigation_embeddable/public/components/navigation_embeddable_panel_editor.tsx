@@ -30,11 +30,13 @@ import {
   EuiFlyoutHeader,
   EuiDragDropContext,
   euiDragDropReorder,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
 import {
+  NavigationLayoutType,
   NavigationEmbeddableLink,
   NavigationEmbeddableInput,
   NavigationEmbeddableLinkList,
@@ -48,7 +50,7 @@ import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_pan
 import noLinksIllustrationDark from '../assets/empty_links_dark.svg';
 import noLinksIllustrationLight from '../assets/empty_links_light.svg';
 
-import './navigation_embeddable.scss';
+import './navigation_embeddable_editor.scss';
 
 const NavigationEmbeddablePanelEditor = ({
   onSave,
@@ -64,6 +66,9 @@ const NavigationEmbeddablePanelEditor = ({
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
+  const [currentLayout, setCurrentLayout] = useState<NavigationLayoutType>(
+    initialInput.layout ?? 'vertical'
+  );
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
 
   useEffect(() => {
@@ -131,7 +136,7 @@ const NavigationEmbeddablePanelEditor = ({
           const newLinks = orderedLinks.reduce((prev, link, i) => {
             return { ...prev, [link.id]: { ...link, order: i } };
           }, {} as NavigationEmbeddableLinkList);
-          onSave({ links: newLinks });
+          onSave({ links: newLinks, layout: currentLayout });
         }}
       >
         {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
@@ -145,7 +150,7 @@ const NavigationEmbeddablePanelEditor = ({
         {button}
       </EuiToolTip>
     );
-  }, [onSave, orderedLinks]);
+  }, [onSave, orderedLinks, currentLayout]);
 
   return (
     <>
@@ -221,6 +226,26 @@ const NavigationEmbeddablePanelEditor = ({
                 </>
               )}
             </>
+          </EuiFormRow>
+          <EuiFormRow label="Layout">
+            <EuiButtonGroup
+              legend="This is a basic group"
+              color="primary"
+              options={[
+                {
+                  id: `vertical`,
+                  label: 'Vertical',
+                },
+                {
+                  id: `horizontal`,
+                  label: 'Horizontal',
+                },
+              ]}
+              idSelected={currentLayout}
+              onChange={(id) => {
+                setCurrentLayout(id);
+              }}
+            />
           </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>

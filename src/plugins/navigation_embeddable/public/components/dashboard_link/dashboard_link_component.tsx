@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import classNames from 'classnames';
+import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import {
-  DASHBOARD_LINK_TYPE,
-  NavigationEmbeddableLink,
-  NavigationLinkInfo,
-} from '../../embeddable/types';
+import { NavigationEmbeddableLink } from '../../embeddable/types';
 import { fetchDashboard } from './dashboard_link_tools';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
@@ -38,23 +35,31 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
       }
     }, [link, parentDashboardId]);
 
+  const linkLabel = useMemo(() => {
+    return (
+      link.label ||
+      (link.destination === parentDashboardId
+        ? parentDashboardTitle
+        : destinationDashboard?.attributes.title)
+    );
+  }, [link, destinationDashboard, parentDashboardId, parentDashboardTitle]);
+
   return (
-    <EuiButtonEmpty
-      isLoading={loadingDestinationDashboard}
-      iconType={NavigationLinkInfo[DASHBOARD_LINK_TYPE].icon}
-      {...(link.destination === parentDashboardId
-        ? {
-            color: 'text',
-          }
-        : {
-            color: 'primary',
-            onClick: () => {}, // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
-          })}
-    >
-      {link.label ||
-        (link.destination === parentDashboardId
-          ? parentDashboardTitle
-          : destinationDashboard?.attributes.title)}
-    </EuiButtonEmpty>
+    <EuiListGroupItem
+      size="s"
+      className={classNames('navigationLink', {
+        navigationLinkCurrent: link.destination === parentDashboardId,
+      })}
+      id={`navigationLink--${link.id}`}
+      disabled={loadingDestinationDashboard}
+      onClick={
+        link.destination === parentDashboardId
+          ? undefined
+          : () => {
+              // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
+            }
+      }
+      label={linkLabel}
+    />
   );
 };
