@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { GET_PREBUILT_RULES_STATUS_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
-import { GetPrebuiltRulesStatusResponseBody } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
+import {
+  GET_PREBUILT_RULES_STATUS_URL,
+  GetPrebuiltRulesStatusResponseBody,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 
 /**
