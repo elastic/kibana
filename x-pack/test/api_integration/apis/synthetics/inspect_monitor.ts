@@ -134,6 +134,8 @@ export default function ({ getService }: FtrProviderContext) {
                       origin: 'project',
                       params: {
                         username: '"********"',
+                        testUpdated: '"********"',
+                        test: '"********"',
                         password: '"********"',
                       },
                       playwright_options: { headless: true, chromiumSandbox: false },
