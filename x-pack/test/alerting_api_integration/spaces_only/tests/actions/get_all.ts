@@ -353,15 +353,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             referencedByCount: 0,
           },
           {
-            actionTypeId: 'test.system-action',
-            id: 'system-connector-test.system-action',
-            isDeprecated: false,
-            isPreconfigured: false,
-            isSystemAction: true,
-            name: 'System action: test.system-action',
-            referencedByCount: 0,
-          },
-          {
             id: 'custom-system-abc-connector',
             isPreconfigured: true,
             isDeprecated: false,
