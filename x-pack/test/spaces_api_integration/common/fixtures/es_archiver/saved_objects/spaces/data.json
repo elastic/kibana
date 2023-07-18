@@ -15,8 +15,7 @@
       "typeMigrationVersion": "6.6.0",
       "managed": false,
       "references": []
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -37,8 +36,7 @@
       "typeMigrationVersion": "6.6.0",
       "managed": false,
       "references": []
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -94,26 +92,31 @@
         "description": "Copy to Space Dashboard from the default space",
         "title": "This is the default test space CTS dashboard"
       },
-      "references": [{
-        "type": "visualization",
-        "id": "cts_vis_1_default",
-        "name": "CTS Vis 1"
-      }, {
-        "type": "visualization",
-        "id": "cts_vis_2_default",
-        "name": "CTS Vis 2"
-      }, {
-        "type": "visualization",
-        "id": "cts_vis_3_default",
-        "name": "CTS Vis 3"
-      }],
+      "references": [
+        {
+          "type": "visualization",
+          "id": "cts_vis_1_default",
+          "name": "CTS Vis 1"
+        },
+        {
+          "type": "visualization",
+          "id": "cts_vis_2_default",
+          "name": "CTS Vis 2"
+        },
+        {
+          "type": "visualization",
+          "id": "cts_vis_3_default",
+          "name": "CTS Vis 3"
+        }
+      ],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "typeMigrationVersion": "8.7.0",
       "coreMigrationVersion": "8.8.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -126,7 +129,9 @@
       "visualization": {
         "title": "CTS vis 1 from default space",
         "description": "AreaChart",
-        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
@@ -140,11 +145,12 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.5.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -157,7 +163,9 @@
       "visualization": {
         "title": "CTS vis 2 from default space",
         "description": "AreaChart",
-        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
@@ -171,11 +179,12 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.5.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -189,7 +198,9 @@
       "visualization": {
         "title": "CTS vis 3 from default space",
         "description": "AreaChart",
-        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
@@ -203,11 +214,12 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.5.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -241,11 +253,12 @@
       ],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "typeMigrationVersion": "8.7.0",
       "coreMigrationVersion": "8.8.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -258,7 +271,9 @@
       "visualization": {
         "title": "CTS vis 1 from space_1 space",
         "description": "AreaChart",
-        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
@@ -272,11 +287,12 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.5.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -289,7 +305,9 @@
       "visualization": {
         "title": "CTS vis 2 from space_1 space",
         "description": "AreaChart",
-        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
@@ -303,11 +321,12 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.5.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -321,7 +340,9 @@
       "visualization": {
         "title": "CTS vis 3 from space_1 space",
         "description": "AreaChart",
-        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
         "uiStateJSON": "{}",
         "version": 1,
         "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
@@ -335,11 +356,12 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.5.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -356,11 +378,12 @@
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.0.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -377,11 +400,12 @@
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.0.0"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -395,9 +419,15 @@
         "title": "A shared saved-object in one space"
       },
       "type": "sharedtype",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "references": [
-        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+        {
+          "type": "sharedtype",
+          "id": "each_space",
+          "name": "refname"
+        }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -435,9 +465,15 @@
         "title": "A shared saved-object in one space"
       },
       "type": "sharedtype",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "references": [
-        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+        {
+          "type": "sharedtype",
+          "id": "each_space",
+          "name": "refname"
+        }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -456,7 +492,9 @@
         "title": "This object only exists to test the second assertion for spacesWithMatchingOrigins in get_shareable_references"
       },
       "type": "sharedtype",
-      "namespaces": ["other_space"],
+      "namespaces": [
+        "other_space"
+      ],
       "references": [],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -474,9 +512,15 @@
         "title": "A shared saved-object in one space"
       },
       "type": "sharedtype",
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "references": [
-        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+        {
+          "type": "sharedtype",
+          "id": "each_space",
+          "name": "refname"
+        }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -495,7 +539,9 @@
         "title": "This object only exists to test the third assertion for spacesWithMatchingOrigins in get_shareable_references"
       },
       "type": "sharedtype",
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "references": [],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -537,7 +583,9 @@
         "targetType": "sharedtype",
         "targetId": "other_id",
         "disabled": true
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -552,7 +600,10 @@
         "title": "A shared saved-object in the default and space_1 spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1"],
+      "namespaces": [
+        "default",
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -569,7 +620,10 @@
         "title": "A shared saved-object in the default and space_2 spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_2"],
+      "namespaces": [
+        "default",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -586,7 +640,10 @@
         "title": "A shared saved-object in the space_1 and space_2 spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["space_1", "space_2"],
+      "namespaces": [
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -603,12 +660,32 @@
         "title": "A shared saved-object in the default, space_1, and space_2 spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "references": [
-        { "type": "sharedtype", "id": "default_only", "name": "refname" },
-        { "type": "sharedtype", "id": "space_1_only", "name": "refname" },
-        { "type": "sharedtype", "id": "space_2_only", "name": "refname" },
-        { "type": "sharedtype", "id": "all_spaces", "name": "refname" }
+        {
+          "type": "sharedtype",
+          "id": "default_only",
+          "name": "refname"
+        },
+        {
+          "type": "sharedtype",
+          "id": "space_1_only",
+          "name": "refname"
+        },
+        {
+          "type": "sharedtype",
+          "id": "space_2_only",
+          "name": "refname"
+        },
+        {
+          "type": "sharedtype",
+          "id": "all_spaces",
+          "name": "refname"
+        }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -626,7 +703,9 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -643,7 +722,11 @@
         "title": "This is used to test that when an object is unshared from a space, inbound aliases for just those spaces are removed"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -663,7 +746,9 @@
         "targetNamespace": "default",
         "targetType": "sharedtype",
         "targetId": "alias_delete_inclusive"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -681,7 +766,9 @@
         "targetNamespace": "space_2",
         "targetType": "sharedtype",
         "targetId": "alias_delete_inclusive"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -696,7 +783,9 @@
         "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
       },
       "type": "sharedtype",
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -716,7 +805,9 @@
         "targetNamespace": "other_space",
         "targetType": "sharedtype",
         "targetId": "alias_delete_exclusive"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -732,7 +823,9 @@
         "title": "This is used to test an inexact match conflict for an originId -> originId match"
       },
       "type": "sharedtype",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -750,7 +843,9 @@
         "title": "This is used to test an inexact match conflict for an originId -> originId match"
       },
       "type": "sharedtype",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -768,7 +863,9 @@
         "title": "This is used to test an inexact match conflict for an originId -> originId match"
       },
       "type": "sharedtype",
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -786,7 +883,9 @@
         "title": "This is used to test an inexact match conflict for an originId -> id match"
       },
       "type": "sharedtype",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -804,7 +903,9 @@
         "title": "This is used to test an inexact match conflict for an originId -> id match"
       },
       "type": "sharedtype",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -821,7 +922,9 @@
         "title": "This is used to test an inexact match conflict for an originId -> id match"
       },
       "type": "sharedtype",
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -838,7 +941,10 @@
         "title": "This is used to test an inexact match conflict for an id -> originId match"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1"],
+      "namespaces": [
+        "default",
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -856,7 +962,9 @@
         "title": "This is used to test an inexact match conflict for an id -> originId match"
       },
       "type": "sharedtype",
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -874,7 +982,9 @@
         "title": "A shared saved-object in one space"
       },
       "type": "sharedtype",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -892,7 +1002,9 @@
         "title": "A shared saved-object in one space"
       },
       "type": "sharedtype",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -910,7 +1022,9 @@
         "title": "A shared saved-object in one space"
       },
       "type": "sharedtype",
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -928,9 +1042,14 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
   }
 }
+

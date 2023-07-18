@@ -1,31 +1,31 @@
 {
   "type": "doc",
   "value": {
-    "index" : ".kibana_alerting_cases",
-    "id" : "action:c95cb100-b075-11ec-bb3f-1f063f8e06cf",
-    "source" : {
-      "action" : {
-        "actionTypeId" : ".email",
-        "name" : "test",
-        "isMissingSecrets" : false,
-        "config" : {
-          "hasAuth" : true,
-          "from" : "a@a.com",
-          "host" : "gmail",
-          "port" : 56,
-          "service" : "other",
-          "secure" : null
+    "index": ".kibana_alerting_cases",
+    "id": "action:c95cb100-b075-11ec-bb3f-1f063f8e06cf",
+    "source": {
+      "action": {
+        "actionTypeId": ".email",
+        "name": "test",
+        "isMissingSecrets": false,
+        "config": {
+          "hasAuth": true,
+          "from": "a@a.com",
+          "host": "gmail",
+          "port": 56,
+          "service": "other",
+          "secure": null
         },
-        "secrets" : "jCv0fZczCM+rlWXIkI6Qo/ZqasgxPhplokCaNeXJrJlJYjKeCgbZgiLAEue4bpq4GUDohfye8o1BlJCQi+3HJPb2Qp6lhbcvXn+C6wUzxj9ZitwY8ZTDo34e22TX7qHFs/1mVfO4stjZ6X86ufRZttjTNu4qjchfi3Jao7nWbw=="
+        "secrets": "jCv0fZczCM+rlWXIkI6Qo/ZqasgxPhplokCaNeXJrJlJYjKeCgbZgiLAEue4bpq4GUDohfye8o1BlJCQi+3HJPb2Qp6lhbcvXn+C6wUzxj9ZitwY8ZTDo34e22TX7qHFs/1mVfO4stjZ6X86ufRZttjTNu4qjchfi3Jao7nWbw=="
       },
-      "type" : "action",
-      "references" : [ ],
-      "namespaces" : [
+      "type": "action",
+      "references": [],
+      "namespaces": [
         "default"
       ],
       "typeMigrationVersion": "8.0.0",
-      "coreMigrationVersion" : "8.1.2",
-      "updated_at" : "2022-03-30T22:07:27.777Z"
+      "coreMigrationVersion": "8.1.2",
+      "updated_at": "2022-03-30T22:07:27.777Z"
     }
   }
 }
@@ -1040,3 +1040,4 @@
     }
   }
 }
+
