@@ -17,6 +17,7 @@ import {
   waitForRuleSuccess,
   getRuleForSignalTesting,
   countDownTest,
+  waitFor,
 } from '../../../utils';
 
 export const sanitizeScores = (scores: Array<Partial<RiskScore>>): Array<Partial<RiskScore>> =>
@@ -100,6 +101,31 @@ export const deleteAllRiskScores = async (
       };
     },
     'deleteAllRiskScores',
+    log
+  );
+};
+
+export const readRiskScores = async (
+  es: Client,
+  index: string[] = ['risk-score.risk-score-default']
+): Promise<RiskScore[]> => {
+  const results = await es.search({
+    index: 'risk-score.risk-score-default',
+  });
+  return results.hits.hits.map((hit) => hit._source as RiskScore);
+};
+
+export const waitForRiskScoresToBePresent = async (
+  es: Client,
+  log: ToolingLog,
+  index: string[] = ['risk-score.risk-score-default']
+): Promise<void> => {
+  await waitFor(
+    async () => {
+      const riskScores = await readRiskScores(es, index);
+      return riskScores.length > 0;
+    },
+    'waitForRiskScoresToBePresent',
     log
   );
 };

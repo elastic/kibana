@@ -16,7 +16,9 @@ import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
+  readRiskScores,
   sanitizeScores,
+  waitForRiskScoresToBePresent,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -59,13 +61,6 @@ export default ({ getService }: FtrProviderContext): void => {
         debug: true,
       },
     });
-  };
-
-  const readRiskScores = async (): Promise<RiskScore[]> => {
-    const results = await es.search({
-      index: 'risk-score.risk-score-default',
-    });
-    return results.hits.hits.map((hit) => hit._source as RiskScore);
   };
 
   describe('Risk Engine Scoring - Calculation', () => {
@@ -112,7 +107,8 @@ export default ({ getService }: FtrProviderContext): void => {
           scores_written: 1,
         });
 
-        const scores = await readRiskScores();
+        await waitForRiskScoresToBePresent(es, log);
+        const scores = await readRiskScores(es);
 
         expect(scores.length).to.eql(1);
         expect(sanitizeScores(scores)).to.eql([
