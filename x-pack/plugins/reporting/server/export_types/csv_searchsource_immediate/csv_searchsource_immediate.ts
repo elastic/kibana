@@ -97,15 +97,13 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
   ) => {
     const job = await this.createJob(immediateJobParams);
 
-    const dataPluginStart = await this.startDeps.data;
+    const dataPluginStart = this.startDeps.data;
     const savedObjectsClient = (await context.core).savedObjects.client;
     const uiSettings = this.getUiSettingsServiceFactory(savedObjectsClient);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
-    const [es, searchSourceStart] = await Promise.all([
-      (await this.startDeps.esClient).asScoped(req),
-      await dataPluginStart.search.searchSource.asScoped(req),
-    ]);
+    const es = this.startDeps.esClient.asScoped(req);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(req);
     const clients = {
       uiSettings,
       data: dataPluginStart.search.asScoped(req),
