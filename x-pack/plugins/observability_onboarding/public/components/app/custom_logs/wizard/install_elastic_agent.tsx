@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -382,6 +383,22 @@ export function InstallElasticAgent() {
                     }
                   />
                   <EuiSpacer size="l" />
+                  {wizardState.autoDownloadConfig && (
+                    <>
+                      <EuiCallOut
+                        title={i18n.translate(
+                          'xpack.observability_onboarding.installElasticAgent.installStep.autoDownloadConfig.overwriteWarning',
+                          {
+                            defaultMessage:
+                              'Automatically downloading the agent config will overwrite any existing agent config on your host.',
+                          }
+                        )}
+                        color="warning"
+                        iconType="warning"
+                      />
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
                   <EuiButtonGroup
                     isFullWidth
                     legend={i18n.translate(
