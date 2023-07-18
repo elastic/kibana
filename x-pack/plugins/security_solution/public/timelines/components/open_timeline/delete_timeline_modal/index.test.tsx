@@ -10,7 +10,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { DeleteTimelineModalOverlay } from '.';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
