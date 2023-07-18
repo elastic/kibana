@@ -16,10 +16,9 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import { EuiHorizontalRule, EuiToolTipProps } from '@elastic/eui';
 import { SerializedStyles } from '@emotion/react';
 import classNames from 'classnames';
+import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -30,11 +29,12 @@ import { UI_SETTINGS } from '../../common';
 import { useDashboardAPI } from '../dashboard_app/dashboard_app';
 import { pluginServices } from '../services/plugin_services';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
+import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
+import { DashboardRedirect } from '../dashboard_container/types';
 
 export interface InternalDashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
@@ -152,10 +152,23 @@ export function InternalDashboardTopNav({
         },
       },
       {
-        text: dashboardTitle,
+        text:
+          viewMode === ViewMode.EDIT ? (
+            <>
+              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+            </>
+          ) : (
+            dashboardTitle
+          ),
+        onClick:
+          viewMode === ViewMode.EDIT
+            ? () => {
+                dashboard.showSettings();
+              }
+            : undefined,
       },
     ]);
-  }, [setBreadcrumbs, redirectTo, dashboardTitle]);
+  }, [setBreadcrumbs, redirectTo, dashboardTitle, dashboard, viewMode]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes

@@ -10,12 +10,12 @@ import { buildRouteValidation } from '../../../../../../utils/build_validation/r
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
-import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GET_RULE_EXECUTION_RESULTS_URL,
   GetRuleExecutionResultsRequestParams,
   GetRuleExecutionResultsRequestQuery,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Returns execution results of a given rule (aggregated by execution UUID) from Event Log.

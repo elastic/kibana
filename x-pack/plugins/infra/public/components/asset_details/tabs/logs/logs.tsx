@@ -11,15 +11,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '../../../../../common/log_views';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
+import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { LogStream } from '../../../log_stream';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 
 export interface LogsProps {
-  currentTime: number;
+  currentTimestamp: number;
   logViewReference?: LogViewReference | null;
   logViewLoading?: boolean;
   nodeName: string;
@@ -32,7 +32,7 @@ const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = ({
   nodeName,
-  currentTime,
+  currentTimestamp,
   nodeType,
   logViewReference,
   search,
@@ -43,7 +43,7 @@ export const Logs = ({
   const { locators } = services;
   const [textQuery, setTextQuery] = useState(search ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(search ?? '');
-  const startTimestamp = currentTime - 60 * 60 * 1000; // 60 minutes
+  const startTimestamp = currentTimestamp - 60 * 60 * 1000; // 60 minutes
 
   useDebounce(
     () => {
@@ -137,7 +137,7 @@ export const Logs = ({
           <LogStream
             logView={logView}
             startTimestamp={startTimestamp}
-            endTimestamp={currentTime}
+            endTimestamp={currentTimestamp}
             query={filter}
             height="60vh"
             showFlyoutAction

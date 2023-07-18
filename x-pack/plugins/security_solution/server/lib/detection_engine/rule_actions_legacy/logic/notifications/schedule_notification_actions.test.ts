@@ -7,7 +7,7 @@
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { DetectionAlert } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { DetectionAlert } from '../../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_THRESHOLD_RESULT_COUNT } from '../../../../../../common/field_maps/field_names';
 import { sampleThresholdAlert } from '../../../rule_types/__mocks__/threshold';
 import type { NotificationRuleTypeParams } from './schedule_notification_actions';

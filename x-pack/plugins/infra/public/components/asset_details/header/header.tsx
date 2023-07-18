@@ -20,41 +20,27 @@ import { css } from '@emotion/react';
 import { AssetDetailsProps, FlyoutTabIds, LinkOptions, Tab, TabIds } from '../types';
 import {
   LinkToApmServices,
-  LinkToUptime,
   LinkToAlertsRule,
   LinkToNodeDetails,
   TabToApmTraces,
   TabToUptime,
 } from '../links';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
+import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
+import { toTimestampRange } from '../utils';
 
-type Props = Pick<
-  AssetDetailsProps,
-  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs' | 'onTabsStateChange'
-> & {
+type Props = Pick<AssetDetailsProps, 'links' | 'tabs'> & {
   compact: boolean;
 };
 
 const APM_FIELD = 'host.hostname';
 
-export const Header = ({
-  nodeType = 'host',
-  node,
-  tabs = [],
-  links = [],
-  compact,
-  currentTimeRange,
-  overrides,
-  onTabsStateChange,
-}: Props) => {
+export const Header = ({ tabs = [], links = [], compact }: Props) => {
+  const { node, nodeType, overrides, dateRange: timeRange } = useAssetDetailsStateContext();
   const { euiTheme } = useEuiTheme();
   const { showTab, activeTabId } = useTabSwitcherContext();
 
   const onTabClick = (tabId: TabIds) => {
-    if (onTabsStateChange) {
-      onTabsStateChange({ activeTabId: tabId });
-    }
-
     showTab(tabId);
   };
 
@@ -69,11 +55,14 @@ export const Header = ({
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = {
     nodeDetails: (
-      <LinkToNodeDetails nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
+      <LinkToNodeDetails
+        nodeName={node.name}
+        nodeType={nodeType}
+        currentTimestamp={toTimestampRange(timeRange).to}
+      />
     ),
     alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
     apmServices: <LinkToApmServices nodeName={node.name} apmField={APM_FIELD} />,
-    uptime: <LinkToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} />,
   };
 
   const tabEntries = tabs.map(({ name, ...tab }) => {

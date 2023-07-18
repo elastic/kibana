@@ -252,6 +252,7 @@ describe('ConnectorsDropdown', () => {
               config: {},
               isPreconfigured: false,
               isDeprecated: false,
+              isSystemAction: false,
             },
           ]}
         />,

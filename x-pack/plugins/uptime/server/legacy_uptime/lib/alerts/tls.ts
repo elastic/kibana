@@ -155,6 +155,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     spaceId,
     startedAt,
     state,
+    rule,
   }) {
     const { share, basePath } = _server;
     const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
@@ -163,7 +164,10 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-      scopedClusterClient.asCurrentUser
+      scopedClusterClient.asCurrentUser,
+      {
+        isLegacyAlert: true,
+      }
     );
 
     const certExpirationThreshold =

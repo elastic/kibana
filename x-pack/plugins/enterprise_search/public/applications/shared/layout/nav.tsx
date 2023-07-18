@@ -150,7 +150,7 @@ export const useEnterpriseSearchNav = () => {
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
       ? [
           {
-            id: 'standaloneExperiences',
+            id: 'enterpriseSearch',
             items: [
               ...(productAccess.hasAppSearchAccess
                 ? [
@@ -181,8 +181,8 @@ export const useEnterpriseSearchNav = () => {
                   ]
                 : []),
             ],
-            name: i18n.translate('xpack.enterpriseSearch.nav.standaloneExperiencesTitle', {
-              defaultMessage: 'Standalone Experiences',
+            name: i18n.translate('xpack.enterpriseSearch.nav.title', {
+              defaultMessage: 'Enterprise Search',
             }),
           },
         ]
