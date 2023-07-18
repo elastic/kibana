@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { PERFORM_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
-import { RuleVersionSpecifier } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
-import { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
+import {
+  PERFORM_RULE_INSTALLATION_URL,
+  RuleVersionSpecifier,
+  PerformRuleInstallationResponseBody,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 
 /**
