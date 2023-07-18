@@ -26,8 +26,8 @@ interface State {
 
 const convertToEui = (toast: Toast): EuiToast => ({
   ...toast,
-  title: typeof toast.title === 'function' ? <MountWrapper mount={toast.title} /> : toast.title,
-  text: typeof toast.text === 'function' ? <MountWrapper mount={toast.text} /> : toast.text,
+  title: toast.title instanceof Function ? <MountWrapper mount={toast.title} /> : toast.title,
+  text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
 });
 
 export class GlobalToastList extends React.Component<Props, State> {
@@ -58,7 +58,10 @@ export class GlobalToastList extends React.Component<Props, State> {
         data-test-subj="globalToastList"
         toasts={this.state.toasts.map(convertToEui)}
         dismissToast={({ id }) => {
-          this.props.dismissToast(id);
+          const toastIsDisplayed = this.state.toasts.some((e) => e.id === id);
+          if (toastIsDisplayed) {
+            this.props.dismissToast(id);
+          }
         }}
         /**
          * This prop is overridden by the individual toasts that are added.

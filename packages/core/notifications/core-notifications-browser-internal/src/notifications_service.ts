@@ -43,13 +43,6 @@ export class NotificationsService {
 
     notificationSetup.toasts.addInfo({ title: 'Title one', text: 'Hello!' });
 
-    setInterval(() => {
-      notificationSetup.toasts.addInfo({
-        title: 'Hello!',
-        text: Math.random() > 0.5 ? 'Bonjour' : 'Gute morgen',
-      });
-    }, 1000);
-
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {

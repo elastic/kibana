@@ -7,9 +7,10 @@
  */
 
 import { Toast } from '@kbn/core-notifications-browser';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
+
+const TOAST_TIMEOUT_LONG = 6e6;
 
 /**
  * Collects toast messages to groups based on the `getKeyOf` function,
@@ -78,10 +79,9 @@ function mergeToasts(toasts: Toast[], closeAll: () => void) {
     ...firstElement,
     id: key,
     text: firstElement.text,
-    toastLifeTimeMs: 50000,
+    toastLifeTimeMs: TOAST_TIMEOUT_LONG,
     onClose: closeAll,
-    // TODO: this causes an error, because the unmount is not called on a react root
-    title: mountReactNode(
+    title: (
       <>
         {firstElement.title}{' '}
         <EuiNotificationBadge color="subdued" className="eui-alignTop">
