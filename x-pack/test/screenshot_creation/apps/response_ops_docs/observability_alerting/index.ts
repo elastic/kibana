@@ -13,17 +13,26 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const actions = getService('actions');
   const rules = getService('rules');
+  const emailConnectorName = 'Email connector 1';
 
   describe('observability alerting', function () {
     let mtRuleId: string;
-    let serverLogConnectorId: string;
+    let emailConnectorId: string;
     before(async () => {
       await browser.setWindowSize(1920, 1080);
-      ({ id: serverLogConnectorId } = await actions.api.createConnector({
-        name: 'my-server-log-connector',
-        config: {},
-        secrets: {},
-        connectorTypeId: '.server-log',
+      ({ id: emailConnectorId } = await actions.api.createConnector({
+        name: emailConnectorName,
+        config: {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'some.non.existent.com',
+          port: 25,
+        },
+        secrets: {
+          user: 'bob',
+          password: 'supersecret',
+        },
+        connectorTypeId: '.email',
       }));
       ({ id: mtRuleId } = await rules.api.createRule({
         consumer: 'infrastructure',
@@ -50,10 +59,10 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         actions: [
           {
             group: 'metrics.threshold.fired',
-            id: serverLogConnectorId,
+            id: emailConnectorId,
             params: {
               level: 'info',
-              message: 'Test Metric Threshold rule',
+              message: '{{rule.name}} - {{context.group}} is in a state of {{context.alertState}}',
             },
           },
         ],
@@ -63,10 +72,11 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     after(async () => {
       await rules.api.deleteRule(mtRuleId);
       await rules.api.deleteAllRules();
-      await actions.api.deleteConnector(serverLogConnectorId);
+      await actions.api.deleteConnector(emailConnectorId);
       await actions.api.deleteAllConnectors();
     });
 
     loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./metric_threshold_rule'));
   });
 }
