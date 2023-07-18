@@ -85,6 +85,10 @@ async function throwIfMaxUserActionsReached({
   userActionsDict: UserActionsDict;
   userActionService: CaseUserActionService;
 }) {
+  if (userActionsDict == null) {
+    return;
+  }
+
   const result = await userActionService.getMultipleCasesUserActionsTotal({
     caseIds: Object.keys(userActionsDict),
   });
@@ -453,9 +457,12 @@ export const update = async (
       return flattenCases;
     }, [] as Case[]);
 
-    const builtUserActions = Object.keys(userActionsDict).reduce<UserActionEvent[]>((acc, key) => {
-      return [...acc, ...userActionsDict[key]];
-    }, []);
+    const builtUserActions =
+      userActionsDict != null
+        ? Object.keys(userActionsDict).reduce<UserActionEvent[]>((acc, key) => {
+            return [...acc, ...userActionsDict[key]];
+          }, [])
+        : [];
 
     await userActionService.creator.bulkCreateUpdateCase({
       builtUserActions,

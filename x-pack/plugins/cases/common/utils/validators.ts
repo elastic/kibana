@@ -32,7 +32,7 @@ export const validateMaxUserActions = async ({
     caseIds: [caseId],
   });
 
-  result.aggregations?.references.caseUserActions.buckets.forEach(
+  result?.aggregations?.references.caseUserActions.buckets.forEach(
     ({ key, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
       if (key === caseId && totalUserActions + userActionsToAdd > MAX_USER_ACTIONS_PER_CASE) {
         throw Boom.badRequest(
