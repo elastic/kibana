@@ -8,23 +8,20 @@
 
 import { AppDeepLink, AppUpdater } from '@kbn/core/public';
 import { map, Observable, BehaviorSubject } from 'rxjs';
-import type { DiscoverCustomize, DiscoverProfile, DiscoverProfileId } from './types';
-
-interface SubscriptionDeps {
-  deepLinks: AppDeepLink[];
-  appStateUpdater: BehaviorSubject<AppUpdater>;
-}
+import type { RegisterCustomizationProfile, DiscoverProfile, DiscoverProfileId } from './types';
 
 export interface DiscoverProfileRegistry {
   get(id: DiscoverProfileId): DiscoverProfile | undefined;
   set(profile: DiscoverProfile): void;
-  getDeepLinks$: (initialDeepLinks: AppDeepLink[]) => Observable<AppDeepLink[]>;
-  subscribe: (deps: SubscriptionDeps) => () => void;
+  getDeepLinks$: () => Observable<AppDeepLink[]>;
+  subscribe: (appUpdater: BehaviorSubject<AppUpdater>) => () => void;
+  unsubscribe: () => void;
 }
 
 export const createProfileRegistry = (): DiscoverProfileRegistry => {
   const profiles = new Map<string, DiscoverProfile>([['default', createProfile('default')]]);
   const profiles$ = new BehaviorSubject<DiscoverProfile[]>([...profiles.values()]);
+  let unsubscribe = () => {};
 
   return {
     get: (id) => profiles.get(id.toLowerCase()),
@@ -32,30 +29,33 @@ export const createProfileRegistry = (): DiscoverProfileRegistry => {
       profiles.set(profile.id.toLowerCase(), profile);
       profiles$.next([...profiles.values()]);
     },
-    getDeepLinks$(initialDeepLinks: AppDeepLink[] = []) {
+    getDeepLinks$() {
       return profiles$.pipe(
         map((profilesList) => {
           const mergedDeepLinks = profilesList.flatMap((profile) => profile.deepLinks ?? []);
-          return getUniqueDeepLinks([...initialDeepLinks, ...mergedDeepLinks]);
+          return getUniqueDeepLinks(mergedDeepLinks);
         })
       );
     },
-    subscribe({ deepLinks, appStateUpdater }) {
-      const unsubscribeDeepLinks = this.getDeepLinks$(deepLinks).subscribe(
-        (customizationsDeepLinks) => {
-          appStateUpdater.next(() => ({ deepLinks: customizationsDeepLinks }));
-        }
-      );
+    subscribe(appUpdater) {
+      const unsubscribeDeepLinks = this.getDeepLinks$().subscribe((customizationsDeepLinks) => {
+        appUpdater.next(({ deepLinks }) => ({
+          deepLinks: getUniqueDeepLinks([...(deepLinks ?? []), ...customizationsDeepLinks]),
+        }));
+      });
 
-      return () => {
+      unsubscribe = () => {
         unsubscribeDeepLinks.unsubscribe();
       };
+
+      return unsubscribe;
     },
+    unsubscribe,
   };
 };
 
 export const createCustomizeFunction =
-  (profileRegistry: DiscoverProfileRegistry): DiscoverCustomize =>
+  (profileRegistry: DiscoverProfileRegistry): RegisterCustomizationProfile =>
   (id, options) => {
     const profile = profileRegistry.get(id) ?? createProfile(id);
 

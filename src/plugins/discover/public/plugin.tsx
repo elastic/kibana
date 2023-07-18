@@ -306,12 +306,7 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
-    /**
-     * At the current stage Discover doesn't have any deep link,
-     * this act as the static deep link list that we'll be used as initial values for
-     * updates coming from the profileRegistry.
-     */
-    const deepLinks: AppDeepLink[] = [];
+    this.profileRegistry.subscribe(this.appStateUpdater);
 
     core.application.register({
       id: PLUGIN_ID,
@@ -327,11 +322,6 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
-
-        const unsubscribeProfileRegistry = this.profileRegistry.subscribe({
-          deepLinks,
-          appStateUpdater: this.appStateUpdater,
-        });
 
         // dispatch synthetic hash change event to update hash history objects
         // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
@@ -368,7 +358,6 @@ export class DiscoverPlugin
           isDev,
         });
         return () => {
-          unsubscribeProfileRegistry();
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -435,6 +424,7 @@ export class DiscoverPlugin
   }
 
   stop() {
+    this.profileRegistry.unsubscribe();
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
