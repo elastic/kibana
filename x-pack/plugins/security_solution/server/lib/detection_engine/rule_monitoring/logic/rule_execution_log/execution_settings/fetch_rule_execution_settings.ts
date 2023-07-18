@@ -14,8 +14,8 @@ import {
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
 } from '../../../../../../../common/constants';
-import type { RuleExecutionSettings } from '../../../../../../../common/detection_engine/rule_monitoring';
-import { LogLevelSetting } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionSettings } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { LogLevelSetting } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 export const fetchRuleExecutionSettings = async (
   config: ConfigType,
