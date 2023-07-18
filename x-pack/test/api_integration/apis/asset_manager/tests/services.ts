@@ -15,7 +15,7 @@ const SERVICES_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/services`;
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const synthtrace = getService('synthtraceEsClient');
+  const synthtrace = getService('apmSynthtraceEsClient');
 
   describe('asset management', () => {
     beforeEach(async () => {

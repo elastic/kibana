@@ -7,7 +7,7 @@
 
 import { Asset } from '../../../../common/types_api';
 import { GetServicesOptionsInjected } from '.';
-import { collectServices } from '../../implicit_collection/collectors/services';
+import { collectServices } from '../../collectors/services';
 
 export async function getServicesBySignals(
   options: GetServicesOptionsInjected
