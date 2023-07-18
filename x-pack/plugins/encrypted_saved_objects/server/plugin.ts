@@ -138,11 +138,7 @@ export class EncryptedSavedObjectsPlugin
 
   public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
-
-    this.esoService.initializeVersionedMetadata(savedObjects).catch((err) => {
-      this.logger.fatal(`Failed to ....: ${err.message ?? err}`);
-    });
-
+    this.esoService.initializeVersionedMetadata(savedObjects);
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),

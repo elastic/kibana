@@ -14,6 +14,7 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
@@ -157,6 +158,11 @@ export function descriptorToArray(descriptor: SavedObjectDescriptor) {
  */
 export class EncryptedSavedObjectsService {
   // Embedding excluded AAD fields POC rev2
+  // We need a way to hold off writing versioned ESOs until
+  // the defintions have been creates in ES.
+  private versionedMetadataInitialized: Promise<void | SavedObjectsBulkResponse> | undefined;
+
+  // Embedding excluded AAD fields POC rev2
   // We need an internal repo to write and read the versioned ESO descriptors
   private internalSoRepository?: ISavedObjectsRepository;
 
@@ -254,7 +260,7 @@ export class EncryptedSavedObjectsService {
   // Initializes versioned type storage/caching
   // Creates an internal SO repository to write/read the hidden encrpytion
   // descriptors which contain per-version encrypted fields and AAD metadata
-  public async initializeVersionedMetadata(savedObjects: SavedObjectsServiceStart) {
+  public initializeVersionedMetadata(savedObjects: SavedObjectsServiceStart) {
     this.internalSoRepository = savedObjects.createInternalRepository([
       VERSIONED_ENCYRPTION_DEFINITION_TYPE,
     ]);
@@ -278,13 +284,16 @@ export class EncryptedSavedObjectsService {
         : [];
     });
 
-    // What is the risk of not awaiting this call?
-    // Where could we call this function where we can await it?
-    // This function (initializeVersionedMetadata) is being called from ESO plugin start.
-    await this.internalSoRepository.bulkCreate(versionedEsoMetadata, {
-      overwrite: true,
-      managed: true,
-    });
+    this.versionedMetadataInitialized = this.internalSoRepository
+      .bulkCreate(versionedEsoMetadata, {
+        overwrite: true,
+        managed: true,
+      })
+      .catch((err) => {
+        this.options.logger.fatal(
+          `Failed to create versioned encryption descriptors: ${err.message ?? err}`
+        );
+      });
   }
 
   /**
@@ -493,6 +502,10 @@ export class EncryptedSavedObjectsService {
     attributes: T,
     params?: CommonParameters
   ): Promise<T> {
+    // Embedding excluded AAD fields POC v2
+    // Wait for our versioned ESO defintions to have been created before we use them
+    await this.versionedMetadataInitialized;
+
     // Embedding excluded AAD fields POC v2
     // Determine if there is a model version, and pass it into the iterator
     // const esoDef = this.typeDefinitions.get(descriptor.type);
