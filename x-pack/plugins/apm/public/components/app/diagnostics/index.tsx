@@ -112,7 +112,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
         title={
           <h2>
-            {i18n.translate('xpack.apm.serviceMetrics.loading', {
+            {i18n.translate('xpack.apm.diagnostics.loading', {
               defaultMessage: 'Loading diagnostics',
             })}
           </h2>
