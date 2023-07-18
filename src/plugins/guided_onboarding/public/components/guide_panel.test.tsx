@@ -31,14 +31,11 @@ import {
   mockPluginStateInProgress,
 } from '../services/api.mocks';
 import { GuidePanel } from './guide_panel';
-import { IUiSettingsClient } from '@kbn/core/public';
+import {BehaviorSubject} from "rxjs";
+import {CoreTheme} from "@kbn/core/public";
 
 const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
-
-const uiSettingsMock = {
-  get: jest.fn(),
-} as unknown as IUiSettingsClient;
 
 const mockGetResponse = (path: string, pluginState: PluginState) => {
   if (path === `${API_BASE_PATH}/configs/${testGuideId}`) {
@@ -60,13 +57,14 @@ const setupComponentWithPluginStateMock = async (
 };
 
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
+  const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
   let testBed: TestBed;
   const GuidePanelComponent = () => (
     <GuidePanel
       application={applicationMock}
       api={api}
       notifications={notificationsMock}
-      uiSettings={uiSettingsMock}
+      theme$={coreTheme$}
     />
   );
   await act(async () => {
