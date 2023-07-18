@@ -77,7 +77,8 @@ export const cli = () => {
     async () => {
       const { argv } = yargs(process.argv.slice(2));
 
-      const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
+      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
+      const cypressConfigFile = await import(cypressConfigFilePath);
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
@@ -356,7 +357,7 @@ export const cli = () => {
 
             if (isOpen) {
               await cypress.open({
-                configFile: require.resolve(`../../${argv.configFile}`),
+                configFile: cypressConfigFilePath,
                 config: {
                   e2e: {
                     baseUrl: `http://localhost:${kibanaPort}`,
@@ -369,7 +370,7 @@ export const cli = () => {
                 result = await cypress.run({
                   browser: 'chrome',
                   spec: filePath,
-                  configFile: argv.configFile as string,
+                  configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
                   reporterOptions: argv.reporterOptions,
                   config: {
