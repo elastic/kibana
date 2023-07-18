@@ -45,9 +45,6 @@ const parametrizedComponentFactories = {
   type: function (name, parent) {
     return new TypeAutocompleteComponent(name, parent, false);
   },
-  types: function (name, parent) {
-    return new TypeAutocompleteComponent(name, parent, true);
-  },
   id: function (name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
