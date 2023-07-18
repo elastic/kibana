@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: ['synthetics-param'] });
       await testPrivateLocations.installSyntheticsPackage();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
