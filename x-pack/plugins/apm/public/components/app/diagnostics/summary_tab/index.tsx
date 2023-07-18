@@ -25,9 +25,10 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export function DiagnosticsSummary() {
   const { diagnosticsBundle } = useDiagnosticsContext();
   const isCrossCluster = getIsCrossCluster(diagnosticsBundle);
-  const hasLimitedPrivileges = getHasLimitedPrivileges(diagnosticsBundle);
+  const hasAllPrivileges =
+    diagnosticsBundle?.diagnosticsPrivileges.hasAllPrivileges ?? true;
 
-  if (isCrossCluster || hasLimitedPrivileges) {
+  if (isCrossCluster || !hasAllPrivileges) {
     return (
       <>
         {isCrossCluster && (
@@ -36,7 +37,7 @@ export function DiagnosticsSummary() {
             <EuiSpacer />
           </>
         )}
-        {diagnosticsBundle && hasLimitedPrivileges && (
+        {diagnosticsBundle && !hasAllPrivileges && (
           <PrivilegesCallout diagnosticsBundle={diagnosticsBundle} />
         )}
       </>
@@ -115,24 +116,5 @@ function PrivilegesCallout({
 export function getIsCrossCluster(diagnosticsBundle?: DiagnosticsBundle) {
   return Object.values(diagnosticsBundle?.apmIndices ?? {}).some((indicies) =>
     indicies.includes(':')
-  );
-}
-
-function getHasLimitedPrivileges(diagnosticsBundle?: DiagnosticsBundle) {
-  return (
-    diagnosticsBundle &&
-    diagnosticsBundle.diagnosticsPrivileges.hasAllPrivileges === false
-  );
-}
-
-export function getHasAllClusterPrivileges(
-  diagnosticsBundle?: DiagnosticsBundle
-) {
-  if (!diagnosticsBundle) {
-    return true;
-  }
-
-  return Object.values(diagnosticsBundle.diagnosticsPrivileges.cluster).every(
-    (v) => v
   );
 }

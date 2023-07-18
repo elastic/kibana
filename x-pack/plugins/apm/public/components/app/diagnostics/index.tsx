@@ -19,11 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import {
-  DiagnosticsSummary,
-  getHasAllClusterPrivileges,
-  getIsCrossCluster,
-} from './summary_tab';
+import { DiagnosticsSummary, getIsCrossCluster } from './summary_tab';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { DiagnosticsIndexTemplates } from './index_templates_tab';
 import { DiagnosticsIndices } from './indices_tab';
@@ -121,6 +117,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
     );
   }
 
+  const hasAllClusterPrivileges =
+    diagnosticsBundle?.diagnosticsPrivileges.hasAllClusterPrivileges ?? true;
+
   const tabs = [
     {
       'data-test-subj': 'summary-tab',
@@ -143,8 +142,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         }
       ),
       isSelected: routePath === '/diagnostics/index-pattern-settings',
-      isHidden:
-        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
+      isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
       'data-test-subj': 'index-templates-tab',
@@ -156,8 +154,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         defaultMessage: 'Index templates',
       }),
       isSelected: routePath === '/diagnostics/index-templates',
-      isHidden:
-        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
+      isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
       'data-test-subj': 'data-streams-tab',
@@ -169,8 +166,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         defaultMessage: 'Data streams',
       }),
       isSelected: routePath === '/diagnostics/data-streams',
-      isHidden:
-        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
+      isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
       'data-test-subj': 'indices-tab',
@@ -182,8 +178,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         defaultMessage: 'Indices',
       }),
       isSelected: routePath === '/diagnostics/indices',
-      isHidden:
-        isCrossCluster || !getHasAllClusterPrivileges(diagnosticsBundle),
+      isHidden: isCrossCluster || !hasAllClusterPrivileges,
     },
     {
       'data-test-subj': 'documents-tab',

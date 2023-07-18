@@ -60,6 +60,8 @@ const getDiagnosticsRoute = createApmServerRoute({
     diagnosticsPrivileges: {
       index: Record<string, SecurityHasPrivilegesPrivileges>;
       cluster: Record<string, boolean>;
+      hasAllClusterPrivileges: boolean;
+      hasAllIndexPrivileges: boolean;
       hasAllPrivileges: boolean;
     };
     apmIndices: ApmIndicesConfig;
