@@ -803,7 +803,6 @@ const updateExistingDataStream = async ({
     await rolloverDataStream(dataStreamName, esClient);
   }
 
-  console.log(lifecycle);
   if (lifecycle?.data_retention) {
     try {
       logger.debug(`Updating lifecycle for ${dataStreamName}`);
