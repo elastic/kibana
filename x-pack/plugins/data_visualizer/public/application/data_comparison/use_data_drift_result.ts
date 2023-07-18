@@ -476,6 +476,16 @@ const isRejected = <T>(input: PromiseSettledResult<Awaited<T>>): input is Promis
 type EsRequestParams = NonNullable<
   IKibanaSearchRequest<NonNullable<estypes.SearchRequest>>['params']
 >;
+
+interface ReturnedError {
+  error?: string;
+  errorBody?: string;
+}
+
+function isReturnedError(arg: unknown): arg is ReturnedError {
+  return isPopulatedObject(arg, ['error']);
+}
+
 /**
  * Help split one big request into multiple requests (with max of 30 fields/request)
  * to avoid too big of a data payload
@@ -496,7 +506,7 @@ export const fetchInParallelChunks = async <
   randomSamplerWrapper: RandomSamplerWrapper;
   asyncFetchFn: (chunkedFields: DataComparisonField[]) => Promise<ReturnedRespFromFetchFn>;
   errorMsg?: string;
-}) => {
+}): Promise<ReturnedRespFromFetchFn | ReturnedError> => {
   const { unwrap } = randomSamplerWrapper;
   const results = await Promise.allSettled(
     chunk(fields, 30).map((chunkedFields: DataComparisonField[]) => asyncFetchFn(chunkedFields))
@@ -512,9 +522,7 @@ export const fetchInParallelChunks = async <
       // eslint-disable-next-line no-console
       console.error(error);
       return {
-        data: undefined,
-        status: FETCH_STATUS.FAILURE,
-        error: errorMsg,
+        error: errorMsg ?? 'An error occurred fetching data comparison data',
         errorBody: error.reason.message,
       };
     }
@@ -629,6 +637,7 @@ export const useFetchDataComparisonResult = (
           const baselineResponseAggs = await fetchInParallelChunks({
             fields,
             randomSamplerWrapper,
+
             asyncFetchFn: (chunkedFields) =>
               fetchReferenceBaselineData({
                 dataSearch,
@@ -638,6 +647,16 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+
+          if (isReturnedError(baselineResponseAggs)) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: baselineResponseAggs.error,
+              errorBody: baselineResponseAggs.errorBody,
+            });
+            return;
+          }
 
           setProgressMessage(
             i18n.translate('xpack.dataVisualizer.dataComparison.progress.loadedReference', {
@@ -671,6 +690,7 @@ export const useFetchDataComparisonResult = (
           const driftedRespAggs = await fetchInParallelChunks({
             fields,
             randomSamplerWrapper,
+
             asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
               fetchComparisonDriftedData({
                 dataSearch,
@@ -681,6 +701,15 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+          if (isReturnedError(driftedRespAggs)) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: driftedRespAggs.error,
+              errorBody: driftedRespAggs.errorBody,
+            });
+            return;
+          }
 
           setLoaded(0.5);
           setProgressMessage(
@@ -701,6 +730,7 @@ export const useFetchDataComparisonResult = (
           const referenceHistogramRespAggs = await fetchInParallelChunks({
             fields,
             randomSamplerWrapper,
+
             asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
               fetchHistogramData({
                 dataSearch,
@@ -712,6 +742,16 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+
+          if (isReturnedError(referenceHistogramRespAggs)) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: referenceHistogramRespAggs.error,
+              errorBody: referenceHistogramRespAggs.errorBody,
+            });
+            return;
+          }
 
           setLoaded(0.75);
           setProgressMessage(
@@ -735,6 +775,7 @@ export const useFetchDataComparisonResult = (
           const productionHistogramRespAggs = await fetchInParallelChunks({
             fields,
             randomSamplerWrapper,
+
             asyncFetchFn: (chunkedFields: DataComparisonField[]) =>
               fetchHistogramData({
                 dataSearch,
@@ -746,6 +787,16 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+
+          if (isReturnedError(productionHistogramRespAggs)) {
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: productionHistogramRespAggs.error,
+              errorBody: productionHistogramRespAggs.errorBody,
+            });
+            return;
+          }
 
           const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
           for (const { field, type } of fields) {

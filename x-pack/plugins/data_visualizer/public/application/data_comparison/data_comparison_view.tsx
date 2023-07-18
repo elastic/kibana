@@ -51,7 +51,7 @@ export const DataComparisonView = ({
   lastRefresh,
   randomSampler,
 }: DataComparisonViewProps) => {
-  const [showDataComparisonedOnly, setShowDataComparisonedOnly] = useState(false);
+  const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
@@ -118,13 +118,13 @@ export const DataComparisonView = ({
   const filteredData = useMemo(() => {
     if (!result?.data) return [];
 
-    switch (showDataComparisonedOnly) {
+    switch (showDataComparisonOnly) {
       case true:
         return result.data.filter((d) => d.driftDetected === true);
       default:
         return result.data;
     }
-  }, [result.data, showDataComparisonedOnly]);
+  }, [result.data, showDataComparisonOnly]);
 
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<Feature>(
     filteredData,
@@ -139,8 +139,8 @@ export const DataComparisonView = ({
     [currentAnalysisWindowParameters, windowParameters]
   );
 
-  const onShowDataComparisonedOnlyToggle = (e: EuiSwitchEvent) => {
-    setShowDataComparisonedOnly(e.target.checked);
+  const onShowDataComparisonOnlyToggle = (e: EuiSwitchEvent) => {
+    setShowDataComparisonOnly(e.target.checked);
     setPageIndex(0);
   };
 
@@ -188,8 +188,8 @@ export const DataComparisonView = ({
             <EuiSwitch
               label={showOnlyDriftedFieldsOptionLabel}
               aria-label={showOnlyDriftedFieldsOptionLabel}
-              checked={showDataComparisonedOnly}
-              onChange={onShowDataComparisonedOnlyToggle}
+              checked={showDataComparisonOnly}
+              onChange={onShowDataComparisonOnlyToggle}
               compressed
             />
           </EuiFormRow>
