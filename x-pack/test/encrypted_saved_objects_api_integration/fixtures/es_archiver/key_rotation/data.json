@@ -42,7 +42,7 @@
   "type": "doc",
   "value": {
     "id": "saved-object-with-secret:cd9272b2-6a15-4295-bb7b-15f6347e267b",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
@@ -61,7 +61,7 @@
   "type": "doc",
   "value": {
     "id": "saved-object-with-secret-and-multiple-spaces:6b388d9b-6d8f-4e20-ba38-d9477370729d",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "saved-object-with-secret-and-multiple-spaces": {
         "publicProperty": "some-public-property-0",
@@ -84,7 +84,7 @@
   "type": "doc",
   "value": {
     "id": "hidden-saved-object-with-secret:8d90daef-f992-443c-ab78-053c6a7b0e9c",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "hidden-saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
@@ -103,7 +103,7 @@
   "type": "doc",
   "value": {
     "id": "saved-object-with-secret:4336f782-450f-4142-aecd-b46ed092af52",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
@@ -122,7 +122,7 @@
   "type": "doc",
   "value": {
     "id": "saved-object-with-secret-and-multiple-spaces:2ee1bede-400d-4767-b3f0-09a7064bec14",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "saved-object-with-secret-and-multiple-spaces": {
         "publicProperty": "some-public-property-0",
@@ -145,7 +145,7 @@
   "type": "doc",
   "value": {
     "id": "hidden-saved-object-with-secret:506038a1-ec71-42b5-bce2-99661b29c62b",
-    "index": ".kibana_1",
+    "index": ".kibana",
     "source": {
       "hidden-saved-object-with-secret": {
         "publicProperty": "some-public-property-0",
@@ -159,4 +159,3 @@
     }
   }
 }
-
