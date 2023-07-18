@@ -4,46 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import apm from 'elastic-apm-node';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import apm from 'elastic-apm-node';
 import { Writable } from 'stream';
 import {
-  finalize,
   fromEventPattern,
-  lastValueFrom,
-  map,
   mergeMap,
-  Observable,
-  of,
+  finalize,
   takeUntil,
   tap,
+  map,
+  Observable,
+  of,
+  lastValueFrom,
 } from 'rxjs';
-import { SerializableRecord } from '@kbn/utility-types';
-import { LocatorParams } from '../../../common';
+import { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
+import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
+import { decryptJobHeaders, ExportType, generatePngObservable, getFullUrls } from '../common';
+import { validateUrls } from '../common/validate_urls';
 import {
+  LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-  PNG_JOB_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
+  LICENSE_TYPE_ENTERPRISE,
+  PNG_JOB_TYPE,
   REPORTING_TRANSACTION_TYPE,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '../../../common/constants';
-import { decryptJobHeaders, ExportType, generatePngObservable } from '../common';
-import { JobParamsPNGV2, TaskPayloadPNGV2 } from './types';
-import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 
-/*
- * @TODO move to be within @kbn/reporting-export-types
+/**
+ * @deprecated
+ * Used for the Reporting Diagnostic
  */
-
-export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
-  id = PNG_REPORT_TYPE_V2;
+export class PngV1ExportType extends ExportType<JobParamsPNGDeprecated, TaskPayloadPNG> {
+  id = 'png';
   name = 'PNG';
-  jobType = PNG_JOB_TYPE_V2;
-  jobContentEncoding = 'base64' as const;
+  jobType = PNG_JOB_TYPE;
+  jobContentEncoding? = 'base64' as const;
   jobContentExtension = 'png' as const;
   validLicenses: LicenseType[] = [
     LICENSE_TYPE_TRIAL,
@@ -55,71 +54,67 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
-    this.logger = this.logger.get('png-export-v2');
+    this.logger = this.logger.get('png-export-v1');
   }
 
-  /**
-   * @params JobParamsPNGV2
-   * @returns jobParams
-   */
-  public createJob = async ({ locatorParams, ...jobParams }: JobParamsPNGV2) => {
+  // PR 161712 needs these out of reporting
+  public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      urls: options?.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
+    });
+  }
+
+  public createJob = async (jobParams: JobParamsPNGDeprecated) => {
+    validateUrls([jobParams.relativeUrl]);
     return {
       ...jobParams,
-      locatorParams: [locatorParams] as unknown as LocatorParams<SerializableRecord>,
-      isDeprecated: false,
-      browserTimezone: jobParams.browserTimezone,
+      isDeprecated: true,
       forceNow: new Date().toISOString(),
     };
   };
 
-  /**
-   *
-   * @param jobId
-   * @param payload
-   * @param cancellationToken
-   * @param stream
-   */
   public runTask = (
     jobId: string,
-    payload: TaskPayloadPNGV2,
+    job: TaskPayloadPNG,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
-    const jobLogger = this.logger.get(`execute-job:${jobId}`);
-    const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
+    const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
+    const jobLogger = this.logger.get(`execute:${jobId}`);
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
+      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
       mergeMap((headers) => {
-        const url = getFullRedirectAppUrl(
-          this.config,
-          this.getServerInfo(),
-          payload.spaceId,
-          payload.forceNow
-        );
-
-        const [locatorParams] = payload.locatorParams;
+        const [url] = getFullUrls(this.getServerInfo(), this.config, job);
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
-
         return generatePngObservable(
           () =>
-            this.startDeps.reporting.getScreenshots({
-              format: 'png',
+            this.getScreenshots({
               headers,
-              layout: { ...payload.layout, id: 'preserve_layout' },
-              urls: [[url, locatorParams]],
+              urls: [url],
+              browserTimezone: job.browserTimezone,
+              layout: {
+                ...job.layout,
+                id: 'preserve_layout',
+              },
             }),
           jobLogger,
           {
             headers,
-            browserTimezone: payload.browserTimezone,
-            layout: { ...payload.layout, id: 'preserve_layout' },
-            urls: [[url, locatorParams]],
+            urls: [url],
+            browserTimezone: job.browserTimezone,
+            layout: {
+              ...job.layout,
+              id: 'preserve_layout',
+            },
           }
         );
       }),

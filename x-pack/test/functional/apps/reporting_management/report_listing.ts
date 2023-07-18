@@ -43,8 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
-    // report not deletable because it wasnt created pdf v2
-    xit('Confirm single report deletion works', async () => {
+    it('Confirm single report deletion works', async () => {
       log.debug('Checking for reports.');
       await retry.try(async () => {
         await testSubjects.click('checkboxSelectRow-krazcyw4156m0763b503j7f9');
@@ -62,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    xit('Paginates historical reports', async () => {
+    it('Paginates historical reports', async () => {
       // previous CAN NOT be clicked
       const previousButton = await testSubjects.find('pagination-button-previous');
       expect(await previousButton.getAttribute('disabled')).to.be('true');
@@ -76,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await previousButton.getAttribute('disabled')).to.be(null);
     });
 
-    xit('Displays types of report jobs', async () => {
+    it('Displays types of report jobs', async () => {
       const list = await pageObjects.reporting.getManagementList();
       expectSnapshot(list).toMatchInline(`
         Array [

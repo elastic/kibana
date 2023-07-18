@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
 
   const generateAPI = {
-    getCSVFromSearchSource: async (job: JobParamsDownloadCSV) => {
+    getCSVFromSearchSourceImmediate: async (job: JobParamsDownloadCSV) => {
       return await supertestSvc
         .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
         .set('kbn-xsrf', 'xxx')
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
   const fromTime = '2019-06-20T00:00:00.000Z';
   const toTime = '2019-06-25T00:00:00.000Z';
 
-  describe.skip('CSV Generation from SearchSource', () => {
+  describe('CSV Generation from SearchSource Immediate', () => {
     before(async () => {
       await reportingAPI.initEcommerce();
       await reportingAPI.initLogs();
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe.skip('unquoted values', () => {
+    describe('unquoted values', () => {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'csv:quoteValues': false });
       });
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
           status: resStatus,
           text: resText,
           type: resType,
-        } = (await generateAPI.getCSVFromSearchSource(
+        } = (await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               query: { query: '', language: 'kuery' },
@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
           status: resStatus,
           text: resText,
           type: resType,
-        } = await generateAPI.getCSVFromSearchSource(
+        } = await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               query: { query: '', language: 'kuery' },
@@ -204,9 +204,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('date formatting', () => {
+    describe('date formatting', () => {
       it('With filters and timebased data, default to UTC', async () => {
-        const res = (await generateAPI.getCSVFromSearchSource(
+        const res = (await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               fields: ['@timestamp', 'clientip', 'extension'],
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('With filters and timebased data, non-default timezone', async () => {
-        const res = (await generateAPI.getCSVFromSearchSource(
+        const res = (await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             browserTimezone: 'America/Phoenix',
             searchSource: {
@@ -283,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('nanosecond formatting', () => {
+    describe('nanosecond formatting', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
       });
@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Formatted date_nanos data, UTC timezone', async () => {
-        const res = await generateAPI.getCSVFromSearchSource(
+        const res = await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               query: { query: '', language: 'kuery' },
@@ -314,7 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
-        const res = await generateAPI.getCSVFromSearchSource(
+        const res = await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             browserTimezone: 'America/New_York',
             searchSource: {
@@ -336,11 +336,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('non-timebased', () => {
+    describe('non-timebased', () => {
       it('Handle _id and _index columns', async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
 
-        const res = await generateAPI.getCSVFromSearchSource(
+        const res = await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               query: { query: '', language: 'kuery' },
@@ -368,7 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
           status: resStatus,
           text: resText,
           type: resType,
-        } = (await generateAPI.getCSVFromSearchSource(
+        } = (await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               query: { query: '', language: 'kuery' },
@@ -394,7 +394,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('_id field is a big integer', () => {
+    describe('_id field is a big integer', () => {
       before(async () => {
         await Promise.all([
           esArchiver.load('x-pack/test/functional/es_archives/reporting/big_int_id_field'),
@@ -413,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
       it('passes through the value without mutation', async () => {
-        const { text } = (await generateAPI.getCSVFromSearchSource(
+        const { text } = (await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             browserTimezone: 'UTC',
             version: '8.6.0',
@@ -473,9 +473,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('validation', () => {
+    describe('validation', () => {
       it('Return a 404', async () => {
-        const { body } = (await generateAPI.getCSVFromSearchSource(
+        const { body } = (await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               index: 'gobbledygook',
@@ -496,7 +496,7 @@ export default function ({ getService }: FtrProviderContext) {
           status: resStatus,
           text: resText,
           type: resType,
-        } = (await generateAPI.getCSVFromSearchSource(
+        } = (await generateAPI.getCSVFromSearchSourceImmediate(
           getMockJobParams({
             searchSource: {
               version: true,
