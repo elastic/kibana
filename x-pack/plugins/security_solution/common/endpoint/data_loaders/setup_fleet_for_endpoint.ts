@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
+
 import type { AxiosResponse } from 'axios';
 import type { KbnClient } from '@kbn/test';
 import type {
@@ -21,6 +23,33 @@ export interface SetupFleetForEndpointResponse {
   endpointPackage: BulkInstallPackageInfo;
 }
 
+interface UsageRecord {
+  start: string;
+  finish: string;
+  status: 'success' | 'failure' | 'pending';
+  error?: string;
+  stack?: string;
+}
+const usage: Record<string, UsageRecord[]> = {};
+const addUsageRecord = (key: string, record: UsageRecord) => {
+  usage[key] = usage[key] ?? [];
+  usage[key].push(record);
+};
+const dumpUsage = (logger: ToolingLog) => {
+  Object.entries(usage)
+    .map(([key, usageRecords]) => {
+      return `
+  [${key}]: invocation call count: ${usageRecords.length}
+      ${usageRecords
+        .map((record) => {
+          return JSON.stringify(record);
+        })
+        .join('\n      ')}
+`;
+    })
+    .join('\n');
+};
+
 /**
  * Calls the fleet setup APIs and then installs the latest Endpoint package
  * @param kbnClient
@@ -31,6 +60,15 @@ export const setupFleetForEndpoint = async (
   logger?: ToolingLog
 ): Promise<void> => {
   const log = logger ?? new ToolingLog();
+  const usageRecord: UsageRecord = {
+    start: new Date().toISOString(),
+    finish: '',
+    status: 'pending',
+    error: '',
+  };
+  addUsageRecord('setupFleetForEndpoint()', usageRecord);
+
+  log.info(`setupFleetForEndpoint(): Setting up fleet for endpoint`);
 
   // Setup Fleet
   try {
@@ -43,10 +81,25 @@ export const setupFleetForEndpoint = async (
 
     if (!setupResponse.data.isInitialized) {
       log.error(setupResponse.data);
-      throw new Error('Initializing the ingest manager failed, existing');
+      const err = new Error('Initializing the ingest manager failed, existing');
+
+      usageRecord.finish = new Date().toISOString();
+      usageRecord.status = 'failure';
+      usageRecord.error = err.message;
+      Error.captureStackTrace(usageRecord);
+      dumpUsage(log);
+
+      throw err;
     }
   } catch (error) {
     log.error(error);
+
+    usageRecord.finish = new Date().toISOString();
+    usageRecord.status = 'failure';
+    usageRecord.error = error.message;
+    Error.captureStackTrace(usageRecord);
+    dumpUsage(log);
+
     throw error;
   }
 
@@ -65,6 +118,13 @@ export const setupFleetForEndpoint = async (
     }
   } catch (error) {
     log.error(error);
+
+    usageRecord.finish = new Date().toISOString();
+    usageRecord.status = 'failure';
+    usageRecord.error = error.message;
+    Error.captureStackTrace(usageRecord);
+    dumpUsage(log);
+
     throw error;
   }
 
@@ -73,8 +133,19 @@ export const setupFleetForEndpoint = async (
     await installOrUpgradeEndpointFleetPackage(kbnClient, log);
   } catch (error) {
     log.error(error);
+
+    usageRecord.finish = new Date().toISOString();
+    usageRecord.status = 'failure';
+    usageRecord.error = error.message;
+    Error.captureStackTrace(usageRecord);
+    dumpUsage(log);
+
     throw error;
   }
+
+  usageRecord.finish = new Date().toISOString();
+  usageRecord.status = 'success';
+  dumpUsage(log);
 };
 
 /**
@@ -87,6 +158,16 @@ export const installOrUpgradeEndpointFleetPackage = async (
   kbnClient: KbnClient,
   logger: ToolingLog
 ): Promise<BulkInstallPackageInfo> => {
+  logger.info(`installOrUpgradeEndpointFleetPackage(): starting`);
+
+  const usageRecord: UsageRecord = {
+    start: new Date().toISOString(),
+    finish: '',
+    status: 'pending',
+    error: '',
+  };
+  addUsageRecord('installOrUpgradeEndpointFleetPackage()', usageRecord);
+
   const installEndpointPackageResp = (await kbnClient
     .request({
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
@@ -98,15 +179,36 @@ export const installOrUpgradeEndpointFleetPackage = async (
         prerelease: true,
       },
     })
+    .catch((error) => {
+      logger.error(error);
+
+      usageRecord.finish = new Date().toISOString();
+      usageRecord.status = 'failure';
+      usageRecord.error = error.message;
+      Error.captureStackTrace(usageRecord);
+      dumpUsage(logger);
+
+      throw error;
+    })
     .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
+
+  logger.debug(`Fleet bulk install response:`, installEndpointPackageResp);
 
   const bulkResp = installEndpointPackageResp.data.items;
 
   if (bulkResp.length <= 0) {
-    throw new EndpointDataLoadingError(
+    const error = new EndpointDataLoadingError(
       'Installing the Endpoint package failed, response was empty, existing',
       bulkResp
     );
+
+    usageRecord.finish = new Date().toISOString();
+    usageRecord.status = 'failure';
+    usageRecord.error = error.message;
+    Error.captureStackTrace(usageRecord);
+    dumpUsage(logger);
+
+    throw error;
   }
 
   const installResponse = bulkResp[0];
@@ -115,10 +217,18 @@ export const installOrUpgradeEndpointFleetPackage = async (
 
   if (isFleetBulkInstallError(installResponse)) {
     if (installResponse.error instanceof Error) {
-      throw new EndpointDataLoadingError(
+      const error = new EndpointDataLoadingError(
         `Installing the Endpoint package failed: ${installResponse.error.message}, exiting`,
         bulkResp
       );
+
+      usageRecord.finish = new Date().toISOString();
+      usageRecord.status = 'failure';
+      usageRecord.error = error.message;
+      Error.captureStackTrace(usageRecord);
+      dumpUsage(logger);
+
+      throw error;
     }
 
     // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
@@ -131,12 +241,30 @@ export const installOrUpgradeEndpointFleetPackage = async (
 
         await retryInstallOrUpgradeEndpointFleetPackage(() => {
           return installOrUpgradeEndpointFleetPackage(kbnClient, logger);
-        }, logger);
+        }, logger).catch((error) => {
+          usageRecord.finish = new Date().toISOString();
+          usageRecord.status = 'failure';
+          usageRecord.error = error.message;
+          Error.captureStackTrace(usageRecord);
+          dumpUsage(logger);
+
+          throw error;
+        });
       }
+
+      usageRecord.finish = new Date().toISOString();
+      usageRecord.status = 'failure';
+      usageRecord.error = installResponse.error;
+      Error.captureStackTrace(usageRecord);
+      dumpUsage(logger);
 
       throw new EndpointDataLoadingError(installResponse.error, bulkResp);
     }
   }
+
+  usageRecord.finish = new Date().toISOString();
+  usageRecord.status = 'success';
+  dumpUsage(logger);
 
   return bulkResp[0] as BulkInstallPackageInfo;
 };
