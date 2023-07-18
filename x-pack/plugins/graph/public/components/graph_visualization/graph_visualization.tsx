@@ -146,6 +146,8 @@ export function GraphVisualization({
             .filter((node) => !node.parent)
             .map((node) => {
               const iconOffset = getIconOffset(node.icon);
+              const kx = node.kx || 0;
+              const ky = node.ky || 0;
               return (
                 <g
                   key={makeNodeId(node.data.field, node.data.term)}
@@ -161,8 +163,8 @@ export function GraphVisualization({
                   className="gphNode"
                 >
                   <circle
-                    cx={node.kx}
-                    cy={node.ky}
+                    cx={kx}
+                    cy={ky}
                     r={node.scaledSize}
                     className={classNames('gphNode__circle', {
                       'gphNode__circle--selected': node.isSelected,
@@ -172,8 +174,8 @@ export function GraphVisualization({
                   <IconRenderer
                     icon={node.icon}
                     color={node.color}
-                    x={node.kx - (iconOffset?.x || 0)}
-                    y={node.ky - (iconOffset?.y || 0)}
+                    x={kx - (iconOffset?.x || 0)}
+                    y={ky - (iconOffset?.y || 0)}
                   />
 
                   {node.label.length < 30 && (
@@ -181,8 +183,8 @@ export function GraphVisualization({
                       className="gphNode__label"
                       textAnchor="middle"
                       transform="translate(0,22)"
-                      x={node.kx}
-                      y={node.ky}
+                      x={kx}
+                      y={ky}
                     >
                       {node.label}
                     </text>
@@ -192,8 +194,8 @@ export function GraphVisualization({
                       width="100"
                       height="20"
                       transform="translate(-50,15)"
-                      x={node.kx}
-                      y={node.ky}
+                      x={kx}
+                      y={ky}
                     >
                       <p className="gphNode__label gphNode__label--html gphNoUserSelect">
                         {node.label}
@@ -207,15 +209,15 @@ export function GraphVisualization({
                         r="5"
                         className="gphNode__markerCircle"
                         transform="translate(10,10)"
-                        cx={node.kx}
-                        cy={node.ky}
+                        cx={kx}
+                        cy={ky}
                       />
                       <text
                         className="gphNode__markerText"
                         textAnchor="middle"
                         transform="translate(10,12)"
-                        x={node.kx}
-                        y={node.ky}
+                        x={kx}
+                        y={ky}
                       >
                         {node.numChildren}
                       </text>

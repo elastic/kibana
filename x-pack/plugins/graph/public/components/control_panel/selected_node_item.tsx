@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { hexToRgb, isColorDark } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { WorkspaceNode } from '../../types';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
-
-const isHexColorDark = (color: string) => isColorDark(...hexToRgb(color));
 
 interface SelectedNodeItemProps {
   node: WorkspaceNode;
@@ -39,9 +36,6 @@ export const SelectedNodeItem = ({
   const fieldClasses = classNames('gphSelectionList__field', {
     ['gphSelectionList__field--selected']: isHighlighted,
   });
-  const fieldIconClasses = classNames('fa', 'gphNode__text', 'gphSelectionList__icon', {
-    ['gphNode__text--inverse']: isHexColorDark(node.color),
-  });
   const offset = fixIconOffset(node);
 
   return (
@@ -54,11 +48,12 @@ export const SelectedNodeItem = ({
           cy="12"
           style={{ fill: node.color }}
           onClick={() => onDeselectNode(node)}
+          data-test-subj={`graph-selected-${node.label}`}
         />
         <IconRenderer
-          onClick={() => onDeselectNode(node)}
+          color={node.color}
           icon={node.icon}
-          className={fieldIconClasses}
+          className="gphSelectionList__icon"
           x={offset.x}
           y={offset.y}
         />

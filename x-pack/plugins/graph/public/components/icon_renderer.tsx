@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isColorDark, EuiIcon } from '@elastic/eui';
+import { isColorDark, EuiIcon, EuiIconProps } from '@elastic/eui';
 import chroma from 'chroma-js';
 import React from 'react';
 import type { GenericIcon } from '../helpers/style_choices';
@@ -18,13 +18,8 @@ function getIconColor(color?: string) {
   return isColorDark(...chroma(color).rgb()) ? 'white' : 'black';
 }
 
-interface IconRendererProps {
+interface IconRendererProps extends Omit<EuiIconProps, 'type'> {
   icon: GenericIcon | null;
-  color?: string;
-  x?: number;
-  y?: number;
-  className?: string;
-  onClick?: () => void;
 }
 
 export const getIconOffset = (icon: GenericIcon | null) => {
@@ -42,7 +37,9 @@ export const IconRenderer = ({
   color,
   className,
   onClick,
-  ...offsets
+  x,
+  y,
+  ...otherIconProps
 }: IconRendererProps) => {
   if (icon == null) {
     return null;
@@ -52,11 +49,13 @@ export const IconRenderer = ({
     return (
       <EuiIcon
         type={MAKI_ICONS[icon.id].Svg}
-        title={MAKI_ICONS[icon.id].label}
+        aria-label={MAKI_ICONS[icon.id].label}
         color={backgroundColor}
         className={className}
         onClick={onClick}
-        {...offsets}
+        x={x}
+        y={y}
+        {...otherIconProps}
       />
     );
   }
@@ -64,9 +63,11 @@ export const IconRenderer = ({
     <EuiIcon
       type={icon.id}
       color={backgroundColor}
-      {...offsets}
       className={className}
       onClick={onClick}
+      x={x}
+      y={y}
+      {...otherIconProps}
     />
   );
 };
