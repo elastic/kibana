@@ -502,6 +502,15 @@ export const getEditedRule = (): QueryRuleCreateProps =>
     tags: [...(getExistingRule().tags || []), 'edited'],
   });
 
+export const getEditedDataViewRule = (): QueryRuleCreateProps =>
+  getExistingRule({
+    data_view_id: 'auditbeat-2022',
+    severity: 'medium',
+    name: 'Edited rule using data view',
+    description: 'Edited Rule description',
+    tags: [...(getExistingRule().tags || []), 'edited'],
+  });
+
 export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
   const {
     id,
