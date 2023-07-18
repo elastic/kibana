@@ -281,32 +281,32 @@ async function runServerlessEsNode(log: ToolingLog, { params, name, image }: Ser
   );
 
   log.info(chalk.bold(`Running Serverless ES node: ${name}`));
-  log.indent(4);
-  log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
+  log.indent(4, () => log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`)));
 
   const { stdout } = await execa('docker', dockerCmd);
 
-  log.info(`${name} is running.
+  log.indent(4, () =>
+    log.info(`${name} is running.
   Container Name: ${name}
   Container Id:   ${stdout}
 
   View running output:  ${chalk.bold(`docker attach --sig-proxy=false ${name}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${name} /bin/bash`)}
-`);
-
-  log.indent(-4);
+`)
+  );
 }
 
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
   const volumeParentPath = await setupServerlessVolumes(log, options);
   const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
   const image = getServerlessImage(options);
-  const nodeNames: string[] = [];
 
-  for (const node of SERVERLESS_NODES) {
-    await runServerlessEsNode(log, { ...node, image, params: node.params.concat(volumeCmd) });
-    nodeNames.push(node.name);
-  }
+  const nodeNames = await Promise.all(
+    SERVERLESS_NODES.map(async (node) => {
+      await runServerlessEsNode(log, { ...node, image, params: node.params.concat(volumeCmd) });
+      return node.name;
+    })
+  );
 
   log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
