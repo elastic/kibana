@@ -26,8 +26,8 @@ export default function ({ getService }: FtrProviderContext) {
     let _monitors: MonitorFields[];
 
     before(async () => {
-      await testPrivateLocations.installSyntheticsPackage();
       await kibanaServer.savedObjects.cleanStandardList();
+      await testPrivateLocations.installSyntheticsPackage();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
