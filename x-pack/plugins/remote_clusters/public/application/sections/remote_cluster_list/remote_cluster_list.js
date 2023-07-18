@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiOverlayMask,
   EuiSpacer,
@@ -92,9 +91,10 @@ export class RemoteClusterList extends Component {
 
   renderNoPermission() {
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
-        <EuiEmptyPrompt
+      <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+        <EuiPageTemplate.EmptyPrompt
           iconType="warning"
+          color="danger"
           title={
             <h2>
               <FormattedMessage
@@ -112,7 +112,7 @@ export class RemoteClusterList extends Component {
             </p>
           }
         />
-      </EuiPageSection>
+      </EuiPageTemplate>
     );
   }
 
@@ -122,9 +122,10 @@ export class RemoteClusterList extends Component {
     const { statusCode, error: errorString } = error.body;
 
     return (
-      <EuiPageSection verticalPosition="center" horizontalPosition="center" color="danger">
-        <EuiEmptyPrompt
+      <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
+        <EuiPageTemplate.EmptyPrompt
           iconType="warning"
+          color="danger"
           title={
             <h2>
               <FormattedMessage
@@ -139,13 +140,13 @@ export class RemoteClusterList extends Component {
             </p>
           }
         />
-      </EuiPageSection>
+      </EuiPageTemplate>
     );
   }
 
   renderEmpty() {
     return (
-      <EuiPageTemplate minHeight={0} panelled={false}>
+      <EuiPageTemplate minHeight={0} panelled paddingSize="none" offset={0}>
         <EuiPageTemplate.EmptyPrompt
           data-test-subj="remoteClusterListEmptyPrompt"
           iconType="managementApp"
@@ -186,10 +187,11 @@ export class RemoteClusterList extends Component {
 
   renderLoading() {
     return (
-      <EuiPageSection
-        verticalPosition="center"
-        horizontalPosition="center"
-        color="subdued"
+      <EuiPageTemplate
+        minHeight={0}
+        panelled
+        paddingSize="none"
+        offset={0}
         data-test-subj="remoteClustersTableLoading"
       >
         <SectionLoading>
@@ -198,7 +200,7 @@ export class RemoteClusterList extends Component {
             defaultMessage="Loading remote clusters…"
           />
         </SectionLoading>
-      </EuiPageSection>
+      </EuiPageTemplate>
     );
   }
 
@@ -260,7 +262,6 @@ export class RemoteClusterList extends Component {
     } else {
       content = this.renderList();
     }
-
     return (
       <>
         {content}

@@ -39,7 +39,7 @@ export const RemoteClusterWizard = ({ saveRemoteClusterConfig, onCancel, isSavin
       {
         step: SETUP_TRUST,
         title: i18n.translate('xpack.remoteClusters.clusterWizard.setupTrustLabel', {
-          defaultMessage: 'Establish Trust',
+          defaultMessage: 'Establish trust',
         }),
         status: (currentStep === SETUP_TRUST ? 'current' : 'incomplete') as EuiStepStatus,
         onClick: () => {},

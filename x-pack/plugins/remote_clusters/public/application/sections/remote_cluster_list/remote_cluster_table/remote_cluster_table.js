@@ -259,6 +259,7 @@ export class RemoteClusterTable extends Component {
         ),
         sortable: true,
         width: '160px',
+        align: 'right',
         render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
           const remoteNodesCount =
             mode === PROXY_MODE ? connectedSocketsCount : connectedNodesCount;
