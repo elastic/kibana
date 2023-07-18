@@ -1,11 +1,10 @@
 {
-  "reporterEnabled": "mochawesome, mocha-junit-reporter, ./scripts/run_cypress/mocha_reporter.js",
+  "reporterEnabled": "mochawesome, mocha-junit-reporter",
   "reporterOptions": {
     "html": false,
     "json": true,
     "mochaFile": "../../../target/kibana-security-solution/cypress/results/TEST-security-solution-cypress-[hash].xml",
     "overwrite": false,
-    "reportDir": "../../../target/kibana-security-solution/cypress/results",
-    "tokenName": "BUILDKITE_ANALYTICS_TOKEN"
+    "reportDir": "../../../target/kibana-security-solution/cypress/results"
   }
 }

@@ -42,6 +42,7 @@ const EXCEPTION_LIST_NAME = 'Newly created list';
 
 describe('Exception list detail page', () => {
   before(() => {
+    cy.task('esArchiverResetKibana');
     login();
 
     // Create exception list associated with a rule
