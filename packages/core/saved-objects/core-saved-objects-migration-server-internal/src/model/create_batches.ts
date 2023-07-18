@@ -42,6 +42,26 @@ export interface DocumentExceedsBatchSize {
 }
 
 /**
+ * Build a relationship of index names for each SO type, e.g.:
+ *  'cases': '.kibana_cases'
+ *  'task': '.kibana_task_manager'
+ *   ...
+ *
+ * @param indexTypesMap information about which types are stored in each index
+ */
+export function buildTypeIndexMap(indexTypesMap: IndexTypesMap): Record<string, string> {
+  return Object.entries(indexTypesMap || {}).reduce<Record<string, string>>(
+    (acc, [indexAlias, types]) => {
+      types.forEach((type) => {
+        acc[type] = indexAlias;
+      });
+      return acc;
+    },
+    {}
+  );
+}
+
+/**
  * Build a relationship of temporary index names for each SO type, e.g.:
  *  'cases': '.kibana_cases_8.8.0_reindex_temp'
  *  'task': '.kibana_task_manager_8.8.0_reindex_temp'

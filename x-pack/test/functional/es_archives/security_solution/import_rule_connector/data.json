@@ -14,7 +14,6 @@
       "type": "space",
       "references": [],
       "updated_at": "2021-10-11T14:49:07.012Z",
-      "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "6.6.0"
     }
   }
@@ -36,7 +35,6 @@
       "type": "space",
       "references": [],
       "updated_at": "2021-10-11T14:49:07.012Z",
-      "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "6.6.0"
     }
   }
@@ -59,10 +57,6 @@
       "references": [],
       "namespace": "714-space",
       "updated_at": "2021-12-03T15:33:09.651Z",
-      "namespaces": [
-        "714-space"
-      ],
-      "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "7.14.0"
     }
   }
@@ -84,12 +78,7 @@
       "type": "action",
       "references": [],
       "updated_at": "2021-12-03T15:33:09.651Z",
-      "namespaces": [
-        "default"
-      ],
-      "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "7.14.0"
     }
   }
 }
-

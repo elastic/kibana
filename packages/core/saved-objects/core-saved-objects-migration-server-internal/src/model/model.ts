@@ -48,7 +48,7 @@ import {
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
 } from './helpers';
-import { buildTempIndexMap, createBatches } from './create_batches';
+import { buildTempIndexMap, buildTypeIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
 import {
   CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
@@ -1311,6 +1311,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           corruptDocumentIds,
           transformErrors,
           maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+          typeIndexMap: buildTypeIndexMap(stateP.indexTypesMap),
         });
         if (Either.isRight(batches)) {
           return {
