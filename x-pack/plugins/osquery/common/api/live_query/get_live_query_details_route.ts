@@ -7,15 +7,15 @@
 
 import * as t from 'io-ts';
 
-export const getLiveQueryDetailsRequestQuerySchema = t.type({
-  id: t.string,
-});
+export const getLiveQueryDetailsRequestQuerySchema = t.unknown;
 
 export type GetLiveQueryDetailsRequestQuerySchema = t.OutputOf<
   typeof getLiveQueryDetailsRequestQuerySchema
 >;
 
-export const getLiveQueryDetailsRequestParamsSchema = t.unknown;
+export const getLiveQueryDetailsRequestParamsSchema = t.type({
+  id: t.string,
+});
 
 export type GetLiveQueryDetailsRequestParamsSchema = t.OutputOf<
   typeof getLiveQueryDetailsRequestParamsSchema

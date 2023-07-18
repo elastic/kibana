@@ -41,11 +41,11 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidation<
+            params: buildRouteValidation<
               typeof getLiveQueryDetailsRequestParamsSchema,
               GetLiveQueryDetailsRequestParamsSchema
             >(getLiveQueryDetailsRequestParamsSchema),
-            params: buildRouteValidation<
+            query: buildRouteValidation<
               typeof getLiveQueryDetailsRequestQuerySchema,
               GetLiveQueryDetailsRequestQuerySchema
             >(getLiveQueryDetailsRequestQuerySchema),
@@ -61,7 +61,7 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                filterQuery: request.query,
+                filterQuery: {},
                 factoryQueryType: OsqueryQueries.actionDetails,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
