@@ -7,6 +7,8 @@
 
 // Latest
 export * from './configure/latest';
+export * from './user_action/latest';
 
 // V1
 export * as configureDomainV1 from './configure/v1';
+export * as userActionDomainV1 from './user_action/v1';

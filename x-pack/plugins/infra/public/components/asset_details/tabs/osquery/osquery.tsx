@@ -7,20 +7,21 @@
 
 import { EuiSkeletonText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
+import { TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useMetadata } from '../../hooks/use_metadata';
+import { toTimestampRange } from '../../utils';
 
 export interface OsqueryProps {
   nodeName: string;
   nodeType: InventoryItemType;
-  currentTimeRange: MetricsTimeInput;
+  dateRange: TimeRange;
 }
 
-export const Osquery = ({ nodeName, nodeType, currentTimeRange }: OsqueryProps) => {
+export const Osquery = ({ nodeName, nodeType, dateRange }: OsqueryProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const { loading, metadata } = useMetadata(
@@ -28,7 +29,7 @@ export const Osquery = ({ nodeName, nodeType, currentTimeRange }: OsqueryProps) 
     nodeType,
     inventoryModel.requiredMetrics,
     sourceId,
-    currentTimeRange
+    toTimestampRange(dateRange)
   );
   const {
     services: { osquery },

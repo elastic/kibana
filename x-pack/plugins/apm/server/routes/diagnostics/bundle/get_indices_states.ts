@@ -5,28 +5,32 @@
  * 2.0.
  */
 
-import {
-  FieldCapsResponse,
-  IndicesGetResponse,
-  IngestGetPipelineResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ApmIndicesConfig } from '@kbn/observability-plugin/common/typings';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
+import { getFieldCaps } from './get_field_caps';
+import { getIndicesAndIngestPipelines } from './get_indices';
 
-export function getIndicesStates({
-  indices,
-  fieldCaps,
-  ingestPipelines,
+export async function getIndicesStates({
+  esClient,
+  apmIndices,
 }: {
-  indices: IndicesGetResponse;
-  fieldCaps: FieldCapsResponse;
-  ingestPipelines: IngestGetPipelineResponse;
+  esClient: ElasticsearchClient;
+  apmIndices: ApmIndicesConfig;
 }) {
+  const { indices, ingestPipelines } = await getIndicesAndIngestPipelines({
+    esClient,
+    apmIndices,
+  });
+
   const indicesWithPipelineId = Object.entries(indices).map(([key, value]) => ({
     index: key,
     dataStream: value.data_stream,
     pipelineId: value.settings?.index?.default_pipeline,
   }));
+
+  const fieldCaps = await getFieldCaps({ esClient, apmIndices });
 
   const invalidFieldMappings = Object.values(
     fieldCaps.fields[SERVICE_NAME] ?? {}
@@ -72,7 +76,7 @@ export function getIndicesStates({
   const invalidIndices = items.filter((item) => !item.isValid);
   const validIndices = items.filter((item) => item.isValid);
 
-  return { invalidIndices, validIndices };
+  return { invalidIndices, validIndices, indices, ingestPipelines, fieldCaps };
 }
 
 export function validateIngestPipelineName(

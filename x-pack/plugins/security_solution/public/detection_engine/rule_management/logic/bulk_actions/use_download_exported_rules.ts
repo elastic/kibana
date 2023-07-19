@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { getExportedRulesCounts } from '../../../rule_management_ui/components/rules_table/helpers';
