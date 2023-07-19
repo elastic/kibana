@@ -5,19 +5,16 @@
  * 2.0.
  */
 
+import { ReadableStreamPolyfill, BlobPolyfill, FileReaderPolyfill, FilePolyfill } from '@loaders.gl/polyfills';
 import { GeoJsonImporter } from './geojson_importer';
 
 (function () {
-  Blob.prototype.arrayBuffer = Blob.prototype.arrayBuffer || arrayBufferPolyFill;
-  function arrayBufferPolyFill() {
-    return new Promise((resolve) => {
-      const fr = new FileReader();
-      fr.onload = (event) => {
-        resolve(event?.target?.result);
-      };
-      fr.readAsArrayBuffer(this);
-    });
-  }
+  // can not use installFilePolyfills because global.Blob exists, it just does not contain Blob.Blob.prototype.arrayBuffer
+  // installFilePolyfills only installs poly fill if global.Blob does not exist
+  global.ReadableStream = ReadableStreamPolyfill;
+  global.Blob = BlobPolyfill;
+  global.FileReader = FileReaderPolyfill;
+  global.File = FilePolyfill;
 })();
 
 const FEATURE_COLLECTION = {
