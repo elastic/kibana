@@ -1057,6 +1057,9 @@
   "navigation_embeddable": {
     "dynamic": false,
     "properties": {
+      "id": {
+        "type": "text"
+      },
       "title": {
         "type": "text"
       },
