@@ -23,7 +23,7 @@ if (!global.hasOwnProperty('TextEncoder')) {
 }
 
 // https://github.com/jsdom/jsdom/issues/2555
-if (!global.hasOwnProperty('Blob')) {
+if (!Object.hasOwn(global, 'Blob')) {
   const { Blob } = require('buffer');
   global.Blob = Blob;
 }
