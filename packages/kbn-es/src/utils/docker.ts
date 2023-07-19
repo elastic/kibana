@@ -13,7 +13,6 @@ import { resolve } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
-import { getDataPath } from '@kbn/utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
@@ -29,6 +28,7 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   clean?: boolean;
+  basePath: string;
 }
 
 interface ServerlessEsNodeArgs {
@@ -232,7 +232,7 @@ async function setupDocker(log: ToolingLog) {
  * Setup local volumes for Serverless ES
  */
 async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const volumePath = resolve(getDataPath(), 'stateless');
+  const volumePath = resolve(options.basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local Serverless ES object store at ${volumePath}`));
   log.indent(4);
@@ -257,7 +257,7 @@ async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOption
 
   log.indent(-4);
 
-  return getDataPath();
+  return ['--volume', `${options.basePath}:/objectstore:z`];
 }
 
 /**
@@ -303,8 +303,7 @@ async function runServerlessEsNode(log: ToolingLog, { params, name, image }: Ser
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
   await setupDocker(log);
 
-  const volumeParentPath = await setupServerlessVolumes(log, options);
-  const volumeCmd = ['--volume', `${volumeParentPath}:/objectstore:z`];
+  const volumeCmd = await setupServerlessVolumes(log, options);
   const image = getServerlessImage(options);
 
   const nodeNames = await Promise.all(

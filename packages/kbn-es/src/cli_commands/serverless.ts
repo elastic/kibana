@@ -45,6 +45,7 @@ export const serverless: Command = {
     const argv = process.argv.slice(2);
     const options = getopts(argv, {
       alias: {
+        basePath: 'base-path',
         esArgs: 'E',
       },
 
