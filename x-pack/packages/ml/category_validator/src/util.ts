@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { newJobChartsProvider } from './charts';
-export { topCategoriesProvider } from './categorization';
+export function getMedianStringLength(strings: string[]) {
+  const sortedStringLengths = strings.map((s) => s.length).sort((a, b) => a - b);
+  return sortedStringLengths[Math.floor(sortedStringLengths.length / 2)] || 0;
+}

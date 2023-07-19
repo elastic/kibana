@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { newJobChartsProvider } from './charts';
-export { topCategoriesProvider } from './categorization';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/category_validator'],
+};
