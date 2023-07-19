@@ -71,7 +71,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [] }}
+        errors={{ esqlQuery: [], timeField: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -101,7 +101,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [] }}
+        errors={{ esqlQuery: [], timeField: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -144,7 +144,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [] }}
+        errors={{ esqlQuery: [], timeField: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -176,7 +176,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [] }}
+        errors={{ esqlQuery: [], timeField: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
