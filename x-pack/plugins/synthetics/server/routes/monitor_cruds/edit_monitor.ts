@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
