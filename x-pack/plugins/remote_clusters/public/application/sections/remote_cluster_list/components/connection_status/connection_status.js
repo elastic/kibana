@@ -26,7 +26,7 @@ export function ConnectionStatus({ isConnected, mode }) {
       <EuiFlexItem grow={false}>
         <EuiBadge
           color={isConnected ? 'success' : 'danger'}
-          data-test-subj="remoteClustersConnectionStatusBadge"
+          data-test-subj="remoteClusterConnectionStatusMessage"
         >
           {isConnected
             ? i18n.translate('xpack.remoteClusters.connectedStatus.connectedAriaLabel', {
