@@ -119,13 +119,13 @@ export async function renderTemplates({
     }),
 
     // format each file with prettier
-    transformFileStream((file) => {
+    transformFileStream(async (file) => {
       if (!file.extname) {
         return;
       }
 
       file.contents = Buffer.from(
-        prettier.format(file.contents.toString('utf8'), {
+        await prettier.format(file.contents.toString('utf8'), {
           ...prettierConfig,
           filepath: file.path,
         })

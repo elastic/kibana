@@ -164,7 +164,11 @@ const mergeManagedProperties = (
  * @param infoText The text which should be written to the top of the file to educate users how to customize the settings
  * @param json The settings file as a string
  */
-export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, json?: string) {
+export async function updateVscodeConfig(
+  keys: ManagedConfigKey[],
+  infoText: string,
+  json?: string
+) {
   json = json || '{}';
   const ast = parseExpression(json);
 
@@ -239,7 +243,7 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
     ...(ast.leadingComments ?? [])?.filter((c) => !c.value.includes('@managed')),
   ];
 
-  return Prettier.format(generate(ast).code, {
+  return await Prettier.format(generate(ast).code, {
     endOfLine: 'auto',
     filepath: 'settings.json',
   });
