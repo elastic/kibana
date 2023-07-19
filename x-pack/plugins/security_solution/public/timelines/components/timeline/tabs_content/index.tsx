@@ -9,6 +9,7 @@ import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Assistant } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
+import type { Ref, ReactElement, ComponentType } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -53,18 +54,37 @@ const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScr
   flex: 1;
 `;
 
+/**
+ * A HOC which supplies React.Suspense with a fallback component
+ * @param Component A component deferred by `React.lazy`
+ * @param fallback A fallback component to render while things load. Default is EuiSekeleton for all tabs
+ */
+const tabWithSuspense = <P extends {}, R = {}>(
+  Component: ComponentType<P>,
+  fallback: ReactElement | null = <EuiSkeletonText lines={10} />
+) => {
+  const Comp = React.forwardRef((props: P, ref: Ref<R>) => (
+    <Suspense fallback={fallback}>
+      <Component {...props} ref={ref} />
+    </Suspense>
+  ));
+
+  Comp.displayName = `${Component.displayName ?? 'Tab'}WithSuspense`;
+  return Comp;
+};
+
 const AssistantTabContainer = styled.div`
   overflow-y: auto;
   width: 100%;
 `;
 
-const QueryTabContent = lazy(() => import('../query_tab_content'));
-const EqlTabContent = lazy(() => import('../eql_tab_content'));
-const GraphTabContent = lazy(() => import('../graph_tab_content'));
-const NotesTabContent = lazy(() => import('../notes_tab_content'));
-const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
-const SessionTabContent = lazy(() => import('../session_tab_content'));
-const DiscoverTab = lazy(() => import('../discover_tab_content'));
+const QueryTab = tabWithSuspense(lazy(() => import('../query_tab_content')));
+const EqlTab = tabWithSuspense(lazy(() => import('../eql_tab_content')));
+const GraphTab = tabWithSuspense(lazy(() => import('../graph_tab_content')));
+const NotesTab = tabWithSuspense(lazy(() => import('../notes_tab_content')));
+const PinnedTab = tabWithSuspense(lazy(() => import('../pinned_tab_content')));
+const SessionTab = tabWithSuspense(lazy(() => import('../session_tab_content')));
+const DiscoverTab = tabWithSuspense(lazy(() => import('../discover_tab_content')));
 
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -76,72 +96,6 @@ interface BasicTimelineTab {
   sessionViewConfig?: SessionViewConfig | null;
   timelineDescription: string;
 }
-
-const QueryTab: React.FC<{
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: TimelineId;
-}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <QueryTabContent
-      renderCellValue={renderCellValue}
-      rowRenderers={rowRenderers}
-      timelineId={timelineId}
-    />
-  </Suspense>
-));
-QueryTab.displayName = 'QueryTab';
-
-const EqlTab: React.FC<{
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: TimelineId;
-}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <EqlTabContent
-      renderCellValue={renderCellValue}
-      rowRenderers={rowRenderers}
-      timelineId={timelineId}
-    />
-  </Suspense>
-));
-EqlTab.displayName = 'EqlTab';
-
-const GraphTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <GraphTabContent timelineId={timelineId} />
-  </Suspense>
-));
-GraphTab.displayName = 'GraphTab';
-
-const NotesTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <NotesTabContent timelineId={timelineId} />
-  </Suspense>
-));
-NotesTab.displayName = 'NotesTab';
-
-const SessionTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <SessionTabContent timelineId={timelineId} />
-  </Suspense>
-));
-SessionTab.displayName = 'SessionTab';
-
-const PinnedTab: React.FC<{
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
-  timelineId: TimelineId;
-}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <PinnedTabContent
-      renderCellValue={renderCellValue}
-      rowRenderers={rowRenderers}
-      timelineId={timelineId}
-    />
-  </Suspense>
-));
-PinnedTab.displayName = 'PinnedTab';
 
 const AssistantTab: React.FC<{
   isAssistantEnabled: boolean;
