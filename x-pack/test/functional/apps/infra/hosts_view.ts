@@ -327,7 +327,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await returnTo(HOSTS_VIEW_PATH);
         });
-      
+
         it('should navigate to APM services after click', async () => {
           await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
           const url = parse(await browser.getCurrentUrl());
