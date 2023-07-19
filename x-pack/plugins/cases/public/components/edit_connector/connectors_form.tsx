@@ -14,9 +14,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { CaseConnectors, CaseUI } from '../../../common/ui/types';
-import type { CaseConnector, ConnectorTypeFields } from '../../../common/api';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import type { CaseActionConnector } from '../types';
 import {
@@ -29,6 +28,7 @@ import {
 import { ConnectorSelector } from '../connector_selector/form';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import * as i18n from './translations';
+import type { ConnectorTypeFields, CaseConnector } from '../../../common/types/domain';
 
 interface Props {
   caseData: CaseUI;
