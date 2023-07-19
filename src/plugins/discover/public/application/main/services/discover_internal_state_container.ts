@@ -13,7 +13,7 @@ import {
 } from '@kbn/kibana-utils-plugin/common';
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface InternalState {
   dataView: DataView | undefined;

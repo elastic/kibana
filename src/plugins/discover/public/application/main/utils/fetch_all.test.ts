@@ -23,8 +23,8 @@ import {
 } from '../services/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));

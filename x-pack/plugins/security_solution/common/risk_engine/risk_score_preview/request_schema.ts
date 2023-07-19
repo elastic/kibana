@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { DataViewId } from '../../detection_engine/rule_schema';
+import { DataViewId } from '../../api/detection_engine/model/rule_schema';
 import { afterKeysSchema } from '../after_keys';
 import { identifierTypeSchema } from '../identifier_types';
 import { riskWeightsSchema } from '../risk_weights/schema';
