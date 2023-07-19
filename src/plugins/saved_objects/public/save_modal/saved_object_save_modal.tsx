@@ -237,6 +237,31 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     }
   };
 
+  private saveSavedObjectAsNewGroup = async () => {
+    let duplicateIndex = 1;
+
+    while (true) {
+      this.setState({ hasTitleDuplicate: false });
+
+      const duplicateIndexPattern = duplicateIndex > 0 ? `[${duplicateIndex}]` : '';
+      const duplicatedTitle = `${this.state.title} ${duplicateIndexPattern}`;
+
+      const saveProps = {
+        newTitle: duplicatedTitle,
+        newCopyOnSave: this.state.copyOnSave,
+        isTitleDuplicateConfirmed: false,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      };
+
+      await this.props.onSave(saveProps);
+
+      if (!this.state.hasTitleDuplicate) break;
+
+      duplicateIndex++;
+    }
+  };
+
   private saveSavedObject = async () => {
     if (this.state.isLoading) {
       // ignore extra clicks
@@ -247,13 +272,17 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       isLoading: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
+    if (!this.state.copyOnSave) {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave: this.state.copyOnSave,
+        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      });
+    } else {
+      this.saveSavedObjectAsNewGroup();
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
