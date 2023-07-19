@@ -170,97 +170,57 @@ export const installOrUpgradeEndpointFleetPackage = async (
           prerelease: true,
         },
       })
-      .catch((error) => {
-        logger.error(error);
-
-        usageRecord.finish = new Date().toISOString();
-        usageRecord.status = 'failure';
-        usageRecord.error = error.message;
-        Error.captureStackTrace(usageRecord);
-        dumpUsage(logger);
-
-        throw error;
-      })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
 
-    logger.debug(`Fleet bulk install response:`, installEndpointPackageResp);
+    logger.debug(`Fleet bulk install response:`, installEndpointPackageResp.data, 10);
 
     const bulkResp = installEndpointPackageResp.data.items;
 
     if (bulkResp.length <= 0) {
-      const error = new EndpointDataLoadingError(
+      throw new EndpointDataLoadingError(
         'Installing the Endpoint package failed, response was empty, existing',
         bulkResp
       );
-
-      usageRecord.finish = new Date().toISOString();
-      usageRecord.status = 'failure';
-      usageRecord.error = error.message;
-      Error.captureStackTrace(usageRecord);
-      dumpUsage(logger);
-
-      throw error;
     }
 
     const installResponse = bulkResp[0];
 
-    logger.info(installResponse);
+    logger.debug('package install response:', installResponse);
 
     if (isFleetBulkInstallError(installResponse)) {
       if (installResponse.error instanceof Error) {
-        const error = new EndpointDataLoadingError(
-          `Installing the Endpoint package failed: ${installResponse.error.message}, exiting`,
+        throw new EndpointDataLoadingError(
+          `Installing the Endpoint package failed: ${installResponse.error.message}`,
           bulkResp
         );
-
-        usageRecord.finish = new Date().toISOString();
-        usageRecord.status = 'failure';
-        usageRecord.error = error.message;
-        Error.captureStackTrace(usageRecord);
-        dumpUsage(logger);
-
-        throw error;
       }
 
       // Ignore `409` (conflicts due to Concurrent install or upgrades of package) errors
       if (installResponse.statusCode !== 409) {
-        // // when `no_shard_available_action_exception` errors re-run install or upgrade after a delay
-        // if (isNoShardAvailableActionExceptionError(installResponse)) {
-        //   logger.warning(
-        //     `Known transient failure detected: no_shard_available_action_exception. Retrying...`
-        //   );
-        //
-        //   await retryInstallOrUpgradeEndpointFleetPackage(() => {
-        //     return installOrUpgradeEndpointFleetPackage(kbnClient, logger);
-        //   }, logger).catch((error) => {
-        //     usageRecord.finish = new Date().toISOString();
-        //     usageRecord.status = 'failure';
-        //     usageRecord.error = error.message;
-        //     Error.captureStackTrace(usageRecord);
-        //     dumpUsage(logger);
-        //
-        //     throw error;
-        //   });
-        // }
-
-        usageRecord.finish = new Date().toISOString();
-        usageRecord.status = 'failure';
-        usageRecord.error = installResponse.error;
-        Error.captureStackTrace(usageRecord);
-        dumpUsage(logger);
-
         throw new EndpointDataLoadingError(installResponse.error, bulkResp);
       }
     }
 
-    usageRecord.finish = new Date().toISOString();
-    usageRecord.status = 'success';
-    dumpUsage(logger);
-
     return bulkResp[0] as BulkInstallPackageInfo;
   };
 
-  return retryInstallOrUpgradeEndpointFleetPackage(updatePackages, logger);
+  return retryInstallOrUpgradeEndpointFleetPackage(updatePackages, logger)
+    .then((result) => {
+      usageRecord.finish = new Date().toISOString();
+      usageRecord.status = 'success';
+      dumpUsage(logger);
+
+      return result;
+    })
+    .catch((err) => {
+      usageRecord.finish = new Date().toISOString();
+      usageRecord.status = 'failure';
+      usageRecord.error = err.message;
+      Error.captureStackTrace(usageRecord);
+      dumpUsage(logger);
+
+      throw err;
+    });
 };
 
 function isFleetBulkInstallError(
@@ -269,10 +229,8 @@ function isFleetBulkInstallError(
   return 'error' in installResponse && installResponse.error !== undefined;
 }
 
-function isNoShardAvailableActionExceptionError(error: IBulkInstallPackageHTTPError): boolean {
-  return (
-    typeof error.error === 'string' && error.error.includes('no_shard_available_action_exception')
-  );
+function isNoShardAvailableActionExceptionError(error: Error): boolean {
+  return error.message.includes('no_shard_available_action_exception');
 }
 
 // retry logic for install or upgrade of endpoint package
