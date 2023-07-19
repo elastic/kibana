@@ -72,6 +72,7 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
               })}
               checked={hasSetupTrust}
               onChange={() => setHasSetupTrust(!hasSetupTrust)}
+              data-test-subj="remoteClusterTrustCheckbox"
             />
           </EuiFormRow>
         </EuiForm>
@@ -85,7 +86,13 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
           />
         </EuiButtonEmpty>
 
-        <EuiButton type="submit" form={modalFormId} fill disabled={!hasSetupTrust}>
+        <EuiButton
+          fill
+          type="submit"
+          form={modalFormId}
+          disabled={!hasSetupTrust}
+          data-test-subj="remoteClusterTrustSubmitButton"
+        >
           <FormattedMessage
             id="xpack.remoteClusters.clusterWizard.trustStep.modal.createCluster"
             defaultMessage="Create remote cluster"
