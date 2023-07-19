@@ -339,7 +339,7 @@ export const constructQueryOptions = ({
   reporters,
   status,
   severity,
-  sortByField,
+  sortField,
   owner,
   authorizationFilter,
   from,
@@ -349,7 +349,7 @@ export const constructQueryOptions = ({
 }: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
-  const sortField = convertSortField(sortByField);
+  const sortByField = convertSortField(sortField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
   const statusFilter = status != null ? addStatusFilter(status) : undefined;
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
@@ -370,7 +370,7 @@ export const constructQueryOptions = ({
 
   return {
     filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
-    sortField,
+    sortField: sortByField,
   };
 };
 
