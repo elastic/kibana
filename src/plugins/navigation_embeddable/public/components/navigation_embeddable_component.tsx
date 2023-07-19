@@ -36,9 +36,9 @@ export const NavigationEmbeddableComponent = () => {
           id: currentLink.id,
           content:
             currentLink.type === DASHBOARD_LINK_TYPE ? (
-              <DashboardLinkComponent link={currentLink} />
+              <DashboardLinkComponent key={currentLink.id} link={currentLink} />
             ) : (
-              <ExternalLinkComponent link={currentLink} />
+              <ExternalLinkComponent key={currentLink.id} link={currentLink} />
             ),
         },
       };

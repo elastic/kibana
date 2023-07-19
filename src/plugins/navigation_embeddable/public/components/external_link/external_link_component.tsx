@@ -11,12 +11,13 @@ import React from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { NavigationEmbeddableLink } from '../../embeddable/types';
 
-export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
+export const ExternalLinkComponent = ({ link, ...other }: { link: NavigationEmbeddableLink }) => {
   return (
     <EuiListGroupItem
+      {...other}
       size="s"
       className={'navigationLink'}
-      id={`navigationLink--${link.id}`}
+      id={`externalLink--${link.id}`}
       label={link.label || link.destination}
       onClick={() => {
         // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown

@@ -18,7 +18,7 @@ import { DashboardLinkStrings } from './dashboard_link_strings';
 import { DashboardItem, NavigationEmbeddableLink } from '../../embeddable/types';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
-export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
+export const DashboardLinkComponent = ({ link, ...other }: { link: NavigationEmbeddableLink }) => {
   const navEmbeddable = useNavigationEmbeddable();
   const [errorState, setErrorState] = useState<boolean>(false);
 
@@ -54,11 +54,18 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
     );
   }, [link, destinationDashboard, parentDashboardId, parentDashboardTitle]);
 
-  return (
+  return loadingDestinationDashboard ? (
+    <li {...other} id={`dashboardLink--${link.id}--loading`}>
+      <EuiButtonEmpty size="s" isLoading={true}>
+        {DashboardLinkStrings.getLoadingDashboardLabel()}
+      </EuiButtonEmpty>
+    </li>
+  ) : (
     <EuiListGroupItem
+      {...other}
       size="s"
       isDisabled={errorState}
-      id={`navigationLink--${link.id}`}
+      id={`dashboardLink--${link.id}`}
       iconType={errorState ? 'warning' : undefined}
       className={classNames('navigationLink', {
         navigationLinkCurrent: link.destination === parentDashboardId,
@@ -70,15 +77,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
               // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
             }
       }
-      label={
-        loadingDestinationDashboard ? (
-          <EuiButtonEmpty size="s" isLoading={true} flush="both">
-            {DashboardLinkStrings.getLoadingDashboardLabel()}
-          </EuiButtonEmpty>
-        ) : (
-          <EuiText size="s">{linkLabel}</EuiText>
-        )
-      }
+      label={<EuiText size="s">{linkLabel}</EuiText>}
     />
   );
 };
