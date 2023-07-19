@@ -35,11 +35,12 @@ export const useAgentGroups = () => {
   >(
     ['agentGroups'],
     async () => {
-      const policiesQuery = osqueryPolicies?.reduce((acc, policy) => `${acc} OR ${policy}`);
+      const policiesQuery = osqueryPolicies?.join(' OR ');
       const responseData = await lastValueFrom(
         data.search.search<AgentsRequestOptions, AgentsStrategyResponse>(
           {
             kuery: `policy_id: ( ${policiesQuery} )`,
+            filterQuery: {},
             factoryQueryType: OsqueryQueries.agents,
             pagination: generateTablePaginationOptions(0, 9000),
             sort: {

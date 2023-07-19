@@ -17,6 +17,5 @@ export interface AgentsStrategyResponse extends IEsSearchResponse {
 }
 
 export type AgentsRequestOptions = RequestOptionsPaginated & {
-  kuery?: string;
-  filterQuery: undefined;
+  kuery: string;
 };

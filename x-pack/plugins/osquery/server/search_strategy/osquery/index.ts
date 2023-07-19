@@ -41,7 +41,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
         mergeMap((exists) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
-            ...('filterQuery' in request ? { filterQuery: request.filterQuery } : {}),
+            filterQuery: request.filterQuery,
             ...('kuery' in request ? { kuery: request.kuery } : {}),
             ...('aggregations' in request ? { aggregations: request.aggregations } : {}),
             ...('pagination' in request ? { pagination: request.pagination } : {}),
