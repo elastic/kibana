@@ -19,7 +19,9 @@
     "@kbn/logging",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/config-schema",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/i18n",
+    "@kbn/spaces-plugin"
   ],
   "exclude": [
     "target/**/*",
