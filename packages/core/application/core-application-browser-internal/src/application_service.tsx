@@ -253,7 +253,7 @@ export class ApplicationService {
       .pipe(
         map((statusUpdaters) => {
           return new Map(
-            [...applications$.getValue()].map(([id, app]) => [
+            [...availableApps].map(([id, app]) => [
               id,
               updateStatus(app, [...statusUpdaters.values()]),
             ])

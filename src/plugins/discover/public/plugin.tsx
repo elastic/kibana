@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Subscription } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -222,7 +222,6 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private profileRegistrySubscription: Subscription | undefined = undefined;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
@@ -309,14 +308,23 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
-    this.profileRegistrySubscription = this.profileRegistry
-      .getContributedAppState$()
-      .subscribe(this.appStateUpdater);
+    const appStateUpdater$ = combineLatest([
+      this.appStateUpdater,
+      this.profileRegistry.getContributedAppState$(),
+    ]).pipe(
+      map(
+        ([urlAppStateUpdater, profileAppStateUpdater]): AppUpdater =>
+          (app) => ({
+            ...urlAppStateUpdater(app),
+            ...profileAppStateUpdater(app),
+          })
+      )
+    );
 
     core.application.register({
       id: PLUGIN_ID,
       title: 'Discover',
-      updater$: this.appStateUpdater.asObservable(),
+      updater$: appStateUpdater$,
       order: 1000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -429,9 +437,6 @@ export class DiscoverPlugin
   }
 
   stop() {
-    if (this.profileRegistrySubscription) {
-      this.profileRegistrySubscription.unsubscribe();
-    }
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
