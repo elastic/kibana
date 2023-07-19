@@ -11,10 +11,7 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/reporting'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/reporting',
   coverageReporters: ['text', 'html'],
-<<<<<<< HEAD
-=======
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/reporting/{common,public,server}/**/*.{js,ts,tsx}',
   ],
->>>>>>> reporting/new-export-type-registry
 };
