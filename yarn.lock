@@ -4174,6 +4174,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/event-annotation-components@link:packages/kbn-event-annotation-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
   version "0.0.0"
   uid ""
@@ -4667,6 +4675,10 @@
   uid ""
 
 "@kbn/ml-anomaly-utils@link:x-pack/packages/ml/anomaly_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-category-validator@link:x-pack/packages/ml/category_validator":
   version "0.0.0"
   uid ""
 
@@ -5778,7 +5790,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-ui-components@link:src/plugins/visualization_ui_components":
+"@kbn/visualization-ui-components@link:packages/kbn-visualization-ui-components":
   version "0.0.0"
   uid ""
 
@@ -30026,10 +30038,10 @@ xpath@0.0.32:
   resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.32.tgz#1b73d3351af736e17ec078d6da4b8175405c48af"
   integrity sha512-rxMJhSIoiO8vXcWvSifKqhvV96GjiD5wYb8/QHdoRyQvraTpp4IEv944nhGausZZ3u7dhQXteZuZbaqfpB7uYw==
 
-xstate@^4.37.2:
-  version "4.37.2"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.37.2.tgz#c5f4c1d8062784238b91e2dfddca05f821cb4eac"
-  integrity sha512-Qm337O49CRTZ3PRyRuK6b+kvI+D3JGxXIZCTul+xEsyFCVkTFDt5jixaL1nBWcUBcaTQ9um/5CRGVItPi7fveg==
+xstate@^4.38.1:
+  version "4.38.1"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.1.tgz#9be54c2dfc44d1d566c697393921edaf6d3c9998"
+  integrity sha512-1gBUcFWBj/rv/pRcP2Bedl5sNRGX2d36CaOx9z7fE9uSiHaOEHIWzLg1B853q2xdUHUA9pEiWKjLZ3can4SJaQ==
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.1:
   version "4.0.2"
