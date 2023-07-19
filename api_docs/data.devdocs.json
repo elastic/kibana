@@ -28716,6 +28716,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.KQL_TELEMETRY_ROUTE_LATEST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "KQL_TELEMETRY_ROUTE_LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "src/plugins/data/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.META_FIELDS",
         "type": "string",
         "tags": [],
@@ -28742,6 +28757,21 @@
           "{ query: string | { [key: string]: any; }; language: string; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,229 @@
+{
+  "id": "@kbn/discover-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.buildDataTableRecord",
+        "type": "Function",
+        "tags": [],
+        "label": "buildDataTableRecord",
+        "description": [
+          "\nBuild a record for data table, explorer + classic one"
+        ],
+        "signature": [
+          "(doc: ",
+          "EsHitRecord",
+          ", dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, isAnchor: boolean | undefined) => ",
+          "DataTableRecord"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [
+              "the document returned from Elasticsearch"
+            ],
+            "signature": [
+              "EsHitRecord"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "this current data view"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecord.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isAnchor",
+            "description": [
+              "determines if the given doc is the anchor doc when viewing surrounding documents"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.buildDataTableRecordList",
+        "type": "Function",
+        "tags": [],
+        "label": "buildDataTableRecordList",
+        "description": [
+          "\nHelper to build multiple DataTableRecords at once, saved a bit of testing code lines"
+        ],
+        "signature": [
+          "(docs: ",
+          "EsHitRecord",
+          "[], dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined) => ",
+          "DataTableRecord",
+          "[]"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecordList.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "docs",
+            "description": [
+              "Array of documents returned from Elasticsearch"
+            ],
+            "signature": [
+              "EsHitRecord",
+              "[]"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecordList.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "this current data view"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getDocId",
+        "type": "Function",
+        "tags": [],
+        "label": "getDocId",
+        "description": [
+          "\nReturning a generated id of a given ES document, since `_id` can be the same\nwhen using different indices and shard routing"
+        ],
+        "signature": [
+          "(doc: ",
+          "EsHitRecord",
+          " & { _routing?: string | undefined; }) => string"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_doc_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getDocId.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "EsHitRecord",
+              " & { _routing?: string | undefined; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_doc_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

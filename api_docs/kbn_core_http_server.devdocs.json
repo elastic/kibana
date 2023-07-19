@@ -3496,10 +3496,6 @@
                 "path": "x-pack/plugins/actions/server/routes/legacy/list_action_types.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/server/scripts/route.ts"
-              },
-              {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/http/short_urls/register_get_route.ts"
               },
@@ -6284,10 +6280,6 @@
               {
                 "plugin": "contentManagement",
                 "path": "src/plugins/content_management/server/rpc/routes/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/kql_telemetry/route.ts"
               },
               {
                 "plugin": "share",
@@ -13795,6 +13787,10 @@
                 "path": "src/plugins/data/server/query/routes.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/scripts/route.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/json_schema.ts"
               },
@@ -14733,6 +14729,10 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/kql_telemetry/route.ts"
               },
               {
                 "plugin": "aiops",
