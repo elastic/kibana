@@ -6,5 +6,9 @@ schema:
   enum:
     - createdAt
     - updatedAt
+    - title
+    - category
+    - status
+    - severity
   default: createdAt
 example: updatedAt
