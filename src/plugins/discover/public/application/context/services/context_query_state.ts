@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataTableRecord, SearchResponseInterceptedWarning } from '../../../types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseInterceptedWarning } from '../../../types';
 
 export interface ContextFetchState {
   /**

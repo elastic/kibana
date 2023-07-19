@@ -8,17 +8,15 @@
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type {
-  DataTableRecord,
-  EsHitRecord,
-  SearchResponseInterceptedWarning,
-} from '../../../types';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseInterceptedWarning } from '../../../types';
 import type { DiscoverServices } from '../../../build_services';
 import { DISABLE_SHARD_FAILURE_WARNING } from '../../../../common/constants';
 import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
+
 
 export async function fetchAnchor(
   anchorId: string,

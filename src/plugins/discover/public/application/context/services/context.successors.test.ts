@@ -14,7 +14,7 @@ import { createContextSearchSourceStub } from './_stubs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Query } from '@kbn/es-query';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
+import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;

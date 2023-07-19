@@ -14,8 +14,8 @@ import { Query } from '@kbn/es-query';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { EsHitRecord } from '../../../types';
-import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
