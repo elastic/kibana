@@ -314,43 +314,6 @@ describe('Exception builder helpers', () => {
         };
         expect(output).toEqual(expected);
       });
-
-      test('it returns all fields that matched those in "exceptionable_fields.json" with no further filtering if "item.nested" is not "child" or "parent"', () => {
-        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-        );
-        const fieldsExpected: FieldSpec[] = [
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['keyword'],
-            name: 'file.path.caseless',
-            readFromDocValues: false,
-            scripted: false,
-            searchable: true,
-            type: 'string',
-          },
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'file.Ext.code_signature.status',
-            readFromDocValues: false,
-            scripted: false,
-            searchable: true,
-            subType: { nested: { path: 'file.Ext.code_signature' } },
-            type: 'string',
-          },
-        ];
-        const expected: DataViewBase = {
-          fields: fieldsExpected,
-          id: '1234',
-          title: 'logstash-*',
-        };
-        expect(output).toEqual(expected);
-      });
     });
   });
 

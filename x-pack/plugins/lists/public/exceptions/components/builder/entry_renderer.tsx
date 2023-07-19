@@ -303,8 +303,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [
       indexPattern,
       entry,
-      listType,
-      osTypes,
       isDisabled,
       handleFieldChange,
       allowCustomOptions,

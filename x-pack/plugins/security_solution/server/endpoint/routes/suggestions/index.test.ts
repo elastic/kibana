@@ -148,36 +148,6 @@ describe('when calling the Suggestions route handler', () => {
         body: 'Invalid suggestion_type: any',
       });
     });
-
-    it('should respond with bad request if wrong field name', async () => {
-      applyActionsEsSearchMock(
-        mockScopedEsClient.asInternalUser,
-        new EndpointActionGenerator().toEsSearchResponse([])
-      );
-
-      const mockContext = requestContextMock.convertContext(
-        createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-      );
-      const mockRequest = httpServerMock.createKibanaRequest<
-        TypeOf<typeof EndpointSuggestionsSchema.params>,
-        never,
-        never
-      >({
-        params: { suggestion_type: 'eventFilters' },
-        body: {
-          field: 'test-field',
-          query: 'test-query',
-          filters: 'test-filters',
-          fieldMeta: 'test-field-meta',
-        },
-      });
-
-      await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: 'Unsupported field name: test-field',
-      });
-    });
   });
   describe('without having right privileges', () => {
     beforeEach(() => {

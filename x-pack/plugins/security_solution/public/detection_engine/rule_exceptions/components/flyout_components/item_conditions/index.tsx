@@ -85,7 +85,6 @@ interface ExceptionsFlyoutConditionsComponentProps {
   onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
   /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
   onSetErrorExists: (errorExists: boolean) => void;
-  onFilterIndexPatterns: (patterns: DataViewBase) => DataViewBase;
 
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
@@ -103,7 +102,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onOsChange,
   onExceptionItemAdd,
   onSetErrorExists,
-  onFilterIndexPatterns,
   getExtendedFields,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
