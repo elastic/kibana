@@ -215,6 +215,7 @@ const CasesFindRequestSortFieldsRt = rt.keyof({
   category: null,
   createdAt: null,
   updatedAt: null,
+  closedAt: null,
   status: null,
   severity: null,
 });

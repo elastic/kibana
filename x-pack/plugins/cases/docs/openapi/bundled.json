@@ -3986,6 +3986,7 @@
           "enum": [
             "createdAt",
             "updatedAt",
+            "closedAt",
             "title",
             "category",
             "status",

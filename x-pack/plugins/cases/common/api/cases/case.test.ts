@@ -389,6 +389,15 @@ describe('Case', () => {
       });
     });
 
+    it('succeeds with closedAt as sortField', () => {
+      const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'closedAt' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, sortField: 'closedAt', page: 1, perPage: 10 },
+      });
+    });
+
     it('succeeds with severity as sortField', () => {
       const query = CasesFindRequestRt.decode({ ...defaultRequest, sortField: 'severity' });
 
