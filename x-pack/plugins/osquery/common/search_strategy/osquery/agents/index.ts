@@ -16,4 +16,7 @@ export interface AgentsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export type AgentsRequestOptions = RequestOptionsPaginated;
+export type AgentsRequestOptions = RequestOptionsPaginated & {
+  kuery?: string;
+  filterQuery: undefined;
+};
