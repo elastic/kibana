@@ -24,7 +24,4 @@ if (!global.hasOwnProperty('TextEncoder')) {
 
 // NOTE: We should evaluate removing this once we upgrade to Node 18 and find out if loaders.gl already fixed this usage
 // https://github.com/jsdom/jsdom/issues/2555
-if (!Object.hasOwn(global, 'Blob')) {
-  const { Blob } = require('buffer');
-  global.Blob = Blob;
-}
+require('@loaders.gl/polyfills');
