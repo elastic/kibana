@@ -18,16 +18,15 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiText,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { cloneDeep, get, set } from 'lodash';
 import type { EuiCheckboxProps } from '@elastic/eui/src/components/form/checkbox/checkbox';
-import { getEmptyValue } from '../../../../../../../common/components/empty_value';
-import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
-import type { PolicyFormComponentCommonProps } from '../../types';
-import { SettingCard, SettingCardHeader } from '../setting_card';
-import { PolicyOperatingSystem } from '../../../../../../../../common/endpoint/types';
-import type { UIPolicyConfig } from '../../../../../../../../common/endpoint/types';
+import { getEmptyValue } from '../../../../../../common/components/empty_value';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import type { PolicyFormComponentCommonProps } from '../types';
+import { SettingCard, SettingCardHeader } from './setting_card';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+import type { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 
 const mapOperatingSystemToPolicyOsKey = {
   [OperatingSystem.WINDOWS]: PolicyOperatingSystem.windows,
@@ -48,15 +47,15 @@ export interface EventFormOption<T extends OperatingSystem> {
 }
 
 export interface SupplementalEventFormOption<T extends OperatingSystem> {
+  name: string;
+  protectionField: ProtectionField<T>;
+  indented?: boolean;
   id?: string;
   title?: string;
   description?: string;
-  name: string;
   uncheckedName?: string;
-  protectionField: ProtectionField<T>;
   tooltipText?: string;
   beta?: boolean;
-  indented?: boolean;
   isDisabled?(policyConfig: UIPolicyConfig): boolean;
 }
 
@@ -112,7 +111,7 @@ export const EventCollectionCard = memo(
         })}
         supportedOss={[os]}
         rightCorner={
-          <EuiText size="s" color="subdued">
+          <EuiText size="s" color="subdued" data-test-subj={getTestId('selectedCount')}>
             {i18n.translate(
               'xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled',
               {
@@ -134,23 +133,25 @@ export const EventCollectionCard = memo(
         </SettingCardHeader>
         <EuiSpacer size="s" />
 
-        {options.map(({ name, protectionField }) => {
-          const keyPath = `${policyOs}.events.${protectionField}`;
+        <div data-test-subj={getTestId('options')}>
+          {options.map(({ name, protectionField }) => {
+            const keyPath = `${policyOs}.events.${protectionField}`;
 
-          return (
-            <EventCheckbox
-              label={name}
-              key={keyPath}
-              keyPath={keyPath}
-              policy={policy}
-              onChange={onChange}
-              mode={mode}
-              data-test-subj={getTestId(protectionField as string)}
-            />
-          );
-        })}
+            return (
+              <EventCheckbox
+                label={name}
+                key={keyPath}
+                keyPath={keyPath}
+                policy={policy}
+                onChange={onChange}
+                mode={mode}
+                data-test-subj={getTestId(protectionField as string)}
+              />
+            );
+          })}
 
-        {selectedCount === 0 && !isEditMode && <div>{getEmptyValue()}</div>}
+          {selectedCount === 0 && !isEditMode && <div>{getEmptyValue()}</div>}
+        </div>
 
         {supplementalOptions &&
           supplementalOptions.map(
@@ -167,6 +168,7 @@ export const EventCollectionCard = memo(
             }) => {
               const keyPath = `${policyOs}.events.${protectionField}`;
               const isChecked = get(policy, keyPath);
+              const fieldString = protectionField as string;
 
               if (!isEditMode && !isChecked) {
                 return null;
@@ -176,18 +178,25 @@ export const EventCollectionCard = memo(
                 <div
                   key={String(protectionField)}
                   style={indented ? { paddingLeft: theme.eui.euiSizeL } : {}}
+                  data-test-subj={getTestId(`${fieldString}Container`)}
                 >
                   {title && (
                     <>
                       <EuiSpacer size="m" />
-                      <SettingCardHeader>{title}</SettingCardHeader>
+                      <SettingCardHeader data-test-subj={getTestId(`${fieldString}Title`)}>
+                        {title}
+                      </SettingCardHeader>
                     </>
                   )}
 
                   {description && (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiText size="xs" color="subdued">
+                      <EuiText
+                        size="xs"
+                        color="subdued"
+                        data-test-subj={getTestId(`${fieldString}Description`)}
+                      >
                         {description}
                       </EuiText>
                     </>
@@ -206,19 +215,27 @@ export const EventCollectionCard = memo(
                         onChange={onChange}
                         mode={mode}
                         disabled={isDisabled ? isDisabled(policy) : false}
-                        data-test-subj={getTestId(protectionField as string)}
+                        data-test-subj={getTestId(fieldString)}
                       />
                     </EuiFlexItem>
 
                     {tooltipText && (
                       <EuiFlexItem grow={false}>
-                        <EuiIconTip position="right" content={tooltipText} />
+                        <EuiIconTip
+                          position="right"
+                          content={tooltipText}
+                          anchorProps={{ 'data-test-subj': getTestId(`${fieldString}TooltipIcon`) }}
+                        />
                       </EuiFlexItem>
                     )}
 
                     {beta && (
                       <EuiFlexItem grow={false}>
-                        <EuiBetaBadge label="beta" size="s" />
+                        <EuiBetaBadge
+                          label="beta"
+                          size="s"
+                          data-test-subj={getTestId(`${fieldString}Badge`)}
+                        />
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
@@ -250,7 +267,6 @@ const EventCheckbox = memo<EventCheckboxProps>(
     disabled,
     'data-test-subj': dataTestSubj,
   }) => {
-    const checkboxId = useGeneratedHtmlId();
     const isChecked: boolean = get(policy, keyPath);
     const isEditMode = mode === 'edit';
     const displayLabel = isChecked ? label : unCheckedLabel ? unCheckedLabel : label;
@@ -268,7 +284,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
     return isEditMode ? (
       <EuiCheckbox
         key={keyPath}
-        id={checkboxId}
+        id={keyPath}
         label={displayLabel}
         data-test-subj={dataTestSubj}
         checked={isChecked}
@@ -276,7 +292,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
         disabled={disabled}
       />
     ) : isChecked ? (
-      <div>{displayLabel}</div>
+      <div data-test-subj={dataTestSubj}>{displayLabel}</div>
     ) : null;
   }
 );
