@@ -7,6 +7,7 @@
  */
 
 export {
+  IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
   formatFieldValue,
@@ -14,5 +15,6 @@ export {
   getDocId,
   getIgnoredReason,
   getShouldShowFieldHandler,
-  IgnoredReason,
+  isNestedFieldParent,
+  usePager,
 } from './src';
