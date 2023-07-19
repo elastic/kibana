@@ -54,15 +54,14 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'TEST',
+            name: 'TEST-1',
             namespace: 'default',
           })
           .expect(200);
-        const { body: responseBody } = await supertest
-          .get(`/api/fleet/agent_policies?kuery=name:TEST`)
+        await supertest
+          .get(`/api/fleet/agent_policies?kuery=name:TEST-1`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        expect(responseBody.items.length).to.eql(1);
       });
 
       it('should return 400 if passed kuery is not correct', async () => {

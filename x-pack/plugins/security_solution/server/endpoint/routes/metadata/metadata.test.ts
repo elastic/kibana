@@ -182,19 +182,19 @@ describe('test endpoint routes', () => {
                 should: [
                   {
                     bool: {
-                      should: [{ match: { 'fleet-agents.status': 'updating' } }],
+                      should: [{ match: { status: 'updating' } }],
                       minimum_should_match: 1,
                     },
                   },
                   {
                     bool: {
-                      should: [{ match: { 'fleet-agents.status': 'unenrolling' } }],
+                      should: [{ match: { status: 'unenrolling' } }],
                       minimum_should_match: 1,
                     },
                   },
                   {
                     bool: {
-                      should: [{ match: { 'fleet-agents.status': 'enrolling' } }],
+                      should: [{ match: { status: 'enrolling' } }],
                       minimum_should_match: 1,
                     },
                   },

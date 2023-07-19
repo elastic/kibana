@@ -19,7 +19,6 @@ import {
   agentPolicyRouteService,
   agentRouteService,
   AGENTS_INDEX,
-  AGENTS_PREFIX,
 } from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -132,7 +131,7 @@ export const waitForHostToEnroll = async (
   while (!found && !hasTimedOut()) {
     found = await fetchFleetAgents(kbnClient, {
       perPage: 1,
-      kuery: `(${AGENTS_PREFIX}.local_metadata.host.hostname.keyword: "${hostname}") and (${AGENTS_PREFIX}.status:online)`,
+      kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
       showInactive: false,
     }).then((response) => response.items[0]);
 

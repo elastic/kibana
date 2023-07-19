@@ -78,7 +78,6 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
-
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,

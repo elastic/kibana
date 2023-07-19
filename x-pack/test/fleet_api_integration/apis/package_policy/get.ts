@@ -492,12 +492,11 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
       });
-      it('should return 200 even if the passed kuery does not have prefix ingest-package-policies', async () => {
-        const { body: packagePolicyResponse } = await supertest
-          .get(`/api/fleet/package_policies?kuery=package.name:test`)
+      it('should return 400 if the passed kuery does not have prefix ingest-package-policies', async () => {
+        await supertest
+          .get(`/api/fleet/package_policies?kuery=package.name:endpoint`)
           .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-        expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
+          .expect(400);
       });
 
       it('should return 400 if the passed kuery is not correct', async () => {

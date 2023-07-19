@@ -180,7 +180,6 @@ export const getAgentsHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
   const soClient = coreContext.savedObjects.client;
-  const { kuery } = request.query;
 
   try {
     const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
@@ -188,7 +187,7 @@ export const getAgentsHandler: RequestHandler<
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
-      kuery,
+      kuery: request.query.kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
       getStatusSummary: request.query.getStatusSummary,

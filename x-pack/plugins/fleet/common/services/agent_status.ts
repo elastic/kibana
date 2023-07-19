@@ -6,7 +6,6 @@
  */
 
 import type { Agent, AgentStatus, FleetServerAgent } from '../types';
-import { AGENTS_PREFIX } from '../constants';
 
 export function getPreviousAgentStatusForOfflineAgents(
   agent: Agent | FleetServerAgent
@@ -35,25 +34,25 @@ export function getPreviousAgentStatusForOfflineAgents(
 }
 
 export function buildKueryForUnenrolledAgents(): string {
-  return `${AGENTS_PREFIX}.status:unenrolled`;
+  return 'status:unenrolled';
 }
 
 export function buildKueryForOnlineAgents(): string {
-  return `${AGENTS_PREFIX}.status:online`;
+  return 'status:online';
 }
 
 export function buildKueryForErrorAgents(): string {
-  return `(${AGENTS_PREFIX}.status:error or ${AGENTS_PREFIX}.status:degraded)`;
+  return '(status:error or status:degraded)';
 }
 
 export function buildKueryForOfflineAgents(): string {
-  return `${AGENTS_PREFIX}.status:offline`;
+  return 'status:offline';
 }
 
 export function buildKueryForUpdatingAgents(): string {
-  return `(${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`;
+  return '(status:updating or status:unenrolling or status:enrolling)';
 }
 
 export function buildKueryForInactiveAgents() {
-  return `${AGENTS_PREFIX}.status:inactive`;
+  return 'status:inactive';
 }

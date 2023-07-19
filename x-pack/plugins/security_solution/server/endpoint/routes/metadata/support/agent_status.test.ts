@@ -11,48 +11,44 @@ describe('buildStatusesKuery', () => {
   it('correctly builds kuery for healthy status', () => {
     const status = ['healthy'];
     const kuery = buildStatusesKuery(status);
-    expect(kuery).toMatchInlineSnapshot(`"(fleet-agents.status:online)"`);
+    expect(kuery).toMatchInlineSnapshot(`"(status:online)"`);
   });
 
   it('correctly builds kuery for offline status', () => {
     const status = ['offline'];
     const kuery = buildStatusesKuery(status);
-    expect(kuery).toMatchInlineSnapshot(`"(fleet-agents.status:offline)"`);
+    expect(kuery).toMatchInlineSnapshot(`"(status:offline)"`);
   });
 
   it('correctly builds kuery for unhealthy status', () => {
     const status = ['unhealthy'];
     const kuery = buildStatusesKuery(status);
-    expect(kuery).toMatchInlineSnapshot(
-      `"((fleet-agents.status:error or fleet-agents.status:degraded))"`
-    );
+    expect(kuery).toMatchInlineSnapshot(`"((status:error or status:degraded))"`);
   });
 
   it('correctly builds kuery for updating status', () => {
     const status = ['updating'];
     const kuery = buildStatusesKuery(status);
     expect(kuery).toMatchInlineSnapshot(
-      `"((fleet-agents.status:updating or fleet-agents.status:unenrolling or fleet-agents.status:enrolling))"`
+      `"((status:updating or status:unenrolling or status:enrolling))"`
     );
   });
 
   it('correctly builds kuery for inactive status', () => {
     const status = ['inactive'];
     const kuery = buildStatusesKuery(status);
-    expect(kuery).toMatchInlineSnapshot(`"(fleet-agents.status:inactive)"`);
+    expect(kuery).toMatchInlineSnapshot(`"(status:inactive)"`);
   });
 
   it('correctly builds kuery for unenrolled status', () => {
     const status = ['unenrolled'];
     const kuery = buildStatusesKuery(status);
-    expect(kuery).toMatchInlineSnapshot(`"(fleet-agents.status:unenrolled)"`);
+    expect(kuery).toMatchInlineSnapshot(`"(status:unenrolled)"`);
   });
 
   it('correctly builds kuery for multiple statuses', () => {
     const statuses = ['offline', 'unhealthy'];
     const kuery = buildStatusesKuery(statuses);
-    expect(kuery).toMatchInlineSnapshot(
-      `"(fleet-agents.status:offline OR (fleet-agents.status:error or fleet-agents.status:degraded))"`
-    );
+    expect(kuery).toMatchInlineSnapshot(`"(status:offline OR (status:error or status:degraded))"`);
   });
 });

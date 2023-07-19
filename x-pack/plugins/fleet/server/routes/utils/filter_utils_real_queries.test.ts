@@ -225,6 +225,26 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
         },
       ]);
     });
+
+    it('Allows passing query without SO', async () => {
+      const astFilter = esKuery.fromKueryExpression(`package.name:packageName`);
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        indexMapping: PACKAGE_POLICIES_MAPPINGS,
+        storeValue: true,
+        skipNormalization: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'package.name',
+          type: 'package',
+        },
+      ]);
+    });
   });
 
   describe('Agents', () => {
@@ -635,7 +655,7 @@ describe('validateKuery validates real kueries', () => {
   describe('Package policies', () => {
     it('Search by package name without SO', async () => {
       const validationObj = validateKuery(
-        `package.name:packageName`,
+        `package.name:fleet_server`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
         PACKAGE_POLICIES_MAPPINGS,
         true
@@ -645,7 +665,7 @@ describe('validateKuery validates real kueries', () => {
 
     it('Search by package name', async () => {
       const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
         PACKAGE_POLICIES_MAPPINGS,
         true
@@ -653,7 +673,26 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('invalid search by nested wrong parameter', async () => {
+    it('Search by package name works with attributes if skipNormalization is not passed', async () => {
+      const validationObj = validateKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Search by name and version', async () => {
+      const validationObj = validateKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "TestName" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version: "8.8.0"`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS,
+        true
+      );
+      expect(validationObj?.isValid).toEqual(true);
+    });
+
+    it('Invalid search by nested wrong parameter', async () => {
       const validationObj = validateKuery(
         `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.is_managed:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
@@ -689,25 +728,6 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.error).toEqual(
         `KQLSyntaxError: This key 'ingest-package-policies.non_existent_parameter' does NOT exist in ingest-package-policies saved object index patterns`
       );
-    });
-
-    it('Search by package name works with attributes if skipNormalization is not passed', async () => {
-      const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
-
-    it('Search by name and version', async () => {
-      const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "TestName" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version: "8.8.0"`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
     });
   });
 

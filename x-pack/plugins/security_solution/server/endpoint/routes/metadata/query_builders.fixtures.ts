@@ -48,7 +48,7 @@ export const expectedCompleteUnitedIndexQuery = {
           should: [
             {
               match: {
-                'fleet-agents.status': 'online',
+                status: 'online',
               },
             },
           ],

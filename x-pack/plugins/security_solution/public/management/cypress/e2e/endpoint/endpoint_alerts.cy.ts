@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AGENTS_PREFIX } from '@kbn/fleet-plugin/common';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { getAlertsTableRows, navigateToAlertsList } from '../../screens/alerts';
 import { waitForEndpointAlerts } from '../../tasks/alerts';
@@ -89,7 +88,7 @@ describe('Endpoint generated alerts', () => {
       })
       .then(() => {
         return navigateToAlertsList(
-          `query=(language:kuery,query:'${AGENTS_PREFIX}.agent.id: "${createdHost.agentId}" ')`
+          `query=(language:kuery,query:'agent.id: "${createdHost.agentId}" ')`
         );
       });
 

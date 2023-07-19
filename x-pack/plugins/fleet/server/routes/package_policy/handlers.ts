@@ -45,11 +45,11 @@ import type {
 import { installationStatuses, inputsFormat } from '../../../common/constants';
 import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
+import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
-import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
@@ -64,12 +64,11 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
 
-  const { kuery, ...restOfQuery } = request.query;
   try {
-    const { items, total, page, perPage } = await packagePolicyService.list(soClient, {
-      kuery,
-      ...restOfQuery,
-    });
+    const { items, total, page, perPage } = await packagePolicyService.list(
+      soClient,
+      request.query
+    );
 
     checkAllowedPackages(items, limitedToPackages, 'package.name');
 
