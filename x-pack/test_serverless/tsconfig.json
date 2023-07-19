@@ -32,5 +32,6 @@
     "@kbn/default-nav-analytics",
     "@kbn/default-nav-management",
     "@kbn/default-nav-devtools",
+    "@kbn/security-plugin",
   ]
 }
