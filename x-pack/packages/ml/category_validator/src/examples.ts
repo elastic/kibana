@@ -30,15 +30,10 @@ const CHUNK_SIZE = 100;
  * produced from a field.
  *
  * @export
- * @param {IScopedClusterClient} {
-  asCurrentUser,
-  asInternalUser,
-}
+ * @param {IScopedClusterClient} client
  */
-export function categorizationExamplesProvider({
-  asCurrentUser,
-  asInternalUser,
-}: IScopedClusterClient) {
+export function categorizationExamplesProvider(client: IScopedClusterClient) {
+  const { asCurrentUser, asInternalUser } = client;
   const validationResults = new ValidationResults();
 
   /**

@@ -63,18 +63,27 @@ export enum VALIDATION_RESULT {
  * Description for each validation result.
  */
 export const VALIDATION_CHECK_DESCRIPTION = {
+  /**
+   * Examples were successfully loaded.
+   */
   [VALIDATION_RESULT.NO_EXAMPLES]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validNoDataFound',
     {
       defaultMessage: 'Examples were successfully loaded.',
     }
-  ),
+  ) as string,
+  /**
+   * The loaded examples were tokenized successfully.
+   */
   [VALIDATION_RESULT.FAILED_TO_TOKENIZE]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validFailureToGetTokens',
     {
       defaultMessage: 'The loaded examples were tokenized successfully.',
     }
-  ),
+  ) as string,
+  /**
+   * More than {tokenCount} tokens per example were found in over {percentage}% of the loaded examples.
+   */
   [VALIDATION_RESULT.TOKEN_COUNT]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validTokenLength',
     {
@@ -85,7 +94,10 @@ export const VALIDATION_CHECK_DESCRIPTION = {
         tokenCount: VALID_TOKEN_COUNT,
       },
     }
-  ),
+  ) as string,
+  /**
+   * The median line length of the loaded examples was less than {medianCharCount} characters.
+   */
   [VALIDATION_RESULT.MEDIAN_LINE_LENGTH]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validMedianLineLength',
     {
@@ -95,7 +107,10 @@ export const VALIDATION_CHECK_DESCRIPTION = {
         medianCharCount: MEDIAN_LINE_LENGTH_LIMIT,
       },
     }
-  ),
+  ) as string,
+  /**
+   * Less than {percentage}% of the loaded examples were null.
+   */
   [VALIDATION_RESULT.NULL_VALUES]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validNullValues',
     {
@@ -104,17 +119,23 @@ export const VALIDATION_CHECK_DESCRIPTION = {
         percentage: Math.floor(100 - NULL_COUNT_PERCENT_LIMIT * 100),
       },
     }
-  ),
+  ) as string,
+  /**
+   * Less than 10000 tokens were found in total in the loaded examples.
+   */
   [VALIDATION_RESULT.TOO_MANY_TOKENS]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validTooManyTokens',
     {
       defaultMessage: 'Less than 10000 tokens were found in total in the loaded examples.',
     }
-  ),
+  ) as string,
+  /**
+   * The user has sufficient privileges to perform the checks.
+   */
   [VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validUserPrivileges',
     {
       defaultMessage: 'The user has sufficient privileges to perform the checks.',
     }
-  ),
+  ) as string,
 };
