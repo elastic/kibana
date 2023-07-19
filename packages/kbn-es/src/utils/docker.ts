@@ -291,7 +291,7 @@ async function runServerlessEsNode(log: ToolingLog, { params, name, image }: Ser
   Container Name: ${name}
   Container Id:   ${stdout}
 
-  View running output:  ${chalk.bold(`docker attach --sig-proxy=false ${name}`)}
+  View logs:            ${chalk.bold(`docker logs -f ${name}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${name} /bin/bash`)}
 `)
   );

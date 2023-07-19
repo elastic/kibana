@@ -21,7 +21,6 @@ export const docker: Command = {
   help: (defaults: Record<string, any> = {}) => {
     const { password } = defaults;
 
-    // TODO: additional env/es params?
     // TODO: tests
     // TODO: docs?
     // TODO: setup pw

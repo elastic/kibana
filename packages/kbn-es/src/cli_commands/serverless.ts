@@ -19,7 +19,6 @@ export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
   usage: 'es serverless [<args>]',
   help: (defaults: Record<string, any> = {}) => {
-    // TODO: Additional env/es params
     return dedent`
     Options:
 
