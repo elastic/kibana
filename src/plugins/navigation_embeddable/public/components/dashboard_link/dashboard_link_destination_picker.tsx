@@ -22,8 +22,8 @@ import {
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { DashboardItem } from '../../embeddable/types';
+import { DashboardLinkStrings } from './dashboard_link_strings';
 import { memoizedFetchDashboard, memoizedFetchDashboards } from './dashboard_link_tools';
-import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
 
 type DashboardComboBoxOption = EuiComboBoxOptionOption<DashboardItem>;
 
@@ -86,7 +86,7 @@ export const DashboardLinkDestinationPicker = ({
         <EuiFlexGroup gutterSize="s" alignItems="center" className={contentClassName}>
           {dashboardId === parentDashboardId && (
             <EuiFlexItem grow={false}>
-              <EuiBadge>{DashboardLinkEmbeddableStrings.getCurrentDashboardLabel()}</EuiBadge>
+              <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
           <EuiFlexItem className={'navEmbeddableLinkText'}>
@@ -108,8 +108,8 @@ export const DashboardLinkDestinationPicker = ({
       fullWidth
       className={'navEmbeddableDashboardPicker'}
       isLoading={loadingDashboardList}
-      aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
-      placeholder={DashboardLinkEmbeddableStrings.getDashboardPickerPlaceholder()}
+      aria-label={DashboardLinkStrings.getDashboardPickerAriaLabel()}
+      placeholder={DashboardLinkStrings.getDashboardPickerPlaceholder()}
       singleSelection={{ asPlainText: true }}
       options={dashboardList}
       onSearchChange={(searchValue) => {

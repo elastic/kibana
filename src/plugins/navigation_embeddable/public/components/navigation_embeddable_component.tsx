@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import { DASHBOARD_LINK_TYPE } from '../embeddable/types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { ExternalLinkComponent } from './external_link/external_link_component';
+import { DASHBOARD_LINK_TYPE, NAV_HORIZONTAL_LAYOUT } from '../embeddable/types';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { memoizedGetOrderedLinkList } from '../editor/navigation_embeddable_editor_tools';
 
@@ -46,20 +45,14 @@ export const NavigationEmbeddableComponent = () => {
     }, {});
   }, [links]);
 
-  /** TODO: Render this as a list **or** "tabs" as part of https://github.com/elastic/kibana/issues/154357 */
   return (
     <EuiPanel
       className={`navEmbeddableComponent ${
-        layout === 'horizontal' ? 'eui-xScroll' : 'eui-yScroll'
+        layout === NAV_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
       }`}
       paddingSize="xs"
     >
-      <EuiListGroup
-        maxWidth={false}
-        className={`${
-          layout === 'horizontal' ? 'horizontalLayoutWrapper' : 'verticalLayoutWrapper '
-        }`}
-      >
+      <EuiListGroup maxWidth={false} className={`${layout}LayoutWrapper`}>
         {orderedLinks.map((link) => linkItems[link.id].content)}
       </EuiListGroup>
     </EuiPanel>

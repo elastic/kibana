@@ -2,10 +2,6 @@
   font-weight: $euiFontWeightRegular;
 
   .navigationLink {
-    .euiListGroupItem__button {
-      text-decoration: none !important;
-    }
-
     &.navigationLinkCurrent {
       border-radius: 0;
   
@@ -40,6 +36,8 @@
     flex-direction: row;
 
     .navigationLink {
+      // min-width: 50px;
+
       &.navigationLinkCurrent {
         box-shadow: $euiColorPrimary 0px -2px 0px inset;
 

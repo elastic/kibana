@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
 import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
-import { DashboardLinkEmbeddableStrings } from '../components/dashboard_link/dashboard_link_strings';
+import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 
 /**
  * Dashboard to dashboard links
@@ -33,6 +34,23 @@ export const EXTERNAL_LINK_TYPE = 'externalLink';
 export const NAV_HORIZONTAL_LAYOUT = 'horizontal';
 export const NAV_VERTICAL_LAYOUT = 'vertical';
 export type NavigationLayoutType = typeof NAV_HORIZONTAL_LAYOUT | typeof NAV_VERTICAL_LAYOUT;
+
+export const NavigationLayoutInfo: {
+  [id in NavigationLayoutType]: { icon: string; displayName: string };
+} = {
+  [NAV_HORIZONTAL_LAYOUT]: {
+    icon: 'sortRight',
+    displayName: i18n.translate('navigationEmbeddable.editor.horizontalLayout', {
+      defaultMessage: 'Horizontal',
+    }),
+  },
+  [NAV_VERTICAL_LAYOUT]: {
+    icon: 'sortDown',
+    displayName: i18n.translate('navigationEmbeddable.editor.verticalLayout', {
+      defaultMessage: 'Vertical',
+    }),
+  },
+};
 
 /**
  * Navigation embeddable explicit input
@@ -61,8 +79,8 @@ export const NavigationLinkInfo: {
 } = {
   [DASHBOARD_LINK_TYPE]: {
     icon: 'dashboardApp',
-    displayName: DashboardLinkEmbeddableStrings.getDisplayName(),
-    description: DashboardLinkEmbeddableStrings.getDescription(),
+    displayName: DashboardLinkStrings.getDisplayName(),
+    description: DashboardLinkStrings.getDescription(),
   },
   [EXTERNAL_LINK_TYPE]: {
     icon: 'link',

@@ -17,8 +17,8 @@ import {
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationEmbeddableInput } from './types';
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
+import { NavigationEmbeddableInput, NAV_VERTICAL_LAYOUT } from './types';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
@@ -26,6 +26,7 @@ export type NavigationEmbeddableFactory = EmbeddableFactory;
 // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant as part of https://github.com/elastic/kibana/issues/154381
 const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableInput, 'id'> => ({
   links: {},
+  layout: NAV_VERTICAL_LAYOUT,
   disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
@@ -83,7 +84,7 @@ export class NavigationEmbeddableFactoryDefinition
       // swallow the promise rejection that happens when the flyout is closed
       return {};
     });
-    console.log('input', input);
+    // console.log('input', input);
     return input;
   }
 

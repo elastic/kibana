@@ -10,11 +10,12 @@ import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import { EuiListGroupItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationEmbeddableLink } from '../../embeddable/types';
 import { fetchDashboard } from './dashboard_link_tools';
+import { DashboardLinkStrings } from './dashboard_link_strings';
+import { NavigationEmbeddableLink } from '../../embeddable/types';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
 export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
@@ -51,7 +52,6 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
         navigationLinkCurrent: link.destination === parentDashboardId,
       })}
       id={`navigationLink--${link.id}`}
-      disabled={loadingDestinationDashboard}
       onClick={
         link.destination === parentDashboardId
           ? undefined
@@ -59,7 +59,15 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
               // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
             }
       }
-      label={linkLabel}
+      label={
+        loadingDestinationDashboard ? (
+          <EuiButtonEmpty size="s" isLoading={true} flush="both">
+            {DashboardLinkStrings.getLoadingDashboardLabel()}
+          </EuiButtonEmpty>
+        ) : (
+          linkLabel
+        )
+      }
     />
   );
 };

@@ -6,16 +6,11 @@
  * Side Public License, v 1.
  */
 
-import useObservable from 'react-use/lib/useObservable';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
-  EuiText,
   EuiForm,
-  EuiImage,
   EuiTitle,
-  EuiPanel,
-  EuiSpacer,
   EuiButton,
   EuiToolTip,
   EuiFormRow,
@@ -24,31 +19,30 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiFlyoutBody,
-  EuiEmptyPrompt,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiDragDropContext,
   euiDragDropReorder,
-  EuiButtonGroup,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { coreServices } from '../../services/kibana_services';
 import {
   NavigationLayoutType,
   NavigationEmbeddableLink,
   NavigationEmbeddableInput,
   NavigationEmbeddableLinkList,
+  NAV_HORIZONTAL_LAYOUT,
+  NAV_VERTICAL_LAYOUT,
+  NavigationLayoutInfo,
 } from '../../embeddable/types';
 import { NavEmbeddableStrings } from '../navigation_embeddable_strings';
-
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { memoizedGetOrderedLinkList } from '../../editor/navigation_embeddable_editor_tools';
 import { NavigationEmbeddablePanelEditorLink } from './navigation_embeddable_panel_editor_link';
-
-import noLinksIllustrationDark from '../../assets/empty_links_dark.svg';
-import noLinksIllustrationLight from '../../assets/empty_links_light.svg';
+import { NavigationEmbeddablePanelEditorEmptyPrompt } from './navigation_embeddable_panel_editor_empty_prompt';
 
 import './navigation_embeddable_editor.scss';
 
@@ -63,11 +57,10 @@ const NavigationEmbeddablePanelEditor = ({
   initialInput: Partial<NavigationEmbeddableInput>;
   onSave: (input: Partial<NavigationEmbeddableInput>) => void;
 }) => {
-  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const editLinkFlyoutRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const [currentLayout, setCurrentLayout] = useState<NavigationLayoutType>(
-    initialInput.layout ?? 'vertical'
+    initialInput.layout ?? NAV_VERTICAL_LAYOUT
   );
   const [orderedLinks, setOrderedLinks] = useState<NavigationEmbeddableLink[]>([]);
 
@@ -152,6 +145,16 @@ const NavigationEmbeddablePanelEditor = ({
     );
   }, [onSave, orderedLinks, currentLayout]);
 
+  const layoutOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
+    return ([NAV_HORIZONTAL_LAYOUT, NAV_VERTICAL_LAYOUT] as NavigationLayoutType[]).map((type) => {
+      return {
+        iconType: NavigationLayoutInfo[type].icon,
+        id: type,
+        label: NavigationLayoutInfo[type].displayName,
+      };
+    });
+  }, []);
+
   return (
     <>
       <div ref={editLinkFlyoutRef} />
@@ -166,35 +169,11 @@ const NavigationEmbeddablePanelEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm fullWidth>
-          <EuiFormRow>
+          {orderedLinks.length === 0 ? (
+            <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
+          ) : (
             <>
-              {orderedLinks.length === 0 ? (
-                <EuiPanel paddingSize="m" hasBorder={true}>
-                  <EuiEmptyPrompt
-                    paddingSize="none"
-                    hasShadow={false}
-                    color="plain"
-                    icon={
-                      <EuiImage
-                        alt="alt"
-                        size="s"
-                        src={isDarkTheme ? noLinksIllustrationDark : noLinksIllustrationLight}
-                      />
-                    }
-                    body={
-                      <>
-                        <EuiText size="s">
-                          {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
-                        </EuiText>
-                        <EuiSpacer size="m" />
-                        <EuiButton size="s" onClick={() => addOrEditLink()} iconType="plusInCircle">
-                          {NavEmbeddableStrings.editor.getAddButtonLabel()}
-                        </EuiButton>
-                      </>
-                    }
-                  />
-                </EuiPanel>
-              ) : (
+              <EuiFormRow>
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable droppableId="navEmbeddableDroppableLinksArea">
@@ -224,29 +203,20 @@ const NavigationEmbeddablePanelEditor = ({
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>
-              )}
+              </EuiFormRow>
+              <EuiFormRow label="Layout">
+                <EuiButtonGroup
+                  legend={''}
+                  buttonSize="compressed"
+                  options={layoutOptions}
+                  idSelected={currentLayout}
+                  onChange={(id) => {
+                    setCurrentLayout(id as NavigationLayoutType);
+                  }}
+                />
+              </EuiFormRow>
             </>
-          </EuiFormRow>
-          <EuiFormRow label="Layout">
-            <EuiButtonGroup
-              legend="This is a basic group"
-              color="primary"
-              options={[
-                {
-                  id: `vertical`,
-                  label: 'Vertical',
-                },
-                {
-                  id: `horizontal`,
-                  label: 'Horizontal',
-                },
-              ]}
-              idSelected={currentLayout}
-              onChange={(id) => {
-                setCurrentLayout(id);
-              }}
-            />
-          </EuiFormRow>
+          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

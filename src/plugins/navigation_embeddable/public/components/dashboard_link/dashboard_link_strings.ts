@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DashboardLinkEmbeddableStrings = {
+export const DashboardLinkStrings = {
   getDisplayName: () =>
     i18n.translate('navigationEmbeddable.dashboardLink.displayName', {
       defaultMessage: 'Dashboard',
@@ -28,5 +28,9 @@ export const DashboardLinkEmbeddableStrings = {
   getCurrentDashboardLabel: () =>
     i18n.translate('navigationEmbeddable.dashboardLink.editor.currentDashboardLabel', {
       defaultMessage: 'Current',
+    }),
+  getLoadingDashboardLabel: () =>
+    i18n.translate('navigationEmbeddable.dashboardLink.editor.loadingDashboardLabel', {
+      defaultMessage: 'Loading...',
     }),
 };
