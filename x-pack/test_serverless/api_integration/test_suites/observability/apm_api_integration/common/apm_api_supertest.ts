@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { FtrConfigProviderContext } from '@kbn/test';
 import {
   ApmUsername,
   APM_TEST_PASSWORD,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { format, UrlObject } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
@@ -21,7 +19,6 @@ import type {
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
@@ -116,26 +113,18 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
   body: APIReturnType<TEndpoint>;
 }
 
-export const apmApiTestService = {
-  apmApiClient: async (context: FtrProviderContext) => {
-    const { username, password } = servers.kibana;
-    const esUrl = format(esServer);
+export async function getApmTestService({ readConfigFile }: FtrConfigProviderContext) {
+  const svlSharedConfig = await readConfigFile(require.resolve('../../../../config.base.ts'));
+  const kibanaServer = svlSharedConfig.get('servers.kibana');
 
-    // Creates APM users
-    await createApmUsers({
-      elasticsearch: { node: esUrl, username, password },
-      kibana: { hostname: 'https://localhost:8220' },
-    });
-
-    return {
-      viewerUser: await getApmApiClient({
-        kibanaServer,
-        username: ApmUsername.viewerUser,
-      }),
-      editorUser: await getApmApiClient({
-        kibanaServer,
-        username: ApmUsername.editorUser,
-      }),
-    };
-  },
-};
+  return {
+    viewerUser: await getApmApiClient({
+      kibanaServer,
+      username: ApmUsername.viewerUser,
+    }),
+    editorUser: await getApmApiClient({
+      kibanaServer,
+      username: ApmUsername.editorUser,
+    }),
+  };
+}

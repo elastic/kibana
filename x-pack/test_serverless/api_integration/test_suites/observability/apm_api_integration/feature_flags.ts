@@ -28,25 +28,24 @@ const sourceMapsResponse = {
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
+  const apmApiClient = getService('apmApiClient');
   const supertest = getService('supertest');
 
   describe('apm feature flags', () => {
     describe('fleet migrations', () => {
       it('rejects requests to save apm server schema', async () => {
-        const { body, status } = await supertest
-          .post('/api/apm/fleet/apm_server_schema 2023-10-31')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .send({ name: 'test', host_urls: ['https://localhost:8220'] });
+        const { body, status } = await apmApiClient.editorUser({
+          endpoint: 'GET /api/apm/fleet/apm_server_schema 2023-10-31',
+        });
 
         expect(body).toEqual(fleetMigrationResponse);
         expect(status).toBe(fleetMigrationResponse.statusCode);
       });
 
       it('rejects requests to get unsupported apm server schema', async () => {
-        const { body, status } = await supertest
-          .get('/internal/apm/fleet/apm_server_schema/unsupported')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .send({ name: 'test', host_urls: ['https://localhost:8220'] });
+        const { body, status } = await apmApiClient.editorUser({
+          endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
+        });
 
         expect(body).toEqual(fleetMigrationResponse);
         expect(status).toBe(fleetMigrationResponse.statusCode);
@@ -115,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     // it's returning 404 but we expect 501 Not implemented
-    describe.skip('source maps', () => {
+    describe('source maps', () => {
       it('rejects requests to list source maps', async () => {
         const { body, status } = await supertest
           .get('/api/apm/sourcemaps 2023-10-31')
