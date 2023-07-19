@@ -19,6 +19,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import { useGrouping } from '@kbn/securitysolution-grouping';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
@@ -336,6 +337,8 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 
   const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
+  return <TestGrouping />;
+
   return (
     <>
       <FindingsSearchBar
@@ -429,5 +432,54 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         </>
       )}
     </>
+  );
+};
+
+const TestGrouping = () => {
+  const { getGrouping, groupSelector, selectedGroups, setSelectedGroups } = useGrouping({
+    componentProps: {
+      // groupPanelRenderer: () => <div>hello</div>,
+      // groupStatsRenderer: () => <div>hi hi</div>,
+      onGroupToggle: () => {},
+      // unit: defaultUnit,
+    },
+    groupingId: 'groupingTestId',
+    defaultGroupingOptions: [
+      {
+        label: 'name',
+        key: 'name',
+      },
+      {
+        label: 'severity',
+        key: 'vulnerability.severity',
+      },
+    ],
+    fields: [
+      {
+        name: 'vulnerability.severity',
+        type: 'keyword',
+        searchable: false,
+        aggregatable: false,
+      },
+    ],
+  });
+
+  console.log(getGrouping);
+
+  const groupingComponent = getGrouping({
+    isLoading: false,
+    activePage: 1,
+    itemsPerPage: 5,
+    renderChildComponent: () => <div>child</div>,
+    onGroupClose: () => {},
+    selectedGroup: 'severity',
+    takeActionItems: () => [<div>actions</div>],
+  });
+
+  return (
+    <div>
+      <div>{groupingComponent}</div>
+      {/* <div>{groupSelector}</div>*/}
+    </div>
   );
 };
