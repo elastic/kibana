@@ -120,6 +120,7 @@ function ActionMenuSections({
     query: { rangeFrom, rangeTo, environment },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
