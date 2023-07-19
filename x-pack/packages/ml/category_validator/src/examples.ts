@@ -21,7 +21,6 @@ import { ValidationResults } from './validation_results';
 /**
  * The size of each chunk for processing examples.
  *
- * @type {100}
  */
 const CHUNK_SIZE = 100;
 
