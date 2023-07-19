@@ -18,9 +18,13 @@ function TutorialRedirect() {
   } = useApmPluginContext();
 
   if (serverlessOnboarding) {
-    navigateToUrl(basePath.prepend('/app/apm/onboarding'));
+    navigateToUrl(basePath.prepend('/app/apm/onboarding'), {
+      forceRedirect: true,
+    });
   } else {
-    navigateToUrl(basePath.prepend('/app/home#/tutorial/apm'));
+    navigateToUrl(basePath.prepend('/app/home#/tutorial/apm'), {
+      forceRedirect: true,
+    });
   }
   return <></>;
 }
