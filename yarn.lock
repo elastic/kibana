@@ -4658,6 +4658,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-category-validator@link:x-pack/packages/ml/category_validator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
   version "0.0.0"
   uid ""
