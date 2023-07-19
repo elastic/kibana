@@ -53,7 +53,7 @@ export const DiscoverTabContent = () => {
   const DiscoverContainer = discover.DiscoverContainer;
 
   return (
-    <EmbeddedDiscoverContainer>
+    <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
       <HideSearchSessionIndicatorBreadcrumbIcon />
       <DiscoverContainer
         overrideServices={services}
