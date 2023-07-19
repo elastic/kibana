@@ -47,10 +47,18 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
       getInputAsRefType: jest.fn(),
       getInputAsValueType: jest.fn(),
       inputIsRefType: jest.fn(),
-      unwrapAttributes: jest.fn(),
+      unwrapAttributes: jest.fn(() => ({
+        attributes: { id: 'savedSearch', title: 'savedSearchTitle' },
+      })),
       wrapAttributes: jest.fn(),
     } as unknown as SavedSearchAttributeService,
-    toSavedSearch: jest.fn(),
+    toSavedSearch: jest.fn((id, result) =>
+      Promise.resolve({
+        id,
+        title: result.attributes.title,
+        searchSource: createEmptySearchSource(),
+      })
+    ),
   },
 });
 

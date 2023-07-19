@@ -10,12 +10,10 @@ import { ContactCardEmbeddable } from '@kbn/embeddable-plugin/public/lib/test_sa
 import { ViewSavedSearchAction } from './view_saved_search_action';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { createStartContractMock } from '../__mocks__/start_contract';
-import { savedSearchMock } from '../__mocks__/saved_search';
 import { discoverServiceMock } from '../__mocks__/services';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const applicationMock = createStartContractMock();
-const savedSearch = savedSearchMock;
 const services = discoverServiceMock;
 const searchInput = {
   timeRange: {
@@ -78,9 +76,10 @@ describe('view saved search action', () => {
   it('execute navigates to a saved search', async () => {
     const action = new ViewSavedSearchAction(applicationMock);
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
+    await new Promise((resolve) => setTimeout(resolve, 0));
     await action.execute({ embeddable, trigger });
     expect(applicationMock.navigateToApp).toHaveBeenCalledWith('discover', {
-      path: `#/view/${savedSearch.id}`,
+      path: `#/view/${searchInput.savedObjectId}`,
     });
   });
 });
