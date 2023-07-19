@@ -28,7 +28,7 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
-      return esArchiver(on, config);
+      esArchiver(on, config);
     },
   },
 });
