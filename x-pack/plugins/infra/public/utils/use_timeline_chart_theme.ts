@@ -6,9 +6,11 @@
  */
 
 import { SettingsProps } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 export function useTimelineChartTheme(): Pick<SettingsProps, 'baseTheme' | 'theme'> {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { charts },
   } = useKibanaContextForPlugin();
@@ -27,7 +29,7 @@ export function useTimelineChartTheme(): Pick<SettingsProps, 'baseTheme' | 'them
       crosshair: {
         band: {
           ...theme.crosshair?.band,
-          fill: '#d3dae6',
+          fill: euiTheme.colors.lightShade,
         },
       },
       axes: {
