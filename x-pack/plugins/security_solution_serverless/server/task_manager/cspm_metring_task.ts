@@ -117,8 +117,7 @@ export const getFindingsByResourceAggQuery = () => ({
         {
           range: {
             '@timestamp': {
-              // gte: 'now-' + CSPM_CYCLE_SCAN_FREQUENT, // the "look back" period should be the same as the scan interval
-              gte: 'now-' + '3d', // the "look back" period should be the same as the scan interval
+              gte: 'now-' + CSPM_CYCLE_SCAN_FREQUENT, // the "look back" period should be the same as the scan interval
             },
           },
         },
