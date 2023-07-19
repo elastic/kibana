@@ -166,7 +166,6 @@ const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
 ];
 
 /**
- *
  * Determine the Docker image from CLI options and defaults
  */
 const resolveDockerImage = ({
@@ -222,7 +221,6 @@ async function maybeCreateDockerNetwork(log: ToolingLog) {
 }
 
 /**
- *
  * Common setup for Docker and Serverless containers
  */
 async function setupDocker(log: ToolingLog) {
@@ -262,6 +260,9 @@ async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOption
   return getDataPath();
 }
 
+/**
+ * Resolve the Serverless ES image based on defaults and CLI options
+ */
 function getServerlessImage(options: ServerlessOptions) {
   return resolveDockerImage({
     ...options,
@@ -270,6 +271,9 @@ function getServerlessImage(options: ServerlessOptions) {
   });
 }
 
+/**
+ * Run a single node in the ES Serverless cluster
+ */
 async function runServerlessEsNode(log: ToolingLog, { params, name, image }: ServerlessEsNodeArgs) {
   const dockerCmd = SHARED_SERVERLESS_PARAMS.concat(
     params,
@@ -293,6 +297,9 @@ async function runServerlessEsNode(log: ToolingLog, { params, name, image }: Ser
   );
 }
 
+/**
+ * Runs an ES Serverless Cluster through Docker
+ */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
   await setupDocker(log);
 
@@ -312,12 +319,15 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     `);
 }
 
+/**
+ * Resolve the Elasticsearch image based on defaults and CLI options
+ */
 function getDockerImage(options: DockerOptions) {
   return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
 }
 
 /**
- * Resolve the command to run Elasticsearch Docker container
+ * Resolve the full command to run Elasticsearch Docker container
  */
 const resolveDockerCmd = (options: DockerOptions) => {
   return options.dockerCmd
@@ -325,6 +335,10 @@ const resolveDockerCmd = (options: DockerOptions) => {
     : DOCKER_BASE_CMD.concat(getDockerImage(options));
 };
 
+/**
+ *
+ * Runs an Elasticsearch Docker Container
+ */
 export async function runDockerContainer(log: ToolingLog, options: DockerOptions) {
   await setupDocker(log);
 
@@ -332,8 +346,8 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   const dockerCmd = resolveDockerCmd(options);
 
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
-  const { stdout } = await execa('docker', dockerCmd, {
-    // inherit is required to show Java console output for pw, enrollment token, etc
+  await execa('docker', dockerCmd, {
+    // inherit is required to show Docker pull output and Java console output for pw, enrollment token, etc
     stdio: ['ignore', 'inherit', 'inherit'],
   });
 }
