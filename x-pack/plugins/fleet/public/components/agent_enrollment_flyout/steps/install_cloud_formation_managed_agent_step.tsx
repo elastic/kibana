@@ -15,18 +15,20 @@ import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/re
 
 import { CloudFormationInstructions } from '../cloud_formation_instructions';
 
+import type { CloudSecurityIntegration } from '../types';
+
 export const InstallCloudFormationManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
   enrollToken,
   isComplete,
-  cloudFormationTemplateUrl,
+  cloudSecurityIntegration,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   enrollToken?: string;
   isComplete?: boolean;
-  cloudFormationTemplateUrl: string;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -38,7 +40,7 @@ export const InstallCloudFormationManagedAgentStep = ({
     children:
       selectedApiKeyId && apiKeyData ? (
         <CloudFormationInstructions
-          cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+          cloudSecurityIntegration={cloudSecurityIntegration}
           enrollmentAPIKey={enrollToken}
         />
       ) : (

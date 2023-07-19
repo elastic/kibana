@@ -22,7 +22,9 @@ export type SelectionType = 'tabs' | 'radio' | undefined;
 
 export interface CloudSecurityIntegration {
   integrationType: CloudSecurityIntegrationType | undefined;
-  cloudformationUrl: string | undefined;
+  cloudFormationUrl: string | undefined;
+  isLoading: boolean;
+  isCloudFormation: boolean;
 }
 
 export interface BaseProps {
@@ -65,5 +67,4 @@ export interface InstructionProps extends BaseProps {
   setSelectedAPIKeyId: (key?: string) => void;
   fleetServerHosts: string[];
   fleetProxy?: FleetProxy;
-  cloudFormationTemplateUrl?: string;
 }

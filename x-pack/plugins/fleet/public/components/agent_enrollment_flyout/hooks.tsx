@@ -8,13 +8,17 @@ import { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy, AgentPolicy } from '../../types';
-import { sendGetOneAgentPolicy, useStartServices } from '../../hooks';
+import { sendGetOneAgentPolicy, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
 import {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
-import { getCloudFormationTemplateUrlFromAgentPolicy } from '../../services';
+
+import {
+  getCloudFormationTemplateUrlFromPackageInfo,
+  getCloudFormationTemplateUrlFromAgentPolicy,
+} from '../../services';
 
 import type { K8sMode, CloudSecurityIntegrationType } from './types';
 
@@ -74,19 +78,43 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
 }
 
 export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
+  const integrationVersion = useMemo(() => {
+    return getCloudSecurityIntegrationVersionFromAgentPolicy(agentPolicy);
+  }, [agentPolicy]);
+
+  const { data: packageInfoData, isLoading } = useGetPackageInfoByKeyQuery(
+    FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+    integrationVersion,
+    { full: true }
+  );
+
   const cloudSecurityIntegration = useMemo(() => {
     if (!agentPolicy) {
       return undefined;
     }
 
     const integrationType = getCloudSecurityIntegrationTypeFromPackagePolicy(agentPolicy);
-    const cloudformationUrl = getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
+    if (!integrationType) return undefined;
+
+    const cloudFormationTemplateFromAgentPolicy =
+      getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
+
+    // Use the latest CloudFormation template for the current version
+    // So it guarantee that the template version matches the integration version
+    // when the integration is upgraded.
+    // In case it can't find the template for the current version,
+    // it will fallback to the one from the agent policy.
+    const cloudFormationUrl = packageInfoData?.item
+      ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
+      : cloudFormationTemplateFromAgentPolicy;
 
     return {
+      isLoading,
       integrationType,
-      cloudformationUrl,
+      cloudFormationUrl,
+      isCloudFormation: Boolean(cloudFormationTemplateFromAgentPolicy),
     };
-  }, [agentPolicy]);
+  }, [agentPolicy, packageInfoData?.item, isLoading]);
 
   return { cloudSecurityIntegration };
 }
@@ -106,4 +134,14 @@ const getCloudSecurityIntegrationTypeFromPackagePolicy = (
   if (!packagePolicy) return undefined;
   return packagePolicy?.inputs?.find((input) => input.enabled)
     ?.policy_template as CloudSecurityIntegrationType;
+};
+
+const getCloudSecurityIntegrationVersionFromAgentPolicy = (
+  agentPolicy?: AgentPolicy
+): string | undefined => {
+  const packagePolicy = agentPolicy?.package_policies?.find(
+    (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
+  );
+  if (!packagePolicy) return undefined;
+  return packagePolicy?.package?.version;
 };
