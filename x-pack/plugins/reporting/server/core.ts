@@ -55,6 +55,7 @@ import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 import { CsvSearchSourceImmediateExportType } from './export_types/csv_searchsource_immediate';
+import { ExportType } from './export_types/common';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -110,12 +111,7 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private csvSearchSourceExport: CsvSearchSourceExportType;
-  private csvV2ExportType: CsvV2ExportType;
-  private pdfExport: PdfExportType;
-  private pdfV1Export: PdfV1ExportType;
-  private pngExport: PngExportType;
-  private pngV1Export: PngV1ExportType;
+  private exportTypes: ExportType[] = [];
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -131,28 +127,20 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    this.csvSearchSourceExport = new CsvSearchSourceExportType(
-      this.core,
-      this.config,
-      this.logger,
-      this.context
+    // Export Type declarations
+    this.exportTypes.push(
+      new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
     );
-    this.exportTypesRegistry.register(this.csvSearchSourceExport);
-
-    this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.csvV2ExportType);
-
-    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.pdfExport);
-
-    this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.pngExport);
-
+    this.exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+    this.exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
+    this.exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
     // deprecated export types for tests
-    this.pdfV1Export = new PdfV1ExportType(this.core, this.config, this.logger, this.context);
-    this.pngV1Export = new PngV1ExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.pdfV1Export);
-    this.exportTypesRegistry.register(this.pngV1Export);
+    this.exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+    this.exportTypes.push(new PngV1ExportType(this.core, this.config, this.logger, this.context));
+
+    this.exportTypes.forEach((et) => {
+      this.exportTypesRegistry.register(et);
+    });
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -179,12 +167,9 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.csvSearchSourceExport.setup(setupDeps);
-    this.csvV2ExportType.setup(setupDeps);
-    this.pdfExport.setup(setupDeps);
-    this.pdfV1Export.setup(setupDeps);
-    this.pngExport.setup(setupDeps);
-    this.pngV1Export.setup(setupDeps);
+    this.exportTypes.forEach((et) => {
+      et.setup(setupDeps);
+    });
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
