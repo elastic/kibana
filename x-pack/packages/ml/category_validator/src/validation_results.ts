@@ -13,13 +13,10 @@ import {
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   CATEGORY_EXAMPLES_ERROR_LIMIT,
   CATEGORY_EXAMPLES_WARNING_LIMIT,
-} from '../../../../../common/constants/categorization_job';
-import {
-  FieldExampleCheck,
-  CategoryFieldExample,
   VALIDATION_RESULT,
-} from '../../../../../common/types/categories';
-import { getMedianStringLength } from '../../../../../common/util/string_utils';
+} from '../common/constants/categorization';
+import type { FieldExampleCheck, CategoryFieldExample } from '../common/types/categories';
+import { getMedianStringLength } from './util';
 
 export class ValidationResults {
   private _results: FieldExampleCheck[] = [];

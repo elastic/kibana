@@ -500,6 +500,7 @@
     "@kbn/maps-vector-tile-utils": "link:x-pack/packages/maps/vector_tile_utils",
     "@kbn/ml-agg-utils": "link:x-pack/packages/ml/agg_utils",
     "@kbn/ml-anomaly-utils": "link:x-pack/packages/ml/anomaly_utils",
+    "@kbn/ml-category-validator": "link:x-pack/packages/ml/category_validator",
     "@kbn/ml-data-frame-analytics-utils": "link:x-pack/packages/ml/data_frame_analytics_utils",
     "@kbn/ml-data-grid": "link:x-pack/packages/ml/data_grid",
     "@kbn/ml-date-picker": "link:x-pack/packages/ml/date_picker",
