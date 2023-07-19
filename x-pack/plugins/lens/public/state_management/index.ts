@@ -63,6 +63,7 @@ export const makeConfigureStore = (
           'payload.history',
           'payload.newState.dataViews',
           'lens.activeData',
+          'payload.source.filterOperations',
           'payload.target.filterOperations',
         ],
         ignoredPaths: ['lens.dataViews.indexPatterns'],
