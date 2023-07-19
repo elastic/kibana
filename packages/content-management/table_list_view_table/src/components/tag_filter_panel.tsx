@@ -175,7 +175,7 @@ export const TagFilterPanel: FC<Props> = ({
             </EuiFlexItem>
 
             <EuiFlexItem css={saveBtnWrapperCSS}>
-              <EuiButton onClick={closePopover}>Save</EuiButton>
+              <EuiButton onClick={closePopover}>Apply</EuiButton>
             </EuiFlexItem>
 
             <EuiFlexItem>
