@@ -83,12 +83,6 @@ export abstract class ExportType<
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
-  protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = this.startDeps;
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-    return scopedUiSettingsService;
-  }
-
   private getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
     const spacesService = this.setupDeps.spaces?.spacesService;
     if (spacesService) {
@@ -101,6 +95,12 @@ export abstract class ExportType<
         logger.debug(`Request uses default Space`);
       }
     }
+  }
+
+  protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+    const { uiSettings: uiSettingsService } = this.startDeps;
+    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
+    return scopedUiSettingsService;
   }
 
   protected async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {

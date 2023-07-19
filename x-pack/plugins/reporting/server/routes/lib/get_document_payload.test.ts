@@ -40,8 +40,7 @@ describe('getDocumentPayload', () => {
   });
 
   describe('when the report is completed', () => {
-    // skipping because printable_pdf
-    xit('should return payload for the completed report', async () => {
+    it('should return payload for the completed report', async () => {
       await expect(
         getDocumentPayload({
           id: 'id1',
@@ -67,8 +66,7 @@ describe('getDocumentPayload', () => {
       );
     });
 
-    // Skipping because CSV
-    xit('should return warning headers', async () => {
+    it('should return warning headers', async () => {
       await expect(
         getDocumentPayload({
           id: 'id1',

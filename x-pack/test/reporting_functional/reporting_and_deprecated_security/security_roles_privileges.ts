@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingFunctional.teardownEcommerce();
     });
 
-    describe.skip('Dashboard: Download CSV file', () => {
+    describe('Dashboard: Download CSV file', () => {
       it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Discover: Generate CSV', () => {
+    describe('Discover: Generate CSV', () => {
       it('does not allow user that does not have reporting_user role', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openSavedSearch(SAVEDSEARCH_TITLE);
@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.tryGeneratePdfFail();
       });
 
-      xit('does allow user with reporting_user role', async () => {
+      it('does allow user with reporting_user role', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedVisualization(VIS_TITLE);
         await reportingFunctional.tryGeneratePdfSuccess();

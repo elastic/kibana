@@ -330,6 +330,7 @@ examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 x-pack/plugins/discover_log_explorer @elastic/infra-monitoring-ui
 src/plugins/discover @elastic/kibana-data-discovery
+packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
@@ -483,6 +484,7 @@ x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
+x-pack/packages/ml/category_validator @elastic/ml-ui
 x-pack/packages/ml/data_frame_analytics_utils @elastic/ml-ui
 x-pack/packages/ml/data_grid @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui

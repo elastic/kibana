@@ -55,6 +55,7 @@ export class CsvV2ExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
+  declare startDeps: CsvV2ExportTypeStartDeps;
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);

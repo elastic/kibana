@@ -7,10 +7,8 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
-import type {
-  JobParamsCsvFromSavedObject,
-  ReportApiJSON,
-} from '@kbn/reporting-plugin/common/types';
+import type { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types-csv';
+import type { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import rison from '@kbn/rison';
 import request from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -104,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   };
 
-  describe.skip('CSV Generation from Saved Search ID', () => {
+  describe('CSV Generation from Saved Search ID', () => {
     before(async () => {
       // clear any previous UI Settings
       await kibanaServer.uiSettings.replace({});

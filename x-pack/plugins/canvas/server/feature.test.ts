@@ -13,6 +13,8 @@ beforeEach(() => {
   mockReportingPlugin = {
     usesUiCapabilities: () => false,
     registerExportTypes: () => {},
+    getSpaceId: jest.fn(),
+    getScreenshots: jest.fn(),
   };
 });
 
@@ -89,6 +91,8 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
   mockReportingPlugin = {
     usesUiCapabilities: () => true,
     registerExportTypes: () => {},
+    getSpaceId: jest.fn(),
+    getScreenshots: jest.fn(),
   };
   expect(getCanvasFeature({ reporting: mockReportingPlugin })).toMatchInlineSnapshot(`
     Object {

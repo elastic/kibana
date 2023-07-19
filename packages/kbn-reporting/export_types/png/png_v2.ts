@@ -25,8 +25,17 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
 import { Writable } from 'stream';
-import * as Rx from 'rxjs';
-import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs';
+import {
+  finalize,
+  fromEventPattern,
+  lastValueFrom,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
@@ -66,7 +75,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     };
   };
 
-  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult> {
+  public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
     return this.startDeps.screenshotting.getScreenshots({
       ...options,
       urls: options?.urls?.map((url) =>
@@ -94,7 +103,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     let apmGeneratePng: { end: () => void } | null | undefined;
     const { encryptionKey } = this.config;
 
-    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
+    const process$: Observable<TaskRunResult> = of(1).pipe(
       mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
       mergeMap((headers) => {
         const url = getFullRedirectAppUrl(
@@ -136,7 +145,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
       finalize(() => apmGeneratePng?.end())
     );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
-    return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
+    const stop$ = fromEventPattern(cancellationToken.on);
+    return lastValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

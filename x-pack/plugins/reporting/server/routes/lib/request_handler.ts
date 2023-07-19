@@ -72,7 +72,7 @@ export class RequestHandler {
     const payload = {
       ...job,
       headers,
-      title: jobParams.title,
+      title: job.title,
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,

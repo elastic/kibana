@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     return result;
   };
 
-  describe.skip('Job Listing APIs', () => {
+  describe('Job Listing APIs', () => {
     before(async () => {
       await reportingAPI.initLogs();
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
