@@ -12,8 +12,13 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import type { TaskPayloadPNG, TaskPayloadPDF } from '@kbn/reporting-export-types-deprecated';
-import { ReportingConfigType, ReportingServerInfo, validateUrls } from '@kbn/reporting-common';
+import {
+  ReportingConfigType,
+  ReportingServerInfo,
+  TaskPayloadPDF,
+  TaskPayloadPNG,
+  validateUrls,
+} from '@kbn/reporting-common';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 
 function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
