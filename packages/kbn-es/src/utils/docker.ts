@@ -38,9 +38,10 @@ interface ServerlessEsNodeArgs {
   params: string[];
 }
 
+// TODO verify docker image
 const DOCKER_REGISTRY = 'docker.elastic.co';
 
-export const DOCKER_BASE_CMD = [
+const DOCKER_BASE_CMD = [
   'run',
 
   '--rm',
@@ -58,12 +59,12 @@ export const DOCKER_BASE_CMD = [
 
   '-p',
   '127.0.0.1:9300:9300',
+];
 
-  '--env',
-  'ES_LOG_STYLE=file',
+const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
+  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
 
-  '--env',
-  'ES_JAVA_OPTS=-Xms1g -Xmx1g',
+  ['ES_LOG_STYLE', 'file'],
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
@@ -243,6 +244,10 @@ function resolveEsArgs(
     });
   }
 
+  if (options.password) {
+    esArgs.set('ELASTIC_PASSWORD', options.password);
+  }
+
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
 }
 
@@ -326,12 +331,13 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node) => {
-      const esArgs = resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options);
-
       await runServerlessEsNode(log, {
         ...node,
         image,
-        params: node.params.concat(esArgs, volumeCmd),
+        params: node.params.concat(
+          resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
+          volumeCmd
+        ),
       });
       return node.name;
     })
@@ -353,9 +359,14 @@ function getDockerImage(options: DockerOptions) {
  * Resolve the full command to run Elasticsearch Docker container
  */
 const resolveDockerCmd = (options: DockerOptions) => {
-  return options.dockerCmd
-    ? options.dockerCmd.split(' ')
-    : DOCKER_BASE_CMD.concat(getDockerImage(options));
+  if (options.dockerCmd) {
+    return options.dockerCmd.split(' ');
+  }
+
+  return DOCKER_BASE_CMD.concat(
+    resolveEsArgs(DEFAULT_DOCKER_ESARGS, options),
+    getDockerImage(options)
+  );
 };
 
 /**
@@ -365,7 +376,6 @@ const resolveDockerCmd = (options: DockerOptions) => {
 export async function runDockerContainer(log: ToolingLog, options: DockerOptions) {
   await setupDocker(log);
 
-  // TODO: add args
   const dockerCmd = resolveDockerCmd(options);
 
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
