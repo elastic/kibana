@@ -10,27 +10,32 @@ import { Toast } from '@kbn/core-notifications-browser';
 import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
+export interface DeduplicateResult {
+  toasts: Toast[];
+  idToToasts: Record<string, Toast[]>;
+}
+
 /**
  * Collects toast messages to groups based on the `getKeyOf` function,
  * then represents every group of message with a single toast
  * @param allToasts
- * @param dismissToast
+ * @return the deduplicated list of toasts, and a lookup to find toasts represented by their first toast's ID
  */
-export function deduplicateToasts(allToasts: Toast[], dismissToast: (id: string) => void) {
+export function deduplicateToasts(allToasts: Toast[]): DeduplicateResult {
   const toastGroups = groupByKey(allToasts);
 
   const distinctToasts: Toast[] = [];
+  const idToToasts: Record<string, Toast[]> = {};
   for (const toastGroup of Object.values(toastGroups)) {
+    idToToasts[toastGroup[0].id] = toastGroup;
     if (toastGroup.length === 1) {
       distinctToasts.push(toastGroup[0]);
     } else {
-      distinctToasts.push(
-        mergeToasts(toastGroup, () => toastGroup.forEach((t) => dismissToast(t.id)))
-      );
+      distinctToasts.push(mergeToasts(toastGroup));
     }
   }
 
-  return distinctToasts;
+  return { toasts: distinctToasts, idToToasts };
 }
 
 /**
@@ -70,15 +75,10 @@ function groupByKey(allToasts: Toast[]) {
   return toastGroups;
 }
 
-function mergeToasts(toasts: Toast[], closeAll: () => void) {
+function mergeToasts(toasts: Toast[]): Toast {
   const firstElement = toasts[0];
-  const key = getKeyOf(firstElement);
   return {
     ...firstElement,
-    id: key,
-    text: firstElement.text,
-    toastLifeTimeMs: firstElement.toastLifeTimeMs,
-    onClose: closeAll,
     title: (
       <>
         {firstElement.title}{' '}

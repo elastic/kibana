@@ -9,8 +9,7 @@ exports[`global_toast_list with duplicate elements renders the list with a singl
   toasts={
     Array [
       Object {
-        "id": "AOL Notifications You've got mail!",
-        "onClose": [Function],
+        "id": "0",
         "text": "You've got mail!",
         "title": <React.Fragment>
           AOL Notifications
@@ -22,7 +21,7 @@ exports[`global_toast_list with duplicate elements renders the list with a singl
             4
           </EuiNotificationBadge>
         </React.Fragment>,
-        "toastLifeTimeMs": undefined,
+        "toastLifeTimeMs": 5000,
       },
     ]
   }

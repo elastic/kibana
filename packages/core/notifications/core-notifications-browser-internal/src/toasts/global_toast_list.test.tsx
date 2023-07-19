@@ -7,6 +7,7 @@
  */
 
 import { EuiGlobalToastList } from '@elastic/eui';
+import { Toast } from '@kbn/core-notifications-browser/src/types';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Observable, from, EMPTY } from 'rxjs';
@@ -58,7 +59,13 @@ it('passes latest value from toasts$ to <EuiGlobalToastList />', () => {
 describe('global_toast_list with duplicate elements', () => {
   const dummyText = `You've got mail!`;
   const dummyTitle = `AOL Notifications`;
-  const toast = (id: any) => ({ id, text: dummyText, title: dummyTitle });
+  const toast = (id: any): Toast => ({
+    id: id.toString(),
+    text: dummyText,
+    title: dummyTitle,
+    toastLifeTimeMs: 5000,
+  });
+
   const globalToastList = shallow(
     render({
       toasts$: from([[toast(0), toast(1), toast(2), toast(3)]]) as any,
@@ -81,15 +88,13 @@ describe('global_toast_list with duplicate elements', () => {
 
   it(`calls all toast's dismiss when closed`, () => {
     const firstRenderedToast = toastsProp![0];
-    if (firstRenderedToast.onClose) {
-      firstRenderedToast.onClose();
-      expect(mockDismissToast).toHaveBeenCalledTimes(4);
-      expect(mockDismissToast).toHaveBeenCalledWith(0);
-      expect(mockDismissToast).toHaveBeenCalledWith(1);
-      expect(mockDismissToast).toHaveBeenCalledWith(2);
-      expect(mockDismissToast).toHaveBeenCalledWith(3);
-    } else {
-      fail('Merged toasts should have onClose defined on them');
-    }
+    const dismissToast: (toast: Toast) => void = globalToastList.prop('dismissToast');
+    dismissToast(firstRenderedToast);
+
+    expect(mockDismissToast).toHaveBeenCalledTimes(4);
+    expect(mockDismissToast).toHaveBeenCalledWith('0');
+    expect(mockDismissToast).toHaveBeenCalledWith('1');
+    expect(mockDismissToast).toHaveBeenCalledWith('2');
+    expect(mockDismissToast).toHaveBeenCalledWith('3');
   });
 });

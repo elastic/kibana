@@ -11,8 +11,6 @@ import { Toast } from '@kbn/core-notifications-browser';
 import { render } from 'enzyme';
 import { ReactElement, ReactNode } from 'react';
 
-const mockDismissToast = jest.fn();
-
 function toast(title: string, text: string, id = Math.random()): Toast {
   return {
     id: id.toString(),
@@ -25,7 +23,7 @@ describe('deduplicate toasts', () => {
   it('returns an empty list for an empty input', () => {
     const toasts: Toast[] = [];
 
-    const deduplicatedToastList = deduplicateToasts(toasts, mockDismissToast);
+    const { toasts: deduplicatedToastList } = deduplicateToasts(toasts);
 
     expect(deduplicatedToastList).toHaveLength(0);
   });
@@ -36,7 +34,7 @@ describe('deduplicate toasts', () => {
       toast('X', 'Y'), // single toast
     ];
 
-    const deduplicatedToastList = deduplicateToasts(toasts, mockDismissToast);
+    const { toasts: deduplicatedToastList } = deduplicateToasts(toasts);
 
     expect(deduplicatedToastList).toHaveLength(toasts.length);
     verifyTextAndTitle(deduplicatedToastList[0], 'A', 'B');
@@ -53,7 +51,7 @@ describe('deduplicate toasts', () => {
       toast('X', 'Y'),
     ];
 
-    const deduplicatedToastList = deduplicateToasts(toasts, mockDismissToast);
+    const { toasts: deduplicatedToastList } = deduplicateToasts(toasts);
 
     expect(deduplicatedToastList).toHaveLength(3);
     verifyTextAndTitle(deduplicatedToastList[0], 'A 2', 'B');

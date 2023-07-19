@@ -22,6 +22,7 @@ interface Props {
 
 interface State {
   toasts: Toast[];
+  idToToasts: Record<string, Toast[]>;
 }
 
 const convertToEui = (toast: Toast): EuiToast => ({
@@ -33,19 +34,28 @@ const convertToEui = (toast: Toast): EuiToast => ({
 export class GlobalToastList extends React.Component<Props, State> {
   public state: State = {
     toasts: [],
+    idToToasts: {},
   };
 
   private subscription?: Subscription;
 
   public componentDidMount() {
-    this.subscription = this.props.toasts$.subscribe((toasts) => {
-      this.setState({ toasts: deduplicateToasts(toasts, this.props.dismissToast) });
+    this.subscription = this.props.toasts$.subscribe((redundantToastList) => {
+      const { toasts, idToToasts } = deduplicateToasts(redundantToastList);
+      this.setState({ toasts, idToToasts });
     });
   }
 
   public componentWillUnmount() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+  }
+
+  private closeToastsRepresentedById(id: string) {
+    const representedToasts = this.state.idToToasts[id];
+    if (representedToasts) {
+      representedToasts.forEach((toast) => this.props.dismissToast(toast.id));
     }
   }
 
@@ -57,12 +67,7 @@ export class GlobalToastList extends React.Component<Props, State> {
         })}
         data-test-subj="globalToastList"
         toasts={this.state.toasts.map(convertToEui)}
-        dismissToast={({ id }) => {
-          const toastIsDisplayed = this.state.toasts.some((e) => e.id === id);
-          if (toastIsDisplayed) {
-            this.props.dismissToast(id);
-          }
-        }}
+        dismissToast={({ id }) => this.closeToastsRepresentedById(id)}
         /**
          * This prop is overridden by the individual toasts that are added.
          * Use `Infinity` here so that it's obvious a timeout hasn't been
