@@ -44,26 +44,6 @@ export const configSchema = schema.object({
   lockedSource: schema.oneOf([schema.literal('assets'), schema.literal('signals')], {
     defaultValue: 'signals',
   }),
-  implicitCollection: schema.maybe(
-    schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      interval: schema.duration({ defaultValue: '5m' }),
-      input: schema.maybe(
-        schema.object({
-          hosts: schema.string(),
-          username: schema.string(),
-          password: schema.string(),
-        })
-      ),
-      output: schema.maybe(
-        schema.object({
-          hosts: schema.string(),
-          username: schema.string(),
-          password: schema.string(),
-        })
-      ),
-    })
-  ),
 });
 
 export type AssetManagerConfig = TypeOf<typeof configSchema>;
