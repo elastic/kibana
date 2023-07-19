@@ -228,6 +228,6 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public migrateReportingIndicesIlmPolicy() {
-    return this.http.put(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS); // FIXME This is wrong
+    return this.http.put(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS);
   }
 }

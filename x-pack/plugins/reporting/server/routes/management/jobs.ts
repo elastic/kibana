@@ -27,7 +27,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   const registerGetList = () => {
     // list jobs in the queue, paginated
     const path = INTERNAL_ROUTES.JOBS.LIST;
-
     router.get(
       {
         path,
@@ -71,7 +70,6 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   const registerGetCount = () => {
     // return the count of all jobs in the queue
     const path = INTERNAL_ROUTES.JOBS.COUNT;
-
     router.get(
       { path, validate: false },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {

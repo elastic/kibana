@@ -37,7 +37,6 @@ const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
 });
 
 const path = INTERNAL_ROUTES.DIAGNOSE.BROWSER;
-
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
