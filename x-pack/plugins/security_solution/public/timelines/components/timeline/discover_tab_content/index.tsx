@@ -56,7 +56,7 @@ export const DiscoverTabContent = () => {
     <EmbeddedDiscoverContainer>
       <HideSearchSessionIndicatorBreadcrumbIcon />
       <DiscoverContainer
-        services={services}
+        overrideServices={services}
         scopedHistory={history as ScopedHistory}
         customize={customize}
       />

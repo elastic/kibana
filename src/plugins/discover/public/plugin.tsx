@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ComponentType, useMemo } from 'react';
+import React, { ComponentType } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
   AppMountParameters,
@@ -414,25 +414,24 @@ export class DiscoverPlugin
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
     const isDev = this.initializerContext.env.mode.dev;
-    const services = buildServices(
-      core,
-      plugins,
-      this.initializerContext,
-      this.locator!,
-      this.contextLocator!,
-      this.singleDocLocator!
-    );
+
+    const getDiscoverServicesInternal = async () => {
+      return this.getDiscoverServices(core, plugins);
+    };
 
     return {
       locator: this.locator,
       customize: createCustomizeFunction(this.profileRegistry),
       DiscoverContainer: (props: DiscoverContainerProps) => {
-        const mergedServices = useMemo(
-          () => ({ ...services, ...props.services }),
-          [props.services]
+        const { overrideServices, ...restProps } = props;
+        return (
+          <DiscoverContainerInternal
+            overrideServices={overrideServices}
+            getDiscoverServices={getDiscoverServicesInternal}
+            isDev={isDev}
+            {...restProps}
+          />
         );
-
-        return <DiscoverContainerInternal {...props} services={mergedServices} isDev={isDev} />;
       },
     };
   }
@@ -443,6 +442,23 @@ export class DiscoverPlugin
     }
   }
 
+  getDiscoverServices = async (core: CoreStart, plugins: DiscoverStartPlugins) => {
+    const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+      locator: this.locator!,
+      contextLocator: this.contextLocator!,
+      singleDocLocator: this.singleDocLocator!,
+    });
+
+    return buildServices(
+      core,
+      plugins,
+      this.initializerContext,
+      locator,
+      contextLocator,
+      singleDocLocator
+    );
+  };
+
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
@@ -452,25 +468,12 @@ export class DiscoverPlugin
       };
     };
 
-    const getDiscoverServices = async () => {
-      const [coreStart, discoverStartPlugins] = await core.getStartServices();
-      const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
-        locator: this.locator!,
-        contextLocator: this.contextLocator!,
-        singleDocLocator: this.singleDocLocator!,
-      });
-
-      return buildServices(
-        coreStart,
-        discoverStartPlugins,
-        this.initializerContext,
-        locator,
-        contextLocator,
-        singleDocLocator
-      );
+    const getDiscoverServicesInternal = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return this.getDiscoverServices(coreStart, deps);
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);
+    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }
