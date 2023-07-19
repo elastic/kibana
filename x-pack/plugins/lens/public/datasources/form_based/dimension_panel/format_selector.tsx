@@ -16,7 +16,7 @@ import {
   EuiSwitch,
   EuiCode,
 } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
