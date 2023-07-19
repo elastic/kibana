@@ -52,14 +52,14 @@ export const performUpdate = async <T>(
     migration: migrationHelper,
     validation: validationHelper,
   } = helpers;
+  const { securityExtension } = extensions;
+  const namespace = commonHelper.getCurrentNamespace(options.namespace);
+
   // check request is valid
   const { validRequest, error } = isValidRequest({ allowedTypes, type, id });
   if (!validRequest && error) {
     throw error;
   }
-
-  const { securityExtension } = extensions;
-  const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
   const {
     version,
