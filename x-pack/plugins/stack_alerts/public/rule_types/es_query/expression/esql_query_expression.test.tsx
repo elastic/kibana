@@ -57,10 +57,6 @@ describe('EsqlQueryRuleTypeExpression', () => {
     hasExpressionValidationErrors.mockReturnValue(false);
   });
 
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-
   it('should render EsqlQueryRuleTypeExpression with expected components', () => {
     const result = render(
       <EsqlQueryExpression
