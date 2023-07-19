@@ -367,6 +367,7 @@ export class UserActionPersister {
     userAction: UserActionEvent;
   } & IndexRefresh): Promise<void> {
     const createdUserAction = await this.create({ ...userAction.parameters, refresh });
+
     this.auditLogger.log(userAction.eventDetails, createdUserAction.id);
   }
 
@@ -380,7 +381,7 @@ export class UserActionPersister {
 
       const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(attributes);
 
-      return await this.context.unsecuredSavedObjectsClient.create<T>(
+      const res = await this.context.unsecuredSavedObjectsClient.create<T>(
         CASE_USER_ACTION_SAVED_OBJECT,
         decodedAttributes as unknown as T,
         {
@@ -388,6 +389,7 @@ export class UserActionPersister {
           refresh,
         }
       );
+      return res;
     } catch (error) {
       this.context.log.error(`Error on POST a new case user action: ${error}`);
       throw error;

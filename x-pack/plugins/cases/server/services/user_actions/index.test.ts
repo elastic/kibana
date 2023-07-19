@@ -649,6 +649,22 @@ describe('CaseUserActionService', () => {
                   full_name: 'Elastic User',
                   username: 'elastic',
                 },
+                type: 'category',
+                owner: 'securitySolution',
+                payload: { category: 'pizza toppings' },
+              },
+              references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: UserActionActions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
                 type: 'description',
                 owner: 'securitySolution',
                 payload: { description: 'updated desc' },
@@ -738,7 +754,7 @@ describe('CaseUserActionService', () => {
           builtUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(8);
+        expect(mockAuditLogger.log).toBeCalledTimes(9);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -787,6 +803,27 @@ describe('CaseUserActionService', () => {
               Object {
                 "event": Object {
                   "action": "case_user_action_update_case_connector",
+                  "category": Array [
+                    "database",
+                  ],
+                  "outcome": "success",
+                  "type": Array [
+                    "change",
+                  ],
+                },
+                "kibana": Object {
+                  "saved_object": Object {
+                    "id": "1",
+                    "type": "cases",
+                  },
+                },
+                "message": undefined,
+              },
+            ],
+            Array [
+              Object {
+                "event": Object {
+                  "action": "case_user_action_update_case_category",
                   "category": Array [
                     "database",
                   ],

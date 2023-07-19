@@ -64,6 +64,7 @@ export const patchCasesRequest = {
         title: 'updated title',
         status: CaseStatuses.closed,
         connector: casePayload.connector,
+        category: 'pizza toppings',
       },
       originalCase: originalCases[0],
       references: [],
@@ -256,6 +257,38 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             id: '456',
             name: 'connectorId',
             type: 'action',
+          },
+        ],
+      },
+    },
+    {
+      eventDetails: {
+        action: 'update',
+        descriptiveAction: 'case_user_action_update_case_category',
+        getMessage: isMock ? jest.fn() : expect.any(Function),
+        savedObjectId: '1',
+        savedObjectType: 'cases',
+      },
+      parameters: {
+        attributes: {
+          action: 'update',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            category: 'pizza toppings',
+          },
+          type: 'category',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'associated-cases',
+            type: 'cases',
           },
         ],
       },
