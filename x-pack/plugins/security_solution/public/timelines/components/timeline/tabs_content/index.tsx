@@ -63,7 +63,6 @@ const GraphTabContent = lazy(() => import('../graph_tab_content'));
 const NotesTabContent = lazy(() => import('../notes_tab_content'));
 const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 const SessionTabContent = lazy(() => import('../session_tab_content'));
-const DiscoverTabContent = lazy(() => import('../discover_tab_content'));
 
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -142,16 +141,9 @@ const PinnedTab: React.FC<{
 ));
 PinnedTab.displayName = 'PinnedTab';
 
-const DiscoverTab: React.FC = memo(() => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <DiscoverTabContent />
-  </Suspense>
-));
-DiscoverTab.displayName = 'DiscoverTab';
-
-type ActiveTimelineTabProps = BasicTimelineTab & { activeTimelineTab: TimelineTabs };
 const AssistantTab: React.FC<{
   isAssistantEnabled: boolean;
+
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
@@ -196,8 +188,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             return <NotesTab timelineId={timelineId} />;
           case TimelineTabs.session:
             return <SessionTab timelineId={timelineId} />;
-          case TimelineTabs.discover:
-            return <DiscoverTab />;
           default:
             return null;
         }
@@ -244,12 +234,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />
-        </HideShowContainer>
-        <HideShowContainer
-          $isVisible={TimelineTabs.discover === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
-        >
-          <DiscoverTab />
         </HideShowContainer>
         {timelineType === TimelineType.default && (
           <HideShowContainer
@@ -401,10 +385,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     setActiveTab(TimelineTabs.session);
   }, [setActiveTab]);
 
-  const setDiscoverAsActiveTab = useCallback(() => {
-    setActiveTab(TimelineTabs.discover);
-  }, [setActiveTab]);
-
   const setSecurityAssistantAsActiveTab = useCallback(() => {
     setActiveTab(TimelineTabs.securityAssistant);
   }, [setActiveTab]);
@@ -488,15 +468,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
                 <CountBadge>{numberOfPinnedEvents}</CountBadge>
               </div>
             )}
-          </StyledEuiTab>
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.discover}`}
-            onClick={setDiscoverAsActiveTab}
-            isSelected={activeTab === TimelineTabs.discover}
-            disabled={false}
-            key={TimelineTabs.discover}
-          >
-            <span>{i18n.DISCOVER_TAB}</span>
           </StyledEuiTab>
           {hasAssistantPrivilege && (
             <StyledEuiTab

@@ -49,7 +49,6 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getHistory } from './kibana_services';

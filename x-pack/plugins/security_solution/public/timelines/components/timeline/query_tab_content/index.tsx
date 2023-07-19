@@ -30,10 +30,12 @@ import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager, flattenHit } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-plugin/public/types';
 // import type { ControlColumnProps } from '../../../../../common/types';
+import { RowRendererId } from '../../../../../common/api/timeline';
 import { Actions } from '../../../../common/components/header_actions/actions';
-import { RowRendererId } from '../../../../../common/types';
+
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -217,8 +219,18 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const {
     uiSettings,
+    fieldFormats,
     discover: { useDiscoverGrid },
   } = useKibana().services;
+
+  const dataView = useMemo(() => {
+    if (sourcererDataView != null) {
+      return new DataView({ spec: sourcererDataView, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [sourcererDataView, fieldFormats]);
+
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
@@ -359,12 +371,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           data,
           ecs,
           raw: hit,
-          flattened: flattenHit(hit, sourcererDataView, {
+          flattened: flattenHit(hit, dataView, {
             includeIgnoredValues: true,
           }),
         };
       }),
-    [events, sourcererDataView]
+    [events, dataView]
   );
 
   const noop = () => {};
@@ -468,7 +480,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             <div role="row" css={styles.row} key={rowIndex}>
               <div css={styles.rowCellsWrapper}>
                 {visibleColumns.map((column, colIndex) => {
-                  console.log('Stuff!!:', column, row);
                   // Skip the row details cell - we'll render it manually outside of the flex wrapper
                   if (column.id.includes('timeline')) {
                     return (
@@ -480,21 +491,21 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                     );
                   }
                   if (column.id !== 'row-details') {
-                    return (
-                      <TgridTdCell
-                        _id={discoverGridRows[rowIndex]._id}
-                        ariaRowindex={rowIndex}
-                        index={rowIndex}
-                        header={defaultHeaders.find(({ id }) => column.id === id)}
-                        data={discoverGridRows[rowIndex].data}
-                        ecsData={discoverGridRows[rowIndex].ecs}
-                        hasRowRenderers={true}
-                        notesCount={0}
-                        renderCellValue={renderCellValue}
-                        tabType={TimelineTabs.query}
-                        timelineId={timelineId}
-                      />
-                    );
+                    // return (
+                    //   <TgridTdCell
+                    //     _id={discoverGridRows[rowIndex]._id}
+                    //     ariaRowindex={rowIndex}
+                    //     index={rowIndex}
+                    //     header={defaultHeaders.find(({ id }) => column.id === id)}
+                    //     data={discoverGridRows[rowIndex].data}
+                    //     ecsData={discoverGridRows[rowIndex].ecs}
+                    //     hasRowRenderers={true}
+                    //     notesCount={0}
+                    //     renderCellValue={renderCellValue}
+                    //     tabType={TimelineTabs.query}
+                    //     timelineId={timelineId}
+                    //   />
+                    // );
 
                     // return renderCellValue({
                     //   columnId: column.id,
@@ -513,13 +524,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                     //   scopeId: timelineId,
                     //   key: `${timelineId}-query`,
                     // });
-                    // return (
-                    //   <Cell
-                    //     colIndex={colIndex}
-                    //     visibleRowIndex={rowIndex}
-                    //     key={`${rowIndex},${colIndex}`}
-                    //   />
-                    // );
+                    return (
+                      <Cell
+                        colIndex={colIndex}
+                        visibleRowIndex={rowIndex}
+                        key={`${rowIndex},${colIndex}`}
+                      />
+                    );
                   }
                 })}
               </div>
@@ -678,11 +689,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               className="timeline-flyout-body"
             >
               <div ref={containerRef}>
-                {sourcererDataView && (
+                {dataView && (
                   <DiscoverGrid
                     columns={defaultColumns}
                     columnVisibility={{ visibleColumns, setVisibleColumns }}
-                    dataView={sourcererDataView}
+                    dataView={dataView}
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={rowDetails}
                     sorting={{ columns: sortingColumns, onSort }}
