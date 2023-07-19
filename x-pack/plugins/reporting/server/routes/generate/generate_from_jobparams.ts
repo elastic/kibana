@@ -9,11 +9,9 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import rison from '@kbn/rison';
 import type { ReportingCore } from '../..';
-import { API_BASE_URL } from '../../../common/constants';
+import { INTERNAL_ROUTES } from '../../../common/constants';
 import type { BaseParams } from '../../types';
 import { authorizedUserPreRouting, getCounters, RequestHandler } from '../lib';
-
-const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -27,7 +25,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
 
   const registerPostGenerationEndpoint = () => {
-    const path = `${BASE_GENERATE}/{exportType}`;
+    const path = `${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/{exportType}`;
 
     router.post(
       {
@@ -98,7 +96,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
     // Get route to generation endpoint: show error about GET method to user
     router.get(
       {
-        path: `${BASE_GENERATE}/{p*}`,
+        path: `${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/{p*}`,
         validate: false,
       },
       (_context, _req, res) => {

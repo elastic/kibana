@@ -10,7 +10,7 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { API_GET_ILM_POLICY_STATUS } from '../../../../common/constants';
+import { INTERNAL_ROUTES } from '../../../../common/constants';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
@@ -21,7 +21,7 @@ import { registerDeprecationsRoutes } from '../deprecations';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
+describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
@@ -57,7 +57,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get(API_GET_ILM_POLICY_STATUS)
+      .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
       .expect(200)
       .then(/* Ignore result */);
   });
@@ -71,7 +71,7 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .get(API_GET_ILM_POLICY_STATUS)
+      .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
       .expect(200)
       .then(/* Ignore result */);
   });

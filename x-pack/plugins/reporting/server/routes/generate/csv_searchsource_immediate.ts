@@ -10,18 +10,15 @@ import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import moment from 'moment';
 import type { ReportingCore } from '../..';
-import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
+import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE, INTERNAL_ROUTES } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { PassThroughStream } from '../../lib';
 import { authorizedUserPreRouting, getCounters } from '../lib';
 
-const API_BASE_URL_V1 = '/api/reporting/v1';
-const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
+const path = INTERNAL_ROUTES.GENERATE.CSV_IMMEDIATE;
 
 export type CsvFromSavedObjectRequest = KibanaRequest<unknown, unknown, JobParamsDownloadCSV>;
-
-const path = `${API_BASE_GENERATE_V1}/immediate/csv_searchsource`;
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import type { DiagnosticResponse } from '.';
 import type { ReportingCore } from '../..';
-import { API_DIAGNOSE_URL } from '../../../common/constants';
+import { INTERNAL_ROUTES } from '../../../common/constants';
 import { authorizedUserPreRouting, getCounters } from '../lib';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
@@ -36,7 +36,7 @@ const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   }),
 });
 
-const path = `${API_DIAGNOSE_URL}/browser`;
+const path = INTERNAL_ROUTES.DIAGNOSE.BROWSER;
 
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();

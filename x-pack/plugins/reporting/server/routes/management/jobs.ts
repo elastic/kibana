@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { promisify } from 'util';
 import { ReportingCore } from '../..';
-import { ALLOWED_JOB_CONTENT_TYPES, API_BASE_URL } from '../../../common/constants';
+import { ALLOWED_JOB_CONTENT_TYPES, INTERNAL_ROUTES } from '../../../common/constants';
 import { getContentStream } from '../../lib';
 import {
   authorizedUserPreRouting,
@@ -19,8 +19,6 @@ import {
   jobsQueryFactory,
 } from '../lib';
 
-const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
-
 export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
@@ -28,7 +26,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerGetList = () => {
     // list jobs in the queue, paginated
-    const path = `${MAIN_ENTRY}/list`;
+    const path = INTERNAL_ROUTES.JOBS.LIST;
 
     router.get(
       {
@@ -72,13 +70,10 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerGetCount = () => {
     // return the count of all jobs in the queue
-    const path = `${MAIN_ENTRY}/count`;
+    const path = INTERNAL_ROUTES.JOBS.COUNT;
 
     router.get(
-      {
-        path,
-        validate: false,
-      },
+      { path, validate: false },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
@@ -107,8 +102,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerGetInfo = () => {
     // return some info about the job
-    const path = `${MAIN_ENTRY}/info/{docId}`;
-
+    const path = INTERNAL_ROUTES.JOBS.INFO;
     router.get(
       {
         path,
@@ -141,8 +135,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerDownloadReport = () => {
     // trigger a download of the output from a job
-    const path = `${MAIN_ENTRY}/download/{docId}`;
-
+    const path = INTERNAL_ROUTES.JOBS.DOWNLOAD;
     router.get(
       {
         path,
@@ -192,8 +185,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerDeleteReport = () => {
     // allow a report to be deleted
-    const path = `${MAIN_ENTRY}/delete/{docId}`;
-
+    const path = INTERNAL_ROUTES.JOBS.DELETE;
     router.delete(
       {
         path,

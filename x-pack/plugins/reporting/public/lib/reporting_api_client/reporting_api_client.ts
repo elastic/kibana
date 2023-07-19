@@ -4,20 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { stringify } from 'query-string';
-import rison from '@kbn/rison';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import rison from '@kbn/rison';
+import moment from 'moment';
+import { stringify } from 'query-string';
 import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
-  API_BASE_GENERATE,
-  API_BASE_URL,
-  API_GENERATE_IMMEDIATE,
-  API_LIST_URL,
-  API_MIGRATE_ILM_POLICY_URL,
   getRedirectAppPath,
+  INTERNAL_ROUTES,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import {
@@ -97,8 +93,9 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public getReportURL(jobId: string) {
-    const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
-    const downloadLink = `${apiBaseUrl}/download/${jobId}`;
+    const downloadLink = this.http.basePath.prepend(
+      `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`
+    );
 
     return downloadLink;
   }
@@ -110,7 +107,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete<void>(`${API_LIST_URL}/delete/${jobId}`, {
+    return await this.http.delete<void>(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${jobId}`, {
       asSystemRequest: true,
     });
   }
@@ -122,7 +119,7 @@ export class ReportingAPIClient implements IReportingAPI {
       query.ids = jobIds.slice(0, 10).join(',');
     }
 
-    const jobQueueEntries: ReportApiJSON[] = await this.http.get(`${API_LIST_URL}/list`, {
+    const jobQueueEntries: ReportApiJSON[] = await this.http.get(INTERNAL_ROUTES.JOBS.LIST, {
       query,
       asSystemRequest: true,
     });
@@ -131,7 +128,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async total() {
-    return await this.http.get<number>(`${API_LIST_URL}/count`, {
+    return await this.http.get<number>(INTERNAL_ROUTES.JOBS.COUNT, {
       asSystemRequest: true,
     });
   }
@@ -151,14 +148,17 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async getInfo(jobId: string) {
-    const report: ReportApiJSON = await this.http.get(`${API_LIST_URL}/info/${jobId}`, {
-      asSystemRequest: true,
-    });
+    const report: ReportApiJSON = await this.http.get(
+      `${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/info/${jobId}`,
+      {
+        asSystemRequest: true,
+      }
+    );
     return new Job(report);
   }
 
   public async findForJobIds(jobIds: JobId[]) {
-    const reports: ReportApiJSON[] = await this.http.fetch(`${API_LIST_URL}/list`, {
+    const reports: ReportApiJSON[] = await this.http.fetch(INTERNAL_ROUTES.JOBS.LIST, {
       query: { page: 0, ids: jobIds.join(',') },
       method: 'GET',
     });
@@ -169,13 +169,15 @@ export class ReportingAPIClient implements IReportingAPI {
     const params = stringify({
       jobParams: rison.encode(jobParams),
     });
-    return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
+    return `${this.http.basePath.prepend(
+      INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX
+    )}/${exportType}?${params}`;
   }
 
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
-      `${API_BASE_GENERATE}/${exportType}`,
+      `${INTERNAL_ROUTES.GENERATE.EXPORT_TYPE_PREFIX}/${exportType}`,
       {
         method: 'POST',
         body: JSON.stringify({
@@ -191,7 +193,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(`${API_GENERATE_IMMEDIATE}`, {
+    return this.http.post(INTERNAL_ROUTES.GENERATE.CSV_IMMEDIATE, {
       asResponse: true,
       body: JSON.stringify(params),
     });
@@ -217,23 +219,23 @@ export class ReportingAPIClient implements IReportingAPI {
     this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
   public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
-    this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
+    this.http.basePath.prepend(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/${jobId}`);
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/browser`, {
+    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER, {
       asSystemRequest: true,
     });
   }
 
   public verifyScreenCapture() {
-    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/screenshot`, {
+    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT, {
       asSystemRequest: true,
     });
   }
 
   public migrateReportingIndicesIlmPolicy() {
-    return this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
+    return this.http.put(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS); // FIXME This is wrong
   }
 }

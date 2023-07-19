@@ -6,11 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import {
-  API_GET_ILM_POLICY_STATUS,
-  API_MIGRATE_ILM_POLICY_URL,
-  ILM_POLICY_NAME,
-} from '../../../common/constants';
+import { INTERNAL_ROUTES, ILM_POLICY_NAME } from '../../../common/constants';
 import type { IlmPolicyStatusResponse } from '../../../common/types';
 import type { ReportingCore } from '../../core';
 import { IlmPolicyManager } from '../../lib';
@@ -59,14 +55,11 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   const { router } = reporting.getPluginSetupDeps();
   const authzWrapper = getAuthzWrapper(reporting, logger);
 
+  const getStatusPath = INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS;
   router.get(
-    { path: API_GET_ILM_POLICY_STATUS, validate: false },
+    { path: getStatusPath, validate: false },
     authzWrapper(async ({ core }, req, res) => {
-      const counters = getCounters(
-        req.route.method,
-        API_GET_ILM_POLICY_STATUS,
-        reporting.getUsageCounter()
-      );
+      const counters = getCounters(req.route.method, getStatusPath, reporting.getUsageCounter());
 
       const {
         elasticsearch: { client: scopedClient },
@@ -99,14 +92,11 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
     })
   );
 
+  const migrateApiPath = INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY;
   router.put(
-    { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
+    { path: migrateApiPath, validate: false },
     authzWrapper(async ({ core }, req, res) => {
-      const counters = getCounters(
-        req.route.method,
-        API_GET_ILM_POLICY_STATUS,
-        reporting.getUsageCounter()
-      );
+      const counters = getCounters(req.route.method, migrateApiPath, reporting.getUsageCounter());
 
       const store = await reporting.getStore();
       const {
