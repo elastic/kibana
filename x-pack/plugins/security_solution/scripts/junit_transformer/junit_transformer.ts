@@ -8,62 +8,6 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import globby from 'globby';
 
-const CypressJunitTestCase = t.type({
-  $: t.type({
-    name: t.string,
-    classname: t.string
-  })
-});
-
-const CypressJunitTestSuite = t.type({
-  testcase: t.array(CypressJunitTestCase)
-});
-
-const CypressJunitRootTestSuite = t.type({
-  $: t.type({
-    name: t.literal("Root Suite"),
-    file: t.string
-  })
-})
-
-const CypressJunitReport = t.type({
-  testsuites: t.type({
-    testsuite: t.array(t.union([CypressJunitRootTestSuite, CypressJunitTestSuite]))
-  })
-})
-
-function validateCypressJunitReport(parsedReport: unknown): { result: 'success' } | { error: string} {
-  const decoded = CypressJunitReport.decode(parsedReport); // Either<Errors, User>
-  if (isLeft(decoded)) {
-    return { error: `Could not validate data: ${PathReporter.report(decoded).join("\n")}` }
-  }
-
-  const valid: t.TypeOf<typeof CypressJunitReport> = decoded.right;
-
-  // TODO: explain why the first element in the array is different and why we care.
-  for (let index = 0; index < valid.testsuites.testsuite.length; index++) {
-    const testsuite = valid.testsuites.testsuite[index];
-    if (index === 0) {
-      if (!CypressJunitRootTestSuite.is(testsuite)) {
-        return { error: 'The first suite must be the Root Suite, which contains the spec file name.' };
-      }
-    } else {
-      if (!CypressJunitTestSuite.is(testsuite)) {
-        return { error: 'All testsuite elements except for the first one must have testcase elements' };
-      } else {
-        for (const testcase of testsuite.testcase) {
-          if (testcase.$.classname.indexOf('·') !== -1) {
-            // TODO, explain what this means
-            return { error : 'This report has already been transformed' };
-          }
-        }
-      }
-    }
-  }
-
-  // success
-  return { result: 'success' };
-}
 
 run(
   async ({ flags, log }) => {
@@ -116,7 +60,6 @@ run(
   }
 );
 
-
 async function transformedReport({ path, rootDirectory, reportName }: { path: string, rootDirectory: string, reportName: string }): Promise<{ result: string } | { error: string }> {
   const source = await fs.readFile(path, 'utf8');
   const result = await parseStringPromise(source /*, options */);
@@ -155,4 +98,88 @@ async function transformedReport({ path, rootDirectory, reportName }: { path: st
     // definitely an error
     return { error: `Error while validating ${path}: ${maybeValidationResult.error}`};
   }
+}
+
+/**
+ * Test cases have a name, which is populated with part of the BDD test name, and classname, which is also populated with part of the BDD test name.
+ *
+ */
+const CypressJunitTestCase = t.type({
+  $: t.type({
+    name: t.string,
+    classname: t.string
+  })
+});
+
+/**
+ * standard testsuites contain testcase elements, each representing a specific test execution.
+ */
+const CypressJunitTestSuite = t.type({
+  testcase: t.array(CypressJunitTestCase)
+});
+
+/**
+ * The root suite is a special test suite, found at the same level as other test suites, but which contains no test cases and has the file name as an attribute.
+ */
+const CypressJunitRootTestSuite = t.type({
+  $: t.type({
+    name: t.literal("Root Suite"),
+    file: t.string
+  })
+})
+
+/** This type represents the Cypress-specific flavor of junit report */
+const CypressJunitReport = t.type({
+  testsuites: t.type({
+    /** The testsuite's created by the Cypress junit reporter are non-standard. The first testsuite has a name: 'Root Suite' and contains the path of the spec file, relative to where Cypress was invoked, in the 'file' attribute. Other testsuites are standard and relate to a 'describe' block. They contain 'testcase' elements.
+     *
+     * For this reason, the testsuite array is a union of two types, the CypressJunitRootTestSuite, which is the first element, and which is non-standard, and the CypressJunitTestSuite, which is the type representing the remaining, standard, testsuite elements.
+     */
+    testsuite: t.array(t.union([CypressJunitRootTestSuite, CypressJunitTestSuite]))
+  })
+})
+
+/**
+ * Validate the JSON representation of the Junit XML.
+ * If there are no errors, this returns `{ result: 'successs' }`, otherwise it returns an error, wrapped in `{ error: string }`.
+ *
+ * This uses io-ts to do a base level of validation, and then does additional assertions. io-ts has, at the time of this writing, poor support for specifiying an array type where the first element has a different type than all subsequent elements. Therefore we do that validation using the custom predicate functions (i.e. `.is`.)
+ *
+ * This also asserts that the junit report contains no '·' characters in the classname. This character is used by the kibana operations triage scripts, and the failed test reporter, to replace `.` characters in a path as part of its encoding scheme. If this character is found, we assume that the encoding has already taken place.
+ */
+function validateCypressJunitReport(parsedReport: unknown): { result: 'success' } | { error: string} {
+  const decoded = CypressJunitReport.decode(parsedReport);
+
+  // Error text to append to each error message.
+  const boilerplate: string = 'This script relies on this assumption. If your junit report is valid, then you must enhance this script in order to have support for it. If you are not trying to transform a Cypress junit report into a report that is compatible with Kibana Operations workflows, then you are running this script in error.';
+
+  if (isLeft(decoded)) {
+    return { error: `Could not validate data: ${PathReporter.report(decoded).join("\n")}. This script uses an io-ts schema to validate that parsed Junit reports match the expected schema. This script is only designed to process Junit reports generated by Cypress. ${boilerplate}` }
+  }
+
+  const valid: t.TypeOf<typeof CypressJunitReport> = decoded.right;
+
+  // TODO: explain why the first element in the array is different and why we care.
+  for (let index = 0; index < valid.testsuites.testsuite.length; index++) {
+    const testsuite = valid.testsuites.testsuite[index];
+
+
+    if (index === 0) {
+      if (!CypressJunitRootTestSuite.is(testsuite)) {
+        return { error: `The first suite must be the Root Suite, which contains the spec file name. ${boilerplate}` };
+      }
+    } else {
+      if (!CypressJunitTestSuite.is(testsuite)) {
+        return { error: `All testsuite elements except for the first one must have testcase elements. ${boilerplate}` };
+      } else {
+        for (const testcase of testsuite.testcase) {
+          if (testcase.$.classname.indexOf('·') !== -1) {
+            return { error : `This report appears to have already been transformed because a '·' character was found in the classname. If your test intentionally includes this character as part of its name, remove it. This character is reserved for encoding file paths in the classname attribute. ${boilerplate}`};
+          }
+        }
+      }
+    }
+  }
+
+  return { result: 'success' };
 }
