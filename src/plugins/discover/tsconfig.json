@@ -56,6 +56,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
+    "@kbn/core-application-browser",
   ],
   "exclude": [
     "target/**/*",
