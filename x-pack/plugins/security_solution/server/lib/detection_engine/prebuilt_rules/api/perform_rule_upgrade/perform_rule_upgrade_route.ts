@@ -6,16 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { PERFORM_RULE_UPGRADE_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
 import {
+  PERFORM_RULE_UPGRADE_URL,
+  SkipRuleUpgradeReason,
   PerformRuleUpgradeRequestBody,
   PickVersionValues,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_request_schema';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleUpgradeResponseBody,
   SkippedRuleUpgrade,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
-import { SkipRuleUpgradeReason } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';

@@ -7,8 +7,8 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionEditType } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { ScheduleItem } from '../../../../../../detections/components/rules/schedule_item_form';
 import type { FormSchema } from '../../../../../../shared_imports';
 import { UseField, useForm } from '../../../../../../shared_imports';
