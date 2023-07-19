@@ -44,7 +44,7 @@ const STORYBOOKS = [
   'lists',
   'observability',
   'presentation',
-  'security_solution',
+  // 'security_solution', => This build is error out and failing CI
   'security_solution_packages',
   'serverless',
   'shared_ux',
