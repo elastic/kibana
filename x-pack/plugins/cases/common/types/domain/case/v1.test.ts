@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType } from '../../../api';
+import { AttachmentType } from '../attachment/v1';
 import { ConnectorTypes } from '../connector/v1';
 import {
   CaseAttributesRt,
@@ -24,7 +24,7 @@ const basicCase = {
   comments: [
     {
       comment: 'Solve this fast!',
-      type: CommentType.user,
+      type: AttachmentType.user,
       id: 'basic-comment-id',
       created_at: '2020-02-19T23:06:33.798Z',
       created_by: {

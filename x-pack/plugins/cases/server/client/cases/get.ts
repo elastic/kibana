@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { Case, CaseAttributes, User } from '../../../common/types/domain';
+import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
 import type {
   AllCategoriesFindRequest,
   AllReportersFindRequest,
@@ -26,7 +26,6 @@ import {
   GetReportersResponseRt,
   GetTagsResponseRt,
 } from '../../../common/types/api';
-import type { AttachmentTotals } from '../../../common/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';

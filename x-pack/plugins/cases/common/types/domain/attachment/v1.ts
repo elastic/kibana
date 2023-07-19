@@ -6,7 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { jsonValueRt, UserRt } from '../../../api';
+import { jsonValueRt } from '../../../api';
+import { UserRt } from '../user/v1';
 
 /**
  * Files

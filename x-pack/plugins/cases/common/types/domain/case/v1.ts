@@ -7,10 +7,10 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
-import { AttachmentTotalsRt, CommentRt } from '../../../api';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
+import { AttachmentRt } from '../attachment/v1';
 
 export { CaseStatuses };
 
@@ -118,12 +118,17 @@ export const CaseRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      comments: rt.array(CommentRt),
+      comments: rt.array(AttachmentRt),
     })
   ),
 ]);
 
 export const CasesRt = rt.array(CaseRt);
+
+export const AttachmentTotalsRt = rt.strict({
+  alerts: rt.number,
+  userComments: rt.number,
+});
 
 export const RelatedCaseRt = rt.strict({
   id: rt.string,
@@ -139,3 +144,4 @@ export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CaseSettings = rt.TypeOf<typeof CaseSettingsRt>;
 export type RelatedCase = rt.TypeOf<typeof RelatedCaseRt>;
+export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;

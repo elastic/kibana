@@ -12,7 +12,6 @@ import type {
 } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import type { AttachmentTotals } from '../../../../common/api';
 import { decodeOrThrow } from '../../../../common/api';
 import type {
   AttachmentPersistedAttributes,
@@ -27,7 +26,7 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type { AlertAttachmentAttributes } from '../../../../common/types/domain';
+import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
 import { AttachmentType, AlertAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
