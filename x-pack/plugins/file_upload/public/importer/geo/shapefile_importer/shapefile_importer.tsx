@@ -52,10 +52,12 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     }
 
     // read header from dbf file to get number of records in data file
-    const dbfIterator = (await loadInBatches(this._dbfFile, DBFLoader, {
-      metadata: false,
-      dbf: { encoding: 'latin1' },
-    }))[Symbol.asyncIterator]() as AsyncIterator<{ nRecords: number }>;
+    const dbfIterator = (
+      await loadInBatches(this._dbfFile, DBFLoader, {
+        metadata: false,
+        dbf: { encoding: 'latin1' },
+      })
+    )[Symbol.asyncIterator]() as AsyncIterator<{ nRecords: number }>;
     const { value } = await dbfIterator.next();
     if (value.nRecords && typeof value.nRecords === 'number') {
       this._tableRowCount = value.nRecords;
