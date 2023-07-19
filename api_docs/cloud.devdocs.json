@@ -115,6 +115,34 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.users_and_roles_url",
+            "type": "string",
+            "tags": [],
+            "label": "users_and_roles_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.performance_url",
+            "type": "string",
+            "tags": [],
+            "label": "performance_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.trial_end_date",
             "type": "string",
             "tags": [],
@@ -301,6 +329,38 @@
             "label": "organizationUrl",
             "description": [
               "\nThe full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.performanceUrl",
+            "type": "string",
+            "tags": [],
+            "label": "performanceUrl",
+            "description": [
+              "\nThe full URL to the performance page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.usersAndRolesUrl",
+            "type": "string",
+            "tags": [],
+            "label": "usersAndRolesUrl",
+            "description": [
+              "\nThe full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud."
             ],
             "signature": [
               "string | undefined"
