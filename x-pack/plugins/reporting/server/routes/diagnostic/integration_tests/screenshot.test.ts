@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { defer } from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
+import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { generatePngObservable } from '../../../export_types/common';
 import {
   createMockConfigSchema,
@@ -17,12 +19,14 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
-import { defer } from 'rxjs';
 
 jest.mock('../../../export_types/common/generate_png');
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
+/**
+ * Tests internal diagnostic API endpoints
+ */
 describe('POST /diagnose/screenshot', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
@@ -67,7 +71,7 @@ describe('POST /diagnose/screenshot', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post('/api/reporting/diagnose/screenshot')
+      .post(INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT)
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchInlineSnapshot(`
@@ -86,7 +90,7 @@ describe('POST /diagnose/screenshot', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post('/api/reporting/diagnose/screenshot')
+      .post(INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT)
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchInlineSnapshot(`
@@ -107,7 +111,7 @@ describe('POST /diagnose/screenshot', () => {
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post('/api/reporting/diagnose/screenshot')
+      .post(INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT)
       .expect(200)
       .then(({ body }) => {
         expect(body.help).toContain(`We couldn't screenshot your Kibana install.`);

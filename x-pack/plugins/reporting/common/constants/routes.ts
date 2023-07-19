@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const prefixInternalPath = '/_internal/reporting';
+const prefixInternalPath = '/internal/reporting';
 export const INTERNAL_ROUTES = {
   MIGRATE: {
     MIGRATE_ILM_POLICY: prefixInternalPath + '/deprecations/migrate_ilm_policy',

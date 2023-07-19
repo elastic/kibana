@@ -18,6 +18,7 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseBrowser } from '../browser';
+import { INTERNAL_ROUTES } from '../../../../common/constants';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -81,7 +82,7 @@ describe('POST /diagnose/browser', () => {
     screenshotting.diagnose.mockReturnValue(Rx.of(devtoolMessage));
 
     return supertest(httpSetup.server.listener)
-      .post('/api/reporting/diagnose/browser')
+      .post(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
         expect(body.success).toEqual(true);
@@ -97,7 +98,7 @@ describe('POST /diagnose/browser', () => {
     screenshotting.diagnose.mockReturnValue(Rx.of(logs));
 
     return supertest(httpSetup.server.listener)
-      .post('/api/reporting/diagnose/browser')
+      .post(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchInlineSnapshot(`
@@ -119,7 +120,7 @@ describe('POST /diagnose/browser', () => {
     screenshotting.diagnose.mockReturnValue(Rx.of(`${devtoolMessage}\n${fontNotFoundMessage}`));
 
     return supertest(httpSetup.server.listener)
-      .post('/api/reporting/diagnose/browser')
+      .post(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchInlineSnapshot(`

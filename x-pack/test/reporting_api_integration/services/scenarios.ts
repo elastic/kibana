@@ -134,7 +134,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const downloadCsv = async (username: string, password: string, job: JobParamsDownloadCSV) => {
     return await supertestWithoutAuth
-      .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
+      .post(`/internal/reporting/generate/immediate/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send(job);

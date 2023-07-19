@@ -26,6 +26,9 @@ import { registerJobGenerationRoutes } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
+/**
+ * Tests the public API endpoints of Reporting
+ */
 describe('POST /api/reporting/generate', () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
@@ -49,9 +52,7 @@ describe('POST /api/reporting/generate', () => {
     );
 
     const mockSetupDeps = createMockPluginSetup({
-      security: {
-        license: { isEnabled: () => true },
-      },
+      security: { license: { isEnabled: () => true } },
       router: httpSetup.createRouter(''),
     });
 
