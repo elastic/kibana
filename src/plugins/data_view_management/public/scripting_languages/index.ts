@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, NotificationsStart } from '@kbn/core/public';
+import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
 
 export function getSupportedScriptingLanguages(): estypes.ScriptLanguage[] {
   return ['painless'];
@@ -21,12 +22,16 @@ export const getEnabledScriptingLanguages = (
   http: HttpStart,
   toasts: NotificationsStart['toasts']
 ) =>
-  http.get<estypes.ScriptLanguage[]>('/api/kibana/scripts/languages').catch(() => {
-    toasts.addDanger(
-      i18n.translate('indexPatternManagement.scriptingLanguages.errorFetchingToastDescription', {
-        defaultMessage: 'Error getting available scripting languages from Elasticsearch',
-      })
-    );
+  http
+    .get<estypes.ScriptLanguage[]>('/internal/scripts/languages', {
+      version: SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
+    })
+    .catch(() => {
+      toasts.addDanger(
+        i18n.translate('indexPatternManagement.scriptingLanguages.errorFetchingToastDescription', {
+          defaultMessage: 'Error getting available scripting languages from Elasticsearch',
+        })
+      );
 
-    return [] as estypes.ScriptLanguage[];
-  });
+      return [] as estypes.ScriptLanguage[];
+    });
