@@ -12,6 +12,7 @@ import type {
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import { NavigationEmbeddableContentType } from '../../types';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from './constants';
 
 export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
   NavigationEmbeddableContentType,
@@ -24,9 +25,25 @@ export type NavigationEmbeddableCrudTypes = ContentManagementCrudTypes<
   }
 >;
 
+/**
+ * Navigation embeddable explicit input
+ */
+export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
+
+export interface NavigationEmbeddableLink {
+  type: NavigationLinkType;
+  destination: string;
+  // order: number; TODO: Use this as part of https://github.com/elastic/kibana/issues/154361
+  label?: string;
+}
+
+export interface NavigationEmbeddableLinkList {
+  [id: string]: NavigationEmbeddableLink;
+}
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type NavigationEmbeddableAttributes = {
   title: string;
   description?: string;
-  linksJSON?: string;
+  links?: NavigationEmbeddableLinkList;
 };

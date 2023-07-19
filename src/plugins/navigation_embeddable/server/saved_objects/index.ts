@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CONTENT_ID, LATEST_VERSION } from './constants';
+export { navigationEmbeddableSavedObjectType } from './navigation_embeddable';

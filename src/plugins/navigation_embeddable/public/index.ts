@@ -7,11 +7,7 @@
  */
 
 export type { NavigationEmbeddableFactory } from './embeddable';
-export {
-  NAVIGATION_EMBEDDABLE_TYPE,
-  NavigationEmbeddableFactoryDefinition,
-  NavigationEmbeddable,
-} from './embeddable';
+export { NavigationEmbeddableFactoryDefinition, NavigationEmbeddable } from './embeddable';
 
 import { NavigationEmbeddablePlugin } from './plugin';
 

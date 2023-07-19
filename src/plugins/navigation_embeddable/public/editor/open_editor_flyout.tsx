@@ -14,21 +14,30 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
-import { NavigationEmbeddableInput } from '../../common';
+import { NavigationEmbeddableInput } from '../embeddable/types';
 import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
+import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
+import { NavigationEmbeddableAttributes } from '../../common/content_management';
 
 /**
  * @throws in case user cancels
  */
 export async function openEditorFlyout(
-  initialInput?: Omit<NavigationEmbeddableInput, 'id'>,
+  initialInput: NavigationEmbeddableInput,
   parentDashboard?: DashboardContainer
 ): Promise<Partial<NavigationEmbeddableInput>> {
+  const { attributes } = await getNavigationEmbeddableAttributeService().unwrapAttributes(
+    initialInput
+  );
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
-    const onSave = (partialInput: Partial<NavigationEmbeddableInput>) => {
-      resolve(partialInput);
+    const onSave = async (newAttributes: NavigationEmbeddableAttributes, useRefType: boolean) => {
+      const wrappedAttributes = (await getNavigationEmbeddableAttributeService()).wrapAttributes(
+        newAttributes,
+        useRefType
+      );
+      resolve(wrappedAttributes);
       editorFlyout.close();
     };
 
@@ -49,7 +58,7 @@ export async function openEditorFlyout(
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
         <NavigationEmbeddablePanelEditor
-          initialInput={initialInput ?? {}}
+          attributes={attributes}
           onClose={onCancel}
           onSave={onSave}
           parentDashboard={parentDashboard}

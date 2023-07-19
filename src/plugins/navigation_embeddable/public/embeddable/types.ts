@@ -7,16 +7,22 @@
  */
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 
 import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
 import { DashboardLinkEmbeddableStrings } from '../components/dashboard_link/dashboard_link_strings';
+import {} from '../../common/types';
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
-  NavigationEmbeddableInput,
   NavigationLinkType,
-} from '../../common/types';
+  NavigationEmbeddableAttributes,
+  NavigationEmbeddableLinkList,
+} from '../../common/content_management';
 
 export const NavigationLinkInfo: {
   [id in NavigationLinkType]: { icon: string; displayName: string; description: string };
@@ -33,6 +39,20 @@ export const NavigationLinkInfo: {
   },
 };
 
+export type NavigationEmbeddableByValueInput = {
+  attributes: NavigationEmbeddableAttributes;
+} & EmbeddableInput;
+
+export type NavigationEmbeddableByReferenceInput = SavedObjectEmbeddableInput;
+
+export type NavigationEmbeddableInput =
+  | NavigationEmbeddableByValueInput
+  | NavigationEmbeddableByReferenceInput;
+
+export type NavigationEmbeddableOutput = EmbeddableOutput & {
+  links?: NavigationEmbeddableLinkList;
+};
+
 /**
  *  Navigation embeddable redux state
  */
@@ -40,6 +60,6 @@ export const NavigationLinkInfo: {
 
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,
-  EmbeddableOutput,
+  NavigationEmbeddableOutput,
   {} // We currently don't have any component state - TODO: Replace with `NavigationEmbeddableComponentState` if necessary
 >;

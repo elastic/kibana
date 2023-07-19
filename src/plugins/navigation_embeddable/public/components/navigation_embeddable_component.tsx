@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { DASHBOARD_LINK_TYPE } from '../../common/types';
+import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from './external_link/external_link_component';
@@ -18,7 +18,7 @@ import { ExternalLinkComponent } from './external_link/external_link_component';
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
-  const links = navEmbeddable.select((state) => state.explicitInput.links);
+  const links = navEmbeddable.select((state) => state.output.links) ?? {};
 
   /** TODO: Render this as a list **or** "tabs" as part of https://github.com/elastic/kibana/issues/154357 */
   return (

@@ -15,12 +15,19 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
+
+const navigationEmbeddableLinkSchema = schema.object({
+  type: schema.oneOf([schema.literal(DASHBOARD_LINK_TYPE), schema.literal(EXTERNAL_LINK_TYPE)]),
+  destination: schema.string(),
+  label: schema.maybe(schema.string()),
+});
 
 const navigationEmbeddableAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.string()),
-    linksJSON: schema.maybe(schema.string()),
+    links: schema.maybe(schema.recordOf(schema.string(), navigationEmbeddableLinkSchema)),
   },
   { unknowns: 'forbid' }
 );
@@ -39,7 +46,6 @@ const searchOptionsSchema = schema.maybe(
 );
 
 const navigationEmbeddableCreateOptionsSchema = schema.object({
-  id: createOptionsSchemas.id,
   references: schema.maybe(createOptionsSchemas.references),
   overwrite: createOptionsSchemas.overwrite,
 });
@@ -64,7 +70,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: navigationEmbeddableCreateOptionsSchema,
       },
       data: {
-        schema: navigationEmbeddableSavedObjectSchema,
+        schema: navigationEmbeddableAttributesSchema,
       },
     },
     out: {
@@ -79,7 +85,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: navigationEmbeddableUpdateOptionsSchema, // same schema as "create"
       },
       data: {
-        schema: navigationEmbeddableSavedObjectSchema,
+        schema: navigationEmbeddableAttributesSchema,
       },
     },
   },

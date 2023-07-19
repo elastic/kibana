@@ -13,10 +13,9 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { NAVIGATION_EMBEDDABLE_TYPE } from './embeddable';
 import { NavigationEmbeddableFactoryDefinition } from './embeddable';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { APP_NAME } from '../common/constants';
+import { APP_NAME, NAVIGATION_EMBEDDABLE_TYPE } from '../common/constants';
 import { setKibanaServices } from './services/kibana_services';
 
 export interface NavigationEmbeddableSetupDependencies {

@@ -34,9 +34,9 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
-  NavigationEmbeddableInput,
+  NavigationEmbeddableAttributes,
   NavigationEmbeddableLink,
-} from '../../common/types';
+} from '../../common/content_management';
 import { NavigationLinkInfo } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
@@ -47,16 +47,18 @@ import './navigation_embeddable.scss';
 export const NavigationEmbeddablePanelEditor = ({
   onSave,
   onClose,
-  initialInput,
+  attributes,
+  savedObjectId,
   parentDashboard,
 }: {
+  onSave: (attributes: NavigationEmbeddableAttributes, useRefType: boolean) => void;
   onClose: () => void;
-  initialInput: Partial<NavigationEmbeddableInput>;
-  onSave: (input: Partial<NavigationEmbeddableInput>) => void;
+  attributes?: NavigationEmbeddableAttributes;
+  savedObjectId?: string;
   parentDashboard?: DashboardContainer;
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
-  const [links, setLinks] = useState(initialInput.links);
+  const [links, setLinks] = useState(attributes?.links);
   const [saveToLibrary, setSaveToLibrary] = useState(false);
   const [libraryTitle, setLibraryTitle] = useState<string | undefined>();
 
@@ -88,6 +90,8 @@ export const NavigationEmbeddablePanelEditor = ({
     );
     return newLinks;
   }, [links]);
+
+  const getIsByValueMode = () => !Boolean(savedObjectId || saveToLibrary);
 
   return (
     <>
@@ -190,7 +194,8 @@ export const NavigationEmbeddablePanelEditor = ({
               type="submit"
               disabled={!links || isEmpty(links)}
               onClick={() => {
-                onSave({ ...initialInput, links });
+                const newAttributes = { ...attributes, title: libraryTitle, links };
+                onSave(newAttributes, !getIsByValueMode());
                 onClose();
               }}
             >

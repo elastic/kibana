@@ -10,8 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 export const LATEST_VERSION = 1;
 
-export const CONTENT_ID = 'navigationEmbeddable';
+export const CONTENT_ID = 'navigation_embeddable';
 
-export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
+export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
+
+export const APP_ICON = 'link';
+
+export const APP_NAME = i18n.translate('navigationEmbeddable.visTypeAlias.title', {
   defaultMessage: 'Links',
 });

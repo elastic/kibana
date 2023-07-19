@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { CONTENT_ID, LATEST_VERSION } from './constants';
+/**
+ * Dashboard to dashboard links
+ */
+export const DASHBOARD_LINK_TYPE = 'dashboardLink';
+
+/**
+ * External URL links
+ */
+export const EXTERNAL_LINK_TYPE = 'externalLink';

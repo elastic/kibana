@@ -14,6 +14,11 @@ export type {
   NavigationEmbeddableCrudTypes,
   NavigationEmbeddableAttributes,
   NavigationEmbeddableItem,
+  NavigationLinkType,
+  NavigationEmbeddableLink,
+  NavigationEmbeddableLinkList,
 } from './latest';
+
+export { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from './latest';
 
 export * as NavigationEmbeddableV1 from './v1';

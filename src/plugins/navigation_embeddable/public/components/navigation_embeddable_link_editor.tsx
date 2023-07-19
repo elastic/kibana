@@ -33,7 +33,7 @@ import {
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
   NavigationEmbeddableLink,
-} from '../../common/types';
+} from '../../common/content_management';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
 import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';

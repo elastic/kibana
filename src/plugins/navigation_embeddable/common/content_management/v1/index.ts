@@ -7,5 +7,12 @@
  */
 
 import { NavigationEmbeddableCrudTypes } from './types';
-export type { NavigationEmbeddableCrudTypes, NavigationEmbeddableAttributes } from './types';
+export type {
+  NavigationEmbeddableCrudTypes,
+  NavigationEmbeddableAttributes,
+  NavigationEmbeddableLink,
+  NavigationEmbeddableLinkList,
+  NavigationLinkType,
+} from './types';
 export type NavigationEmbeddableItem = NavigationEmbeddableCrudTypes['Item'];
+export { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from './constants';

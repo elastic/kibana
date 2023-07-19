@@ -77,6 +77,7 @@ export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
     'ml-module',
     'ml-trained-model',
     'monitoring-telemetry',
+    'navigation_embeddable',
     'osquery-manager-usage-metric',
     'osquery-pack',
     'osquery-pack-asset',

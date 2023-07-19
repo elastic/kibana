@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
-
-import { i18n } from '@kbn/i18n';
 import {
   ACTION_ADD_PANEL,
   EmbeddableFactory,
@@ -20,11 +17,11 @@ import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public'
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { NavigationEmbeddableInput } from '../../common';
+import { NavigationEmbeddableByReferenceInput, NavigationEmbeddableInput } from './types';
 import type { NavigationEmbeddable } from './navigation_embeddable';
-import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
-import { navigationEmbeddableClient } from '../content_management';
+import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
+import { APP_ICON, APP_NAME, CONTENT_ID, NAVIGATION_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -35,7 +32,6 @@ export interface NavigationEmbeddableCreationOptions {
 
 // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant as part of https://github.com/elastic/kibana/issues/154381
 const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableInput, 'id'> => ({
-  links: {},
   disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
@@ -44,7 +40,13 @@ export class NavigationEmbeddableFactoryDefinition
 {
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
 
-  public isContainerType = false;
+  public readonly isContainerType = false;
+
+  public readonly savedObjectMetaData = {
+    name: APP_NAME,
+    type: CONTENT_ID,
+    getIconForSavedObject: () => APP_ICON,
+  };
 
   // TODO create<Inject|Extract> functions
   // public inject: EmbeddablePersistableStateService['inject'];
@@ -70,34 +72,35 @@ export class NavigationEmbeddableFactoryDefinition
 
   public async createFromSavedObject(
     savedObjectId: string,
-    input: Partial<NavigationEmbeddableInput>,
+    input: NavigationEmbeddableInput,
     parent: DashboardContainer
   ): Promise<NavigationEmbeddable | ErrorEmbeddable> {
-    try {
-      const { navigationEmbeddableFound, navigationEmbeddableInput } =
-        await navigationEmbeddableClient.loadNavigationEmbeddableState({
-          id: savedObjectId,
-        });
-      if (!navigationEmbeddableFound || navigationEmbeddableInput === undefined)
-        throw new Error(`Unable to load saved object with id: ${savedObjectId}`);
-      return this.createEmbeddable(navigationEmbeddableInput, parent);
-    } catch (e) {
-      return new ErrorEmbeddable(e, { id: savedObjectId }, parent);
+    if (!(input as NavigationEmbeddableByReferenceInput).savedObjectId) {
+      (input as NavigationEmbeddableByReferenceInput).savedObjectId = savedObjectId;
     }
+    return this.create(input, parent);
   }
 
   public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
-    if (!initialInput.links || isEmpty(initialInput.links)) {
-      // don't create an empty navigation embeddable - it should always have at least one link
-      return;
-    }
-    return this.createEmbeddable(initialInput, parent);
+    await untilPluginStartServicesReady();
+
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
+    const { NavigationEmbeddable } = await import('./navigation_embeddable');
+    const editable = await this.isEditable();
+
+    return new NavigationEmbeddable(
+      reduxEmbeddablePackage,
+      { editable },
+      { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
+      await getNavigationEmbeddableAttributeService(),
+      parent
+    );
   }
 
   public async getExplicitInput(
     initialInput?: NavigationEmbeddableInput,
     parent?: DashboardContainer
-  ) {
+  ): Promise<Omit<NavigationEmbeddableInput, 'id'>> {
     if (!parent) return {};
 
     const { openEditorFlyout: createNavigationEmbeddable } = await import(
@@ -116,30 +119,10 @@ export class NavigationEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return i18n.translate('navigationEmbeddable.navigationEmbeddableFactory.displayName', {
-      defaultMessage: 'Links',
-    });
+    return APP_NAME;
   }
 
   public getIconType() {
     return 'link';
-  }
-
-  private async createEmbeddable(
-    initialInput: NavigationEmbeddableInput,
-    parent: DashboardContainer
-  ) {
-    await untilPluginStartServicesReady();
-
-    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
-    const { NavigationEmbeddable } = await import('./navigation_embeddable');
-    const editable = await this.isEditable();
-
-    return new NavigationEmbeddable(
-      reduxEmbeddablePackage,
-      { editable },
-      { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
-      parent
-    );
   }
 }

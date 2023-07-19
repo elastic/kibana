@@ -8,17 +8,24 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import {
+  AttributeService,
+  Embeddable,
+  ReferenceOrValueEmbeddable,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-
 import { navigationEmbeddableReducers } from './navigation_embeddable_reducers';
-import { NavigationEmbeddableReduxState } from './types';
+import {
+  NavigationEmbeddableByReferenceInput,
+  NavigationEmbeddableByValueInput,
+  NavigationEmbeddableReduxState,
+} from './types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
-import { NavigationEmbeddableInput } from '../../common';
-import { navigationEmbeddableClient } from '../content_management';
-
-export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
+import { NavigationEmbeddableInput, NavigationEmbeddableOutput } from './types';
+import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { NAVIGATION_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export const NavigationEmbeddableContext = createContext<NavigationEmbeddable | null>(null);
 export const useNavigationEmbeddable = (): NavigationEmbeddable => {
@@ -38,8 +45,16 @@ export interface NavigationEmbeddableConfig {
   editable: boolean;
 }
 
-export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, EmbeddableOutput> {
+export class NavigationEmbeddable
+  extends Embeddable<NavigationEmbeddableInput, NavigationEmbeddableOutput>
+  implements
+    ReferenceOrValueEmbeddable<
+      NavigationEmbeddableByValueInput,
+      NavigationEmbeddableByReferenceInput
+    >
+{
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
+  deferEmbeddableLoad = true;
 
   // state management
   public select: NavigationReduxEmbeddableTools['select'];
@@ -48,11 +63,13 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
   public onStateChange: NavigationReduxEmbeddableTools['onStateChange'];
 
   private cleanupStateTools: () => void;
+  private attributes?: NavigationEmbeddableAttributes;
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
     config: NavigationEmbeddableConfig,
     initialInput: NavigationEmbeddableInput,
+    private attributeService: AttributeService<NavigationEmbeddableAttributes>,
     parent?: DashboardContainer
   ) {
     super(
@@ -82,12 +99,29 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
     this.setInitializationFinished();
   }
 
-  public runSaveToLibrary = async ({ title, description }: { title: string; description?: string }) => {
-    const { id } = await navigationEmbeddableClient.create({ data: { title, description } });
-    return id;
-  };
+  public inputIsRefType(
+    input: NavigationEmbeddableByValueInput | NavigationEmbeddableByReferenceInput
+  ): input is NavigationEmbeddableByReferenceInput {
+    return this.attributeService.inputIsRefType(input);
+  }
 
-  public async reload() {}
+  public async getInputAsRefType(): Promise<SavedObjectEmbeddableInput> {
+    return this.attributeService.getInputAsRefType(this.getExplicitInput(), {
+      showSaveModal: false,
+    });
+  }
+
+  public async getInputAsValueType(): Promise<NavigationEmbeddableByValueInput> {
+    return this.attributeService.getInputAsValueType(this.getExplicitInput());
+  }
+
+  public async reload() {
+    this.updateOutput({
+      defaultTitle: this.attributes?.title,
+      defaultDescription: this.attributes?.description,
+      links: this.attributes?.links,
+    });
+  }
 
   public destroy() {
     super.destroy();

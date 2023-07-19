@@ -6,68 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { NavigationEmbeddableCrudTypes } from '../../common/content_management';
 import { CONTENT_ID as contentTypeId } from '../../common';
 import { contentManagement } from '../services/kibana_services';
-import { NavigationEmbeddableLink } from '../../common/types';
-
-export interface NavigationEmbeddableLinksMap {
-  [key: string]: NavigationEmbeddableLink;
-}
 
 const get = async (id: string) => {
-  return contentManagement.client.get({ contentTypeId, id });
-};
-
-const loadNavigationEmbeddableState = async ({ id }: { id: string }) => {
-  const embeddableId = uuidv4();
-
-  const { item: rawNavigationEmbeddableContent, meta: resolveMeta } =
-    await contentManagement.client.get<
-      NavigationEmbeddableCrudTypes['GetIn'],
-      NavigationEmbeddableCrudTypes['GetOut']
-    >({ contentTypeId, id });
-
-  /**
-   * Inject saved object references back into the saved object attributes
-   */
-  const { references, attributes: rawAttributes } = rawNavigationEmbeddableContent;
-  const attributes = (() => {
-    // TODO inject references
-    return rawAttributes;
-  })();
-
-  const { description, linksJSON, title } = attributes;
-
-  /**
-   * Parse links from JSON
-   */
-  const links: NavigationEmbeddableLink[] = linksJSON ? JSON.parse(linksJSON) : undefined;
-  const linksMap: NavigationEmbeddableLinksMap = {};
-  links.forEach((link, idx) => {
-    linksMap[String(idx)] = link;
-  });
-
-  return {
-    resolveMeta,
-    navigationEmbeddableFound: true,
-    navigationEmbeddableId: id,
-    navigationEmbeddableInput: {
-      id: embeddableId,
-      title,
-      description,
-      links: linksMap,
-    },
-  };
+  return contentManagement.client.get<
+    NavigationEmbeddableCrudTypes['GetIn'],
+    NavigationEmbeddableCrudTypes['GetOut']
+  >({ contentTypeId, id });
 };
 
 const create = async ({
   data,
   options,
 }: Omit<NavigationEmbeddableCrudTypes['CreateIn'], 'contentTypeId'>) => {
-  const { item } = await contentManagement.client.create<
+  const res = await contentManagement.client.create<
     NavigationEmbeddableCrudTypes['CreateIn'],
     NavigationEmbeddableCrudTypes['CreateOut']
   >({
@@ -75,7 +30,7 @@ const create = async ({
     data,
     options,
   });
-  return item;
+  return res;
 };
 
 const update = async ({
@@ -121,7 +76,6 @@ const search = async (
 
 export const navigationEmbeddableClient = {
   get,
-  loadNavigationEmbeddableState,
   create,
   update,
   delete: deleteNavigationEmbeddable,

@@ -10,6 +10,8 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { NavigationEmbeddableStorage } from './content_management';
+import { navigationEmbeddableSavedObjectType } from './saved_objects';
+import { NavigationEmbeddableAttributes } from '../common/content_management';
 
 export class NavigationEmbeddableServerPlugin implements Plugin<object, object> {
   public setup(
@@ -26,24 +28,9 @@ export class NavigationEmbeddableServerPlugin implements Plugin<object, object> 
       },
     });
 
-    core.savedObjects.registerType({
-      name: CONTENT_ID,
-      hidden: false,
-      hiddenFromHttpApis: true,
-      namespaceType: 'multiple',
-      management: {
-        icon: 'link',
-        defaultSearchField: 'title',
-      },
-      mappings: {
-        dynamic: false,
-        properties: {
-          title: { type: 'text' },
-          description: { type: 'text' },
-          linksJSON: { type: 'text', index: false },
-        },
-      },
-    });
+    core.savedObjects.registerType<NavigationEmbeddableAttributes>(
+      navigationEmbeddableSavedObjectType
+    );
 
     return {};
   }

@@ -15,7 +15,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import { NavigationLinkInfo } from '../../embeddable/types';
 import { fetchDashboard } from './dashboard_link_tools';
 import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
-import { DASHBOARD_LINK_TYPE, NavigationEmbeddableLink } from '../../../common/types';
+import { DASHBOARD_LINK_TYPE, NavigationEmbeddableLink } from '../../../common/content_management';
 
 export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   const navEmbeddable = useNavigationEmbeddable();
