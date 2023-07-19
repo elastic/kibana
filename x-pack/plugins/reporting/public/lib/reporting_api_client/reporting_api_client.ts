@@ -147,7 +147,7 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public async getInfo(jobId: string) {
     const report: ReportApiJSON = await this.http.get(
-      `${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/info/${jobId}`
+      `${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/${jobId}`
     );
     return new Job(report);
   }

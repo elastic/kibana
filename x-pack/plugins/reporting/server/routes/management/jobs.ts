@@ -102,7 +102,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerGetInfo = () => {
     // return some info about the job
-    const path = INTERNAL_ROUTES.JOBS.INFO;
+    const path = INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/{docId}';
     router.get(
       {
         path,
@@ -135,7 +135,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerDownloadReport = () => {
     // trigger a download of the output from a job
-    const path = INTERNAL_ROUTES.JOBS.DOWNLOAD;
+    const path = INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX + '/{docId}';
     router.get(
       {
         path,
@@ -185,7 +185,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
   const registerDeleteReport = () => {
     // allow a report to be deleted
-    const path = INTERNAL_ROUTES.JOBS.DELETE;
+    const path = INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/{docId}';
     router.delete(
       {
         path,
