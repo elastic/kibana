@@ -16,7 +16,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
