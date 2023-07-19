@@ -40,6 +40,9 @@ export const getSections = ({
   infraLocators,
   infraLinksAvailable,
   profilingLocators,
+  rangeFrom,
+  rangeTo,
+  environment,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -48,6 +51,9 @@ export const getSections = ({
   infraLocators: InfraLocators;
   infraLinksAvailable: boolean;
   profilingLocators?: ProfilingLocators;
+  rangeFrom: string;
+  rangeTo: string;
+  environment: string;
 }) => {
   if (!transaction) return [];
   const hostName = transaction.host?.hostname;
@@ -57,12 +63,6 @@ export const getSections = ({
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
-
-  const routeParams = apmRouter.getParams(
-    '/services/{serviceName}/transactions/view',
-    location
-  );
-  const { rangeFrom, rangeTo, environment } = routeParams.query;
 
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
