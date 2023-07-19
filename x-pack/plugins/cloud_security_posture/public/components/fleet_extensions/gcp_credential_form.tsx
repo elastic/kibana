@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -14,13 +14,16 @@ import {
   EuiTitle,
   EuiSelect,
   EuiForm,
+  EuiCallOut,
+  EuiTextArea,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
+import { MIN_VERSION_GCP_CIS } from '../../common/constants';
 
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 const GCPSetupInfoContent = () => (
@@ -81,17 +84,21 @@ interface GcpInputFields {
 const gcpField: GcpInputFields = {
   fields: {
     project_id: {
-      label: i18n.translate('xpack.csp.gcpIntegration.projectidLabel', {
+      label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
         defaultMessage: 'Project ID',
       }),
       type: 'text',
     },
     credentials_file: {
-      label: 'Credentials File',
+      label: i18n.translate('xpack.csp.gcpIntegration.credentialsFileFieldLabel', {
+        defaultMessage: 'Credentials File',
+      }),
       type: 'text',
     },
     credentials_json: {
-      label: 'Credentials JSON',
+      label: i18n.translate('xpack.csp.gcpIntegration.credentialsJSONFieldLabel', {
+        defaultMessage: 'Credentials JSON',
+      }),
       type: 'text',
     },
   },
@@ -140,6 +147,9 @@ interface Props {
     { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' | 'cloudbeat/cis_gcp' }
   >;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  packageInfo: PackageInfo;
+  setIsValid: (isValid: boolean) => void;
+  onChange: any;
 }
 
 const getInputVarsFields = (
@@ -158,9 +168,41 @@ const getInputVarsFields = (
       } as const;
     });
 
-export const GcpCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
+export const GcpCredentialsForm = ({
+  input,
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+  setIsValid,
+  onChange,
+}: Props) => {
   const fields = getInputVarsFields(input, gcpField.fields);
 
+  useEffect(() => {
+    const isInvalid = packageInfo.version < MIN_VERSION_GCP_CIS;
+
+    setIsValid(!isInvalid);
+
+    onChange({
+      isValid: !isInvalid,
+      updatedPolicy: newPolicy,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, packageInfo]);
+
+  if (packageInfo.version < MIN_VERSION_GCP_CIS) {
+    return (
+      <>
+        <EuiSpacer size="l" />
+        <EuiCallOut color="warning">
+          <FormattedMessage
+            id="xpack.csp.awsIntegration.cloudFormationSetupStep.notSupported"
+            defaultMessage="CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP"
+          />
+        </EuiCallOut>
+      </>
+    );
+  }
   return (
     <>
       <GCPSetupInfoContent />
@@ -207,9 +249,9 @@ const GcpInputVarFields = ({
       <EuiForm component="form">
         <EuiFormRow fullWidth label={gcpField.fields.project_id.label}>
           <EuiFieldText
-            id={fields[0].id}
+            id={targetFieldName('project_id')!.id}
             fullWidth
-            value={fields[0].value || ''}
+            value={targetFieldName('project_id')!.value || ''}
             onChange={(event) => onChange(targetFieldName('project_id')!.id, event.target.value)}
           />
         </EuiFormRow>
@@ -237,7 +279,7 @@ const GcpInputVarFields = ({
         )}
         {credentialOption === 'Credentials JSON' && (
           <EuiFormRow fullWidth label={CredentialJSONText}>
-            <EuiFieldText
+            <EuiTextArea
               id={targetFieldName('credentials_json')!.id}
               fullWidth
               value={targetFieldName('credentials_json')!.value || ''}
